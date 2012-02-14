@@ -57,11 +57,11 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 
 /**
- * {@link UnifiedINBOXException} - Indicates a Unified INBOX error.
+ * {@link UnifiedInboxException} - Indicates a Unified INBOX error.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXException extends OXException {
+public final class UnifiedInboxException extends OXException {
 
     /**
      * Serial Version UID
@@ -152,7 +152,7 @@ public final class UnifiedINBOXException extends OXException {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
-            prefix = UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.getName();
+            prefix = UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.getName();
         }
 
         private Code(final MailExceptionCode code) {
@@ -232,9 +232,9 @@ public final class UnifiedINBOXException extends OXException {
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXException}
+     * Initializes a new {@link UnifiedInboxException}
      */
-    private UnifiedINBOXException() {
+    private UnifiedInboxException() {
         super();
     }
 

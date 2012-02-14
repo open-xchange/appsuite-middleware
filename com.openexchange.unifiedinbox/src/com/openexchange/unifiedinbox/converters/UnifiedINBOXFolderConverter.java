@@ -69,8 +69,8 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
-import com.openexchange.unifiedinbox.UnifiedINBOXException;
+import com.openexchange.unifiedinbox.UnifiedInboxAccess;
+import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
@@ -203,15 +203,15 @@ public final class UnifiedINBOXFolderConverter {
         }
         // What else?!
         tmp.setDefaultFolder(true);
-        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+        if (UnifiedInboxAccess.INBOX.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.INBOX);
-        } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+        } else if (UnifiedInboxAccess.TRASH.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.TRASH);
-        } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+        } else if (UnifiedInboxAccess.SENT.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.SENT);
-        } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+        } else if (UnifiedInboxAccess.SPAM.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.SPAM);
-        } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+        } else if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
         } else {
             tmp.setDefaultFolderType(DefaultFolderType.NONE);
@@ -246,7 +246,7 @@ public final class UnifiedINBOXFolderConverter {
         mailFolder.addPermission(permission);
     }
 
-    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, OXException {
+    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedInboxException, OXException {
         final MailAccount[] accounts;
         {
             final MailAccountStorageService storageService =
@@ -429,15 +429,15 @@ public final class UnifiedINBOXFolderConverter {
             }
             // What else?!
             tmp.setDefaultFolder(true);
-            if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+            if (UnifiedInboxAccess.INBOX.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.INBOX);
-            } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+            } else if (UnifiedInboxAccess.TRASH.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.TRASH);
-            } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+            } else if (UnifiedInboxAccess.SENT.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.SENT);
-            } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+            } else if (UnifiedInboxAccess.SPAM.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.SPAM);
-            } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+            } else if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
             } else {
                 tmp.setDefaultFolderType(DefaultFolderType.NONE);

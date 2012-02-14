@@ -92,14 +92,14 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedINBOXMessageStorage} - The Unified INBOX message storage implementation.
+ * {@link UnifiedInboxMessageStorage} - The Unified INBOX message storage implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
+public final class UnifiedInboxMessageStorage extends MailMessageStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -120,20 +120,20 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     private final Context ctx;
 
-    private final UnifiedINBOXAccess access;
+    private final UnifiedInboxAccess access;
 
     private Locale locale;
 
     private UnifiedINBOXMessageCopier copier;
 
     /**
-     * Initializes a new {@link UnifiedINBOXMessageStorage}.
+     * Initializes a new {@link UnifiedInboxMessageStorage}.
      *
      * @param access The Unified INBOX access
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
      */
-    public UnifiedINBOXMessageStorage(final UnifiedINBOXAccess access, final Session session) throws OXException {
+    public UnifiedInboxMessageStorage(final UnifiedInboxAccess access, final Session session) throws OXException {
         super();
         this.access = access;
         this.session = session;
@@ -194,9 +194,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
         }
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final MailMessage[] messages = new MailMessage[mailIds.length];
             // Parse mail IDs
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
@@ -329,10 +329,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     @Override
     public MailMessage getMessage(final String fullName, final String mailId, final boolean markSeen) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final UnifiedINBOXUID uid = new UnifiedINBOXUID(mailId);
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
             MailAccess<?, ?> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, uid.getAccountId());
@@ -371,9 +371,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts;
             {
                 final MailAccountStorageService storageService =
@@ -414,7 +414,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             final MailMessage[] accountMails =
                                 mailAccess.getMessageStorage().searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
-                            final UnifiedINBOXUID helper = new UnifiedINBOXUID();
+                            final UnifiedInboxUID helper = new UnifiedInboxUID();
                             for (final MailMessage accountMail : accountMails) {
                                 final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
                                 umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
@@ -484,9 +484,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     @Override
     public MailMessage[] getUnreadMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final MailAccount[] accounts;
             {
                 final MailAccountStorageService storageService =
@@ -521,7 +521,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             // Get account's unread messages
                             final MailMessage[] accountMails =
                                 mailAccess.getMessageStorage().getUnreadMessages(fn, sortField, order, fields, limit);
-                            final UnifiedINBOXUID helper = new UnifiedINBOXUID();
+                            final UnifiedInboxUID helper = new UnifiedInboxUID();
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             for (final MailMessage accountMail : accountMails) {
                                 final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
@@ -579,9 +579,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     @Override
     public void deleteMessages(final String fullName, final String[] mailIds, final boolean hardDelete) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             // Parse mail IDs
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
@@ -661,9 +661,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     @Override
     public String[] appendMessages(final String destFullname, final MailMessage[] mailMessages) throws OXException {
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(destFullname)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(destFullname)) {
             // TODO: Error code OR default account?!
-            throw UnifiedINBOXException.Code.INVALID_DESTINATION_FOLDER.create(new Object[0]);
+            throw UnifiedInboxException.Code.INVALID_DESTINATION_FOLDER.create(new Object[0]);
         }
         // Parse destination folder
         final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFullname);
@@ -680,9 +680,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     @Override
     public void updateMessageFlags(final String fullName, final String[] mailIds, final int flags, final boolean set) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             // Parse mail IDs
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
@@ -752,9 +752,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     @Override
     public void updateMessageColorLabel(final String fullName, final String[] mailIds, final int colorLabel) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
-            throw UnifiedINBOXException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             // Parse mail IDs
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
@@ -826,7 +826,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     @Override
     public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage composedMail) throws OXException {
-        throw UnifiedINBOXException.Code.DRAFTS_NOT_SUPPORTED.create();
+        throw UnifiedInboxException.Code.DRAFTS_NOT_SUPPORTED.create();
     }
 
     /*-
@@ -836,7 +836,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
      */
 
     private static void insertMessage(final String[] mailIds, final MailMessage[] toFill, final int accountId, final String folder, final MailMessage[] mails, final String uiFullname) {
-        final UnifiedINBOXUID helper = new UnifiedINBOXUID();
+        final UnifiedInboxUID helper = new UnifiedInboxUID();
         for (final MailMessage mail : mails) {
             if (null != mail) {
                 final String lookFor = helper.setUID(accountId, folder, mail.getMailId()).toString();

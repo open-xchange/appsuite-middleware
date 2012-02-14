@@ -84,13 +84,13 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedINBOXFolderStorage} - The Unified INBOX folder storage implementation.
+ * {@link UnifiedInboxFolderStorage} - The Unified INBOX folder storage implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
+public final class UnifiedInboxFolderStorage extends MailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxFolderStorage.class));
 
     // private final UnifiedINBOXAccess access;
 
@@ -103,13 +103,13 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     private Locale locale;
 
     /**
-     * Initializes a new {@link UnifiedINBOXFolderStorage}
+     * Initializes a new {@link UnifiedInboxFolderStorage}
      *
      * @param access The Unified INBOX access
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
      */
-    public UnifiedINBOXFolderStorage(final UnifiedINBOXAccess access, final Session session) throws OXException {
+    public UnifiedInboxFolderStorage(final UnifiedInboxAccess access, final Session session) throws OXException {
         super();
         // this.access = access;
         unifiedInboxId = access.getAccountId();
@@ -122,7 +122,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (DEFAULT_FOLDER_ID.equals(fullname)) {
             return true;
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullname)) {
             return true;
         }
         final String fn = startsWithKnownFullname(fullname);
@@ -150,7 +150,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (DEFAULT_FOLDER_ID.equals(fullname)) {
             return UnifiedINBOXFolderConverter.getRootFolder();
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullname)) {
             return UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(unifiedInboxId, session, fullname, getLocalizedName(fullname));
         }
         final String fn = startsWithKnownFullname(fullname);
@@ -158,7 +158,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
             final int nestedAccountId = fa.getAccountId();
             if (!isMailAccountEnabled(nestedAccountId)) {
-                throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(fullname);
+                throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(fullname);
             }
             MailAccess<?, ?> mailAccess = null;
             try {
@@ -185,7 +185,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 }
             }
         }
-        throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(fullname);
+        throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(fullname);
     }
 
     @Override
@@ -193,7 +193,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
             return getRootSubfolders(false);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(parentFullname)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(parentFullname)) {
             return getKnownFolderSubfolders(parentFullname);
         }
         final String fn = startsWithKnownFullname(parentFullname);
@@ -201,18 +201,18 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
             final int nestedAccountId = fa.getAccountId();
             if (!isMailAccountEnabled(nestedAccountId)) {
-                throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(parentFullname);
+                throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(parentFullname);
             }
             /*
              * Return empty array since mapped default folders have no subfolders in Unified INBOX account
              */
             return EMPTY_PATH;
         }
-        throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(parentFullname);
+        throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(parentFullname);
     }
 
     private static final String[] FULLNAMES = {
-        UnifiedINBOXAccess.INBOX, UnifiedINBOXAccess.DRAFTS, UnifiedINBOXAccess.SENT, UnifiedINBOXAccess.SPAM, UnifiedINBOXAccess.TRASH };
+        UnifiedInboxAccess.INBOX, UnifiedInboxAccess.DRAFTS, UnifiedInboxAccess.SENT, UnifiedInboxAccess.SPAM, UnifiedInboxAccess.TRASH };
 
     private MailFolder[] getRootSubfolders(final boolean byAccount) throws OXException {
         if (byAccount) {
@@ -264,11 +264,11 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             }
             // Merge them
             final String[] names = new String[5];
-            names[0] = getLocalizedName(UnifiedINBOXAccess.INBOX);
-            names[1] = getLocalizedName(UnifiedINBOXAccess.DRAFTS);
-            names[2] = getLocalizedName(UnifiedINBOXAccess.SENT);
-            names[3] = getLocalizedName(UnifiedINBOXAccess.SPAM);
-            names[4] = getLocalizedName(UnifiedINBOXAccess.TRASH);
+            names[0] = getLocalizedName(UnifiedInboxAccess.INBOX);
+            names[1] = getLocalizedName(UnifiedInboxAccess.DRAFTS);
+            names[2] = getLocalizedName(UnifiedInboxAccess.SENT);
+            names[3] = getLocalizedName(UnifiedInboxAccess.SPAM);
+            names[4] = getLocalizedName(UnifiedInboxAccess.TRASH);
             return UnifiedINBOXFolderConverter.mergeAccountDefaultFolders(list, FULLNAMES, names);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -284,11 +284,11 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         final TrackingCompletionService<Retval> completionService = new UnifiedINBOXCompletionService<Retval>(executor);
         // Init names
         final String[][] names = new String[5][];
-        names[0] = new String[] { UnifiedINBOXAccess.INBOX, getLocalizedName(UnifiedINBOXAccess.INBOX) };
-        names[1] = new String[] { UnifiedINBOXAccess.DRAFTS, getLocalizedName(UnifiedINBOXAccess.DRAFTS) };
-        names[2] = new String[] { UnifiedINBOXAccess.SENT, getLocalizedName(UnifiedINBOXAccess.SENT) };
-        names[3] = new String[] { UnifiedINBOXAccess.SPAM, getLocalizedName(UnifiedINBOXAccess.SPAM) };
-        names[4] = new String[] { UnifiedINBOXAccess.TRASH, getLocalizedName(UnifiedINBOXAccess.TRASH) };
+        names[0] = new String[] { UnifiedInboxAccess.INBOX, getLocalizedName(UnifiedInboxAccess.INBOX) };
+        names[1] = new String[] { UnifiedInboxAccess.DRAFTS, getLocalizedName(UnifiedInboxAccess.DRAFTS) };
+        names[2] = new String[] { UnifiedInboxAccess.SENT, getLocalizedName(UnifiedInboxAccess.SENT) };
+        names[3] = new String[] { UnifiedInboxAccess.SPAM, getLocalizedName(UnifiedInboxAccess.SPAM) };
+        names[4] = new String[] { UnifiedInboxAccess.TRASH, getLocalizedName(UnifiedInboxAccess.TRASH) };
         // Create a Callable for each known subfolder
         for (int i = 0; i < retval.length; i++) {
             final int index = i;
@@ -427,28 +427,28 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
-        throw UnifiedINBOXException.Code.FOLDER_CREATION_FAILED.create();
+        throw UnifiedInboxException.Code.FOLDER_CREATION_FAILED.create();
     }
 
     @Override
     public String moveFolder(final String fullname, final String newFullname) throws OXException {
-        throw UnifiedINBOXException.Code.MOVE_DENIED.create();
+        throw UnifiedInboxException.Code.MOVE_DENIED.create();
     }
 
     @Override
     public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws OXException {
-        throw UnifiedINBOXException.Code.UPDATE_DENIED.create();
+        throw UnifiedInboxException.Code.UPDATE_DENIED.create();
     }
 
     @Override
     public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
-        throw UnifiedINBOXException.Code.DELETE_DENIED.create();
+        throw UnifiedInboxException.Code.DELETE_DENIED.create();
     }
 
     @Override
     public void clearFolder(final String fullname, final boolean hardDelete) throws OXException {
         // Shall we support clear() ? ? ?
-        throw UnifiedINBOXException.Code.CLEAR_NOT_SUPPORTED.create();
+        throw UnifiedInboxException.Code.CLEAR_NOT_SUPPORTED.create();
     }
 
     @Override
@@ -456,8 +456,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (DEFAULT_FOLDER_ID.equals(fullname)) {
             return EMPTY_PATH;
         }
-        if (!UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
-            throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(fullname);
+        if (!UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullname)) {
+            throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(fullname);
         }
         return new MailFolder[] {
             UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(unifiedInboxId, session, fullname, getLocalizedName(fullname)),
@@ -476,26 +476,26 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     @Override
     public String getDraftsFolder() throws OXException {
-        return UnifiedINBOXAccess.DRAFTS;
+        return UnifiedInboxAccess.DRAFTS;
     }
 
     @Override
     public String getSentFolder() throws OXException {
-        return UnifiedINBOXAccess.SENT;
+        return UnifiedInboxAccess.SENT;
     }
 
     @Override
     public String getSpamFolder() throws OXException {
-        return UnifiedINBOXAccess.SPAM;
+        return UnifiedInboxAccess.SPAM;
     }
 
     @Override
     public String getTrashFolder() throws OXException {
-        return UnifiedINBOXAccess.TRASH;
+        return UnifiedInboxAccess.TRASH;
     }
 
     @Override
-    public void releaseResources() throws UnifiedINBOXException {
+    public void releaseResources() throws UnifiedInboxException {
         // Nothing to release
     }
 
@@ -519,26 +519,26 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     }
 
     private String getLocalizedName(final String fullname) throws OXException {
-        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+        if (UnifiedInboxAccess.INBOX.equals(fullname)) {
             return I18n.getInstance().translate(getLocale(), NameStrings.NAME_INBOX);
         }
-        if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+        if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
             return I18n.getInstance().translate(getLocale(), NameStrings.NAME_DRAFTS);
         }
-        if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+        if (UnifiedInboxAccess.SENT.equals(fullname)) {
             return I18n.getInstance().translate(getLocale(), NameStrings.NAME_SENT);
         }
-        if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+        if (UnifiedInboxAccess.SPAM.equals(fullname)) {
             return I18n.getInstance().translate(getLocale(), NameStrings.NAME_SPAM);
         }
-        if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+        if (UnifiedInboxAccess.TRASH.equals(fullname)) {
             return I18n.getInstance().translate(getLocale(), NameStrings.NAME_TRASH);
         }
-        throw UnifiedINBOXException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullname);
+        throw UnifiedInboxException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullname);
     }
 
     private static String startsWithKnownFullname(final String fullname) {
-        for (final String knownFullname : UnifiedINBOXAccess.KNOWN_FOLDERS) {
+        for (final String knownFullname : UnifiedInboxAccess.KNOWN_FOLDERS) {
             if (fullname.startsWith(knownFullname)) {
                 // Cut off starting known fullname AND separator character
                 return fullname.substring(knownFullname.length() + 1);
@@ -548,7 +548,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     }
 
     private static String getStartingKnownFullname(final String fullname) {
-        for (final String knownFullname : UnifiedINBOXAccess.KNOWN_FOLDERS) {
+        for (final String knownFullname : UnifiedInboxAccess.KNOWN_FOLDERS) {
             if (fullname.startsWith(knownFullname)) {
                 return knownFullname;
             }

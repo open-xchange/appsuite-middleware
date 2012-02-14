@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.unifiedinbox.UnifiedINBOXProvider;
+import com.openexchange.unifiedinbox.UnifiedInboxProvider;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXSynchronousQueueProvider;
 import com.openexchange.user.UserService;
 
@@ -131,8 +131,8 @@ public final class UnifiedINBOXActivator extends HousekeepingActivator {
              * Register service(s)
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.toString());
-            registerService(MailProvider.class, UnifiedINBOXProvider.getInstance(), dictionary);
+            dictionary.put("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
+            registerService(MailProvider.class, UnifiedInboxProvider.getInstance(), dictionary);
             /*
              * Detect what SynchronousQueue to use
              */

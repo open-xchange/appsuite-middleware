@@ -56,11 +56,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 
 /**
- * {@link UnifiedINBOXUID} - The Unified INBOX UID.
+ * {@link UnifiedInboxUID} - The Unified INBOX UID.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXUID {
+public final class UnifiedInboxUID {
 
     private static final String KEY = "unifiedm";
 
@@ -73,44 +73,44 @@ public final class UnifiedINBOXUID {
     private String uidl;
 
     /**
-     * Initializes an empty {@link UnifiedINBOXUID}.
+     * Initializes an empty {@link UnifiedInboxUID}.
      */
-    public UnifiedINBOXUID() {
+    public UnifiedInboxUID() {
         super();
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXUID}.
+     * Initializes a new {@link UnifiedInboxUID}.
      *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
      */
-    public UnifiedINBOXUID(final int accountId, final String fullname, final String id) {
+    public UnifiedInboxUID(final int accountId, final String fullname, final String id) {
         super();
         setUID(accountId, fullname, id);
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXUID}.
+     * Initializes a new {@link UnifiedInboxUID}.
      *
      * @param unifiedINBOXUID The Unified INBOX UID as a string
      * @throws OXException If parsing Unified INBOX UID fails
      */
-    public UnifiedINBOXUID(final String unifiedINBOXUID) throws OXException {
+    public UnifiedInboxUID(final String unifiedINBOXUID) throws OXException {
         super();
         setUIDString(unifiedINBOXUID);
     }
 
     /**
-     * Sets the UID of this {@link UnifiedINBOXUID}.
+     * Sets the UID of this {@link UnifiedInboxUID}.
      *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
-     * @return This {@link UnifiedINBOXUID} with new UID applied.
+     * @return This {@link UnifiedInboxUID} with new UID applied.
      */
-    public UnifiedINBOXUID setUID(final int accountId, final String fullname, final String id) {
+    public UnifiedInboxUID setUID(final int accountId, final String fullname, final String id) {
         this.accountId = accountId;
         this.fullname = fullname;
         this.id = id;
@@ -120,20 +120,20 @@ public final class UnifiedINBOXUID {
             return this;
         } catch (final GeneralSecurityException e) {
             // Must not occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXUID.class)).warn("\n\tPBE (password-based-encryption) failed.\n", e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxUID.class)).warn("\n\tPBE (password-based-encryption) failed.\n", e);
             uidl = mailPath;
         }
         return this;
     }
 
     /**
-     * Sets the UID of this {@link UnifiedINBOXUID}.
+     * Sets the UID of this {@link UnifiedInboxUID}.
      *
      * @param unifiedINBOXUID The Unified INBOX UID as a string
      * @throws MailException If parsing Unified INBOX UID fails
-     * @return This {@link UnifiedINBOXUID} with new UID applied.
+     * @return This {@link UnifiedInboxUID} with new UID applied.
      */
-    public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws OXException {
+    public UnifiedInboxUID setUIDString(final String unifiedINBOXUID) throws OXException {
         String decoded;
         try {
             decoded = decrypt(unifiedINBOXUID, KEY);

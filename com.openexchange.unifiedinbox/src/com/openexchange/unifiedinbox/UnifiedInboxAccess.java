@@ -65,15 +65,15 @@ import com.openexchange.unifiedinbox.config.UnifiedINBOXConfig;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 
 /**
- * {@link UnifiedINBOXAccess} - Access to Unified INBOX.
+ * {@link UnifiedInboxAccess} - Access to Unified INBOX.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStorage, UnifiedINBOXMessageStorage> {
+public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStorage, UnifiedInboxMessageStorage> {
 
     private static final long serialVersionUID = 6666321725945931657L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxAccess.class));
 
     /**
      * Fullname of INBOX.
@@ -116,29 +116,29 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     private boolean connected;
 
-    private transient UnifiedINBOXFolderStorage folderStorage;
+    private transient UnifiedInboxFolderStorage folderStorage;
 
-    private transient UnifiedINBOXMessageStorage messageStorage;
+    private transient UnifiedInboxMessageStorage messageStorage;
 
     private transient MailLogicTools logicTools;
 
     /**
-     * Initializes a new {@link UnifiedINBOXAccess}.
+     * Initializes a new {@link UnifiedInboxAccess}.
      *
      * @param session The session providing needed user data
      */
-    protected UnifiedINBOXAccess(final Session session) {
+    protected UnifiedInboxAccess(final Session session) {
         super(session);
         cacheable = false;
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXAccess}.
+     * Initializes a new {@link UnifiedInboxAccess}.
      *
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
-    protected UnifiedINBOXAccess(final Session session, final int accountId) {
+    protected UnifiedInboxAccess(final Session session, final int accountId) {
         super(session, accountId);
         cacheable = false;
     }
@@ -176,12 +176,12 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    public UnifiedINBOXFolderStorage getFolderStorage() throws OXException {
+    public UnifiedInboxFolderStorage getFolderStorage() throws OXException {
         if (!connected) {
-            throw UnifiedINBOXException.Code.NOT_CONNECTED.create();
+            throw UnifiedInboxException.Code.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
-            folderStorage = new UnifiedINBOXFolderStorage(this, session);
+            folderStorage = new UnifiedInboxFolderStorage(this, session);
         }
         return folderStorage;
     }
@@ -189,7 +189,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     @Override
     public MailLogicTools getLogicTools() throws OXException {
         if (!connected) {
-            throw UnifiedINBOXException.Code.NOT_CONNECTED.create();
+            throw UnifiedInboxException.Code.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
             logicTools = new MailLogicTools(session, accountId);
@@ -198,12 +198,12 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    public UnifiedINBOXMessageStorage getMessageStorage() throws OXException {
+    public UnifiedInboxMessageStorage getMessageStorage() throws OXException {
         if (!connected) {
-            throw UnifiedINBOXException.Code.NOT_CONNECTED.create();
+            throw UnifiedInboxException.Code.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
-            messageStorage = new UnifiedINBOXMessageStorage(this, session);
+            messageStorage = new UnifiedInboxMessageStorage(this, session);
         }
         return messageStorage;
     }
