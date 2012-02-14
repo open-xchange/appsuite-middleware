@@ -50,14 +50,24 @@
 package com.openexchange.documentation.descriptions;
 
 /**
- * {@link Description}
+ * {@link Description} - Common descriptions.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Description {
 	
+	/**
+	 * Specifies the name. Required.
+	 * 
+	 * @return The name
+	 */
 	String getName();
 
+	/**
+	 * Specifies the description. Defaults to <code>""</code>.
+	 * 
+	 * @return the description
+	 */
 	String getDescription();
 
 }

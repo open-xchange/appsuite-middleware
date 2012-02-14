@@ -311,7 +311,7 @@ public final class StructureMailMessageParser {
         final ContentType contentType =
             mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MIMETypes.MIME_APPL_OCTET);
         final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
-        final String filename = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
+        final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
 
         /*
          * Parse part dependent on its MIME type
@@ -343,7 +343,7 @@ public final class StructureMailMessageParser {
                             uuencodedMP.getCleanText(),
                             contentType,
                             uuencodedMP.getCleanText().length(),
-                            filename,
+                            fileName,
                             getSequenceId(prefix, partCount))) {
                             stop = true;
                             return;
@@ -372,7 +372,7 @@ public final class StructureMailMessageParser {
                             uuencodedMP.getCleanText(),
                             contentType,
                             uuencodedMP.getCleanText().length(),
-                            filename,
+                            fileName,
                             getSequenceId(prefix, partCount))) {
                             stop = true;
                             return;
@@ -668,7 +668,7 @@ public final class StructureMailMessageParser {
                         /*
                          * Translate TNEF attributes to MIME
                          */
-                        final String attachFilename = filename;
+                        final String attachFilename = fileName;
                         final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
                         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
@@ -968,6 +968,14 @@ public final class StructureMailMessageParser {
      */
     private static boolean isMessage(final String contentType) {
         return contentType.startsWith(PRIMARY_RFC822, 0);
+    }
+
+    private static boolean isWinmailDat(final String fileName) {
+        if (isEmptyString(fileName)) {
+            return false;
+        }
+        final String toCheck = LocaleTools.toLowerCase(fileName);
+        return toCheck.startsWith("winmail", 0) && toCheck.endsWith(".dat");
     }
 
 }

@@ -55,6 +55,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * {@link Container} - Annotation for containers.
  *
+ * @see com.openexchange.documentation.descriptions.ContainerDescription
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Retention(RetentionPolicy.RUNTIME)

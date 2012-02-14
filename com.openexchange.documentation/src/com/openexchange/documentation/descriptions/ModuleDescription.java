@@ -51,14 +51,25 @@ package com.openexchange.documentation.descriptions;
 
 
 /**
- * {@link ModuleDescription} - Description for modules.
- *
+ * {@link ModuleDescription} - Description for modules. 
+ * 
+ * @see com.openexchange.documentation.annotations.Module
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ModuleDescription extends Description {
 
+	/**
+	 * Specifies the actions. Required.
+	 * 
+	 * @return the actions.
+	 */
 	ActionDescription[] getActions();
 	
+	/**
+	 * Specifies the containers. Required.
+	 * 
+	 * @return the containers.
+	 */
 	ContainerDescription[] getContainers();
 			
 }

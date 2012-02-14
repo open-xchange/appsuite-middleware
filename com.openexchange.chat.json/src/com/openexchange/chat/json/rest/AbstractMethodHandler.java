@@ -78,7 +78,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         super();
     }
 
-    protected static final Pattern SPLIT_CSV = Pattern.compile(Pattern.quote(" *, *"));
+    protected static final Pattern SPLIT_CSV = Pattern.compile(" *, *");
 
     protected static final Pattern SPLIT_PATH = Pattern.compile(Pattern.quote("/"));
 

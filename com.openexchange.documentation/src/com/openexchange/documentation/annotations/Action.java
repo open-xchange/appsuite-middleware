@@ -52,9 +52,13 @@ package com.openexchange.documentation.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
+
 /**
  * {@link Action} - Annotation for actions.
  *
+ * @see com.openexchange.documentation.descriptions.ActionDescription
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
