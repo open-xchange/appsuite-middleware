@@ -106,11 +106,11 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Subscribe operation not permitted on tree "%1$s".
     public static final String NO_REAL_SUBSCRIBE_MSG = "Subscribe operation not permitted on tree \"%1$s\".";
 
-    // Un-Subscribe operation not permitted on tree "%1$s".
-    public static final String NO_REAL_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on tree \"%1$s\".";
+    // Unsubscribe operation not permitted on tree "%1$s".
+    public static final String NO_REAL_UNSUBSCRIBE_MSG = "Unsubscribe operation not permitted on tree \"%1$s\".";
 
-    // Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
-    public static final String NO_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\".";
+    // Unsubscribe operation not permitted on folder "%1$s" in tree "%2$s". Delete subfolders first.
+    public static final String NO_UNSUBSCRIBE_MSG = "Unsubscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\". Unsubscribe subfolders first.";
 
     // Unknown content type: %1$s.
     public static final String UNKNOWN_CONTENT_TYPE_MSG = "Unknown content type: %1$s.";

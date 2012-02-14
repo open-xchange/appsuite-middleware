@@ -354,7 +354,7 @@ public abstract class OXServlet extends WebDavServlet {
      */
     protected static void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
         final StringBuilder builder = new StringBuilder(64);
-        builder.append("Basic realm=\"").append(basicRealm).append('"');
+        builder.append("Basic realm=\"").append(basicRealm).append("\", encoding=\"UTF-8\"");
         resp.setHeader("WWW-Authenticate", builder.toString());
         /*-
          * Digest realm="testrealm@host.com",
