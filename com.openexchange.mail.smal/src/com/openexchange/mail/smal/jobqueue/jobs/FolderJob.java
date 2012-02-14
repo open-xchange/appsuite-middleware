@@ -91,7 +91,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -161,7 +161,7 @@ public final class FolderJob extends AbstractMailSyncJob {
      * Initializes a new {@link FolderJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
-     *
+     * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -180,7 +180,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ignore-deleted flag.
-     *
+     * 
      * @param ignoreDeleted The ignore-deleted flag
      * @return This folder job with new behavior applied
      */
@@ -191,7 +191,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the span; a negative span enforces this job to run if able to exclusively set sync flag
-     *
+     * 
      * @param span The span to set
      * @return This folder job with specified span applied
      */
@@ -202,7 +202,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ranking
-     *
+     * 
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
@@ -213,7 +213,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the storage mails
-     *
+     * 
      * @param storageMails The storage mails to set
      * @return This folder job with specified storage mails applied
      */
@@ -224,7 +224,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the index mails
-     *
+     * 
      * @param indexMail The index mails to set
      * @return This folder job with specified index mails applied
      */
@@ -235,7 +235,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the mayScheduleJobs
-     *
+     * 
      * @param mayScheduleJobs The mayScheduleJobs to set
      */
     public FolderJob setMayScheduleJobs(final boolean mayScheduleJobs) {
@@ -541,6 +541,15 @@ public final class FolderJob extends AbstractMailSyncJob {
         final long st = DEBUG ? System.currentTimeMillis() : 0l;
         final JobQueue queue = JobQueue.getInstance();
         final int configuredBlockSize = Constants.CHUNK_SIZE;
+        if (configuredBlockSize <= 0) {
+            add2Index(ids, fullName, indexAdapter);
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("Folder job \"" + identifier + "\" inserted " + ids.size() + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+            }
+            return ids.size();
+        }
+        // Positive chunk size configured
         final int size = ids.size();
         int start = 0;
         while (start < size) {
@@ -576,13 +585,37 @@ public final class FolderJob extends AbstractMailSyncJob {
     private int chunkedAddWithJobs(final List<String> ids, final IndexAdapter indexAdapter) throws OXException, InterruptedException {
         final long st = DEBUG ? System.currentTimeMillis() : 0l;
         final JobQueue queue = JobQueue.getInstance();
-        final int configuredBlockSize = Constants.CHUNK_SIZE;
         final int size = ids.size();
         final StringBuilder idBuilder = new StringBuilder(identifier);
         idBuilder.append('@').append(UUIDs.getUnformattedString(UUID.randomUUID())).append('@');
         final int resetlen = idBuilder.length();
         int numScheduled = 0;
         final JobCompletionService completionService = mayScheduleJobs ? new UnboundedJobCompletionService() : null;
+        final int configuredBlockSize = Constants.CHUNK_SIZE;
+        if (configuredBlockSize <= 0) {
+            final String subId = idBuilder.append(numScheduled + 1).toString();
+            if (scheduleJob(ids, indexAdapter, completionService, subId)) {
+                /*
+                 * Successfully delegated to completion service
+                 */
+                numScheduled++;
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("Folder job \"" + identifier + "\" scheduled " + size + " messages with sub-job \"" + subId + "\" in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                }
+            } else {
+                /*
+                 * Add this chunk with caller-runs behavior
+                 */
+                add2Index(ids, fullName, indexAdapter);
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("Folder job \"" + identifier + "\" inserted " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                }
+            }
+            return size;
+        }
+        // Positive chunk size
         int start = 0;
         while (start < size) {
             int end = start + configuredBlockSize;
@@ -665,6 +698,28 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     protected void add2Index(final List<String> ids, final String fullName, final IndexAdapter indexAdapter) throws OXException {
+        final MailMessage[] mails = loadMessages(ids, fullName, indexAdapter);
+        try {
+            indexAdapter.add(Arrays.asList(mails), session);
+        } catch (final OXException e) {
+            // Batch add failed; retry one-by-one
+            for (final MailMessage mail : mails) {
+                try {
+                    indexAdapter.add(mail, session);
+                } catch (final Exception inner) {
+                    LOG.warn(
+                        "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
+                        inner);
+                }
+            }
+        } catch (final InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private MailMessage[] loadMessages(final List<String> ids, final String fullName, final IndexAdapter indexAdapter) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final Session session = getSession();
@@ -676,26 +731,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
             fields.removeMailField(MailField.BODY);
             fields.removeMailField(MailField.FULL);
-            final MailMessage[] mails =
-                mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray());
-            try {
-                indexAdapter.add(Arrays.asList(mails), session);
-            } catch (final OXException e) {
-                // Batch add failed; retry one-by-one
-                for (final MailMessage mail : mails) {
-                    try {
-                        indexAdapter.add(mail, session);
-                    } catch (final Exception inner) {
-                        LOG.warn(
-                            "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
-                            inner);
-                    }
-                }
-            } catch (final InterruptedException e) {
-                // Keep interrupted state
-                Thread.currentThread().interrupt();
-                throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-            }
+            return mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray());
         } finally {
             SMALMailAccess.closeUnwrappedInstance(mailAccess);
         }

@@ -56,7 +56,7 @@ import com.openexchange.documentation.descriptions.ModuleDescription;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link DocumentationRegistry} - The documentation registry.
+ * {@link DocumentationRegistry} - Provides access to descriptions for modules and containers.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -68,7 +68,7 @@ public interface DocumentationRegistry {
     /**
      * Gets the module descriptions contained in this registry.
      * 
-     * @return The module descriptions
+     * @return the module descriptions
      * @throws OXException If module descriptions cannot be returned
      */
 	Collection<ModuleDescription> getModules() throws OXException;
@@ -77,25 +77,25 @@ public interface DocumentationRegistry {
      * Gets the module description associated with given name.
      * 
      * @param name The name of the module description
-     * @return The module description associated with given name
-     * @throws OXException If module description cannot be returned
+     * @return the module description associated with given name
+     * @throws OXException if module description cannot be returned
      */
 	ModuleDescription getModule(String name) throws OXException;
 	
     /**
      * Gets the container descriptions contained in this registry.
      * 
-     * @return The container descriptions
-     * @throws OXException If container descriptions cannot be returned
+     * @return the container descriptions
+     * @throws OXException if container descriptions cannot be returned
      */
 	Collection<ContainerDescription> getContainers() throws OXException;
 	
     /**
      * Gets the container description associated with given name.
      * 
-     * @param name The name of the container description
-     * @return The container description associated with given name
-     * @throws OXException If container description cannot be returned
+     * @param name the name of the container description
+     * @return the container description associated with given name
+     * @throws OXException if container description cannot be returned
      */
 	ContainerDescription getContainer(String name) throws OXException;
 	

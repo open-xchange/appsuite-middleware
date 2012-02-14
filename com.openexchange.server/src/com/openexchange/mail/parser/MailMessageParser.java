@@ -554,7 +554,7 @@ public final class MailMessageParser {
                     return;
                 }
             }
-        } else if (TNEFUtils.isTNEFMimeType(lcct) || isWinmailDat(fileName)) {
+        } else if (TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*
                  * Here go with TNEF encoded messages. Since TNEF library is based on JavaMail API we are forced to use JavaMail-specific

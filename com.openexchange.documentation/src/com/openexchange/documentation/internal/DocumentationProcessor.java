@@ -51,10 +51,10 @@ package com.openexchange.documentation.internal;
 
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.DescriptionFactory;
-
+import com.openexchange.documentation.descriptions.ModuleDescription;
 
 /**
- * {@link DocumentationProcessor} - Proecesses services implementing {@link AJAXActionServiceFactory} 
+ * {@link DocumentationProcessor} - Processes services implementing {@link AJAXActionServiceFactory} 
  * and extracts their module description.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -81,7 +81,11 @@ public class DocumentationProcessor {
 	public void add(final AJAXActionServiceFactory service) {
 		DocumentationBuilder builder = new DocumentationBuilder(factory);
 		builder.add(service.getClass()).add(service.getSupportedServices());
-		this.registry.addModule(builder.getModuleDescription());
+		this.add(builder.getModuleDescription());
+	}
+	
+	public void add(final ModuleDescription description) {		
+		this.registry.addModule(description);
 	}
 	
 	/**
@@ -90,11 +94,18 @@ public class DocumentationProcessor {
 	 * @param service the service to remove
 	 */
 	public void remove(final AJAXActionServiceFactory service) {
-		final String name = this.getModuleName(service);
-		if (null != name) {
-			this.registry.removeModule(name);
-		}
+		this.remove(this.getModuleName(service));
 	}
+	
+	public void remove(final ModuleDescription description) {
+		this.remove(description.getName());
+	}
+
+	private void remove(final String module) {		
+		if (null != module) {
+			this.registry.removeModule(module);
+		}
+	}	
 	
 	private String getModuleName(final AJAXActionServiceFactory service) {
 		if (null != service) {

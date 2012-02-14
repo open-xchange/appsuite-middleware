@@ -1,1 +1,1 @@
-i18n.language.path=@prefix@/i18n/
+i18n.language.path=@i18nDir@

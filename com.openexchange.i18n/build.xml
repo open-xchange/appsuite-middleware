@@ -5,6 +5,9 @@
         Installs the language files.
     </description>
 
+    <!-- Constants -->
+    <property name="i18nDir" value="${prefix}/i18n"/>
+
     <import file="build-project.xml"/>
 
     <target name="installConf" description="Patches i18n.properties before installing it.">
@@ -18,7 +21,7 @@
         </copy>
         <move tofile="${tmpDir}/${confDir}/i18n.properties" file="${tmpDir}/${confDir}/i18n.properties.in" overwrite="true"/>
         <replace file="${tmpDir}/${confDir}/i18n.properties">
-            <replacefilter token="@prefix@" value="${prefix}"/>
+            <replacefilter token="@i18nDir@" value="${i18nDir}"/>
         </replace>
         <copy todir="${destDir}/${confInstallDir}">
             <fileset dir="${tmpDir}/${confDir}"/>
@@ -30,7 +33,7 @@
     </target>
 
     <target name="installLanguages">
-        <mkdir dir="${destDir}/${prefix}/i18n"/>
+        <mkdir dir="${destDir}/${i18nDir}"/>
         <antcall target="installLanguage">
             <param name="language" value="de_DE"/>
         </antcall>
@@ -40,7 +43,7 @@
     </target>
 
     <target name="installLanguage">
-        <copy todir="${destDir}/${prefix}/i18n">
+        <copy todir="${destDir}/${i18nDir}">
             <fileset dir="${language}">
                 <include name="server.${language}.po"/>
             </fileset>

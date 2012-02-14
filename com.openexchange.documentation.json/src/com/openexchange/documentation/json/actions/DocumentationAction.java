@@ -137,7 +137,7 @@ public abstract class DocumentationAction implements AJAXActionService {
         	jsonObject.put("containers", jsonArray);
         }
         final ActionDescription[] actions = module.getActions();
-        if (null != containers) {
+        if (null != actions) {
             final JSONArray jsonArray = new JSONArray();
             for (final ActionDescription action : actions) {
             	jsonArray.put(write(action));

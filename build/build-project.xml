@@ -387,24 +387,24 @@
 		<if>
 			<available file="build-project.xml" type="file"/>
 			<then>
-				<path id="distFiles">
-		            <fileset dir="${basedir}">
-		                <exclude name="build-project.xml"/>
-		            </fileset>
-			    </path>
+			    <property name="excludeBuildScript" value="build-project.xml"/>
 			</then>
 			<else>
-                <path id="distFiles">
-                    <fileset dir="${basedir}">
-                        <exclude name="build.xml"/>
-                    </fileset>
-                </path>
+                <property name="excludeBuildScript" value="build.xml"/>
 			</else>
 		</if>
         <copy todir="${destinationDir}">
-            <path refid="distFiles"/>
+            <fileset dir="${basedir}">
+                <exclude name="${excludeBuildScript}"/>
+	            <exclude name="${mainBinDir}"/>
+	            <exclude name="${simBinDir}"/>
+	            <exclude name="${testBinDir}"/>
+	            <exclude name="${testJarFile}"/>
+	            <exclude name="${tmpDir}"/>
+	            <exclude name="${jarsDir}/${Bundle-SymbolicName}*"/>
+            </fileset>
         </copy>
-	</target>
+    </target>
 
     <target name="clean" description="Cleans the build artifacts.">
         <delete dir="${mainBinDir}"/>

@@ -288,7 +288,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int i = 0; i < bodystructures.length; i++) {
                 final BODYSTRUCTURE bodystructure = bodystructures[i];
                 if (null != bodystructure) {
-                    retval[i] = handleBODYSTRUCTURE(fullName, mailIds[i], bodystructure, null, 1, new boolean[1]);
+                    try {
+                        retval[i] = handleBODYSTRUCTURE(fullName, mailIds[i], bodystructure, null, 1, new boolean[1]);
+                    } catch (final Exception e) {
+                        if (DEBUG) {
+                            LOG.debug("Ignoring failed handling of BODYSTRUCTURE item: " + e.getMessage(), e);
+                        }
+                        retval[i] = null;
+                    }
                 }
             }
             return retval;
