@@ -8,10 +8,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.favfolder"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.config"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.generic"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.infostore"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.group.management"/>
@@ -40,7 +36,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.online.infostore"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.resource.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino"/>
