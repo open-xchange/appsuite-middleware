@@ -54,6 +54,7 @@ import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.isEmpty;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitSane;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
+import static java.lang.Math.min;
 import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -361,9 +362,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
      * ----------------------------------------------------------------------------------------------
      */
 
-    private static final int QUERY_ROWS = 1000;
+    private static final int QUERY_ROWS = 2000;
 
-    private static final int ALL_ROWS = QUERY_ROWS << 3;
+    private static final int ALL_ROWS = 8000;
 
     private static final int DELETE_ROWS = 25;
 
@@ -637,16 +638,21 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              */
             final boolean checkContent = false;
             /*
+             * Determine start/end position
+             */
+            final int start;
+            final int end;
+            if (null == indexRange) {
+                start = 0;
+                end = -1;
+            } else {
+                start = indexRange.start;
+                end = indexRange.end;
+            }
+            /*
              * Page-wise retrieval
              */
-            Integer rows = Integer.valueOf(QUERY_ROWS);
-            if (indexRange != null && (indexRange.end - indexRange.start) < rows.intValue()) {
-                rows = Integer.valueOf(indexRange.end - indexRange.start);
-            }
-            Integer start = Integer.valueOf(0);
-            if (indexRange != null && indexRange.start > start.intValue()) {
-                start = Integer.valueOf(indexRange.start);
-            }
+            final Integer rows = Integer.valueOf(end > 0 ? min(end - start, QUERY_ROWS) : QUERY_ROWS);
             int off;
             final String[] fieldArray;
             long numFound;
@@ -654,7 +660,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final List<MailFiller> mailFillers;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
-                solrQuery.setStart(start);
+                solrQuery.setStart(Integer.valueOf(start));
                 solrQuery.setRows(rows);
                 solrQuery.setSortField(sortField2Name.get(null == sortField ? MailSortField.RECEIVED_DATE : sortField), getORDER(order));
                 final Set<String> set = new HashSet<String>(mailFields.size());
@@ -677,13 +683,13 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 if (numFound <= 0) {
                     return Collections.emptyList();
                 }
-                if (null != indexRange && indexRange.end < numFound) {
-                    numFound = indexRange.end;
+                if (end > 0 && end < numFound) {
+                    numFound = end;
                     if (null != more) {
                         more[0] = true;
                     }
                 }
-                mails = new ArrayList<MailMessage>((int) numFound);
+                mails = new ArrayList<MailMessage>(end > 0 ? (end - start) : (int) numFound);
                 mailFillers = fillersFor(mailFields);
                 if (null != optFullName) {
                     mailFillers.add(new FullNameFiller(optFullName));
@@ -695,7 +701,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 for (int i = 0; i < size; i++) {
                     mails.add(readDocument(results.get(i), mailFillers, checkContent));
                 }
-                off = start.intValue() + size;
+                off = start + size;
 
                 System.out.println("SolrjAdapter.search() requested " + off + " of " + numFound + " mails from index for:\n" + query);
 
