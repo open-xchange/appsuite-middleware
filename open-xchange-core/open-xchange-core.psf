@@ -24,6 +24,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.composition"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.config"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.generic"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.infostore"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.folder.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.settings.extensions"/>
@@ -40,6 +44,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.udp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.json"/>
