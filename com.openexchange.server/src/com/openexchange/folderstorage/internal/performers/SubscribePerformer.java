@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -119,10 +118,6 @@ public final class SubscribePerformer extends AbstractPerformer {
     public SubscribePerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
     }
-
-    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        FolderStorage.REAL_TREE_ID,
-        OutlookFolderStorage.OUTLOOK_TREE_ID)));
 
     private static final Set<String> SYSTEM_FOLDERS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
         FolderStorage.ROOT_ID,

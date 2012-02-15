@@ -50,10 +50,6 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -62,7 +58,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -113,10 +108,6 @@ public final class UnsubscribePerformer extends AbstractPerformer {
     public UnsubscribePerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
     }
-
-    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        FolderStorage.REAL_TREE_ID,
-        OutlookFolderStorage.OUTLOOK_TREE_ID)));
 
     /**
      * Performs the <code>UNSUBSCRIBE</code> action.
