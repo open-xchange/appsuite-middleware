@@ -96,10 +96,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
@@ -881,7 +881,7 @@ public final class MailMessageParser {
          * SUBJECT
          */
         {
-            final String subj = MimeMessageUtility.decodeMultiEncodedHeader(mail.getSubject());
+            final String subj = mail.getSubject();
             subject = subj;
             handler.handleSubject(subj);
         }
