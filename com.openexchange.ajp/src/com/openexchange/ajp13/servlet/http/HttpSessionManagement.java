@@ -81,7 +81,7 @@ public final class HttpSessionManagement {
                 sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
                 final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
-                    sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(sessions), 3600000, 3600000);
+                    sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(sessions), 300000, 300000); // Every 5 minutes
                 }
             }
         }

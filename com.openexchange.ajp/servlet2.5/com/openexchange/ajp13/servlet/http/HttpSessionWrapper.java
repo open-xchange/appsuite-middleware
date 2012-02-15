@@ -112,7 +112,7 @@ public class HttpSessionWrapper implements HttpSession {
             (int) (ConfigTools.parseTimespan(null == configurationService ? "1W" : configurationService.getProperty(
                 "com.openexchange.cookie.ttl",
                 "1W")) / 1000);
-        maxInactiveIntervall = cookieTTL;
+        maxInactiveIntervall = 360; // 6 Minutes
         /*
          * Initialize other stuff
          */
