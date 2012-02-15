@@ -266,6 +266,18 @@ public final class MessageUtility {
         }
     }
 
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param bytes The bytes to read
+     * @param charset The charset
+     * @return The <code>String</code> read from input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readBytes(final byte[] bytes, final String charset) throws IOException {
+        return readStream(Streams.newByteArrayInputStream(bytes), charset);
+    }
+
     private static final int BUFSIZE = 8192; // 8K
 
     /**
