@@ -78,7 +78,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -228,10 +228,10 @@ public final class NewAction extends AbstractMailAction {
                     // Add from address
                     fromAddress = defaultSendAddr;
                     message.setFrom(fromAddress);
-                    mail = MIMEMessageConverter.convertMessage(message);
+                    mail = MimeMessageConverter.convertMessage(message);
                 } else {
                     fromAddress = new QuotedInternetAddress(fromAddr, true);
-                    mail = MIMEMessageConverter.convertMessage(message);
+                    mail = MimeMessageConverter.convertMessage(message);
                 }
                 data = new PutNewMailData() {
 

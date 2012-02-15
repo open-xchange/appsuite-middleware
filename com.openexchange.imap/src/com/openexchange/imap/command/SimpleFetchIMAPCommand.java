@@ -81,7 +81,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -495,35 +495,35 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addFrom(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addFrom(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addTo(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addTo(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_CC, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addCc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addCc(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_BCC, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addBcc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addBcc(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.setDispositionNotification(MIMEMessageConverter.getAddressHeader(hdr.getValue())[0]);
+                        mailMessage.setDispositionNotification(MimeMessageConverter.getAddressHeader(hdr.getValue())[0]);
                     }
                 });
                 put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
@@ -553,7 +553,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         final String value = hdr.getValue();
                         if (null != value) {
-                            mailMessage.setPriority(MIMEMessageConverter.parseImportance(value));
+                            mailMessage.setPriority(MimeMessageConverter.parseImportance(value));
                         }
                     }
                 });
@@ -562,7 +562,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         if (!mailMessage.containsPriority()) {
-                            mailMessage.setPriority(MIMEMessageConverter.parsePriority(hdr.getValue()));
+                            mailMessage.setPriority(MimeMessageConverter.parsePriority(hdr.getValue()));
                         }
                     }
                 });

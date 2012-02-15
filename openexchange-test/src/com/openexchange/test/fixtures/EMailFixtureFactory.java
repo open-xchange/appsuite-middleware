@@ -67,7 +67,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
 import com.openexchange.test.fixtures.transformators.EMailFlagsTransformator;
 import com.openexchange.test.fixtures.transformators.InternetAddressTransformator;
@@ -216,7 +216,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
 
             MailMessage retval;
             try {
-                retval = MIMEMessageConverter.convertMessage(msg);
+                retval = MimeMessageConverter.convertMessage(msg);
             } catch (OXException e) {
                 throw new FixtureException(e);
             }
@@ -244,7 +244,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
 
             MailMessage retval;
             try {
-                retval = MIMEMessageConverter.convertMessage(msg);
+                retval = MimeMessageConverter.convertMessage(msg);
             } catch (OXException e) {
                 throw new FixtureException(e);
             }

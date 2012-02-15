@@ -50,7 +50,7 @@
 package com.openexchange.messaging.mail;
 
 import static com.openexchange.mail.mime.MIMEDefaultSession.getDefaultSession;
-import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertMessage;
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

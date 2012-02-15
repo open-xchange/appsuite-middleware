@@ -82,7 +82,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -201,7 +201,7 @@ public final class MIMEStructureParser {
         /*
          * Create appropriate MailMessage instance
          */
-        return MIMEMessageConverter.convertMessage(mimeMessage);
+        return MimeMessageConverter.convertMessage(mimeMessage);
     }
 
     /**

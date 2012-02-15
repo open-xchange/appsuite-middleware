@@ -65,7 +65,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -291,7 +291,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
             nestedMail = (MailMessage) content;
         } else if (content instanceof InputStream) {
             try {
-                nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
                     MIMEDefaultSession.getDefaultSession(),
                     (InputStream) content));
             } catch (final MessagingException e) {

@@ -67,7 +67,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.twitter.Status;
@@ -171,7 +171,7 @@ public final class TwitterStatusConverter {
             /*
              * Get a MailMessage object
              */
-            final MailMessage mm = MIMEMessageConverter.convertMessage(asciiBytes);
+            final MailMessage mm = MimeMessageConverter.convertMessage(asciiBytes);
             mm.setMailId(Long.toString(status.getId()));
             mm.setFolder("INBOX");
             mm.setAccountId(accountId);

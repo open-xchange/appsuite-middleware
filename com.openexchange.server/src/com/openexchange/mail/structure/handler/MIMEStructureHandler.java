@@ -101,7 +101,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
@@ -492,7 +492,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             } else if (content instanceof InputStream) {
                 try {
                     nestedMail =
-                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                        MimeMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }

@@ -70,7 +70,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -386,7 +386,7 @@ public abstract class AbstractMailTest extends TestCase {
         }
         final MailMessage[] retval = new MailMessage[msgs.length];
         for (int i = 0; i < retval.length; i++) {
-            retval[i] = MIMEMessageConverter.convertMessage(msgs[i]);
+            retval[i] = MimeMessageConverter.convertMessage(msgs[i]);
         }
         return retval;
     }

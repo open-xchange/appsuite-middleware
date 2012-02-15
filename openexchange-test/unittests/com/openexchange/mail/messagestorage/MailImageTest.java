@@ -58,7 +58,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -182,7 +182,7 @@ public final class MailImageTest extends AbstractMailTest {
 			final String uid = mailAccess.getMessageStorage()
 					.appendMessages(
 							"INBOX",
-							new MailMessage[] { MIMEMessageConverter.convertMessage(MSG_WITH_INLINE_IMG
+							new MailMessage[] { MimeMessageConverter.convertMessage(MSG_WITH_INLINE_IMG
 									.getBytes(com.openexchange.java.Charsets.US_ASCII)) })[0];
 			try {
 				final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", uid, true);

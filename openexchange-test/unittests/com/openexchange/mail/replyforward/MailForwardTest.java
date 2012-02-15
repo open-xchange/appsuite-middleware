@@ -67,7 +67,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -100,7 +100,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
     public void testMailForward() {
         try {
-            final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            final MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             final Context ctx = new ContextImpl(getCid());
             final SessionObject session = getSession();
@@ -225,7 +225,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
     public void testMailForwardAnother() {
         try {
-            final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            final MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             final Context ctx = new ContextImpl(getCid());
             final SessionObject session = getSession();
@@ -338,8 +338,8 @@ public final class MailForwardTest extends AbstractMailTest {
             try {
                 {
                     final MailMessage[] mails = new MailMessage[2];
-                    mails[0] = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
-                    mails[1] = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    mails[0] = MimeMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    mails[1] = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
                     uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
                 }
 

@@ -94,7 +94,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.InlineContentHandler;
@@ -384,7 +384,7 @@ public final class MimeReply {
                 replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
                     "#CS#",
                     MailProperties.getInstance().getDefaultMimeCharset()));
-                final MailMessage replyMail = MIMEMessageConverter.convertMessage(replyMsg);
+                final MailMessage replyMail = MimeMessageConverter.convertMessage(replyMsg);
                 if (null != msgref) {
                     replyMail.setMsgref(msgref);
                 }
@@ -457,7 +457,7 @@ public final class MimeReply {
             replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(retvalContentType.toString()));
             replyMsg.saveChanges();
-            replyMail = MIMEMessageConverter.convertMessage(replyMsg);
+            replyMail = MimeMessageConverter.convertMessage(replyMsg);
             if (null != msgref) {
                 replyMail.setMsgref(msgref);
             }
@@ -664,7 +664,7 @@ public final class MimeReply {
                 while ((read = is.read(buf, 0, buf.length)) != -1) {
                     tmp.write(buf, 0, read);
                 }
-                final MailMessage attachedMsg = MIMEMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
+                final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
                 // part.getInputStream());
                 found |= generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.replyTexts);
             }

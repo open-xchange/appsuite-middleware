@@ -127,7 +127,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -1966,7 +1966,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             final String uid;
             {
-                final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+                final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
                 filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
                 /*
                  * Append message to draft folder without invoking draftMail.cleanUp() afterwards to avoid loss of possibly uploaded images

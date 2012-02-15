@@ -61,7 +61,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -119,7 +119,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             for (int i = 0; i < mails.length; i++) {
                 out.reset();
                 messages[i].writeTo(out);
-                mails[i] = MIMEMessageConverter.convertMessage(out.toByteArray());
+                mails[i] = MimeMessageConverter.convertMessage(out.toByteArray());
             }
             messageStorage.appendMessages(folder, mails);
         } catch (final OXException e) {

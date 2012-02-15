@@ -161,7 +161,7 @@ import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
@@ -3476,7 +3476,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final String[] ids;
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
-                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MIMEMessageConverter.convertMessage(data.getMail()) }, force);
+                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MimeMessageConverter.convertMessage(data.getMail()) }, force);
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
@@ -3693,7 +3693,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final boolean quit = messages.remove(POISON);
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MIMEMessageConverter.convertMessage(message);
+                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
                     messages.clear();
@@ -3819,7 +3819,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final List<MailMessage> mails = new ArrayList<MailMessage>(messages.size());
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MIMEMessageConverter.convertMessage(message);
+                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
                     messages.clear();

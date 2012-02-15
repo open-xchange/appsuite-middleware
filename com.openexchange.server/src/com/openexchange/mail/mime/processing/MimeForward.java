@@ -87,7 +87,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.NestedMessageMailPart;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
@@ -303,7 +303,7 @@ public final class MimeForward {
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
             }
-            final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+            final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
              * Add all non-inline parts through a handler to keep original sequence IDs
              */
@@ -337,7 +337,7 @@ public final class MimeForward {
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
-            forwardMail = MIMEMessageConverter.convertMessage(forwardMsg);
+            forwardMail = MimeMessageConverter.convertMessage(forwardMsg);
         } else {
             /*
              * Mail only consists of one non-textual part
@@ -361,7 +361,7 @@ public final class MimeForward {
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
             }
-            final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+            final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
              * Add the single "attachment"
              */
@@ -396,7 +396,7 @@ public final class MimeForward {
                         attachmentPart.addHeader(name, header.getValue());
                     }
                 }
-                attachmentMailPart = MIMEMessageConverter.convertPart(attachmentPart, false);
+                attachmentMailPart = MimeMessageConverter.convertPart(attachmentPart, false);
             }
             attachmentMailPart.setSequenceId(String.valueOf(1));
             compositeMail.addAdditionalParts(attachmentMailPart);
@@ -424,7 +424,7 @@ public final class MimeForward {
             multipart.addBodyPart(textPart);
             forwardMsg.setContent(multipart);
             forwardMsg.saveChanges();
-            compositeMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+            compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
         }
         /*
          * Attach messages
@@ -432,12 +432,12 @@ public final class MimeForward {
         for (final MailMessage originalMsg : originalMsgs) {
             final MailMessage nested;
             if (originalMsg instanceof MIMEMailMessage) {
-                nested = MIMEMessageConverter.convertMessage(((MIMEMailMessage) originalMsg).getMimeMessage());
+                nested = MimeMessageConverter.convertMessage(((MIMEMailMessage) originalMsg).getMimeMessage());
             } else {
                 final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) originalMsg.getSize());
                 originalMsg.writeTo(tmp);
                 nested =
-                    MIMEMessageConverter.convertMessage(new MimeMessage(
+                    MimeMessageConverter.convertMessage(new MimeMessage(
                         MIMEDefaultSession.getDefaultSession(),
                         new UnsynchronizedByteArrayInputStream(tmp.toByteArray())));
             }

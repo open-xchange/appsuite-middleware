@@ -78,7 +78,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -736,7 +736,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         for (int i = 0; i < msgs.length; i++) {
             final Message message = msgs[i];
             if (null != message) {
-                final MailMessage mm = MIMEMessageConverter.convertMessage((MimeMessage) message, false);
+                final MailMessage mm = MimeMessageConverter.convertMessage((MimeMessage) message, false);
                 mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
                 toAppend.add(mm);
             }

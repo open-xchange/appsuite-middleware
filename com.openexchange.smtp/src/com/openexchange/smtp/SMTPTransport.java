@@ -96,7 +96,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -526,7 +526,7 @@ public final class SMTPTransport extends MailTransport {
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e);
             }
-            return MIMEMessageConverter.convertMessage(smtpMessage);
+            return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -597,7 +597,7 @@ public final class SMTPTransport extends MailTransport {
             } finally {
                 invokeLater(new MailCleanerTask(composedMail));
             }
-            return MIMEMessageConverter.convertMessage(smtpMessage);
+            return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {

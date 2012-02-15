@@ -133,7 +133,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
@@ -513,7 +513,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Check field existence
              */
-            MIMEMessageConverter.checkFieldExistence(messages, mailFields);
+            MimeMessageConverter.checkFieldExistence(messages, mailFields);
             if (fieldSet.contains(MailField.ACCOUNT_NAME) || fieldSet.contains(MailField.FULL)) {
                 return setAccountInfo(messages);
             }
@@ -697,7 +697,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             msg.setPeek(!markSeen);
             final MailMessage mail;
             try {
-                mail = MIMEMessageConverter.convertMessage(msg, false);
+                mail = MimeMessageConverter.convertMessage(msg, false);
                 mail.setFolder(fullName);
                 mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
@@ -1768,9 +1768,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Convert messages to JavaMail message objects
              */
             msgs =
-                MIMEMessageConverter.convertMailMessages(
+                MimeMessageConverter.convertMailMessages(
                     mailMessages,
-                    MIMEMessageConverter.BEHAVIOR_CLONE | MIMEMessageConverter.BEHAVIOR_STREAM2FILE);
+                    MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
             /*
              * Drop special "x-original-headers" header
              */
@@ -2276,7 +2276,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Append message to draft folder
                  */
                 imapFolderStorage.removeFromCache(draftFullName);
-                uid = appendMessagesLong(draftFullName, new MailMessage[] { MIMEMessageConverter.convertMessage(mimeMessage, false) })[0];
+                uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
             } finally {
                 composedMail.cleanUp();
             }
@@ -2731,7 +2731,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody) throws OXException {
-        return MIMEMessageConverter.convertMessages(msgs, fields, headerNames, includeBody);
+        return MimeMessageConverter.convertMessages(msgs, fields, headerNames, includeBody);
     }
 
     private char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {

@@ -86,7 +86,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -366,7 +366,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MIMEMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageConverter.parseImportance(entry.getValue());
                         jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -376,7 +376,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MIMEMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageConverter.parsePriority(entry.getValue());
                         }
                         jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }
@@ -615,7 +615,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             } else if (content instanceof InputStream) {
                 try {
                     nestedMail =
-                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                        MimeMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }

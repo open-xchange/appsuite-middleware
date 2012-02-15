@@ -115,13 +115,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.pop3.POP3Folder;
 
 /**
- * {@link MIMEMessageConverter} - Provides several methods to convert instances of {@link MimeMessage} to {@link MailMessage} in vice versa.
+ * {@link MimeMessageConverter} - Provides several methods to convert instances of {@link MimeMessage} to {@link MailMessage} in vice versa.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMessageConverter {
+public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageConverter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -216,7 +216,7 @@ public final class MIMEMessageConverter {
     /**
      * Prevent instantiation.
      */
-    private MIMEMessageConverter() {
+    private MimeMessageConverter() {
         super();
     }
 
