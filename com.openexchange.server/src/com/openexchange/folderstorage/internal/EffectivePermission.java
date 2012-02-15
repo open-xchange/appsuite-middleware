@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import gnu.trove.EmptyTIntSet;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.List;
@@ -127,7 +128,7 @@ public final class EffectivePermission implements Permission {
         this.type = type;
         this.userConfig = userConfig;
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
-            this.allowedContentTypes = new TIntHashSet(1);
+            this.allowedContentTypes = EmptyTIntSet.getInstance();
         } else {
             final TIntSet set = new TIntHashSet(allowedContentTypes.size() + 1);
             for (final ContentType allowedContentType : allowedContentTypes) {
