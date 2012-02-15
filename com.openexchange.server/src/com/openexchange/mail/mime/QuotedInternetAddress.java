@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
+import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
@@ -805,7 +806,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     public QuotedInternetAddress() {
         super();
-        jcharset = MimeUtility.getDefaultJavaCharset();
+        jcharset = MailProperties.getInstance().getDefaultMimeCharset();
     }
 
     /**
@@ -835,7 +836,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     public QuotedInternetAddress(final String address) throws AddressException {
         super();
         parseAddress0(address);
-        jcharset = MimeUtility.getDefaultJavaCharset();
+        jcharset = MailProperties.getInstance().getDefaultMimeCharset();
     }
 
     /**
@@ -918,10 +919,14 @@ public final class QuotedInternetAddress extends InternetAddress {
         this.address = toACE(address);
         if (charset == null) {
             // use default charset
-            jcharset = MimeUtility.getDefaultJavaCharset();
+            jcharset = MailProperties.getInstance().getDefaultMimeCharset();
         } else {
             // MIME charset -> java charset
-            jcharset = MimeUtility.javaCharset(charset);
+            String javaCharset = MimeUtility.javaCharset(charset);
+            if ("utf8".equalsIgnoreCase(javaCharset)) {
+                javaCharset = "UTF-8";
+            }
+            jcharset = javaCharset;
         }
         setPersonal(personal, charset);
     }
