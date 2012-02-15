@@ -195,14 +195,27 @@ public class Login extends AJAXServlet {
 
     }
 
+    /**
+     * <code>"open-xchange-session-"</code>
+     */
     public static final String SESSION_PREFIX = "open-xchange-session-".intern();
 
+    /**
+     * <code>"open-xchange-secret-"</code>
+     */
     public static final String SECRET_PREFIX = "open-xchange-secret-".intern();
 
+    /**
+     * <code>"open-xchange-public-session"</code>
+     */
     public static final String PUBLIC_SESSION_NAME = "open-xchange-public-session".intern();
 
     private static final String ACTION_FORMLOGIN = "formlogin";
-    public static final String ACTION_CHANGEIP = "changeip";
+
+    /**
+     * <code>"changeip"</code>
+     */
+    public static final String ACTION_CHANGEIP = "changeip".intern();
 
     private static enum CookieType {
         SESSION,

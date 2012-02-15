@@ -82,6 +82,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ConditionTreeMap {
 
+    private static final EmptyTIntSet EMPTY_SET = EmptyTIntSet.getInstance();
+
     private final ConcurrentTIntObjectHashMap<ConditionTree> trees;
 
     private final int contextId;
@@ -190,7 +192,7 @@ public final class ConditionTreeMap {
     public TIntSet getVisibleForUser(final int userId, final int[] groups, final int[] accessibleModules, final Condition... conditions) {
         final ConditionTree tree = trees.get(userId);
         if (null == tree) {
-            return EmptyTIntSet.getInstance();
+            return EMPTY_SET;
         }
         final Condition condition = new CombinedCondition(new ModulesCondition(accessibleModules), conditions);
         /*
@@ -223,7 +225,7 @@ public final class ConditionTreeMap {
     public TIntSet getVisibleForUser(final int userId, final int[] groups, final int[] accessibleModules, final Collection<Condition> conditions) {
         final ConditionTree tree = trees.get(userId);
         if (null == tree) {
-            return EmptyTIntSet.getInstance();
+            return EMPTY_SET;
         }
         final Condition condition = new CombinedCondition(new ModulesCondition(accessibleModules), conditions);
         /*
@@ -325,7 +327,7 @@ public final class ConditionTreeMap {
     public TIntSet getVisibleTypeForUser(final int userId, final int[] groups, final int[] accessibleModules, final int type) {
         final ConditionTree tree = trees.get(userId);
         if (null == tree) {
-            return EmptyTIntSet.getInstance();
+            return EMPTY_SET;
         }
         final Condition condition = new CombinedCondition(new ModulesCondition(accessibleModules), new TypeCondition(type, userId));
         /*
@@ -358,14 +360,14 @@ public final class ConditionTreeMap {
     public TIntSet getVisibleModuleForUser(final int userId, final int[] groups, final int[] accessibleModules, final int module) {
         final ConditionTree tree = trees.get(userId);
         if (null == tree) {
-            return EmptyTIntSet.getInstance();
+            return EMPTY_SET;
         }
         final Condition condition;
         {
             if (null != accessibleModules) {
                 final TIntSet modules = new TIntHashSet(accessibleModules);
                 if (!modules.contains(module)) {
-                    return EmptyTIntSet.getInstance();
+                    return EMPTY_SET;
                 }
             }
             condition = new CombinedCondition(new ModuleCondition(module));
@@ -401,14 +403,14 @@ public final class ConditionTreeMap {
     public TIntSet getVisibleForUser(final int userId, final int[] groups, final int[] accessibleModules, final int module, final int type) {
         final ConditionTree tree = trees.get(userId);
         if (null == tree) {
-            return EmptyTIntSet.getInstance();
+            return EMPTY_SET;
         }
         final Condition condition;
         {
             if (null != accessibleModules) {
                 final TIntSet modules = new TIntHashSet(accessibleModules);
                 if (!modules.contains(module)) {
-                    return EmptyTIntSet.getInstance();
+                    return EMPTY_SET;
                 }
             }
             condition = new CombinedCondition(new ModuleCondition(module), new TypeCondition(type, userId));
