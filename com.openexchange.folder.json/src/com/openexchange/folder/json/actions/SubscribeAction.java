@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -107,10 +106,7 @@ public final class SubscribeAction extends AbstractFolderAction {
             if (null == targetTreeId) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(NAME_TREE);
             }
-            String parent = request.getParameter("parent");
-            if (null == parent) {
-                parent = FolderStorage.ROOT_ID;
-            }
+            final String optParent = request.getParameter("parent");
             /*
              * Parse JSON object
              */
@@ -147,7 +143,7 @@ public final class SubscribeAction extends AbstractFolderAction {
                 folderService.unsubscribeFolder(targetTreeId, subscribeParams.folderId, session);
             }
             for (final SubscribeParams subscribeParams : subscribeList) {
-                folderService.subscribeFolder(subscribeParams.sourceTree, subscribeParams.folderId, targetTreeId, parent, session);
+                folderService.subscribeFolder(subscribeParams.sourceTree, subscribeParams.folderId, targetTreeId, optParent, session);
             }
             /*
              * Return

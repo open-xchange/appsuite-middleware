@@ -174,13 +174,13 @@ public interface FolderService {
      * @param sourceTreeId The source tree identifier
      * @param folderId The (source) folder identifier
      * @param targetTreeId The target tree identifier
-     * @param targetParentId The target parent identifier
+     * @param optTargetParentId The optional target parent identifier
      * @param user The user
      * @param context The context
      * @param session The session
      * @throws OXException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, User user, Context context) throws OXException;
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String optTargetParentId, User user, Context context) throws OXException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -190,11 +190,11 @@ public interface FolderService {
      * @param sourceTreeId The source tree identifier
      * @param folderId The (source) folder identifier
      * @param targetTreeId The target tree identifier
-     * @param targetParentId The target parent identifier
+     * @param optTargetParentId The optional target parent identifier
      * @param session The session
      * @throws OXException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, Session session) throws OXException;
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String optTargetParentId, Session session) throws OXException;
 
     /**
      * Unsubscribes the specified folder in given (virtual) tree only.

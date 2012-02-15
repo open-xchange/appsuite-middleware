@@ -244,28 +244,28 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final User user, final Context context) throws OXException {
+    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String optTargetParentId, final User user, final Context context) throws OXException {
         if (!FolderStorage.REAL_TREE_ID.equals(sourceTreeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe only supported for real tree as source tree.");
         }
-        if (KNOWN_TREES.contains(targetParentId)) {
+        if (KNOWN_TREES.contains(optTargetParentId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe not supported for known trees.");
         }
-        new SubscribePerformer(user, context).doSubscribe(sourceTreeId, folderId, targetTreeId, targetParentId);
+        new SubscribePerformer(user, context).doSubscribe(sourceTreeId, folderId, targetTreeId, optTargetParentId);
 
     }
 
     private static final Set<String> KNOWN_TREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID)));
 
     @Override
-    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final Session session) throws OXException {
+    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String optTargetParentId, final Session session) throws OXException {
         if (!FolderStorage.REAL_TREE_ID.equals(sourceTreeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe only supported for real tree as source tree.");
         }
         if (KNOWN_TREES.contains(targetTreeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe not supported for known trees.");
         }
-        new SubscribePerformer(ServerSessionAdapter.valueOf(session)).doSubscribe(sourceTreeId, folderId, targetTreeId, targetParentId);
+        new SubscribePerformer(ServerSessionAdapter.valueOf(session)).doSubscribe(sourceTreeId, folderId, targetTreeId, optTargetParentId);
     }
 
     @Override
