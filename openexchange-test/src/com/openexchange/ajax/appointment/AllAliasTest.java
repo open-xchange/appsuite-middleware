@@ -47,78 +47,74 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.appointment;
 
+import java.util.Date;
 import org.json.JSONArray;
+import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.ajax.task.actions.ListRequest;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.container.Appointment;
 
 
 /**
- * {@link ListAliasTest}
+ * {@link AllAliasTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class ListAliasTest extends AbstractTaskTest {
+public class AllAliasTest extends AppointmentTest {
 
+    private Appointment appointment;
     private AJAXClient client;
-    private Task task;
 
     /**
      * Initializes a new {@link AllAliasTest}.
-     *
      * @param name
      */
-    public ListAliasTest(final String name) {
+    public AllAliasTest(final String name) {
         super(name);
     }
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp();
         client = getClient();
+
+        appointment = new Appointment();
+        appointment.setStartDate(new Date());
+        appointment.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
+        appointment.setIgnoreConflicts(true);
+        appointment.setTitle("All Alias Test Appointment");
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+
+        final InsertRequest insertRequest = new InsertRequest(appointment, client.getValues().getTimeZone());
+        final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
+        insertResponse.fillAppointment(appointment);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        final DeleteRequest delete = new DeleteRequest(task);
-        client.execute(delete);
+        final DeleteRequest deleteRequest = new DeleteRequest(appointment);
+        client.equals(deleteRequest);
         super.tearDown();
     }
 
-    public void testAll() throws Throwable {
-        task = new Task();
-        task.setTitle("Task TestListAlias");
-        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
-        final InsertRequest insertRequest = new InsertRequest(task, getTimeZone());
-        final InsertResponse insertResponse = client.execute(insertRequest);
-        insertResponse.fillObject(task);
+    public void testAllAlias() throws Exception {
+        final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), "all", new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
+        final CommonAllResponse allAliasResponse = client.execute(allAliasRequest);
+        final Object[][] aliasAppointments = allAliasResponse.getArray();
 
-        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateTaskFolder(), new int[] {20,1}, 0, Order.NO_ORDER);
+        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), new int[] {1,20,207,201}, new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
         final CommonAllResponse allResponse = client.execute(allRequest);
-        final ListIDs ids = allResponse.getListIDs();
+        final Object[][] appointments = allResponse.getArray();
 
-        final ListRequest aliasRequest = new ListRequest(ids, "list");
-        final CommonListResponse aliasResponse = client.execute(aliasRequest);
-        final Object[][] tasksAlias = aliasResponse.getArray();
-
-        final ListRequest request = new ListRequest(ids, new int[] {20,1,5});
-        final CommonListResponse response = client.execute(request);
-        final Object[][] tasks = response.getArray();
-
-        assertEquals("Arrays' sizes are not equal.", tasksAlias.length, tasks.length);
-        for (int i = 0; i < tasksAlias.length; i++) {
-            final Object[] o1 = tasksAlias[i];
-            final Object[] o2 = tasks[i];
+        assertEquals("Arrays' sizes are not equal.", aliasAppointments.length, appointments.length);
+        for (int i = 0; i < aliasAppointments.length; i++) {
+            final Object[] o1 = aliasAppointments[i];
+            final Object[] o2 = appointments[i];
             assertEquals("Objects' sizes are not equal.", o1.length, o2.length);
             for (int j = 0; j < o1.length; j++) {
                 if ((o1[j] != null || o2[j] != null)) {
