@@ -98,11 +98,11 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.FullnameFolder;
 import com.openexchange.mail.mime.HeaderCollection;
+import com.openexchange.mail.mime.ManagedMimeMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.ManagedMimeMessage;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
@@ -2284,13 +2284,13 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(checkNonAscii(valueArr[0]));
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
-                sb.append(delimiter).append(checkNonAscii(valueArr[i]));
+                sb.append(delimiter).append(valueArr[i]);
             }
             values = sb.toString();
         } else {
-            values = checkNonAscii(valueArr[0]);
+            values = valueArr[0];
         }
         return decodeMultiEncodedHeader(values);
     }
