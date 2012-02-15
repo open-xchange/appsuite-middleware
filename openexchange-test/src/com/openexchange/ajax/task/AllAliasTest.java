@@ -131,7 +131,7 @@ public class AllAliasTest extends AbstractTaskTest {
         for (int i = 0; i < o1.length(); i++) {
             if ((o1.get(i) != null || o2.get(i) != null)) {
                 if (!(o1.get(i) instanceof JSONArray) && !(o2.get(i) instanceof JSONArray)) {
-                    assertEquals("Array[" + i + "] not equal.", o1.get(i), o2.get(i));
+                    assertEquals("Array[" + i + "] not equal.", o1.get(i).toString(), o2.get(i).toString());
                 } else {
                     compareArrays((JSONArray) o1.get(i), (JSONArray) o2.get(i));
                 }

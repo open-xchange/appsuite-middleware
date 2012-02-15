@@ -58,19 +58,18 @@ import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.request.AppointmentRequest;
+import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
 
 /**
  * Contains the data for an appointment all request.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AllRequest extends CommonAllRequest {
 
-    public static final int[] GUI_COLUMNS = new int[] {
-        Appointment.OBJECT_ID,
-        Appointment.FOLDER_ID
-    };
+    public static final int[] GUI_COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID };
 
     public static final int GUI_SORT = Appointment.START_DATE;
 
@@ -86,9 +85,7 @@ public class AllRequest extends CommonAllRequest {
 
     private final boolean showPrivates;
 
-
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-        final Date end, final TimeZone tz) {
+    public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz) {
         this(folderId, columns, start, end, tz, true);
     }
 
@@ -98,9 +95,26 @@ public class AllRequest extends CommonAllRequest {
     public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster) {
         this(folderId, columns, start, end, tz, recurrenceMaster, false);
     }
+
     public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
-        super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns),
-            0, null, true);
+        super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns), 0, null, true);
+        // Add time zone's offset to simulate local time as passed by requests from GUI
+        this.start = addTimeZone2Date(start, tz);
+        this.end = addTimeZone2Date(end, tz);
+        this.recurrenceMaster = recurrenceMaster;
+        this.showPrivates = showPrivates;
+    }
+
+    public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz) {
+        this(folderId, alias, start, end, tz, true);
+    }
+
+    public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster) {
+        this(folderId, alias, start, end, tz, recurrenceMaster, false);
+    }
+
+    public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
+        super(AbstractAppointmentRequest.URL, folderId, alias, 0, null, true);
         // Add time zone's offset to simulate local time as passed by requests from GUI
         this.start = addTimeZone2Date(start, tz);
         this.end = addTimeZone2Date(end, tz);
@@ -146,29 +160,30 @@ public class AllRequest extends CommonAllRequest {
     }
 
     private static Date addTimeZone2Date(final Date d, final TimeZone tz) {
-		return addTimeZone2Date(d.getTime(), tz);
-	}
+        return addTimeZone2Date(d.getTime(), tz);
+    }
 
-	private static Date addTimeZone2Date(final long timeMillis, final TimeZone tz) {
-		return new Date(timeMillis + tz.getOffset(timeMillis));
-	}
+    private static Date addTimeZone2Date(final long timeMillis, final TimeZone tz) {
+        return new Date(timeMillis + tz.getOffset(timeMillis));
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public Parameter[] getParameters() {
-        List<Parameter> params = new LinkedList<Parameter>( Arrays.asList(super.getParameters()));
+        final List<Parameter> params = new LinkedList<Parameter>(Arrays.asList(super.getParameters()));
 
-        if (null != timeZoneId)
+        if (null != timeZoneId) {
             params.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZoneId));
+        }
 
         params.add(new Parameter(AJAXServlet.PARAMETER_START, start));
         params.add(new Parameter(AJAXServlet.PARAMETER_END, end));
-        params.add( new Parameter(AppointmentRequest.RECURRENCE_MASTER,recurrenceMaster));
+        params.add(new Parameter(AppointmentRequest.RECURRENCE_MASTER, recurrenceMaster));
         params.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
 
-        return params.toArray(new Parameter[]{});
+        return params.toArray(new Parameter[] {});
     }
 
     /**
@@ -176,6 +191,16 @@ public class AllRequest extends CommonAllRequest {
      */
     @Override
     public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+        if (getColumns() != null) {
+            return new AllParser(isFailOnError(), getColumns());
+        } else {
+            if (getAlias().equals("all")) {
+                return new AllParser(isFailOnError(), AppointmentAction.COLUMNS_ALL_ALIAS);
+            }
+            if (getAlias().equals("list")) {
+                return new AllParser(isFailOnError(), AppointmentAction.COLUMNS_LIST_ALIAS);
+            }
+        }
+        return null;
     }
 }
