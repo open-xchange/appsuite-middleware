@@ -138,18 +138,22 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             openedStorages.add(virtualStorage);
         }
         try {
+            if (!virtualStorage.containsFolder(treeId, folderId, storageParameters)) {
+                return;
+            }
+            /*
+             * Unsubscribe contained folder
+             */
             final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
-            {
-                /*
-                 * Check folder permission
-                 */
-                final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
-                if (!permission.isVisible()) {
-                    throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        getFolderInfo4Error(folder),
-                        getUserInfo4Error(),
-                        getContextInfo4Error());
-                }
+            /*
+             * Check folder permission
+             */
+            final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+            if (!permission.isVisible()) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             {
                 /*

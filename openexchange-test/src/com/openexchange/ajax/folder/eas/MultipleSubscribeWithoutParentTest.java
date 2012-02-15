@@ -65,20 +65,20 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link MultipleSubscribeTest}
+ * {@link MultipleSubscribeWithoutParentTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MultipleSubscribeTest extends AbstractAJAXSession {
+public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
 
     private AJAXClient client;
 
     /**
-     * Initializes a new {@link MultipleSubscribeTest}.
+     * Initializes a new {@link MultipleSubscribeWithoutParentTest}.
      *
      * @param name The name of the test.
      */
-    public MultipleSubscribeTest(final String name) {
+    public MultipleSubscribeWithoutParentTest(final String name) {
         super(name);
     }
 
@@ -88,10 +88,10 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
         client = getClient();
     }
 
-    private String createPrivateCalendarFolder() throws Throwable {
+    private String createPrivateCalendarFolder(final String prefix, final int parentId) throws Throwable {
         final FolderObject fo = new FolderObject();
-        fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        fo.setFolderName("testCalendarFolder" + System.currentTimeMillis());
+        fo.setParentFolderID(parentId > 0 ? parentId : FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        fo.setFolderName((null == prefix ? "testCalendarFolder" : prefix) + System.currentTimeMillis());
         fo.setModule(FolderObject.CALENDAR);
 
         final OCLPermission oclP = new OCLPermission();
@@ -113,23 +113,19 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
         final String parent = FolderStorage.ROOT_ID;
         final LinkedList<String> ids = new LinkedList<String>();
         try {
-            final String newId = createPrivateCalendarFolder();
+            final String newId = createPrivateCalendarFolder("testCalendarParentFolder", -1);
             assertNotNull("New ID must not be null!", newId);
             ids.addFirst(newId);
-
-            SubscribeRequest subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, parent, true);
-            subscribeRequest.addFolderId(newId, true);
-            client.execute(subscribeRequest);
             
             /*-
              * ---------------------------------------------------
              */
             
-            final String newSubId = createPrivateCalendarFolder();
+            final String newSubId = createPrivateCalendarFolder("testCalendarChildFolder", Integer.parseInt(newId));
             assertNotNull("New ID must not be null!", newSubId);
             ids.addFirst(newSubId);
 
-            subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, newId, true);
+            SubscribeRequest subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, newId, true);
             subscribeRequest.addFolderId(newSubId, true);
             client.execute(subscribeRequest);
 
@@ -143,6 +139,17 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
                 }
             }
             assertTrue("Subscribed subfolder not found.", found);
+
+            listRequest = new ListRequest(EnumAPI.EAS_FOLDERS, parent);
+            listResponse = client.execute(listRequest);
+            found = false;
+            for (final Object[] vals : listResponse.getArray()) {
+                if (newId.equals(vals[0].toString())) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue("Subscribed folder not found.", found);
             
             /*-
              * ---------------------------------------------------

@@ -113,6 +113,7 @@ public final class FolderTestSuite {
         // EAS subscribe
         tests.addTestSuite(com.openexchange.ajax.folder.eas.SubscribeTest.class);
         tests.addTestSuite(com.openexchange.ajax.folder.eas.MultipleSubscribeTest.class);
+        tests.addTestSuite(com.openexchange.ajax.folder.eas.MultipleSubscribeWithoutParentTest.class);
 
         // And finally bug tests.
         tests.addTestSuite(Bug12393Test.class);
