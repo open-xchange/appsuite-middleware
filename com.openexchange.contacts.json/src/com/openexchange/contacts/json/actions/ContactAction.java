@@ -63,7 +63,6 @@ import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link ContactAction}
  *
@@ -73,6 +72,10 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class ContactAction implements AJAXActionService {
 
     private final ServiceLookup serviceLookup;
+
+    public static final int[] COLUMNS_ALIAS_ALL = new int[] { 6 };
+
+    public static final int[] COLUMNS_ALIAS_LIST = new int[] { 20, 1, 501, 502, 505, 555, 556, 557, 569, 602, 606 };
 
     public ContactAction(final ServiceLookup serviceLookup) {
         super();

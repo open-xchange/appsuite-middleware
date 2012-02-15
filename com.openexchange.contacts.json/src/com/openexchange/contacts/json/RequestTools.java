@@ -59,6 +59,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
@@ -78,6 +79,12 @@ public class RequestTools {
 
     public static int[] getColumnsAsIntArray(final AJAXRequestData request, final String parameter) throws OXException {
         final String valueStr = request.getParameter("columns");
+        if (valueStr.equals("all")) {
+            return ContactAction.COLUMNS_ALIAS_ALL;
+        }
+        if (valueStr.equals("list")) {
+            return ContactAction.COLUMNS_ALIAS_LIST;
+        }
         final String[] valueStrArr = valueStr.split(",");
 
         final int[] values = new int[valueStrArr.length];
