@@ -79,4 +79,23 @@ public class ListRequest extends CommonListRequest {
     public ListRequest(final ListIDs list, final int[] columns) {
         super(AbstractTaskRequest.TASKS_URL, list, columns, true);
     }
+
+    public ListRequest(final int[][] folderAndTaskIds, final String alias) {
+        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, alias);
+    }
+
+    public ListRequest(final int[][] folderAndTaskIds, final String alias,
+        final boolean failOnError) {
+        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, alias,
+            failOnError);
+    }
+
+    public ListRequest(final ListIDs list, final String alias,
+        final boolean failOnError) {
+        super(AbstractTaskRequest.TASKS_URL, list, alias, failOnError);
+    }
+
+    public ListRequest(final ListIDs list, final String alias) {
+        super(AbstractTaskRequest.TASKS_URL, list, alias, true);
+    }
 }
