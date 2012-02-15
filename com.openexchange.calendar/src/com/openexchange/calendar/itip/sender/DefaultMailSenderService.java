@@ -90,7 +90,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -251,7 +251,7 @@ public class DefaultMailSenderService implements MailSenderService {
 					ct.setNameParameter(fileName);
 				}
 				bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,
-						MIMEMessageUtility.foldContentType(ct.toString()));
+						MimeMessageUtility.foldContentType(ct.toString()));
 				bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				if (fileName != null) {
 					final ContentDisposition cd = new ContentDisposition(
@@ -259,7 +259,7 @@ public class DefaultMailSenderService implements MailSenderService {
 					cd.setFilenameParameter(fileName);
 					bodyPart.setHeader(
 							MessageHeaders.HDR_CONTENT_DISPOSITION,
-							MIMEMessageUtility.foldContentDisposition(cd.toString()));
+							MimeMessageUtility.foldContentDisposition(cd.toString()));
 				}
 				bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC,
 						"base64");
@@ -336,7 +336,7 @@ public class DefaultMailSenderService implements MailSenderService {
 		icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile,
 				contentType)));
 		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,
-				MIMEMessageUtility.foldContentType(contentType));
+				MimeMessageUtility.foldContentType(contentType));
 		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC,
 				isAscii ? "7bit" : "quoted-printable");
 		return icalPart;
@@ -381,7 +381,7 @@ public class DefaultMailSenderService implements MailSenderService {
 		icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile,
 				contentType)));
 		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,
-				MIMEMessageUtility.foldContentType(contentType));
+				MimeMessageUtility.foldContentType(contentType));
 		/*
 		 * Content-Disposition & Content-Transfer-Encoding
 		 */

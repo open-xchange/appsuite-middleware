@@ -68,11 +68,11 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMERawSource;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
@@ -280,7 +280,7 @@ public final class TextFinder {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -314,8 +314,8 @@ public final class TextFinder {
                     try {
                         cs = CharsetDetector.detectCharsetFailOnError(mailPart.getInputStream());
                     } catch (final IOException e) {
-                        if (mailPart instanceof MIMERawSource) {
-                            cs = CharsetDetector.detectCharset(((MIMERawSource) mailPart).getRawInputStream());
+                        if (mailPart instanceof MimeRawSource) {
+                            cs = CharsetDetector.detectCharset(((MimeRawSource) mailPart).getRawInputStream());
                         } else {
                             cs = CharsetDetector.getFallback();
                         }
@@ -339,8 +339,8 @@ public final class TextFinder {
                 try {
                     cs = CharsetDetector.detectCharsetFailOnError(mailPart.getInputStream());
                 } catch (final IOException e) {
-                    if (mailPart instanceof MIMERawSource) {
-                        cs = CharsetDetector.detectCharset(((MIMERawSource) mailPart).getRawInputStream());
+                    if (mailPart instanceof MimeRawSource) {
+                        cs = CharsetDetector.detectCharset(((MimeRawSource) mailPart).getRawInputStream());
                     } else {
                         cs = CharsetDetector.getFallback();
                     }

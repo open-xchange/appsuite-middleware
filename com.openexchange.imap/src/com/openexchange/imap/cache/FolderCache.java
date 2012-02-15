@@ -63,7 +63,7 @@ import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
@@ -242,7 +242,7 @@ public final class FolderCache {
                     mailFolder = newFld;
                 }
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e, folderStorage.getImapConfig(), session);
+                throw MimeMailException.handleMessagingException(e, folderStorage.getImapConfig(), session);
             }
         }
         /*
@@ -280,7 +280,7 @@ public final class FolderCache {
             }
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 

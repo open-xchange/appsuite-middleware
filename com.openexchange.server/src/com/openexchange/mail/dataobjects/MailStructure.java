@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 
 /**
  * {@link MailStructure} - Represents a mail structure
@@ -152,14 +152,14 @@ public final class MailStructure {
     private static MailStructure getMailStructure0(final MailPart part) throws OXException {
         final MailStructure retval;
         final ContentType ct = part.getContentType();
-        if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+        if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
             final MailStructure multi = new MailStructure(ct);
             final int count = part.getEnclosedCount();
             for (int i = 0; i < count; i++) {
                 multi.addSubStructure(getMailStructure0(part.getEnclosedMailPart(i)));
             }
             retval = multi;
-        } else if (ct.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+        } else if (ct.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
             final MailStructure nested = new MailStructure(ct);
             nested.addSubStructure(getMailStructure0((MailMessage) part.getContent()));
             retval = nested;

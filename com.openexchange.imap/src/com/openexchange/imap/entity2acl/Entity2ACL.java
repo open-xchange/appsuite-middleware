@@ -54,7 +54,7 @@ import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.IMAPStore;
@@ -127,7 +127,7 @@ public abstract class Entity2ACL {
             }
             return cached;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig);
+            throw MimeMailException.handleMessagingException(e, imapConfig);
         }
     }
 

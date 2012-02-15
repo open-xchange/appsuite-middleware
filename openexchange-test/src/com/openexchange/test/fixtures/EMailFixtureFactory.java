@@ -65,7 +65,7 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
@@ -267,11 +267,11 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
     				/*
     				 * Define session properties
     				 */
-    				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-    				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-    				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-    				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-    				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+    				System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+    				System.getProperties().put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+    				System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+    				System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+    				System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
     				/*
     				 * Define imap session properties
     				 */
@@ -287,13 +287,13 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
     				 * object is returned to the connection pool if the pool is not
     				 * over capacity.
     				 */
-    				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+    				sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
     				/*
     				 * A mechanism is provided for timing out idle connection pool
     				 * IMAP protocol objects. Timed out connections are closed and
     				 * removed (pruned) from the connection pool.
     				 */
-    				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
+    				sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
     				return sessionProperties;
     			}
     			return sessionProperties;

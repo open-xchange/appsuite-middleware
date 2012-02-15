@@ -78,12 +78,12 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
@@ -154,7 +154,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             /*
              * Compose a new mail
              */
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Set default subject
              */
@@ -191,13 +191,13 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 if (fileName != null) {
                     final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                     cd.setFilenameParameter(fileName);
-                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
                 }
                 vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 if (fileName != null && !ct.containsNameParameter()) {
                     ct.setNameParameter(fileName);
                 }
-                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 mimeMultipart.addBodyPart(vcardPart);
             }
             mimeMessage.setContent(mimeMultipart);

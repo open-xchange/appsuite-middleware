@@ -76,8 +76,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -256,7 +256,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
                     } else {
@@ -268,7 +268,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
                     } else {
@@ -613,10 +613,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 warnings.add(MailExceptionCode.IO_ERROR.create(nested, nested.getMessage()));
             } else {
                 LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
-                warnings.add(MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
+                warnings.add(MimeMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
             }
         } catch (final OXException e) {
-            if (MIMEMailExceptionCode.LOGIN_FAILED.equals(e) || MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+            if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                 throw e;
             }
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);

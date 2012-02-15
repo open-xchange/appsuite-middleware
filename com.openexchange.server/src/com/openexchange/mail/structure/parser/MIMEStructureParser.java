@@ -76,9 +76,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -182,7 +182,7 @@ public final class MIMEStructureParser {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -240,7 +240,7 @@ public final class MIMEStructureParser {
     }
 
     private static MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws OXException {
-        final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+        final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
         parseMessage(jsonStructure, mimeMessage);
         return mimeMessage;
     }
@@ -325,7 +325,7 @@ public final class MIMEStructureParser {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -334,7 +334,7 @@ public final class MIMEStructureParser {
             /*
              * Parse headers
              */
-            final ContentType contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+            final ContentType contentType = new ContentType(MimeTypes.MIME_DEFAULT);
             parseHeaders(jsonPart.getJSONObject("headers"), mimePart, contentType);
             /*
              * Determine Content-Type
@@ -364,11 +364,11 @@ public final class MIMEStructureParser {
 
     private static void parseMessageBody(final JSONObject jsonMessage, final MimePart mimePart) throws OXException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             parseMessage(jsonMessage, mimeMessage);
             mimePart.setContent(mimeMessage, "message/rfc822");
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -385,7 +385,7 @@ public final class MIMEStructureParser {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -402,7 +402,7 @@ public final class MIMEStructureParser {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -414,7 +414,7 @@ public final class MIMEStructureParser {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
@@ -495,7 +495,7 @@ public final class MIMEStructureParser {
              */
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }

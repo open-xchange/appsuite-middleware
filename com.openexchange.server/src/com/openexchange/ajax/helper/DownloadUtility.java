@@ -60,7 +60,7 @@ import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.encoding.URLCoder;
@@ -119,7 +119,7 @@ public final class DownloadUtility {
             /*
              * Try to determine MIME type
              */
-            final String ct = MIMEType2ExtMap.getContentType(fileName);
+            final String ct = MimeType2ExtMap.getContentType(fileName);
             final int pos = ct.indexOf('/');
             contentType.setPrimaryType(ct.substring(0, pos));
             contentType.setSubType(ct.substring(pos + 1));
@@ -160,12 +160,12 @@ public final class DownloadUtility {
                     return asAttachment(inputStream, preparedFileName);
                 }
             } else {
-                final Set<String> extensions = new HashSet<String>(MIMEType2ExtMap.getFileExtensions(contentType.getBaseType()));
+                final Set<String> extensions = new HashSet<String>(MimeType2ExtMap.getFileExtensions(contentType.getBaseType()));
                 if (extensions.isEmpty() || (extensions.size() == 1 && extensions.contains("dat"))) {
                     /*
                      * Content type determined by file name extension is unknown
                      */
-                    final String ct = MIMEType2ExtMap.getContentType(fn);
+                    final String ct = MimeType2ExtMap.getContentType(fn);
                     if ("application/octet-stream".equals(ct)) {
                         /*
                          * No content type known

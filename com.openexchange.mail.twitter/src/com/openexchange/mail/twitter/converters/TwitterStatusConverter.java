@@ -64,8 +64,8 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;
@@ -107,7 +107,7 @@ public final class TwitterStatusConverter {
                 /*
                  * Use JavaMail library to compose an appropriate message
                  */
-                final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+                final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
                 final String text = status.getText();
                 /*
                  * Headers
@@ -180,7 +180,7 @@ public final class TwitterStatusConverter {
             mm.setSize(asciiBytes.length);
             return mm;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {

@@ -53,11 +53,11 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link MIMERawSource} - Provides access to raw data with any Content-Transfer-Encoding intact.
+ * {@link MimeRawSource} - Provides access to raw data with any Content-Transfer-Encoding intact.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MIMERawSource {
+public interface MimeRawSource {
 
     /**
      * Gets an {@link InputStream} to the raw data with any Content-Transfer-Encoding intact. This method is useful if the

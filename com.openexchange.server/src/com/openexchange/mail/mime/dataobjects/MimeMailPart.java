@@ -68,9 +68,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -78,15 +78,15 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link MIMEMailPart} - Represents a MIME part as per RFC 822.
+ * {@link MimeMailPart} - Represents a MIME part as per RFC 822.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMailPart extends MailPart implements MIMERawSource {
+public final class MimeMailPart extends MailPart implements MimeRawSource {
 
     private static final long serialVersionUID = -1142595512657302179L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMailPart.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMailPart.class));
 
     /**
      * The max. in-memory size in bytes.
@@ -162,7 +162,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     /**
      * Constructor - Only applies specified part, but does not set any attributes.
      */
-    public MIMEMailPart(final Part part) {
+    public MimeMailPart(final Part part) {
         super();
         applyPart(part);
     }
@@ -204,7 +204,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                 if (ct != null && ct.length > 0) {
                     this.setContentType(ct[0]);
                 } else {
-                    this.setContentType(MIMETypes.MIME_DEFAULT);
+                    this.setContentType(MimeTypes.MIME_DEFAULT);
                 }
                 tmp = getContentType().startsWith(MULTIPART);
             } catch (final OXException e) {
@@ -249,7 +249,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -264,7 +264,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         try {
             return part.getDataHandler();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -284,7 +284,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             }
             throw MailExceptionCode.NO_CONTENT.create();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -336,10 +336,10 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     me.setNextException(e);
                     throw me;
                 }
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -421,7 +421,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             if ("No content".equals(e.getMessage())) {
                 throw MailExceptionCode.NO_CONTENT.create(e, new Object[0]);
             }
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -455,16 +455,16 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     if (ct != null && ct.length > 0) {
                         contentType = new ContentType(ct[0]);
                     } else {
-                        contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+                        contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+                if (contentType.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
                     /*
                      * Compose a new body part with message/rfc822 data
                      */
                     part = createBodyMessage(getBytesFromPart((Message) part.getContent()));
                     contentLoaded = true;
-                } else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+                } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                     /*
                      * Compose a new body part with multipart/ data
                      */
@@ -480,7 +480,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                 contentLoaded = true;
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -519,13 +519,13 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     if (ct != null && ct.length > 0) {
                         contentType = new ContentType(ct[0]);
                     } else {
-                        contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+                        contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+                if (contentType.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
                     serializeType = STYPE_MIME_BODY_MSG;
                     serializedContent = getBytesFromPart((Message) part.getContent());
-                } else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+                } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                     serializeType = STYPE_MIME_BODY_MULTI;
                     serializedContent = getBytesFromMultipart((Multipart) part.getContent());
                     serializedContentType = contentType.toString();
@@ -627,8 +627,8 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     private static MimeBodyPart createBodyMessage(final byte[] data) throws MessagingException {
         final MimeBodyPart mimeBodyPart = new MimeBodyPart();
         mimeBodyPart.setContent(
-            new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data)),
-            MIMETypes.MIME_MESSAGE_RFC822);
+            new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data)),
+            MimeTypes.MIME_MESSAGE_RFC822);
         return mimeBodyPart;
     }
 
@@ -665,7 +665,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
      * @throws MessagingException If a messaging error occurs
      */
     private static MimeMessage createMessage(final byte[] data) throws MessagingException {
-        return new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data));
+        return new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data));
     }
 
     /**

@@ -74,10 +74,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -334,9 +334,9 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         if (ids.contains(id)) {
             final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
-            String ct = MIMEType2ExtMap.getContentType(part.getFileName());
+            String ct = MimeType2ExtMap.getContentType(part.getFileName());
             if (ct == null || ct.length() == 0) {
-                ct = MIMETypes.MIME_APPL_OCTET;
+                ct = MimeTypes.MIME_APPL_OCTET;
             }
             mailPart.setContentType(ct);
             mailPart.setSize(part.getFileSize());
@@ -382,10 +382,10 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         } else if (content instanceof InputStream) {
             try {
                 nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
-                    MIMEDefaultSession.getDefaultSession(),
+                    MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         } else {
             LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));

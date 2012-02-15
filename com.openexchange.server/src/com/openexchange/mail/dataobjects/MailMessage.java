@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -68,7 +68,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -912,7 +912,7 @@ public abstract class MailMessage extends MailPart {
      */
     public String getSubject() {
         if (!b_subject) {
-            final String subjectStr = MIMEMessageUtility.checkNonAscii(getFirstHeader(MessageHeaders.HDR_SUBJECT));
+            final String subjectStr = MimeMessageUtility.checkNonAscii(getFirstHeader(MessageHeaders.HDR_SUBJECT));
             if (subjectStr != null) {
                 setSubject(decodeMultiEncodedHeader(subjectStr));
             }

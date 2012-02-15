@@ -63,7 +63,7 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.event.EventPool;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.Initialization;
 
@@ -231,7 +231,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
          */
         AttachmentTokenRegistry.releaseInstance();
         EventPool.releaseInstance();
-        MIMEType2ExtMap.reset();
+        MimeType2ExtMap.reset();
         EnqueueingMailAccessCache.releaseInstance();
         SingletonMailAccessCache.releaseInstance();
         MailMessageCache.releaseInstance();

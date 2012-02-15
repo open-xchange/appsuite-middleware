@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 
 /**
  * {@link UnifiedInboxException} - Indicates a Unified Mail error.
@@ -121,7 +121,7 @@ public final class UnifiedInboxException extends OXException {
         /**
          * Mail folder could not be found: %1$s.
          */
-        FOLDER_NOT_FOUND(MIMEMailExceptionCode.FOLDER_NOT_FOUND),
+        FOLDER_NOT_FOUND(MimeMailExceptionCode.FOLDER_NOT_FOUND),
         /**
          * Unknown default folder fullname: %1$s.
          */
@@ -162,7 +162,7 @@ public final class UnifiedInboxException extends OXException {
             prefix = code.getPrefix();
         }
 
-        private Code(final MIMEMailExceptionCode code) {
+        private Code(final MimeMailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();

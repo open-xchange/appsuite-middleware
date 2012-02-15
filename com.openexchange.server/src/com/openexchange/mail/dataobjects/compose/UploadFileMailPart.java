@@ -65,8 +65,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -132,7 +132,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 
     private static String prepareContentType(final String contentType, final String preparedFileName) {
         if (null == contentType || contentType.length() == 0) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         final String retval;
         {
@@ -144,7 +144,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             }
         }
         if ("multipart/form-data".equalsIgnoreCase(retval)) {
-            return MIMEType2ExtMap.getContentType(preparedFileName);
+            return MimeType2ExtMap.getContentType(preparedFileName);
         }
         return contentType;
     }
@@ -171,7 +171,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 dataSource = new FileDataSource(uploadFile, getContentType().toString());
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
-                dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
+                dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }
         return dataSource;
@@ -195,7 +195,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {
                 try {

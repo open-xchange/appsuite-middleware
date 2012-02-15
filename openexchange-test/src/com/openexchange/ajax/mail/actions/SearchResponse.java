@@ -56,7 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 
 /**
  * {@link SearchResponse}
@@ -82,7 +82,7 @@ public class SearchResponse extends CommonAllResponse {
     }
 
     private MailMessage parse(final JSONArray mailAsArray, final int[] columns) throws JSONException, AddressException {
-        final MIMEMailMessage message = new MIMEMailMessage();
+        final MimeMailMessage message = new MimeMailMessage();
 
         for (int i = 0; i < mailAsArray.length() && i < columns.length; i++) {
             // MailID
@@ -114,7 +114,7 @@ public class SearchResponse extends CommonAllResponse {
         return message;
     }
 
-    private void handleInnerArrays(final JSONArray mailAsArray, final MIMEMailMessage message, final int i, final String type) throws JSONException, AddressException {
+    private void handleInnerArrays(final JSONArray mailAsArray, final MimeMailMessage message, final int i, final String type) throws JSONException, AddressException {
         final JSONArray innerArray = (JSONArray) (mailAsArray.get(i));
         for (int a = 0; a < innerArray.length(); a++) {
             final JSONArray secondInnerArray = (JSONArray) innerArray.get(a);

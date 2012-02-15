@@ -61,12 +61,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -106,7 +106,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
-        if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MIMETypes.MIME_APPL_OCTET)) {
+        if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MimeTypes.MIME_APPL_OCTET)) {
             String cid = part.getContentId();
             if (cid == null || cid.length() == 0) {
                 /*
@@ -117,15 +117,15 @@ public final class ImageMessageHandler implements MailMessageHandler {
                     /*
                      * Compare with filename
                      */
-                    final String realFilename = MIMEMessageUtility.getRealFilename(part);
-                    if (MIMEMessageUtility.equalsCID(this.cid, realFilename)) {
+                    final String realFilename = MimeMessageUtility.getRealFilename(part);
+                    if (MimeMessageUtility.equalsCID(this.cid, realFilename)) {
                         imagePart = part;
                         return false;
                     }
                     return true;
                 }
             }
-            if (MIMEMessageUtility.equalsCID(this.cid, cid)) {
+            if (MimeMessageUtility.equalsCID(this.cid, cid)) {
                 imagePart = part;
                 return false;
             }
@@ -198,21 +198,21 @@ public final class ImageMessageHandler implements MailMessageHandler {
             /*
              * Compare with filename
              */
-            final String realFilename = MIMEMessageUtility.getRealFilename(part);
-            if (MIMEMessageUtility.equalsCID(cid, realFilename)) {
+            final String realFilename = MimeMessageUtility.getRealFilename(part);
+            if (MimeMessageUtility.equalsCID(cid, realFilename)) {
                 imagePart = part;
                 return false;
             }
             return true;
-        } else if (MIMEMessageUtility.equalsCID(cid, imageCID)) {
+        } else if (MimeMessageUtility.equalsCID(cid, imageCID)) {
             imagePart = part;
             return false;
         } else {
             /*
              * Compare with filename
              */
-            final String realFilename = MIMEMessageUtility.getRealFilename(part);
-            if (MIMEMessageUtility.equalsCID(cid, realFilename)) {
+            final String realFilename = MimeMessageUtility.getRealFilename(part);
+            if (MimeMessageUtility.equalsCID(cid, realFilename)) {
                 imagePart = part;
                 return false;
             }
@@ -292,10 +292,10 @@ public final class ImageMessageHandler implements MailMessageHandler {
         } else if (content instanceof InputStream) {
             try {
                 nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
-                    MIMEDefaultSession.getDefaultSession(),
+                    MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         } else {
             LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));

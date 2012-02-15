@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.json.parser;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.quotePersonal;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.quotePersonal;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -105,8 +105,8 @@ import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
@@ -436,7 +436,7 @@ public final class MessageParser {
                     parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), attachmentHandler, attachmentArray);
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
-                    part.setContentType(MIMETypes.MIME_DEFAULT);
+                    part.setContentType(MimeTypes.MIME_DEFAULT);
                     transportMail.setContentType(part.getContentType());
                     // Add text part
                     attachmentHandler.setTextPart(part);
@@ -448,7 +448,7 @@ public final class MessageParser {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final AddressException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -672,7 +672,7 @@ public final class MessageParser {
                         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
                         final String conformHTML =
                             htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "ISO-8859-1");
-                        if (MIMETypes.MIME_TEXT_PLAIN.equals(contentType)) {
+                        if (MimeTypes.MIME_TEXT_PLAIN.equals(contentType)) {
                             content = htmlService.html2text(conformHTML, true).getBytes(charsetName);
                         } else {
                             content = conformHTML.getBytes(charsetName);
@@ -825,12 +825,12 @@ public final class MessageParser {
     private static String parseContentType(final String ctStrArg) {
         final String ctStr = ctStrArg.toLowerCase(Locale.ENGLISH).trim();
         if (ctStr.indexOf(CT_ALTERNATIVE) != -1) {
-            return MIMETypes.MIME_MULTIPART_ALTERNATIVE;
+            return MimeTypes.MIME_MULTIPART_ALTERNATIVE;
         }
-        if (MIMETypes.MIME_TEXT_PLAIN.equals(ctStr)) {
-            return MIMETypes.MIME_TEXT_PLAIN;
+        if (MimeTypes.MIME_TEXT_PLAIN.equals(ctStr)) {
+            return MimeTypes.MIME_TEXT_PLAIN;
         }
-        return MIMETypes.MIME_TEXT_HTML;
+        return MimeTypes.MIME_TEXT_HTML;
     }
 
     /**

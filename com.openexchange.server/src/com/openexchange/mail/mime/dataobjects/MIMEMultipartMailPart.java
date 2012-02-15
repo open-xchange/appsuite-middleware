@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.extractHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.extractHeader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,8 +67,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -366,7 +366,7 @@ public final class MIMEMultipartMailPart extends MailPart {
              * Get content-type
              */
             final ContentType ct = new ContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(subArr), false));
-            if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                 return new MIMEMultipartMailPart(ct, subArr);
             }
 //            else if (ct.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
@@ -388,7 +388,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             mbp.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=\"US-ASCII\"");
             return MimeMessageConverter.convertPart(mbp);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -402,7 +402,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 new StringBuilder("text/plain; charset=\"").append(charset).append('"').toString());
             return MimeMessageConverter.convertPart(mbp);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 

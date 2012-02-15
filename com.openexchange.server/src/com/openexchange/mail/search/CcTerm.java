@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link CcTerm}
@@ -127,7 +127,7 @@ public final class CcTerm extends SearchTerm<String> {
             /*
              * Parse addresses
              */
-            final InternetAddress[] addresses = MIMEMessageUtility.parseAddressList(MIMEMessageUtility.decodeMultiEncodedHeader(headers[0]), false, false);
+            final InternetAddress[] addresses = MimeMessageUtility.parseAddressList(MimeMessageUtility.decodeMultiEncodedHeader(headers[0]), false, false);
             if (containsWildcard()) {
                 return toRegex(addr).matcher(getAllAddresses(addresses)).find();
             }

@@ -53,16 +53,16 @@ import java.util.Properties;
 import com.openexchange.mail.config.MailProperties;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of {@link javax.mail.Session}
+ * {@link MimeDefaultSession} - Provides access to default instance of {@link javax.mail.Session}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEDefaultSession {
+public final class MimeDefaultSession {
 
     /**
      * No instance
      */
-    private MIMEDefaultSession() {
+    private MimeDefaultSession() {
         super();
     }
 
@@ -78,7 +78,7 @@ public final class MIMEDefaultSession {
     public static javax.mail.Session getDefaultSession() {
         javax.mail.Session tmp = instance;
         if (tmp == null) {
-            synchronized (MIMEDefaultSession.class) {
+            synchronized (MimeDefaultSession.class) {
                 tmp = instance;
                 if (tmp == null) {
                     /*
@@ -101,25 +101,25 @@ public final class MIMEDefaultSession {
     public static Properties getDefaultMailProperties() {
         Properties p = properties;
         if (null == properties) {
-            synchronized (MIMEDefaultSession.class) {
+            synchronized (MimeDefaultSession.class) {
                 p = properties;
                 if (null == properties) {
                     p = new Properties();
-                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
-                    p.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
-                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
-                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
-                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_MULTIPART_ALLOWEMPTY, "true");
+                    p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+                    p.put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+                    p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+                    p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+                    p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_MULTIPART_ALLOWEMPTY, "true");
                     final MailProperties mailProperties = MailProperties.getInstance();
                     final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {
-                        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEDefaultSession.class));
+                        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeDefaultSession.class));
                         if (log.isWarnEnabled()) {
                             log.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
                         }
-                        p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+                        p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
                     } else {
-                        p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
+                        p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
                     }
                     final Properties javaMailProperties = mailProperties.getJavaMailProperties();
                     if (javaMailProperties != null) {

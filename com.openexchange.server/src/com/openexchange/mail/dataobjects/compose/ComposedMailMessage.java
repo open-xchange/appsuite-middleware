@@ -66,7 +66,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -88,7 +88,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     private final Context ctx;
 
-    private transient MIMEMessageFiller filler;
+    private transient MimeMessageFiller filler;
 
     private final Set<InternetAddress> recipients;
 
@@ -192,7 +192,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      *
      * @param filler The mail filler
      */
-    public void setFiller(final MIMEMessageFiller filler) {
+    public void setFiller(final MimeMessageFiller filler) {
         this.filler = filler;
     }
 

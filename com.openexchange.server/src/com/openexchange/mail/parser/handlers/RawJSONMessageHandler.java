@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.parser.handlers;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
@@ -81,10 +81,10 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -165,7 +165,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 }
                 jsonObject.put(
                     MailJSONField.HAS_ATTACHMENTS.getKey(),
-                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
@@ -520,11 +520,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
-            String contentType = MIMETypes.MIME_APPL_OCTET;
+            String contentType = MimeTypes.MIME_APPL_OCTET;
             final String filename = part.getFileName();
             try {
                 final Locale locale = Locale.ENGLISH;
-                contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
+                contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
             } catch (final Exception e) {
                 final Throwable t =
                     new Throwable(
@@ -593,7 +593,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         /*
          * Determine if message is of MIME type multipart/alternative
          */
-        if (mp.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
+        if (mp.getContentType().startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
             isAlternative = true;
             altId = id;
         } else if (null != altId && !id.startsWith(altId)) {
@@ -615,9 +615,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             } else if (content instanceof InputStream) {
                 try {
                     nestedMail =
-                        MimeMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                        MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
             } else {
                 final StringBuilder sb = new StringBuilder(128);

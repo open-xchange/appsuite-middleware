@@ -65,8 +65,8 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.session.Session;
 
 /**
@@ -204,25 +204,25 @@ public final class InlineImageDataSource implements ImageDataSource {
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
             }
-            if (!contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
+            if (!contentType.isMimeType(MimeTypes.MIME_IMAGE_ALL)) {
                 /*
                  * Either general purpose "application/octet-stream" or check by file name
                  */
                 final String fileName = mailPart.getFileName();
                 if (null == fileName) {
-                    if (!contentType.isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+                    if (!contentType.isMimeType(MimeTypes.MIME_APPL_OCTET)) {
                         throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
                     }
                 } else {
                     try {
-                        final String byFileName = MIMEType2ExtMap.getContentType(fileName);
-                        if (ContentType.isMimeType(byFileName, MIMETypes.MIME_IMAGE_ALL)) {
+                        final String byFileName = MimeType2ExtMap.getContentType(fileName);
+                        if (ContentType.isMimeType(byFileName, MimeTypes.MIME_IMAGE_ALL)) {
                             /*
                              * File name indicates an image/* content type
                              */
                             contentType.setBaseType(byFileName);
                         } else {
-                            if (!contentType.isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+                            if (!contentType.isMimeType(MimeTypes.MIME_APPL_OCTET)) {
                                 throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
                             }
                         }

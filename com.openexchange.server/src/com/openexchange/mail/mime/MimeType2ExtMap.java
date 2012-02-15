@@ -67,7 +67,7 @@ import java.util.Map;
 import com.openexchange.configuration.SystemConfig;
 
 /**
- * {@link MIMEType2ExtMap} - Maps MIME types to file extensions and vice versa.
+ * {@link MimeType2ExtMap} - Maps MIME types to file extensions and vice versa.
  * <p>
  * This class looks in various places for MIME types file entries. When requests are made to look up MIME types or file extensions, it
  * searches MIME types files in the following order:
@@ -81,9 +81,9 @@ import com.openexchange.configuration.SystemConfig;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEType2ExtMap {
+public final class MimeType2ExtMap {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEType2ExtMap.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeType2ExtMap.class));
 
     private static volatile Map<String, String> typeMap;
 
@@ -92,7 +92,7 @@ public final class MIMEType2ExtMap {
     /**
      * No instance.
      */
-    private MIMEType2ExtMap() {
+    private MimeType2ExtMap() {
         super();
     }
 
@@ -101,7 +101,7 @@ public final class MIMEType2ExtMap {
      */
     public static void reset() {
         if (null != typeMap) {
-            synchronized (MIMEType2ExtMap.class) {
+            synchronized (MimeType2ExtMap.class) {
                 if (null == typeMap) {
                     return;
                 }
@@ -116,7 +116,7 @@ public final class MIMEType2ExtMap {
      */
     public static void init() {
         if (null == typeMap) {
-            synchronized (MIMEType2ExtMap.class) {
+            synchronized (MimeType2ExtMap.class) {
                 if (null != typeMap) {
                     return;
                 }
@@ -216,19 +216,19 @@ public final class MIMEType2ExtMap {
     public static String getContentType(final String fileName) {
         init();
         if (null == fileName) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         final int pos = fileName.lastIndexOf('.');
         if (pos < 0) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         final String s1 = fileName.substring(pos + 1);
         if (s1.length() == 0) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         final String type = typeMap.get(s1.toLowerCase(Locale.ENGLISH));
         if (null == type) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         return type;
     }
@@ -242,11 +242,11 @@ public final class MIMEType2ExtMap {
     public static String getContentTypeByExtension(final String extension) {
         init();
         if (null == extension || 0 == extension.length()) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         final String type = typeMap.get(extension.toLowerCase(Locale.ENGLISH));
         if (null == type) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         return type;
     }
@@ -368,8 +368,8 @@ public final class MIMEType2ExtMap {
         } else if (entry.charAt(0) == '#') {
             return;
         }
-        final Map<String, List<String>> extMap = MIMEType2ExtMap.extMap;
-        final Map<String, String> typeMap = MIMEType2ExtMap.typeMap;
+        final Map<String, List<String>> extMap = MimeType2ExtMap.extMap;
+        final Map<String, String> typeMap = MimeType2ExtMap.typeMap;
         if (entry.indexOf('=') > 0) {
             final MimeTypeFileLineParser parser = new MimeTypeFileLineParser(entry);
             final String type = parser.getType();

@@ -61,7 +61,7 @@ import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.imap.IMAPFolder;
@@ -247,7 +247,7 @@ public final class ListLsubCache {
         try {
             return getSeparator(accountId, (IMAPFolder) imapStore.getFolder(INBOX), session);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -333,7 +333,7 @@ public final class ListLsubCache {
                 return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -355,7 +355,7 @@ public final class ListLsubCache {
                 return collection.getActualEntry(fullName, imapFolder);
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -492,7 +492,7 @@ public final class ListLsubCache {
                             user = new String[0];
                         }
                     } catch (final MessagingException e) {
-                        throw MIMEMailException.handleMessagingException(e);
+                        throw MimeMailException.handleMessagingException(e);
                     }
                     return new ListLsubCollection(imapFolder, shared, user, DO_STATUS, DO_GETACL);
                 }

@@ -64,7 +64,7 @@ import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -114,7 +114,7 @@ final class IMAPSessionStorage {
         try {
             currentData = new HashSet<IMAPUpdateableData>(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
         final AccAndFN key = new AccAndFN(accountId, imapFolder.getFullName());
         Set<IMAPUpdateableData> data = dataMap.get(key);
@@ -249,7 +249,7 @@ final class IMAPSessionStorage {
                  */
                 return new long[][] { newAndModified.toArray(), deleted.toArray() };
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         }
     }

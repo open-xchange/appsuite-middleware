@@ -61,7 +61,7 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.session.Session;
 
 /**
@@ -94,7 +94,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
             }
-            if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CALENDAR)) {
+            if (!contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
                 throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: " + contentType.getBaseType());
             }
             final DataProperties properties = new DataProperties();

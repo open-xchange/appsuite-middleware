@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

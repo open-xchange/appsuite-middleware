@@ -153,16 +153,16 @@ import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -1268,7 +1268,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     // Filter
                     if (!ignorableContentTypes.isEmpty()) {
-                        MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
+                        MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
                         mimeMessage = new MimeFilter(ignorableContentTypes).filter(mimeMessage);                        
                         baos.reset();
                         mimeMessage.writeTo(baos);
@@ -1769,8 +1769,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                      */
                     final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                     final List<CommonObject> retvalList = new ArrayList<CommonObject>();
-                    if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
-                        MIMETypes.MIME_TEXT_VCARD)) {
+                    if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
+                        MimeTypes.MIME_TEXT_VCARD)) {
                         /*
                          * Save VCard
                          */
@@ -1781,8 +1781,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                             retvalList,
                             session,
                             ctx);
-                    } else if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
-                        MIMETypes.MIME_TEXT_CALENDAR)) {
+                    } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
+                        MimeTypes.MIME_TEXT_CALENDAR)) {
                         /*
                          * Save ICalendar
                          */
@@ -2038,7 +2038,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (mailPart == null) {
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                     }
-                    if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+                    if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_HTM_ALL)) {
                         /*
                          * Apply filter
                          */
@@ -2619,7 +2619,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            if (MIMEMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
+            if (MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
                 e.setCategory(Category.CATEGORY_USER_INPUT);
                 if (DEBUG) {
                     LOG.warn(e.getMessage(), e);
@@ -3428,7 +3428,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     InputStream in = null;
                     try {
                         in = req.getInputStream();
-                        message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), in);
+                        message = new MimeMessage(MimeDefaultSession.getDefaultSession(), in);
                     } finally {
                         if (null != in) {
                             try {
@@ -3443,7 +3443,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Drop special "x-original-headers" header
                  */
                 message.removeHeader("x-original-headers");
-                new MIMEMessageFiller(session, session.getContext()).setCommonHeaders(message);
+                new MimeMessageFiller(session, session.getContext()).setCommonHeaders(message);
                 /*
                  * Proceed...
                  */
@@ -3630,7 +3630,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     /**
      * The poison element to quit message import immediately.
      */
-    protected static final MimeMessage POISON = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+    protected static final MimeMessage POISON = new MimeMessage(MimeDefaultSession.getDefaultSession());
 
     private static final class AppenderTask extends AbstractTask<Object> {
 
@@ -3711,7 +3711,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 exception = e;
                 throw e;
             } catch (final MessagingException e) {
-                exception = MIMEMailException.handleMessagingException(e);
+                exception = MimeMailException.handleMessagingException(e);
                 throw exception;
             } catch (final InterruptedException e) {
                 exception = getWrappingOXException(e);
@@ -3771,7 +3771,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final InputStream is = item.openStream();
                         final MimeMessage message;
                         try {
-                            message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
+                            message = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
                         } finally {
                             try {
                                 is.close();
@@ -3899,7 +3899,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Send raw message source
              */
             if (MailProperties.getInstance().isAddClientIPAddress()) {
-                MIMEMessageFiller.addClientIPAddress(m, session);
+                MimeMessageFiller.addClientIPAddress(m, session);
             }
             /*
              * Get message bytes
@@ -3999,7 +3999,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             return responseData;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -4649,7 +4649,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         try {
                             from = MessageParser.getFromField(jsonMailObj)[0];
                         } catch (final AddressException e) {
-                            throw MIMEMailException.handleMessagingException(e);
+                            throw MimeMailException.handleMessagingException(e);
                         }
                         int accountId;
                         try {
@@ -4726,7 +4726,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         try {
                             from = MessageParser.getFromField(jsonMailObj)[0];
                         } catch (final AddressException e) {
-                            throw MIMEMailException.handleMessagingException(e);
+                            throw MimeMailException.handleMessagingException(e);
                         }
                         int accountId = resolveFrom2Account(session, from, false, true);
                         /*
@@ -4799,7 +4799,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     try {
                         from = MessageParser.getFromField(jsonMailObj)[0];
                     } catch (final AddressException e) {
-                        throw MIMEMailException.handleMessagingException(e);
+                        throw MimeMailException.handleMessagingException(e);
                     }
                     int accountId;
                     try {
@@ -4923,7 +4923,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
                     }
                 } catch (final AddressException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
             }
             accountId = MailAccount.DEFAULT_ID;

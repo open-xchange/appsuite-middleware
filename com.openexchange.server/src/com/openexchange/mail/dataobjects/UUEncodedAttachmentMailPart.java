@@ -53,8 +53,8 @@ import java.io.InputStream;
 import javax.activation.DataHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
@@ -89,9 +89,9 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
         if (!containsContentType()) {
             contentType = getContentType();
         } else {
-            String ct = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
+            String ct = MimeType2ExtMap.getContentType(uuencPart.getFileName());
             if ((ct == null) || (ct.length() == 0)) {
-                ct = MIMETypes.MIME_APPL_OCTET;
+                ct = MimeTypes.MIME_APPL_OCTET;
             }
             contentType = new ContentType(ct);
         }

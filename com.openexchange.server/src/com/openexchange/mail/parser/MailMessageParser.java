@@ -96,15 +96,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMERawSource;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
@@ -122,7 +122,7 @@ public final class MailMessageParser {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailMessageParser.class));
 
-    private static final String APPL_OCTET = MIMETypes.MIME_APPL_OCTET;
+    private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 
@@ -549,7 +549,7 @@ public final class MailMessageParser {
                     return;
                 }
             } else {
-                if (!handler.handleAttachment(mailPart, isInline, MIMETypes.MIME_MESSAGE_RFC822, fileName, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, MimeTypes.MIME_MESSAGE_RFC822, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -748,10 +748,10 @@ public final class MailMessageParser {
                                 contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
                             }
                             if ((contentTypeStr == null) && (attachFilename != null)) {
-                                contentTypeStr = MIMEType2ExtMap.getContentType(attachFilename);
+                                contentTypeStr = MimeType2ExtMap.getContentType(attachFilename);
                             }
                             if (contentTypeStr == null) {
-                                contentTypeStr = MIMETypes.MIME_APPL_OCTET;
+                                contentTypeStr = MimeTypes.MIME_APPL_OCTET;
                             }
                             final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
                             bodyPart.setDataHandler(new DataHandler(ds));
@@ -763,7 +763,7 @@ public final class MailMessageParser {
                                 cd.setFilenameParameter(attachFilename);
                                 bodyPart.setHeader(
                                     HDR_CONTENT_DISPOSITION,
-                                    MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                                    MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             os.reset();
                             attachment.writeTo(os);
@@ -774,11 +774,11 @@ public final class MailMessageParser {
                              * Nested message
                              */
                             final MimeMessage nestedMessage =
-                                TNEFMime.convert(MIMEDefaultSession.getDefaultSession(), attachment.getNestedMessage());
+                                TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
-                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
-                            bodyPart.setHeader(HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MimeTypes.MIME_MESSAGE_RFC822)));
+                            bodyPart.setHeader(HDR_CONTENT_TYPE, MimeTypes.MIME_MESSAGE_RFC822);
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
                     }
@@ -808,17 +808,17 @@ public final class MailMessageParser {
                          * Translate TNEF attributes to MIME
                          */
                         final String attachFilename = fileName;
-                        final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
+                        final DataSource ds = new RawDataSource(messageClass.getRawData(), MimeTypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
                         bodyPart.setHeader(
                             HDR_CONTENT_TYPE,
-                            ContentType.prepareContentTypeString(MIMETypes.MIME_APPL_OCTET, attachFilename));
+                            ContentType.prepareContentTypeString(MimeTypes.MIME_APPL_OCTET, attachFilename));
                         if (attachFilename != null) {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
                             bodyPart.setHeader(
                                 HDR_CONTENT_DISPOSITION,
-                                MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                                MimeMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
                         parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
@@ -881,7 +881,7 @@ public final class MailMessageParser {
          * SUBJECT
          */
         {
-            final String subj = MIMEMessageUtility.decodeMultiEncodedHeader(mail.getSubject());
+            final String subj = MimeMessageUtility.decodeMultiEncodedHeader(mail.getSubject());
             subject = subj;
             handler.handleSubject(subj);
         }
@@ -951,7 +951,7 @@ public final class MailMessageParser {
     public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
-            final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
+            final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
             final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
@@ -960,7 +960,7 @@ public final class MailMessageParser {
             }
             filename = sb.toString();
         } else {
-            filename = MIMEMessageUtility.decodeMultiEncodedHeader(filename);
+            filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
             // try {
             // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
             // } catch (final Exception e) {
@@ -1006,9 +1006,9 @@ public final class MailMessageParser {
     }
 
     private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
-        if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
+        if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MimeRawSource)) {
             try {
-                final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
+                final byte[] bytes = MessageUtility.getBytesFrom(((MimeRawSource) mailPart).getRawInputStream());
                 if (!MessageUtility.isAscii(bytes)) {
                     try {
                         String cs = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));

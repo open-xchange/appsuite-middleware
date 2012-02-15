@@ -91,7 +91,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -106,13 +106,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
- * {@link MIMEMessageUtility} - Utilities for MIME messages.
+ * {@link MimeMessageUtility} - Utilities for MIME messages.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMessageUtility {
+public final class MimeMessageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageUtility.class));
 
     private static final boolean TRACE = LOG.isTraceEnabled();
 
@@ -137,7 +137,7 @@ public final class MIMEMessageUtility {
     /**
      * No instantiation
      */
-    private MIMEMessageUtility() {
+    private MimeMessageUtility() {
         super();
     }
 
@@ -452,11 +452,11 @@ public final class MIMEMessageUtility {
             final BodyPart part = mp.getBodyPart(i);
             final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
-                ct.setContentType(MIMEMessageUtility.unfold(tmp[0]));
+                ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
             } else {
-                ct.setContentType(MIMETypes.MIME_DEFAULT);
+                ct.setContentType(MimeTypes.MIME_DEFAULT);
             }
-            if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                 found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
             }
         }
@@ -518,7 +518,7 @@ public final class MIMEMessageUtility {
          * is transferred as:
          * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
          */
-        final char[] chars = MIMEMessageUtility.checkNonAscii(subject).toCharArray();
+        final char[] chars = MimeMessageUtility.checkNonAscii(subject).toCharArray();
         final StringBuilder sb = new StringBuilder(chars.length);
         int i = 0;
         while (i < chars.length) {
@@ -533,7 +533,7 @@ public final class MIMEMessageUtility {
             }
             i++;
         }
-        return MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
+        return MimeMessageUtility.decodeEnvelopeHeader(sb.toString());
     }
 
     /**
@@ -584,7 +584,7 @@ public final class MIMEMessageUtility {
         if (headerValue == null) {
             return null;
         }
-        final String hdrVal = unfold ? MIMEMessageUtility.unfold(headerValue) : headerValue;
+        final String hdrVal = unfold ? MimeMessageUtility.unfold(headerValue) : headerValue;
         /*
          * Whether the sequence "=?" exists at all
          */
@@ -728,7 +728,7 @@ public final class MIMEMessageUtility {
         if (headerValue == null) {
             return null;
         }
-        final String hdrVal = MIMEMessageUtility.unfold(headerValue);
+        final String hdrVal = MimeMessageUtility.unfold(headerValue);
         final Matcher m = ENC_PATTERN.matcher(hdrVal);
         if (m.find()) {
             final StringBuilder sb = new StringBuilder(hdrVal.length());

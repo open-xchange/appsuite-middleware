@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.parser.handlers;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
@@ -89,13 +89,13 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
@@ -266,7 +266,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
                 jsonObject.put(
                     MailJSONField.HAS_ATTACHMENTS.getKey(),
-                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
@@ -630,7 +630,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
-        if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.startsWith(MIMETypes.MIME_TEXT_PLAIN)) {
+        if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.startsWith(MimeTypes.MIME_TEXT_PLAIN)) {
             /*
              * User wants to see message's alternative content
              */
@@ -648,7 +648,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             return true;
         }
         try {
-            if (contentType.startsWith(MIMETypes.MIME_TEXT_ENRICHED) || contentType.startsWith(MIMETypes.MIME_TEXT_RICHTEXT) || contentType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
+            if (contentType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || contentType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT) || contentType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
                 if (textAppended) {
                     if (DisplayMode.DISPLAY.equals(displayMode)) {
                         /*
@@ -742,7 +742,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
-        if (baseType.startsWith(MIMETypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MIMETypes.MIME_TEXT_RICHTEXT)) {
+        if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 ENRCONV.convert(src),
                 contentType.getCharsetParameter(),
@@ -771,11 +771,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
-            String contentType = MIMETypes.MIME_APPL_OCTET;
+            String contentType = MimeTypes.MIME_APPL_OCTET;
             final String filename = part.getFileName();
             try {
                 final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
-                contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
+                contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
             } catch (final Exception e) {
                 final Throwable t =
                     new Throwable(
@@ -874,7 +874,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         /*
          * Determine if message is of MIME type multipart/alternative
          */
-        if (mp.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
+        if (mp.getContentType().startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
             isAlternative = true;
             altId = id;
         } else if (null != altId && !id.startsWith(altId)) {
@@ -896,9 +896,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
             } else if (content instanceof InputStream) {
                 try {
                     nestedMail =
-                        MimeMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                        MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
             } else {
                 final StringBuilder sb = new StringBuilder(128);
@@ -1147,7 +1147,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             if (fileName == null) {
                 jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
             } else {
-                jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MIMEMessageUtility.decodeMultiEncodedHeader(fileName));
+                jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeMessageUtility.decodeMultiEncodedHeader(fileName));
             }
             /*
              * Add token
@@ -1194,7 +1194,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
-            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_PLAIN);
+            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_PLAIN);
             /*
              * Try to convert the given html to regular text
              */
@@ -1222,7 +1222,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 if (fileName == null) {
                     originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
                 } else {
-                    originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MIMEMessageUtility.decodeMultiEncodedHeader(fileName));
+                    originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeMessageUtility.decodeMultiEncodedHeader(fileName));
                 }
                 getAttachmentsArr().put(originalVersion);
             }

@@ -87,10 +87,10 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.publish.Publication;
@@ -540,14 +540,14 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             bodyPart.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,
-                MIMEMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
+                MimeMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
             bodyPart.setHeader(
                 MessageHeaders.HDR_CONTENT_DISPOSITION,
-                MIMEMessageUtility.foldContentDisposition("attachment; filename=links.html"));
+                MimeMessageUtility.foldContentDisposition("attachment; filename=links.html"));
             return convertPart(bodyPart, false);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     } // End of createLinksAttachment()
 

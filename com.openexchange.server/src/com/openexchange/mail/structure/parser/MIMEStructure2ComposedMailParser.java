@@ -85,8 +85,8 @@ import com.openexchange.mail.json.parser.IAttachmentHandler;
 import com.openexchange.mail.json.parser.PublishAttachmentHandler;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -219,7 +219,7 @@ public final class MIMEStructure2ComposedMailParser {
             /*
              * Parse headers
              */
-            final ContentType contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+            final ContentType contentType = new ContentType(MimeTypes.MIME_DEFAULT);
             final Map<String, String> m;
             if (headers) {
                 final JSONObject jsonHeaders = jsonPart.getJSONObject("headers");
@@ -402,7 +402,7 @@ public final class MIMEStructure2ComposedMailParser {
             }
             attachmentHandler.addAttachment(mailPart);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -497,7 +497,7 @@ public final class MIMEStructure2ComposedMailParser {
              */
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }

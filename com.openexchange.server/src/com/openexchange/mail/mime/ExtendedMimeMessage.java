@@ -58,7 +58,7 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
@@ -98,7 +98,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      * @param msgnum The message number in folder
      */
     public ExtendedMimeMessage(final String fullname, final char separator, final int msgnum) {
-        super(MIMEDefaultSession.getDefaultSession());
+        super(MimeDefaultSession.getDefaultSession());
         this.fullname = fullname;
         this.separator = separator;
         this.msgnum = msgnum;
@@ -151,13 +151,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
                     Boolean.valueOf(ct.startsWith(MULTI) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct.getSubType())));
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
-                hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
-                hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
-                hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             }
         }
         return hasAttachment.booleanValue();
@@ -168,12 +168,12 @@ public final class ExtendedMimeMessage extends MimeMessage {
             /*
              * Body structure is available
              */
-            return MIMEMessageUtility.hasAttachments(bodystructure);
+            return MimeMessageUtility.hasAttachments(bodystructure);
         } else if ((null != content) || (null != contentStream)) {
             /*
              * Message body is available
              */
-            return MIMEMessageUtility.hasAttachments((Multipart) getContent(), subType);
+            return MimeMessageUtility.hasAttachments((Multipart) getContent(), subType);
         }
         /*
          * Not enough information to deeply check for (file) attachments

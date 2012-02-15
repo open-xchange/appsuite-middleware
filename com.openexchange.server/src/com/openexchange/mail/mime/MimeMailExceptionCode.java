@@ -18,7 +18,7 @@ import com.openexchange.mail.MailExceptionCode;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum MIMEMailExceptionCode implements OXExceptionCode {
+public enum MimeMailExceptionCode implements OXExceptionCode {
 
     /**
      * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
@@ -262,19 +262,19 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
 
     private final Category category;
 
-    private MIMEMailExceptionCode(final String message, final Category category, final int detailNumber) {
+    private MimeMailExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
     }
 
-    private MIMEMailExceptionCode(final MailExceptionCode code, final String message) {
+    private MimeMailExceptionCode(final MailExceptionCode code, final String message) {
         this.message = message;
         this.detailNumber = code.getNumber();
         this.category = code.getCategory();
     }
 
-    private MIMEMailExceptionCode(final MailExceptionCode code) {
+    private MimeMailExceptionCode(final MailExceptionCode code) {
         this.message = code.getMessage();
         this.detailNumber = code.getNumber();
         this.category = code.getCategory();

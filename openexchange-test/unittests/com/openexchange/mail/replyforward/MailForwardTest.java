@@ -66,7 +66,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -138,7 +138,7 @@ public final class MailForwardTest extends AbstractMailTest {
                  * Check if the content type "multipart/mixed"
                  */
                 assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(
-                    MIMETypes.MIME_MULTIPART_MIXED));
+                    MimeTypes.MIME_MULTIPART_MIXED));
 
                 /*
                  * Check if the number of the enclosed parts is 2
@@ -152,7 +152,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 for (int i = 0; i < count; i++) {
                     final MailPart part = forwardMail.getEnclosedMailPart(i);
                     if (i == 0) {
-                        assertTrue("Unexpected content type in body", part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL));
+                        assertTrue("Unexpected content type in body", part.getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL));
                         final Object content = part.getContent();
                         assertTrue("Missing content", content != null);
 
@@ -202,10 +202,10 @@ public final class MailForwardTest extends AbstractMailTest {
                     } else {
                         if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment()) {
                             assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
-                                MIMETypes.MIME_TEXT_ALL_CARD));
+                                MimeTypes.MIME_TEXT_ALL_CARD));
                         } else {
                             assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
-                                MIMETypes.MIME_MESSAGE_RFC822));
+                                MimeTypes.MIME_MESSAGE_RFC822));
                         }
                     }
                 }
@@ -257,10 +257,10 @@ public final class MailForwardTest extends AbstractMailTest {
 
                 if (isInlineForward) {
                     assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(
-                        MIMETypes.MIME_TEXT_PLAIN));
+                        MimeTypes.MIME_TEXT_PLAIN));
                 } else {
                     assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(
-                        MIMETypes.MIME_MULTIPART_ALL));
+                        MimeTypes.MIME_MULTIPART_ALL));
                 }
 
                 final int count = forwardMail.getEnclosedCount();
@@ -351,7 +351,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(fetchedMails);
 
                 assertTrue("Unexpected content type: " + forwardMail.getContentType().toString(), forwardMail.getContentType().isMimeType(
-                    MIMETypes.MIME_MULTIPART_MIXED));
+                    MimeTypes.MIME_MULTIPART_MIXED));
 
                 final int count = forwardMail.getEnclosedCount();
                 assertTrue("Unexpected number of attachments: " + count, count == 3);
@@ -363,10 +363,10 @@ public final class MailForwardTest extends AbstractMailTest {
                     final MailPart part = forwardMail.getEnclosedMailPart(i);
                     if (i == 0) {
                         assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(
-                            MIMETypes.MIME_TEXT_ALL));
+                            MimeTypes.MIME_TEXT_ALL));
                     } else {
                         assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(
-                            MIMETypes.MIME_MESSAGE_RFC822));
+                            MimeTypes.MIME_MESSAGE_RFC822));
                     }
                     /*
                      * additional checks for bug 12420, where there is an amount of forwarded mails, yet their content is always that of the

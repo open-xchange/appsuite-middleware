@@ -56,7 +56,7 @@ import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 
 /**
  * {@link NestedMessageMailPart} - Represents a mail part holding a nested message.
@@ -78,7 +78,7 @@ public final class NestedMessageMailPart extends MailPart {
     public NestedMessageMailPart(final MailMessage mailMessage) throws OXException {
         super();
         this.mailMessage = mailMessage;
-        setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+        setContentType(MimeTypes.MIME_MESSAGE_RFC822);
         setContentDisposition(Part.INLINE);
     }
 

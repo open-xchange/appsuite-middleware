@@ -93,17 +93,17 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
@@ -373,9 +373,9 @@ public final class MIMEStructureHandler implements StructureHandler {
     @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         final String filename = part.getFileName();
-        String contentType = MIMETypes.MIME_APPL_OCTET;
+        String contentType = MimeTypes.MIME_APPL_OCTET;
         try {
-            contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
+            contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
         } catch (final Exception e) {
             final Throwable t =
                 new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
@@ -492,9 +492,9 @@ public final class MIMEStructureHandler implements StructureHandler {
             } else if (content instanceof InputStream) {
                 try {
                     nestedMail =
-                        MimeMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                        MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
             } else {
                 final StringBuilder sb = new StringBuilder(128);
@@ -826,9 +826,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                             hdrObject.put(name, ja);
                             ja.put(previous);
                         }
-                        ja.put(MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
+                        ja.put(MimeMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
                     } else {
-                        hdrObject.put(name, MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
+                        hdrObject.put(name, MimeMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
                     }
                 }
             }

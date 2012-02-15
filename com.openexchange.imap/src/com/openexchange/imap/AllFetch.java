@@ -66,9 +66,9 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -176,9 +176,9 @@ public final class AllFetch {
                     if (logger.isWarnEnabled()) {
                         logger.warn(e.getMessage(), e);
                     }
-                    m.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
+                    m.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 }
-                m.setHasAttachment(bs.isMulti() && ("MIXED".equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
+                m.setHasAttachment(bs.isMulti() && ("MIXED".equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
             }
         }),
         /**
@@ -214,7 +214,7 @@ public final class AllFetch {
                 // In-Reply-To and Message-Id
                 m.addHeader("In-Reply-To", envelope.inReplyTo);
                 m.addHeader("Message-Id", envelope.messageId);
-                m.setSubject(MIMEMessageUtility.decodeEnvelopeSubject(envelope.subject));
+                m.setSubject(MimeMessageUtility.decodeEnvelopeSubject(envelope.subject));
             }
 
             private String addrs2String(final InternetAddress[] addrs) {
