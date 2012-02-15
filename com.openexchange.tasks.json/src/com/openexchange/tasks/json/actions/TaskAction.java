@@ -66,13 +66,11 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.server.ServiceLookup;
-
-
 
 /**
  * {@link TaskAction}
@@ -81,6 +79,10 @@ import com.openexchange.server.ServiceLookup;
  */
 
 public abstract class TaskAction implements AJAXActionService {
+
+    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 20, 1, 5, 200, 220 };
+
+    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 20, 1, 5 };
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -162,26 +164,26 @@ public abstract class TaskAction implements AJAXActionService {
         return isWhitespace;
     }
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log){
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log) {
         final Participant[] participants = appointmentObj.getParticipants();
-        if(participants == null) {
+        if (participants == null) {
             return;
         }
 
         final UserService us = getService(UserService.class);
 
-        for(int pos = 0; pos < participants.length; pos++){
+        for (int pos = 0; pos < participants.length; pos++) {
             final Participant part = participants[pos];
-            if(part.getType() == Participant.EXTERNAL_USER){
+            if (part.getType() == Participant.EXTERNAL_USER) {
                 User foundUser;
                 try {
                     foundUser = us.searchUser(part.getEmailAddress(), ctx);
-                    if(foundUser == null) {
+                    if (foundUser == null) {
                         continue;
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
                 } catch (final OXException e) {
-                    log.error(e); //...and continue doing this for the remaining users
+                    log.error(e); // ...and continue doing this for the remaining users
                 }
             }
         }

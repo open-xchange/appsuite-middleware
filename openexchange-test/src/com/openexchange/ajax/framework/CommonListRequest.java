@@ -67,6 +67,8 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
 
     private final int[] columns;
 
+    private final String alias;
+
     private final boolean failOnError;
 
     public CommonListRequest(final String servletPath,
@@ -117,6 +119,41 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         this.servletPath = servletPath;
         this.identifier = identifier;
         this.columns = columns;
+        this.alias = null;
+        this.failOnError = failOnError;
+    }
+
+    public CommonListRequest(final String servletPath,
+        final int[][] folderAndObjectIds, final String alias) {
+        this(servletPath, folderAndObjectIds, alias, true);
+    }
+
+    public CommonListRequest(final String servletPath,
+        final int[][] folderAndObjectIds, final String alias,
+        final boolean failOnError) {
+        this(servletPath, createListIDs(folderAndObjectIds), alias,
+            failOnError);
+    }
+
+    public CommonListRequest(final String servletPath,
+        final String[][] folderAndObjectIds, final String alias) {
+        this(servletPath, folderAndObjectIds, alias, true);
+    }
+
+    public CommonListRequest(final String servletPath,
+        final String[][] folderAndObjectIds, final String alias,
+        final boolean failOnError) {
+        this(servletPath, createListIDs(folderAndObjectIds), alias,
+            failOnError);
+    }
+
+    public CommonListRequest(final String servletPath, final ListIDs identifier,
+        final String alias, final boolean failOnError) {
+        super();
+        this.servletPath = servletPath;
+        this.identifier = identifier;
+        this.columns = null;
+        this.alias = alias;
         this.failOnError = failOnError;
     }
 
@@ -145,10 +182,19 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
-        };
+        if (columns != null) {
+            return new Parameter[] {
+                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
+                new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
+            };
+        }
+        if (alias != null) {
+            return new Parameter[] {
+                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
+                new Parameter(AJAXServlet.PARAMETER_COLUMNS, alias)
+            };
+        }
+        return null;
     }
 
     @Override

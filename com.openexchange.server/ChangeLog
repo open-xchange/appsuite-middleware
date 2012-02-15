@@ -1,3 +1,7 @@
+* 2012-02-15 - jan.bauerdick@open-xchange.com
+
+ - Added column-aliases "all" & "list" for taskrequests
+
 * 2012-02-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 21537: Fixed generation of virtual Unified Mail identifiers
