@@ -143,6 +143,9 @@ public final class CreatePerformer extends AbstractPerformer {
         if (null == treeId) {
             throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
         }
+        if (!KNOWN_TREES.contains(treeId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
+        }
         final FolderStorage parentStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
