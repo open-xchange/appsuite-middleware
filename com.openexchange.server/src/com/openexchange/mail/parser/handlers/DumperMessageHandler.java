@@ -65,7 +65,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MessageUtility;
@@ -317,7 +317,7 @@ public class DumperMessageHandler implements MailMessageHandler {
             nestedMail = (MailMessage) content;
         } else if (content instanceof InputStream) {
             try {
-                nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
                     MIMEDefaultSession.getDefaultSession(),
                     (InputStream) content));
             } catch (final MessagingException e) {

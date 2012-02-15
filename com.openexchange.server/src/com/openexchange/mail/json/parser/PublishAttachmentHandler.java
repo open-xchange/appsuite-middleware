@@ -50,7 +50,7 @@
 package com.openexchange.mail.json.parser;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
-import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertPart;
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertPart;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 import java.io.IOException;

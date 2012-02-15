@@ -88,7 +88,7 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -523,7 +523,7 @@ public final class StructureMailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment
@@ -549,7 +549,7 @@ public final class StructureMailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment
@@ -565,7 +565,7 @@ public final class StructureMailMessageParser {
                     final String value = (String) attrBody.getValue();
                     bodyPart.setText(value);
                     bodyPart.setSize(value.length());
-                    parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                    parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
                 final MAPIProps mapiProps = message.getMAPIProps();
                 if (mapiProps != null) {
@@ -588,7 +588,7 @@ public final class StructureMailMessageParser {
                         bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
                         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
                         bodyPart.setSize(decompressedBytes.length);
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
                 /*
@@ -635,7 +635,7 @@ public final class StructureMailMessageParser {
                             os.reset();
                             attachment.writeTo(os);
                             bodyPart.setSize(os.size());
-                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                            parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
                              * Nested message
@@ -646,7 +646,7 @@ public final class StructureMailMessageParser {
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
-                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                            parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
                     }
                 } else {
@@ -682,7 +682,7 @@ public final class StructureMailMessageParser {
                                 MIMEMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
             } catch (final IOException tnefExc) {

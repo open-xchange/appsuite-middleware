@@ -90,7 +90,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -394,7 +394,7 @@ public final class MIMEStructure2ComposedMailParser {
             mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
             mimePart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.ATTACHMENT);
             mimePart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-            final MailPart mailPart = MIMEMessageConverter.convertPart(mimePart, false);
+            final MailPart mailPart = MimeMessageConverter.convertPart(mimePart, false);
             if (!headers.isEmpty()) {
                 for (final Entry<String, String> entry : headers.entrySet()) {
                     mailPart.setHeader(entry.getKey(), entry.getValue());

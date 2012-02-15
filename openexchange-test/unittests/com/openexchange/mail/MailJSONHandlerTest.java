@@ -51,7 +51,7 @@ package com.openexchange.mail;
 
 import org.json.JSONObject;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -212,7 +212,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
         try {
             final SessionObject session = getSession();
 
-            final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            final MailMessage mail = MimeMessageConverter.convertMessage(SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             final JSONMessageHandler handler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,

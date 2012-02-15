@@ -72,7 +72,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -236,9 +236,9 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         try {
             final Object obj = part.getContent();
             if (obj instanceof MimeMessage) {
-                return MIMEMessageConverter.convertMessage((MimeMessage) obj);
+                return MimeMessageConverter.convertMessage((MimeMessage) obj);
             } else if (obj instanceof Part) {
-                return MIMEMessageConverter.convertPart((Part) obj, false);
+                return MimeMessageConverter.convertPart((Part) obj, false);
             } else {
                 return obj;
             }
@@ -827,7 +827,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         @Override
         public MailPart getMailPart(final int index) throws OXException {
             try {
-                return MIMEMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);
+                return MimeMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);
             } catch (final MessagingException e) {
                 throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }

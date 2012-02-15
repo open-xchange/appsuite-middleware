@@ -53,7 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
 
 /**
@@ -127,7 +127,7 @@ public class Bug18981StructureTest extends AbstractMailTest {
         try {
             getSession();
 
-            final MailMessage mail = MIMEMessageConverter.convertMessage(SOURCE);
+            final MailMessage mail = MimeMessageConverter.convertMessage(SOURCE);
 
             final MIMEStructureHandler handler = new MIMEStructureHandler(-1L);
             new StructureMailMessageParser().parseMailMessage(mail, handler);

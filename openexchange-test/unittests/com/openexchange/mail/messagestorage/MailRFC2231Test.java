@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -298,7 +298,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 		try {
             final SessionObject session = getSession();
 
-            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            final MailMessage rfc2231Mail = MimeMessageConverter.convertMessage(RFC2231_1.getBytes(com.openexchange.java.Charsets.US_ASCII));
             final JSONMessageHandler messageHandler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,
                 null,
@@ -335,7 +335,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
         try {
             final SessionObject session = getSession();
 
-            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            final MailMessage rfc2231Mail = MimeMessageConverter.convertMessage(RFC2231_2.getBytes(com.openexchange.java.Charsets.US_ASCII));
             final JSONMessageHandler messageHandler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,
                 null,

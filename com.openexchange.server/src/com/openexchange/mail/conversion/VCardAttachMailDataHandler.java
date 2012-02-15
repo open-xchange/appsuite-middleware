@@ -81,7 +81,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -207,7 +207,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
              */
             final JSONObject mailObject = MessageWriter.writeMailMessage(
                 MailAccount.DEFAULT_ID,
-                MIMEMessageConverter.convertMessage(mimeMessage),
+                MimeMessageConverter.convertMessage(mimeMessage),
                 DisplayMode.MODIFYABLE,
                 session,
                 null);

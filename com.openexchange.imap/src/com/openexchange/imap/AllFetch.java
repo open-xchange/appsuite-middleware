@@ -67,7 +67,7 @@ import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.BadCommandException;
@@ -154,7 +154,7 @@ public final class AllFetch {
 
             @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
-                MIMEMessageConverter.parseFlags((FLAGS) item, m);
+                MimeMessageConverter.parseFlags((FLAGS) item, m);
             }
         }),
         /**

@@ -57,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 
 /**
  * {@link FlagTerm}
@@ -111,7 +111,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
 
     @Override
     public boolean matches(final Message msg) throws OXException {
-        final Flags flagsObj = MIMEMessageConverter.convertMailFlags(flags);
+        final Flags flagsObj = MimeMessageConverter.convertMailFlags(flags);
         final Flags msgFlags;
         try {
             msgFlags = msg.getFlags();
@@ -124,7 +124,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
 
     @Override
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        return new javax.mail.search.FlagTerm(MIMEMessageConverter.convertMailFlags(flags), set);
+        return new javax.mail.search.FlagTerm(MimeMessageConverter.convertMailFlags(flags), set);
     }
 
     @Override

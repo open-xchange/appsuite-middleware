@@ -71,7 +71,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMERawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -242,7 +242,7 @@ public final class TextFinder {
                 final String value = (String) attrBody.getValue();
                 bodyPart.setText(value);
                 bodyPart.setSize(value.length());
-                final String s = getTextRecursive(MIMEMessageConverter.convertPart(bodyPart));
+                final String s = getTextRecursive(MimeMessageConverter.convertPart(bodyPart));
                 if (null != s) {
                     return s;
                 }
@@ -276,7 +276,7 @@ public final class TextFinder {
                     }
                 }
             }
-            return getTextRecursive(MIMEMessageConverter.convertPart(rtfPart));
+            return getTextRecursive(MimeMessageConverter.convertPart(rtfPart));
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
