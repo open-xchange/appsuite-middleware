@@ -91,8 +91,8 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -518,7 +518,7 @@ public final class MimeMessageUtility {
          * is transferred as:
          * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
          */
-        final char[] chars = MimeMessageUtility.checkNonAscii(subject).toCharArray();
+        final char[] chars = checkNonAscii(subject).toCharArray();
         final StringBuilder sb = new StringBuilder(chars.length);
         int i = 0;
         while (i < chars.length) {
@@ -533,7 +533,17 @@ public final class MimeMessageUtility {
             }
             i++;
         }
-        return MimeMessageUtility.decodeEnvelopeHeader(sb.toString());
+        return decodeEnvelopeHeader0(sb.toString());
+    }
+
+    /**
+     * Decodes a string header obtained from ENVELOPE fetch item.
+     *
+     * @param value The header value
+     * @return The decoded header value
+     */
+    public static String decodeEnvelopeHeader(final String value) {
+        return decodeEnvelopeHeader0(checkNonAscii(value));
     }
 
     /**
@@ -542,18 +552,18 @@ public final class MimeMessageUtility {
     private static final int ENCODED_WORD_LEN = 75;
 
     /**
-     * Decodes a string header obtained from ENVELOPE fetch item.
+     * Internal method to decode a string header obtained from ENVELOPE fetch item.
      *
-     * @param headerValue The header value
+     * @param value The header value
      * @return The decoded header value
      */
-    public static String decodeEnvelopeHeader(final String headerValue) {
-        final int length = headerValue.length();
+    private static String decodeEnvelopeHeader0(final String value) {
+        final int length = value.length();
         /*
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
-        if ((length > ENCODED_WORD_LEN) && (headerValue.indexOf('\r') < 0) && (headerValue.indexOf('\n') < 0)) {
-            final StringBuilder sb = new StringBuilder(length).append(headerValue);
+        if ((length > ENCODED_WORD_LEN) && (value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
+            final StringBuilder sb = new StringBuilder(length).append(value);
             final String pattern = "?= =?";
             int i;
             while ((i = sb.indexOf(pattern)) >= 0) {
@@ -561,7 +571,7 @@ public final class MimeMessageUtility {
             }
             return decodeMultiEncodedHeader0(sb.toString(), false);
         }
-        return decodeMultiEncodedHeader0(headerValue, true);
+        return decodeMultiEncodedHeader0(value, true);
     }
 
     private static final Pattern ENC_PATTERN = Pattern.compile("=\\?(\\S+?)\\?(\\S+?)\\?(.+?)\\?=");
@@ -577,7 +587,7 @@ public final class MimeMessageUtility {
      * @return The possibly decoded header value
      */
     public static String decodeMultiEncodedHeader(final String headerValue) {
-        return decodeMultiEncodedHeader0(headerValue, true);
+        return decodeMultiEncodedHeader0(checkNonAscii(headerValue), true);
     }
 
     private static String decodeMultiEncodedHeader0(final String headerValue, final boolean unfold) {
@@ -696,8 +706,9 @@ public final class MimeMessageUtility {
             bytes[i] = (byte) rawHeader.charAt(i);
         }
         try {
-            return new String(bytes, Charsets.forName(MailProperties.getInstance().getDefaultMimeCharset()));
-        } catch (final UnsupportedCharsetException e) {
+            final String detectCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+            return MessageUtility.readStream(new UnsynchronizedByteArrayInputStream(bytes), detectCharset);
+        } catch (final IOException e) {
             // Cannot occur
             return rawHeader;
         }

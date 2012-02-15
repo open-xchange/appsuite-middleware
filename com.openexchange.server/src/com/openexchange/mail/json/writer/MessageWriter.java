@@ -404,12 +404,10 @@ public final class MessageWriter {
                     final String subject = mail.getSubject();
                     if (withKey) {
                         if (subject != null) {
-                            ((JSONObject) jsonContainer).put(
-                                MailJSONField.SUBJECT.getKey(),
-                                MimeMessageUtility.decodeMultiEncodedHeader(subject.trim()));
+                            ((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(),subject.trim());
                         }
                     } else {
-                        ((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : MimeMessageUtility.decodeMultiEncodedHeader(subject.trim()));
+                        ((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : subject.trim());
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

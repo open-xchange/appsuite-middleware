@@ -5,6 +5,7 @@
 * 2012-02-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 21556: Using Java charset name for UTF8
+ - Fix for bug 21558: Dealing with non-ascii header values
 
 * 2012-02-15 - jan.bauerdick@open-xchange.com
 
