@@ -84,9 +84,11 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(ThreadSortTest.class);
         mailSuite.addTestSuite(UpdateMailTest.class);
         mailSuite.addTestSuite(ViewTest.class);
-        
+        mailSuite.addTestSuite(AllAliasTest.class);
+        mailSuite.addTestSuite(ListAliasTest.class);
+
         /*mailSuite.addTestSuite(AlwaysTest.class);*/
-        
+
         mailSuite.addTestSuite(Bug12409Test.class);
         mailSuite.addTestSuite(Bug14234Test.class);
         mailSuite.addTestSuite(Bug15608Test.class);
