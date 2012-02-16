@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip.analyzers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -63,6 +64,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
+import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnalyzer;
 import com.openexchange.calendar.itip.ITipChange;
@@ -88,6 +90,8 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -536,4 +540,58 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 		return false;
 	}
+	
+	protected void ensureParticipant(CalendarDataObject appointment, Session session) {
+        int confirm = CalendarDataObject.NONE;
+        Participant[] participants = appointment.getParticipants();
+        boolean found = false;
+        if (null != participants) {
+            for (Participant participant : participants) {
+                if (participant instanceof UserParticipant) {
+                    UserParticipant up = (UserParticipant) participant;
+                    if (up.getIdentifier() == session.getUserId()) {
+                        found = true;
+                        if (confirm != -1) {
+                            up.setConfirm(confirm);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!found) {
+            UserParticipant up = new UserParticipant(session.getUserId());
+            if (confirm != -1) {
+                up.setConfirm(confirm);
+            }
+            Participant[] tmp = appointment.getParticipants();
+            List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
+            participantList.add(up);
+            appointment.setParticipants(participantList);
+        }
+        
+        found = false;
+        UserParticipant[] users = appointment.getUsers();
+        if (users != null) {
+            for (UserParticipant userParticipant : users) {
+                if (userParticipant.getIdentifier() == session.getUserId()) {
+                    found = true;
+                    if (confirm != -1) {
+                        userParticipant.setConfirm(confirm);
+                    }
+                }
+            }
+        }
+        
+        if (!found) {
+            UserParticipant up = new UserParticipant(session.getUserId());
+            if (confirm != -1) {
+                up.setConfirm(confirm);
+            }
+            UserParticipant[] tmp = appointment.getUsers();
+            List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
+            participantList.add(up);
+            appointment.setUsers(participantList);
+        }
+    }
 }
