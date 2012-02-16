@@ -1279,6 +1279,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (fo.getObjectID() <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(OXFolderUtility.getFolderName(fo));
         }
+        if (fo.getObjectID() < FolderObject.MIN_FOLDER_ID) {
+            throw OXFolderExceptionCode.NO_SYSTEM_FOLDER_MOVE.create(OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+        }
         if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
             /*
              * Incomplete, whereby its existence is checked
