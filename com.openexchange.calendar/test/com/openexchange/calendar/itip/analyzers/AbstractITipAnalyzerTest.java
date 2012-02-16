@@ -55,6 +55,8 @@ import java.util.Set;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import static org.junit.Assert.*;
@@ -65,7 +67,8 @@ import static org.junit.Assert.*;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AbstractITipAnalyzerTest {
-    protected Session session = new SimSession();
+    protected Session session = new SimSession(12,1337);
+    protected  UserParticipant theUser = new UserParticipant(session.getUserId());
     
     // Test Data
 
@@ -75,7 +78,12 @@ public class AbstractITipAnalyzerTest {
         cdao.setStartDate(D("tomorrow at 12:00"));
         cdao.setEndDate(D("tomorrow at 13:00"));
         cdao.setTitle("A new title!");
-
+       
+        theUser.setConfirm(ConfirmStatus.ACCEPT.getId());
+        cdao.setParticipants(Arrays.asList(theUser));
+        cdao.setUsers(Arrays.asList(theUser));
+        
+        
         return cdao;
     }
     
