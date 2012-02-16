@@ -55,6 +55,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.framework.AbstractAllRequest;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.mail.json.actions.AbstractMailAction;
 
 /**
  * {@link AllRequest}
@@ -73,11 +74,19 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         super(servletPath, folderId, columns, sort, order, failOnError);
     }
 
+    public AllRequest(final String servletPath, final int folderId, final String alias, final int sort, final Order order, final boolean failOnError) {
+        super(servletPath, folderId, alias, sort, order, failOnError);
+    }
+
     /**
      * Default constructor.
      */
     public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
+    }
+
+    public AllRequest(final String folderPath, final String alias, final int sort, final Order order, final boolean failOnError) {
+        super(AbstractMailRequest.MAIL_URL, folderPath, alias, sort, order, failOnError);
     }
 
     @Override
@@ -88,7 +97,12 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (columns != null) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        }
+        if (alias != null) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, alias));
+        }
         params.add(new Parameter(AJAXServlet.PARAMETER_SORT, "thread"));
         params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         if (validateLimit()) {
@@ -114,7 +128,18 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
      */
     @Override
     public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+        if (getColumns() != null) {
+            return new AllParser(isFailOnError(), getColumns());
+        }
+        if (getAlias() != null) {
+            if (getAlias().equals("all")) {
+                return new AllParser(isFailOnError(), AbstractMailAction.COLUMNS_ALL_ALIAS);
+            }
+            if (getAlias().equals("list")) {
+                return new AllParser(isFailOnError(), AbstractMailAction.COLUMNS_LIST_ALIAS);
+            }
+        }
+        return null;
     }
 
 }

@@ -62,11 +62,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -365,6 +367,14 @@ public class AJAXRequestData {
         final String parameter = getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        if (name.equals(AJAXServlet.PARAMETER_COLUMNS)) {
+            if (parameter.equals("all")) {
+                return AbstractMailAction.COLUMNS_ALL_ALIAS;
+            }
+            if (parameter.equals("list")) {
+                return AbstractMailAction.COLUMNS_LIST_ALIAS;
+            }
         }
         final String[] sa = SPLIT.split(parameter, 0);
         final int[] ret = new int[sa.length];

@@ -47,40 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.ajax.mail;
 
 import org.json.JSONArray;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.mail.actions.AllRequest;
+import com.openexchange.ajax.mail.actions.AllResponse;
+import com.openexchange.groupware.search.Order;
 
 /**
- * {@link ListAliasTest}
+ * {@link AllAliasTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class ListAliasTest extends ContactTest {
+public class AllAliasTest extends AbstractMailTest {
 
     private AJAXClient client;
 
     /**
-     * Initializes a new {@link ListAliasTest}.
+     * Initializes a new {@link AllAliasTest}.
      *
      * @param name
      */
-    public ListAliasTest(final String name) {
+    public AllAliasTest(final String name) {
         super(name);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
+        client = getClient();
     }
 
     @Override
@@ -88,24 +84,19 @@ public class ListAliasTest extends ContactTest {
         super.tearDown();
     }
 
-    public void testListAlias() throws Exception {
-        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateContactFolder(), new int[] { 20, 1 });
-        final CommonAllResponse allResponse = client.execute(allRequest);
-        final ListIDs ids = allResponse.getListIDs();
+    public void testAllAlias() throws Exception {
+        final AllRequest allAliasRequest = new AllRequest(client.getValues().getInboxFolder(), "all", 0, Order.ASCENDING, true);
+        final AllResponse allAliasResponse = client.execute(allAliasRequest);
+        final Object[][] aliasMails = allAliasResponse.getArray();
 
-        final ListRequest aliasRequest = new ListRequest(ids, "list");
-        final CommonListResponse aliasResponse = client.execute(aliasRequest);
-        final Object[][] aliasContacts = aliasResponse.getArray();
+        final AllRequest allRequest = new AllRequest(client.getValues().getInboxFolder(), new int[] { 600, 601 }, 0, Order.ASCENDING, true);
+        final AllResponse allResponse = client.execute(allRequest);
+        final Object[][] mails = allResponse.getArray();
 
-        final ListRequest request = new ListRequest(ids, new int[] {
-            20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 });
-        final CommonListResponse response = client.execute(request);
-        final Object[][] contacts = response.getArray();
-
-        assertEquals("Arrays' sizes are not equal.", aliasContacts.length, contacts.length);
-        for (int i = 0; i < aliasContacts.length; i++) {
-            final Object[] o1 = aliasContacts[i];
-            final Object[] o2 = contacts[i];
+        assertEquals("Arrays' sizes are not equal.", aliasMails.length, mails.length);
+        for (int i = 0; i < aliasMails.length; i++) {
+            final Object[] o1 = aliasMails[i];
+            final Object[] o2 = mails[i];
             assertEquals("Objects' sizes are not equal.", o1.length, o2.length);
             for (int j = 0; j < o1.length; j++) {
                 if ((o1[j] != null || o2[j] != null)) {
