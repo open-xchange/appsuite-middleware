@@ -51,8 +51,8 @@ package com.openexchange.pop3.config;
 
 import java.util.Properties;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
 
 /**
  * {@link POP3SessionProperties} - Default properties for an POP3 session established via <code>JavaMail</code> API
@@ -109,26 +109,26 @@ public final class POP3SessionProperties {
         /*
          * Define POP3 session properties
          */
-        pop3SessionProperties = MIMEDefaultSession.getDefaultMailProperties();
+        pop3SessionProperties = MimeDefaultSession.getDefaultMailProperties();
         /*
          * Set some global JavaMail properties
          */
         final Properties properties = pop3SessionProperties;
-        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
-            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+        if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
+            properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+            System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
         }
-        if (!properties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-            properties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
-            System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+        if (!properties.containsKey(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
+            properties.put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+            System.getProperties().put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
         }
-        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
-            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+        if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
+            properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+            System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
         }
-        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
-            System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+        if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
+            properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+            System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
         }
         /*
          * A connected POP3Store maintains a pool of POP3 protocol objects for use in communicating with the POP3 server. The POP3Store will
@@ -142,10 +142,10 @@ public final class POP3SessionProperties {
          * (pruned) from the connection pool.
          */
         properties.put("mail.pop3.connectionpooltimeout", "1000");
-        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
+        if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+            properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
             System.getProperties().put(
-                MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
+                MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET,
                 MailProperties.getInstance().getDefaultMimeCharset());
         }
         if (POP3Properties.getInstance().getPOP3Timeout() > 0) {

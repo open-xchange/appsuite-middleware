@@ -50,10 +50,6 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -62,7 +58,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -114,10 +109,6 @@ public final class UnsubscribePerformer extends AbstractPerformer {
         super(user, context, folderStorageDiscoverer);
     }
 
-    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        FolderStorage.REAL_TREE_ID,
-        OutlookFolderStorage.OUTLOOK_TREE_ID)));
-
     /**
      * Performs the <code>UNSUBSCRIBE</code> action.
      *
@@ -138,23 +129,22 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             openedStorages.add(virtualStorage);
         }
         try {
+            if (!virtualStorage.containsFolder(treeId, folderId, storageParameters)) {
+                return;
+            }
+            /*
+             * Unsubscribe contained folder
+             */
             final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
-            {
-                /*
-                 * Check folder permission for parent folder
-                 */
-                final Permission parentPermission;
-                if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
-                } else {
-                    parentPermission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
-                }
-                if (!parentPermission.isVisible()) {
-                    throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        getFolderInfo4Error(folder),
-                        getUserInfo4Error(),
-                        getContextInfo4Error());
-                }
+            /*
+             * Check folder permission
+             */
+            final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+            if (!permission.isVisible()) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                    getFolderInfo4Error(folder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
             }
             {
                 /*

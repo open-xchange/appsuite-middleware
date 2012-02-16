@@ -65,7 +65,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.search.BodyTerm;
 import com.openexchange.mail.search.ComparisonType;
@@ -345,7 +345,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 				final String uid;
 				{
-					final MailMessage mail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+					final MailMessage mail = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 					assertEquals("Unexpected or missing Message-ID header: ",
 							"<32496175.17311207643539009.JavaMail.open-xchange@oxee>", mail.getFirstHeader("Message-ID"));
 					uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { mail })[0];
@@ -525,7 +525,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 				final String uid;
 				{
-					final MailMessage mail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+					final MailMessage mail = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 					uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { mail })[0];
 				}
 

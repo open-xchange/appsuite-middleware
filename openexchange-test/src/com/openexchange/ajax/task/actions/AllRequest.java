@@ -53,9 +53,11 @@ import com.openexchange.ajax.framework.AbstractAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.tasks.json.actions.TaskAction;
 
 /**
  * Contains the data for an task all request.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AllRequest extends AbstractAllRequest<CommonAllResponse> {
@@ -67,10 +69,12 @@ public class AllRequest extends AbstractAllRequest<CommonAllResponse> {
     /**
      * Default constructor.
      */
-    public AllRequest(final int folderId, final int[] columns, final int sort,
-        final Order order) {
-        super(AbstractTaskRequest.TASKS_URL, folderId, AbstractTaskRequest
-            .addGUIColumns(columns), sort, order, true);
+    public AllRequest(final int folderId, final int[] columns, final int sort, final Order order) {
+        super(AbstractTaskRequest.TASKS_URL, folderId, AbstractTaskRequest.addGUIColumns(columns), sort, order, true);
+    }
+
+    public AllRequest(final int folderId, final String alias, final int sort, final Order order) {
+        super(AbstractTaskRequest.TASKS_URL, folderId, alias, sort, order, true);
     }
 
     /**
@@ -78,6 +82,16 @@ public class AllRequest extends AbstractAllRequest<CommonAllResponse> {
      */
     @Override
     public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+        if (getColumns() != null) {
+            return new AllParser(isFailOnError(), getColumns());
+        } else {
+            if (getAlias().equals("all")) {
+                return new AllParser(isFailOnError(), TaskAction.COLUMNS_ALL_ALIAS);
+            }
+            if (getAlias().equals("list")) {
+                return  new AllParser(isFailOnError(), TaskAction.COLUMNS_LIST_ALIAS);
+            }
+        }
+        return null;
     }
 }

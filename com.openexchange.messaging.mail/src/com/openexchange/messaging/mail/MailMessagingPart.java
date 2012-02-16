@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.mail;
 
-import static com.openexchange.mail.mime.MIMEDefaultSession.getDefaultSession;
-import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertMessage;
+import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,7 +67,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
@@ -191,7 +191,7 @@ public class MailMessagingPart implements MessagingPart {
             } catch (final IOException e) {
                 throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final javax.mail.MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         }
         return tmp;

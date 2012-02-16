@@ -72,7 +72,7 @@ import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
@@ -372,7 +372,7 @@ public final class IMAPDefaultFolderChecker {
                      */
                     setDefaultFoldersChecked(key, true, mailSessionCache);
                 } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+                    throw MimeMailException.handleMessagingException(e, imapConfig, session);
                 }
             }
         }
@@ -503,7 +503,7 @@ public final class IMAPDefaultFolderChecker {
             }
             return null;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 

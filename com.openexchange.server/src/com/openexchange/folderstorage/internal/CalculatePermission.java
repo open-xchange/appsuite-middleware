@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.internal.performers.AbstractPerformer;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -156,6 +157,23 @@ public final class CalculatePermission {
             }
         }
         folder.setPermissions(tmp.toArray(new Permission[tmp.size()]));
+    }
+
+    /**
+     * Calculates the effective permission for given user in given folder.
+     *
+     * @param folder The folder
+     * @param performer The performer to calculate for
+     * @param allowedContentTypes The allowed content types; an empty list indicates all are allowed
+     * @return The effective permission for given user in given folder
+     * @throws OXException If calculating the effective permission fails
+     */
+    public static Permission calculate(final Folder folder, final AbstractPerformer performer, final java.util.List<ContentType> allowedContentTypes) throws OXException {
+        final ServerSession session = performer.getSession();
+        if (null == session) {
+            return calculate(folder, performer.getUser(), performer.getContext(), allowedContentTypes);
+        }
+        return calculate(folder, session, allowedContentTypes);
     }
 
     /**

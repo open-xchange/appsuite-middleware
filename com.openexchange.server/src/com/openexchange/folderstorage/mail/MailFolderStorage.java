@@ -124,7 +124,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
@@ -250,11 +250,11 @@ public final class MailFolderStorage implements FolderStorage {
                         }
                     }
                     Collections.sort(accountList, new MailAccountComparator(session.getUser().getLocale()));
-                    if (!accountList.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accountList.get(0).getMailProtocol())) {
+                    if (!accountList.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accountList.get(0).getMailProtocol())) {
                         /*
-                         * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                         * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
-                        final UnifiedINBOXManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
+                        final UnifiedInboxManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
                         if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             accountList.remove(0);
                         } else {
@@ -917,11 +917,11 @@ public final class MailFolderStorage implements FolderStorage {
                     final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
                     accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
-                if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                     /*
-                     * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                     * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                      */
-                    final UnifiedINBOXManagement uim = serviceRegistry.getService(UnifiedINBOXManagement.class);
+                    final UnifiedInboxManagement uim = serviceRegistry.getService(UnifiedInboxManagement.class);
                     if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                         accounts.remove(0);
                     }
@@ -1401,12 +1401,12 @@ public final class MailFolderStorage implements FolderStorage {
 
         @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
-            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
+                if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                     return 0;
                 }
                 return -1;
-            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            } else if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                 return 1;
             }
             if (o1.isDefaultAccount()) {

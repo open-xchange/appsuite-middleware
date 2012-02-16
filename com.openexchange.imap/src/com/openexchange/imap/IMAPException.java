@@ -61,7 +61,7 @@ import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -789,23 +789,23 @@ public final class IMAPException extends OXException {
         /**
          * Mail folder "%1$s" could not be found.
          */
-        FOLDER_NOT_FOUND(MIMEMailExceptionCode.FOLDER_NOT_FOUND, null),
+        FOLDER_NOT_FOUND(MimeMailExceptionCode.FOLDER_NOT_FOUND, null),
         /**
          * Mail folder could not be found: %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
          */
-        FOLDER_NOT_FOUND_EXT(MIMEMailExceptionCode.FOLDER_NOT_FOUND_EXT, FOLDER_NOT_FOUND),
+        FOLDER_NOT_FOUND_EXT(MimeMailExceptionCode.FOLDER_NOT_FOUND_EXT, FOLDER_NOT_FOUND),
         /**
          * An attempt was made to open a read-only folder with read-write "%1$s"
          */
-        READ_ONLY_FOLDER(MIMEMailExceptionCode.READ_ONLY_FOLDER, null),
+        READ_ONLY_FOLDER(MimeMailExceptionCode.READ_ONLY_FOLDER, null),
         /**
          * An attempt was made to open a read-only folder with read-write "%1$s" on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        READ_ONLY_FOLDER_EXT(MIMEMailExceptionCode.READ_ONLY_FOLDER_EXT, READ_ONLY_FOLDER),
+        READ_ONLY_FOLDER_EXT(MimeMailExceptionCode.READ_ONLY_FOLDER_EXT, READ_ONLY_FOLDER),
         /**
          * Connect error: Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
          */
-        CONNECT_ERROR(MIMEMailExceptionCode.CONNECT_ERROR, null),
+        CONNECT_ERROR(MimeMailExceptionCode.CONNECT_ERROR, null),
         /**
          * Mailbox' root folder must not be source or the destination full name of a move operation.
          */
@@ -907,7 +907,7 @@ public final class IMAPException extends OXException {
             prefix = code.getPrefix();
         }
 
-        private IMAPCode(final MIMEMailExceptionCode code, final IMAPCode extend) {
+        private IMAPCode(final MimeMailExceptionCode code, final IMAPCode extend) {
             message = code.getMessage();
             this.extend = extend;
             detailNumber = code.getNumber();

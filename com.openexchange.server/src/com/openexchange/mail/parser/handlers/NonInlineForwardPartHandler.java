@@ -64,8 +64,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -214,9 +214,9 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
-        String ct = MIMEType2ExtMap.getContentType(part.getFileName());
+        String ct = MimeType2ExtMap.getContentType(part.getFileName());
         if (ct == null || ct.length() == 0) {
-            ct = MIMETypes.MIME_APPL_OCTET;
+            ct = MimeTypes.MIME_APPL_OCTET;
         }
         mailPart.setContentType(ct);
         mailPart.setSize(part.getFileSize());

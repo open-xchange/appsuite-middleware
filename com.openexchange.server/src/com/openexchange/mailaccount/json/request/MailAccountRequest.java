@@ -80,7 +80,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -254,9 +254,9 @@ public final class MailAccountRequest {
 
         checkNeededFields(accountDescription);
 
-        // Check if account denotes a Unified INBOX account
+        // Check if account denotes a Unified Mail account
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-            // Deny creation of Unified INBOX account
+            // Deny creation of Unified Mail account
             throw MailAccountExceptionCodes.CREATION_FAILED.create();
         }
 
@@ -308,7 +308,7 @@ public final class MailAccountRequest {
 
         checkNeededFields(accountDescription);
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-            // Deny validation of Unified INBOX account
+            // Deny validation of Unified Mail account
             throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
         }
         // Check for tree parameter
@@ -666,7 +666,7 @@ public final class MailAccountRequest {
     }
 
     private static boolean isUnifiedINBOXAccount(final String mailProtocol) {
-        return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
+        return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
     private static boolean isDefaultMailAccount(final MailAccount mailAccount) {

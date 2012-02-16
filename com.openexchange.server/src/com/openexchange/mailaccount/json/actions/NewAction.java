@@ -64,7 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -108,9 +108,9 @@ public final class NewAction extends AbstractMailAccountAction {
 
             checkNeededFields(accountDescription);
 
-            // Check if account denotes a Unified INBOX account
+            // Check if account denotes a Unified Mail account
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-                // Deny creation of Unified INBOX account
+                // Deny creation of Unified Mail account
                 throw MailAccountExceptionCodes.CREATION_FAILED.create();
             }
 
@@ -127,7 +127,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     session.setParameter("mail-account.validate.type", "create");
                     try {
                         if (!ValidateAction.actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
-                            final OXException warning = MIMEMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                            final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                             warning.setCategory(Category.CATEGORY_WARNING);
                             warnings.add(0, warning);
                         }

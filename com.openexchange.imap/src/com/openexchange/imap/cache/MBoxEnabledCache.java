@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -136,7 +136,7 @@ public final class MBoxEnabledCache {
                 try {
                     mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
                 } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig, imapConfig.getSession());
+                    throw MimeMailException.handleMessagingException(e, imapConfig, imapConfig.getSession());
                 }
                 if (null == mbox) {
                     ft.run();
@@ -156,7 +156,7 @@ public final class MBoxEnabledCache {
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
-                throw MIMEMailException.handleMessagingException((MessagingException) cause, imapConfig);
+                throw MimeMailException.handleMessagingException((MessagingException) cause, imapConfig);
             }
             if (cause instanceof RuntimeException) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());

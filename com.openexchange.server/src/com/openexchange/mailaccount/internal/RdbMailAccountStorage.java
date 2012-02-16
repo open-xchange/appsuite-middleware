@@ -97,7 +97,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
@@ -973,10 +973,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  */
                 updateUnifiedINBOXEnabled(mailAccount.isUnifiedINBOXEnabled(), MailAccount.DEFAULT_ID, user, cid, con);
                 /*
-                 * Automatically check Unified INBOX existence
+                 * Automatically check Unified Mail existence
                  */
                 if (mailAccount.isUnifiedINBOXEnabled()) {
-                    final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                    final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
                     if (null != management && !management.exists(user, cid, con)) {
                         management.createUnifiedINBOX(user, cid, con);
                     }
@@ -1251,10 +1251,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 closeSQLStuff(rs, stmt);
             }
             /*
-             * Automatically check Unified INBOX existence
+             * Automatically check Unified Mail existence
              */
             if (attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
-                final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
                 if (null != management && !management.exists(user, cid, con)) {
                     management.createUnifiedINBOX(user, cid, con);
                 }
@@ -1528,10 +1528,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             con.commit();
             autocommit(con);
             /*
-             * Automatically check Unified INBOX existence
+             * Automatically check Unified Mail existence
              */
             if (mailAccount.isUnifiedINBOXEnabled()) {
-                final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
                 if (null != management && !management.exists(user, cid, con)) {
                     management.createUnifiedINBOX(user, cid, con);
                 }
@@ -1555,7 +1555,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session, final Connection con) throws OXException {
         final int cid = ctx.getContextId();
-        final boolean isUnifiedMail = mailAccount.getMailProtocol().startsWith(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX, 0);
+        final boolean isUnifiedMail = mailAccount.getMailProtocol().startsWith(UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX, 0);
         final String primaryAddress = mailAccount.getPrimaryAddress();
         final String name = mailAccount.getName();
         if (!isUnifiedMail) {
@@ -1737,10 +1737,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             closeSQLStuff(null, stmt);
         }
         /*
-         * Automatically check Unified INBOX existence
+         * Automatically check Unified Mail existence
          */
         if (mailAccount.isUnifiedINBOXEnabled()) {
-            final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+            final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
             if (null != management && !management.exists(user, cid, con)) {
                 management.createUnifiedINBOX(user, cid, con);
             }

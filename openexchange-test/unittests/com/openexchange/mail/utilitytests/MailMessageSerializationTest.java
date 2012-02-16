@@ -60,7 +60,7 @@ import java.io.OutputStream;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 
 /**
  * {@link MailMessageSerializationTest}
@@ -94,7 +94,7 @@ public final class MailMessageSerializationTest extends AbstractMailTest {
 			}
 
 			for (final MailMessage mail : mails) {
-				if (mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+				if (mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
 					/*
 					 * Serialize to file
 					 */
@@ -113,7 +113,7 @@ public final class MailMessageSerializationTest extends AbstractMailTest {
 					final int count = mail.getEnclosedCount();
 					for (int i = 0; i < count; i++) {
 						final MailPart part = mail.getEnclosedMailPart(i);
-						if (part.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+						if (part.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
 							final int c = part.getEnclosedCount();
 							assertTrue("Count not available from multipart part", c != MailPart.NO_ENCLOSED_PARTS);
 						} else {
@@ -140,7 +140,7 @@ public final class MailMessageSerializationTest extends AbstractMailTest {
 					assertTrue("Enclosed part count does not match", cloneCount == count);
 					for (int i = 0; i < cloneCount; i++) {
 						final MailPart part = clone.getEnclosedMailPart(i);
-						if (part.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+						if (part.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
 							final int c = part.getEnclosedCount();
 							assertTrue("Count not available from multipart part", c != MailPart.NO_ENCLOSED_PARTS);
 						} else {

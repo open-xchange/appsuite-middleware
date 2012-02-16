@@ -88,6 +88,8 @@ public class AppointmentAJAXSuite extends TestSuite{
         tests.addTestSuite(ConfirmationsTest.class);
         tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
         tests.addTestSuite(CreatedByTest.class);
+        tests.addTestSuite(AllAliasTest.class);
+        tests.addTestSuite(ListAliasTest.class);
         tests.addTest(RecurrenceTestSuite.suite());
         tests.addTest(AppointmentBugTestSuite.suite());
         tests.addTest(NewAppointmentHttpApiTestSuite.suite());

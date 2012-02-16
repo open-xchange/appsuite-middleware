@@ -11,5 +11,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-calendar-printing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-chat"/>
 </provider>
 </psf>

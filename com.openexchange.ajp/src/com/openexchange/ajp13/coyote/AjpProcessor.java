@@ -784,6 +784,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         requestHeaderMessage.dump("Invalid forward-request detected");
                     }
                     continue;
+                } catch (final IllegalStateException stateException) {
+                    /*-
+                     * Max. number of HTTP sessions reached.
+                     * 
+                     * Status code (503) indicating that the HTTP server is
+                     * temporarily overloaded, and unable to handle the request.
+                     */
+                    response.setStatus(503);
+                    error = true;
                 } catch (final Throwable t) {
                     // 400 - Bad Request
                     {

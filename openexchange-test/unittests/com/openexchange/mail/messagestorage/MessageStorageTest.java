@@ -14,7 +14,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
@@ -92,7 +92,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             return true;
         }
         try {
-            InternetAddress.parse(MIMEMessageUtility.decodeMultiEncodedHeader(addressStr), true);
+            InternetAddress.parse(MimeMessageUtility.decodeMultiEncodedHeader(addressStr), true);
             // Valid addresses
             return true;
         } catch (final Exception e) {

@@ -64,9 +64,9 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
@@ -178,7 +178,7 @@ public final class MimeProcessingUtility {
         if (null == filename) {
             filename = contentType.getParameter("name");
         }
-        return MIMEMessageUtility.decodeMultiEncodedHeader(filename);
+        return MimeMessageUtility.decodeMultiEncodedHeader(filename);
     }
 
     /**
@@ -192,7 +192,7 @@ public final class MimeProcessingUtility {
      */
     static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final boolean allowHTML) throws IOException, OXException {
         final String charset = getCharset(textPart, contentType);
-        if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+        if (contentType.isMimeType(MimeTypes.MIME_TEXT_HTM_ALL)) {
             if (allowHTML) {
                 return readContent(textPart, charset);
             }
@@ -200,7 +200,7 @@ public final class MimeProcessingUtility {
             final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
             return htmlService.html2text(htmlService.getConformHTML(readContent(textPart, charset), contentType.getCharsetParameter()), false);
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
-        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
+        } else if (contentType.isMimeType(MimeTypes.MIME_TEXT_PLAIN)) {
             final String content = readContent(textPart, charset);
             final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
             if (uuencodedMP.isUUEncoded()) {

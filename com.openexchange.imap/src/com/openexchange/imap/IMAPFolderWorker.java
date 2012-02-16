@@ -68,8 +68,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
@@ -195,7 +195,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         } catch (final IllegalStateException e) {
             LOG.debug("Invoked close() on a closed folder", e);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } finally {
             resetIMAPFolder();
         }
@@ -322,7 +322,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolderFullname);
                     }
                     if ((desiredMode == Folder.READ_WRITE) && ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
-                        MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
+                        MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT,
                         STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
@@ -381,7 +381,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
-                MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
+                MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT,
                 STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
                 throw IMAPException.create(
                     IMAPException.Code.READ_ONLY_FOLDER,

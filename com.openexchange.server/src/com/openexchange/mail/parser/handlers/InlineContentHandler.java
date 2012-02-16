@@ -63,11 +63,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -132,16 +132,16 @@ public final class InlineContentHandler implements MailMessageHandler {
                 partCid = part.getFirstHeader(MessageHeaders.HDR_CONTENT_ID);
             }
             partCid = partCid == null ? "" : partCid;
-            String realFilename = MIMEMessageUtility.getRealFilename(part);
+            String realFilename = MimeMessageUtility.getRealFilename(part);
             realFilename = realFilename == null ? "" : realFilename;
             if (partCid.length() == 0 && realFilename.length() == 0) {
                 return true;
             }
             for (int i = 0; i < size; i++) {
                 final String cid = cids.get(i);
-                if (MIMEMessageUtility.equalsCID(cid, partCid)) {
+                if (MimeMessageUtility.equalsCID(cid, partCid)) {
                     inlineContents.put(cid, part);
-                } else if (MIMEMessageUtility.equalsCID(cid, realFilename)) {
+                } else if (MimeMessageUtility.equalsCID(cid, realFilename)) {
                     inlineContents.put(cid, part);
                 }
             }
@@ -193,16 +193,16 @@ public final class InlineContentHandler implements MailMessageHandler {
         if (imageCID == null) {
             imageCID = "";
         }
-        String realFilename = MIMEMessageUtility.getRealFilename(part);
+        String realFilename = MimeMessageUtility.getRealFilename(part);
         realFilename = realFilename == null ? "" : realFilename;
         if (imageCID.length() == 0 && realFilename.length() == 0) {
             return true;
         }
         for (int i = 0; i < size; i++) {
             final String cid = cids.get(i);
-            if (MIMEMessageUtility.equalsCID(cid, imageCID)) {
+            if (MimeMessageUtility.equalsCID(cid, imageCID)) {
                 inlineContents.put(cid, part);
-            } else if (MIMEMessageUtility.equalsCID(cid, realFilename)) {
+            } else if (MimeMessageUtility.equalsCID(cid, realFilename)) {
                 inlineContents.put(cid, part);
             }
         }
@@ -252,11 +252,11 @@ public final class InlineContentHandler implements MailMessageHandler {
             nestedMail = (MailMessage) content;
         } else if (content instanceof InputStream) {
             try {
-                nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
-                    MIMEDefaultSession.getDefaultSession(),
+                nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
+                    MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         } else {
             LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));

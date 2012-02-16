@@ -123,11 +123,11 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -1584,7 +1584,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 }
             } catch (final AddressException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         }
         final FullnameArgument argument = prepareMailFolderParam(destFolder);
@@ -1896,7 +1896,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
             } catch (final OXException e) {
-                if (MIMEMailExceptionCode.LOGIN_FAILED.equals(e) || MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+                if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                     MailServletInterface.mailInterfaceMonitor.changeNumFailedLogins(true);
                 }
                 throw e;
@@ -1966,7 +1966,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             final String uid;
             {
-                final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+                final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
                 filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
                 /*
                  * Append message to draft folder without invoking draftMail.cleanUp() afterwards to avoid loss of possibly uploaded images
@@ -2265,7 +2265,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } finally {
             transport.close();
         }
@@ -2315,7 +2315,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         for (int i = 0; i < count; i++) {
                             final MailPart part = composedMail.getEnclosedMailPart(i);
                             final MailPath path = part.getMsgref();
-                            if ((path != null) && part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+                            if ((path != null) && part.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
                                 paths.add(path);
                             }
                         }
@@ -2739,7 +2739,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         throw MailExceptionCode.INVALID_SENDER.create(fromAddr);
                     }
                 } catch (final AddressException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
             } else {
                 if (!new QuotedInternetAddress(ma.getPrimaryAddress()).equals(new QuotedInternetAddress(fromAddr))) {
@@ -2747,7 +2747,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         } catch (final AddressException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
         /*
          * Initialize

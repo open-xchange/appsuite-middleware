@@ -72,7 +72,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.parser.handlers.RawJSONMessageHandler;
@@ -404,12 +404,10 @@ public final class MessageWriter {
                     final String subject = mail.getSubject();
                     if (withKey) {
                         if (subject != null) {
-                            ((JSONObject) jsonContainer).put(
-                                MailJSONField.SUBJECT.getKey(),
-                                MIMEMessageUtility.decodeMultiEncodedHeader(subject.trim()));
+                            ((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(),subject.trim());
                         }
                     } else {
-                        ((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : MIMEMessageUtility.decodeMultiEncodedHeader(subject.trim()));
+                        ((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : subject.trim());
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -774,13 +772,13 @@ public final class MessageWriter {
     // private static final Pattern PATTERN_QUOTE = Pattern.compile("[.,:;<>\"]");
 
     private static String preparePersonal(final String personal) {
-        return MIMEMessageUtility.quotePhrase(MIMEMessageUtility.decodeMultiEncodedHeader(personal), false);
+        return MimeMessageUtility.quotePhrase(MimeMessageUtility.decodeMultiEncodedHeader(personal), false);
     }
 
     private static final String DUMMY_DOMAIN = "@unspecified-domain";
 
     private static String prepareAddress(final String address) {
-        final String decoded = MIMEMessageUtility.decodeMultiEncodedHeader(address);
+        final String decoded = MimeMessageUtility.decodeMultiEncodedHeader(address);
         final int pos = decoded.indexOf(DUMMY_DOMAIN);
         if (pos >= 0) {
             return decoded.substring(0, pos);

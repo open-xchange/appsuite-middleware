@@ -287,9 +287,9 @@ public interface MailAccount extends Serializable {
     public String getConfirmedSpam();
 
     /**
-     * Checks if this mail account is enabled for Unified INBOX.
+     * Checks if this mail account is enabled for Unified Mail.
      *
-     * @return <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
+     * @return <code>true</code> if this mail account is enabled for Unified Mail; otherwise <code>false</code>
      */
     public boolean isUnifiedINBOXEnabled();
 

@@ -49,7 +49,9 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -68,6 +70,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -85,6 +88,13 @@ public abstract class AbstractPerformer {
      * The constant indicating all content types are allowed.
      */
     protected static final List<ContentType> ALL_ALLOWED = Collections.emptyList();
+
+    /**
+     * Known working trees.
+     */
+    protected static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+        FolderStorage.REAL_TREE_ID,
+        OutlookFolderStorage.OUTLOOK_TREE_ID)));
 
     protected final FolderStorageDiscoverer folderStorageDiscoverer;
 

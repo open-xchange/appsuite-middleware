@@ -65,11 +65,11 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.ContentDisposition;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by the possibility to add extra parts to an existing
@@ -340,7 +340,7 @@ public final class CompositeMailMessage extends MailMessage {
             return;
         }
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Copy headers
              */
@@ -382,7 +382,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !mp.getContentType().containsNameParameter()) {
                     mp.getContentType().setNameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(mp.getContentType().toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(mp.getContentType().toString()));
                 final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
                 final ContentDisposition contentDisposition;
                 if (disposition == null) {
@@ -394,7 +394,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
             /*
@@ -427,7 +427,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !mp.getContentType().containsNameParameter()) {
                     mp.getContentType().setNameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(mp.getContentType().toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(mp.getContentType().toString()));
                 final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
                 final ContentDisposition contentDisposition;
                 if (disposition == null) {
@@ -439,13 +439,13 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
             mimeMessage.setContent(mimeMultipart);
             mimeMessage.writeTo(out);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }

@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.threadsort;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

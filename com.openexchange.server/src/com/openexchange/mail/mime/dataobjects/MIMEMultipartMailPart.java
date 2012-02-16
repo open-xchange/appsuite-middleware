@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.extractHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.extractHeader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,10 +67,10 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -366,14 +366,14 @@ public final class MIMEMultipartMailPart extends MailPart {
              * Get content-type
              */
             final ContentType ct = new ContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(subArr), false));
-            if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                 return new MIMEMultipartMailPart(ct, subArr);
             }
 //            else if (ct.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
 //                return MIMEMessageConverter.convertMessage(subArr);
 //            }
             else {
-                return MIMEMessageConverter.convertPart(subArr);
+                return MimeMessageConverter.convertPart(subArr);
             }
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -386,9 +386,9 @@ public final class MIMEMultipartMailPart extends MailPart {
             mbp.setText("", "US-ASCII");
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             mbp.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=\"US-ASCII\"");
-            return MIMEMessageConverter.convertPart(mbp);
+            return MimeMessageConverter.convertPart(mbp);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -400,9 +400,9 @@ public final class MIMEMultipartMailPart extends MailPart {
             mbp.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,
                 new StringBuilder("text/plain; charset=\"").append(charset).append('"').toString());
-            return MIMEMessageConverter.convertPart(mbp);
+            return MimeMessageConverter.convertPart(mbp);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 

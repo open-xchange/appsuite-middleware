@@ -54,7 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -84,7 +84,7 @@ public final class MailAccountStorageInit implements Initialization {
         }
         // Simulate bundle start
         ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, newMailAccountStorageService());
-        ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, newUnifiedINBOXManagement());
+        ServerServiceRegistry.getInstance().addService(UnifiedInboxManagement.class, newUnifiedINBOXManagement());
         DeleteListenerRegistry.initInstance();
         LOG.info("MailAccountStorageService successfully injected to server service registry");
     }
@@ -96,7 +96,7 @@ public final class MailAccountStorageInit implements Initialization {
         }
         // Simulate bundle stop
         DeleteListenerRegistry.releaseInstance();
-        ServerServiceRegistry.getInstance().removeService(UnifiedINBOXManagement.class);
+        ServerServiceRegistry.getInstance().removeService(UnifiedInboxManagement.class);
         ServerServiceRegistry.getInstance().removeService(MailAccountStorageService.class);
         LOG.info("MailAccountStorageService successfully removed from server service registry");
     }
@@ -111,12 +111,12 @@ public final class MailAccountStorageInit implements Initialization {
     }
 
     /**
-     * Creates a new Unified INBOX management instance.
+     * Creates a new Unified Mail management instance.
      *
-     * @return A new Unified INBOX management instance
+     * @return A new Unified Mail management instance
      */
-    public static UnifiedINBOXManagement newUnifiedINBOXManagement() {
-        return new UnifiedINBOXManagementImpl();
+    public static UnifiedInboxManagement newUnifiedINBOXManagement() {
+        return new UnifiedInboxManagementImpl();
     }
 
 }

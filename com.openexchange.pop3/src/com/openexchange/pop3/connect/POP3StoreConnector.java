@@ -66,8 +66,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
@@ -336,7 +336,7 @@ public final class POP3StoreConnector {
             /*
              * Check if debug should be enabled
              */
-            if (Boolean.parseBoolean(pop3Session.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (Boolean.parseBoolean(pop3Session.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 pop3Session.setDebug(true);
                 pop3Session.setDebugOut(System.out);
             } else {
@@ -455,7 +455,7 @@ public final class POP3StoreConnector {
             result.setPop3Store(pop3Store);
             return result;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Config, session);
+            throw MimeMailException.handleMessagingException(e, pop3Config, session);
         }
     }
 

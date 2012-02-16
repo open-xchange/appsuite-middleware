@@ -93,8 +93,8 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
@@ -462,7 +462,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             return retval;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, getMailConfig(), session);
+            throw MimeMailException.handleMessagingException(e, getMailConfig(), session);
         }
     }
 
@@ -498,7 +498,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            if (Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.err);
             }
@@ -523,7 +523,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     // Ignore
                 }
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e, config, session);
+                throw MimeMailException.handleMessagingException(e, config, session);
             } finally {
                 if (null != imapStore) {
                     try {
@@ -609,7 +609,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Check if debug should be enabled
              */
             final boolean certainUser = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
-            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
             }
@@ -686,7 +686,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             config.initializeCapabilities(imapStore, session);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, config, session);
+            throw MimeMailException.handleMessagingException(e, config, session);
         }
     }
 

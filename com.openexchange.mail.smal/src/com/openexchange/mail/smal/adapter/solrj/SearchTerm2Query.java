@@ -59,14 +59,17 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
+import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.CcTerm;
 import com.openexchange.mail.search.ComparablePattern;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.FromTerm;
+import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.SearchTermVisitor;
 import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
@@ -75,33 +78,29 @@ import com.openexchange.mail.smal.adapter.IndexAdapters;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
- *
+ * 
  * @see http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTerm2Query implements SolrConstants {
 
-    /**
-     * Initializes a new {@link SearchTerm2Query}.
-     */
-    private SearchTerm2Query() {
-        super();
-    }
+    private static final class SearchTerm2QueryVisitor implements SearchTermVisitor {
 
-    /**
-     * Transforms specified search term to a query.
-     *
-     * @param searchTerm The search term
-     * @return The resulting query
-     */
-    public static StringBuilder searchTerm2Query(final SearchTerm<?> searchTerm) {
-        if (null == searchTerm) {
-            return null;
+        protected final StringBuilder queryBuilder;
+
+        protected SearchTerm2QueryVisitor() {
+            super();
+            queryBuilder = new StringBuilder(48);
         }
-        final StringBuilder queryBuilder = new StringBuilder(32);
-        if (searchTerm instanceof ANDTerm) {
-            final ANDTerm andTerm = (ANDTerm) searchTerm;
-            final SearchTerm<?>[] terms = andTerm.getPattern();
+
+        protected SearchTerm2QueryVisitor reset() {
+            queryBuilder.setLength(0);
+            return this;
+        }
+
+        @Override
+        public void visit(final ANDTerm term) {
+            final SearchTerm<?>[] terms = term.getPattern();
             queryBuilder.append('(');
             queryBuilder.append(searchTerm2Query(terms[0]));
             for (int i = 1; i < terms.length; i++) {
@@ -109,65 +108,39 @@ public final class SearchTerm2Query implements SolrConstants {
                 queryBuilder.append(searchTerm2Query(terms[i]));
             }
             queryBuilder.append(')');
-            return queryBuilder;
         }
-        if (searchTerm instanceof ORTerm) {
-            final ORTerm orTerm = (ORTerm) searchTerm;
-            final SearchTerm<?>[] terms = orTerm.getPattern();
-            queryBuilder.append('(');
-            queryBuilder.append(searchTerm2Query(terms[0]));
-            for (int i = 1; i < terms.length; i++) {
-                queryBuilder.append(" OR ");
-                queryBuilder.append(searchTerm2Query(terms[i]));
+
+        @Override
+        public void visit(final BccTerm term) {
+            stringPattern(Arrays.asList(FIELD_BCC_PERSONAL, FIELD_BCC_ADDR), term.getPattern());
+        }
+
+        @Override
+        public void visit(final BodyTerm term) {
+            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            final List<String> names = new ArrayList<String>(knownLocales.size());
+            final StringBuilder tmp = new StringBuilder(FIELD_CONTENT_PREFIX); // 8
+            for (final Locale loc : knownLocales) {
+                tmp.setLength(8);
+                tmp.append(loc.getLanguage());
+                names.add(tmp.toString());
             }
-            queryBuilder.append(')');
-            return queryBuilder;
+            stringPattern(names, term.getPattern());
         }
-        if (searchTerm instanceof NOTTerm) {
-            final NOTTerm notTerm = (NOTTerm) searchTerm;
-            queryBuilder.append("NOT (");
-            queryBuilder.append(searchTerm2Query(notTerm.getPattern()));
-            queryBuilder.append(')');
-            return queryBuilder;
+
+        @Override
+        public void visit(final BooleanTerm term) {
+            throw new IllegalStateException("Unsupported search term: " + BooleanTerm.class.getName());
         }
-        final Object pattern = searchTerm.getPattern();
-        if (pattern instanceof String) {
-            final String sPattern = (String) pattern;
-            queryBuilder.append('(');
-            final List<String> names = getFieldNameFor(searchTerm);
-            queryBuilder.append(names.get(0)).append(':').append('"').append(sPattern).append('"');
-            for (int i = 1; i < names.size(); i++) {
-                queryBuilder.append(" OR ");
-                queryBuilder.append(names.get(i)).append(':').append('"').append(sPattern).append('"');
-            }
-            queryBuilder.append(')');
-            return queryBuilder;
+
+        @Override
+        public void visit(final CcTerm term) {
+            stringPattern(Arrays.asList(FIELD_CC_PERSONAL, FIELD_CC_ADDR), term.getPattern());
         }
-        /*
-         * Size term
-         */
-        if (searchTerm instanceof SizeTerm) {
-            final SizeTerm sizeTerm = (SizeTerm) searchTerm;
-            final ComparablePattern<Integer> comparablePattern = sizeTerm.getPattern();
-            switch (comparablePattern.getComparisonType()) {
-            case EQUALS:
-                return queryBuilder.append('(').append(FIELD_SIZE).append(':').append(comparablePattern.getPattern().intValue()).append(')');
-            case GREATER_THAN:
-                return queryBuilder.append('(').append(FIELD_SIZE).append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(
-                    " TO ").append(Integer.MAX_VALUE).append(']').append(')');
-            case LESS_THAN:
-                return queryBuilder.append('(').append(FIELD_SIZE).append(':').append('[').append(0).append(" TO ").append(
-                    comparablePattern.getPattern().intValue() - 1).append(']').append(')');
-            default:
-                throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
-            }
-        }
-        /*
-         * Flag term
-         */
-        if (searchTerm instanceof FlagTerm) {
-            final FlagTerm flagTerm = (FlagTerm) searchTerm;
-            int flags = flagTerm.getPattern().intValue();
+
+        @Override
+        public void visit(final FlagTerm term) {
+            int flags = term.getPattern().intValue();
             final boolean set = flags >= 0;
             if (!set) {
                 flags *= -1;
@@ -207,80 +180,151 @@ public final class SearchTerm2Query implements SolrConstants {
             }
             queryBuilder.delete(off, off + andConcat.length()); // Delete first >>" AND "<< prefix
             queryBuilder.append(')');
-
-            return queryBuilder;
         }
-        /*
-         * Date terms
-         */
-        boolean isRecDate;
-        if ((isRecDate = (searchTerm instanceof ReceivedDateTerm)) || (searchTerm instanceof SentDateTerm)) {
-            @SuppressWarnings("unchecked") final SearchTerm<ComparablePattern<java.util.Date>> dateTerm =
-                (SearchTerm<ComparablePattern<java.util.Date>>) searchTerm;
-            final ComparablePattern<Date> comparablePattern = dateTerm.getPattern();
+
+        @Override
+        public void visit(final FromTerm term) {
+            stringPattern(Arrays.asList(FIELD_FROM_PERSONAL, FIELD_FROM_ADDR), term.getPattern());
+        }
+
+        @Override
+        public void visit(final HeaderTerm term) {
+            throw new IllegalStateException("Unsupported search term: " + HeaderTerm.class.getName());
+        }
+
+        @Override
+        public void visit(final NOTTerm term) {
+            queryBuilder.append("NOT (");
+            queryBuilder.append(searchTerm2Query(term.getPattern()));
+            queryBuilder.append(')');
+        }
+
+        @Override
+        public void visit(final ORTerm term) {
+            final SearchTerm<?>[] terms = term.getPattern();
+            queryBuilder.append('(');
+            queryBuilder.append(searchTerm2Query(terms[0]));
+            for (int i = 1; i < terms.length; i++) {
+                queryBuilder.append(" OR ");
+                queryBuilder.append(searchTerm2Query(terms[i]));
+            }
+            queryBuilder.append(')');
+        }
+
+        @Override
+        public void visit(final ReceivedDateTerm term) {
+            final ComparablePattern<Date> comparablePattern = term.getPattern();
             final long time = comparablePattern.getPattern().getTime();
-            final String name = isRecDate ? FIELD_RECEIVED_DATE : FIELD_SENT_DATE;
+            final String name = FIELD_RECEIVED_DATE;
             switch (comparablePattern.getComparisonType()) {
             case EQUALS:
-                return queryBuilder.append('(').append(name).append(':').append(time).append(')');
+                queryBuilder.append('(').append(name).append(':').append(time).append(')');
+                break;
             case GREATER_THAN:
-                return queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(
+                queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(
                     ']').append(')');
+                break;
             case LESS_THAN:
-                return queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(
+                queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(
                     ']').append(')');
+                break;
             default:
                 throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
             }
         }
-        throw new IllegalStateException("Unknown search term: " + searchTerm.getClass().getName());
+
+        @Override
+        public void visit(final SentDateTerm term) {
+            final ComparablePattern<Date> comparablePattern = term.getPattern();
+            final long time = comparablePattern.getPattern().getTime();
+            final String name = FIELD_SENT_DATE;
+            switch (comparablePattern.getComparisonType()) {
+            case EQUALS:
+                queryBuilder.append('(').append(name).append(':').append(time).append(')');
+                break;
+            case GREATER_THAN:
+                queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(
+                    ']').append(')');
+                break;
+            case LESS_THAN:
+                queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(
+                    ']').append(')');
+                break;
+            default:
+                throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
+            }
+        }
+
+        @Override
+        public void visit(final SizeTerm term) {
+            final ComparablePattern<Integer> comparablePattern = term.getPattern();
+            switch (comparablePattern.getComparisonType()) {
+            case EQUALS:
+                queryBuilder.append('(').append(FIELD_SIZE).append(':').append(comparablePattern.getPattern().intValue()).append(')');
+                break;
+            case GREATER_THAN:
+                queryBuilder.append('(').append(FIELD_SIZE).append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(
+                    " TO ").append(Integer.MAX_VALUE).append(']').append(')');
+                break;
+            case LESS_THAN:
+                queryBuilder.append('(').append(FIELD_SIZE).append(':').append('[').append(0).append(" TO ").append(
+                    comparablePattern.getPattern().intValue() - 1).append(']').append(')');
+                break;
+            default:
+                throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
+            }
+        }
+
+        @Override
+        public void visit(final SubjectTerm term) {
+            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            final List<String> names = new ArrayList<String>(knownLocales.size());
+            final StringBuilder tmp = new StringBuilder(FIELD_SUBJECT_PREFIX); // 8
+            for (final Locale loc : knownLocales) {
+                tmp.setLength(8);
+                tmp.append(loc.getLanguage());
+                names.add(tmp.toString());
+            }
+            stringPattern(names, term.getPattern());
+        }
+
+        @Override
+        public void visit(final ToTerm term) {
+            stringPattern(Arrays.asList(FIELD_TO_PERSONAL, FIELD_TO_ADDR), term.getPattern());
+        }
+
+        private void stringPattern(final List<String> names, final String pattern) {
+            queryBuilder.append('(');
+            queryBuilder.append(names.get(0)).append(':').append('"').append(pattern).append('"');
+            for (int i = 1; i < names.size(); i++) {
+                queryBuilder.append(" OR ");
+                queryBuilder.append(names.get(i)).append(':').append('"').append(pattern).append('"');
+            }
+            queryBuilder.append(')');
+        }
+
     }
 
-    private static List<String> getFieldNameFor(final SearchTerm<?> searchTerm) {
-        if (searchTerm instanceof BccTerm) {
-            return Arrays.asList(FIELD_BCC_PERSONAL, FIELD_BCC_ADDR);
+    /**
+     * Initializes a new {@link SearchTerm2Query}.
+     */
+    private SearchTerm2Query() {
+        super();
+    }
+
+    /**
+     * Transforms specified search term to a query.
+     * 
+     * @param searchTerm The search term
+     * @return The resulting query
+     */
+    public static StringBuilder searchTerm2Query(final SearchTerm<?> searchTerm) {
+        if (null == searchTerm) {
+            return null;
         }
-        if (searchTerm instanceof BodyTerm) {
-            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
-            final List<String> names = new ArrayList<String>(knownLocales.size());
-            final StringBuilder tmp = new StringBuilder(FIELD_CONTENT_PREFIX); //8
-            for (final Locale loc : knownLocales) {
-                tmp.setLength(8);
-                tmp.append(loc.getLanguage());
-                names.add(tmp.toString());
-            }
-            return names;
-        }
-        if (searchTerm instanceof CcTerm) {
-            return Arrays.asList(FIELD_CC_PERSONAL, FIELD_CC_ADDR);
-        }
-        if (searchTerm instanceof FromTerm) {
-            return Arrays.asList(FIELD_FROM_PERSONAL, FIELD_FROM_ADDR);
-        }
-        if (searchTerm instanceof ReceivedDateTerm) {
-            return Arrays.asList(FIELD_RECEIVED_DATE);
-        }
-        if (searchTerm instanceof SentDateTerm) {
-            return Arrays.asList(FIELD_SENT_DATE);
-        }
-        if (searchTerm instanceof SizeTerm) {
-            return Arrays.asList(FIELD_SIZE);
-        }
-        if (searchTerm instanceof SubjectTerm) {
-            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
-            final List<String> names = new ArrayList<String>(knownLocales.size());
-            final StringBuilder tmp = new StringBuilder(FIELD_SUBJECT_PREFIX); //8
-            for (final Locale loc : knownLocales) {
-                tmp.setLength(8);
-                tmp.append(loc.getLanguage());
-                names.add(tmp.toString());
-            }
-            return names;
-        }
-        if (searchTerm instanceof ToTerm) {
-            return Arrays.asList(FIELD_TO_PERSONAL, FIELD_TO_ADDR);
-        }
-        throw new IllegalStateException("Unsupported search term: " + searchTerm.getClass().getName());
+        final SearchTerm2QueryVisitor visitor = new SearchTerm2QueryVisitor();
+        searchTerm.accept(visitor);
+        return visitor.queryBuilder;
     }
 
 }

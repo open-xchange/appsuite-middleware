@@ -65,6 +65,14 @@ public class CommonAllRequest extends AbstractAllRequest<CommonAllResponse> {
         super(servletPath, folderPath, columns, sort, order, failOnError);
     }
 
+    public CommonAllRequest(final String servletPath, final int folderId, final String alias, final int sort, final Order order, final boolean failOnError) {
+        super(servletPath, folderId, alias, sort, order, failOnError);
+    }
+
+    public CommonAllRequest(final String servletPath, final String folderPath, final String alias, final int sort, final Order order, final boolean failOnError) {
+        super(servletPath, folderPath, alias, sort, order, failOnError);
+    }
+
     @Override
     public CommonAllParser getParser() {
         return new CommonAllParser(isFailOnError(), getColumns());

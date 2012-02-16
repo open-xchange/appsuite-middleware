@@ -68,7 +68,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
@@ -205,7 +205,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
             if (bytes != null) {
                 String charset = getContentType().getCharsetParameter();
                 if (null == charset) {

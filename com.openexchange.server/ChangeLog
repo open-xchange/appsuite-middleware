@@ -1,3 +1,23 @@
+* 2012-02-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21565: Deny deletion of system folders
+
+* 201-02-15 - jan.bauerdick@open-xchange.com
+
+ - Added column-aliases "all" & "list" for taskrequests
+ - Added column-aliases "all" & "list" for appointmentrequests
+ - Added column-aliases "all" & "list" for contactrequests
+ - Removed required plugins in calendar, contacts & tasks JSON bundle
+
+* 2012-02-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21556: Using Java charset name for UTF8
+ - Fix for bug 21558: Dealing with non-ascii header values
+
+* 2012-02-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21537: Fixed generation of virtual Unified Mail identifiers
+
 * 2012-02-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 21532: Converting MS conditional commands to proper HTML comments

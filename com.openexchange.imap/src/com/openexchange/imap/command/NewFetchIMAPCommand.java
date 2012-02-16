@@ -77,12 +77,12 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -412,7 +412,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
              * Discard corrupt message
              */
             if (WARN) {
-                final OXException imapExc = MIMEMailException.handleMessagingException(e);
+                final OXException imapExc = MimeMailException.handleMessagingException(e);
                 LOG.warn(
                     new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(imapExc.getMessage()).toString(),
                     imapExc);
@@ -585,49 +585,49 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addFrom(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addFrom(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addTo(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addTo(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_CC, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addCc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addCc(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_BCC, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addBcc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                        mailMessage.addBcc(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.setDispositionNotification(MIMEMessageConverter.getAddressHeader(hdr.getValue())[0]);
+                        mailMessage.setDispositionNotification(MimeMessageConverter.getAddressHeader(hdr.getValue())[0]);
                     }
                 });
                 put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(MIMEMessageUtility.checkNonAscii(hdr.getValue())));
+                        mailMessage.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue())));
                     }
                 });
                 put(MessageHeaders.HDR_DATE, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        final MailDateFormat mdf = MIMEMessageUtility.getDefaultMailDateFormat();
+                        final MailDateFormat mdf = MimeMessageUtility.getDefaultMailDateFormat();
                         synchronized (mdf) {
                             try {
                                 mailMessage.setSentDate(mdf.parse(hdr.getValue()));
@@ -643,7 +643,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         final String value = hdr.getValue();
                         if (null != value) {
-                            mailMessage.setPriority(MIMEMessageConverter.parseImportance(value));
+                            mailMessage.setPriority(MimeMessageConverter.parseImportance(value));
                         }
                     }
                 });
@@ -652,7 +652,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         if (!mailMessage.containsPriority()) {
-                            mailMessage.setPriority(MIMEMessageConverter.parsePriority(hdr.getValue()));
+                            mailMessage.setPriority(MimeMessageConverter.parsePriority(hdr.getValue()));
                         }
                     }
                 });
@@ -901,7 +901,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
             msg.addHeader("In-Reply-To", env.inReplyTo);
             msg.addHeader("Message-Id", env.messageId);
-            msg.setSubject(MIMEMessageUtility.decodeEnvelopeSubject(env.subject));
+            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
         }
 
@@ -925,7 +925,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
             header = message.getHeader("Subject");
             if (null != header && header.length > 0) {
-                msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(header[0]));
+                msg.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(header[0]));
             }
             msg.setSentDate(message.getSentDate());
         }
@@ -975,10 +975,10 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 if (logger.isWarnEnabled()) {
                     logger.warn(e.getMessage(), e);
                 }
-                msg.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
-                msg.addHeader("Content-Type", MIMETypes.MIME_DEFAULT);
+                msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
+                msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
             }
-            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
+            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
         }
 
         @Override
@@ -999,7 +999,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             } else {
                 try {
                     final ContentType ct = new ContentType(contentType);
-                    msg.setHasAttachment(ct.startsWith("multipart/") && ("mixed".equalsIgnoreCase(ct.getSubType()) || MIMEMessageUtility.hasAttachments(
+                    msg.setHasAttachment(ct.startsWith("multipart/") && ("mixed".equalsIgnoreCase(ct.getSubType()) || MimeMessageUtility.hasAttachments(
                         (Multipart) message.getContent(),
                         ct.getSubType())));
                 } catch (final IOException e) {

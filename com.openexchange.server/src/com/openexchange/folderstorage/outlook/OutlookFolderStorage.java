@@ -124,11 +124,11 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingService;
@@ -1845,12 +1845,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                     accountSubfolderIDs = new ArrayList<String>(accounts.size());
                     for (final MailAccount mailAccount : accounts) {
                         if (!mailAccount.isDefaultAccount()) {
-                            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                            if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                                 /*
-                                 * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                                 * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                                  */
-                                final UnifiedINBOXManagement uim =
-                                    OutlookServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
+                                final UnifiedInboxManagement uim =
+                                    OutlookServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
                                 try {
                                     if (null != uim && uim.isEnabled(user.getId(), contextId)) {
                                         accountSubfolderIDs.add(MailFolderUtility.prepareFullname(
@@ -2143,7 +2143,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
-                    } else if (MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+                    } else if (MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }
@@ -2152,7 +2152,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
-                    } else if (MIMEMailExceptionCode.CONNECT_ERROR.equals(e)) {
+                    } else if (MimeMailExceptionCode.CONNECT_ERROR.equals(e)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }
@@ -2244,12 +2244,12 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
-            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
+                if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                     return 0;
                 }
                 return -1;
-            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            } else if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                 return 1;
             }
             if (o1.isDefaultAccount()) {

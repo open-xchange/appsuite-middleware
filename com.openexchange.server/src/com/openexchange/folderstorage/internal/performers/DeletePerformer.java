@@ -125,6 +125,9 @@ public final class DeletePerformer extends AbstractPerformer {
      * @throws OXException If an error occurs during deletion
      */
     public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws OXException {
+        if (!KNOWN_TREES.contains(treeId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
+        }
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -189,12 +192,7 @@ public final class DeletePerformer extends AbstractPerformer {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
         {
-            final Permission permission;
-            if (null == getSession()) {
-                permission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
-            } else {
-                permission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
-            }
+            final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
             if (!permission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     getFolderInfo4Error(folder),

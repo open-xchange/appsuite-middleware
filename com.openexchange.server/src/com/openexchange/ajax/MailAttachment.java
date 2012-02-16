@@ -76,7 +76,7 @@ import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
@@ -153,7 +153,7 @@ public class MailAttachment extends AJAXServlet {
             final File file = null;
             InputStream attachmentInputStream = null;
             try {
-                if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+                if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_HTM_ALL)) {
                     /*
                      * Apply filter
                      */

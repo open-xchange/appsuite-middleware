@@ -163,7 +163,7 @@ import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
@@ -512,8 +512,8 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateIDSequenceTable());
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         registerService(MailAccountStorageService.class, ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class));
-        // TODO: Register server's Unified INBOX management here until its encapsulated in an own bundle
-        registerService(UnifiedINBOXManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class));
+        // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
+        registerService(UnifiedInboxManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class));
         // Register ID generator
         registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
         /*

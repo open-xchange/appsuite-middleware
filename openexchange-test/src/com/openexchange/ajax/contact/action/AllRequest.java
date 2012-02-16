@@ -53,48 +53,55 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
+import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
  * Contains the data for an contact all request.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:ben.pahne@open-xchange.org">Ben Pahne</a>
  */
 public class AllRequest extends CommonAllRequest {
 
-    public static final int[] GUI_COLUMNS = new int[] {
-        Contact.OBJECT_ID,
-        Contact.FOLDER_ID
-    };
+    public static final int[] GUI_COLUMNS = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
 
     public static final int GUI_SORT = Contact.SUR_NAME;
 
     public static final Order GUI_ORDER = Order.ASCENDING;
 
-	private String collation;
+    private String collation;
 
     /**
      * Default constructor.
      */
     public AllRequest(final int folderId, final int[] columns) {
-        super(AbstractContactRequest.URL, folderId, addGUIColumns(columns),
-            0, null, true);
+        super(AbstractContactRequest.URL, folderId, addGUIColumns(columns), 0, null, true);
     }
 
-    public AllRequest(final int folderId, final int[] columns, int orderBy, Order order, String collation) {
+    public AllRequest(final int folderId, final int[] columns, final int orderBy, final Order order, final String collation) {
         super(AbstractContactRequest.URL, folderId, addGUIColumns(columns), orderBy, order, true);
         this.collation = collation;
     }
 
-	@Override
-	public Parameter[] getParameters() {
-		Parameter[] params = super.getParameters();
-		return Arrays.add(params, new Parameter(AJAXServlet.PARAMETER_COLLATION, collation));
-	}
+    public AllRequest(final int folderId, final String alias) {
+        super(AbstractContactRequest.URL, folderId, alias, 0, null, true);
+    }
 
-	private static int[] addGUIColumns(final int[] columns) {
+    public AllRequest(final int folderId, final String alias, final int orderBy, final Order order, final String collation) {
+        super(AbstractContactRequest.URL, folderId, alias, orderBy, order, true);
+        this.collation = collation;
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        final Parameter[] params = super.getParameters();
+        return Arrays.add(params, new Parameter(AJAXServlet.PARAMETER_COLLATION, collation));
+    }
+
+    private static int[] addGUIColumns(final int[] columns) {
         final List<Integer> list = new ArrayList<Integer>();
         for (int i = 0; i < columns.length; i++) {
             list.add(Integer.valueOf(columns[i]));
@@ -118,6 +125,16 @@ public class AllRequest extends CommonAllRequest {
      */
     @Override
     public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+        if (getColumns() != null) {
+            return new AllParser(isFailOnError(), getColumns());
+        } else {
+            if (getAlias().equals("all")) {
+                return new AllParser(isFailOnError(), ContactAction.COLUMNS_ALIAS_ALL);
+            }
+            if (getAlias().equals("list")) {
+                return new AllParser(isFailOnError(), ContactAction.COLUMNS_ALIAS_LIST);
+            }
+        }
+        return null;
     }
 }

@@ -65,7 +65,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -113,7 +113,7 @@ public final class EditAction extends AbstractMailAction {
                 try {
                     from = MessageParser.getFromField(jsonMailObj)[0];
                 } catch (final AddressException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
                 int accountId = resolveFrom2Account(session, from, false, true);
                 /*

@@ -320,8 +320,8 @@ public final class InternalList {
      * All this tasks should extend {@link UpdateTaskAdapter} to fulfill the prerequisites to be sorted among their dependencies.
      */
     private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
-        // Renames "Unified INBOX" to "Unified Mail"
-        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
+        // Renames "Unified Mail" to "Unified Mail"
+        new com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask(),
 
         // Creates necessary tables for mail header cache
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),

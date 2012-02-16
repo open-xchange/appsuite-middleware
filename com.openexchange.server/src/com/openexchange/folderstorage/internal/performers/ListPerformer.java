@@ -230,12 +230,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Check folder permission for parent folder
                  */
-                final Permission parentPermission;
-                if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(parent, getUser(), getContext(), getAllowedContentTypes());
-                } else {
-                    parentPermission = CalculatePermission.calculate(parent, getSession(), getAllowedContentTypes());
-                }
+                final Permission parentPermission = CalculatePermission.calculate(parent, this, getAllowedContentTypes());
                 if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         getFolderInfo4Error(parent),
@@ -301,6 +296,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
                     paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
                 }
+                final AbstractPerformer performer = this;
                 int taskCount = 0;
                 for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
                     final FolderStorage tmp = entry.getKey();
@@ -363,13 +359,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                          * Check for subscribed status dependent on parameter "all"
                                          */
                                         if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                            final Permission userPermission;
-                                            if (null == getSession()) {
-                                                userPermission =
-                                                    CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                            } else {
-                                                userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                            }
+                                            final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                             if (userPermission.isVisible()) {
                                                 subfolders[index] =
                                                     getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
@@ -389,13 +379,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                              * Check for subscribed status dependent on parameter "all"
                                              */
                                             if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                                final Permission userPermission;
-                                                if (null == getSession()) {
-                                                    userPermission =
-                                                        CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                                } else {
-                                                    userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                                }
+                                                final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                                 if (userPermission.isVisible()) {
                                                     subfolders[index] =
                                                         getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
@@ -578,6 +562,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
             paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
         }
+        final AbstractPerformer performer = this;
         int taskCount = 0;
         for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();
@@ -637,13 +622,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                  * Check for subscribed status dependent on parameter "all"
                                  */
                                 if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                    final Permission userPermission;
-                                    if (null == getSession()) {
-                                        userPermission =
-                                            CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                    } else {
-                                        userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                    }
+                                    final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                     if (userPermission.isVisible()) {
                                         subfolders[index] =
                                             getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
@@ -664,14 +643,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                          * Check for subscribed status dependent on parameter "all"
                                          */
                                         if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                            final Permission userPermission;
-                                            if (null == getSession()) {
-                                                userPermission =
-                                                    CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                            } else {
-                                                userPermission =
-                                                    CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                            }
+                                            final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                             if (userPermission.isVisible()) {
                                                 subfolders[index] =
                                                     getUserizedFolder(

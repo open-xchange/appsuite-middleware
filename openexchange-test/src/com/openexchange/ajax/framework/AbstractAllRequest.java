@@ -66,6 +66,8 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
 
     protected final int[] columns;
 
+    protected final String alias;
+
     protected final int sort;
 
     protected final Order order;
@@ -81,6 +83,18 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         this.servletPath = servletPath;
         this.folderId = String.valueOf(folderId);
         this.columns = columns;
+        this.alias = null;
+        this.sort = sort;
+        this.order = order;
+        this.failOnError = failOnError;
+    }
+
+    public AbstractAllRequest(final String servletPath, final int folderId, final String alias, final int sort, final Order order, final boolean failOnError) {
+        super();
+        this.servletPath = servletPath;
+        this.folderId = String.valueOf(folderId);
+        this.columns = null;
+        this.alias = alias;
         this.sort = sort;
         this.order = order;
         this.failOnError = failOnError;
@@ -91,6 +105,18 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         this.servletPath = servletPath;
         this.folderId = folderPath;
         this.columns = columns;
+        this.alias = null;
+        this.sort = sort;
+        this.order = order;
+        this.failOnError = failOnError;
+    }
+
+    public AbstractAllRequest(final String servletPath, final String folderPath, final String alias, final int sort, final Order order, final boolean failOnError) {
+        super();
+        this.servletPath = servletPath;
+        this.folderId = folderPath;
+        this.columns = null;
+        this.alias = alias;
         this.sort = sort;
         this.order = order;
         this.failOnError = failOnError;
@@ -121,7 +147,12 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (columns != null) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        }
+        if (alias != null) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, alias));
+        }
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
@@ -138,6 +169,10 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
 
     public int[] getColumns() {
         return columns;
+    }
+
+    public String getAlias() {
+        return alias;
     }
 
     protected boolean isFailOnError() {

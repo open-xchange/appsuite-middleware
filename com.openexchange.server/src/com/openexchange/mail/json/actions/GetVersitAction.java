@@ -67,7 +67,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -113,8 +113,8 @@ public final class GetVersitAction extends AbstractMailAction {
                  */
                 final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                 final List<CommonObject> retvalList = new ArrayList<CommonObject>();
-                if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
-                    MIMETypes.MIME_TEXT_VCARD)) {
+                if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
+                    MimeTypes.MIME_TEXT_VCARD)) {
                     /*
                      * Save VCard
                      */
@@ -125,8 +125,8 @@ public final class GetVersitAction extends AbstractMailAction {
                         retvalList,
                         session,
                         ctx);
-                } else if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
-                    MIMETypes.MIME_TEXT_CALENDAR)) {
+                } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
+                    MimeTypes.MIME_TEXT_CALENDAR)) {
                     /*
                      * Save ICalendar
                      */

@@ -89,5 +89,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.importexport"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.osgi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jslob"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contacts.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tasks.json"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

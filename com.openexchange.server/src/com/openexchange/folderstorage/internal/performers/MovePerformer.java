@@ -228,11 +228,7 @@ final class MovePerformer extends AbstractPerformer {
             {
                 final Folder rootFolder = realStorage.getFolder(realTreeId, rootId, storageParameters);
                 final List<ContentType> contentTypes = Collections.<ContentType> emptyList();
-                if (null == getSession()) {
-                    rootPermission = CalculatePermission.calculate(rootFolder, getUser(), getContext(), contentTypes);
-                } else {
-                    rootPermission = CalculatePermission.calculate(rootFolder, getSession(), contentTypes);
-                }
+                rootPermission = CalculatePermission.calculate(rootFolder, this, contentTypes);
             }
             if (rootPermission.getFolderPermission() >= Permission.CREATE_SUB_FOLDERS) {
                 /*
@@ -479,13 +475,7 @@ final class MovePerformer extends AbstractPerformer {
     }
 
     private Permission effectivePermission(final Folder f) throws OXException {
-        final Permission permission;
-        if (null == session) {
-            permission = CalculatePermission.calculate(f, getUser(), getContext(), ALL_ALLOWED);
-        } else {
-            permission = CalculatePermission.calculate(f, getSession(), ALL_ALLOWED);
-        }
-        return permission;
+        return CalculatePermission.calculate(f, this, ALL_ALLOWED);
     }
 
     private static boolean containsAny(final String treeId, final FolderInfo folderInfo, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {

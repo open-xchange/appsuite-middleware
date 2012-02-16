@@ -74,11 +74,11 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -134,7 +134,7 @@ public final class NewAction extends AbstractMailAction {
                     try {
                         from = MessageParser.getFromField(jsonMailObj)[0];
                     } catch (final AddressException e) {
-                        throw MIMEMailException.handleMessagingException(e);
+                        throw MimeMailException.handleMessagingException(e);
                     }
                     int accountId;
                     try {
@@ -220,7 +220,7 @@ public final class NewAction extends AbstractMailAction {
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
             final PutNewMailData data;
             {
-                final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
+                final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
                 final MailMessage mail;
@@ -228,10 +228,10 @@ public final class NewAction extends AbstractMailAction {
                     // Add from address
                     fromAddress = defaultSendAddr;
                     message.setFrom(fromAddress);
-                    mail = MIMEMessageConverter.convertMessage(message);
+                    mail = MimeMessageConverter.convertMessage(message);
                 } else {
                     fromAddress = new QuotedInternetAddress(fromAddr, true);
-                    mail = MIMEMessageConverter.convertMessage(message);
+                    mail = MimeMessageConverter.convertMessage(message);
                 }
                 data = new PutNewMailData() {
 
@@ -270,7 +270,7 @@ public final class NewAction extends AbstractMailAction {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

@@ -5,7 +5,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 
 /**
  * {@link OXExceptionCode} - The POP3 error codes.
@@ -222,15 +222,15 @@ public enum POP3ExceptionCode implements OXExceptionCode {
     /**
      * Mail folder could not be found: %1$s.
      */
-    FOLDER_NOT_FOUND(MIMEMailExceptionCode.FOLDER_NOT_FOUND),
+    FOLDER_NOT_FOUND(MimeMailExceptionCode.FOLDER_NOT_FOUND),
     /**
      * An attempt was made to open a read-only folder with read-write: %1$s
      */
-    READ_ONLY_FOLDER(MIMEMailExceptionCode.READ_ONLY_FOLDER),
+    READ_ONLY_FOLDER(MimeMailExceptionCode.READ_ONLY_FOLDER),
     /**
      * Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s.
      */
-    CONNECT_ERROR(MIMEMailExceptionCode.CONNECT_ERROR),
+    CONNECT_ERROR(MimeMailExceptionCode.CONNECT_ERROR),
     /**
      * POP3 does not support to move folders.
      */
@@ -357,7 +357,7 @@ public enum POP3ExceptionCode implements OXExceptionCode {
         prefix = code.getPrefix();
     }
 
-    private POP3ExceptionCode(final MIMEMailExceptionCode code) {
+    private POP3ExceptionCode(final MimeMailExceptionCode code) {
         message = code.getMessage();
         detailNumber = code.getNumber();
         category = code.getCategory();

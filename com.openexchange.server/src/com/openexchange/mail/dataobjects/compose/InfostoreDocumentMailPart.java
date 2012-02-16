@@ -65,7 +65,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -106,7 +106,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             final File fileMetadata = fileAccess.getFileMetadata(documentId, FileStorageFileAccess.CURRENT_VERSION);
             setSize(fileMetadata.getFileSize());
             final String docMIMEType = fileMetadata.getFileMIMEType();
-            setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MIMETypes.MIME_APPL_OCTET : fileMetadata.getFileMIMEType());
+            setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MimeTypes.MIME_APPL_OCTET : fileMetadata.getFileMIMEType());
             try {
                 setFileName(MimeUtility.encodeText(fileMetadata.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
             } catch (final UnsupportedEncodingException e) {

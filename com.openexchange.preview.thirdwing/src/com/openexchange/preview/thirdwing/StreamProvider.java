@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -134,7 +134,7 @@ public class StreamProvider implements IStreamProvider {
             final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
             final File tempFile = fileManagement.newTempFile("open-xchange", extension);
             final FileOutputStream fos = new FileOutputStream(tempFile);
-            final String mimeType = MIMEType2ExtMap.getContentType(fileName);
+            final String mimeType = MimeType2ExtMap.getContentType(fileName);
             final ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
             managedFile.setContentType(mimeType);
             managedFile.setFileName(fileName);

@@ -51,7 +51,7 @@ package com.openexchange.mail.mime;
 
 import java.util.Locale;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link PlainTextAddress} - A plain text internet address without a personal part.
@@ -91,7 +91,7 @@ public final class PlainTextAddress extends InternetAddress {
      * @param address The plain text address
      */
     public PlainTextAddress(final String address) {
-        this.address = MIMEMessageUtility.decodeMultiEncodedHeader(address);
+        this.address = MimeMessageUtility.decodeMultiEncodedHeader(address);
         hashCode = address.toLowerCase(Locale.ENGLISH).hashCode();
     }
 
@@ -131,7 +131,7 @@ public final class PlainTextAddress extends InternetAddress {
 
     @Override
     public String toUnicodeString() {
-        return MIMEMessageUtility.decodeMultiEncodedHeader(address);
+        return MimeMessageUtility.decodeMultiEncodedHeader(address);
     }
 
 }

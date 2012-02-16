@@ -52,7 +52,7 @@ package com.openexchange.mail;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -119,7 +119,7 @@ public final class MailBugfixTest extends AbstractMailTest {
 	 */
 	public void testBug12357() {
 		try {
-			final MailMessage mail = MIMEMessageConverter.convertMessage(MAIL_BYTES);
+			final MailMessage mail = MimeMessageConverter.convertMessage(MAIL_BYTES);
 
 			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
