@@ -94,12 +94,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAction.class));
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     private final ServiceLookup services;
+
+    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 600, 601 };
+
+    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 };
 
     /**
      * Initializes a new {@link AbstractMailAction}.
@@ -318,8 +321,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
          */
         int accountId;
         try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
             final int user = session.getUserId();
             final int cid = session.getContextId();
             if (null == from) {
@@ -372,8 +376,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
         try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
             return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
         } catch (final OXException e) {
             throw new OXException(e);

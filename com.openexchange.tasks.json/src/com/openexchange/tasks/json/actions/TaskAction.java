@@ -80,9 +80,9 @@ import com.openexchange.user.UserService;
 
 public abstract class TaskAction implements AJAXActionService {
 
-    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 20, 1, 5, 200, 220 };
+    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 20, 1, 2, 5, 4 };
 
-    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 20, 1, 5 };
+    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102 };
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 

@@ -517,7 +517,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
                 if (cdao.containsRecurrenceID()) {
                     cdao.setRecurrenceCalculator(setInt(i++, load_resultset));
-                    cdao.setRecurrencePosition(setInt(i++, load_resultset));
+                    int recurrencePosition = setInt(i++, load_resultset);
+                    if (recurrencePosition != 0) {
+                        cdao.setRecurrencePosition(recurrencePosition);
+                    }
                     cdao.setRecurrence(setString(i++, load_resultset));
                     cdao.setDelExceptions(setString(i++, load_resultset));
                     cdao.setExceptions(setString(i++, load_resultset));

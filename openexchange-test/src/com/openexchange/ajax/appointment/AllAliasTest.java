@@ -60,7 +60,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.container.Appointment;
 
-
 /**
  * {@link AllAliasTest}
  *
@@ -69,10 +68,12 @@ import com.openexchange.groupware.container.Appointment;
 public class AllAliasTest extends AppointmentTest {
 
     private Appointment appointment;
+
     private AJAXClient client;
 
     /**
      * Initializes a new {@link AllAliasTest}.
+     *
      * @param name
      */
     public AllAliasTest(final String name) {
@@ -103,11 +104,17 @@ public class AllAliasTest extends AppointmentTest {
     }
 
     public void testAllAlias() throws Exception {
-        final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), "all", new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
+        final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), "all", new Date(0), new Date(
+            Long.MAX_VALUE), client.getValues().getTimeZone());
         final CommonAllResponse allAliasResponse = client.execute(allAliasRequest);
         final Object[][] aliasAppointments = allAliasResponse.getArray();
 
-        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), new int[] {1,20,207,201}, new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
+        final AllRequest allRequest = new AllRequest(
+            client.getValues().getPrivateAppointmentFolder(),
+            new int[] { 1, 20, 207, 206, 2 },
+            new Date(0),
+            new Date(Long.MAX_VALUE),
+            client.getValues().getTimeZone());
         final CommonAllResponse allResponse = client.execute(allRequest);
         final Object[][] appointments = allResponse.getArray();
 
