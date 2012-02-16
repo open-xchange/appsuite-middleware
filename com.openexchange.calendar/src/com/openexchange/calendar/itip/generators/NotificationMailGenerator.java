@@ -58,6 +58,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -84,6 +86,7 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
+import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -886,7 +889,11 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             // This is a counter proposal
 
             if (participant.hasRole(ITipRole.ORGANIZER)) {
-                return counter(counter(participant), ITipRole.ORGANIZER);
+            	if (isCounterableOnly()) {
+                    return counter(counter(participant), ITipRole.ORGANIZER);
+            	} else {
+                    return counter(noITIP(participant, Type.MODIFIED), ITipRole.ORGANIZER);
+            	}
             }
             if (!participant.isExternal()) {
                 return counter(noITIP(participant, getStateTypeForStatus(confirmStatus)), ITipRole.ATTENDEE);
@@ -894,7 +901,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return null;
         }
 
-        protected boolean onlyMyStateChanged() {
+        protected boolean isCounterableOnly() {
+        	if (diff == null) {
+        		return false;
+        	}
+        	
+        	return diff.onlyTheseChanged(AppointmentFields.START_DATE,  AppointmentFields.END_DATE,  AppointmentFields.LOCATION,  AppointmentFields.TITLE);
+		}
+
+		protected boolean onlyMyStateChanged() {
             if (stateChanged != null) {
                 return stateChanged;
             }
@@ -1003,7 +1018,11 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 // This is a update on behalf of the organizer
 
                 if (participant.hasRole(ITipRole.ORGANIZER)) {
-                    return update(counter(participant));
+                	if (isCounterableOnly()) {
+                        return update(counter(participant));
+                	} else {
+                        return update(noITIP(participant, Type.MODIFIED));
+                	}
                 }
                 if (!participant.isExternal()) {
                     return update(noITIP(participant, State.Type.MODIFIED));

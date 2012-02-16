@@ -53,11 +53,11 @@ import java.sql.Connection;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link UnifiedINBOXManagement} - Management for Unified Mail accounts.
+ * {@link UnifiedInboxManagement} - Management for Unified Mail accounts.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface UnifiedINBOXManagement {
+public interface UnifiedInboxManagement {
 
     /**
      * The Unified Mail protocol name.

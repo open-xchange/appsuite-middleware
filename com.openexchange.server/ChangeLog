@@ -1,3 +1,7 @@
+* 2012-02-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21565: Deny deletion of system folders
+
 * 201-02-15 - jan.bauerdick@open-xchange.com
 
  - Added column-aliases "all" & "list" for taskrequests

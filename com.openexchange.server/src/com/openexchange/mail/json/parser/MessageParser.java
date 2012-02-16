@@ -115,7 +115,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -962,8 +962,8 @@ public final class MessageParser {
 
     private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws OXException {
         try {
-            final UnifiedINBOXManagement unifiedINBOXManagement =
-                ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+            final UnifiedInboxManagement unifiedINBOXManagement =
+                ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
             if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(
                 session.getUserId(),
                 session.getContextId())) {

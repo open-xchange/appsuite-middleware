@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -72,6 +73,8 @@ public final class HttpSessionManagement {
 
     private static volatile ScheduledTimerTask sessionRemover;
 
+    private static volatile int maxActiveSessions = -1;
+
     /**
      * Initializes HTTP session management
      */
@@ -79,6 +82,8 @@ public final class HttpSessionManagement {
         synchronized (HttpSessionManagement.class) {
             if (null == sessions) {
                 sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
+                final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                maxActiveSessions = null == service ? -1 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", -1);
                 final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
                     sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(sessions), 300000, 300000); // Every 5 minutes
@@ -95,6 +100,7 @@ public final class HttpSessionManagement {
             if (null != sessions) {
                 sessions.clear();
                 sessions = null;
+                maxActiveSessions = -1;
                 sessionRemover.cancel(false);
                 final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
@@ -128,8 +134,15 @@ public final class HttpSessionManagement {
      * Puts specified HTTP session into this management
      *
      * @param httpSession The HTTP session to add
+     * @throws IllegalStateException If max. number of HTTP session is exceeded
      */
     public static void putHttpSession(final HttpSessionWrapper httpSession) {
+        final int max = maxActiveSessions;
+        if (max > 0 && sessions.size() >= max) {
+            final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+            LOG.warn(message);
+            throw new IllegalStateException(message);
+        }
         sessions.put(httpSession.getId(), httpSession);
     }
 
@@ -158,16 +171,23 @@ public final class HttpSessionManagement {
      *
      * @param uniqueId The unique ID to apply to HTTP session
      * @return The new HTTP session
+     * @throws IllegalStateException If max. number of HTTP session is exceeded
      */
     public static HttpSession createAndGetHttpSession(final String uniqueId) {
         final HttpSessionWrapper httpSession;
-        final Map<String, HttpSessionWrapper> sessionMap = sessions;
-        if (sessionMap.containsKey(uniqueId)) {
-            httpSession = sessionMap.get(uniqueId);
+        final Map<String, HttpSessionWrapper> sessions = HttpSessionManagement.sessions;
+        if (sessions.containsKey(uniqueId)) {
+            httpSession = sessions.get(uniqueId);
             httpSession.touch(); // Touch last-accessed time stamp
         } else {
             httpSession = new HttpSessionWrapper(uniqueId);
-            sessionMap.put(uniqueId, httpSession);
+            final int max = maxActiveSessions;
+            if (max > 0 && sessions.size() >= max) {
+                final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+                LOG.warn(message);
+                throw new IllegalStateException(message);
+            }
+            sessions.put(uniqueId, httpSession);
         }
         return httpSession;
     }
@@ -176,19 +196,28 @@ public final class HttpSessionManagement {
      * Creates a new HTTP session with given unique ID
      *
      * @param uniqueId The unique ID to apply to HTTP session
+     * @throws IllegalStateException If max. number of HTTP session is exceeded
      */
     public static void createHttpSession(final String uniqueId) {
-        final Map<String, HttpSessionWrapper> sessionMap = sessions;
-        HttpSessionWrapper httpSession = sessionMap.get(uniqueId);
+        final Map<String, HttpSessionWrapper> sessions = HttpSessionManagement.sessions;
+        HttpSessionWrapper httpSession = sessions.get(uniqueId);
         if (null != httpSession) {
             return;
         }
         httpSession = new HttpSessionWrapper(uniqueId);
-        sessionMap.put(uniqueId, httpSession);
+        final int max = maxActiveSessions;
+        if (max > 0 && sessions.size() >= max) {
+            final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+            LOG.warn(message);
+            throw new IllegalStateException(message);
+        }
+        sessions.put(uniqueId, httpSession);
     }
 
     /**
      * Creates a new HTTP session
+     * 
+     * @throws IllegalStateException If max. number of HTTP session is exceeded
      */
     public static void createHttpSession() {
         createHttpSession(getNewUniqueId());
@@ -265,8 +294,8 @@ public final class HttpSessionManagement {
         @Override
         public void run() {
             try {
-                for (final Iterator<Map.Entry<String, HttpSessionWrapper>> iter = sessionsMap.entrySet().iterator(); iter.hasNext();) {
-                    final HttpSessionWrapper session = iter.next().getValue();
+                for (final Iterator<HttpSessionWrapper> iter = sessionsMap.values().iterator(); iter.hasNext();) {
+                    final HttpSessionWrapper session = iter.next();
                     if (isHttpSessionExpired(session)) {
                         session.invalidate();
                         iter.remove();

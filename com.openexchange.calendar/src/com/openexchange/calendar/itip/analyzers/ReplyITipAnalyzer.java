@@ -142,7 +142,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 					update, original, message.getMethod(), message);
 			if (participantChange != null) {
 				participantChange.setComment(message.getComment());
-
+			}
+			if (participantChange != null || message.getMethod() == ITipMethod.COUNTER) {
 				ITipChange change = new ITipChange();
 				change.setNewAppointment(update);
 				change.setCurrentAppointment(original);
@@ -242,18 +243,17 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			}
 			
 			String stateChange = "";
-			switch (newStatus) {
-			case ACCEPT: stateChange = Messages.ACCEPTED; break;
-			case DECLINE: stateChange = Messages.DECLINED; break;
-			case TENTATIVE: stateChange = Messages.TENTATIVELY_ACCEPTED; break;
-			}
-			
-			
-			change.setIntroduction(new Sentence(Messages.COUNTER_REPLY_INTRO)
+			if (newStatus != null) {
+				switch (newStatus) {
+				case ACCEPT: stateChange = Messages.ACCEPTED; break;
+				case DECLINE: stateChange = Messages.DECLINED; break;
+				case TENTATIVE: stateChange = Messages.TENTATIVELY_ACCEPTED; break;
+				}
+				change.setIntroduction(new Sentence(Messages.COUNTER_REPLY_INTRO)
 				.add(displayName, ArgumentType.PARTICIPANT)
 				.add(stateChange, ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
-
-
+			}
+			
 			Style style = Style.ASK;
 			ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
 					new Details(style));
@@ -333,22 +333,24 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				if (participant instanceof UserParticipant) {
 					UserParticipant up = (UserParticipant) participant;
 					Participant[] participants2 = update.getParticipants();
-					for (Participant participant2 : participants2) {
-						if (participant2 instanceof UserParticipant) {
-							UserParticipant up2 = (UserParticipant) participant2;
-							if (up2.getIdentifier() == up.getIdentifier()) {
-								UserParticipant nup = new UserParticipant(
-										up.getIdentifier());
-								nup.setConfirm(up2.getConfirm());
-								nup.setConfirmMessage(up2.getConfirmMessage());
+					if (participants2 != null) {
+						for (Participant participant2 : participants2) {
+							if (participant2 instanceof UserParticipant) {
+								UserParticipant up2 = (UserParticipant) participant2;
+								if (up2.getIdentifier() == up.getIdentifier()) {
+									UserParticipant nup = new UserParticipant(
+											up.getIdentifier());
+									nup.setConfirm(up2.getConfirm());
+									nup.setConfirmMessage(up2.getConfirmMessage());
 
-								pChange.setComment(up2.getConfirmMessage());
-								pChange.setConfirmStatusUpdate(ConfirmStatus
-										.byId(up2.getConfirm()));
+									pChange.setComment(up2.getConfirmMessage());
+									pChange.setConfirmStatusUpdate(ConfirmStatus
+											.byId(up2.getConfirm()));
 
-								newParticipants.add(nup);
-								added = true;
-								noChange = false;
+									newParticipants.add(nup);
+									added = true;
+									noChange = false;
+								}
 							}
 						}
 					}
@@ -477,23 +479,25 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 					ExternalUserParticipant ep = (ExternalUserParticipant) participant;
 					ConfirmableParticipant[] participants2 = update.getConfirmations();
 					if (confirmations != null) {
-						for (ConfirmableParticipant	 participant2 : participants2) {
-							if (participant2 instanceof ExternalUserParticipant) {
-								ExternalUserParticipant ep2 = (ExternalUserParticipant) participant2;
-								if (ep2.getEmailAddress().equalsIgnoreCase(
-										ep.getEmailAddress())) {
-									ExternalUserParticipant nup = new ExternalUserParticipant(
-											ep.getEmailAddress());
-									nup.setStatus(ep2.getStatus());
-									nup.setMessage(ep2.getMessage());
+						if (participants2 != null) {
+							for (ConfirmableParticipant	 participant2 : participants2) {
+								if (participant2 instanceof ExternalUserParticipant) {
+									ExternalUserParticipant ep2 = (ExternalUserParticipant) participant2;
+									if (ep2.getEmailAddress().equalsIgnoreCase(
+											ep.getEmailAddress())) {
+										ExternalUserParticipant nup = new ExternalUserParticipant(
+												ep.getEmailAddress());
+										nup.setStatus(ep2.getStatus());
+										nup.setMessage(ep2.getMessage());
 
-									pChange.setComment(ep2.getMessage());
-									pChange.setConfirmStatusUpdate(ConfirmStatus
-											.byId(ep2.getConfirm()));
+										pChange.setComment(ep2.getMessage());
+										pChange.setConfirmStatusUpdate(ConfirmStatus
+												.byId(ep2.getConfirm()));
 
-									newConfirmations.add(nup);
-									noChange = false;
-									added = true;
+										newConfirmations.add(nup);
+										noChange = false;
+										added = true;
+									}
 								}
 							}
 						}

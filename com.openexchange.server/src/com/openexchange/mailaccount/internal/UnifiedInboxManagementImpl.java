@@ -65,26 +65,26 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedINBOXManagementImpl} - The Unified Mail management implementation.
+ * {@link UnifiedInboxManagementImpl} - The Unified Mail management implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement {
+public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement {
 
     private static final String SQL_CHECK = "SELECT url FROM user_mail_account WHERE cid = ? AND user = ? AND name = ?";
 
     private static final String SQL_ENABLED = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND unified_inbox > 0";
 
     /**
-     * Initializes a new {@link UnifiedINBOXManagementImpl}.
+     * Initializes a new {@link UnifiedInboxManagementImpl}.
      */
-    public UnifiedINBOXManagementImpl() {
+    public UnifiedInboxManagementImpl() {
         super();
     }
 
@@ -163,7 +163,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             int id = -1;
             for (int i = 0; i < existingAccounts.length && id < 0; i++) {
                 final MailAccount mailAccount = existingAccounts[i];
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                     id = mailAccount.getId();
                 }
             }
@@ -202,7 +202,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             rs = stmt.executeQuery();
             while (rs.next()) {
                 final String url = rs.getString(1);
-                if (!rs.wasNull() && url != null && url.startsWith(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX, 0)) {
+                if (!rs.wasNull() && url != null && url.startsWith(UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX, 0)) {
                     return true;
                 }
             }
@@ -265,7 +265,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             ResultSet rs = null;
             try {
                 stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = 1337 AND user = 17 AND url LIKE ?");
-                stmt.setString(1, UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX + '%');
+                stmt.setString(1, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
                 rs = stmt.executeQuery();
                 return rs.next() ? rs.getInt(1) : -1;
             } catch (final SQLException e) {

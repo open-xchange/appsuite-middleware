@@ -2315,13 +2315,13 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(checkNonAscii(valueArr[0]));
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
-                sb.append(delimiter).append(checkNonAscii(valueArr[i]));
+                sb.append(delimiter).append(valueArr[i]);
             }
             values = sb.toString();
         } else {
-            values = checkNonAscii(valueArr[0]);
+            values = valueArr[0];
         }
         return decodeMultiEncodedHeader(values);
     }
