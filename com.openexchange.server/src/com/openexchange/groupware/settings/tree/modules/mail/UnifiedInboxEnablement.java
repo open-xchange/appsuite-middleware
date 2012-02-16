@@ -55,22 +55,22 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link UnifiedINBOXEnablement}
+ * {@link UnifiedInboxEnablement}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnifiedINBOXEnablement implements PreferencesItemService {
+public class UnifiedInboxEnablement implements PreferencesItemService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXEnablement.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxEnablement.class));
 
     /**
      * Default constructor.
      */
-    public UnifiedINBOXEnablement() {
+    public UnifiedInboxEnablement() {
         super();
     }
 
@@ -96,9 +96,9 @@ public class UnifiedINBOXEnablement implements PreferencesItemService {
 
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
-                final UnifiedINBOXManagement management;
+                final UnifiedInboxManagement management;
                 try {
-                    management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class, true);
+                    management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -116,9 +116,9 @@ public class UnifiedINBOXEnablement implements PreferencesItemService {
             @Override
             protected void setValue(final UserSettingMail settings, final String value) {
                 final boolean enable = Boolean.parseBoolean(value);
-                final UnifiedINBOXManagement management;
+                final UnifiedInboxManagement management;
                 try {
-                    management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class, true);
+                    management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(

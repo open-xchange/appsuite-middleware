@@ -53,7 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 
 /**
  * {@link RemoveAfterAccessFolder} - A folder which is removed from cache (if elapsed) after it was accessed.
@@ -68,7 +68,7 @@ public interface RemoveAfterAccessFolder extends Folder {
     /**
      * Set of ignorable mail protocol identifiers.
      */
-    public static final Set<String> IGNORABLES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("pop3", UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX)));
+    public static final Set<String> IGNORABLES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("pop3", UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX)));
 
     /**
      * Whether to load subfolders.

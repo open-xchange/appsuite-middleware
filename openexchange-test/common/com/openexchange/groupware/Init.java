@@ -141,7 +141,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
@@ -624,7 +624,7 @@ public final class Init {
             imapServiceRegistry.addService(CacheService.class, services.get(CacheService.class));
             imapServiceRegistry.addService(UserService.class, services.get(UserService.class));
             imapServiceRegistry.addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
-            imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
+            imapServiceRegistry.addService(UnifiedInboxManagement.class, services.get(UnifiedInboxManagement.class));
             imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
             imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
             IMAPStoreCache.initInstance();
@@ -656,9 +656,9 @@ public final class Init {
             TestServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
             MailServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, storageService);
 
-            final UnifiedINBOXManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
-            services.put(UnifiedINBOXManagement.class, unifiedINBOXManagement);
-            TestServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, unifiedINBOXManagement);
+            final UnifiedInboxManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
+            services.put(UnifiedInboxManagement.class, unifiedINBOXManagement);
+            TestServiceRegistry.getInstance().addService(UnifiedInboxManagement.class, unifiedINBOXManagement);
         }
     }
 

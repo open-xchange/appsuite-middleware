@@ -128,7 +128,7 @@ import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
@@ -693,12 +693,12 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 }
                             }
                             if (!accounts.isEmpty() || !messagingAccounts.isEmpty()) {
-                                if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                                if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                                     /*
                                      * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                                      */
-                                    final UnifiedINBOXManagement uim =
-                                        ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                                    final UnifiedInboxManagement uim =
+                                        ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
                                     if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                                         accounts.remove(0);
                                     }
@@ -1566,11 +1566,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 }
                 if (!accounts.isEmpty() || !messagingAccounts.isEmpty()) {
-                    if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                    if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                         /*
                          * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
-                        final UnifiedINBOXManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                        final UnifiedInboxManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
                         if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             accounts.remove(0);
                         }
@@ -2598,12 +2598,12 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
-            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
+                if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                     return 0;
                 }
                 return -1;
-            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            } else if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                 return 1;
             }
             if (o1.isDefaultAccount()) {

@@ -75,7 +75,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -184,7 +184,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     }
 
     protected static boolean isUnifiedINBOXAccount(final String mailProtocol) {
-        return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
+        return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
     protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
