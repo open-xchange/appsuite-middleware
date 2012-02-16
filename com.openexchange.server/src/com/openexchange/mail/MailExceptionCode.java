@@ -372,6 +372,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Invalid folder name: "%1$s"
      */
     INVALID_FOLDER_NAME2("Invalid folder name: \"%1$s\"", INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
+    /**
+     * Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.
+     */
+    INVALID_FOLDER_NAME_TOO_LONG("Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.", Category.CATEGORY_USER_INPUT, 83),
 
     ;
 
