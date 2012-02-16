@@ -139,7 +139,9 @@ public final class HttpSessionManagement {
     public static void putHttpSession(final HttpSessionWrapper httpSession) {
         final int max = maxActiveSessions;
         if (max > 0 && sessions.size() >= max) {
-            throw new IllegalStateException("Max. number of HTTP session exceeded.");
+            final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+            LOG.warn(message);
+            throw new IllegalStateException(message);
         }
         sessions.put(httpSession.getId(), httpSession);
     }
@@ -181,7 +183,9 @@ public final class HttpSessionManagement {
             httpSession = new HttpSessionWrapper(uniqueId);
             final int max = maxActiveSessions;
             if (max > 0 && sessions.size() >= max) {
-                throw new IllegalStateException("Max. number of HTTP session exceeded.");
+                final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+                LOG.warn(message);
+                throw new IllegalStateException(message);
             }
             sessions.put(uniqueId, httpSession);
         }
@@ -203,7 +207,9 @@ public final class HttpSessionManagement {
         httpSession = new HttpSessionWrapper(uniqueId);
         final int max = maxActiveSessions;
         if (max > 0 && sessions.size() >= max) {
-            throw new IllegalStateException("Max. number of HTTP session exceeded.");
+            final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+            LOG.warn(message);
+            throw new IllegalStateException(message);
         }
         sessions.put(uniqueId, httpSession);
     }

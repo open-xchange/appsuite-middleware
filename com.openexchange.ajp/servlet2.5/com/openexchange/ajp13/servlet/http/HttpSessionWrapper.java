@@ -73,11 +73,46 @@ public class HttpSessionWrapper implements HttpSession {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpSessionWrapper.class));
 
+    private static volatile int cookieTTL = -1;
+
+    /**
+     * Gets the cookieTTL
+     *
+     * @return The cookieTTL
+     */
+    public static int getCookieTTL() {
+        int tmp = cookieTTL;
+        if (tmp < 0) {
+            synchronized (HttpSessionWrapper.class) {
+                tmp = cookieTTL;
+                if (tmp < 0) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        tmp = (int) ConfigTools.parseTimespan("1W");
+                    } else {
+                        tmp = (int) (ConfigTools.parseTimespan(service.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
+                    }
+                    cookieTTL = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Resets the cookieTTL
+     */
+    public static void resetCookieTTL() {
+        cookieTTL = -1;
+    }
+
+    /*-
+     * -------------------- Member stuff ---------------------
+     */
+
     private final Map<String, Object> attributes;
 
     private final Map<String, Object> values;
-
-    private final int cookieTTL;
 
     private final long creationTime;
 
@@ -105,14 +140,10 @@ public class HttpSessionWrapper implements HttpSession {
         super();
         newSession = true;
         /*
-         * Max. inactive interval set to cookie time-to-live by default
+         * Max. inactive interval
          */
-        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
-        cookieTTL =
-            (int) (ConfigTools.parseTimespan(null == configurationService ? "1W" : configurationService.getProperty(
-                "com.openexchange.cookie.ttl",
-                "1W")) / 1000);
-        maxInactiveIntervall = null == configurationService ? 1800 : configurationService.getIntProperty("com.openexchange.servlet.maxInactiveIntervallSec", 1800); // 30 Minutes
+        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        maxInactiveIntervall = null == service ? 1800 : service.getIntProperty("com.openexchange.servlet.maxInactiveIntervall", 1800); // 30 Minutes
         /*
          * Initialize other stuff
          */
@@ -260,6 +291,7 @@ public class HttpSessionWrapper implements HttpSession {
 
     @Override
     public void setMaxInactiveInterval(final int maxInactiveIntervall) {
+        final int cookieTTL = getCookieTTL();
         if (maxInactiveIntervall < 0 || maxInactiveIntervall > cookieTTL) {
             LOG.warn("Specified maxInactiveIntervall is negative or exceeds max. cookie time-to-live. Using max. cookie time-to-live: " + cookieTTL + "seconds");
             this.maxInactiveIntervall = cookieTTL;

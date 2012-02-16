@@ -89,10 +89,10 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
-    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 1, 20, 207, 201 };
+    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 1, 20, 207, 206, 2 };
 
     public static final int[] COLUMNS_LIST_ALIAS = new int[] {
-        1, 2, 3, 4, 5, 20, 100, 101, 102, 104, 200, 201, 202, 203, 204, 207, 208, 209, 212, 213, 214, 215, 216, 220, 221, 400, 401, 402 };
+        1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 };
 
     public static final String RECURRENCE_MASTER = "recurrence_master";
 

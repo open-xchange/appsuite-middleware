@@ -55,7 +55,6 @@ import com.openexchange.ajax.framework.CommonListRequest;
  * {@link ListRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class ListRequest extends CommonListRequest {
 
@@ -66,9 +65,15 @@ public class ListRequest extends CommonListRequest {
         super(AbstractMailRequest.MAIL_URL, folderAndMailIds, columns);
     }
 
-    public ListRequest(final String[][] folderAndMailIds, final int[] columns,
-        final boolean failOnError) {
-        super(AbstractMailRequest.MAIL_URL, folderAndMailIds, columns,
-            failOnError);
+    public ListRequest(final String[][] folderAndMailIds, final int[] columns, final boolean failOnError) {
+        super(AbstractMailRequest.MAIL_URL, folderAndMailIds, columns, failOnError);
+    }
+
+    public ListRequest(final String[][] folderAndMailIds, final String alias) {
+        super(AbstractMailRequest.MAIL_URL, folderAndMailIds, alias);
+    }
+
+    public ListRequest(final String[][] folderAndMailIds, final String alias, final boolean failOnError) {
+        super(AbstractMailRequest.MAIL_URL, folderAndMailIds, alias, failOnError);
     }
 }
