@@ -2,6 +2,7 @@
 
  - Fix for bug 21565: Deny deletion of system folders
  - Fix for bug 21571: Checking mailbox name length
+ - Fix for bug 21578: Fixed preparation of an internet address' personal part
 
 * 201-02-15 - jan.bauerdick@open-xchange.com
 
