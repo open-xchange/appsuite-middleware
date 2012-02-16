@@ -721,10 +721,10 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscci = true;
-        for (int i = 0; (i < chars.length) && isAscci; i++) {
-            isAscci &= (chars[i] < 128);
+        for (int i = 0; (i < length) && isAscci; i++) {
+            isAscci &= (s.charAt(i) < 128);
         }
         return isAscci;
     }
