@@ -98,7 +98,7 @@ import net.freeutils.tnef.TNEFInputStream;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -438,7 +438,7 @@ public final class TNEF2ICal {
     private static void parseMailSource(final String mailSrc) throws MessagingException, IOException {
         final MimeMessage mimeMessage =
             new MimeMessage(
-                MIMEDefaultSession.getDefaultSession(),
+                MimeDefaultSession.getDefaultSession(),
                 new UnsynchronizedByteArrayInputStream(mailSrc.getBytes(com.openexchange.java.Charsets.US_ASCII)));
 
         final Multipart mulitpart = (Multipart) mimeMessage.getContent();

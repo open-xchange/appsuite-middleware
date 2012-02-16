@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.utils;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;

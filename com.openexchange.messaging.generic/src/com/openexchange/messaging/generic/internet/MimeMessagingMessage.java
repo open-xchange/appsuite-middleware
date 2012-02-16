@@ -56,7 +56,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.ParameterizedMessagingMessage;
@@ -121,7 +121,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
      * Initializes a new {@link MimeMessagingMessage}.
      */
     public MimeMessagingMessage() {
-        super(new MimeMessage(MIMEDefaultSession.getDefaultSession()), null);
+        super(new MimeMessage(MimeDefaultSession.getDefaultSession()), null);
         mimeMessage = (MimeMessage) part;
         parameters = new HashMap<String, Object>(4);
     }

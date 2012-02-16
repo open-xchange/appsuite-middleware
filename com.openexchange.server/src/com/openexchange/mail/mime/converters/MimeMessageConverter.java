@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.mime.converters;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.checkNonAscii;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.checkNonAscii;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.getFileName;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.hasAttachments;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -98,30 +98,30 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.FullnameFolder;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
-import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
-import com.openexchange.mail.mime.filler.MIMEMessageFiller;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.pop3.POP3Folder;
 
 /**
- * {@link MIMEMessageConverter} - Provides several methods to convert instances of {@link MimeMessage} to {@link MailMessage} in vice versa.
+ * {@link MimeMessageConverter} - Provides several methods to convert instances of {@link MimeMessage} to {@link MailMessage} in vice versa.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMessageConverter {
+public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageConverter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -216,7 +216,7 @@ public final class MIMEMessageConverter {
     /**
      * Prevent instantiation.
      */
-    private MIMEMessageConverter() {
+    private MimeMessageConverter() {
         super();
     }
 
@@ -356,15 +356,15 @@ public final class MIMEMessageConverter {
             final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
             final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
             final MimeMessage mimeMessage;
-            if (!clone && (mail instanceof MIMEMailMessage)) {
-                mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
+            if (!clone && (mail instanceof MimeMailMessage)) {
+                mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
             } else {
                 final ManagedFileManagement fileManagement;
                 if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
                     mail.writeTo(out);
                     mimeMessage =
-                        new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                        new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
                 } else {
                     final File file = checkForFile(mail);
                     if (null == file) {
@@ -376,7 +376,7 @@ public final class MIMEMessageConverter {
                             fos.flush();
                             fos.close();
                             fos = null;
-                            mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), newTempFile);
+                            mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), newTempFile);
                         } catch (final IOException e) {
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         } finally {
@@ -390,7 +390,7 @@ public final class MIMEMessageConverter {
                         }
                     } else {
                         try {
-                            mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), file);
+                            mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
                         } catch (final IOException e) {
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         }
@@ -424,8 +424,8 @@ public final class MIMEMessageConverter {
     }
 
     private static File checkForFile(final MailMessage mail) {
-        if (mail instanceof MIMEMailMessage) {
-            final MimeMessage mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
+        if (mail instanceof MimeMailMessage) {
+            final MimeMessage mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
             if (mimeMessage instanceof ManagedMimeMessage) {
                 return ((ManagedMimeMessage) mimeMessage).getFile();
             }
@@ -442,11 +442,11 @@ public final class MIMEMessageConverter {
      */
     public static Message convertComposedMailMessage(final ComposedMailMessage composedMail) throws OXException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Fill message
              */
-            final MIMEMessageFiller filler = new MIMEMessageFiller(composedMail.getSession(), composedMail.getContext());
+            final MimeMessageFiller filler = new MimeMessageFiller(composedMail.getSession(), composedMail.getContext());
             composedMail.setFiller(filler);
             /*
              * Set headers
@@ -470,7 +470,7 @@ public final class MIMEMessageConverter {
     }
 
     /**
-     * Fills specified instance of {@link ComposedMailMessage} with {@link MIMEMessageFiller}.
+     * Fills specified instance of {@link ComposedMailMessage} with {@link MimeMessageFiller}.
      *
      * @param composedMail The composed mail
      * @return A filled instance of {@link MailMessage} ready for further usage
@@ -478,11 +478,11 @@ public final class MIMEMessageConverter {
      */
     public static MailMessage fillComposedMailMessage(final ComposedMailMessage composedMail) throws OXException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Fill message
              */
-            final MIMEMessageFiller filler = new MIMEMessageFiller(composedMail.getSession(), composedMail.getContext());
+            final MimeMessageFiller filler = new MimeMessageFiller(composedMail.getSession(), composedMail.getContext());
             composedMail.setFiller(filler);
             /*
              * Set headers
@@ -586,13 +586,13 @@ public final class MIMEMessageConverter {
                 }
                 fillers = tmp.toArray(new MailMessageFieldFiller[tmp.size()]);
             }
-            final MailMessage[] mails = new MIMEMailMessage[msgs.length];
+            final MailMessage[] mails = new MimeMailMessage[msgs.length];
             for (int i = 0; i < mails.length; i++) {
                 if (null != msgs[i]) {
                     /*
                      * Create with no reference to content
                      */
-                    mails[i] = includeBody ? new MIMEMailMessage((MimeMessage) msgs[i]) : new MIMEMailMessage();
+                    mails[i] = includeBody ? new MimeMailMessage((MimeMessage) msgs[i]) : new MimeMailMessage();
                     fillMessage(fillers, mails[i], msgs[i]);
                 }
             }
@@ -617,13 +617,13 @@ public final class MIMEMessageConverter {
     public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields, final boolean includeBody) throws OXException {
         try {
             final MailMessageFieldFiller[] fillers = createFieldFillers(folder, fields);
-            final MailMessage[] mails = new MIMEMailMessage[msgs.length];
+            final MailMessage[] mails = new MimeMailMessage[msgs.length];
             for (int i = 0; i < mails.length; i++) {
                 if (null != msgs[i]) {
                     /*
                      * Create with no reference to content
                      */
-                    mails[i] = includeBody ? new MIMEMailMessage((MimeMessage) msgs[i]) : new MIMEMailMessage();
+                    mails[i] = includeBody ? new MimeMailMessage((MimeMessage) msgs[i]) : new MimeMailMessage();
                     fillMessage(fillers, mails[i], msgs[i]);
                 }
             }
@@ -1281,7 +1281,7 @@ public final class MIMEMessageConverter {
                     if (tmp != null && tmp.length > 0) {
                         ct = new ContentType(tmp[0]);
                     } else {
-                        ct = new ContentType(MIMETypes.MIME_DEFAULT);
+                        ct = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 } catch (final OXException e) {
                     /*
@@ -1289,7 +1289,7 @@ public final class MIMEMessageConverter {
                      */
                     LOG1.error("Invalid content type: " + msg.getContentType(), e);
                     try {
-                        ct = new ContentType(MIMETypes.MIME_DEFAULT);
+                        ct = new ContentType(MimeTypes.MIME_DEFAULT);
                     } catch (final OXException e1) {
                         /*
                          * Cannot occur
@@ -1312,14 +1312,14 @@ public final class MIMEMessageConverter {
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                        mailMessage.setHasAttachment(ct.startsWith(MIMETypes.MIME_MULTIPART_MIXED));
+                        mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
                         LOG1.warn(new StringBuilder(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                             e.getMessage()).append(
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                        mailMessage.setHasAttachment(ct.startsWith(MIMETypes.MIME_MULTIPART_MIXED));
+                        mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final IOException e) {
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
@@ -1532,7 +1532,7 @@ public final class MIMEMessageConverter {
      * @return A new instance of {@link MailMessage}
      */
     public static MailMessage newMailMessage() {
-        return new MIMEMailMessage();
+        return new MimeMailMessage();
     }
 
     /**
@@ -1545,10 +1545,10 @@ public final class MIMEMessageConverter {
     public static MailMessage convertMessage(final byte[] asciiBytes) throws OXException {
         try {
             return convertMessage(new MimeMessage(
-                MIMEDefaultSession.getDefaultSession(),
+                MimeDefaultSession.getDefaultSession(),
                 new UnsynchronizedByteArrayInputStream(asciiBytes)));
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -1579,7 +1579,7 @@ public final class MIMEMessageConverter {
         /*
          * Create with reference to content
          */
-        final MIMEMailMessage mail = new MIMEMailMessage(msg);
+        final MimeMailMessage mail = new MimeMailMessage(msg);
         try {
             /*
              * Parse flags
@@ -1635,7 +1635,7 @@ public final class MIMEMessageConverter {
                 if ((tmp != null) && (tmp.length > 0)) {
                     mail.setContentType(tmp[0]);
                 } else {
-                    mail.setContentType(MIMETypes.MIME_DEFAULT);
+                    mail.setContentType(MimeTypes.MIME_DEFAULT);
                 }
             }
             {
@@ -1650,14 +1650,14 @@ public final class MIMEMessageConverter {
                         "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                         e.getMessage()).append(
                         ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                    mail.setHasAttachment(ct.startsWith(MIMETypes.MIME_MULTIPART_MIXED));
+                    mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {
                     // A messaging error occurred
                     LOG.warn(new StringBuilder(256).append(
                         "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                         e.getMessage()).append(
                         ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                    mail.setHasAttachment(ct.startsWith(MIMETypes.MIME_MULTIPART_MIXED));
+                    mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                 }
             }
             {
@@ -1768,7 +1768,7 @@ public final class MIMEMessageConverter {
             mail.setThreadLevel(0);
             return mail;
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -1788,10 +1788,10 @@ public final class MIMEMessageConverter {
     public static MailMessage convertMessage(final byte[] asciiBytes, final String uid, final String fullname, final char separator, final MailField[] fields) throws OXException {
         try {
             return convertMessage(new MimeMessage(
-                MIMEDefaultSession.getDefaultSession(),
+                MimeDefaultSession.getDefaultSession(),
                 new UnsynchronizedByteArrayInputStream(asciiBytes)), uid, fullname, separator, fields);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -1816,7 +1816,7 @@ public final class MIMEMessageConverter {
         }
         try {
             final MailMessageFieldFiller[] fillers = createFieldFillers(new FullnameFolder(fullname, separator, uid), fields);
-            final MailMessage mail = (set.contains(MailField.BODY)) ? new MIMEMailMessage(msg) : new MIMEMailMessage();
+            final MailMessage mail = (set.contains(MailField.BODY)) ? new MimeMailMessage(msg) : new MimeMailMessage();
             fillMessage(fillers, mail, msg);
             return mail;
         } catch (final MessagingException e) {
@@ -1835,7 +1835,7 @@ public final class MIMEMessageConverter {
         try {
             return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)));
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -1867,7 +1867,7 @@ public final class MIMEMessageConverter {
             /*
              * Create with reference to content
              */
-            final MailPart mailPart = new MIMEMailPart(part);
+            final MailPart mailPart = new MimeMailPart(part);
             /*
              * Set all cacheable data
              */
@@ -2284,13 +2284,13 @@ public final class MIMEMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(checkNonAscii(valueArr[0]));
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
-                sb.append(delimiter).append(checkNonAscii(valueArr[i]));
+                sb.append(delimiter).append(valueArr[i]);
             }
             values = sb.toString();
         } else {
-            values = checkNonAscii(valueArr[0]);
+            values = valueArr[0];
         }
         return decodeMultiEncodedHeader(values);
     }
@@ -2315,13 +2315,13 @@ public final class MIMEMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(checkNonAscii(valueArr[0]));
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
-                sb.append(delimiter).append(checkNonAscii(valueArr[i]));
+                sb.append(delimiter).append(valueArr[i]);
             }
             values = sb.toString();
         } else {
-            values = checkNonAscii(valueArr[0]);
+            values = valueArr[0];
         }
         return decodeMultiEncodedHeader(values);
     }
@@ -2453,7 +2453,7 @@ public final class MIMEMessageConverter {
         final String s = part.getHeader("Date", null);
         if (s != null) {
             try {
-                final MailDateFormat mailDateFormat = MIMEMessageUtility.getDefaultMailDateFormat();
+                final MailDateFormat mailDateFormat = MimeMessageUtility.getDefaultMailDateFormat();
                 synchronized (mailDateFormat) {
                     return mailDateFormat.parse(s);
                 }

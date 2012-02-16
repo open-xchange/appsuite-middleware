@@ -101,7 +101,7 @@ import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -1859,13 +1859,13 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         }
 
         private static String preparePersonal(final String personal) {
-            return MIMEMessageUtility.quotePhrase(MIMEMessageUtility.decodeMultiEncodedHeader(personal), false);
+            return MimeMessageUtility.quotePhrase(MimeMessageUtility.decodeMultiEncodedHeader(personal), false);
         }
 
         private static final String DUMMY_DOMAIN = "@unspecified-domain";
 
         private static String prepareAddress(final String address) {
-            final String decoded = MIMEMessageUtility.decodeMultiEncodedHeader(address);
+            final String decoded = MimeMessageUtility.decodeMultiEncodedHeader(address);
             final int pos = decoded.indexOf(DUMMY_DOMAIN);
             if (pos >= 0) {
                 return toIDN(decoded.substring(0, pos));

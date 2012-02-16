@@ -49,14 +49,14 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.Collections;
 
 /**
@@ -424,7 +424,7 @@ public class ContentType extends ParameterizedHeader {
                 parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
                 final String name = parameterList.getParameter("name");
                 if (null != name) {
-                    final String byName = MIMEType2ExtMap.getContentType(name);
+                    final String byName = MimeType2ExtMap.getContentType(name);
                     if (null != byName) {
                         final int slash = byName.indexOf('/');
                         primaryType = byName.substring(0, slash);
@@ -610,7 +610,7 @@ public class ContentType extends ParameterizedHeader {
      * @throws OXException If parsing content-type string fails
      */
     public static String prepareContentTypeString(final String contentType) throws OXException {
-        return MIMEMessageUtility.foldContentType(new ContentType(contentType).toString());
+        return MimeMessageUtility.foldContentType(new ContentType(contentType).toString());
     }
 
     /**
@@ -627,7 +627,7 @@ public class ContentType extends ParameterizedHeader {
         if (name != null && !ct.containsNameParameter()) {
             ct.setNameParameter(name);
         }
-        return MIMEMessageUtility.foldContentType(ct.toString());
+        return MimeMessageUtility.foldContentType(ct.toString());
     }
 
     /**

@@ -82,16 +82,16 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.NestedMessageMailPart;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.text.HTMLProcessing;
@@ -206,19 +206,19 @@ public final class MimeForward {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm =
                 userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
-            final MimeMessage forwardMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage forwardMsg = new MimeMessage(MimeDefaultSession.getDefaultSession());
             {
                 /*
                  * Set its headers. Start with subject constructed from first message.
                  */
                 final String subjectPrefix = PREFIX_FWD;
-                String origSubject = MIMEMessageUtility.checkNonAscii(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
+                String origSubject = MimeMessageUtility.checkNonAscii(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
                 if (origSubject == null) {
                     forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
                 } else {
-                    origSubject = MIMEMessageUtility.unfold(origSubject);
+                    origSubject = MimeMessageUtility.unfold(origSubject);
                     final String subject =
-                        MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
+                        MimeMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
                             true,
                             0,
                             subjectPrefix,
@@ -245,7 +245,7 @@ public final class MimeForward {
              */
             return asInlineForward(originalMsgs[0], session, ctx, usm, forwardMsg);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -285,7 +285,7 @@ public final class MimeForward {
                 if (null == firstSeenText) {
                     firstSeenText = "";
                 } else if (isHtml) {
-                    contentIds = MIMEMessageUtility.getContentIDs(firstSeenText);
+                    contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
                 }
                 /*
                  * Add appropriate text part prefixed with forward text
@@ -298,12 +298,12 @@ public final class MimeForward {
                     contentType.getCharsetParameter(),
                     contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType.toString()));
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
             }
-            final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+            final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
              * Add all non-inline parts through a handler to keep original sequence IDs
              */
@@ -335,9 +335,9 @@ public final class MimeForward {
                 originalContentType.getCharsetParameter(),
                 originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(originalContentType.toString()));
+            forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
-            forwardMail = MIMEMessageConverter.convertMessage(forwardMsg);
+            forwardMail = MimeMessageConverter.convertMessage(forwardMsg);
         } else {
             /*
              * Mail only consists of one non-textual part
@@ -347,7 +347,7 @@ public final class MimeForward {
              * Add appropriate text part prefixed with forward text
              */
             {
-                final ContentType contentType = new ContentType(MIMETypes.MIME_TEXT_PLAIN);
+                final ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
                 contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(generateForwardText(
@@ -356,12 +356,12 @@ public final class MimeForward {
                     originalMsg,
                     false), MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType.toString()));
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
             }
-            final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+            final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
              * Add the single "attachment"
              */
@@ -396,7 +396,7 @@ public final class MimeForward {
                         attachmentPart.addHeader(name, header.getValue());
                     }
                 }
-                attachmentMailPart = MIMEMessageConverter.convertPart(attachmentPart, false);
+                attachmentMailPart = MimeMessageConverter.convertPart(attachmentPart, false);
             }
             attachmentMailPart.setSequenceId(String.valueOf(1));
             compositeMail.addAdditionalParts(attachmentMailPart);
@@ -418,27 +418,27 @@ public final class MimeForward {
             final MimeBodyPart textPart = new MimeBodyPart();
             textPart.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
             textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
+            textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
                 "#CS#",
                 MailProperties.getInstance().getDefaultMimeCharset()));
             multipart.addBodyPart(textPart);
             forwardMsg.setContent(multipart);
             forwardMsg.saveChanges();
-            compositeMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+            compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
         }
         /*
          * Attach messages
          */
         for (final MailMessage originalMsg : originalMsgs) {
             final MailMessage nested;
-            if (originalMsg instanceof MIMEMailMessage) {
-                nested = MIMEMessageConverter.convertMessage(((MIMEMailMessage) originalMsg).getMimeMessage());
+            if (originalMsg instanceof MimeMailMessage) {
+                nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
             } else {
                 final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) originalMsg.getSize());
                 originalMsg.writeTo(tmp);
                 nested =
-                    MIMEMessageConverter.convertMessage(new MimeMessage(
-                        MIMEDefaultSession.getDefaultSession(),
+                    MimeMessageConverter.convertMessage(new MimeMessage(
+                        MimeDefaultSession.getDefaultSession(),
                         new UnsynchronizedByteArrayInputStream(tmp.toByteArray())));
             }
             nested.setMsgref(originalMsg.getMailPath());
@@ -461,7 +461,7 @@ public final class MimeForward {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
-        if ((contentType.startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) || contentType.startsWith(MIMETypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
+        if ((contentType.startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) || contentType.startsWith(MimeTypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
             /*
              * Get html content
              */
@@ -573,7 +573,7 @@ public final class MimeForward {
 
         }
         {
-            final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(msg.getSubject());
+            final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(msg.getSubject());
             forwardPrefix =
                 PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : quoteReplacement(decodedSubject));
         }

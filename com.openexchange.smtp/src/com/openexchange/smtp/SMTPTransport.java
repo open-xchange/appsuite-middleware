@@ -50,7 +50,7 @@
 package com.openexchange.smtp;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
@@ -93,11 +93,11 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
@@ -405,7 +405,7 @@ public final class SMTPTransport extends MailTransport {
              * Sent date in UTC time
              */
             {
-                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
                 synchronized (mdf) {
                     smtpMessage.setHeader("Date", mdf.format(new Date()));
                 }
@@ -437,7 +437,7 @@ public final class SMTPTransport extends MailTransport {
                         usm.getAutoLinebreak()),
                     defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 mixedMultipart.addBodyPart(text);
             }
             /*
@@ -453,7 +453,7 @@ public final class SMTPTransport extends MailTransport {
                         quoteReplacement(msgId)),
                     defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, CD_READ_ACK);
                 mixedMultipart.addBodyPart(ack);
             }
@@ -477,7 +477,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                 }
             } catch (final javax.mail.AuthenticationFailedException e) {
-                throw MIMEMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
             }
             try {
                 saveChangesSafe(smtpMessage);
@@ -487,7 +487,7 @@ public final class SMTPTransport extends MailTransport {
                 transport.close();
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -514,7 +514,7 @@ public final class SMTPTransport extends MailTransport {
                         transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw MIMEMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
                 }
                 try {
                     saveChangesSafe(smtpMessage);
@@ -524,11 +524,11 @@ public final class SMTPTransport extends MailTransport {
                     transport.close();
                 }
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
-            return MIMEMessageConverter.convertMessage(smtpMessage);
+            return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -582,7 +582,7 @@ public final class SMTPTransport extends MailTransport {
                         transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw MIMEMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
                 }
                 try {
                     saveChangesSafe(smtpMessage);
@@ -597,9 +597,9 @@ public final class SMTPTransport extends MailTransport {
             } finally {
                 invokeLater(new MailCleanerTask(composedMail));
             }
-            return MIMEMessageConverter.convertMessage(smtpMessage);
+            return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -652,7 +652,7 @@ public final class SMTPTransport extends MailTransport {
         try {
             transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
         } catch (final NoSuchProviderException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
         boolean close = false;
         try {
@@ -666,10 +666,10 @@ public final class SMTPTransport extends MailTransport {
                 }
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {
-                throw MIMEMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
+                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } finally {
             if (close) {
                 try {
@@ -738,7 +738,7 @@ public final class SMTPTransport extends MailTransport {
                 }
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -767,7 +767,7 @@ public final class SMTPTransport extends MailTransport {
         try {
             dh = part.getDataHandler();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
         if (dh == null) {
             return;
@@ -810,7 +810,7 @@ public final class SMTPTransport extends MailTransport {
                 }
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }

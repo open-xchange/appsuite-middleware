@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -152,7 +152,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                     if (null == sFileName) {
                         contentType = new ContentType("application/octet-stream");
                     } else {
-                        contentType = new ContentType(MIMEType2ExtMap.getContentType(sFileName));
+                        contentType = new ContentType(MimeType2ExtMap.getContentType(sFileName));
                     }
                 } else {
                     contentType = new ContentType(cts);

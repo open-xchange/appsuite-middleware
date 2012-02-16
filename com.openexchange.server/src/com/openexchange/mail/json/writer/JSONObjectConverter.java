@@ -66,8 +66,8 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.RTF2HTMLConverter;
@@ -381,7 +381,7 @@ public final class JSONObjectConverter {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), textObject, jsonObject);
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
-            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_PLAIN);
+            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_PLAIN);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             attachmentsArr.put(jsonObject);
@@ -404,7 +404,7 @@ public final class JSONObjectConverter {
                     modified,
                     displayMode);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
-            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_HTML);
+            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_HTML);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             attachmentsArr.put(jsonObject);
@@ -431,7 +431,7 @@ public final class JSONObjectConverter {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
-            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_PLAIN);
+            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_PLAIN);
             /*
              * Try to convert the given html to regular text
              */
@@ -451,7 +451,7 @@ public final class JSONObjectConverter {
                  */
                 final JSONObject originalVersion = new JSONObject();
                 copyValue(MailListField.ID.getKey(), htmlObject, originalVersion);
-                jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_HTML);
+                jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_HTML);
                 originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
                 originalVersion.put(MailJSONField.SIZE.getKey(), htmlContent.length());
                 originalVersion.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
@@ -459,7 +459,7 @@ public final class JSONObjectConverter {
                 if (fileName == null) {
                     originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
                 } else {
-                    originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MIMEMessageUtility.decodeMultiEncodedHeader(fileName));
+                    originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeMessageUtility.decodeMultiEncodedHeader(fileName));
                 }
                 attachmentsArr.put(originalVersion);
             }
@@ -472,7 +472,7 @@ public final class JSONObjectConverter {
 
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
-        if (baseType.startsWith(MIMETypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MIMETypes.MIME_TEXT_RICHTEXT)) {
+        if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 ENRCONV.convert(src),
                 contentType.getCharsetParameter(),
@@ -481,7 +481,7 @@ public final class JSONObjectConverter {
                 usm,
                 modified,
                 displayMode);
-        } else if (baseType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
+        } else if (baseType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 RTF2HTMLConverter.convertRTFToHTML(src),
                 contentType.getCharsetParameter(),

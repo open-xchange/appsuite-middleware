@@ -50,16 +50,16 @@
 package com.openexchange.mail.mime;
 
 /**
- * {@link MIMETypes} - Constants for MIME types.
+ * {@link MimeTypes} - Constants for MIME types.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMETypes {
+public final class MimeTypes {
 
     /**
      * No instantiation
      */
-    private MIMETypes() {
+    private MimeTypes() {
         super();
     }
 

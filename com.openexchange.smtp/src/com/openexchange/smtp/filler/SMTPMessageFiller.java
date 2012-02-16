@@ -59,7 +59,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -72,7 +72,7 @@ import com.sun.mail.smtp.SMTPMessage;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPMessageFiller extends MIMEMessageFiller {
+public final class SMTPMessageFiller extends MimeMessageFiller {
 
     private final ISMTPProperties smtpProperties;
 

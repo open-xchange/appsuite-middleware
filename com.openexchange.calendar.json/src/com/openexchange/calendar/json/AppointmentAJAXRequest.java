@@ -54,6 +54,7 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -145,7 +146,7 @@ public final class AppointmentAJAXRequest {
         }
     }
 
-    public Date optDate(String name) throws OXException {
+    public Date optDate(final String name) throws OXException {
         final String parameter = request.getParameter(name);
         if (null == parameter) {
             return null;
@@ -158,7 +159,7 @@ public final class AppointmentAJAXRequest {
     }
 
     public Date checkDate(final String name) throws OXException {
-        Date date = optDate(name);
+        final Date date = optDate(name);
         if (null == date) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
@@ -213,6 +214,14 @@ public final class AppointmentAJAXRequest {
         final String parameter = request.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        if (name.equals(AJAXServlet.PARAMETER_COLUMNS)) {
+            if (parameter.equals("all")) {
+                return AppointmentAction.COLUMNS_ALL_ALIAS;
+            }
+            if (parameter.equals("list")) {
+                return AppointmentAction.COLUMNS_LIST_ALIAS;
+            }
         }
         final String[] sa = SPLIT.split(parameter, 0);
         final int[] ret = new int[sa.length];
@@ -326,7 +335,7 @@ public final class AppointmentAJAXRequest {
     }
 
     public int getFolderId() throws OXException {
-        int optInt = optInt(AJAXServlet.PARAMETER_FOLDERID);
+        final int optInt = optInt(AJAXServlet.PARAMETER_FOLDERID);
         if (optInt == NOT_FOUND) {
             return 0;
         }

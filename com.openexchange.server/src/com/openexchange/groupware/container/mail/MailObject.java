@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.container.mail;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,14 +77,14 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -190,11 +190,11 @@ public class MailObject {
         final String fileName = file.getName();
         final ContentType ct = new ContentType();
         ct.setContentType(contentType);
-        if (ct.startsWith(MIMETypes.MIME_APPL_OCTET)) {
+        if (ct.startsWith(MimeTypes.MIME_APPL_OCTET)) {
             /*
              * Try to determine MIME type
              */
-            final String ctStr = MIMEType2ExtMap.getContentType(fileName);
+            final String ctStr = MimeType2ExtMap.getContentType(fileName);
             final int pos = ctStr.indexOf('/');
             ct.setPrimaryType(ctStr.substring(0, pos));
             ct.setSubType(ctStr.substring(pos + 1));
@@ -211,7 +211,7 @@ public class MailObject {
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
             }
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
             /*
              * Force base64 encoding to keep data as it is
              */
@@ -227,7 +227,7 @@ public class MailObject {
                 } else {
                     final ContentDisposition contentDisposition = new ContentDisposition(Part.ATTACHMENT);
                     contentDisposition.setFilenameParameter(fileName);
-                    disp = MIMEMessageUtility.foldContentDisposition(contentDisposition.toString());
+                    disp = MimeMessageUtility.foldContentDisposition(contentDisposition.toString());
                 }
                 bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, disp);
             } else {
@@ -236,7 +236,7 @@ public class MailObject {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             /*
              * Add to multipart
@@ -246,7 +246,7 @@ public class MailObject {
             }
             multipart.addBodyPart(bodyPart);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -264,11 +264,11 @@ public class MailObject {
          */
         final ContentType ct = new ContentType();
         ct.setContentType(contentType);
-        if (ct.startsWith(MIMETypes.MIME_APPL_OCTET) && fileName != null) {
+        if (ct.startsWith(MimeTypes.MIME_APPL_OCTET) && fileName != null) {
             /*
              * Try to determine MIME type
              */
-            final String ctStr = MIMEType2ExtMap.getContentType(fileName);
+            final String ctStr = MimeType2ExtMap.getContentType(fileName);
             final int pos = ctStr.indexOf('/');
             ct.setPrimaryType(ctStr.substring(0, pos));
             ct.setSubType(ctStr.substring(pos + 1));
@@ -285,7 +285,7 @@ public class MailObject {
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
             }
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
             /*
              * Force base64 encoding to keep data as it is
              */
@@ -301,7 +301,7 @@ public class MailObject {
                 } else {
                     final ContentDisposition contentDisposition = new ContentDisposition(Part.ATTACHMENT);
                     contentDisposition.setFilenameParameter(fileName);
-                    disp = MIMEMessageUtility.foldContentDisposition(contentDisposition.toString());
+                    disp = MimeMessageUtility.foldContentDisposition(contentDisposition.toString());
                 }
                 bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, disp);
             } else {
@@ -310,7 +310,7 @@ public class MailObject {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             /*
              * Add to multipart
@@ -322,7 +322,7 @@ public class MailObject {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -347,7 +347,7 @@ public class MailObject {
     public final void send() throws OXException {
         try {
             validateMailObject();
-            final MimeMessage msg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            final MimeMessage msg = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Set from
              */
@@ -430,7 +430,7 @@ public class MailObject {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 multipart.addBodyPart(textPart, 0);
                 msg.setContent(multipart);
             }
@@ -473,7 +473,7 @@ public class MailObject {
              * Set sent date in UTC time
              */
             if (msg.getSentDate() == null) {
-                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
                 synchronized (mdf) {
                     msg.setHeader("Date", mdf.format(new Date()));
                 }
@@ -512,7 +512,7 @@ public class MailObject {
                 transport.close();
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }

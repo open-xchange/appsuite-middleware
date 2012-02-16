@@ -62,7 +62,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -332,14 +332,14 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 	    // TODO: Should not be part of "real" MAL tests
     public void testNoAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
-        final MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
+        final MailMessage testMail = MimeMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
         assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
         assertFalse("A message w/o attachments is marked to hold attachments", testMail.hasAttachment());
 	}
 
     // TODO: Should not be part of "real" MAL tests
 	public void testHasAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
-	    final MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
+	    final MailMessage testMail = MimeMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
         assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
         assertTrue("A message with attachments is marked to NOT hold attachments", testMail.hasAttachment());
 	}
@@ -350,7 +350,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
 
-			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231.getBytes(com.openexchange.java.Charsets.US_ASCII));
+			final MailMessage rfc2231Mail = MimeMessageConverter.convertMessage(RFC2231.getBytes(com.openexchange.java.Charsets.US_ASCII));
 			final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, null, rfc2231Mail, DisplayMode.DISPLAY,
 					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 							session.getContextId()), false, -1);

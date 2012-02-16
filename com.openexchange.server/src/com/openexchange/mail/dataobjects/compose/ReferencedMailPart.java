@@ -69,7 +69,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
@@ -124,7 +124,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * @throws OXException If a mail error occurs
      */
     protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws OXException {
-        isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822) && !referencedPart.getContentDisposition().isAttachment();
+        isMail = referencedPart.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822) && !referencedPart.getContentDisposition().isAttachment();
         try {
             handleReferencedPart(referencedPart, session);
         } catch (final IOException e) {
@@ -169,7 +169,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
                 referencedPart.writeTo(out);
                 data = out.toByteArray();
-                setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+                setContentType(MimeTypes.MIME_MESSAGE_RFC822);
                 setContentDisposition(Part.INLINE);
                 setSize(size);
             } else {
@@ -181,7 +181,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
                 referencedPart.writeTo(out);
                 copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-                setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+                setContentType(MimeTypes.MIME_MESSAGE_RFC822);
                 setContentDisposition(Part.INLINE);
 
             } else {
@@ -316,7 +316,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
             if (data != null) {
                 String charset = getContentType().getCharsetParameter();
                 if (null == charset) {

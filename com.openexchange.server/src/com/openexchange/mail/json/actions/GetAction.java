@@ -73,7 +73,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.preferences.ServerUserSetting;
@@ -217,7 +217,7 @@ public final class GetAction extends AbstractMailAction {
                 }
                 // Filter
                 if (!ignorableContentTypes.isEmpty()) {
-                    MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
+                    MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
                     mimeMessage = new MimeFilter(ignorableContentTypes).filter(mimeMessage);                        
                     baos.reset();
                     mimeMessage.writeTo(baos);

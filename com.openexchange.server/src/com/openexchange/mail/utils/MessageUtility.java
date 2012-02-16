@@ -66,7 +66,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.dataobjects.MIMERawSource;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
@@ -259,11 +259,23 @@ public final class MessageUtility {
         try {
             return readStream(mailPart.getInputStream(), charset);
         } catch (final IOException e) {
-            if (mailPart instanceof MIMERawSource) {
-                return readStream(((MIMERawSource) mailPart).getRawInputStream(), charset);
+            if (mailPart instanceof MimeRawSource) {
+                return readStream(((MimeRawSource) mailPart).getRawInputStream(), charset);
             }
             throw e;
         }
+    }
+
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param bytes The bytes to read
+     * @param charset The charset
+     * @return The <code>String</code> read from input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readBytes(final byte[] bytes, final String charset) throws IOException {
+        return readStream(Streams.newByteArrayInputStream(bytes), charset);
     }
 
     private static final int BUFSIZE = 8192; // 8K

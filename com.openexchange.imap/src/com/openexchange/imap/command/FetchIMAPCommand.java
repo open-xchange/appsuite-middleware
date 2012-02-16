@@ -68,10 +68,10 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPFolder.FetchProfileItem;
@@ -498,7 +498,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             /*
              * Discard corrupt message
              */
-            final OXException imapExc = MIMEMailException.handleMessagingException(e);
+            final OXException imapExc = MimeMailException.handleMessagingException(e);
             LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
                 imapExc.getMessage()).toString(), imapExc);
             error = true;
@@ -682,7 +682,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
                 if (MessageHeaders.HDR_SUBJECT.equals(name)) {
-                    msg.addHeader(name, MIMEMessageUtility.checkNonAscii(hdr.getValue()));
+                    msg.addHeader(name, MimeMessageUtility.checkNonAscii(hdr.getValue()));
                 } else {
                     msg.addHeader(name, hdr.getValue());
                 }
@@ -726,7 +726,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setReplyTo(env.replyTo);
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
-            msg.setSubject(MIMEMessageUtility.decodeEnvelopeSubject(env.subject));
+            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
         }
     };
@@ -764,9 +764,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 if (logger.isWarnEnabled()) {
                     logger.warn(e.getMessage(), e);
                 }
-                msg.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
+                msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
             }
-            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
+            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
         }
     };
 

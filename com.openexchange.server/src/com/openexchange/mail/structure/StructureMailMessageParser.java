@@ -83,15 +83,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
@@ -309,7 +309,7 @@ public final class StructureMailMessageParser {
         int partCount = partCountArg;
         final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
         final ContentType contentType =
-            mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MIMETypes.MIME_APPL_OCTET);
+            mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MimeTypes.MIME_APPL_OCTET);
         final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
         final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
 
@@ -438,7 +438,7 @@ public final class StructureMailMessageParser {
                     buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
                 }
                 {
-                    final String ct = MIMEMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
+                    final String ct = MimeMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
                     buf.write(("Content-Type:" + ct + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
                 }
                 buf.write(extractBodyFrom(bytes));
@@ -523,7 +523,7 @@ public final class StructureMailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment
@@ -549,7 +549,7 @@ public final class StructureMailMessageParser {
                          * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
                          * implementation
                          */
-                        parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
                     }
                     /*
                      * Stop to further process TNEF attachment
@@ -565,7 +565,7 @@ public final class StructureMailMessageParser {
                     final String value = (String) attrBody.getValue();
                     bodyPart.setText(value);
                     bodyPart.setSize(value.length());
-                    parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                    parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
                 final MAPIProps mapiProps = message.getMAPIProps();
                 if (mapiProps != null) {
@@ -588,7 +588,7 @@ public final class StructureMailMessageParser {
                         bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
                         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
                         bodyPart.setSize(decompressedBytes.length);
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
                 /*
@@ -615,10 +615,10 @@ public final class StructureMailMessageParser {
                                 contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
                             }
                             if ((contentTypeStr == null) && (attachFilename != null)) {
-                                contentTypeStr = MIMEType2ExtMap.getContentType(attachFilename);
+                                contentTypeStr = MimeType2ExtMap.getContentType(attachFilename);
                             }
                             if (contentTypeStr == null) {
-                                contentTypeStr = MIMETypes.MIME_APPL_OCTET;
+                                contentTypeStr = MimeTypes.MIME_APPL_OCTET;
                             }
                             final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
                             bodyPart.setDataHandler(new DataHandler(ds));
@@ -630,23 +630,23 @@ public final class StructureMailMessageParser {
                                 cd.setFilenameParameter(attachFilename);
                                 bodyPart.setHeader(
                                     MessageHeaders.HDR_CONTENT_DISPOSITION,
-                                    MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                                    MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             os.reset();
                             attachment.writeTo(os);
                             bodyPart.setSize(os.size());
-                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                            parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
                              * Nested message
                              */
                             final MimeMessage nestedMessage =
-                                TNEFMime.convert(MIMEDefaultSession.getDefaultSession(), attachment.getNestedMessage());
+                                TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
-                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
-                            parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MimeTypes.MIME_MESSAGE_RFC822)));
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeTypes.MIME_MESSAGE_RFC822);
+                            parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
                     }
                 } else {
@@ -669,20 +669,20 @@ public final class StructureMailMessageParser {
                          * Translate TNEF attributes to MIME
                          */
                         final String attachFilename = fileName;
-                        final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
+                        final DataSource ds = new RawDataSource(messageClass.getRawData(), MimeTypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
                         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
-                            MIMETypes.MIME_APPL_OCTET,
+                            MimeTypes.MIME_APPL_OCTET,
                             attachFilename));
                         if (attachFilename != null) {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
                             bodyPart.setHeader(
                                 MessageHeaders.HDR_CONTENT_DISPOSITION,
-                                MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                                MimeMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
-                        parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
+                        parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
             } catch (final IOException tnefExc) {
@@ -802,7 +802,7 @@ public final class StructureMailMessageParser {
     public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
-            final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
+            final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
             final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
@@ -811,7 +811,7 @@ public final class StructureMailMessageParser {
             }
             filename = sb.toString();
         } else {
-            filename = MIMEMessageUtility.decodeMultiEncodedHeader(filename);
+            filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
             // try {
             // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
             // } catch (final Exception e) {

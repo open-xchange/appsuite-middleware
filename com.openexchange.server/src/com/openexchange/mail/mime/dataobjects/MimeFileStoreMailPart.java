@@ -69,8 +69,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -80,17 +80,17 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link MIMEFileStoreMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added
+ * {@link MimeFileStoreMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added
  * as an attachment later
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MIMEFileStoreMailPart extends MailPart {
+public abstract class MimeFileStoreMailPart extends MailPart {
 
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEFileStoreMailPart.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeFileStoreMailPart.class));
 
     private final IDBasedFileAccessFactory fileAccessFactory;
 
@@ -105,12 +105,12 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
     private transient Object cachedContent;
 
     /**
-     * Initializes a new {@link MIMEFileStoreMailPart}
+     * Initializes a new {@link MimeFileStoreMailPart}
      *
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MIMEFileStoreMailPart(final DataSource dataSource, final Session session) throws OXException {
+    protected MimeFileStoreMailPart(final DataSource dataSource, final Session session) throws OXException {
         super();
         try {
             final File file = new DefaultFile();
@@ -216,7 +216,7 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
 
     private static String prepareContentType(final String contentType, final String preparedFileName) {
         if (null == contentType || contentType.length() == 0) {
-            return MIMETypes.MIME_APPL_OCTET;
+            return MimeTypes.MIME_APPL_OCTET;
         }
         final String retval;
         {
@@ -228,7 +228,7 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
             }
         }
         if ("multipart/form-data".equalsIgnoreCase(retval)) {
-            return MIMEType2ExtMap.getContentType(preparedFileName);
+            return MimeType2ExtMap.getContentType(preparedFileName);
 
         }
         return contentType;
@@ -258,7 +258,7 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
                 dataSource = mds;
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
-                dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
+                dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }
         return dataSource;
@@ -278,7 +278,7 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
             final MessageDataSource mds = getDataSource();
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {

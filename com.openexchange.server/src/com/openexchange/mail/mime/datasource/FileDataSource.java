@@ -59,7 +59,7 @@ import java.io.OutputStream;
 import javax.activation.DataSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 
 /**
  * {@link FileDataSource} - A simple {@link DataSource data source} that encapsulates a file.
@@ -123,7 +123,7 @@ public final class FileDataSource implements DataSource {
      * @param file The file
      */
     public FileDataSource(final File file) {
-        this(file, MIMEType2ExtMap.getContentType(file.getName()));
+        this(file, MimeType2ExtMap.getContentType(file.getName()));
     }
 
     /**
@@ -210,7 +210,7 @@ public final class FileDataSource implements DataSource {
      */
     public void setName(final String name) {
         this.name = name == null ? file.getName() : name;
-        this.contentType = MIMEType2ExtMap.getContentType(this.name);
+        this.contentType = MimeType2ExtMap.getContentType(this.name);
     }
 
 }

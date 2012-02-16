@@ -69,8 +69,8 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -308,11 +308,11 @@ public abstract class AbstractMailTest extends TestCase {
                 /*
                  * Define session properties
                  */
-                System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-                System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-                System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-                System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-                System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
                 /*
                  * Define imap session properties
                  */
@@ -328,13 +328,13 @@ public abstract class AbstractMailTest extends TestCase {
                  * object is returned to the connection pool if the pool is not
                  * over capacity.
                  */
-                sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+                sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
                 /*
                  * A mechanism is provided for timing out idle connection pool
                  * IMAP protocol objects. Timed out connections are closed and
                  * removed (pruned) from the connection pool.
                  */
-                sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
+                sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
                 return sessionProperties;
             }
             return sessionProperties;
@@ -386,7 +386,7 @@ public abstract class AbstractMailTest extends TestCase {
         }
         final MailMessage[] retval = new MailMessage[msgs.length];
         for (int i = 0; i < retval.length; i++) {
-            retval[i] = MIMEMessageConverter.convertMessage(msgs[i]);
+            retval[i] = MimeMessageConverter.convertMessage(msgs[i]);
         }
         return retval;
     }

@@ -66,8 +66,8 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**
@@ -97,7 +97,7 @@ public class GetResponse extends AbstractAJAXResponse {
      */
     public MailMessage getMail(final TimeZone timeZone) throws JSONException, OXException {
         if (null == mail) {
-            final MailMessage parsed = new MIMEMailMessage();
+            final MailMessage parsed = new MimeMailMessage();
             final JSONObject jsonObject;
             if (getResponse().getData() instanceof JSONObject) {
                 jsonObject = (JSONObject) getResponse().getData();
@@ -306,7 +306,7 @@ public class GetResponse extends AbstractAJAXResponse {
                 final String personal = persAndAddr.getString(0);
                 final boolean hasPersonal = (personal != null && !"null".equals(personal));
                 if (hasPersonal) {
-                    sb.append(MIMEMessageUtility.quotePersonal(personal)).append(" <");
+                    sb.append(MimeMessageUtility.quotePersonal(personal)).append(" <");
                 }
                 sb.append(persAndAddr.getString(1));
                 if (hasPersonal) {
@@ -319,7 +319,7 @@ public class GetResponse extends AbstractAJAXResponse {
                 final String personal = persAndAddr.getString(0);
                 final boolean hasPersonal = (personal != null && !"null".equals(personal));
                 if (hasPersonal) {
-                    sb.append(MIMEMessageUtility.quotePersonal(personal)).append(" <");
+                    sb.append(MimeMessageUtility.quotePersonal(personal)).append(" <");
                 }
                 sb.append(persAndAddr.getString(1));
                 if (hasPersonal) {

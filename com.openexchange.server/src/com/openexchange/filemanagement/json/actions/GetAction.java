@@ -66,7 +66,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -130,7 +130,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
                 /*
                  * Try to determine MIME type
                  */
-                final String ct = MIMEType2ExtMap.getContentType(fileName);
+                final String ct = MimeType2ExtMap.getContentType(fileName);
                 final int pos = ct.indexOf('/');
                 contentType.setPrimaryType(ct.substring(0, pos));
                 contentType.setSubType(ct.substring(pos + 1));

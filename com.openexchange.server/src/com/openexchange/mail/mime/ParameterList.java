@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link ParameterList} - Represents the parameter list of a parameterized header.
@@ -242,7 +242,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         }
         int pos = name.indexOf('*');
         if (pos == -1) {
-            parameters.put(name, new Parameter(name, MIMEMessageUtility.decodeMultiEncodedHeader(val)));
+            parameters.put(name, new Parameter(name, MimeMessageUtility.decodeMultiEncodedHeader(val)));
         } else {
             Parameter p = null;
             final String soleName = name.substring(0, pos);

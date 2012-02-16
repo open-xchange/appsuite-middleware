@@ -59,11 +59,19 @@ import com.openexchange.ajax.framework.ListIDs;
  */
 public class ListRequest extends CommonListRequest {
 
-    public ListRequest(ListIDs identifier, int[] columns, boolean failOnError) {
+    public ListRequest(final ListIDs identifier, final int[] columns, final boolean failOnError) {
         super(AbstractContactRequest.URL, identifier, columns, failOnError);
     }
 
-    public ListRequest(ListIDs identifier, int[] columns) {
+    public ListRequest(final ListIDs identifier, final int[] columns) {
         this(identifier, columns, true);
+    }
+
+    public ListRequest(final ListIDs identifier, final String alias, final boolean failOnError) {
+        super(AbstractContactRequest.URL, identifier, alias, failOnError);
+    }
+
+    public ListRequest(final ListIDs identifier, final String alias) {
+        this(identifier, alias, true);
     }
 }

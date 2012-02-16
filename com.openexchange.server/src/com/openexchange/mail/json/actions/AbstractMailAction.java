@@ -75,7 +75,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
@@ -362,7 +362,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
                     }
                 } catch (final AddressException e) {
-                    throw MIMEMailException.handleMessagingException(e);
+                    throw MimeMailException.handleMessagingException(e);
                 }
             }
             accountId = MailAccount.DEFAULT_ID;

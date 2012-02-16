@@ -142,7 +142,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
@@ -1111,14 +1111,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             if (fileName != null && !ct.containsNameParameter()) {
                                 ct.setNameParameter(fileName);
                             }
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                             bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                             if (fileName != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(fileName);
                                 bodyPart.setHeader(
                                     MessageHeaders.HDR_CONTENT_DISPOSITION,
-                                    MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                                    MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
                             if (DEBUG) {
@@ -1239,7 +1239,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final String ct = b.toString();
                 b.setLength(0);
                 iCalAttachmentPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, ct)));
-                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct));
+                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct));
                 b.append("attachment; filename=\"").append(fileName).append('"');
                 iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, b.toString());
                 b.setLength(0);
@@ -1252,7 +1252,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final String contentType = b.append("text/calendar; charset=UTF-8; ").append(method.getMethod()).toString();
             b.setLength(0);
             iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
-            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
+            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
             // iCalPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
             /*

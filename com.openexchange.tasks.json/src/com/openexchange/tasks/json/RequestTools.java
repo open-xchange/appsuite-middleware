@@ -50,8 +50,10 @@
 package com.openexchange.tasks.json;
 
 import java.util.regex.Pattern;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.tasks.json.actions.TaskAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -78,6 +80,14 @@ public class RequestTools {
         final String parameter = request.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        if (name.equals(AJAXServlet.PARAMETER_COLUMNS)) {
+            if (parameter.equals("all")) {
+                return TaskAction.COLUMNS_ALL_ALIAS;
+            }
+            if (parameter.equals("list")) {
+                return TaskAction.COLUMNS_LIST_ALIAS;
+            }
         }
         final String[] sa = SPLIT.split(parameter, 0);
         final int[] ret = new int[sa.length];

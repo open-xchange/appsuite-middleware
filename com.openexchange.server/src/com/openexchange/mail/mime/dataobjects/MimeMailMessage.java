@@ -58,15 +58,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 
 /**
- * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME messages (as per RFC822).
+ * {@link MimeMailMessage} - A subclass of {@link MailMessage} to support MIME messages (as per RFC822).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEMailMessage extends MailMessage implements MIMERawSource {
+public final class MimeMailMessage extends MailMessage implements MimeRawSource {
 
     private static final long serialVersionUID = 4593386724062676753L;
 
-    private MIMEMailPart mailPart;
+    private MimeMailPart mailPart;
 
     private String id;
 
@@ -79,18 +79,18 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
     /**
      * Constructor - Constructs an empty mail message
      */
-    public MIMEMailMessage() {
+    public MimeMailMessage() {
         super();
-        mailPart = new MIMEMailPart(null);
+        mailPart = new MimeMailPart(null);
     }
 
     /**
      * Constructor - Only applies specified message, but does not set any attributes
      */
-    public MIMEMailMessage(final MimeMessage msg) {
+    public MimeMailMessage(final MimeMessage msg) {
         super();
         // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
-        mailPart = new MIMEMailPart(msg);
+        mailPart = new MimeMailPart(msg);
     }
 
     /**
@@ -138,7 +138,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
      */
     public void setContent(final MimeMessage msg) {
         // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
-        mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
+        mailPart = msg == null ? new MimeMailPart(null) : new MimeMailPart(msg);
     }
 
     /**

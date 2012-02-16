@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.io.Serializable;
 import java.util.Iterator;
 

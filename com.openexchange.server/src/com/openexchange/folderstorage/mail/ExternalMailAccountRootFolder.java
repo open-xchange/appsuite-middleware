@@ -63,7 +63,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,8 +95,8 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         /*
          * Set proper name
          */
-        if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-            name = StringHelper.valueOf(session.getUser().getLocale()).getString(UnifiedINBOXManagement.NAME_UNIFIED_INBOX);
+        if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+            name = StringHelper.valueOf(session.getUser().getLocale()).getString(UnifiedInboxManagement.NAME_UNIFIED_INBOX);
         } else {
             name = mailAccount.getName();
         }

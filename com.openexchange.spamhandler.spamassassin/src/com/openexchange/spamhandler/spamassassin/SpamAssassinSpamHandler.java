@@ -61,7 +61,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.session.Session;
@@ -263,7 +263,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             MailMessage tmp = null;
             if (wrapped instanceof MailMessage) {
                 tmp = (MailMessage) wrapped;
-            } else if (wrapped.getContentType().startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
+            } else if (wrapped.getContentType().startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                 tmp = (MailMessage) (wrapped.getContent());
             }
             if (null == tmp) {
@@ -342,7 +342,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             final String spamHdr = mails[i].getFirstHeader(MessageHeaders.HDR_X_SPAM_FLAG);
             final String spamChecker = mails[i].getFirstHeader("X-Spam-Checker-Version");
             final ContentType contentType = mails[i].getContentType();
-            if (spamHdr != null && "yes".regionMatches(true, 0, spamHdr, 0, 3) && contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (spamChecker == null ? true : spamChecker.toLowerCase(
+            if (spamHdr != null && "yes".regionMatches(true, 0, spamHdr, 0, 3) && contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL) && (spamChecker == null ? true : spamChecker.toLowerCase(
                 Locale.ENGLISH).indexOf("spamassassin") != -1)) {
                 extractIDs.add(mailIDs[i]);
             } else {

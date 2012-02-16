@@ -63,8 +63,8 @@ import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.messaging.generic.internal.TimeZoneUtils;
 
@@ -202,7 +202,7 @@ public final class Utility {
      * @return The decoded subject value
      */
     public static String decodeEnvelopeSubject(final String subject) {
-        return MIMEMessageUtility.decodeEnvelopeSubject(subject);
+        return MimeMessageUtility.decodeEnvelopeSubject(subject);
     }
 
     /**
@@ -212,7 +212,7 @@ public final class Utility {
      * @return The decoded header value
      */
     public static String decodeEnvelopeHeader(final String headerValue) {
-        return MIMEMessageUtility.decodeEnvelopeHeader(headerValue);
+        return MimeMessageUtility.decodeEnvelopeHeader(headerValue);
     }
 
     /**
@@ -226,7 +226,7 @@ public final class Utility {
      * @return The possibly decoded header value
      */
     public static String decodeMultiEncodedHeader(final String headerValue) {
-        return MIMEMessageUtility.decodeMultiEncodedHeader(headerValue);
+        return MimeMessageUtility.decodeMultiEncodedHeader(headerValue);
     }
 
     /**
@@ -241,7 +241,7 @@ public final class Utility {
      * @return The folded string
      */
     public static String fold(final int used, final String foldMe) {
-        return MIMEMessageUtility.fold(used, foldMe);
+        return MimeMessageUtility.fold(used, foldMe);
     }
 
     /**
@@ -251,7 +251,7 @@ public final class Utility {
      * @return The unfolded string
      */
     public static String unfold(final String headerLine) {
-        return MIMEMessageUtility.unfold(headerLine);
+        return MimeMessageUtility.unfold(headerLine);
     }
 
     /**
@@ -365,7 +365,7 @@ public final class Utility {
      * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
      */
     public static String getContentType(final String fileName) {
-        return MIMEType2ExtMap.getContentType(fileName);
+        return MimeType2ExtMap.getContentType(fileName);
     }
 
     /**
@@ -375,7 +375,7 @@ public final class Utility {
      * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
      */
     public static String getContentTypeByExtension(final String extension) {
-        return MIMEType2ExtMap.getContentTypeByExtension(extension);
+        return MimeType2ExtMap.getContentTypeByExtension(extension);
     }
 
     /**
@@ -385,6 +385,6 @@ public final class Utility {
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
     public static List<String> getFileExtensions(final String mimeType) {
-        return MIMEType2ExtMap.getFileExtensions(mimeType);
+        return MimeType2ExtMap.getFileExtensions(mimeType);
     }
 }

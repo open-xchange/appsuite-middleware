@@ -69,7 +69,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
@@ -295,7 +295,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 	public void testMailReply() {
 		try {
-			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+			final MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final Context ctx = new ContextImpl(getCid());
 			final SessionObject session = getSession();
@@ -373,7 +373,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 	public void testMailReplyAll() {
 		try {
-			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_REPLY_ALL.getBytes(com.openexchange.java.Charsets.US_ASCII));
+			final MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_REPLY_ALL.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final Context ctx = new ContextImpl(getCid());
 			final SessionObject session = getSession();
@@ -458,7 +458,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 	public void testMailReplyMsgRef() {
 		try {
-			MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
+			MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final Context ctx = new ContextImpl(getCid());
 			final SessionObject session = getSession();

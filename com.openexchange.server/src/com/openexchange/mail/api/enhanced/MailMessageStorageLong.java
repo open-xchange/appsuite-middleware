@@ -61,7 +61,7 @@ import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
@@ -417,7 +417,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
-            final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+            final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
             filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
             /*
              * Append message to draft folder

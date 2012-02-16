@@ -63,9 +63,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MessageUtility;
@@ -317,11 +317,11 @@ public class DumperMessageHandler implements MailMessageHandler {
             nestedMail = (MailMessage) content;
         } else if (content instanceof InputStream) {
             try {
-                nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
-                    MIMEDefaultSession.getDefaultSession(),
+                nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
+                    MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
             } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e);
             }
         } else {
             LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));

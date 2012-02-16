@@ -68,7 +68,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
@@ -446,7 +446,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             final POP3Config config = getPOP3Config();
             key = LoginKey.N(new InetSocketAddress(InetAddress.getByName(config.getServer()), config.getPort()), config.getLogin());
         } catch (final UnknownHostException e) {
-            throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
+            throw MimeMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
         Future<Object> f = SYNCHRONIZER_MAP.get(key);
         boolean removeFromMap = false;
