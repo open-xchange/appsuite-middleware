@@ -551,9 +551,6 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                     UserParticipant up = (UserParticipant) participant;
                     if (up.getIdentifier() == session.getUserId()) {
                         found = true;
-                        if (confirm != -1) {
-                            up.setConfirm(confirm);
-                        }
                     }
                 }
             }
@@ -576,9 +573,6 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             for (UserParticipant userParticipant : users) {
                 if (userParticipant.getIdentifier() == session.getUserId()) {
                     found = true;
-                    if (confirm != -1) {
-                        userParticipant.setConfirm(confirm);
-                    }
                 }
             }
         }
