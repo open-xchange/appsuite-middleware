@@ -959,6 +959,7 @@ public class Login extends AJAXServlet {
                 // Store associated session
                 SessionServlet.rememberSession(req, ServerSessionAdapter.valueOf(session, result.getContext(), result.getUser()));
                 writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+                writeSessionCookie(resp, session, session.getHash(), req.isSecure());
 
                 // Login response is unfortunately not conform to default responses.
                 ((JSONObject) response.getData()).write(resp.getWriter());
