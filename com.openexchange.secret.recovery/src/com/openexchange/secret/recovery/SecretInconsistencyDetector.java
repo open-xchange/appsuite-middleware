@@ -60,6 +60,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface SecretInconsistencyDetector {
 
+    /**
+     * Checks if specified session's current secret is working.
+     * 
+     * @param session The session whose secret shall be checked
+     * @return <code>true</code> if secret works; otherwise <code>false</code>
+     * @throws OXException If checking secret fails
+     */
     String isSecretWorking(ServerSession session) throws OXException;
 
 }
