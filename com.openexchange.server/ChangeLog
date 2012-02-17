@@ -1,3 +1,7 @@
+* 2012-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20826: Using proper decrypt mechanism for encrypted passwords of ext. mail accounts
+
 * 2012-02-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 21565: Deny deletion of system folders
