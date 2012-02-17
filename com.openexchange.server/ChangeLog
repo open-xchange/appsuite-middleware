@@ -1,3 +1,8 @@
+* 2012-02-17 - jan.bauerdick@open-xchange.com
+
+ - Added column-aliases "all" & "list" for mailrequests
+ - Fixed autologin in OX7 B/E & OX6 F/E
+
 * 2012-02-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 21565: Deny deletion of system folders
