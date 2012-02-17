@@ -525,6 +525,9 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 			} catch (SQLException e) {
 				appointment.setExternalOrganizer(false);
 				return;
+			} catch (OXException x) {
+				appointment.setExternalOrganizer(false);
+				return;
 			}
 			organizer = loaded.getOrganizer();
 			if (organizer == null || appointment.getOrganizerId() > 0 || appointment.getPrincipalId() > 0) {
