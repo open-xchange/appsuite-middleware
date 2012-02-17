@@ -80,7 +80,10 @@ public final class StaticConfigIndexService implements ConfigIndexService {
         server.setMaxConnectionsPerHost(100);
         server.setSoTimeout(3000);
         this.server = server;
-        this.indexUrl = new IndexUrlImpl(server, "solr/main");
+        final SolrCore core = new SolrCore();
+        core.setServer(server);
+        core.setCoreName("solr/main");
+        indexUrl = new IndexUrlImpl(core);
     }
 
     @Override
@@ -99,7 +102,7 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public void unregisterIndexServer(final int serverId, final boolean deleteMappings) throws OXException {
+    public void unregisterIndexServer(final int serverId) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -116,21 +119,8 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public void addIndexMapping(final int cid, final int uid, final int module, final String index) throws OXException {
+    public void deleteIndexFile(final String indexFile) throws OXException {
         // TODO Auto-generated method stub
-
+        
     }
-
-    @Override
-    public void removeIndexMapping(final int cid, final int uid, final int module) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void modifiyIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
 }

@@ -69,24 +69,43 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
 
     @Override
     public IndexUrl getReadOnlyURL(final int cid, final int uid, final int module) throws OXException {
-        return ConfigIndexMysql.getInstance().getIndexUrl(cid, uid, module);
+        final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
+        final boolean hasActiveCore = indexMysql.hasActiveCore(cid, uid, module);
+        if (!hasActiveCore) {
+            final String indexFile = indexMysql.getIndexFile(cid, uid, module);
+            final String coreName = startUpSolrCore(indexFile);
+            // TODO: determine server id.
+            final int serverId = -1;
+            
+            if (!indexMysql.activateCoreEntry(cid, uid, module, coreName, serverId)) {
+                /*
+                 * Somebody else tried to start up a core for this index and was faster.
+                 */
+                shutDownSolrCore(coreName);
+            }
+        }
+        
+        final SolrCore core = indexMysql.getSolrCore(cid, uid, module);
+        final IndexUrlImpl indexUrl = new IndexUrlImpl(core);
+        
+        return indexUrl;
     }
 
     @Override
     public IndexUrl getWriteURL(final int cid, final int uid, final int module) throws OXException {
         // TODO: Until now there is now difference between read and write connection.
         // Change this here if it's going to be implemented.
-        return ConfigIndexMysql.getInstance().getIndexUrl(cid, uid, module);
+        return getReadOnlyURL(cid, uid, module);
     }
 
     @Override
-    public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
-        ConfigIndexMysql.getInstance().unregisterIndexServer(serverId, deleteMappings);
+    public void unregisterIndexServer(final int serverId) throws OXException {
+        ConfigIndexMysql.getInstance().removeIndexServerEntry(serverId);
     }
 
     @Override
-    public int registerIndexServer(IndexServer server) throws OXException {
-        return ConfigIndexMysql.getInstance().registerIndexServer(server);
+    public int registerIndexServer(final IndexServer server) throws OXException {
+        return ConfigIndexMysql.getInstance().createIndexServerEntry(server);
     }
 
     @Override
@@ -95,28 +114,27 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     }
 
     @Override
-    public void modifyIndexServer(IndexServer server) throws OXException {
-        ConfigIndexMysql.getInstance().modifyIndexServer(server);
+    public void modifyIndexServer(final IndexServer server) throws OXException {
+        ConfigIndexMysql.getInstance().updateIndexServerEntry(server);
     }
-
+    
     @Override
-    public void addIndexMapping(int cid, int uid, int module, String index) throws OXException {
-        int serverId = ConfigIndexMysql.getInstance().createIndexMapping(cid, uid, module, index);
-
-        // TODO: Create index / core here
+    public void deleteIndexFile(final String indexFile) throws OXException {
+        // TODO Auto-generated method stub
+        
     }
-
-    @Override
-    public void removeIndexMapping(int cid, int uid, int module) throws OXException {
-        ConfigIndexMysql.getInstance().removeIndexMapping(cid, uid, module);
-
-        // TODO: Remove index / core
+    
+    private String startUpSolrCore(final String indexFile) throws OXException {
+        /*
+         * TODO: Start up Solr core on this machine using underlying kippdata management service.
+         * Return the cores name. 
+         */
+        return null;
     }
-
-    @Override
-    public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
-        ConfigIndexMysql.getInstance().modifiyIndexMapping(cid, uid, module, server, index);
-
-        // TODO: Apply any changes to the modified index / core
-    }
+    
+    private void shutDownSolrCore(final String coreName) throws OXException {
+        /*
+         * TODO: Shut down Solr core on this machine using underlying kippdata management service.
+         */
+    }   
 }

@@ -66,7 +66,7 @@ public class IndexUpdateTaskProviderService implements UpdateTaskProviderService
 
     private List<UpdateTaskV2> updateTasks;
 
-    public IndexUpdateTaskProviderService(UpdateTaskV2... updateTasks) {
+    public IndexUpdateTaskProviderService(final UpdateTaskV2... updateTasks) {
         super();
         if (updateTasks == null || updateTasks.length == 0) {
             this.updateTasks = Collections.EMPTY_LIST;

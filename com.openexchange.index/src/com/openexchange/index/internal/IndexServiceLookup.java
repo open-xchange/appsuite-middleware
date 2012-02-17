@@ -75,7 +75,7 @@ public class IndexServiceLookup implements ServiceLookup {
     }
 
     @Override
-    public <S> S getService(Class<? extends S> clazz) {
+    public <S> S getService(final Class<? extends S> clazz) {
         final ServiceLookup serviceLookup = serviceLookupRef.get();
         if (null == serviceLookup) {
             return null;
@@ -85,7 +85,7 @@ public class IndexServiceLookup implements ServiceLookup {
     }
     
     @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
         final ServiceLookup serviceLookup = serviceLookupRef.get();
         if (null == serviceLookup) {
             return null;
@@ -97,7 +97,4 @@ public class IndexServiceLookup implements ServiceLookup {
     public void setServiceLookup(final ServiceLookup serviceLookup) {
         serviceLookupRef.set(serviceLookup);
     }
-    
-    
-
 }
