@@ -134,7 +134,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         if (differ && message.getDataObject() != null) {
-            change.setNewAppointment(message.getDataObject());
+        	CalendarDataObject dao = message.getDataObject().clone();
+        	ensureParticipant(dao, session);
+        	change.setNewAppointment(dao);
 
             change.setConflicts(util.getConflicts(message.getDataObject(), session));
 
@@ -146,6 +148,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         for (CalendarDataObject exception : message.exceptions()) {
+        	exception = exception.clone();
+        	ensureParticipant(exception, session);
+
             Appointment matchingException = findAndRemoveMatchingException(exception, exceptions);
             change = new ITipChange();
             change.setException(true);

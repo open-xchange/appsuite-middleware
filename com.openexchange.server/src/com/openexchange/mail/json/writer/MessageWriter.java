@@ -772,7 +772,7 @@ public final class MessageWriter {
     // private static final Pattern PATTERN_QUOTE = Pattern.compile("[.,:;<>\"]");
 
     private static String preparePersonal(final String personal) {
-        return MimeMessageUtility.quotePhrase(MimeMessageUtility.decodeMultiEncodedHeader(personal), false);
+        return MimeMessageUtility.quotePhrase(personal, false);
     }
 
     private static final String DUMMY_DOMAIN = "@unspecified-domain";

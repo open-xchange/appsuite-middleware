@@ -57,6 +57,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
+import com.openexchange.ajp13.servlet.http.HttpSessionWrapper;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -149,6 +150,18 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 public void start() {
                     final ConfigurationService service = getService(ConfigurationService.class);
                     AJPv13Request.setEchoHeaderName(null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName"));
+                }
+            });
+            inits.add(new Initialization() {
+
+                @Override
+                public void stop() {
+                    HttpSessionWrapper.resetCookieTTL();
+                }
+
+                @Override
+                public void start() {
+                    HttpSessionWrapper.getCookieTTL();
                 }
             });
             /*

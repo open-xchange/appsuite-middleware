@@ -67,6 +67,7 @@ import com.openexchange.groupware.tasks.Task;
 public class AllAliasTest extends AbstractTaskTest {
 
     private AJAXClient client;
+
     private Task task;
 
     /**
@@ -103,7 +104,11 @@ public class AllAliasTest extends AbstractTaskTest {
         final CommonAllResponse aliasResponse = client.execute(aliasRequest);
         final Object[][] tasksAlias = aliasResponse.getArray();
 
-        final AllRequest request = new AllRequest(client.getValues().getPrivateTaskFolder(), new int[] {20,1,5,200,220}, 0, Order.NO_ORDER);
+        final AllRequest request = new AllRequest(
+            client.getValues().getPrivateTaskFolder(),
+            new int[] { 20, 1, 2, 5, 4 },
+            0,
+            Order.NO_ORDER);
         final CommonAllResponse response = client.execute(request);
         final Object[][] tasks = response.getArray();
 

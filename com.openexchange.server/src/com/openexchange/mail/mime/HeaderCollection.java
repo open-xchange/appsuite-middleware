@@ -63,10 +63,14 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -409,12 +413,12 @@ public class HeaderCollection implements Serializable {
             /*
              * Append
              */
-            values.add(value);
+            values.add(checkValue(value));
         } else {
             /*
              * Prepend
              */
-            values.add(0, value);
+            values.add(0, checkValue(value));
         }
         count++;
     }
@@ -828,12 +832,13 @@ public class HeaderCollection implements Serializable {
             return true;
         }
         if (isName) {
-            if (str.length() == 0) {
+            final int length = str.length();
+            if (length == 0) {
                 return true;
             }
-            final char[] chars = str.toCharArray();
-            for (int i = 0; i < chars.length; i++) {
-                if (Character.isWhitespace(chars[i]) || (chars[i] >= 128)) {
+            for (int i = 0; i < length; i++) {
+                final char c = str.charAt(i);
+                if (Character.isWhitespace(c) || (c >= 128)) {
                     /*
                      * Whitespace or non-ascii character
                      */
@@ -858,10 +863,10 @@ public class HeaderCollection implements Serializable {
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static final boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscci = true;
-        for (int i = 0; (i < chars.length) && isAscci; i++) {
-            isAscci &= (chars[i] < 128);
+        for (int i = 0; (i < length) && isAscci; i++) {
+            isAscci &= (s.charAt(i) < 128);
         }
         return isAscci;
     }
@@ -882,6 +887,25 @@ public class HeaderCollection implements Serializable {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String checkValue(final String value) {
+        if (isAscii(value)) {
+            return value;
+        }
+        final int length = value.length();
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) value.charAt(i);
+        }
+        try {
+            final String detectCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+            final String unicodeVal = MessageUtility.readStream(new UnsynchronizedByteArrayInputStream(bytes), detectCharset);
+            return MimeUtility.encodeWord(unicodeVal, "UTF-8", "Q");
+        } catch (final IOException e) {
+            // Cannot occur
+            return value;
+        }
     }
 
     /**

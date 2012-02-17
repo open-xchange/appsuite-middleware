@@ -131,6 +131,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    /**
+     * The max. length for a mailbox name
+     */
+    private static final int MAX_MAILBOX_NAME = 255;
+
     private static final String STR_INBOX = "INBOX";
 
     private static final String STR_MSEC = "msec";
@@ -814,6 +819,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (isEmpty(name)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
+        if (name.length() > MAX_MAILBOX_NAME) {
+            throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+        }
         boolean created = false;
         IMAPFolder createMe = null;
         try {
@@ -1163,6 +1171,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
                 } else if (newName.indexOf(separator) != -1) {
                     throw MailExceptionCode.INVALID_FOLDER_NAME.create(String.valueOf(separator));
+                } else if (newName.length() > MAX_MAILBOX_NAME) {
+                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
                 }
                 /*-
                  * Perform rename operation
@@ -1337,6 +1347,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                         newName = newFullname.substring(pos + 1);
                     }
+                }
+                if (newName.length() > MAX_MAILBOX_NAME) {
+                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
                 }
                 /*
                  * Check for move

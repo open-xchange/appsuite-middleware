@@ -62,7 +62,6 @@ import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * {@link ListAliasTest}
  *
@@ -71,6 +70,7 @@ import com.openexchange.groupware.tasks.Task;
 public class ListAliasTest extends AbstractTaskTest {
 
     private AJAXClient client;
+
     private Task task;
 
     /**
@@ -103,7 +103,7 @@ public class ListAliasTest extends AbstractTaskTest {
         final InsertResponse insertResponse = client.execute(insertRequest);
         insertResponse.fillObject(task);
 
-        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateTaskFolder(), new int[] {20,1}, 0, Order.NO_ORDER);
+        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateTaskFolder(), new int[] { 20, 1 }, 0, Order.NO_ORDER);
         final CommonAllResponse allResponse = client.execute(allRequest);
         final ListIDs ids = allResponse.getListIDs();
 
@@ -111,7 +111,7 @@ public class ListAliasTest extends AbstractTaskTest {
         final CommonListResponse aliasResponse = client.execute(aliasRequest);
         final Object[][] tasksAlias = aliasResponse.getArray();
 
-        final ListRequest request = new ListRequest(ids, new int[] {20,1,5});
+        final ListRequest request = new ListRequest(ids, new int[] { 20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102 });
         final CommonListResponse response = client.execute(request);
         final Object[][] tasks = response.getArray();
 
