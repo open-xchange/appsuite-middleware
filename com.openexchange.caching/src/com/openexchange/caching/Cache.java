@@ -197,6 +197,15 @@ public interface Cache {
     public void localRemove(Serializable key) throws OXException;
 
     /**
+     * Puts the object into the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
+     * 
+     * @param key The key
+     * @param value Object to store
+     * @throws OXException If put operation on cache fails
+     */
+    public void localPut(Serializable key, Serializable value) throws OXException;
+
+    /**
      * Removes the object located in specified group and bound to given key.
      *
      * @param key The key

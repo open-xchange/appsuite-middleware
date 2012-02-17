@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,24 @@
  *
  */
 
-package com.openexchange.secret.recovery;
+package com.openexchange.halo.mail.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.mail.OxEmailDataSource;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
 
+public class MailHaloActivator extends HousekeepingActivator {
 
-/**
- * {@link SecretInconsistencyDetector}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public interface SecretInconsistencyDetector {
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return new Class[]{ MailService.class, MailAccountStorageService.class };
+	}
 
-    /**
-     * Checks if specified session's current secret is working.
-     * 
-     * @param session The session whose secret shall be checked
-     * @return <code>true</code> if secret works; otherwise <code>false</code>
-     * @throws OXException If checking secret fails
-     */
-    String isSecretWorking(ServerSession session) throws OXException;
+	@Override
+	protected void startBundle() throws Exception {
+		registerService(HaloContactDataSource.class, new OxEmailDataSource(this));
+	}
 
 }

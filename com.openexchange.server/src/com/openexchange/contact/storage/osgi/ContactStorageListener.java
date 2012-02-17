@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,47 @@
  *
  */
 
-package com.openexchange.secret.recovery;
+package com.openexchange.contact.storage.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link SecretInconsistencyDetector}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ContactStorageListener} - Recognizes {@link ContactStorage} services.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface SecretInconsistencyDetector {
+public class ContactStorageListener implements SimpleRegistryListener<ContactStorage> {
+	
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactStorageListener.class));
+    
+    private final DefaultContactStorageRegistry registry;
 
     /**
-     * Checks if specified session's current secret is working.
+     * Initializes a new {@link ContactStorageListener}.
      * 
-     * @param session The session whose secret shall be checked
-     * @return <code>true</code> if secret works; otherwise <code>false</code>
-     * @throws OXException If checking secret fails
+     * @param registry the registry to use
      */
-    String isSecretWorking(ServerSession session) throws OXException;
+    public ContactStorageListener(final DefaultContactStorageRegistry registry) {
+        super();
+        this.registry = registry;
+        LOG.debug("initialized.");
+    }
+
+    @Override
+    public void added(final ServiceReference<ContactStorage> ref, final ContactStorage service) {
+        LOG.info("adding contact storage: " + service);
+        this.registry.addStorage(service);
+    }
+
+    @Override
+    public void removed(final ServiceReference<ContactStorage> ref, final ContactStorage service) {
+        LOG.info("removing contact storage: " + service);
+        this.registry.removeStorage(service);
+    }
 
 }

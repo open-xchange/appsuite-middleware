@@ -61,6 +61,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.InvalidatedMarker;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -182,6 +184,16 @@ public final class SessionHandler {
                 } catch (final OXException e) {
                     LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 }
+            }
+            /*
+             * Get cache service
+             */
+            try {
+                final Cache sessionCache = SessionCache.getInstance().getCache();
+                final Integer key = Integer.valueOf(contextId);
+                sessionCache.put(key, InvalidatedMarker.newInstance(key));
+            } catch (final OXException e) {
+                // Ignore
             }
         }
         if (INFO) {
