@@ -535,13 +535,21 @@ public final class HTMLServiceImpl implements HTMLService {
         final StringBuilder sb = new StringBuilder(text.length());
         int quote = 0;
         String prefix = "";
-        for (final String line : lines) {
+        for (String line : lines) {
             if (line.startsWith(BLOCKQUOTE_MARKER)) {
-                quote = quote + (line.length() >= len && line.startsWith(END, len) ? -1 : 1);
+                if (line.length() >= len && line.startsWith(END, len)) { // Marker for blockquote end
+                    quote--;
+                    line = line.substring(BLOCKQUOTE_MARKER.length() + 2).trim();
+                } else {
+                    quote++;
+                    line = line.substring(BLOCKQUOTE_MARKER.length()).trim();
+                }
                 prefix = getPrefixFor(quote);
-            } else {
-                sb.append(prefix).append(line).append(CRLF);
+                if (isEmpty(line)) {
+                    continue;
+                }
             }
+            sb.append(prefix).append(line).append(CRLF);
         }
         return sb.toString();
     }
@@ -555,6 +563,18 @@ public final class HTMLServiceImpl implements HTMLService {
             sb.append("> ");
         }
         return sb.toString();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("<blockquote.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
