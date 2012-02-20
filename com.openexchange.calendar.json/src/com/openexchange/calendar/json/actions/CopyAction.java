@@ -64,6 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -77,6 +79,9 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {},
+requestBody = "",
+responseDescription = "")
 public final class CopyAction extends AppointmentAction {
 
     /**

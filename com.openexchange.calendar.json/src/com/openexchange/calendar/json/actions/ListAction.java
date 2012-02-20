@@ -67,6 +67,9 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -84,6 +87,12 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "list", description = "Get a list of appointments.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data."),
+    @Parameter(name = "recurrence_master", description = "Extract the recurrence to several appointments. The default value is false so every appointment of the recurrence will be calculated.")
+}, requestBody = "An array with full object IDs (folder, id and optionally either recurrence_position or recurrence_date_position) of requested appointments.",
+responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class ListAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =

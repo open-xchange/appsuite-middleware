@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.actions.AllAction;
@@ -74,6 +75,7 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Module(name = "tasks", description = "Provides access to task information.")
 public class TaskActionFactory implements AJAXActionServiceFactory {
 
     private static final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
