@@ -50,85 +50,109 @@
 package com.openexchange.index;
 
 
+
 /**
- * {@link IndexServer}
+ * {@link IndexServerImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexServer {
+public class IndexServer {
+
+    private String url;
+
+    private int soTimeout;
+
+    private int connectionTimeout;
+
+    private int maxConnectionsPerHost;
+
+
+    public IndexServer() {
+      super();
+      soTimeout = 1000;
+      connectionTimeout = 100;
+      maxConnectionsPerHost = 100;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public int getSoTimeout() {
+        return soTimeout;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public int getMaxConnectionsPerHost() {
+        return maxConnectionsPerHost;
+    }
 
     /**
-     * Gets the unique id of the index server.
+     * Sets the url
      *
-     * @return The id.
+     * @param url The url to set
      */
-    int getId();
+    public void setUrl(final String url) {
+        this.url = url;
+    }
 
     /**
-     * Gets the index servers url.
+     * Sets the soTimeout
      *
-     * @return The url
+     * @param soTimeout The soTimeout to set
      */
-    String getUrl();
+    public void setSoTimeout(final int soTimeout) {
+        this.soTimeout = soTimeout;
+    }
 
     /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
+     * Sets the connectionTimeout
      *
-     * @return The setting for SO_TIMEOUT
+     * @param connectionTimeout The connectionTimeout to set
      */
-    int getSoTimeout();
+    public void setConnectionTimeout(final int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
 
     /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
+     * Sets the maxConnectionsPerHost
      *
-     * @return The connection timeout
+     * @param maxConnectionsPerHost The maxConnectionsPerHost to set
      */
-    int getConnectionTimeout();
+    public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
+        this.maxConnectionsPerHost = maxConnectionsPerHost;
+    }
 
-    /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
-     *
-     * @return The max. number of connections per host
-     */
-    int getMaxConnectionsPerHost();
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        return result;
+    }
 
-    /**
-     * Gets the max. number of indices that can be created on this server.
-     * <p>
-     * Default is <code>100</code>.
-     *
-     * @return The max. number of indices
-     */
-    int getMaxIndices();
-
-    /**
-     * <code>true</code> if url has been set. Otherwise <code>false</code>.
-     */
-    boolean hasUrl();
-
-    /**
-     * <code>true</code> if socket timeout has been set. Otherwise <code>false</code>.
-     */
-    boolean hasSoTimeout();
-
-    /**
-     * <code>true</code> if connection timeout has been set. Otherwise <code>false</code>.
-     */
-    boolean hasConnectionTimeout();
-
-    /**
-     * <code>true</code> if max. connections per host has been set. Otherwise <code>false</code>.
-     */
-    boolean hasMaxConnectionsPerHost();
-
-    /**
-     * <code>true</code> if max. indices has been set. Otherwise <code>false</code>.
-     */
-    boolean hasMaxIndices();
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final IndexServer other = (IndexServer) obj;
+        if (url == null) {
+            if (other.url != null) {
+                return false;
+            }
+        } else if (!url.equals(other.url)) {
+            return false;
+        }
+        return true;
+    }
 }

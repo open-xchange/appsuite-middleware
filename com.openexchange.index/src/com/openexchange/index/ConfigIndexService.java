@@ -62,6 +62,7 @@ import com.openexchange.groupware.Types;
 public interface ConfigIndexService {
     /**
      * Gets the appropriate read-only URL to index host for specified arguments.
+     * If there is no core running for this user/module-combination it will be started automatically.
      *
      * @param contextId The context identifier.
      * @param userId The user identifier. Use <code>0</code> here to receive the contexts index for public folders.
@@ -73,6 +74,7 @@ public interface ConfigIndexService {
 
     /**
      * Gets the appropriate read-write URL to index host for specified arguments.
+     * If there is no core running for this user/module-combination it will be started automatically.
      *
      * @param contextId The context identifier.
      * @param userId The user identifier. Use <code>0</code> here to receive the contexts index for public folders.
@@ -81,45 +83,67 @@ public interface ConfigIndexService {
      * @throws OXException If index URL cannot be returned.
      */
     IndexUrl getWriteURL(int contextId, int userId, int module) throws OXException;
-
-    /**
-     * Registers a new index search server at the config db.
-     *
-     * @param server The index server to register.
-     * @return The id of the registered server.
-     * @throws OXException If the server could not be registered.
-     */
-    int registerIndexServer(IndexServer server) throws OXException;
-
-    /**
-     * Modifies an index search server.
-     *
-     * @param server The index server to modify.
-     * @throws OXException If the server could not be modified.
-     */
-    void modifyIndexServer(IndexServer server) throws OXException;
-
-    /**
-     * Removes an index search server from the config db.
-     *
-     * @param serverId The id of the server to remove.
-     * @throws OXException
-     */
-    void unregisterIndexServer(int serverId) throws OXException;
-
-    /**
-     * Gets all registered index search servers.
-     *
-     * @return An array of IndexUrls. Every IndexUrl points to one server.
-     * @throws OXException
-     */
-    List<IndexServer> getAllIndexServers() throws OXException;
     
     /**
-     * Deletes an index file.
+     * Gets a list of all available core stores.
      * 
-     * @param indexFile The path to the index file.
-     * @throws OXException if deletion fails.
+     * @return The store list.
+     * @throws OXException
      */
-    void deleteIndexFile(String indexFile) throws OXException;
+    List<SolrCoreStore> getAllStores() throws OXException;
+    
+    /**
+     * Registers a new solr core store.
+     * 
+     * @param store The store.
+     * @return The stores id.
+     * @throws OXException
+     */
+    int registerCoreStore(SolrCoreStore store) throws OXException;
+    
+    /**
+     * Modifies an existing core.
+     * 
+     * @param store The store to modifiy. Must contain id!
+     * @throws OXException
+     */
+    void modifyCoreStore(SolrCoreStore store) throws OXException;
+    
+    /**
+     * Unregisters a core store.
+     * 
+     * @param storeId The id of the store to unregister.
+     * @throws OXException
+     */
+    void unregisterCoreStore(int storeId) throws OXException;
+    
+    /**
+     * Stops a running solr core.
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void stopCore(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Creates a new solr core. The core will be inactive after creation.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void createCore(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Deletes a core. If the core is running, it will be stopped first.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void deleteCore(int contextId, int userId, int module) throws OXException;
+    
 }

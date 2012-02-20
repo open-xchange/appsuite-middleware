@@ -6,7 +6,8 @@ Bundle-Version: 6.21.0.0
 Bundle-Activator: com.openexchange.index.osgi.IndexActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.database,
+Import-Package: com.openexchange.config,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware.update,
  com.openexchange.osgi,
