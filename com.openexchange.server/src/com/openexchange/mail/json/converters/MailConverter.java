@@ -162,7 +162,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 } else if (Mail.ACTION_LIST.equalsIgnoreCase(action)) {
                     convertMultiple4List(mails, requestData, result, session);
                 } else {
-                    throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+                    //throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+                	convertMultiple4List(mails, requestData, result, session);
                 }
             }
         } catch (final JSONException e) {

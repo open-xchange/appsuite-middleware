@@ -58,6 +58,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.databaseold.Database;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -86,6 +88,9 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {},
+requestBody = "",
+responseDescription = "")
 public class CopyAction extends ContactAction {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CopyAction.class));

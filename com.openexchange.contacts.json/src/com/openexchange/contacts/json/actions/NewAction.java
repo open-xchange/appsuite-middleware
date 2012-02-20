@@ -55,6 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.converters.ContactParser;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -71,6 +74,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Create a contact.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "Contact object as described in Common object data and Detailed contact data. The field id is not included. To add some contact image the PUT command must be replaced with a POST command and all data must be provided within a multipart/form-data body. The normal request body must be placed into a form field named json while the image file must be placed in a file field named file. The response is then an HTML page as described in section File uploads.",
+responseDescription = "A json objekt with attribute id of the newly created contact.")
 public class NewAction extends ContactAction {
 
     /**

@@ -59,6 +59,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
@@ -73,13 +76,18 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "list", description = "Get a list of tasks.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data. The alias \"list\" uses a predefined columnset.")
+}, requestBody = "An array of with object IDs of requested tasks. ",
+responseDescription = "Response with timestamp: An object containing all data of the requested task. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed task data. The field id is not included. ")
 public class ListAction extends TaskAction {
 
     /**
      * Initializes a new {@link ListAction}.
      * @param services
      */
-    public ListAction(ServiceLookup services) {
+    public ListAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -87,7 +95,7 @@ public class ListAction extends TaskAction {
      * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
      */
     @Override
-    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         Date timestamp = new Date(0);
 
         Date lastModified = null;

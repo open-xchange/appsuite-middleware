@@ -57,6 +57,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -70,6 +73,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Action(method = RequestMethod.GET, name = "updates", description = "Get updated contacts.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for contacts are defined in Common object data and Detailed contact data."),
+    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
+    @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested contacts."),
+    @Parameter(name = "ignore", description = "(mandatory - should be set to \"deleted\") (deprecated) – Which kinds of updates should be ignored. Currently, the only valid value – \"deleted\" – causes deleted object IDs not to be returned.")
+}, responseDescription = "Response with timestamp: An array with new, modified and deleted contacts. New and modified contacts are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted contacts (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array.")
 public class UpdatesAction extends ContactAction {
 
     /**

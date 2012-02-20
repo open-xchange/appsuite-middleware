@@ -55,6 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.converters.ContactParser;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -75,6 +78,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a contact.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", description = "Folder identifier through that the contact is accessed. This is necessary for checking the permissions."),
+    @Parameter(name = "id", description = "Object ID of the updated contact."),
+    @Parameter(name = "timestamp", description = "Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.")
+}, requestBody = "Contact object as described in Common object data and Detailed contact data. Only modified fields are present.",
+responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated contact, and maybe errors.")
 public class UpdateAction extends ContactAction {
 
     /**

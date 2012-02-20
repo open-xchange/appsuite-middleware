@@ -56,6 +56,8 @@ import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -68,6 +70,9 @@ import com.openexchange.tasks.json.TaskRequest;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Create a task.", parameters = {},
+requestBody = "Task object as described in Common object data, Detailed task and appointment data and Detailed task data. The field id is not present.",
+responseDescription = "A json objekt with attribute id of the newly created task.")
 public class NewAction extends TaskAction {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(NewAction.class));
@@ -77,7 +82,7 @@ public class NewAction extends TaskAction {
      *
      * @param services
      */
-    public NewAction(ServiceLookup services) {
+    public NewAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -86,7 +91,7 @@ public class NewAction extends TaskAction {
      * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
      */
     @Override
-    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final Task task = new Task();
 
         final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
