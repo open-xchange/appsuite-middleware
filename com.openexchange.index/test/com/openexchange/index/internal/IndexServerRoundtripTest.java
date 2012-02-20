@@ -74,16 +74,16 @@ public class IndexServerRoundtripTest extends SQLTestCase {
         super.setUp();
         dbProvider = getDBProvider();
         con = dbProvider.getWriteConnection(null);
-        con.createStatement().executeUpdate("DELETE FROM index_servers");
+        con.createStatement().executeUpdate("DELETE FROM solrServers");
     }
 
     public void testIndexServerCreation() throws OXException {
-        IndexServerImpl expected = createIndexServer();
+        final IndexServerImpl expected = createIndexServer();
 
         // List all servers and check the inserted one
-        List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
+        final List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         boolean found = false;
-        for (IndexServer actual : servers) {
+        for (final IndexServer actual : servers) {
             if (expected.getId() == actual.getId()) {
                 found = true;
                 assertServers(expected, actual);
@@ -97,18 +97,18 @@ public class IndexServerRoundtripTest extends SQLTestCase {
     }
 
     public void testIndexServerModification() throws OXException {
-        IndexServerImpl expected = createIndexServer();
+        final IndexServerImpl expected = createIndexServer();
         expected.setConnectionTimeout(32);
         expected.setMaxConnectionsPerHost(45);
         expected.setMaxIndices(21);
         expected.setSoTimeout(64);
         expected.setUrl("http://4.3.2.1:5008");
-        ConfigIndexMysql.getInstance().modifyIndexServer(con, expected);
+        ConfigIndexMysql.getInstance().updateIndexServerEntry(con, expected);
 
         // List all servers and check the modified one
-        List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
+        final List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         boolean found = false;
-        for (IndexServer actual : servers) {
+        for (final IndexServer actual : servers) {
             if (expected.getId() == actual.getId()) {
                 found = true;
                 assertServers(expected, actual);
@@ -122,12 +122,12 @@ public class IndexServerRoundtripTest extends SQLTestCase {
     }
 
     public void testIndexServerDeletion() throws OXException {
-        IndexServerImpl expected = createIndexServer();
+        final IndexServerImpl expected = createIndexServer();
 
         // List all servers and check the inserted one
         List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         boolean found = false;
-        for (IndexServer actual : servers) {
+        for (final IndexServer actual : servers) {
             if (expected.getId() == actual.getId()) {
                 found = true;
                 assertServers(expected, actual);
@@ -139,10 +139,10 @@ public class IndexServerRoundtripTest extends SQLTestCase {
             fail("Did not find the modified server.");
         }
 
-        ConfigIndexMysql.getInstance().unregisterIndexServer(con, expected.getId(), false);
+        ConfigIndexMysql.getInstance().removeIndexServerEntry(con, expected.getId());
         servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         found = false;
-        for (IndexServer actual : servers) {
+        for (final IndexServer actual : servers) {
             if (expected.getId() == actual.getId()) {
                 found = true;
                 break;
@@ -158,7 +158,7 @@ public class IndexServerRoundtripTest extends SQLTestCase {
         return IndexTestTool.createIndexServer(con);
     }
 
-    private void assertServers(IndexServer indexServer, IndexServer actual) {
+    private void assertServers(final IndexServer indexServer, final IndexServer actual) {
         assertEquals("Id and Url were not equal.", indexServer, actual);
         assertEquals("Connection timeout was not equal.", indexServer.getConnectionTimeout(), actual.getConnectionTimeout());
         assertEquals("Max connections per host was not equal.", indexServer.getMaxConnectionsPerHost(), actual.getMaxConnectionsPerHost());
@@ -168,7 +168,7 @@ public class IndexServerRoundtripTest extends SQLTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        con.createStatement().executeUpdate("DELETE FROM index_servers");
+        con.createStatement().executeUpdate("DELETE FROM solrServers");
         dbProvider.releaseWriteConnection(null, con);
         super.tearDown();
     }

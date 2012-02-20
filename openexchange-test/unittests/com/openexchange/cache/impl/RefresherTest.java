@@ -228,6 +228,11 @@ public class RefresherTest extends TestCase {
                     // TODO Auto-generated method stub
                     
                 }
+                @Override
+                public void localPut(final Serializable key, final Serializable value) throws OXException {
+                    // TODO Auto-generated method stub
+                    
+                }
             };
             @Override
             public void freeCache(final String name) {

@@ -65,7 +65,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.cache.SessionCache;
 
 /**
  * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}
@@ -155,21 +154,6 @@ public class SessiondServiceImpl implements SessiondService {
         if (null == sessionControl) {
             LOG.info("Session not found. ID: " + sessionId);
             return null;
-        }
-        {
-            try {
-                final int contextId = sessionControl.getSession().getContextId();
-                if (SessionCache.getInstance().containsInvalidateMarker(contextId)) {
-                    // Drops sessions belonging to context
-                    SessionHandler.removeContextSessions(contextId, true);
-                    // Return null
-                    LOG.info("Context is marked as invalid: " + contextId);
-                    return null;
-                }
-            } catch (final Exception e) {
-                // Ignore
-                LOG.debug("Caching error.", e);
-            }
         }
         return sessionControl.touch().getSession();
     }

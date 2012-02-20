@@ -50,18 +50,22 @@
 package com.openexchange.file.storage.webdav.osgi;
 
 import static com.openexchange.file.storage.webdav.services.WebDAVFileStorageServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
 import com.openexchange.file.storage.webdav.session.WebDAVEventHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 
@@ -72,7 +76,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class WebDAVFileStorageActivator extends HousekeepingActivator {
 
-    private List<ServiceTracker<?,?>> trackers;
+    WebDAVFileStorageService webdavFileStorageService;
 
     private Registerer registerer;
 
@@ -129,15 +133,27 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
             // FacebookConstants.init();
             // FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
 
-            trackers = new ArrayList<ServiceTracker<?,?>>(1);
-            // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
-            /*
-             * Register services
-             */
-            // registrations.add(context.registerService(FileStorageService.class.getName(), WebDAVFileStorageService.newInstance(), null));
+            track(FileStorageAccountManagerProvider.class, new SimpleRegistryListener<FileStorageAccountManagerProvider>() {
+
+                @Override
+                public void added(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
+                    if (null != webdavFileStorageService) {
+                        return;
+                    }
+                    try {
+                        webdavFileStorageService = WebDAVFileStorageService.newInstance();
+                        registerService(FileStorageService.class, webdavFileStorageService);
+                    } catch (final OXException e) {
+                        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class));
+                        log.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
+                    // Nope
+                }
+            });
             /*
              * Register event handler to detect removed sessions
              */
@@ -154,7 +170,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
                 registerService(EventHandler.class, registerer, dict);
             }
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -174,7 +190,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

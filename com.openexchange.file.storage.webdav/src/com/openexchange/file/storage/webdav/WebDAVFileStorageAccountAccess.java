@@ -384,7 +384,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         final String login = (String) configuration.get(WebDAVConstants.WEBDAV_LOGIN);
         final String password = (String) configuration.get(WebDAVConstants.WEBDAV_PASSWORD);
         if (null != login && null != password) {
-            final Credentials creds = new UsernamePasswordCredentials("thorben.betten", "maniacNo1");
+            final Credentials creds = new UsernamePasswordCredentials("thorben", "netline");
             newClient.getParams().setAuthenticationPreemptive(true);
             newClient.getState().setCredentials(AuthScope.ANY, creds);
         }

@@ -180,7 +180,7 @@ public final class SessionHandler {
                 try {
                     SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
                 } catch (final OXException e) {
-                    LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
+                    LOG.warn("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 }
             }
         }

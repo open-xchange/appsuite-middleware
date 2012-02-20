@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,59 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.index.IndexServer;
 
 /**
- * {@link IndexExceptionMessages}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SolrCore}
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class IndexExceptionMessages implements LocalizableStrings {
+public class SolrCore {
 
-    /**
-     * Initializes a new {@link IndexExceptionMessages}.
-     */
-    public IndexExceptionMessages() {
+    private String coreName;
+
+    private IndexServer server;
+    
+
+    public SolrCore() {
         super();
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
+    /**
+     * Gets the coreName
+     * 
+     * @return The coreName
+     */
+    public String getCoreName() {
+        return coreName;
+    }
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    /**
+     * Sets the coreName
+     * 
+     * @param coreName The coreName to set
+     */
+    public void setCoreName(final String coreName) {
+        this.coreName = coreName;
+    }
 
-    // Could not find search index for user %1$s and module %2$s in context %3$s.
-    public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
+    /**
+     * Gets the server
+     * 
+     * @return The server
+     */
+    public IndexServer getServer() {
+        return server;
+    }
 
-    // Could not register index search server with url %1$s.
-    public static final String REGISTER_SERVER_ERROR_MSG = "Could not register index search server with url %1$s.";
-
-    // Could not unregister index search server with id %1$s.
-    public static final String UNREGISTER_SERVER_ERROR_MSG = "Could not unregister index search server with id %1$s.";
-
-    // Did not find solr core entry for user %1$s and module %2$s in context %3$s.
-    public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
-
-    // Could not find server with id %1$s.
-    public static final String SERVER_NOT_FOUND_MSG = "Could not find server with id %1$s.";
-
-    // Could not find a server to add a new index to.
-    public static final String SERVER_FULL_MSG = "Could not find a server to add a new index to.";
-
+    /**
+     * Sets the server
+     * 
+     * @param server The server to set
+     */
+    public void setServer(final IndexServer server) {
+        this.server = server;
+    }
 }

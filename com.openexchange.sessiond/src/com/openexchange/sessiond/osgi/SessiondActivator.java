@@ -69,6 +69,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.event.SessiondEventHandler;
+import com.openexchange.sessiond.impl.InvalidatedAwareSessiondService;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -146,7 +147,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
             SessiondInit.getInstance().start();
-            final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
+            final SessiondService serviceImpl = new InvalidatedAwareSessiondService(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);

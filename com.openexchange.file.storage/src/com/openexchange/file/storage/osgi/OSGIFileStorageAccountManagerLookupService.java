@@ -49,11 +49,13 @@
 
 package com.openexchange.file.storage.osgi;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -78,6 +80,11 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      * The backing list.
      */
     final Queue<FileStorageAccountManagerProvider> providers;
+
+    /**
+     * The bundle context reference.
+     */
+    private BundleContext bundleContext;
 
     /**
      * The tracker instance.
@@ -119,6 +126,36 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
     @Override
     public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
+        if (providers.isEmpty()) {
+            if (null == bundleContext) {
+                throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+            }
+            try {
+                final Collection<ServiceReference<FileStorageAccountManagerProvider>> references = bundleContext.getServiceReferences(FileStorageAccountManagerProvider.class, null);
+                for (final ServiceReference<FileStorageAccountManagerProvider> reference : references) {
+                    final FileStorageAccountManagerProvider addMe = bundleContext.getService(reference);
+                    synchronized (providers) {
+                        if (!providers.contains(addMe)) {
+                            providers.add(addMe);
+                            /*
+                             * Post event
+                             */
+                            final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
+                            if (null != eventAdmin) {
+                                final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
+                                dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
+                                dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
+                                final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
+                                eventAdmin.postEvent(event);
+                            }
+                        }
+                    }
+                }
+            } catch (final InvalidSyntaxException e) {
+                throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, service.getId());
+            }
+        }
+
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers) {
             if (provider.supports(service) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {

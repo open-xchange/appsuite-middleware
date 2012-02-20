@@ -84,9 +84,9 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      */
     UNREGISTER_SERVER_ERROR(IndexExceptionMessages.UNREGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 5),
     /**
-     * Could not create index mapping for user %1$s in context %2$s for module %3$s on server %4$s.
+     * Did not find solr core entry for user %1$s and module %2$s in context %3$s. 
      */
-    ADD_MAPPING_ERROR(IndexExceptionMessages.ADD_MAPPING_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    CORE_ENTRY_NOT_FOUND(IndexExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Could not find server with id %1$s.
      */

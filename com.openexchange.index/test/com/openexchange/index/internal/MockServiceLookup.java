@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,35 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link IndexExceptionMessages}
+ * {@link MockServiceLookup}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class IndexExceptionMessages implements LocalizableStrings {
+public class MockServiceLookup implements ServiceLookup {
+    
+    private final DatabaseService dbService;
 
-    /**
-     * Initializes a new {@link IndexExceptionMessages}.
-     */
-    public IndexExceptionMessages() {
+    public MockServiceLookup(final DatabaseService dbService) {
         super();
+        this.dbService = dbService;
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
+    @Override
+    public <S> S getService(final Class<? extends S> clazz) {
+        return (S) dbService;
+    }
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Could not find search index for user %1$s and module %2$s in context %3$s.
-    public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
-
-    // Could not register index search server with url %1$s.
-    public static final String REGISTER_SERVER_ERROR_MSG = "Could not register index search server with url %1$s.";
-
-    // Could not unregister index search server with id %1$s.
-    public static final String UNREGISTER_SERVER_ERROR_MSG = "Could not unregister index search server with id %1$s.";
-
-    // Did not find solr core entry for user %1$s and module %2$s in context %3$s.
-    public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
-
-    // Could not find server with id %1$s.
-    public static final String SERVER_NOT_FOUND_MSG = "Could not find server with id %1$s.";
-
-    // Could not find a server to add a new index to.
-    public static final String SERVER_FULL_MSG = "Could not find a server to add a new index to.";
+    @Override
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }
