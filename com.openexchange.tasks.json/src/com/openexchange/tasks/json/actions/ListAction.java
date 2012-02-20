@@ -78,7 +78,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of tasks.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data.")
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data. The alias \"list\" uses a predefined columnset.")
 }, requestBody = "An array of with object IDs of requested tasks. ",
 responseDescription = "Response with timestamp: An object containing all data of the requested task. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed task data. The field id is not included. ")
 public class ListAction extends TaskAction {

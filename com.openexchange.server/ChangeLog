@@ -1,3 +1,7 @@
+* 2012-02-20 - jan.bauerdick@open-xchange.com
+
+ - Self documenting API in modules tasks, calendar, contact
+
 * 2012-02-17 - jan.bauerdick@open-xchange.com
 
  - Added column-aliases "all" & "list" for mailrequests
