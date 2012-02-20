@@ -58,6 +58,9 @@ import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -70,9 +73,12 @@ import com.openexchange.tasks.json.TaskRequest;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+}, responseDescription = "")
 public class CopyAction extends TaskAction {
 
-    public CopyAction(ServiceLookup services) {
+    public CopyAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -80,7 +86,7 @@ public class CopyAction extends TaskAction {
      * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
      */
     @Override
-    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
         final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = (JSONObject) req.getRequest().getData();

@@ -47,59 +47,52 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.index.internal.tasks;
 
-import java.util.Date;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link GetUserAction}
+ * {@link IndexCreateTableService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@Action(method = RequestMethod.GET, name = "getuser", description = "Get contact by user ID.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "User ID (not Object ID) of the requested user."),
-}, responseDescription = "Response with timestamp: An object containing all data of the requested contact. The fields of the object are listed in Common object data and Detailed contact data.")
-public class GetUserAction extends ContactAction {
+public class IndexCreateTableService extends AbstractCreateTableImpl {
+    
+    private static final String CT_SOLR_INDEX_FILES =
+        "CREATE TABLE solrIndexFiles (" +
+            "cid int(10) unsigned NOT NULL," +
+            "uid int(10) unsigned NOT NULL," +
+            "module int(10) unsigned NOT NULL," +
+            "indexFile varchar(32) NOT NULL," +
+            "PRIMARY KEY  (cid,uid,module)" +
+         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    
+    private static final String CT_CORES =
+        "CREATE TABLE solrCores (" +
+            "cid int(10) unsigned NOT NULL," +
+            "uid int(10) unsigned NOT NULL," +
+            "module int(10) unsigned NOT NULL," +
+            "active tinyint(1) unsigned NOT NULL," +
+            "core varchar(32) DEFAULT NULL," +
+            "server int(10) unsigned DEFAULT NULL,  " +
+            "PRIMARY KEY  (cid,uid,module)," +
+            "KEY server (server)" +
+         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    
 
-    /**
-     * Initializes a new {@link GetUserAction}.
-     * @param serviceLookup
-     */
-    public GetUserAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();
-        final Context ctx = session.getContext();
-
-        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Contact contact = contactInterface.getUserById(uid);
-        final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    public String[] tablesToCreate() {
+        return new String[] {"solrIndexFiles", "solrCores"};
     }
 
+    @Override
+    protected String[] getCreateStatements() {        
+        return new String[] {CT_SOLR_INDEX_FILES, CT_CORES};
+    }
 }

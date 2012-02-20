@@ -52,6 +52,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.internal.IndexServiceLookup;
 import com.openexchange.index.internal.StaticConfigIndexService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -73,15 +74,25 @@ public class IndexActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting Bundle com.openexchange.index.osgi.");
-        // Only for testing purpose...
-        // registerService(ConfigIndexService.class, new ConfigIndexServiceImpl(getService(DatabaseService.class)));
-        registerService(ConfigIndexService.class, new StaticConfigIndexService());
-
+        IndexServiceLookup.getInstance().setServiceLookup(this);
+        final DatabaseService dbService = getService(DatabaseService.class);
+        final ConfigIndexService service = new StaticConfigIndexService();    // TODO: Choose right implementation for production     
+        
         /*
-         * Register UpdateTask and DeleteListener. Uncomment for production.
+         * Register UpdateTasks and DeleteListener. Uncomment for production.
          */
-//        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(new IndexCreateTablesTask()));
-//        registerService(DeleteListener.class, new IndexDeleteListener());
+//        final CreateTableService createTableService = new IndexCreateTableService();
+//        registerService(CreateTableService.class, createTableService);        
+//        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(
+//            new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService),
+//            new IndexCreateServerTableTask(dbService)
+//        ));
+//        registerService(DeleteListener.class, new IndexDeleteListener(service));        
+        
+        
+        /*
+         * Register ConfigIndexService
+         */
+        registerService(ConfigIndexService.class, service);
     }
-
 }

@@ -140,7 +140,7 @@ public class IndexServerImpl implements IndexServer {
      *
      * @param url The url to set
      */
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
         hasUrl = true;
     }
@@ -180,7 +180,7 @@ public class IndexServerImpl implements IndexServer {
      *
      * @param maxIndices The maxIndices to set
      */
-    public void setMaxIndices(int maxIndices) {
+    public void setMaxIndices(final int maxIndices) {
         this.maxIndices = maxIndices;
         hasMaxIndices = true;
     }
@@ -220,21 +220,27 @@ public class IndexServerImpl implements IndexServer {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        IndexServerImpl other = (IndexServerImpl) obj;
-        if (id != other.id)
+        }
+        final IndexServerImpl other = (IndexServerImpl) obj;
+        if (id != other.id) {
             return false;
+        }
         if (url == null) {
-            if (other.url != null)
+            if (other.url != null) {
                 return false;
-        } else if (!url.equals(other.url))
+            }
+        } else if (!url.equals(other.url)) {
             return false;
+        }
         return true;
     }
 }

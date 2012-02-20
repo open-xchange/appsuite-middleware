@@ -50,6 +50,7 @@
 package com.openexchange.index.internal;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import com.openexchange.exception.OXException;
 
 
@@ -60,17 +61,47 @@ import com.openexchange.exception.OXException;
  */
 public class IndexTestTool {
 
-    public static IndexServerImpl createIndexServer(Connection con) throws OXException {
-        IndexServerImpl indexServer = new IndexServerImpl();
+    public static IndexServerImpl createIndexServer(final Connection con) throws OXException {
+        final IndexServerImpl indexServer = createIndexServer();
+        final int serverId = ConfigIndexMysql.getInstance().createIndexServerEntry(con, indexServer);
+        indexServer.setId(serverId);
+
+        return indexServer;
+    }
+    
+    public static IndexServerImpl createIndexServer() throws OXException {
+        final IndexServerImpl indexServer = new IndexServerImpl();
         indexServer.setUrl("http://1.2.3.4:8005");
         indexServer.setConnectionTimeout(23);
         indexServer.setMaxConnectionsPerHost(54);
         indexServer.setMaxIndices(10);
         indexServer.setSoTimeout(46);
-        int serverId = ConfigIndexMysql.getInstance().registerIndexServer(con, indexServer);
-        indexServer.setId(serverId);
 
         return indexServer;
+    }
+    
+    public static void createInactiveCoreEntry(final Connection con, final int cid, final int uid, final int module) throws Exception {
+        PreparedStatement stmt = null;
+        stmt = con.prepareStatement("INSERT INTO solrCores (cid, uid, module, active, core, server) VALUES (?, ?, ?, ?, ?, ?)");
+        int i = 1;
+        stmt.setInt(i++, cid);
+        stmt.setInt(i++, uid);
+        stmt.setInt(i++, module);
+        stmt.setInt(i++, 0);
+        stmt.setNull(i++, java.sql.Types.VARCHAR);
+        stmt.setNull(i, java.sql.Types.INTEGER);
+        stmt.executeUpdate();
+    }
+    
+    public static void createIndexFileEntry(final Connection con, final int cid, final int uid, final int module, final String indexFile) throws Exception {
+        PreparedStatement stmt = null;
+        stmt = con.prepareStatement("INSERT INTO solrIndexFiles (cid, uid, module, indexFile) VALUES (?, ?, ?, ?)");
+        int i = 1;
+        stmt.setInt(i++, cid);
+        stmt.setInt(i++, uid);
+        stmt.setInt(i++, module);
+        stmt.setString(i, indexFile);
+        stmt.executeUpdate();
     }
 
 }

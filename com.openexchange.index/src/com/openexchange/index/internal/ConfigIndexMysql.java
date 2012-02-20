@@ -49,22 +49,18 @@
 
 package com.openexchange.index.internal;
 
-import static com.openexchange.index.internal.IndexDatabaseStuff.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexServer;
-import com.openexchange.index.IndexUrl;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -78,8 +74,6 @@ public class ConfigIndexMysql {
 
     private static final ConfigIndexMysql INSTANCE = new ConfigIndexMysql();
 
-    private final Lock LOCK = new ReentrantLock();
-
 
     private ConfigIndexMysql() {
         super();
@@ -87,75 +81,69 @@ public class ConfigIndexMysql {
 
     public static ConfigIndexMysql getInstance() {
         return INSTANCE;
-    }
-
-
-    public IndexUrl getIndexUrl(final int cid, final int uid, final int module) throws OXException {
+    }    
+    
+    public IndexServer getIndexServer(final int cid, final int uid, final int module, final int serverId) throws OXException {
         final DatabaseService dbService = getDbService();
-        final Connection readCon = dbService.getReadOnly();
+        final Connection con = dbService.getReadOnly();
         try {
-            return getIndexUrl(readCon, cid, uid, module);
+            return getIndexServer(con, cid, uid, module, serverId);
         } finally {
-            dbService.backReadOnly(readCon);
+            dbService.backReadOnly(con);
         }
     }
-
-    public IndexUrl getIndexUrl(final Connection con, final int cid, final int uid, final int module) throws OXException {
+    
+    public IndexServer getIndexServer(final Connection con, final int cid, final int uid, final int module, final int serverId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_INDEX_URL);
-            int i = 1;
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i, module);
+            stmt = con.prepareStatement("SELECT serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections FROM solrServers WHERE id = ?");
+            stmt.setInt(1, serverId);
+            
             rs = stmt.executeQuery();
+            if (rs.next()) {
+                int i = 1;
+                final String serverUrl = rs.getString(i++);
+                final int maxIndices = rs.getInt(i++);
+                final int socketTimeout = rs.getInt(i++);
+                final int connectionTimeout = rs.getInt(i++);
+                final int maxConnections = rs.getInt(i++);
 
-            if (!rs.next()) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(Integer.valueOf(uid), Integer.valueOf(module), Integer.valueOf(cid));
+                final IndexServerImpl server = new IndexServerImpl();
+                server.setId(serverId);
+                server.setUrl(serverUrl);
+                server.setMaxIndices(maxIndices);
+                server.setSoTimeout(socketTimeout);
+                server.setConnectionTimeout(connectionTimeout);
+                server.setMaxConnectionsPerHost(maxConnections);
+                
+                return server;
             }
-
-            i = 1;
-            final int id = rs.getInt(i++);
-            final String serverUrl = rs.getString(i++);
-            final int maxIndices = rs.getInt(i++);
-            final int socketTimeout = rs.getInt(i++);
-            final int connectionTimeout = rs.getInt(i++);
-            final int maxConnections = rs.getInt(i++);
-            final String index = rs.getString(i);
-
-            final IndexServerImpl server = new IndexServerImpl();
-            server.setId(id);
-            server.setUrl(serverUrl);
-            server.setMaxIndices(maxIndices);
-            server.setSoTimeout(socketTimeout);
-            server.setConnectionTimeout(connectionTimeout);
-            server.setMaxConnectionsPerHost(maxConnections);
-
-            return new IndexUrlImpl(server, index);
+            
+            throw IndexExceptionCodes.SERVER_NOT_FOUND.create(serverId);
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-
-    public int registerIndexServer(final IndexServer server) throws OXException {
+    
+    public int createIndexServerEntry(final IndexServer server) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
-            return registerIndexServer(con, server);
+            return createIndexServerEntry(con, server);
         } finally {
             dbService.backWritable(con);
         }
     }
 
-    public int registerIndexServer(final Connection con, final IndexServer server) throws OXException {
+    public int createIndexServerEntry(final Connection con, final IndexServer server) throws OXException {
         PreparedStatement stmt = null;
         try {
             DBUtils.startTransaction(con);
             final int id = IDGenerator.getId(con);
-            stmt = con.prepareStatement(SQL_INSERT_INDEX_SERVER);
+            stmt = con.prepareStatement("INSERT INTO solrServers (id, serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections) VALUES (?, ?, ?, ?, ?, ?)");
             int i = 1;
             stmt.setInt(i++, id);
             stmt.setString(i++, server.getUrl());
@@ -180,22 +168,22 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void unregisterIndexServer(final int serverId, final boolean deleteMappings) throws OXException {
+    public void removeIndexServerEntry(final int serverId) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
-            unregisterIndexServer(con, serverId, deleteMappings);
+            removeIndexServerEntry(con, serverId);
         } finally {
             dbService.backWritable(con);
         }
     }
 
-    public void unregisterIndexServer(final Connection con, final int serverId, final boolean deleteMappings) throws OXException {
+    public void removeIndexServerEntry(final Connection con, final int serverId) throws OXException {
         PreparedStatement sstmt = null;
-        PreparedStatement mstmt = null;
+        final PreparedStatement mstmt = null;
         try {
             DBUtils.startTransaction(con);
-            sstmt = con.prepareStatement(SQL_DELETE_INDEX_SERVER);
+            sstmt = con.prepareStatement("DELETE FROM solrServers WHERE id = ?");
             sstmt.setInt(1, serverId);
 
             final int rows = sstmt.executeUpdate();
@@ -203,11 +191,6 @@ public class ConfigIndexMysql {
                 throw IndexExceptionCodes.UNREGISTER_SERVER_ERROR.create(Integer.valueOf(serverId));
             }
 
-            if (deleteMappings) {
-                mstmt = con.prepareStatement(SQL_DELETE_INDEX_MAPPING_BY_SERVER);
-                mstmt.setInt(1, serverId);
-                mstmt.executeUpdate();
-            }
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -219,17 +202,17 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void modifyIndexServer(final IndexServer server) throws OXException {
+    public void updateIndexServerEntry(final IndexServer server) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
-            modifyIndexServer(con, server);
+            updateIndexServerEntry(con, server);
         } finally {
             dbService.backReadOnly(con);
         }
     }
 
-    public void modifyIndexServer(final Connection con, final IndexServer server) throws OXException {
+    public void updateIndexServerEntry(final Connection con, final IndexServer server) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(createServerUpdateSQL(server));
@@ -261,72 +244,261 @@ public class ConfigIndexMysql {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-
-    public int createIndexMapping(final int cid, final int uid, final int module, final String index) throws OXException {
+    
+    public boolean hasActiveCore(final int cid, final int uid, final int module) throws OXException {
         final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
+        final Connection con = dbService.getWritable(cid);
         try {
-            return createIndexMapping(con, cid, uid, module, index);
+            return hasActiveCore(con, cid, uid, module);
         } finally {
-            dbService.backWritable(con);
+            dbService.backWritable(cid, con);
         }
     }
-
-    public int createIndexMapping(final Connection con, final int cid, final int uid, final int module, final String index) throws OXException {
+    
+    public boolean hasActiveCore(final Connection con, final int cid, final int uid, final int module) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            LOCK.lock();
-            con.createStatement().execute("SELECT * FROM user_module2index FOR UPDATE");
-            final int serverId = getSuitableIndexServer(con);
-            stmt = con.prepareStatement(SQL_INSERT_INDEX_MAPPING);
+            stmt = con.prepareStatement("SELECT active FROM solrCores WHERE cid = ? AND uid = ? AND module = ?");
             int i = 1;
             stmt.setInt(i++, cid);
             stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
-            stmt.setInt(i++, serverId);
-            stmt.setString(i, index);
-
-            final int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.ADD_MAPPING_ERROR.create(Integer.valueOf(uid), Integer.valueOf(cid), Integer.valueOf(module), Integer.valueOf(serverId));
-            }
-
-            return serverId;
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            LOCK.unlock();
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    public void removeIndexMapping(final int cid, final int uid, final int module) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        try {
-            removeIndexMapping(con, cid, uid, module);
-        } finally {
-            dbService.backWritable(con);
-        }
-    }
-
-    public void removeIndexMapping(final Connection con, final int cid, final int uid, final int module) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_DELETE_INDEX_MAPPING);
-            int i = 1;
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
-
-            final int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(Integer.valueOf(uid), Integer.valueOf(module), Integer.valueOf(cid));
+            stmt.setInt(i, module);
+            
+            rs = stmt.executeQuery();            
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            } else {
+                createCoreEntry(con, cid, uid, module);
+                return false;
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+    
+    public String getIndexFile(final int cid, final int uid, final int module) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getReadOnly(cid);
+        try {
+            return getIndexFile(con, cid, uid, module);
+        } finally {
+            dbService.backReadOnly(cid, con);
+        }
+    }
+    
+    public String getIndexFile(final Connection con, final int cid, final int uid, final int module) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT indexFile FROM solrIndexFiles WHERE cid = ? AND uid = ? AND module = ?");
+            int i = 1;
+            stmt.setInt(i++, cid);
+            stmt.setInt(i++, uid);
+            stmt.setInt(i, module);
+            
+            rs = stmt.executeQuery();            
+            final String indexFile;
+            if (rs.next()) {
+                indexFile = rs.getString(1);
+            } else {
+                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
+            }
+            
+            return indexFile;
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+    
+    public void createIndexFileEntry(final int cid, final int uid, final int module, final String indexFile) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getWritable(cid);
+        try {
+            createIndexFileEntry(con, cid, uid, module, indexFile);
+        } finally {
+            dbService.backWritable(cid, con);
+        }
+    }
+    
+    public void createIndexFileEntry(final Connection con, final int cid, final int uid, final int module, final String indexFile) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO solrIndexFiles (cid, uid, module, indexFile) VALUES (?, ?, ?, ?)");
+            int i = 1;
+            stmt.setInt(i++, cid);
+            stmt.setInt(i++, uid);
+            stmt.setInt(i++, module);
+            stmt.setString(i, indexFile);
+            
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+    
+    public SolrCore getSolrCore(final int cid, final int uid, final int module) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getReadOnly(cid);
+        try {
+            return getSolrCore(con, cid, uid, module);
+        } finally {
+            dbService.backReadOnly(cid, con);
+        }
+    }
+    
+    public SolrCore getSolrCore(final Connection con, final int cid, final int uid, final int module) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final String coreName;
+        final int serverId;
+        boolean hasServerId = false;
+        try {
+            stmt = con.prepareStatement("SELECT core, server FROM solrCores WHERE cid = ? AND uid = ? AND module = ?");
+            int i = 1;
+            stmt.setInt(i++, cid);
+            stmt.setInt(i++, uid);
+            stmt.setInt(i, module);
+            
+            rs = stmt.executeQuery();            
+            if (rs.next()) {
+                coreName = rs.getString(1);
+                serverId = rs.getInt(2);
+                if (!rs.wasNull()) {
+                    hasServerId = true;
+                }
+            } else {
+                throw IndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+            }
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        
+        final SolrCore core = new SolrCore();
+        core.setCoreName(coreName);
+        
+        if (hasServerId) {
+            final IndexServer indexServer = getIndexServer(con, cid, uid, module, serverId);
+            core.setServer(indexServer);
+        }        
+        
+        return core;
+    }
+    
+    public void createCoreEntry(final int cid, final int uid, final int module) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getWritable(cid);
+        try {
+            createCoreEntry(con, cid, uid, module);
+        } finally {
+            dbService.backWritable(cid, con);
+        }
+    }
+    
+    public void createCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO solrCores (cid, uid, module, active, core, server) VALUES (?, ?, ?, ?, ?, ?)");
+            int i = 1;
+            stmt.setInt(i++, cid);
+            stmt.setInt(i++, uid);
+            stmt.setInt(i++, module);
+            stmt.setBoolean(i++, false);
+            stmt.setNull(i++, java.sql.Types.VARCHAR);
+            stmt.setNull(i, java.sql.Types.INTEGER);
+            
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+    
+    public boolean activateCoreEntry(final int cid, final int uid, final int module, final String coreName, final int serverId) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getWritable(cid);
+        try {
+            return activateCoreEntry(con, cid, uid, module, coreName, serverId);
+        } finally {
+            dbService.backWritable(cid, con);
+        }
+    }
+    
+    public boolean activateCoreEntry(final Connection con, final int cid, final int uid, final int module, final String coreName, final int serverId) throws OXException {
+        return updateCoreEntry(con, cid, uid, module, true, coreName, serverId);
+    }
+    
+    public boolean deactivateCoreEntry(final int cid, final int uid, final int module) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getWritable(cid);
+        try {
+            return deactivateCoreEntry(con, cid, uid, module);
+        } finally {
+            dbService.backWritable(cid, con);
+        }
+    }
+    
+    public boolean deactivateCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {
+        return updateCoreEntry(con, cid, uid, module, false, null, 0);
+    }
+    
+    private boolean updateCoreEntry(final Connection con, final int cid, final int uid, final int module, final boolean activate, final String coreName, final int serverId) throws OXException {
+        PreparedStatement sstmt = null;
+        ResultSet rs = null;
+        PreparedStatement ustmt = null;
+        try {
+            DBUtils.startTransaction(con);
+            sstmt = con.prepareStatement("SELECT active FROM solrCores WHERE cid = ? AND uid = ? AND module = ? FOR UPDATE");
+            int i = 1;
+            sstmt.setInt(i++, cid);
+            sstmt.setInt(i++, uid);
+            sstmt.setInt(i, module);
+            
+            rs = sstmt.executeQuery();
+            if (rs.next()) {
+                final boolean active = rs.getBoolean(1);
+                if (active && activate) {
+                    con.commit();
+                    return false;
+                } else {
+                    ustmt = con.prepareStatement("UPDATE solrCores SET active = ?, core = ?, server = ? WHERE cid = ? AND uid = ? AND module = ?");
+                    i = 1;
+                    ustmt.setBoolean(i++, activate);
+                    if (activate) {
+                        ustmt.setString(i++, coreName);
+                        ustmt.setInt(i++, serverId);
+                    } else {
+                        ustmt.setNull(i++, java.sql.Types.VARCHAR);
+                        ustmt.setNull(i++, java.sql.Types.INTEGER);
+                    }                    
+                    ustmt.setInt(i++, cid);
+                    ustmt.setInt(i++, uid);
+                    ustmt.setInt(i, module);
+                    
+                    ustmt.executeUpdate();
+                    con.commit();
+                    
+                    return true;
+                }
+            } else {
+                throw IndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+            }
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {            
+            DBUtils.closeSQLStuff(rs, sstmt);
+            DBUtils.closeSQLStuff(ustmt);         
+            DBUtils.autocommit(con);
         }
     }
 
@@ -346,7 +518,7 @@ public class ConfigIndexMysql {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_INDEX_SERVERS);
+            stmt = con.prepareStatement("SELECT id, serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections FROM solrServers");
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -377,69 +549,6 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void modifiyIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        try {
-            modifiyIndexMapping(con, cid, uid, module, server, index);
-        } finally {
-            dbService.backWritable(con);
-        }
-    }
-
-    public void modifiyIndexMapping(final Connection con, final int cid, final int uid, final int module, final int server, final String index) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_UPDATE_INDEX_MAPPING);
-            int i = 1;
-            stmt.setInt(i++, server);
-            stmt.setString(i++, index);
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
-
-            final int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(Integer.valueOf(uid), Integer.valueOf(module), Integer.valueOf(cid));
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    private int getSuitableIndexServer(final Connection con) throws OXException {
-        final String sql = SQL_SELECT_SUITABLE_INDEX_SERVER;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        int serverId = 0;
-        int maxIndices = 0;
-        int count = 0;
-        try {
-            stmt = con.prepareStatement(sql);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                int i = 1;
-                serverId = rs.getInt(i++);
-                maxIndices = rs.getInt(i++);
-                count = rs.getInt(i++);
-            } else {
-                throw IndexExceptionCodes.SERVER_FULL.create();
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
-
-        if (count >= maxIndices) {
-            throw IndexExceptionCodes.SERVER_FULL.create();
-        }
-        return serverId;
-    }
-
     private DatabaseService getDbService() throws OXException {
         final DatabaseService dbService = IndexServiceLookup.getInstance().getService(DatabaseService.class);
         if (dbService == null) {
@@ -450,7 +559,7 @@ public class ConfigIndexMysql {
     }
 
     private String createServerUpdateSQL(final IndexServer server) {
-        final StringBuilder sb = new StringBuilder("UPDATE ").append(TBL_IDX_SERVER).append(" SET");
+        final StringBuilder sb = new StringBuilder("UPDATE solrServers SET");
         boolean first = true;
         if (server.hasUrl()) {
             first = false;

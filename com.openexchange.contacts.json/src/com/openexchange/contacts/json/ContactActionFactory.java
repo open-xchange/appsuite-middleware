@@ -67,6 +67,7 @@ import com.openexchange.contacts.json.actions.NewAction;
 import com.openexchange.contacts.json.actions.SearchAction;
 import com.openexchange.contacts.json.actions.UpdateAction;
 import com.openexchange.contacts.json.actions.UpdatesAction;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -76,6 +77,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Module(name = "contact", description = "Provides access to contact information.")
 public class ContactActionFactory implements AJAXActionServiceFactory {
 
     private static final Map<String, ContactAction> actions = new ConcurrentHashMap<String, ContactAction>(12);

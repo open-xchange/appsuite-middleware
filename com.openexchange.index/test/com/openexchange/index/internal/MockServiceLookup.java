@@ -47,64 +47,35 @@
  *
  */
 
-package com.openexchange.tasks.json;
+package com.openexchange.index.internal;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tasks.json.actions.AllAction;
-import com.openexchange.tasks.json.actions.ConfirmAction;
-import com.openexchange.tasks.json.actions.CopyAction;
-import com.openexchange.tasks.json.actions.DeleteAction;
-import com.openexchange.tasks.json.actions.GetAction;
-import com.openexchange.tasks.json.actions.ListAction;
-import com.openexchange.tasks.json.actions.NewAction;
-import com.openexchange.tasks.json.actions.SearchAction;
-import com.openexchange.tasks.json.actions.TaskAction;
-import com.openexchange.tasks.json.actions.UpdateAction;
-import com.openexchange.tasks.json.actions.UpdatesAction;
 
 
 /**
- * {@link TaskActionFactory}
+ * {@link MockServiceLookup}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@Module(name = "tasks", description = "Provides access to task information.")
-public class TaskActionFactory implements AJAXActionServiceFactory {
+public class MockServiceLookup implements ServiceLookup {
+    
+    private final DatabaseService dbService;
 
-    private static final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
-
-    /**
-     * Initializes a new {@link TaskActionFactory}.
-     */
-    public TaskActionFactory(final ServiceLookup serviceLookup) {
+    public MockServiceLookup(final DatabaseService dbService) {
         super();
-        actions.put("all", new AllAction(serviceLookup));
-        actions.put("confirm", new ConfirmAction(serviceLookup));
-        actions.put("copy", new CopyAction(serviceLookup));
-        actions.put("delete", new DeleteAction(serviceLookup));
-        actions.put("get", new GetAction(serviceLookup));
-        actions.put("list", new ListAction(serviceLookup));
-        actions.put("new", new NewAction(serviceLookup));
-        actions.put("search", new SearchAction(serviceLookup));
-        actions.put("update", new UpdateAction(serviceLookup));
-        actions.put("updates", new UpdatesAction(serviceLookup));
+        this.dbService = dbService;
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public <S> S getService(final Class<? extends S> clazz) {
+        return (S) dbService;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
