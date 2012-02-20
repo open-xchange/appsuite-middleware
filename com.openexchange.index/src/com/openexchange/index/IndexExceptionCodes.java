@@ -91,10 +91,6 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      * Could not find server with id %1$s.
      */
     SERVER_NOT_FOUND(IndexExceptionMessages.SERVER_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
-    /**
-     * Could not find a server to add a new index to.
-     */
-    SERVER_FULL(IndexExceptionMessages.SERVER_FULL_MSG, CATEGORY_ERROR, 8)
 
     ;
 

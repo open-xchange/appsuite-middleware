@@ -86,8 +86,5 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // Could not find server with id %1$s.
     public static final String SERVER_NOT_FOUND_MSG = "Could not find server with id %1$s.";
-
-    // Could not find a server to add a new index to.
-    public static final String SERVER_FULL_MSG = "Could not find a server to add a new index to.";
-
+    
 }
