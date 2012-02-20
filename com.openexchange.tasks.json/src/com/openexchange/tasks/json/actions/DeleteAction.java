@@ -57,6 +57,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
@@ -68,13 +71,18 @@ import com.openexchange.tasks.json.TaskRequest;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete tasks.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted tasks.")
+}, requestBody = "An object in the field \"id\" and \"folder\".",
+responseDescription = "An array with object IDs of tasks which were modified after the specified timestamp and were therefore not deleted.")
 public class DeleteAction extends TaskAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
      * @param services
      */
-    public DeleteAction(ServiceLookup services) {
+    public DeleteAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -82,7 +90,7 @@ public class DeleteAction extends TaskAction {
      * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
      */
     @Override
-    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
         final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);

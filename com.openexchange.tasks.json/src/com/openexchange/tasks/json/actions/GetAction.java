@@ -54,6 +54,9 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -66,13 +69,18 @@ import com.openexchange.tasks.json.TaskRequest;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Get a task.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Object ID of the requested task."),
+    @Parameter(name = "folder", description =  "Object ID of the task's folder.")
+}, responseDescription = "Response with timestamp: An object containing all data of the requested task. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed task data. The field id is not included. ")
 public class GetAction extends TaskAction {
 
     /**
      * Initializes a new {@link GetAction}.
      * @param services
      */
-    public GetAction(ServiceLookup services) {
+    public GetAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -80,7 +88,7 @@ public class GetAction extends TaskAction {
      * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
      */
     @Override
-    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
         final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
         Date timestamp = new Date(0);
