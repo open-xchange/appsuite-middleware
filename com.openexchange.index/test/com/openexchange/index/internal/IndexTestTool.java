@@ -52,6 +52,7 @@ package com.openexchange.index.internal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexServer;
 
 
 /**
@@ -61,20 +62,12 @@ import com.openexchange.exception.OXException;
  */
 public class IndexTestTool {
 
-    public static IndexServerImpl createIndexServer(final Connection con) throws OXException {
-        final IndexServerImpl indexServer = createIndexServer();
-        final int serverId = ConfigIndexMysql.getInstance().createIndexServerEntry(con, indexServer);
-        indexServer.setId(serverId);
-
-        return indexServer;
-    }
     
-    public static IndexServerImpl createIndexServer() throws OXException {
-        final IndexServerImpl indexServer = new IndexServerImpl();
+    public static IndexServer createIndexServer() throws OXException {
+        final IndexServer indexServer = new IndexServer();
         indexServer.setUrl("http://1.2.3.4:8005");
         indexServer.setConnectionTimeout(23);
         indexServer.setMaxConnectionsPerHost(54);
-        indexServer.setMaxIndices(10);
         indexServer.setSoTimeout(46);
 
         return indexServer;

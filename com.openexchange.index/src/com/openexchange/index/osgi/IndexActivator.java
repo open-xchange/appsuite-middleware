@@ -50,11 +50,13 @@ package com.openexchange.index.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.internal.IndexServiceLookup;
 import com.openexchange.index.internal.StaticConfigIndexService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
  * {@link IndexActivator} - The activator of the index bundle.
@@ -68,7 +70,7 @@ public class IndexActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class };
+        return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class };
     }
 
     @Override

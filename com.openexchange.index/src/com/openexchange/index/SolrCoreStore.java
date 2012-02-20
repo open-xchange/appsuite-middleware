@@ -49,65 +49,90 @@
 
 package com.openexchange.index;
 
+import com.openexchange.groupware.Types;
+
+
 /**
- * {@link IndexUrl} - The URL to an index host.
+ * {@link SolrCoreStore}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexUrl {
+public class SolrCoreStore {
+    
+    private int id;
+    
+    private String uri;
+    
+    private int maxCores;
+    
+    
+    public SolrCoreStore() {
+        super();
+    }    
+    
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
+    
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(final int id) {
+        this.id = id;
+    }
 
     /**
-     * Gets the string representation of the URL
+     * Gets the uri
      *
-     * @return The URL's string representation
+     * @return The uri
      */
-    String getUrl();
-
+    public String getUri() {
+        return uri;
+    }
+    
     /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
+     * Sets the uri
      *
-     * @return The setting for SO_TIMEOUT
+     * @param uri The uri to set
      */
-    int getSoTimeout();
-
+    public void setUri(final String uri) {
+        this.uri = uri;
+    }
+    
     /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
+     * Gets the maxCores
      *
-     * @return The connection timeout
+     * @return The maxCores
      */
-    int getConnectionTimeout();
-
+    public int getMaxCores() {
+        return maxCores;
+    }
+    
     /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
+     * Sets the maxCores
      *
-     * @return The max. number of connections per host
+     * @param maxCores The maxCores to set
      */
-    int getMaxConnectionsPerHost();
-
+    public void setMaxCores(final int maxCores) {
+        this.maxCores = maxCores;
+    }
+    
     /**
-     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
-     *
-     * @return A hash code value for this object.
-     * @see java.lang.Object#equals(java.lang.Object)
+     * Returns the name for the user and modules solr core.
+     * @param cid The context id.
+     * @param uid The user id.
+     * @param module The module. See {@link Types}.
+     * @return The core name.
      */
-    @Override
-    int hashCode();
-
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     *
-     * @param obj The reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     */
-    @Override
-    boolean equals(Object obj);
+    public static String getCoreName(final int cid, final int uid, final int module) {
+        return "sc_c" + cid + "_u" + uid + "_m" + module;
+    }
 
 }

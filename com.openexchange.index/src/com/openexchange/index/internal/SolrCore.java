@@ -50,6 +50,7 @@
 package com.openexchange.index.internal;
 
 import com.openexchange.index.IndexServer;
+import com.openexchange.index.SolrCoreStore;
 
 /**
  * {@link SolrCore}
@@ -57,32 +58,23 @@ import com.openexchange.index.IndexServer;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrCore {
-
-    private String coreName;
+    
+    private final int cid;
+    
+    private final int uid;
+    
+    private final int module;
 
     private IndexServer server;
     
+    private SolrCoreStore store;
+    
 
-    public SolrCore() {
+    public SolrCore(final int cid, final int uid, final int module) {
         super();
-    }
-
-    /**
-     * Gets the coreName
-     * 
-     * @return The coreName
-     */
-    public String getCoreName() {
-        return coreName;
-    }
-
-    /**
-     * Sets the coreName
-     * 
-     * @param coreName The coreName to set
-     */
-    public void setCoreName(final String coreName) {
-        this.coreName = coreName;
+        this.cid = cid;
+        this.uid = uid;
+        this.module = module;
     }
 
     /**
@@ -101,5 +93,31 @@ public class SolrCore {
      */
     public void setServer(final IndexServer server) {
         this.server = server;
+    }
+    
+    /**
+     * Gets the store
+     *
+     * @return The store
+     */
+    public SolrCoreStore getStore() {
+        return store;
+    }
+    
+    /**
+     * Sets the store
+     *
+     * @param store The store to set
+     */
+    public void setStore(final SolrCoreStore store) {
+        this.store = store;
+    }
+    
+    /**
+     * Returns the cores name.
+     * @return The name.
+     */
+    public String getCoreName() {
+        return SolrCoreStore.getCoreName(cid, uid, module);
     }
 }
