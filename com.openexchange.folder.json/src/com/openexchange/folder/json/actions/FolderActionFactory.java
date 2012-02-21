@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -63,6 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@Module(name = "folders", description = "Provides access to OX folder structure.")
 public final class FolderActionFactory implements AJAXActionServiceFactory {
 
     private static final FolderActionFactory SINGLETON = new FolderActionFactory();

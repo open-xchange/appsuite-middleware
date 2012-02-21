@@ -59,25 +59,17 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public class IndexCreateTableService extends AbstractCreateTableImpl {
     
-    private static final String CT_SOLR_INDEX_FILES =
-        "CREATE TABLE solrIndexFiles (" +
-            "cid int(10) unsigned NOT NULL," +
-            "uid int(10) unsigned NOT NULL," +
-            "module int(10) unsigned NOT NULL," +
-            "indexFile varchar(32) NOT NULL," +
-            "PRIMARY KEY  (cid,uid,module)" +
-         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    
     private static final String CT_CORES =
         "CREATE TABLE solrCores (" +
             "cid int(10) unsigned NOT NULL," +
             "uid int(10) unsigned NOT NULL," +
             "module int(10) unsigned NOT NULL," +
+            "store int(10) unsigned NOT NULL," +
             "active tinyint(1) unsigned NOT NULL," +
-            "core varchar(32) DEFAULT NULL," +
-            "server int(10) unsigned DEFAULT NULL,  " +
+            "server varchar(32) DEFAULT NULL,  " +
             "PRIMARY KEY  (cid,uid,module)," +
-            "KEY server (server)" +
+            "KEY server (server)," +
+            "KEY store (store)" +
          ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
     
 
@@ -88,11 +80,11 @@ public class IndexCreateTableService extends AbstractCreateTableImpl {
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] {"solrIndexFiles", "solrCores"};
+        return new String[] { "solrCores" };
     }
 
     @Override
     protected String[] getCreateStatements() {        
-        return new String[] {CT_SOLR_INDEX_FILES, CT_CORES};
+        return new String[] { CT_CORES };
     }
 }

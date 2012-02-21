@@ -161,7 +161,8 @@ public final class Tools {
         /*
          * Variables
          */
-        String prefix = account.generateMailServerURL().startsWith("pop3") ? "" : null;;
+        final String mailServerURL = account.generateMailServerURL();
+        String prefix = null != mailServerURL && mailServerURL.startsWith("pop3") ? "" : null;
         StringBuilder tmp = null;
         MailAccount primaryAccount = null;
         /*

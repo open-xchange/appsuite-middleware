@@ -47,59 +47,92 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.index;
 
-import java.util.Date;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.Types;
 
 
 /**
- * {@link GetUserAction}
+ * {@link SolrCoreStore}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@Action(method = RequestMethod.GET, name = "getuser", description = "Get contact by user ID.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "User ID (not Object ID) of the requested user."),
-}, responseDescription = "Response with timestamp: An object containing all data of the requested contact. The fields of the object are listed in Common object data and Detailed contact data.")
-public class GetUserAction extends ContactAction {
-
+public class SolrCoreStore {
+    
+    private int id;
+    
+    private String uri;
+    
+    private int maxCores;
+    
+    
+    public SolrCoreStore() {
+        super();
+    }    
+    
     /**
-     * Initializes a new {@link GetUserAction}.
-     * @param serviceLookup
+     * Gets the id
+     *
+     * @return The id
      */
-    public GetUserAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public int getId() {
+        return id;
+    }
+    
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(final int id) {
+        this.id = id;
     }
 
-    @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();
-        final Context ctx = session.getContext();
-
-        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Contact contact = contactInterface.getUserById(uid);
-        final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    /**
+     * Gets the uri
+     *
+     * @return The uri
+     */
+    public String getUri() {
+        return uri;
+    }
+    
+    /**
+     * Sets the uri
+     *
+     * @param uri The uri to set
+     */
+    public void setUri(final String uri) {
+        this.uri = uri;
+    }
+    
+    /**
+     * Gets the maxCores
+     *
+     * @return The maxCores
+     */
+    public int getMaxCores() {
+        return maxCores;
+    }
+    
+    /**
+     * Sets the maxCores
+     *
+     * @param maxCores The maxCores to set
+     */
+    public void setMaxCores(final int maxCores) {
+        this.maxCores = maxCores;
+    }
+    
+    /**
+     * Returns the name for the user and modules solr core.
+     * @param cid The context id.
+     * @param uid The user id.
+     * @param module The module. See {@link Types}.
+     * @return The core name.
+     */
+    public static String getCoreName(final int cid, final int uid, final int module) {
+        return "sc_c" + cid + "_u" + uid + "_m" + module;
     }
 
 }

@@ -51,16 +51,16 @@ package com.openexchange.index.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -72,10 +72,17 @@ public class IndexDeleteListener implements DeleteListener {
 
     private final ConfigIndexService indexService;
     
+    private final UserService userService;
+    
+    private final int[] coreTypes;
+    
 
-    public IndexDeleteListener(final ConfigIndexService indexService) {
+    public IndexDeleteListener(final ConfigIndexService indexService, final UserService userService) {
         super();
         this.indexService = indexService;
+        this.userService = userService;
+     // TODO: extend!
+        coreTypes = new int[] { Types.EMAIL };
     }
 
     @Override
@@ -84,21 +91,22 @@ public class IndexDeleteListener implements DeleteListener {
             final int cid = event.getContext().getContextId();
             final int uid = event.getId();
             
-            final List<String> indexFiles = getIndexFiles(readCon, cid, uid);
-            for (final String file : indexFiles) {
-                indexService.deleteIndexFile(file);
-            }
-            
+            deleteAllCores(cid, uid);
             deleteUserEntriesFromDB(writeCon, cid, uid);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
             final int cid = event.getContext().getContextId();
+            final User[] users = userService.getUser(event.getContext());
             
-            final List<String> indexFiles = getIndexFiles(readCon, cid, 0);
-            for (final String file : indexFiles) {
-                indexService.deleteIndexFile(file);
+            for (final User user : users) {
+                deleteAllCores(cid, user.getId());
             }
-            
             deleteContextEntriesFromDB(writeCon, cid);
+        }
+    }
+    
+    private void deleteAllCores(final int cid, final int uid) throws OXException {
+        for (final int type : coreTypes) {
+            indexService.deleteCore(cid, uid, type); 
         }
     }
 
@@ -106,11 +114,6 @@ public class IndexDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM solrCores WHERE cid = ?");
-            stmt.setInt(1, cid);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            stmt = con.prepareStatement("DELETE FROM solrIndexFiles WHERE cid = ?");
             stmt.setInt(1, cid);
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -127,39 +130,11 @@ public class IndexDeleteListener implements DeleteListener {
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
             stmt.executeUpdate();
-            stmt.close();
-            
-            stmt = con.prepareStatement("DELETE FROM solrIndexFiles WHERE cid = ? AND uid = ?");
-            stmt.setInt(1, cid);
-            stmt.setInt(2, uid);
-            stmt.executeUpdate();
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-    }
-    
-    private List<String> getIndexFiles(final Connection con, final int cid, final int uid) throws OXException {
-        final List<String> files = new ArrayList<String>();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT indexFile FROM solrIndexFiles WHERE cid = ? AND uid = ?");
-            stmt.setInt(1, cid);
-            stmt.setInt(2, uid);
-            
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                files.add(rs.getString(1));
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
-        
-        return files;
     }
 
 }

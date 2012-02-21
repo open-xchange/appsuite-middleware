@@ -433,8 +433,8 @@ public final class SieveTextFilter {
 
     private static Set<String> requiredList(final Set<String> requireds) {
         if (requireds.contains("imapflags") && requireds.contains("imap4flags")) {
-            // Prefer "imapflags" if both supported
-            requireds.remove("imap4flags");
+            // Prefer "imap4flags" if both supported
+            requireds.remove("imapflags");
         }
         return requireds;
     }

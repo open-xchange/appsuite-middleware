@@ -75,19 +75,19 @@ public final class IndexExceptionMessages implements LocalizableStrings {
     // Could not find search index for user %1$s and module %2$s in context %3$s.
     public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
 
-    // Could not register index search server with url %1$s.
-    public static final String REGISTER_SERVER_ERROR_MSG = "Could not register index search server with url %1$s.";
-
-    // Could not unregister index search server with id %1$s.
-    public static final String UNREGISTER_SERVER_ERROR_MSG = "Could not unregister index search server with id %1$s.";
-
-    // Did not find solr core entry for user %1$s and module %2$s in context %3$s.
+    // Could not find solr core entry for user %1$s and module %2$s in context %3$s.
     public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
 
-    // Could not find server with id %1$s.
-    public static final String SERVER_NOT_FOUND_MSG = "Could not find server with id %1$s.";
+    // Could not find solr core store for given attributes. %1$s.
+    public static final String CORE_STORE_ENTRY_NOT_FOUND_MSG = "Could not find solr core store for given attributes. %1$s.";
 
-    // Could not find a server to add a new index to.
-    public static final String SERVER_FULL_MSG = "Could not find a server to add a new index to.";
+    // All core stores seem to be full.
+    public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
+    
+    // This cores instance directory (%1$s) already exists. It cannot be created.
+    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
 
+    // Could not parse URI: %1$s.
+    public static final String URI_PARSE_ERROR_MSG = "Could not parse URI: %1$s.";
+    
 }

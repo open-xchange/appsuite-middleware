@@ -98,11 +98,6 @@ public final class IndexUrlImpl implements IndexUrl {
     }
 
     @Override
-    public int getMaxIndices() {
-        return server.getMaxIndices();
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

@@ -55,6 +55,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -63,6 +66,10 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.GET, name = "resolveuid", description = "Resolve UID.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "uid", description = "The UID to be resolved.")
+}, responseDescription = "An object object with the field \"id\" containing the ox-object id, if existing, an error message otherwise.")
 public final class ResolveUIDAction extends AppointmentAction {
 
     /**

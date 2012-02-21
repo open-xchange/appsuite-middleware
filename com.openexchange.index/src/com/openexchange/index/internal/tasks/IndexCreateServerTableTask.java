@@ -67,17 +67,13 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class IndexCreateServerTableTask extends UpdateTaskAdapter {
     
-    private static final String CT_SOLR_SERVERS = 
-        "CREATE TABLE solrServers (" +
-          "id int(10) unsigned NOT NULL," +
-          "serverUrl varchar(32) NOT NULL," +
-          "maxIndices int(10) unsigned NOT NULL," +
-          "socketTimeout int(10) unsigned DEFAULT 0," +
-          "connectionTimeout int(10) unsigned DEFAULT 0," +
-          "maxConnections int(10) unsigned DEFAULT 0," +
-          "PRIMARY KEY (id)," +
-          "KEY url (serverUrl)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    private static final String CT_CORE_STORES = 
+        "CREATE TABLE solrCoreStores (" +
+            "id int(10) unsigned NOT NULL," +
+            "uri varchar(32) NOT NULL," +
+            "maxCores int(10) unsigned NOT NULL," +
+            "PRIMARY KEY (id)" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
     
     private final DatabaseService dbService;
     
@@ -103,7 +99,7 @@ public class IndexCreateServerTableTask extends UpdateTaskAdapter {
                 if (DBUtils.tableExists(writeCon, "solrServers")) {
                     return;
                 }
-                stmt = writeCon.prepareStatement(CT_SOLR_SERVERS);
+                stmt = writeCon.prepareStatement(CT_CORE_STORES);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

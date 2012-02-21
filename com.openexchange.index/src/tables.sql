@@ -2,13 +2,22 @@ CREATE TABLE `solrCores` (
   `cid` int(10) unsigned NOT NULL,
   `uid` int(10) unsigned NOT NULL,
   `module` int(10) unsigned NOT NULL,
-  `active` tinyint(1) unsigned NOT NULL,
-  `core` varchar(32) DEFAULT NULL,
-  `server` int(10) unsigned DEFAULT NULL,  
+  `store` int(10) unsigned NOT NULL,
+  `active` tinyint(1) unsigned NOT NULL,  
+  `server` varchar(32) DEFAULT NULL,  
   PRIMARY KEY  (`cid`,`uid`,`module`),
-  KEY `server` (`server`)
+  KEY `server` (`server`),
+  KEY `store` (`store`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
+CREATE TABLE `solrCoreStores` (
+  `id` int(10) unsigned NOT NULL,
+  `uri` varchar(32) NOT NULL,
+  `maxCores` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+/*
 CREATE TABLE `solrIndexFiles` (
   `cid` int(10) unsigned NOT NULL,
   `uid` int(10) unsigned NOT NULL,
@@ -27,3 +36,4 @@ CREATE TABLE `solrServers` (
   PRIMARY KEY (`id`),
   KEY `url` (`serverUrl`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+*/

@@ -53,6 +53,9 @@ import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -65,6 +68,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Get a contact.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Object ID of the requested contact."),
+    @Parameter(name = "folder", description = "Object ID of the contact's folder.")
+}, responseDescription = "Response with timestamp: An object containing all data of the requested contact. The fields of the object are listed in Common object data and Detailed contact data. The field id is not included.")
 public class GetAction extends ContactAction {
 
     public GetAction(final ServiceLookup serviceLookup) {

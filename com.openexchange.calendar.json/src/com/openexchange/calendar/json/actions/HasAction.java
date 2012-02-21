@@ -58,6 +58,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -67,6 +70,11 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.GET, name = "has", description = "Get appointment information.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "start", description = "Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned."),
+    @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.")
+}, responseDescription = "Response is an array of booleans. Array length is the number of days. Each entry in the array corresponds with one day in the range that was queried, explaining whether there is an appointment on this day or not.")
 public final class HasAction extends AppointmentAction {
 
     /**
