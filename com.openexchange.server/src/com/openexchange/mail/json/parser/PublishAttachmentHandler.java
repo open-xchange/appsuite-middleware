@@ -87,8 +87,8 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
@@ -294,7 +294,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         for (final InternetAddress address : addresses) {
             User user = null;
             try {
-                user = userService.searchUser(address.getAddress(), ctx);
+                user = userService.searchUser(QuotedInternetAddress.toIDN(address.getAddress()), ctx);
             } catch (final OXException e) {
                 /*
                  * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.

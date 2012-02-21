@@ -742,6 +742,8 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
+    private final static String ACE_PREFIX = gnu.inet.encoding.IDNA.ACE_PREFIX;
+    
     /**
      * Converts a unicode representation of an internet address to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters
      * are not allowed and STD3 ASCII rules are enforced.
@@ -786,13 +788,14 @@ public final class QuotedInternetAddress extends InternetAddress {
      *
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address
+     * @see #getIDNAddress()
      */
     public static String toIDN(final String aceAddress) {
         if (null == aceAddress) {
             return null;
         }
         final int pos = aceAddress.indexOf('@');
-        if (pos < 0) {
+        if (pos < 0 || aceAddress.indexOf(ACE_PREFIX) < 0) {
             return aceAddress;
         }
         return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
@@ -963,6 +966,16 @@ public final class QuotedInternetAddress extends InternetAddress {
         this.address = internetAddress.address;
         personal = internetAddress.personal;
         encodedPersonal = internetAddress.encodedPersonal;
+    }
+
+    /**
+     * Gets the email address in its internationalized, unicode form.
+     * 
+     * @return The IDN email address
+     * @see #toIDN(String)
+     */
+    public String getIDNAddress() {
+        return toIDN(address);
     }
 
     /**
