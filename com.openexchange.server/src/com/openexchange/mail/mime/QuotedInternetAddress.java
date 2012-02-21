@@ -786,6 +786,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      *
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address
+     * @see #getIDNAddress()
      */
     public static String toIDN(final String aceAddress) {
         if (null == aceAddress) {
@@ -963,6 +964,16 @@ public final class QuotedInternetAddress extends InternetAddress {
         this.address = internetAddress.address;
         personal = internetAddress.personal;
         encodedPersonal = internetAddress.encodedPersonal;
+    }
+
+    /**
+     * Gets the email address in its internationalized, unicode form.
+     * 
+     * @return The IDN email address
+     * @see #toIDN(String)
+     */
+    public String getIDNAddress() {
+        return toIDN(address);
     }
 
     /**
