@@ -1224,7 +1224,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * Unsubscribe sub-tree
                  */
-                unsubscribeFolder(renameMe);
+                setFolderSubscription(renameMe, false);
                 /*
                  * Rename
                  */
@@ -1253,6 +1253,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         renameMe.getFullName(),
                         newFullName,
                         e.getMessage());
+                } finally {
+                    if (!success) {
+                        setFolderSubscription(renameMe, true);
+                    }
                 }
                 /*
                  * Success?
@@ -1538,7 +1542,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Unsubscribe sub-tree
                      */
-                    unsubscribeFolder(moveMe);
+                    setFolderSubscription(moveMe, false);
                     /*
                      * Rename
                      */
@@ -1568,6 +1572,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             newFullName,
                             e.getMessage());
 
+                    } finally {
+                        if (!success) {
+                            setFolderSubscription(moveMe, true);
+                        }
                     }
                     /*
                      * Success?
@@ -2429,14 +2437,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
     }
 
-    private void unsubscribeFolder(final IMAPFolder f) throws MessagingException {
+    private void setFolderSubscription(final IMAPFolder f, final boolean subscribed) throws MessagingException {
         if ((f.getType() & Folder.HOLDS_FOLDERS) > 0) {
             final Folder[] folders = f.list();
             for (int i = 0; i < folders.length; i++) {
-                unsubscribeFolder((IMAPFolder) folders[i]);
+                setFolderSubscription((IMAPFolder) folders[i], subscribed);
             }
         }
-        f.setSubscribed(false);
+        f.setSubscribed(subscribed);
     }
 
     private void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m) throws MessagingException, OXException {
