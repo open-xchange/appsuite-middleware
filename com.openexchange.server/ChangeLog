@@ -1,3 +1,7 @@
+* 2012-02-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21604: Prefer "imap4flags" over "imapflags" if both supported
+
 * 2012-02-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 21590: Maintaining a multiupart's subtype while filtering parts
