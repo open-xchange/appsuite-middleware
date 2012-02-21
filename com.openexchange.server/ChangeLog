@@ -3,6 +3,7 @@
  - Fix for bug 21604: Prefer "imap4flags" over "imapflags" if both supported
  - Fix for bug 21602: Fixed possible deadlock when checking for elapsed sessions
  - Fix for bug 21598: Fixed possible NPE
+ - Fix for bug 21610: Restoring subscription status on failed rename/move operation
 
 * 2012-02-20 - thorben.betten@open-xchange.com
 
