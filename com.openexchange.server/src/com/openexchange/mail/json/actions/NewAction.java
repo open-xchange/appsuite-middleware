@@ -62,6 +62,9 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
@@ -74,9 +77,9 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
@@ -93,6 +96,12 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Send/Save mail as MIME data block (RFC822) (added in SP5)", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", optional=true, description = "In case the mail should not be sent out, but saved in a specific folder, the \"folder\" parameter can be used. If the mail should be sent out to the recipient, the \"folder\" parameter must not be included and the mail is stored in the folder \"Sent Items\". Example \"folder=default.INBOX/Testfolder\""),
+    @Parameter(name = "flags", optional=true, description = "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. If no \"folder\" parameter is specified, this parameter must not be included. For infos about mail flags see Detailed mail data spec.")
+}, requestBody = "The MIME Data Block.",
+responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
