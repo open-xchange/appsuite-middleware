@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import static com.openexchange.tools.io.IOTools.reallyBloodySkip;
-
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,12 +59,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -120,7 +116,9 @@ public class WebdavGetAction extends WebdavHeadAction {
 			}
 
 		} catch (final IOException e) {
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			final WebdavProtocolException wpe = WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			wpe.initCause(e);
+            throw wpe;
 		} finally {
 			if(out != null) {
 				try {
