@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.Module;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.json.actions.AbstractResourceAction;
 import com.openexchange.server.ServiceLookup;
@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(actions = { "get", "all", "list", "search", "updates" })
+@Module(name = "resource", description = "Allows to query available resources. It is mainly used by the dialog for the selection of participants.")
 public class ResourceActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractResourceAction> actions;
