@@ -57,6 +57,7 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
@@ -225,7 +226,7 @@ public final class IMAPConfig extends MailConfig {
 
     @Override
     public void setServer(final String imapServer) {
-        this.imapServer = imapServer;
+        this.imapServer = null == imapServer ? null : IDNA.toUnicode(imapServer);
     }
 
     /**

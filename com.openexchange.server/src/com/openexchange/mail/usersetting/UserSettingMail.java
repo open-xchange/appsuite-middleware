@@ -50,6 +50,7 @@
 package com.openexchange.mail.usersetting;
 
 import java.io.Serializable;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -905,12 +906,12 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     public void setReplyToAddr(final String replyToAddr) {
-        this.replyToAddr = replyToAddr;
+        this.replyToAddr = IDNA.toIDN(replyToAddr);
         modifiedDuringSession = true;
     }
 
     public void setSendAddr(final String sendAddr) {
-        this.sendAddr = sendAddr;
+        this.sendAddr = IDNA.toIDN(sendAddr);
         modifiedDuringSession = true;
     }
 

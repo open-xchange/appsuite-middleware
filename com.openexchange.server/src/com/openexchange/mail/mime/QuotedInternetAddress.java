@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.mail.config.MailProperties;
@@ -756,23 +757,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If ASCII representation of given internet address cannot be created
      */
     public static String toACE(final String idnAddress) throws AddressException {
-        if (null == idnAddress) {
-            return null;
-        }
-        try {
-            final int pos = idnAddress.indexOf('@');
-            if (pos < 0) {
-                return idnAddress;
-            }
-            final int length = idnAddress.length();
-            if (pos == length - 1) {
-                return idnAddress;
-            }
-            return new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
-                gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true)).toString();
-        } catch (final gnu.inet.encoding.IDNAException e) {
-            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
-        }
+        return IDNA.toACE(idnAddress);
     }
 
     /**
@@ -789,15 +774,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @see #getIDNAddress()
      */
     public static String toIDN(final String aceAddress) {
-        if (null == aceAddress) {
-            return null;
-        }
-        final int pos = aceAddress.indexOf('@');
-        if (pos < 0) {
-            return aceAddress;
-        }
-        return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
-            gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
+        return IDNA.toIDN(aceAddress);
     }
 
     private final String jcharset;

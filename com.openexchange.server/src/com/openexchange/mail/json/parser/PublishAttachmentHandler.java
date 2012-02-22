@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import com.openexchange.exception.OXException;
@@ -87,9 +88,8 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -294,7 +294,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         for (final InternetAddress address : addresses) {
             User user = null;
             try {
-                user = userService.searchUser(address.getAddress(), ctx);
+                user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
             } catch (final OXException e) {
                 /*
                  * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
@@ -307,7 +307,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                  * Retry
                  */
                 try {
-                    user = userService.searchUser(QuotedInternetAddress.toIDN(address.getAddress()), ctx);
+                    user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
                 } catch (final OXException inner) {
                     if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(inner)) {
                         throw inner;

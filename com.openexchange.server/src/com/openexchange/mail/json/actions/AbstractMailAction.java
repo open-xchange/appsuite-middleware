@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -331,7 +332,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             } else {
                 accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
                 if (accountId != -1) {
-                    accountId = storageService.getByPrimaryAddress(QuotedInternetAddress.toIDN(from.getAddress()), user, cid);
+                    // Retry with IDN representation
+                    accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
                 }
             }
             if (accountId != -1) {

@@ -416,7 +416,7 @@ public final class HTMLServiceImpl implements HTMLService {
         final char[] chars = s.toCharArray();
         boolean isAscci = true;
         for (int i = 0; isAscci && (i < chars.length); i++) {
-            isAscci &= (chars[i] < 128);
+            isAscci = (chars[i] < 128);
         }
         return isAscci;
     }

@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -415,7 +416,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setMailServer(final String mailServer) {
         mailServerUrl = null;
-        this.mailServer = mailServer;
+        this.mailServer = mailServer == null ? null : IDNA.toUnicode(mailServer);
     }
 
     /**
@@ -455,7 +456,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setTransportServer(final String transportServer) {
         transportServerUrl = null;
-        this.transportServer = transportServer;
+        this.transportServer = transportServer == null ? null : IDNA.toUnicode(transportServer);
     }
 
     /**
@@ -498,7 +499,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
         final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
         try {
-            return mailServerUrl = URITools.generateURI(protocol, mailServer, mailPort).toString();
+            return mailServerUrl = URITools.generateURI(protocol, IDNA.toASCII(mailServer), mailPort).toString();
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.
@@ -519,7 +520,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void parseMailServerURL(final String mailServerURL) throws OXException {
         try {
-            setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
+            setMailServer(URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP));
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, mailServerURL);
         }
@@ -555,7 +556,7 @@ public abstract class AbstractMailAccount implements MailAccount {
             return;
         }
         try {
-            setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
+            setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
         } catch (final URISyntaxException e) {
             setTransportServer((String) null);
             return;
@@ -591,7 +592,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
-            return transportServerUrl = URITools.generateURI(protocol, transportServer, transportPort).toString();
+            return transportServerUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.

@@ -52,18 +52,19 @@ package com.openexchange.mail.autoconfig.internal;
 import java.util.LinkedList;
 import java.util.List;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.AutoconfigException;
 import com.openexchange.mail.autoconfig.AutoconfigService;
+import com.openexchange.mail.autoconfig.sources.ConfigServer;
 import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
 import com.openexchange.mail.autoconfig.sources.Database;
-import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.autoconfig.sources.Guess;
-import com.openexchange.mail.autoconfig.sources.ConfigServer;
+import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 
@@ -76,24 +77,24 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     private final List<ConfigSource> sources;
 
-    private final ServiceLookup services;
+    // private final ServiceLookup services;
 
-    public AutoconfigServiceImpl(ServiceLookup services) {
-        this.services = services;
+    public AutoconfigServiceImpl(final ServiceLookup services) {
+        // this.services = services;
         sources = new LinkedList<ConfigSource>();
-        sources.add(new ConfigurationFile(this.services));
+        sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer());
-        sources.add(new ISPDB(this.services));
-        sources.add(new Database(this.services));
+        sources.add(new ISPDB(services));
+        sources.add(new Database(services));
         sources.add(new Guess());
     }
 
     @Override
-    public Autoconfig getConfig(String email, String password, User user, Context context) throws OXException {
+    public Autoconfig getConfig(final String email, final String password, final User user, final Context context) throws OXException {
         QuotedInternetAddress internetAddress;
         try {
             internetAddress = new QuotedInternetAddress(email);
-        } catch (AddressException e) {
+        } catch (final AddressException e) {
             throw AutoconfigException.invalidMail(email);
         }
 
@@ -102,12 +103,12 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         try {
             mailLocalPart = getLocalPart(internetAddress);
             mailDomain = getDomain(internetAddress);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (final ArrayIndexOutOfBoundsException e) {
             return null;
         }
 
-        for (ConfigSource source : sources) {
-            Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context);
+        for (final ConfigSource source : sources) {
+            final Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context);
             if (config != null) {
                 return config;
             }
@@ -116,11 +117,11 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         return null;
     }
 
-    private String getDomain(QuotedInternetAddress internetAddress) {
-        return internetAddress.getAddress().split("@")[1];
+    private String getDomain(final QuotedInternetAddress internetAddress) {
+        return IDNA.toIDN(internetAddress.getAddress()).split("@")[1];
     }
 
-    private String getLocalPart(QuotedInternetAddress internetAddress) {
+    private String getLocalPart(final QuotedInternetAddress internetAddress) {
         return internetAddress.getAddress().split("@")[0];
     }
 
