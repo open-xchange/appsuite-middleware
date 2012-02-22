@@ -62,6 +62,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.IDNA;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -167,7 +168,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 retval = new ConnectionData();
                 retval.props = new Properties();
                 int pos = 1;
-                retval.url = result.getString(pos++);
+                retval.url = IDNA.toASCII(result.getString(pos++));
                 retval.driverClass = result.getString(pos++);
                 retval.props.put("user", result.getString(pos++));
                 retval.props.put("password", result.getString(pos++));
