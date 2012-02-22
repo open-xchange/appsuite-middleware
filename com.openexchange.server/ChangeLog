@@ -1,3 +1,7 @@
+* 2012-02-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21615: Honor max. retry count in Compare&Set condition
+
 * 2012-02-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 21604: Prefer "imap4flags" over "imapflags" if both supported

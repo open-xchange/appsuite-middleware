@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.settings.impl;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -200,17 +198,14 @@ public class RdbSettingStorage extends SettingStorage {
     private void saveInternal(final Connection con, final Setting setting)
         throws OXException {
         if (null == con) {
-            final Connection myCon = DBPool.pickupWriteable(ctx);
+            Connection myCon = null;
             try {
-                myCon.setAutoCommit(false);
+                myCon = DBPool.pickupWriteable(ctx);
                 saveInternal2(myCon, setting);
-                myCon.commit();
-            } catch (final SQLException e) {
-                rollback(myCon);
-                throw SettingExceptionCodes.SQL_ERROR.create(e);
             } finally {
-                autocommit(myCon);
-                DBPool.closeWriterSilent(ctx, myCon);
+                if (null != myCon) {
+                    DBPool.closeWriterSilent(ctx, myCon);
+                }
             }
         } else {
             saveInternal2(con, setting);
@@ -260,7 +255,7 @@ public class RdbSettingStorage extends SettingStorage {
                         }
                         cur = performSelect(setting, con);
                     }
-                } while (!compareAndSet(setting, cur, con));
+                } while (!compareAndSet(setting, cur, con) && retry++ < retryCount);
                 val = setting.getSingleValue().toString();
                 /*
                  * Retry...
