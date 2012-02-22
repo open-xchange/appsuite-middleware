@@ -77,6 +77,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
@@ -123,10 +124,10 @@ import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -369,7 +370,7 @@ public class MimeMessageFiller {
                     final int contextId = session.getContextId();
                     int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
                     if (id < 0) {
-                        id = mass.getByPrimaryAddress(QuotedInternetAddress.toIDN(from.getAddress()), userId, contextId);
+                        id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
                         if (id < 0) {
                             /*
                              * No appropriate mail account found which matches from address

@@ -73,6 +73,7 @@ import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Transport;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -93,9 +94,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
@@ -298,7 +299,7 @@ public final class SMTPTransport extends MailTransport {
                             }
                         }
                         try {
-                            final InetSocketAddress address = new InetSocketAddress(smtpConfig.getServer(), smtpConfig.getPort());
+                            final InetSocketAddress address = new InetSocketAddress(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort());
                             final Map<String, String> capabilities = SMTPCapabilityCache.getCapabilities(address, smtpConfig.isSecure(), smtpProperties, hostName);
                             if (capabilities.containsKey("STARTTLS")) {
                                 smtpProps.put("mail.smtp.starttls.enable", "true");
@@ -469,12 +470,12 @@ public final class SMTPTransport extends MailTransport {
             try {
                 if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
                     transport.connect(
-                        smtpConfig.getServer(),
+                        IDNA.toASCII(smtpConfig.getServer()),
                         smtpConfig.getPort(),
                         smtpConfig.getLogin(),
                         encodePassword(smtpConfig.getPassword()));
                 } else {
-                    transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
+                    transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), null, null);
                 }
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -509,9 +510,9 @@ public final class SMTPTransport extends MailTransport {
                 try {
                     if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
                         final String encPass = encodePassword(smtpConfig.getPassword());
-                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
                     } else {
-                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
+                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -577,9 +578,9 @@ public final class SMTPTransport extends MailTransport {
                 try {
                     if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
                         final String encPass = encodePassword(smtpConfig.getPassword());
-                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
                     } else {
-                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
+                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -660,9 +661,9 @@ public final class SMTPTransport extends MailTransport {
             try {
                 if (config.getSMTPProperties().isSmtpAuth()) {
                     final String encPass = encodePassword(config.getPassword());
-                    transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
+                    transport.connect(IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), encPass);
                 } else {
-                    transport.connect(config.getServer(), config.getPort(), null, null);
+                    transport.connect(IDNA.toASCII(config.getServer()), config.getPort(), null, null);
                 }
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {

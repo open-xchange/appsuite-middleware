@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.mail.internet.IDNA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
@@ -727,7 +728,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final String mailServerURL = storageUser.getImapServer();
                 final URI uri;
                 try {
-                    uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
+                    uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
                 } catch (final URISyntaxException e) {
                     throw OXMailfilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
                 }

@@ -51,6 +51,7 @@ package com.openexchange.smtp.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -142,7 +143,7 @@ public final class SMTPConfig extends TransportConfig {
 
     @Override
     public void setServer(final String smtpServer) {
-        this.smtpServer = smtpServer;
+        this.smtpServer = null == smtpServer ? null : IDNA.toUnicode(smtpServer);
     }
 
     @Override

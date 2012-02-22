@@ -56,6 +56,7 @@ import java.util.EnumMap;
 import java.util.Locale;
 import javax.mail.Address;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.config.MailProperties;
@@ -145,7 +146,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static String getCompareStringFromAddress(final Address addr, final Locale locale) {
         if (addr instanceof PlainTextAddress) {
-            return ((PlainTextAddress) addr).getAddress().toLowerCase(Locale.ENGLISH);
+            return ((PlainTextAddress) addr).getAddress().toLowerCase(locale);
         } else if (addr instanceof InternetAddress) {
             final InternetAddress ia1 = (InternetAddress) addr;
             final String personal = ia1.getPersonal();
@@ -155,7 +156,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                  */
                 return (personal.charAt(0) == '\'') || (personal.charAt(0) == '"') ? personal.substring(1).toLowerCase(locale) : personal.toLowerCase(locale);
             }
-            return ia1.getAddress().toLowerCase(Locale.ENGLISH);
+            return IDNA.toIDN(ia1.getAddress()).toLowerCase(locale);
         } else {
             return STR_EMPTY;
         }

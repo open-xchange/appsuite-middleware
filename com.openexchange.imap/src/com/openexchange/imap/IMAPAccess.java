@@ -67,6 +67,7 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
+import javax.mail.internet.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
@@ -507,7 +508,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get store
                  */
-                imapStore = connectIMAPStore(false, imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass, null);
+                imapStore = connectIMAPStore(false, imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, null);
                 /*
                  * Add warning if non-secure
                  */
@@ -632,7 +633,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get connected store
              */
-            this.server = config.getServer();
+            this.server = IDNA.toASCII(config.getServer());
             this.port = config.getPort();
             this.login = isProxyAuth ? proxyUser : user;
             this.password = tmpPass;
@@ -1136,7 +1137,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (config.getIMAPProperties().isEnableTls()) {
                 try {
-                    final InetSocketAddress socketAddress = new InetSocketAddress(config.getServer(), config.getPort());
+                    final InetSocketAddress socketAddress = new InetSocketAddress(IDNA.toASCII(config.getServer()), config.getPort());
                     final Map<String, String> capabilities =
                         IMAPCapabilityAndGreetingCache.getCapabilities(socketAddress, false, config.getIMAPProperties());
                     if (null != capabilities) {
