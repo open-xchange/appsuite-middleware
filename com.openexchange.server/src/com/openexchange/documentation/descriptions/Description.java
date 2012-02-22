@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,27 @@
  *
  */
 
-package com.openexchange.groupware.attach.json;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.documentation.descriptions;
 
 /**
- * {@link AttachmentActionFactory}
+ * {@link Description} - Common descriptions.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Module(name = "attachment", description = "Allows file attachments to arbitrary objects. Object addresses are defined analogous to the Link module. An Attachment always belongs to an object (called 'attached') in a certain folder of a certain module.")
-public class AttachmentActionFactory implements AJAXActionServiceFactory {
+public interface Description {
+	
+	/**
+	 * Specifies the name. Required.
+	 * 
+	 * @return The name
+	 */
+	String getName();
 
-    private final Map<String, AJAXActionService> actions;
-
-    public AttachmentActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(8);
-        actions.put("document", new com.openexchange.groupware.attach.json.actions.GetDocumentAction(services));
-        actions.put("get", new com.openexchange.groupware.attach.json.actions.GetAction(services));
-        actions.put("attach", new com.openexchange.groupware.attach.json.actions.AttachAction(services));
-        actions.put("detach", new com.openexchange.groupware.attach.json.actions.DetachAction(services));
-        actions.put("updates", new com.openexchange.groupware.attach.json.actions.UpdatesAction(services));
-        actions.put("all", new com.openexchange.groupware.attach.json.actions.AllAction(services));
-        actions.put("list", new com.openexchange.groupware.attach.json.actions.ListAction(services));
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+	/**
+	 * Specifies the description. Defaults to <code>""</code>.
+	 * 
+	 * @return the description
+	 */
+	String getDescription();
 
 }

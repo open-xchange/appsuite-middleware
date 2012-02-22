@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,75 @@
  *
  */
 
-package com.openexchange.groupware.attach.json;
+package com.openexchange.documentation.internal;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.documentation.DescriptionFactory;
+import com.openexchange.documentation.descriptions.ModuleDescription;
 
 /**
- * {@link AttachmentActionFactory}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link DocumentationProcessor} - Processes services implementing {@link AJAXActionServiceFactory} 
+ * and extracts their module description.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Module(name = "attachment", description = "Allows file attachments to arbitrary objects. Object addresses are defined analogous to the Link module. An Attachment always belongs to an object (called 'attached') in a certain folder of a certain module.")
-public class AttachmentActionFactory implements AJAXActionServiceFactory {
+public class DocumentationProcessor {
+	
+	private final DefaultDocumentationRegistry registry;
+	private final DescriptionFactory factory;
 
-    private final Map<String, AJAXActionService> actions;
-
-    public AttachmentActionFactory(final ServiceLookup services) {
+    /**
+     * Initializes a new {@link DocumentationProcessor}.
+     */
+    public DocumentationProcessor(final DefaultDocumentationRegistry registry, final DescriptionFactory factory) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(8);
-        actions.put("document", new com.openexchange.groupware.attach.json.actions.GetDocumentAction(services));
-        actions.put("get", new com.openexchange.groupware.attach.json.actions.GetAction(services));
-        actions.put("attach", new com.openexchange.groupware.attach.json.actions.AttachAction(services));
-        actions.put("detach", new com.openexchange.groupware.attach.json.actions.DetachAction(services));
-        actions.put("updates", new com.openexchange.groupware.attach.json.actions.UpdatesAction(services));
-        actions.put("all", new com.openexchange.groupware.attach.json.actions.AllAction(services));
-        actions.put("list", new com.openexchange.groupware.attach.json.actions.ListAction(services));
+        this.registry = registry;
+        this.factory = factory;
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
+    /**
+     * Processes the supplied service and adds the extracted description to the registry. 
+     * 
+     * @param service the service to add
+     */
+	public void add(final AJAXActionServiceFactory service) {
+		DocumentationBuilder builder = new DocumentationBuilder(factory);
+		builder.add(service.getClass()).add(service.getSupportedServices());
+		this.add(builder.getModuleDescription());
+	}
+	
+	public void add(final ModuleDescription description) {		
+		this.registry.addModule(description);
+	}
+	
+	/**
+     * Processes the supplied service and removes the associated description from the registry. 
+	 * 
+	 * @param service the service to remove
+	 */
+	public void remove(final AJAXActionServiceFactory service) {
+		this.remove(this.getModuleName(service));
+	}
+	
+	public void remove(final ModuleDescription description) {
+		this.remove(description.getName());
+	}
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
+	private void remove(final String module) {		
+		if (null != module) {
+			this.registry.removeModule(module);
+		}
+	}	
+	
+	private String getModuleName(final AJAXActionServiceFactory service) {
+		if (null != service) {
+			final DocumentationBuilder builder = new DocumentationBuilder(factory);
+			builder.add(service.getClass());
+			if (builder.hasModule()) {
+				return builder.getModuleDescription().getName();
+			}
+		}
+		return null;
+	}
+	
 }

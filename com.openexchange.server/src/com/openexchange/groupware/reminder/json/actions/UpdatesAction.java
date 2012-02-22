@@ -59,6 +59,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api2.ReminderService;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -72,6 +75,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "updates", description = "Get updated reminders", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+}, responseDescription = "")
 public final class UpdatesAction extends AbstractReminderAction {
 
     private static final org.apache.commons.logging.Log LOG =
