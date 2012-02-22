@@ -79,6 +79,7 @@ import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import javax.mail.internet.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1898,7 +1899,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return retval;
     }
 
-    private List<DatabaseHandle> removeFull(List<DatabaseHandle> list) {
+    private List<DatabaseHandle> removeFull(final List<DatabaseHandle> list) {
         final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
         for (final DatabaseHandle db : list) {
             final int maxUnit = i(db.getMaxUnits());
@@ -1980,7 +1981,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     ResultSet rsi = null;
                     try {
                         Connection rcon = cache.getSimpleSqlConnection(
-                            db.getUrl() + schema,
+                            IDNA.toASCII(db.getUrl()) + schema,
                             db.getLogin(),
                             db.getPassword(),
                             db.getDriver());

@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import javax.mail.internet.IDNA;
 
 /**
  * Class representing a context.
@@ -163,7 +164,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public final void setName(final String name) {
-        this.name = name;
+        this.name = IDNA.toUnicode(name);
         this.nameset = true;
     }
 
@@ -175,7 +176,14 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      *  
      */    
     public final void setLoginMappings(final HashSet<String> mappings) {
-        this.login_mappings = mappings;
+        if (null == mappings) {
+            login_mappings = null;
+            return;
+        }
+        login_mappings = new HashSet<String>(mappings.size());
+        for (final String mapping : mappings) {
+            login_mappings.add(IDNA.toIDN(mapping));
+        }
     }
     
     /*
@@ -185,33 +193,46 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         if (this.login_mappings == null) {
             this.login_mappings = new HashSet<String>();
         }
-        this.login_mappings.add(mapping);
+        this.login_mappings.add(IDNA.toIDN(mapping));
     }
 
-    public final void addLoginMappings(final Collection<String> mapping) {
+    public final void addLoginMappings(final Collection<String> mappings) {
+        if (null == mappings) {
+            return;
+        }
         if (this.login_mappings == null) {
             this.login_mappings = new HashSet<String>();
         }
-        this.login_mappings.addAll(mapping);
+        for (final String mapping : mappings) {
+            login_mappings.add(IDNA.toIDN(mapping));
+        }
     }
     
     /*
      * Remove a login mapping.
      */
     public final boolean removeLoginMapping(final String mapping) {
-        if (null != this.login_mappings) {
-            return this.login_mappings.remove(mapping);
-        } else {
+        if (null == mapping) {
             return false;
         }
+        if (null == this.login_mappings) {
+            return false;
+        }
+        return this.login_mappings.remove(IDNA.toIDN(mapping));
     }
 
-    public final boolean removeLoginMappings(final Collection<String> mapping) {
-        if (null != this.login_mappings) {
-            return this.login_mappings.removeAll(mapping);
-        } else {
+    public final boolean removeLoginMappings(final Collection<String> mappings) {
+        if (null == mappings) {
             return false;
         }
+        if (null == this.login_mappings) {
+            return false;
+        }
+        boolean b = false;
+        for (final String mapping : mappings) {
+            b |= login_mappings.remove(IDNA.toIDN(mapping));
+        }
+        return b;
     }
 
     public final HashSet<String> getLoginMappings() {
@@ -320,13 +341,14 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
      */
+    @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder();
+        final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
-                Object ob = f.get(this);
-                String tname = f.getName();
+                final Object ob = f.get(this);
+                final String tname = f.getName();
                 if (ob != null && !tname.equals("serialVersionUID")) {
                     ret.append("  ");
                     ret.append(tname);
@@ -334,9 +356,9 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }
@@ -348,7 +370,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         initExtendable();
         this.id = null;
         this.name = null;
-        this.enabled = false;
+        this.enabled = Boolean.FALSE;
         this.filestore_id = null;
         this.average_size = null;
         this.maintenanceReason = null;
@@ -472,7 +494,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     /**
      * Sets a generic user attribute
      */
-    public void setUserAttribute(String namespace, String name, String value) {
+    public void setUserAttribute(final String namespace, final String name, final String value) {
         getNamespace(namespace).put(name, value);
         userAttribtuesset = true;
     }
@@ -480,7 +502,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     /**
      * Read a generic user attribute
      */
-    public String getUserAttribute(String namespace, String name) {
+    public String getUserAttribute(final String namespace, final String name) {
         return getNamespace(namespace).get(name);
     }
     
@@ -491,12 +513,12 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return userAttributes;
     }
     
-    public void setUserAttributes(Map<String, Map<String, String>> userAttributes) {
+    public void setUserAttributes(final Map<String, Map<String, String>> userAttributes) {
         this.userAttribtuesset = true;
         this.userAttributes = userAttributes;
     }
     
-    public Map<String, String> getNamespace(String namespace) {
+    public Map<String, String> getNamespace(final String namespace) {
         if(userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
         }
@@ -512,7 +534,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return new SOAPUserAttributes(userAttributes);
     }
     
-    public void setUserAttributesForSOAP(SOAPUserAttributes userAttributes) {
+    public void setUserAttributesForSOAP(final SOAPUserAttributes userAttributes) {
         this.userAttributes = userAttributes.toMap();
     }
     
@@ -560,96 +582,134 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof Context))
+        }
+        if (!(obj instanceof Context)) {
             return false;
+        }
         final Context other = (Context) obj;
         if (average_size == null) {
-            if (other.average_size != null)
+            if (other.average_size != null) {
                 return false;
-        } else if (!average_size.equals(other.average_size))
+            }
+        } else if (!average_size.equals(other.average_size)) {
             return false;
-        if (average_sizeset != other.average_sizeset)
+        }
+        if (average_sizeset != other.average_sizeset) {
             return false;
+        }
         if (enabled == null) {
-            if (other.enabled != null)
+            if (other.enabled != null) {
                 return false;
-        } else if (!enabled.equals(other.enabled))
+            }
+        } else if (!enabled.equals(other.enabled)) {
             return false;
-        if (enabledset != other.enabledset)
+        }
+        if (enabledset != other.enabledset) {
             return false;
+        }
         if (filestore_id == null) {
-            if (other.filestore_id != null)
+            if (other.filestore_id != null) {
                 return false;
-        } else if (!filestore_id.equals(other.filestore_id))
+            }
+        } else if (!filestore_id.equals(other.filestore_id)) {
             return false;
-        if (filestore_idset != other.filestore_idset)
+        }
+        if (filestore_idset != other.filestore_idset) {
             return false;
+        }
         if (filestore_name == null) {
-            if (other.filestore_name != null)
+            if (other.filestore_name != null) {
                 return false;
-        } else if (!filestore_name.equals(other.filestore_name))
+            }
+        } else if (!filestore_name.equals(other.filestore_name)) {
             return false;
-        if (filestore_nameset != other.filestore_nameset)
+        }
+        if (filestore_nameset != other.filestore_nameset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (login_mappings == null) {
-            if (other.login_mappings != null)
+            if (other.login_mappings != null) {
                 return false;
-        } else if (!login_mappings.equals(other.login_mappings))
+            }
+        } else if (!login_mappings.equals(other.login_mappings)) {
             return false;
+        }
         if (maintenanceReason == null) {
-            if (other.maintenanceReason != null)
+            if (other.maintenanceReason != null) {
                 return false;
-        } else if (!maintenanceReason.equals(other.maintenanceReason))
+            }
+        } else if (!maintenanceReason.equals(other.maintenanceReason)) {
             return false;
-        if (maintenanceReasonset != other.maintenanceReasonset)
+        }
+        if (maintenanceReasonset != other.maintenanceReasonset) {
             return false;
+        }
         if (maxQuota == null) {
-            if (other.maxQuota != null)
+            if (other.maxQuota != null) {
                 return false;
-        } else if (!maxQuota.equals(other.maxQuota))
+            }
+        } else if (!maxQuota.equals(other.maxQuota)) {
             return false;
-        if (maxQuotaset != other.maxQuotaset)
+        }
+        if (maxQuotaset != other.maxQuotaset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         if (readDatabase == null) {
-            if (other.readDatabase != null)
+            if (other.readDatabase != null) {
                 return false;
-        } else if (!readDatabase.equals(other.readDatabase))
+            }
+        } else if (!readDatabase.equals(other.readDatabase)) {
             return false;
-        if (readDatabaseset != other.readDatabaseset)
+        }
+        if (readDatabaseset != other.readDatabaseset) {
             return false;
+        }
         if (usedQuota == null) {
-            if (other.usedQuota != null)
+            if (other.usedQuota != null) {
                 return false;
-        } else if (!usedQuota.equals(other.usedQuota))
+            }
+        } else if (!usedQuota.equals(other.usedQuota)) {
             return false;
-        if (usedQuotaset != other.usedQuotaset)
+        }
+        if (usedQuotaset != other.usedQuotaset) {
             return false;
+        }
         if (writeDatabase == null) {
-            if (other.writeDatabase != null)
+            if (other.writeDatabase != null) {
                 return false;
-        } else if (!writeDatabase.equals(other.writeDatabase))
+            }
+        } else if (!writeDatabase.equals(other.writeDatabase)) {
             return false;
-        if (writeDatabaseset != other.writeDatabaseset)
+        }
+        if (writeDatabaseset != other.writeDatabaseset) {
             return false;
+        }
         return true;
     }
 
@@ -673,7 +733,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @param listrun
      */
-    public final void setListrun(boolean listrun) {
+    public final void setListrun(final boolean listrun) {
         this.listrun = listrun;
     }
 }

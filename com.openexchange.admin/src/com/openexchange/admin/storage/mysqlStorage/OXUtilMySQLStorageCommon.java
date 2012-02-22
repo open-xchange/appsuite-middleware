@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.mail.internet.IDNA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -81,11 +82,11 @@ public class OXUtilMySQLStorageCommon {
 
     private static AdminCache cache = ClientAdminThread.cache;
 
-    public void createDatabase(Database db) throws StorageException {
+    public void createDatabase(final Database db) throws StorageException {
         final List<String> createTableStatements;
         try {
             createTableStatements = cache.getOXDBInitialQueries();
-        } catch (OXGenericException e) {
+        } catch (final OXGenericException e) {
             LOG.error("Error reading DB init Queries!", e);
             throw new StorageException(e);
         }
@@ -95,11 +96,11 @@ public class OXUtilMySQLStorageCommon {
             sql_pass = db.getPassword();
         }
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
-        } catch (SQLException e) {
+            con = cache.getSimpleSQLConnectionWithoutTimeout(IDNA.toASCII(db.getUrl()), db.getLogin(), sql_pass, db.getDriver());
+        } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
@@ -118,13 +119,13 @@ public class OXUtilMySQLStorageCommon {
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initUpdateTaskTable(con, db.getMasterId().intValue(), db.getScheme());
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             if (created) {
                 deleteDatabase(con, db);
             }
             throw new StorageException(e.toString());
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             rollback(con);
             if (created) {
                 deleteDatabase(con, db);
@@ -136,7 +137,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private boolean existsDatabase(Connection con, String name) throws StorageException {
+    private boolean existsDatabase(final Connection con, final String name) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -144,7 +145,7 @@ public class OXUtilMySQLStorageCommon {
             stmt.setString(1, name);
             result = stmt.executeQuery();
             return result.next();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -152,12 +153,12 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void createDatabase(Connection con, String name) throws StorageException {
+    private void createDatabase(final Connection con, final String name) throws StorageException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
             stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -165,7 +166,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void pumpData2DatabaseOld(Connection con, List<String> db_queries) throws StorageException {
+    private void pumpData2DatabaseOld(final Connection con, final List<String> db_queries) throws StorageException {
         Statement stmt = null;
         try {
             try {
@@ -215,38 +216,38 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void pumpData2DatabaseNew(Connection con, List<CreateTableService> createTables) throws StorageException {
-        Set<String> existingTables = new HashSet<String>();
-        for (String table : FROM_SCRIPTS) {
+    private void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
+        final Set<String> existingTables = new HashSet<String>();
+        for (final String table : FROM_SCRIPTS) {
             existingTables.add(table);
         }
-        List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
+        final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
         toCreate.addAll(createTables);
         CreateTableService next;
         try {
             while ((next = findNext(toCreate, existingTables)) != null) {
                 next.perform(con);
-                for (String createdTable : next.tablesToCreate()) {
+                for (final String createdTable : next.tablesToCreate()) {
                     existingTables.add(createdTable);
                 }
                 toCreate.remove(next);
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
         if (!toCreate.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             sb.append("Unable to determine next CreateTableService to execute.\n");
             sb.append("Existing tables: ");
-            for (String existingTable : existingTables) {
+            for (final String existingTable : existingTables) {
                 sb.append(existingTable);
                 sb.append(',');
             }
             sb.setCharAt(sb.length() - 1, '\n');
-            for (CreateTableService service : toCreate) {
+            for (final CreateTableService service : toCreate) {
                 sb.append(service.getClass().getName());
                 sb.append(": ");
-                for (String tableToCreate : service.requiredTables()) {
+                for (final String tableToCreate : service.requiredTables()) {
                     sb.append(tableToCreate);
                     sb.append(',');
                 }
@@ -257,10 +258,10 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private CreateTableService findNext(List<CreateTableService> toCreate, Set<String> existingTables) {
-        for (CreateTableService service : toCreate) {
-            List<String> requiredTables = new ArrayList<String>();
-            for (String requiredTable : service.requiredTables()) {
+    private CreateTableService findNext(final List<CreateTableService> toCreate, final Set<String> existingTables) {
+        for (final CreateTableService service : toCreate) {
+            final List<String> requiredTables = new ArrayList<String>();
+            for (final String requiredTable : service.requiredTables()) {
                 requiredTables.add(requiredTable);
             }
             if (existingTables.containsAll(requiredTables)) {
@@ -270,26 +271,26 @@ public class OXUtilMySQLStorageCommon {
         return null;
     }
 
-    private void initUpdateTaskTable(Connection con, int poolId, String schema) throws StorageException {
-        UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
-        SchemaStore store = SchemaStore.getInstance();
+    private void initUpdateTaskTable(final Connection con, final int poolId, final String schema) throws StorageException {
+        final UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
+        final SchemaStore store = SchemaStore.getInstance();
         try {
-            for (UpdateTask task : tasks) {
+            for (final UpdateTask task : tasks) {
                 store.addExecutedTask(con, task.getClass().getName(), true, poolId, schema);
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
     }
 
-    public void deleteDatabase(Database db) throws StorageException {
+    public void deleteDatabase(final Database db) throws StorageException {
         final Connection con;
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
-        } catch (SQLException e) {
+            con = cache.getSimpleSQLConnectionWithoutTimeout(IDNA.toASCII(db.getUrl()), db.getLogin(), db.getPassword(), db.getDriver());
+        } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
@@ -300,14 +301,14 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void deleteDatabase(final Connection con, Database db) throws StorageException {
+    private void deleteDatabase(final Connection con, final Database db) throws StorageException {
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
             stmt = con.createStatement();
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw new StorageException(e.getMessage(), e);
         } finally {

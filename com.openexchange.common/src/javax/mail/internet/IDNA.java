@@ -128,6 +128,8 @@ public final class IDNA {
 
     private static final String SCHEME_DELIM = "://";
 
+    private static final char[] CHARS = { ':', '/', '?' };
+
     /**
      * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
      * rules are enforced. The input string may be a domain name containing dots.
@@ -148,7 +150,10 @@ public final class IDNA {
             final StringBuilder b = new StringBuilder(unicodeHostName.length() + 16);
             b.append(unicodeHostName.substring(0, pos));
             final String host = unicodeHostName.substring(pos);
-            pos = host.indexOf(':');
+            pos = -1;
+            for (int k = 0; pos < 0 && k < CHARS.length; k++) {
+                pos = host.indexOf(CHARS[k]);
+            }
             if (pos < 0) {
                 b.append(gnu.inet.encoding.IDNA.toASCII(host, true));
             } else {
@@ -180,7 +185,10 @@ public final class IDNA {
         final StringBuilder b = new StringBuilder(asciiHostName.length());
         b.append(asciiHostName.substring(0, pos));
         final String host = asciiHostName.substring(pos);
-        pos = host.indexOf(':');
+        pos = -1;
+        for (int k = 0; pos < 0 && k < CHARS.length; k++) {
+            pos = host.indexOf(CHARS[k]);
+        }
         if (pos < 0) {
             b.append(gnu.inet.encoding.IDNA.toUnicode(host, true));
         } else {
