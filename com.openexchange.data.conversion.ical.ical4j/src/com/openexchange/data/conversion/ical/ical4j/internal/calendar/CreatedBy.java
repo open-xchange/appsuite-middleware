@@ -52,6 +52,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.TimeZone;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Organizer;
@@ -97,11 +99,14 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             } else {
                 address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
             }
+            address = IDNA.toACE(address);
             organizer.setValue("mailto:" + address);
         } catch (final URISyntaxException e) {
             warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e, "URI problem."));
         } catch (final OXException e) {
             warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e));
+        } catch (AddressException e) {
+            warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e, "Address Problem,"));
         }
         component.getProperties().add(organizer);
     }
@@ -118,7 +123,9 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
 
     @Override
     public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        final String organizer = component.getProperty(Property.ORGANIZER).getValue();
-        calendar.setOrganizer(organizer.toLowerCase().startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer);
+        String organizer = component.getProperty(Property.ORGANIZER).getValue();
+        organizer = organizer.toLowerCase().startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer;
+        organizer = IDNA.toIDN(organizer);
+        calendar.setOrganizer(organizer);
     }
 }
