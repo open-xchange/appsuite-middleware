@@ -1029,7 +1029,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 }
                 return null;
             } else if (participant.hasRole(ITipRole.ATTENDEE)) {
-                if (onlyMyStateChanged()) {
+                if (onlyMyStateChanged() && confirmStatus != null) {
                     return stateChanged(request(participant, null, getStateTypeForStatus(confirmStatus)), confirmStatus);
                 } 
                 return ORGANIZER.generateUpdateMailFor(participant);
