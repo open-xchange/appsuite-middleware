@@ -52,6 +52,7 @@ package com.openexchange.pop3.connect;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.POP3Access;
@@ -117,7 +118,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 try {
                     capabilities =
                         POP3CapabilityCache.getCapability(
-                            InetAddress.getByName(server),
+                            InetAddress.getByName(IDNA.toASCII(server)),
                             port,
                             pop3Config.isSecure(),
                             pop3Config.getPOP3Properties(),

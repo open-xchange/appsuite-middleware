@@ -80,6 +80,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.IDNA;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -1876,7 +1877,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             InetAddress addr;
             try {
-                addr = InetAddress.getByName(server);
+                addr = InetAddress.getByName(IDNA.toASCII(server));
             } catch (final UnknownHostException e) {
                 LOG.warn(e.getMessage(), e);
                 addr = null;
@@ -1912,7 +1913,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return server.equalsIgnoreCase(mailServer);
         }
         try {
-            return addr.equals(InetAddress.getByName(mailServer));
+            return addr.equals(InetAddress.getByName(IDNA.toASCII(mailServer)));
         } catch (final UnknownHostException e) {
             LOG.warn(e.getMessage(), e);
             /*
@@ -1942,7 +1943,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             InetAddress addr;
             try {
-                addr = InetAddress.getByName(server);
+                addr = InetAddress.getByName(IDNA.toASCII(server));
             } catch (final UnknownHostException e) {
                 LOG.warn(e.getMessage(), e);
                 addr = null;
@@ -1981,7 +1982,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return server.equalsIgnoreCase(transportServer);
         }
         try {
-            return addr.equals(InetAddress.getByName(transportServer));
+            return addr.equals(InetAddress.getByName(IDNA.toASCII(transportServer)));
         } catch (final UnknownHostException e) {
             LOG.warn(e.getMessage(), e);
             /*

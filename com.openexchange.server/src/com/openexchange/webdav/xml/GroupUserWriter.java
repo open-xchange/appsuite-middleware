@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -269,14 +270,14 @@ public class GroupUserWriter extends ContactWriter {
             final String[] aliases = u.getAliases();
             if (null != aliases && aliases.length > 0) {
                 internalAddresses = new HashSet<InternetAddress>(aliases.length + 1);
-                internalAddresses.add(new InternetAddress(primaryAddress));
+                internalAddresses.add(new QuotedInternetAddress(primaryAddress));
 
                 for (final String alias : aliases) {
-                    internalAddresses.add(new InternetAddress(alias));
+                    internalAddresses.add(new QuotedInternetAddress(alias));
                 }
             } else {
                 internalAddresses = new HashSet<InternetAddress>(1);
-                internalAddresses.add(new InternetAddress(primaryAddress));
+                internalAddresses.add(new QuotedInternetAddress(primaryAddress));
             }
 
             addElement(DataFields.LAST_MODIFIED, contactobject.getLastModified(), e);

@@ -49,16 +49,18 @@
 
 package com.openexchange.index.internal;
 
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DEL_CTX_FROM_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DEL_USR_FROM_MAPPING;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.index.ConfigIndexService;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -68,45 +70,67 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class IndexDeleteListener implements DeleteListener {
 
-    public IndexDeleteListener() {
+    private final ConfigIndexService indexService;
+    
+    private final UserService userService;
+    
+    private final int[] coreTypes;
+    
+
+    public IndexDeleteListener(final ConfigIndexService indexService, final UserService userService) {
         super();
+        this.indexService = indexService;
+        this.userService = userService;
+     // TODO: extend!
+        coreTypes = new int[] { Types.EMAIL };
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (event.getType() == DeleteEvent.TYPE_USER) {
-            deleteUserEntriesFromDB(event, writeCon);
+            final int cid = event.getContext().getContextId();
+            final int uid = event.getId();
+            
+            deleteAllCores(cid, uid);
+            deleteUserEntriesFromDB(writeCon, cid, uid);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
-            deleteContextEntriesFromDB(event, writeCon);
-        } else {
-            return;
+            final int cid = event.getContext().getContextId();
+            final User[] users = userService.getUser(event.getContext());
+            
+            for (final User user : users) {
+                deleteAllCores(cid, user.getId());
+            }
+            deleteContextEntriesFromDB(writeCon, cid);
+        }
+    }
+    
+    private void deleteAllCores(final int cid, final int uid) throws OXException {
+        for (final int type : coreTypes) {
+            indexService.deleteCore(cid, uid, type); 
         }
     }
 
-    private void deleteContextEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
-        final int cid = event.getContext().getContextId();
+    private void deleteContextEntriesFromDB(final Connection con, final int cid) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement(SQL_DEL_CTX_FROM_MAPPING);
+            stmt = con.prepareStatement("DELETE FROM solrCores WHERE cid = ?");
             stmt.setInt(1, cid);
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private void deleteUserEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
-        final int cid = event.getContext().getContextId();
-        final int uid = event.getId();
+    private void deleteUserEntriesFromDB(final Connection con, final int cid, final int uid) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement(SQL_DEL_USR_FROM_MAPPING);
+            stmt = con.prepareStatement("DELETE FROM solrCores WHERE cid = ? AND uid = ?");
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);

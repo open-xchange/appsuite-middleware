@@ -93,7 +93,7 @@ public class MimeFilter {
                 // Nothing to filter
                 return mimeMessage;
             }
-            final MimeMultipart newMultipart = new MimeMultipart();
+            final MimeMultipart newMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
             handlePart((Multipart) mimeMessage.getContent(), newMultipart);
             mimeMessage.setContent(newMultipart);
             mimeMessage.saveChanges();
@@ -117,7 +117,7 @@ public class MimeFilter {
             } else {
                 contentType = LocaleTools.toLowerCase(contentType.trim());
                 if (contentType.startsWith("multipart/")) {
-                    final MimeMultipart newSubMultipart = new MimeMultipart();
+                    final MimeMultipart newSubMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
                     handlePart((Multipart) bodyPart.getContent(), newSubMultipart);
                     final MimeBodyPart mimeBodyPart = new MimeBodyPart();
                     mimeBodyPart.setContent(newSubMultipart);
@@ -132,6 +132,14 @@ public class MimeFilter {
                     newMultipart.addBodyPart(bodyPart);
                 }
             }
+        }
+    }
+
+    private static String getSubType(final String contentType, final String defaultType) {
+        try {
+            return new ContentType(contentType).getSubType();
+        } catch (final Exception e) {
+            return defaultType;
         }
     }
 

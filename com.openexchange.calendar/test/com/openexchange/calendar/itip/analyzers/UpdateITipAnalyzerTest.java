@@ -214,10 +214,10 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertSame(appointment, changes.get(3).getMasterAppointment());
         assertSame(appointment, changes.get(4).getMasterAppointment());
 
-        assertEquals(ex1.getTitle(), changes.get(1).getNewAppointment().getTitle());
-        assertEquals(ex2.getTitle(), changes.get(2).getNewAppointment().getTitle());
-        assertEquals(ex3.getTitle(), changes.get(3).getNewAppointment().getTitle());
-        assertEquals(ex4.getTitle(), changes.get(4).getNewAppointment().getTitle());
+        assertSame(ex1, changes.get(1).getNewAppointment());
+        assertSame(ex2, changes.get(2).getNewAppointment());
+        assertSame(ex3, changes.get(3).getNewAppointment());
+        assertSame(ex4, changes.get(4).getNewAppointment());
         
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 

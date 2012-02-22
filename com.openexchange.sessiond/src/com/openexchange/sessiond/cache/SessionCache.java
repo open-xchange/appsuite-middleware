@@ -100,7 +100,13 @@ public final class SessionCache {
          */
     }
 
-    private Cache getCache() throws OXException {
+    /**
+     * Gets associated cache.
+     * 
+     * @return The cache
+     * @throws OXException If cache is absent
+     */
+    public Cache getCache() throws OXException {
         final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
         if (null == cacheService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( CacheService.class.getName());
@@ -139,6 +145,7 @@ public final class SessionCache {
      * @return <code>true</code> if present in cache; otherwise <code>false</code>
      * @throws OXException If a caching error occurs
      */
+    @SuppressWarnings("unchecked")
     public boolean containsInvalidateMarker(final int contextId) throws OXException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();

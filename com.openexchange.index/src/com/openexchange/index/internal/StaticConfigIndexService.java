@@ -49,12 +49,12 @@
 
 package com.openexchange.index.internal;
 
-import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexServer;
 import com.openexchange.index.IndexUrl;
+import com.openexchange.index.SolrCoreStore;
 
 
 /**
@@ -66,21 +66,19 @@ public final class StaticConfigIndexService implements ConfigIndexService {
 
     private final IndexUrl indexUrl;
 
-    private final IndexServer server;
-
     /**
      * Initializes a new {@link StaticConfigIndexService}.
      */
     public StaticConfigIndexService() {
         super();
-        final IndexServerImpl server = new IndexServerImpl();
-        server.setId(1);
+        final IndexServer server = new IndexServer();
         server.setUrl("http://10.20.31.1:8580");
         server.setConnectionTimeout(1000);
         server.setMaxConnectionsPerHost(100);
         server.setSoTimeout(3000);
-        this.server = server;
-        this.indexUrl = new IndexUrlImpl(server, "solr/main");
+        final SolrCore core = new StaticSolrCore();
+        core.setServer(server);
+        indexUrl = new IndexUrlImpl(core);
     }
 
     @Override
@@ -94,43 +92,45 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public int registerIndexServer(final IndexServer server) throws OXException {
+    public List<SolrCoreStore> getAllStores() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public int registerCoreStore(final SolrCoreStore store) throws OXException {
+        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public void unregisterIndexServer(final int serverId, final boolean deleteMappings) throws OXException {
+    public void modifyCoreStore(final SolrCoreStore store) throws OXException {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
-    public List<IndexServer> getAllIndexServers() throws OXException {
-        return Arrays.asList(new IndexServer[] { server });
+    public void unregisterCoreStore(final int storeId) throws OXException {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
-    public void modifyIndexServer(final IndexServer server) throws OXException {
+    public void stopCore(final int contextId, final int userId, final int module) throws OXException {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
-    public void addIndexMapping(final int cid, final int uid, final int module, final String index) throws OXException {
+    public void createCore(final int contextId, final int userId, final int module) throws OXException {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
-    public void removeIndexMapping(final int cid, final int uid, final int module) throws OXException {
+    public void deleteCore(final int contextId, final int userId, final int module) throws OXException {
         // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void modifiyIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
-        // TODO Auto-generated method stub
-
+        
     }
 
 }

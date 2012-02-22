@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -71,7 +71,7 @@ public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
         final Parameter param = property.getParameter("VALUE");
         if (param == null || !"URL".equalsIgnoreCase(param.getValue(0).getText())) {
             try {
-                str = "mailto:" + new InternetAddress(str).getAddress();
+                str = "mailto:" + new QuotedInternetAddress(str).getAddress();
             } catch (final AddressException e) {
                 final VersitException ve = new VersitException(s, e.getMessage());
                 ve.initCause(e);

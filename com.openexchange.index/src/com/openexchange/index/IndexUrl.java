@@ -92,15 +92,6 @@ public interface IndexUrl {
     int getMaxConnectionsPerHost();
 
     /**
-     * Gets the max. number of indices that can be created on this server.
-     * <p>
-     * Default is <code>100</code>.
-     *
-     * @return The max. number of indices
-     */
-    int getMaxIndices();
-
-    /**
      * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
      *
      * @return A hash code value for this object.

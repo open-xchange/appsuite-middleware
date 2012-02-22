@@ -76,26 +76,26 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      */
     INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
     /**
-     * Could not register index search server with url %1$s.
+     * Could not find solr core entry for user %1$s and module %2$s in context %3$s. 
      */
-    REGISTER_SERVER_ERROR(IndexExceptionMessages.REGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 4),
+    CORE_ENTRY_NOT_FOUND(IndexExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4),
     /**
-     * Could not unregister index search server with id %1$s.
+     * Could not find solr core store for given attributes. %1$s.
      */
-    UNREGISTER_SERVER_ERROR(IndexExceptionMessages.UNREGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+    CORE_STORE_ENTRY_NOT_FOUND(IndexExceptionMessages.CORE_STORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
-     * Could not create index mapping for user %1$s in context %2$s for module %3$s on server %4$s.
+     * All core stores seem to be full.
      */
-    ADD_MAPPING_ERROR(IndexExceptionMessages.ADD_MAPPING_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    NO_FREE_CORE_STORE(IndexExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 6),
     /**
-     * Could not find server with id %1$s.
+     * This cores instance directory (%1$s) already exists. It cannot be created. 
      */
-    SERVER_NOT_FOUND(IndexExceptionMessages.SERVER_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
+    INSTANCE_DIR_EXISTS(IndexExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 7),
     /**
-     * Could not find a server to add a new index to.
+     * Could not parse URI: %1$s.
      */
-    SERVER_FULL(IndexExceptionMessages.SERVER_FULL_MSG, CATEGORY_ERROR, 8)
-
+    URI_PARSE_ERROR(IndexExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 8),
+    
     ;
 
     private final String message;

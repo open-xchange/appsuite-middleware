@@ -51,6 +51,7 @@ package com.openexchange.test.fixtures.transformators;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -67,7 +68,7 @@ import com.openexchange.test.fixtures.SimpleCredentials;
  */
 public class DistributionListTransformator implements Transformator {
 
-	public DistributionListTransformator(FixtureLoader fixtureLoader) {
+	public DistributionListTransformator(final FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
@@ -122,7 +123,7 @@ public class DistributionListTransformator implements Transformator {
 
 	private DistributionListEntryObject getUserDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact();
-		DistributionListEntryObject entry = new DistributionListEntryObject();
+		final DistributionListEntryObject entry = new DistributionListEntryObject();
 		entry.setDisplayname(user.getDisplayName());
 		entry.setEmailaddress(user.getEmail1());
 		entry.setEntryID(DistributionListEntryObject.INDEPENDENT);
@@ -139,10 +140,10 @@ public class DistributionListTransformator implements Transformator {
 			} else {
 				address = addresses[0];
 			}
-		} catch (AddressException e) {
+		} catch (final AddressException e) {
 			throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry + ": " + e.getMessage());
 		}
-		return new DistributionListEntryObject(address.getPersonal(), address.getAddress(), DistributionListEntryObject.INDEPENDENT);
+		return new DistributionListEntryObject(address.getPersonal(), IDNA.toIDN(address.getAddress()), DistributionListEntryObject.INDEPENDENT);
 
 	}
 }

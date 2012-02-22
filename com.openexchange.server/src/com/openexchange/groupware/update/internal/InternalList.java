@@ -436,6 +436,9 @@ public final class InternalList {
 
         // Adds index to oxfolder_tree and del_oxfolder_tree
         new com.openexchange.groupware.update.tasks.FolderAddIndex2LastModified(),
+
+        // Checks for missing folder 'public_infostore' (15) in any available context
+        new com.openexchange.groupware.update.tasks.CheckForPublicInfostoreFolderTask(),
         
     };
 }

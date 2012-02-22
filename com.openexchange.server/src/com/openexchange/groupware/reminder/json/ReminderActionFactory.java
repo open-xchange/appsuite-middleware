@@ -54,22 +54,24 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.json.actions.AbstractReminderAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ReminderActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "reminder", description = "Provides the ability to fetch all active reminders for a user between two dates.")
 public class ReminderActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractReminderAction> actions;
 
     /**
      * Initializes a new {@link ReminderActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public ReminderActionFactory(final ServiceLookup services) {

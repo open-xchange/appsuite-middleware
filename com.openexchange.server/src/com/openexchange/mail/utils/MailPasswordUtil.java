@@ -60,6 +60,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -193,7 +194,25 @@ public final class MailPasswordUtil {
      * @throws GeneralSecurityException If password decryption fails
      */
     public static String decrypt(final String encryptedPassword, final String key) throws GeneralSecurityException {
-        return decrypt(encryptedPassword, generateSecretKey(key));
+        try {
+            return decrypt(encryptedPassword, generateSecretKey(key));
+        } catch (final GeneralSecurityException e) {
+            // Decrypting failed; retry with CryptoService
+            final CryptoService crypto = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+            if (null == crypto) {
+                LOG.warn("MailPasswordUtil.decrypt(): Missing " + CryptoService.class.getSimpleName());
+                throw e;
+            }
+            try {
+                return crypto.decrypt(encryptedPassword, key);
+            } catch (final OXException ce) {
+                // CryptoServce failed, too
+                final StringBuilder sb = new StringBuilder(128).append("MailPasswordUtil.decrypt(): Failed to decrypt \"");
+                sb.append(encryptedPassword).append("\" with ").append(CryptoService.class.getSimpleName());
+                LOG.debug(sb.toString(), ce);
+            }
+            throw e;
+        }
     }
 
     /**

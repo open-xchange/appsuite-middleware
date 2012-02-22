@@ -212,6 +212,17 @@ public final class JCSCache implements Cache {
     }
 
     @Override
+    public void localPut(final Serializable key, final Serializable value) throws OXException {
+        try {
+            final org.apache.jcs.engine.CacheElement ce = new org.apache.jcs.engine.CacheElement(cacheControl.getCacheName(), key, value);
+            ce.setElementAttributes(cacheControl.getElementAttributes());
+            cacheControl.localUpdate(ce);
+        } catch (final Exception e) {
+            throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public void removeFromGroup(final Serializable key, final String group) {
         cache.remove(key, group);
     }

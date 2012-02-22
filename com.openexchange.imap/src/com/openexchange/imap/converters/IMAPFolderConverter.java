@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
@@ -171,7 +172,7 @@ public final class IMAPFolderConverter {
         try {
             return new Entity2ACLArgsImpl(
                 imapConfig.getAccountId(),
-                new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()),
+                new InetSocketAddress(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()),
                 session.getUserId(),
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session));

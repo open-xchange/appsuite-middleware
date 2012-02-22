@@ -52,6 +52,7 @@ package com.openexchange.pop3.config;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
@@ -123,7 +124,7 @@ public final class POP3Config extends MailConfig {
 
     @Override
     public void setServer(final String pop3Server) {
-        this.pop3Server = pop3Server;
+        this.pop3Server = null == pop3Server ? null : IDNA.toUnicode(pop3Server);
     }
 
     @Override

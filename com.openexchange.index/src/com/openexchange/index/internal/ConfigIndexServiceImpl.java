@@ -49,11 +49,17 @@
 
 package com.openexchange.index.internal;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexServer;
 import com.openexchange.index.IndexUrl;
+import com.openexchange.index.SolrCoreStore;
 
 
 /**
@@ -62,61 +68,168 @@ import com.openexchange.index.IndexUrl;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ConfigIndexServiceImpl implements ConfigIndexService {
+    
+    private final ConfigurationService config;
+    
 
-    public ConfigIndexServiceImpl() {
+    public ConfigIndexServiceImpl(final ConfigurationService config) {
         super();
+        this.config = config;
     }
 
     @Override
     public IndexUrl getReadOnlyURL(final int cid, final int uid, final int module) throws OXException {
-        return ConfigIndexMysql.getInstance().getIndexUrl(cid, uid, module);
+        final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
+        final boolean hasActiveCore = indexMysql.hasActiveCore(cid, uid, module);
+        if (!hasActiveCore) {
+            final SolrCoreStore coreStore = indexMysql.getCoreStore(cid, uid, module);
+            final SolrCore core = startUpSolrCore(cid, uid, module, coreStore);
+            final String server = config.getProperty("com.openexchange.index.solrHost");            
+            if (!indexMysql.activateCoreEntry(cid, uid, module, server)) {
+                /*
+                 * Somebody else tried to start up a core for this index and was faster.
+                 */
+                shutDownSolrCore(core);
+            }
+        }
+        
+        final SolrCore core = indexMysql.getSolrCore(cid, uid, module);
+        fillIndexServer(core.getServer());
+        final IndexUrlImpl indexUrl = new IndexUrlImpl(core);
+        
+        return indexUrl;
     }
 
     @Override
     public IndexUrl getWriteURL(final int cid, final int uid, final int module) throws OXException {
         // TODO: Until now there is now difference between read and write connection.
         // Change this here if it's going to be implemented.
-        return ConfigIndexMysql.getInstance().getIndexUrl(cid, uid, module);
+        return getReadOnlyURL(cid, uid, module);
+    }
+    
+    @Override
+    public List<SolrCoreStore> getAllStores() throws OXException {
+        return ConfigIndexMysql.getInstance().getCoreStores();
     }
 
     @Override
-    public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
-        ConfigIndexMysql.getInstance().unregisterIndexServer(serverId, deleteMappings);
+    public int registerCoreStore(final SolrCoreStore store) throws OXException {
+        return ConfigIndexMysql.getInstance().createCoreStoreEntry(store);
     }
 
     @Override
-    public int registerIndexServer(IndexServer server) throws OXException {
-        return ConfigIndexMysql.getInstance().registerIndexServer(server);
+    public void modifyCoreStore(final SolrCoreStore store) throws OXException {
+        ConfigIndexMysql.getInstance().updateCoreStoreEntry(store);
     }
 
     @Override
-    public List<IndexServer> getAllIndexServers() throws OXException {
-        return ConfigIndexMysql.getInstance().getAllIndexServers();
+    public void unregisterCoreStore(final int storeId) throws OXException {
+        ConfigIndexMysql.getInstance().removeCoreStoreEntry(storeId);
     }
-
+    
     @Override
-    public void modifyIndexServer(IndexServer server) throws OXException {
-        ConfigIndexMysql.getInstance().modifyIndexServer(server);
+    public void stopCore(final int cid, final int uid, final int module) throws OXException {
+        final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
+        if (indexMysql.hasActiveCore(cid, uid, module)) {
+            final SolrCore core = indexMysql.getSolrCore(cid, uid, module);
+            indexMysql.deactivateCoreEntry(cid, uid, module);
+            shutDownSolrCore(core);
+        }
     }
-
+    
     @Override
-    public void addIndexMapping(int cid, int uid, int module, String index) throws OXException {
-        int serverId = ConfigIndexMysql.getInstance().createIndexMapping(cid, uid, module, index);
-
-        // TODO: Create index / core here
+    public void createCore(final int cid, final int uid, final int module) throws OXException {
+        final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
+        final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
+        final String baseUri = store.getUri();
+        final String coreName = SolrCoreStore.getCoreName(cid, uid, module);
+        final String instanceUriStr = baseUri + File.pathSeparator + coreName;
+        final String dataUriStr = baseUri + File.pathSeparator + coreName + File.pathSeparator + "data";
+        URI instanceUri = null;
+        URI dataUri = null;
+        try {
+            instanceUri = new URI(instanceUriStr);            
+            final File instanceDir = new File(instanceUri);            
+            if (instanceDir.exists()) {
+                throw IndexExceptionCodes.INSTANCE_DIR_EXISTS.create(instanceDir.toString());
+            }
+            
+            if (instanceDir.mkdir()) {                
+                dataUri = new URI(dataUriStr);
+                final File dataDir = new File(dataUri);
+                dataDir.mkdir();
+            }
+        } catch (final URISyntaxException e) {
+            final String uri;
+            if (instanceUri == null) {
+                uri = instanceUriStr;
+            } else {
+                uri = dataUriStr;
+            }
+            
+            throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, uri);
+        }  
     }
-
+    
     @Override
-    public void removeIndexMapping(int cid, int uid, int module) throws OXException {
-        ConfigIndexMysql.getInstance().removeIndexMapping(cid, uid, module);
-
-        // TODO: Remove index / core
+    public void deleteCore(final int cid, final int uid, final int module) throws OXException {
+        stopCore(cid, uid, module);
+        final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
+        final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
+        final String baseUri = store.getUri();
+        final String coreName = SolrCoreStore.getCoreName(cid, uid, module);
+        final String uriStr = baseUri + File.pathSeparator + coreName;        
+        try {
+            final URI uri = new URI(uriStr);
+            final File instanceDir = new File(uri);
+            if (instanceDir.exists()) {
+                deleteDir(instanceDir);
+            }
+        } catch (final URISyntaxException e) {
+            throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, uriStr);
+        }        
     }
+    
+    private boolean deleteDir(final File dir) {
+        if (dir.isDirectory()) {
+            final String[] children = dir.list();
+            for (int i=0; i<children.length; i++) {
+                final boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
 
-    @Override
-    public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
-        ConfigIndexMysql.getInstance().modifiyIndexMapping(cid, uid, module, server, index);
-
-        // TODO: Apply any changes to the modified index / core
+        return dir.delete();
     }
+    
+    private void fillIndexServer(final IndexServer server) {
+        server.setConnectionTimeout(config.getIntProperty("com.openexchange.index.connectionTimeout", 100));
+        server.setSoTimeout(config.getIntProperty("com.openexchange.index.socketTimeout", 1000));
+        server.setMaxConnectionsPerHost(config.getIntProperty("com.openexchange.index.maxConnections", 100));
+    }
+    
+    private SolrCore startUpSolrCore(final int cid, final int uid, final int module, final SolrCoreStore coreStore) throws OXException {
+        final String solrHost = config.getProperty("com.openexchange.index.solrHost");  
+        final IndexServer indexServer = new IndexServer();
+        indexServer.setUrl(solrHost);
+        fillIndexServer(indexServer);
+        
+        final SolrCore core = new SolrCore(cid, uid, module);
+        core.setStore(coreStore);
+        core.setServer(indexServer);
+        /*
+         * TODO: Start up Solr core on this machine using underlying kippdata management service.
+         * Return the cores name. 
+         */
+        return core;
+    }
+    
+    private void shutDownSolrCore(final SolrCore core) throws OXException {
+        /*
+         * TODO: Shut down Solr core on this machine using underlying kippdata management service.
+         */
+    }
+    
 }

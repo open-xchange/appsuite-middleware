@@ -58,6 +58,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
@@ -157,7 +159,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     protected void addExternalAttendee(final ExternalUserParticipant externalUserParticipant, final T component) {
         final Attendee attendee = new Attendee();
         try {
-            attendee.setValue("mailto:" + externalUserParticipant.getEmailAddress());
+            attendee.setValue("mailto:" + IDNA.toACE(externalUserParticipant.getEmailAddress()));
             final ParameterList parameters = attendee.getParameters();
             parameters.add(CuType.INDIVIDUAL);
             parameters.add(PartStat.NEEDS_ACTION);
@@ -166,6 +168,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
             LOG.error(e); // Shouldn't happen
+        } catch (AddressException e) {
+            LOG.error(e);
         }
     }
 
@@ -185,6 +189,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             } else {
                 address = resolveUserMail(index, userParticipant, ctx);
             }
+            address = IDNA.toACE(address);
             attendee.setValue("mailto:" + address);
             final ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
@@ -205,6 +210,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e); // Shouldn't happen
+        } catch (AddressException e) {
+            LOG.error(e);
         }
     }
 
@@ -246,7 +253,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             } else {
                 final URI uri = attendee.getCalAddress();
                 if(null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
-                    final String mail = uri.getSchemeSpecificPart();
+                    String mail = uri.getSchemeSpecificPart();
+                    mail = IDNA.toIDN(mail);
                     final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
                     mails.put(mail, icalP);
                 }

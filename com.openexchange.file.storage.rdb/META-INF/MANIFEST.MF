@@ -39,3 +39,4 @@ Import-Package: com.openexchange.cache,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.file.storage.rdb
+Bundle-Activator: com.openexchange.file.storage.rdb.osgi.FileStorageRdbActivator

@@ -55,6 +55,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -291,7 +292,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setMailServer(final String mailServer) {
         mailServerUrl = null;
-        this.mailServer = mailServer;
+        this.mailServer = mailServer == null ? null : IDNA.toUnicode(mailServer);
     }
 
     /**
@@ -370,7 +371,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setTransportServer(final String transportServer) {
         transportUrl = null;
-        this.transportServer = transportServer;
+        this.transportServer = transportServer == null ? null : IDNA.toUnicode(transportServer);
     }
 
     /**
@@ -417,7 +418,7 @@ public final class MailAccountDescription implements Serializable {
             return null;
         }
         try {
-            return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, mailServer, mailPort).toString();
+            return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
         } catch (final URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
@@ -442,7 +443,7 @@ public final class MailAccountDescription implements Serializable {
             return;
         }
         try {
-            setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
+            setMailServer(URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP));
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, mailServerURL);
             // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
@@ -499,7 +500,7 @@ public final class MailAccountDescription implements Serializable {
             return;
         }
         try {
-            setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
+            setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
         }
@@ -538,7 +539,7 @@ public final class MailAccountDescription implements Serializable {
         }
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
-            return transportUrl = URITools.generateURI(protocol, transportServer, transportPort).toString();
+            return transportUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
         } catch (final URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);

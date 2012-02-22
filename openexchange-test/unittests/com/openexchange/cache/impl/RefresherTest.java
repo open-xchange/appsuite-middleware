@@ -228,6 +228,11 @@ public class RefresherTest extends TestCase {
                     // TODO Auto-generated method stub
                     
                 }
+                @Override
+                public void localPut(final Serializable key, final Serializable value) throws OXException {
+                    // TODO Auto-generated method stub
+                    
+                }
             };
             @Override
             public void freeCache(final String name) {
@@ -300,7 +305,7 @@ public class RefresherTest extends TestCase {
         }
     }
 
-    private static final OXObjectFactory<Integer> factory = new OXObjectFactory<Integer>() {
+    static final OXObjectFactory<Integer> factory = new OXObjectFactory<Integer>() {
         private final Lock lock = new ReentrantLock();
         @Override
         public Lock getCacheLock() {
@@ -323,7 +328,7 @@ public class RefresherTest extends TestCase {
 
     private static class Refreshed extends Refresher<Integer> {
         private Integer delegate;
-        private Refreshed() throws OXException {
+        Refreshed() throws OXException {
             super(factory, KEY, false);
             delegate = refresh();
         }

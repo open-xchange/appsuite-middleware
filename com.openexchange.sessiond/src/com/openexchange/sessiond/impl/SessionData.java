@@ -161,8 +161,8 @@ final class SessionData {
                             }
                         } finally {
                             // Down-grade lock
-                            rlock.lock();
-                            wlock.unlock();
+                            rlongTermLock.lock();
+                            wlongTermLock.unlock();
                         }
                     }
                 }
