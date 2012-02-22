@@ -518,7 +518,14 @@ public class UserImpl implements User, Cloneable {
      * @param aliases The aliases to set
      */
     public void setAliases(final String[] aliases) {
-        this.aliases = aliases;
+        if (null == aliases) {
+            this.aliases = null;
+            return;
+        }
+        final String[] thisAliases = this.aliases = new String[aliases.length];
+        for (int i = 0; i < aliases.length; i++) {
+            thisAliases[i] = IDNA.toIDN(aliases[i]);
+        }
     }
 
     @Override
