@@ -499,7 +499,7 @@ public class UserImpl implements User, Cloneable {
      * @param imapLogin the imapLogin to set
      */
     void setImapLogin(final String imapLogin) {
-        this.imapLogin = imapLogin;
+        this.imapLogin = imapLogin == null ? imapLogin : IDNA.toIDN(imapLogin);
     }
 
     /**
