@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -133,7 +134,7 @@ public class EMailFolderContactSource implements ContactSource {
                     }
                     final Contact contact = new Contact();
                     contact.setDisplayName(from.getPersonal());
-                    contact.setEmail1(from.getAddress());
+                    contact.setEmail1(IDNA.toIDN(from.getAddress()));
                     if (guardian.add(contact.getDisplayName() + contact.getEmail1())) {
                         contacts.add(contact);
                     }
@@ -145,7 +146,7 @@ public class EMailFolderContactSource implements ContactSource {
                     }
                     final Contact contact = new Contact();
                     contact.setDisplayName(to.getPersonal());
-                    contact.setEmail1(to.getAddress());
+                    contact.setEmail1(IDNA.toIDN(to.getAddress()));
                     if (guardian.add(contact.getDisplayName() + contact.getEmail1())) {
                         contacts.add(contact);
                     }
@@ -157,7 +158,7 @@ public class EMailFolderContactSource implements ContactSource {
                     }
                     final Contact contact = new Contact();
                     contact.setDisplayName(cc.getPersonal());
-                    contact.setEmail1(cc.getAddress());
+                    contact.setEmail1(IDNA.toIDN(cc.getAddress()));
                     if (guardian.add(contact.getDisplayName() + contact.getEmail1())) {
                         contacts.add(contact);
                     }

@@ -65,6 +65,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
@@ -79,7 +80,6 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -472,7 +472,7 @@ public final class MemorizerWorker {
 
     private static Contact transformInternetAddress(final InternetAddress address, final Session session) throws ParseException, UnsupportedEncodingException {
         final Contact retval = new Contact();
-        final String addr = decodeMultiEncodedValue(QuotedInternetAddress.toIDN(address.getAddress()));
+        final String addr = decodeMultiEncodedValue(IDNA.toIDN(address.getAddress()));
         retval.setEmail1(addr);
         final String displayName;
         if (address.getPersonal() != null && !"".equals(address.getPersonal().trim())) {

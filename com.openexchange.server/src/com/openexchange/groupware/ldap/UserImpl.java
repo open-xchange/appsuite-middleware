@@ -52,6 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import javax.mail.internet.IDNA;
 import com.openexchange.i18n.LocaleTools;
 
 /**
@@ -286,7 +287,7 @@ public class UserImpl implements User, Cloneable {
      * @param imapServer IMAP server.
      */
     void setImapServer(final String imapServer) {
-        this.imapServer = imapServer;
+        this.imapServer = imapServer == null ? null : IDNA.toUnicode(imapServer);
     }
 
     /**
@@ -302,7 +303,7 @@ public class UserImpl implements User, Cloneable {
      * @param smtpServer SMTP server.
      */
     void setSmtpServer(final String smtpServer) {
-        this.smtpServer = smtpServer;
+        this.smtpServer = smtpServer == null ? null : IDNA.toUnicode(smtpServer);
     }
 
     /**
@@ -318,7 +319,7 @@ public class UserImpl implements User, Cloneable {
      * @param mailDomain mail domain.
      */
     void setMailDomain(final String mailDomain) {
-        this.mailDomain = mailDomain;
+        this.mailDomain = mailDomain == null ? null : IDNA.toUnicode(mailDomain);
     }
 
     /**
@@ -366,7 +367,7 @@ public class UserImpl implements User, Cloneable {
      * @param mail Mail address.
      */
     void setMail(final String mail) {
-        this.mail = mail;
+        this.mail = mail == null ? mail : IDNA.toIDN(mail);
     }
 
     /**

@@ -65,6 +65,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
@@ -239,7 +240,7 @@ public final class POP3StoreConnector {
             try {
                 capabilities =
                     POP3CapabilityCache.getCapability(
-                        InetAddress.getByName(server),
+                        InetAddress.getByName(IDNA.toASCII(server)),
                         port,
                         pop3Config.isSecure(),
                         pop3ConfProps,

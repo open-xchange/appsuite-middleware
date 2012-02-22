@@ -50,7 +50,6 @@
 package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,14 +75,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -1877,7 +1874,7 @@ public class OXContainerConverter {
             final String address = userObj.getMail();
             if (address != null) {
                 try {
-                    property.setValue(new URI("mailto:" + address));
+                    property.setValue(new URI("mailto:" + IDNA.toACE(address)));
                 } catch (final URISyntaxException e) {
                     final ConverterException ce = new ConverterException(e.getMessage());
                     ce.initCause(e);
