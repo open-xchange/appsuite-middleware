@@ -50,6 +50,7 @@
 package javax.mail.internet;
 
 import gnu.inet.encoding.IDNAException;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).
@@ -77,12 +78,12 @@ public final class IDNA {
      * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
      * 
      * @param idnAddress The unicode representation of an internet address
-     * @return The ASCII-encoded (punycode) of given internet address
+     * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
      * @throws AddressException If ASCII representation of given internet address cannot be created
      */
     public static String toACE(final String idnAddress) throws AddressException {
-        if (null == idnAddress) {
-            return null;
+        if (null == idnAddress || isAscii(idnAddress)) {
+            return idnAddress;
         }
         try {
             final int pos = idnAddress.indexOf('@');
@@ -110,7 +111,7 @@ public final class IDNA {
      * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
      * 
      * @param aceAddress The ASCII-encoded (punycode) address
-     * @return The unicode representation of given internet address
+     * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
      * @see #getIDNAddress()
      */
     public static String toIDN(final String aceAddress) {
@@ -130,16 +131,16 @@ public final class IDNA {
      * rules are enforced. The input string may be a domain name containing dots.
      * 
      * @param unicodeHostName The host name as Unicode string.
-     * @param useIDNA2008 <code>true</code> to use PVALID code points
-     * @return The encoded host name
+     * @return The encoded host name or <code>null</code> if argument is <code>null</code>
      */
-    public static String toASCII(final String unicodeHostName, final boolean useIDNA2008) {
-        if (null == unicodeHostName) {
-            return null;
+    public static String toASCII(final String unicodeHostName) {
+        if (null == unicodeHostName || isAscii(unicodeHostName)) {
+            return unicodeHostName;
         }
         try {
-            return gnu.inet.encoding.IDNA.toASCII(unicodeHostName, useIDNA2008);
+            return gnu.inet.encoding.IDNA.toASCII(unicodeHostName, true);
         } catch (final IDNAException e) {
+            LogFactory.getLog(IDNA.class).warn("Couldn't create ASCII representation for host name: " + unicodeHostName, e);
             return unicodeHostName;
         }
     }
@@ -149,14 +150,28 @@ public final class IDNA {
      * domain name containing dots.
      * 
      * @param asciiHostName The host name as ASCII string.
-     * @param useIDNA2008 <code>true</code> to allow PVALID code points
-     * @return The Unicode host name
+     * @return The Unicode host name or <code>null</code> if argument is <code>null</code>
      */
-    public static String toUnicode(final String asciiHostName, final boolean useIDNA2008) {
+    public static String toUnicode(final String asciiHostName) {
         if (null == asciiHostName || asciiHostName.indexOf(ACE_PREFIX) < 0) {
             return asciiHostName;
         }
-        return gnu.inet.encoding.IDNA.toUnicode(asciiHostName, useIDNA2008);
+        return gnu.inet.encoding.IDNA.toUnicode(asciiHostName, true);
+    }
+
+    /**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
+     */
+    private static boolean isAscii(final String s) {
+        final int length = s.length();
+        boolean isAscci = true;
+        for (int i = 0; isAscci && (i < length); i++) {
+            isAscci = (s.charAt(i) < 128);
+        }
+        return isAscci;
     }
 
 }
