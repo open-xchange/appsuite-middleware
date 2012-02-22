@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (6.20.1.0-5) unstable; urgency=low
+
+  * Public patch 2012-02-24
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Wed, 22 Feb 2012 15:38:38 +0000
+
 open-xchange-spamhandler-spamexperts (6.20.1.0-4) unstable; urgency=low
 
   * build for public ptf 2012-02-20
