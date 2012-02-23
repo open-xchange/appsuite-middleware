@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -150,7 +151,7 @@ public class HeaderCollection implements Serializable {
      * ------------------------ Member stuff ---------------------------------
      */
 
-    private final HashMap<HeaderName, List<String>> map;
+    private final Map<HeaderName, List<String>> map;
 
     private int count;
 
@@ -177,7 +178,8 @@ public class HeaderCollection implements Serializable {
      * @param headers The source headers
      */
     public HeaderCollection(final HeaderCollection headers) {
-        this(headers.map.size());
+        super();
+        map = new LinkedHashMap<HeaderName, List<String>>(headers.map.size());
         addHeaders(headers);
     }
 
@@ -188,7 +190,8 @@ public class HeaderCollection implements Serializable {
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      */
     public HeaderCollection(final String headerSrc) {
-        this();
+        super();
+        map = new LinkedHashMap<HeaderName, List<String>>(40);
         load(headerSrc);
     }
 
@@ -200,7 +203,8 @@ public class HeaderCollection implements Serializable {
      * @throws OXException If parsing the header input stream fails
      */
     public HeaderCollection(final InputStream inputStream) throws OXException {
-        this();
+        super();
+        map = new LinkedHashMap<HeaderName, List<String>>(40);
         load(inputStream);
     }
 
