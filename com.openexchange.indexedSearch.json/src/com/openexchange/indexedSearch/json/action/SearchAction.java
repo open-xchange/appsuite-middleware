@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
+import com.openexchange.indexedSearch.json.IndexedSearchExceptionCodes;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.indexedSearch.json.SearchHandler;
 import com.openexchange.indexedSearch.json.mail.MailSearchHandler;
@@ -110,7 +111,7 @@ public final class SearchAction extends AbstractIndexAction {
             final String module = jQuery.getString("module");
             final SearchHandler handler = handlers.get(module);
             if (null == handler) {
-                throw AjaxExceptionCodes.UNKNOWN_MODULE.create(module);
+                throw IndexedSearchExceptionCodes.MODULE_NOT_SUPPORTED.create(module);
             }
             /*
              * Perform search
