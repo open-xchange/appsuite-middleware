@@ -135,7 +135,13 @@ public class HeaderCollection implements Serializable {
         CASE_SENSITIVE_LOOKUP = Collections.unmodifiableMap(map);
     }
 
-    private static String caseSensitiveHeadreNameFor(final String name) {
+    /**
+     * Gets the case-sensitive header name.
+     * 
+     * @param name The header name to check
+     * @return The case-sensitive header name
+     */
+    public static String caseSensitiveHeadreNameFor(final String name) {
         final String cshn = CASE_SENSITIVE_LOOKUP.get(name.toLowerCase(ENGLISH));
         return null == cshn ? name : cshn;
     }
