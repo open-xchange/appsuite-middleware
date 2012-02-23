@@ -336,25 +336,22 @@ public final class FolderJob extends AbstractMailSyncJob {
                 final Map<String, MailMessage> storageMap;
                 {
                     final List<MailMessage> mails;
-                    if (null == storageMails) {
-                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                        try {
-                            mailAccess = SMALMailAccess.getUnwrappedInstance(getSession(), accountId);
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    try {
+                        mailAccess = SMALMailAccess.getUnwrappedInstance(getSession(), accountId);
+                        mailAccess.connect(true);
+                        /*
+                         * At first check existence of denoted folder
+                         */
+                        if (!mailAccess.getFolderStorage().exists(fullName)) {
                             /*
-                             * Get the mails from mail storage
+                             * Drop entry from database and return
                              */
-                            mailAccess.connect(true);
-                            /*
-                             * At first check existence of denoted folder
-                             */
-                            if (!mailAccess.getFolderStorage().exists(fullName)) {
-                                /*
-                                 * Drop entry from database and return
-                                 */
-                                deleteDBEntry();
-                                unset = false;
-                                return;
-                            }
+                            deleteDBEntry();
+                            unset = false;
+                            return;
+                        }
+                        if (null == storageMails) {
                             /*
                              * Fetch mails
                              */
@@ -366,12 +363,12 @@ public final class FolderJob extends AbstractMailSyncJob {
                                     OrderDirection.ASC,
                                     null,
                                     FIELDS));
-                        } finally {
-                            SMALMailAccess.closeUnwrappedInstance(mailAccess);
-                            mailAccess = null;
+                        } else {
+                            mails = storageMails;
                         }
-                    } else {
-                        mails = storageMails;
+                    } finally {
+                        SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                        mailAccess = null;
                     }
                     if (mails.isEmpty()) {
                         storageMap = Collections.emptyMap();

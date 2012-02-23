@@ -255,6 +255,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         }
                         list.add(next);
                     }
+                    Thread.sleep(100);
                     queue.drainTo(list);
                     final boolean quit = list.remove(POISON);
                     if (!list.isEmpty()) {
