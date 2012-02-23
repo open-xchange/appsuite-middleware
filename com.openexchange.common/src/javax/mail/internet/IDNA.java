@@ -112,7 +112,6 @@ public final class IDNA {
      * 
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
-     * @see #getIDNAddress()
      */
     public static String toIDN(final String aceAddress) {
         if (null == aceAddress) {
