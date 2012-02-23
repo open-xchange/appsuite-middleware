@@ -598,15 +598,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail stateChanged(final NotificationMail mail, final ConfirmStatus status) throws OXException {
         switch (status) {
         case ACCEPT:
-            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED, ArgumentType.STATUS).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.accept");
             break;
         case DECLINE:
-            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.DECLINED, ArgumentType.STATUS).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.DECLINED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.decline");
             break;
         case TENTATIVE:
-            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.TENTATIVELY_ACCEPTED, ArgumentType.STATUS).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.TENTATIVELY_ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.tentative");
             break;
         case NONE:

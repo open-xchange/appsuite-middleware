@@ -95,6 +95,7 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -114,7 +115,6 @@ import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.SMTPServiceRegistry;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
@@ -496,7 +496,8 @@ public final class SMTPTransport extends MailTransport {
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
         try {
-            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), new UnsynchronizedByteArrayInputStream(asciiBytes));
+            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), MimeHeaderNameChecker.sanitizeHeaderNames(asciiBytes));
+            
             /*
              * Check recipients
              */
