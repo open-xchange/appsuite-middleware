@@ -1,3 +1,7 @@
+* 2012-02-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21625: Sanitize header names before message transport
+
 * 2012-02-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 21615: Honor max. retry count in Compare&Set condition

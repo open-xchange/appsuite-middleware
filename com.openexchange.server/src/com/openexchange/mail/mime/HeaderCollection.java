@@ -54,10 +54,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -104,11 +107,51 @@ public class HeaderCollection implements Serializable {
 
     private static final HeaderName CONTENT_TYPE = MessageHeaders.CONTENT_TYPE;
 
+    private static final Locale ENGLISH = Locale.ENGLISH;
+
+    private static final Map<String, String> CASE_SENSITIVE_LOOKUP;
+
+    static {
+        final Map<String, String> map = new HashMap<String, String>(24);
+        final Locale l = ENGLISH;
+        map.put("From".toLowerCase(l), "From");
+        map.put("Sender".toLowerCase(l), "Sender");
+        map.put("Reply-To".toLowerCase(l), "Reply-To");
+        map.put("To".toLowerCase(l), "To");
+        map.put("Cc".toLowerCase(l), "Cc");
+        map.put("Bcc".toLowerCase(l), "Bcc");
+        map.put("Message-ID".toLowerCase(l), "Message-ID");
+        map.put("In-Reply-To".toLowerCase(l), "In-Reply-To");
+        map.put("References".toLowerCase(l), "References");
+        map.put("Subject".toLowerCase(l), "Subject");
+        map.put("Comments".toLowerCase(l), "Comments");
+        map.put("Keywords".toLowerCase(l), "Keywords");
+        map.put("Resent-Date".toLowerCase(l), "Resent-Date");
+        map.put("Resent-From".toLowerCase(l), "Resent-From");
+        map.put("Resent-Sender".toLowerCase(l), "Resent-Sender");
+        map.put("Resent-To".toLowerCase(l), "Resent-To");
+        map.put("Resent-Cc".toLowerCase(l), "Resent-Cc");
+        map.put("Resent-Bcc".toLowerCase(l), "Resent-Bcc");
+        map.put("Resent-Message-ID".toLowerCase(l), "Resent-Message-ID");
+        CASE_SENSITIVE_LOOKUP = Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Gets the case-sensitive header name.
+     * 
+     * @param name The header name to check
+     * @return The case-sensitive header name
+     */
+    public static String caseSensitiveHeadreNameFor(final String name) {
+        final String cshn = CASE_SENSITIVE_LOOKUP.get(name.toLowerCase(ENGLISH));
+        return null == cshn ? name : cshn;
+    }
+
     /*-
      * ------------------------ Member stuff ---------------------------------
      */
 
-    private final HashMap<HeaderName, List<String>> map;
+    private final Map<HeaderName, List<String>> map;
 
     private int count;
 
@@ -135,7 +178,8 @@ public class HeaderCollection implements Serializable {
      * @param headers The source headers
      */
     public HeaderCollection(final HeaderCollection headers) {
-        this(headers.map.size());
+        super();
+        map = new LinkedHashMap<HeaderName, List<String>>(headers.map.size());
         addHeaders(headers);
     }
 
@@ -146,7 +190,8 @@ public class HeaderCollection implements Serializable {
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      */
     public HeaderCollection(final String headerSrc) {
-        this();
+        super();
+        map = new LinkedHashMap<HeaderName, List<String>>(40);
         load(headerSrc);
     }
 
@@ -158,7 +203,8 @@ public class HeaderCollection implements Serializable {
      * @throws OXException If parsing the header input stream fails
      */
     public HeaderCollection(final InputStream inputStream) throws OXException {
-        this();
+        super();
+        map = new LinkedHashMap<HeaderName, List<String>>(40);
         load(inputStream);
     }
 
@@ -401,7 +447,7 @@ public class HeaderCollection implements Serializable {
              */
             return;
         }
-        final HeaderName headerName = HeaderName.valueOf(name);
+        final HeaderName headerName = HeaderName.valueOf(caseSensitiveHeadreNameFor(name));
         List<String> values = map.get(headerName);
         if (values == null) {
             values = new ArrayList<String>(2);
