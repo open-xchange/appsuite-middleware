@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (6.20.2.0-0) unstable; urgency=low
+
+  * prepare for 6.20.2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 23 Feb 2012 13:02:09 +0000
+
 open-xchange-spamhandler-spamexperts (6.20.1.0-5) unstable; urgency=low
 
   * Public patch 2012-02-24
