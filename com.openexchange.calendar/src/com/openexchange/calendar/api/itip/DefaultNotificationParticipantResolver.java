@@ -409,7 +409,7 @@ public class DefaultNotificationParticipantResolver implements
 			if (resource.getMail() != null) {
 				NotificationParticipant participant = new NotificationParticipant(
 						ITipRole.ATTENDEE, false, resource.getMail());
-				participant.setLocale(Locale.getDefault());
+				participant.setLocale(user.getLocale());
 				participant.setTimezone(TimeZone.getDefault());
 				participant.setResource(true);
 				participant.setConfiguration(defaultConfiguration);
@@ -437,6 +437,7 @@ public class DefaultNotificationParticipantResolver implements
 					role, true, mail);
 			participant.setDisplayName(e.getDisplayName());
 			participant.setTimezone(TimeZone.getDefault());
+			participant.setLocale(user.getLocale());
 			ConfirmableParticipant cp = statusMap.get(e.getEmailAddress());
 			if (cp != null) {
 				participant.setConfirmStatus(cp.getStatus());
