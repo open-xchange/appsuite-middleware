@@ -184,7 +184,7 @@ public class Login extends AJAXServlet {
             this.defaultClient = null;
             this.clientVersion = null;
             this.errorPageTemplate = null;
-            this.cookieExpiry = 0;
+            this.cookieExpiry = -1;
             this.cookieForceHTTPS = false;
             this.insecure = false;
             this.ipCheck = false;
@@ -733,7 +733,22 @@ public class Login extends AJAXServlet {
                 }
             }
         }
-        confReference.set(new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges));
+        confReference.set(new LoginConfiguration(
+            uiWebPath,
+            sessiondAutoLogin,
+            hashSource,
+            httpAuthAutoLogin,
+            defaultClient,
+            clientVersion,
+            errorPageTemplate,
+            cookieExpiry,
+            cookieForceHTTPS,
+            insecure,
+            ipCheck,
+            ipCheckWhitelist,
+            redirectIPChangeAllowed,
+            ranges)
+        );
     }
 
     @Override
