@@ -141,7 +141,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
                 } else {
                     increment = 1;
                 }
-            } while (!compareAndSet(type, contextId, cur, cur + increment, con));
+            } while (!compareAndSet(type, contextId, cur, cur + increment, con) && retry++ < 5);
             retval = cur + increment;
             /*
              * Retry...

@@ -54,6 +54,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
@@ -67,6 +70,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Change a resource", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Object ID of the resource to update."),
+    @Parameter(name = "timestamp", description = "Time stamp of the resource to update. If the resource was modified after the specified time stamp, then the update must fail.")
+}, requestBody = "Resource object as described in Resource response. Only modified fields are present and the field id is omitted.",
+responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated resource, and maybe errors.")
 public final class UpdateAction extends AbstractResourceAction {
 
     /**

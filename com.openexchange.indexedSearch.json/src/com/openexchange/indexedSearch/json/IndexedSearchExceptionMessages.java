@@ -47,49 +47,31 @@
  *
  */
 
-package com.openexchange.resource.managerequest.request;
+package com.openexchange.indexedSearch.json;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.resource.managerequest.request.actions.AbstractResourceAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ResourceActionFactory}
- *
+ * {@link IndexedSearchExceptionMessages}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "resource", description = "Allows to query available resources. It is mainly used by the dialog for the selection of participants.")
-public class ResourceActionFactory implements AJAXActionServiceFactory {
+public final class IndexedSearchExceptionMessages implements LocalizableStrings {
 
-    private final Map<String, AbstractResourceAction> actions;
+    // An unexpected error occurred: %1$s
+    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
+
+    // A JSON error occurred: %1$s
+    public static final String JSON_ERROR = "A JSON error occurred: %1$s";
+
+    // Index-based search is not supported for module: %1$s
+    public static final String MODULE_NOT_SUPPORTED = "Index-based search is not supported for module: %1$s";
 
     /**
-     * Initializes a new {@link ResourceActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link IndexedSearchExceptionMessages}.
      */
-    public ResourceActionFactory(final ServiceLookup services) {
+    private IndexedSearchExceptionMessages() {
         super();
-        actions = new ConcurrentHashMap<String, AbstractResourceAction>(5);
-        actions.put("new", new com.openexchange.resource.managerequest.request.actions.NewAction(services));
-        actions.put("update", new com.openexchange.resource.managerequest.request.actions.UpdateAction(services));
-        actions.put("delete", new com.openexchange.resource.managerequest.request.actions.DeleteAction(services));
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

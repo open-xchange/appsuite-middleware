@@ -9,7 +9,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * The calendar error code enumeration.
  */
 public enum OXCalendarExceptionCodes implements OXExceptionCode {
-    CFO_NOT_INITIALIZIED("FATAL: CalendarFolderObject not initialized!", 1, Category.CATEGORY_ERROR),
+    CFO_NOT_INITIALIZIED("CalendarFolderObject not initialized!", 1, Category.CATEGORY_ERROR),
     NOT_YET_SUPPORTED("Not yet supported!", 2, Category.CATEGORY_ERROR),
     NO_SHARED_FOLDER_OWNER("Shared folder owner not given !", 3, Category.CATEGORY_ERROR),
     FOLDER_TYPE_UNRESOLVEABLE("Folder type unresolvable !", 4, Category.CATEGORY_ERROR),
@@ -26,7 +26,7 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
      */
     UNEXPECTED_EXCEPTION("Unexpected exception %d!", 7, Category.CATEGORY_ERROR),
     EXTERNAL_PARTICIPANTS_MANDATORY_FIELD("Mandatory field mail address for external participants", 8, Category.CATEGORY_USER_INPUT),
-    UPDATE_WITHOUT_PARTICIPANTS("FATAL: Would create an object without participants", 9, Category.CATEGORY_ERROR),
+    UPDATE_WITHOUT_PARTICIPANTS("Would create an object without participants", 9, Category.CATEGORY_ERROR),
     UPDATE_USER_SHARED_MISMATCH("Folder type \"SHARED\" is not allowed in this situation.", 10, Category.CATEGORY_USER_INPUT),
     RECURRING_UNEXPECTED_DELETE_STATE("Unexpected state for deleting a virtual appointment (exception). uid:oid:position %d:%d:%d", 11, Category.CATEGORY_ERROR),
     ERROR_SESSIONOBJECT_IS_NULL("SessionObject not initialized", 12, Category.CATEGORY_ERROR),
@@ -38,44 +38,44 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
     FOLDER_IS_EMPTY_INVALID_REQUEST("Invalid request. Folder is shared!", 18, Category.CATEGORY_ERROR),
     FREE_BUSY_UNSUPPOTED_TYPE("Unsupported type detected : %d", 19, Category.CATEGORY_ERROR),
     END_DATE_BEFORE_START_DATE("End date is before start date", 20, Category.CATEGORY_USER_INPUT),
-    UNSUPPORTED_LABEL("ERROR: Unsupported label value %d", 21, Category.CATEGORY_USER_INPUT),
-    PRIVATE_FLAG_IN_PRIVATE_FOLDER("ERROR: Private flag is only allowed inside of a private folder.", 22, Category.CATEGORY_USER_INPUT),
-    PRIVATE_FLAG_AND_PARTICIPANTS("Error: Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional participants or remove the \"Private\" mark.", 23, Category.CATEGORY_USER_INPUT),
-    UNSUPPORTED_PRIVATE_FLAG("ERROR: Unsupported private flag value %d", 24, Category.CATEGORY_USER_INPUT),
-    UNSUPPORTED_SHOWN_AS("ERROR:: Unsupported \"shown as\"  value %d", 25, Category.CATEGORY_USER_INPUT),
+    UNSUPPORTED_LABEL("Unsupported label value %d", 21, Category.CATEGORY_USER_INPUT),
+    PRIVATE_FLAG_IN_PRIVATE_FOLDER("Private flag is only allowed inside of a private folder.", 22, Category.CATEGORY_USER_INPUT),
+    PRIVATE_FLAG_AND_PARTICIPANTS("Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional participants or remove the \"Private\" mark.", 23, Category.CATEGORY_USER_INPUT),
+    UNSUPPORTED_PRIVATE_FLAG("Unsupported private flag value %d", 24, Category.CATEGORY_USER_INPUT),
+    UNSUPPORTED_SHOWN_AS("Unsupported \"shown as\"  value %d", 25, Category.CATEGORY_USER_INPUT),
     MANDATORY_FIELD_START_DATE("Required  value \"Start Date\" was not supplied.", 26, Category.CATEGORY_USER_INPUT),
     MANDATORY_FIELD_END_DATE("Required value \"End Date\" was not supplied.", 27, Category.CATEGORY_USER_INPUT),
     MANDATORY_FIELD_TITLE("Required value \"Title\" was not supplied.", 28, Category.CATEGORY_USER_INPUT),
     UNABLE_TO_CALCULATE_RECURRING_POSITION("Unable to create exception, recurring position can not be calculated !", 29, Category.CATEGORY_USER_INPUT),
-    INTERNAL_USER_PARTICIPANT_CHECK_1("Error: Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type = %d:%d", 30, Category.CATEGORY_ERROR),
-    INTERNAL_USER_PARTICIPANT_CHECK_2("Error: Got an UserParticipant object with a private folder id < 1 : Identifier = %d", 31, Category.CATEGORY_USER_INPUT),
-    INTERNAL_USER_PARTICIPANT_CHECK_3("Error: Got an UserParticipant object with a private folder id in a public folder : Identifier = %d", 32, Category.CATEGORY_USER_INPUT),
+    INTERNAL_USER_PARTICIPANT_CHECK_1("Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type = %d:%d", 30, Category.CATEGORY_ERROR),
+    INTERNAL_USER_PARTICIPANT_CHECK_2("Got an UserParticipant object with a private folder id < 1 : Identifier = %d", 31, Category.CATEGORY_USER_INPUT),
+    INTERNAL_USER_PARTICIPANT_CHECK_3("Got an UserParticipant object with a private folder id in a public folder : Identifier = %d", 32, Category.CATEGORY_USER_INPUT),
     MOVE_NOT_SUPPORTED("Move not supported: Cannot move an appointment from folder %d to folder %d", 33, Category.CATEGORY_ERROR),
     SHARED_FOLDER_MOVE_NOT_SUPPORTED("Move not allowed from shared folders", 34, Category.CATEGORY_ERROR),
     CONTEXT_NOT_SET("Calendar operation: Context not set.", 35, Category.CATEGORY_ERROR),
     NO_PERMISSIONS_TO_ATTACH_DETACH("Insufficient rights to attach/detach an attachment to this folder!", 36, Category.CATEGORY_PERMISSION_DENIED),
     NO_PERMISSIONS_TO_READ("Insufficient read rights for this folder!", 37, Category.CATEGORY_PERMISSION_DENIED),
     /**
-     * FATAL:: Can not resolve recurrence position because we got neither the recurring position nor a recurring date position
+     * Can not resolve recurrence position because we got neither the recurring position nor a recurring date position
      */
-    UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT("FATAL:: Can not resolve recurrence position because we got neither the recurring position nor a recurring date position", 38, Category.CATEGORY_ERROR),
+    UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT("Can not resolve recurrence position because we got neither the recurring position nor a recurring date position", 38, Category.CATEGORY_ERROR),
     RECURRING_MISSING_START_DATE("Missing start date, unable to calculate recurring!", 39, Category.CATEGORY_ERROR),
-    RECURRING_MISSING_DAILY_INTERVAL("Fatal error. (DAILY) Missing or wrong Interval value: %d", 40, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_WEEKLY_INTERVAL("Fatal error. (WEEKLY) Missing or wrong Interval value: %d", 41, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_DAILY_INTERVAL("Missing or wrong interval value: %d", 40, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_WEEKLY_INTERVAL("Missing or wrong interval value: %d", 41, Category.CATEGORY_USER_INPUT),
     /**
-     * Fatal error. (MONTHLY) Missing or wrong value DayInMonth : %d
+     * Missing or wrong value DayInMonth : %d
      */
-    RECURRING_MISSING_MONTLY_INTERVAL("Fatal error. (MONTHLY) Missing or wrong value DayInMonth : %d", 42, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_MONTLY_INTERVAL_2("Fatal error. (MONTHLY) Missing or wrong value Month : %d", 43, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_MONTLY_DAY("Fatal error. (MONTHLY2) Missing or wrong Day value: %d", 44, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_MONTLY_INTERVAL("Missing or wrong value DayInMonth : %d", 42, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_MONTLY_INTERVAL_2("Missing or wrong value Month : %d", 43, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_MONTLY_DAY("Missing or wrong Day value: %d", 44, Category.CATEGORY_USER_INPUT),
     /**
-     * Fatal error. (MONTHLY2) Missing or wrong DayInMonth value: %d
+     * Missing or wrong DayInMonth value: %d
      */
-    RECURRING_MISSING_MONTLY_DAY_2("Fatal error. (MONTHLY2) Missing or wrong DayInMonth value: %d", 45, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_YEARLY_INTERVAL("Fatal error. (YEARLY) Missing or wrong value DayInMonth : %d", 46, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_YEARLY_DAY("Fatal error. (YEARLY2) Missing or wrong value day : %d", 47, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_YEARLY_TYPE("Fatal error. (YEARLY2) Missing or wrong day_or_type : %d", 48, Category.CATEGORY_USER_INPUT),
-    RECURRING_MISSING_YEARLY_INTERVAL_2("Fatal error. (YEARLY2) Missing or wrong Interval value: %d", 49, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_MONTLY_DAY_2("Missing or wrong DayInMonth value: %d", 45, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_YEARLY_INTERVAL("Missing or wrong value DayInMonth : %d", 46, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_YEARLY_DAY("Missing or wrong value day : %d", 47, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_YEARLY_TYPE("Missing or wrong day_or_type : %d", 48, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_YEARLY_INTERVAL_2("Missing or wrong Interval value: %d", 49, Category.CATEGORY_USER_INPUT),
     UNABLE_TO_REMOVE_PARTICIPANT("Unable to remove participant %d", 50, Category.CATEGORY_ERROR),
     UNABLE_TO_REMOVE_PARTICIPANT_2("Unable to remove participant because this participant is the last one", 51, Category.CATEGORY_USER_INPUT),
     UNSUPPORTED_ACTION_TYPE("Action type not supported : %d", 52,  Category.CATEGORY_ERROR),
@@ -90,10 +90,10 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
     LOAD_PERMISSION_EXCEPTION_4("You do not have the appropriate permissions to move this object.", 61, Category.CATEGORY_PERMISSION_DENIED),
     LOAD_PERMISSION_EXCEPTION_5("You do not have the appropriate permissions to read this object %1$d.", 62, Category.CATEGORY_PERMISSION_DENIED),
     LOAD_PERMISSION_EXCEPTION_6("You do not have the appropriate permissions to create an object", 63, Category.CATEGORY_PERMISSION_DENIED),
-    RECURRING_MISSING_YEARLY_MONTH("Fatal error. (YEARLY) Missing or wrong Month value: %d", 64, Category.CATEGORY_USER_INPUT),
-    RECURRING_ALREADY_EXCEPTION("Fatal error. You are trying to create a new recurring from an exception!", 65, Category.CATEGORY_USER_INPUT),
+    RECURRING_MISSING_YEARLY_MONTH("Missing or wrong Month value: %d", 64, Category.CATEGORY_USER_INPUT),
+    RECURRING_ALREADY_EXCEPTION("You are trying to create a new recurring from an exception!", 65, Category.CATEGORY_USER_INPUT),
     RECURRING_EXCEPTION_MOVE_EXCEPTION("You can not move one element of a recurring appointment into another folder.", 66, Category.CATEGORY_USER_INPUT),
-    UPDATE_EXCEPTION("Fatal error. An database update exception occurred.", 67, Category.CATEGORY_ERROR),
+    UPDATE_EXCEPTION("A database update exception occurred.", 67, Category.CATEGORY_ERROR),
     MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED("Move not allowed to a shared folder if the private flag is set", 68, Category.CATEGORY_USER_INPUT),
     RECURRING_EXCEPTION_PRIVATE_FLAG("You can not use different private flags for one element of a recurring appointment", 69, Category.CATEGORY_USER_INPUT),
     PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER("You can not use the private flags in a non private folder", 70, Category.CATEGORY_USER_INPUT),

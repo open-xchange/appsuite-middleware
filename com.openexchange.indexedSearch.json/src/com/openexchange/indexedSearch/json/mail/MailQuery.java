@@ -116,14 +116,27 @@ public final class MailQuery {
                 terms = standardSearchTerm(sQuery, fields);
             }
             // Return query
-            return new MailQuery(
-                terms,
-                names,
-                jsonQuery.hasAndNotNull("folder") ? jsonQuery.getString("folder") : null,
-                jsonQuery.hasAndNotNull("accountId") ? jsonQuery.getInt("accountId") : 0);
+            return new MailQuery(terms, names, optFullName(jsonQuery), optAccountId(jsonQuery));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static String optFullName(final JSONObject jsonQuery) throws JSONException {
+        if (jsonQuery.hasAndNotNull("folder")) {
+            return jsonQuery.getString("folder");
+        }
+        if (jsonQuery.hasAndNotNull("fullName")) {
+            return jsonQuery.getString("fullName");
+        }
+        return null;
+    }
+
+    private static int optAccountId(final JSONObject jsonQuery) throws JSONException {
+        if (jsonQuery.hasAndNotNull("accountId")) {
+            return jsonQuery.getInt("accountId");
+        }
+        return 0; // MailAccount.DEFAULT_ID
     }
 
     private static boolean isEmpty(final String string) {

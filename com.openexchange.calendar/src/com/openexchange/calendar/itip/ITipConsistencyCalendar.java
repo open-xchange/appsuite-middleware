@@ -566,7 +566,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 			} catch (final SQLException e) {
 				appointment.setExternalOrganizer(false);
 				return;
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				appointment.setExternalOrganizer(false);
 				return;
 			}

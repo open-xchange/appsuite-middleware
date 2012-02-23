@@ -126,6 +126,10 @@ public final class IDNA {
             gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
     }
 
+    private static final String SCHEME_DELIM = "://";
+
+    private static final char[] CHARS = { ':', '/', '?' };
+
     /**
      * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
      * rules are enforced. The input string may be a domain name containing dots.
@@ -138,7 +142,24 @@ public final class IDNA {
             return unicodeHostName;
         }
         try {
-            return gnu.inet.encoding.IDNA.toASCII(unicodeHostName, true);
+            int pos = unicodeHostName.indexOf(SCHEME_DELIM);
+            if (pos < 0) {
+                return gnu.inet.encoding.IDNA.toASCII(unicodeHostName, true);
+            }
+            pos += SCHEME_DELIM.length();
+            final StringBuilder b = new StringBuilder(unicodeHostName.length() + 16);
+            b.append(unicodeHostName.substring(0, pos));
+            final String host = unicodeHostName.substring(pos);
+            pos = -1;
+            for (int k = 0; pos < 0 && k < CHARS.length; k++) {
+                pos = host.indexOf(CHARS[k]);
+            }
+            if (pos < 0) {
+                b.append(gnu.inet.encoding.IDNA.toASCII(host, true));
+            } else {
+                b.append(gnu.inet.encoding.IDNA.toASCII(host.substring(0, pos), true)).append(host.substring(pos));
+            }
+            return b.toString();
         } catch (final IDNAException e) {
             LogFactory.getLog(IDNA.class).warn("Couldn't create ASCII representation for host name: " + unicodeHostName, e);
             return unicodeHostName;
@@ -156,7 +177,24 @@ public final class IDNA {
         if (null == asciiHostName || asciiHostName.indexOf(ACE_PREFIX) < 0) {
             return asciiHostName;
         }
-        return gnu.inet.encoding.IDNA.toUnicode(asciiHostName, true);
+        int pos = asciiHostName.indexOf(SCHEME_DELIM);
+        if (pos < 0) {
+            return gnu.inet.encoding.IDNA.toUnicode(asciiHostName, true);
+        }
+        pos += SCHEME_DELIM.length();
+        final StringBuilder b = new StringBuilder(asciiHostName.length());
+        b.append(asciiHostName.substring(0, pos));
+        final String host = asciiHostName.substring(pos);
+        pos = -1;
+        for (int k = 0; pos < 0 && k < CHARS.length; k++) {
+            pos = host.indexOf(CHARS[k]);
+        }
+        if (pos < 0) {
+            b.append(gnu.inet.encoding.IDNA.toUnicode(host, true));
+        } else {
+            b.append(gnu.inet.encoding.IDNA.toUnicode(host.substring(0, pos), true)).append(host.substring(pos));
+        }
+        return b.toString();
     }
 
     /**

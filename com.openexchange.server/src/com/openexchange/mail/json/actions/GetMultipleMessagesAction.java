@@ -55,6 +55,9 @@ import java.io.InputStream;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.mail.MailExceptionCode;
@@ -68,6 +71,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "zip_messages", description = "Get multiple mails as a ZIP file.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", description = "The folder identifier."),
+    @Parameter(name = "id", description = "A comma-separated list of Object IDs of the requested mails."),
+}, responseDescription = "The raw byte data of the ZIP file.")
 public final class GetMultipleMessagesAction extends AbstractMailAction {
 
     /**

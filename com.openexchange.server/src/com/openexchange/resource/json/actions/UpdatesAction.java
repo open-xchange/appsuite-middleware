@@ -55,6 +55,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -70,6 +73,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Get updates (since v6.18.1)", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested resources.")
+}, responseDescription = "Response with timestamp: An array with new, modified and deleted resources. New, modified and deleted resources are represented by JSON objects as described in Resource response.")
 public final class UpdatesAction extends AbstractResourceAction {
 
     private static final org.apache.commons.logging.Log LOG =
