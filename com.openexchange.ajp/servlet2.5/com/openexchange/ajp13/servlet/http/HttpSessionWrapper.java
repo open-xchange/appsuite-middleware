@@ -88,9 +88,9 @@ public class HttpSessionWrapper implements HttpSession {
                 if (tmp < 0) {
                     final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
-                        tmp = (int) ConfigTools.parseTimespan("1W");
+                        tmp = ConfigTools.parseTimespanSecs("1W");
                     } else {
-                        tmp = (int) (ConfigTools.parseTimespan(service.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
+                        tmp = ConfigTools.parseTimespanSecs(service.getProperty("com.openexchange.cookie.ttl", "1W"));
                     }
                     cookieTTL = tmp;
                 }

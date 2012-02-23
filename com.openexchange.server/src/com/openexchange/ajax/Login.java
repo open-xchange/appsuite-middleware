@@ -716,7 +716,7 @@ public class Login extends AJAXServlet {
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
         }
-        final int cookieExpiry = (int) (ConfigTools.parseTimespan(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName())) / 1000);
+        final int cookieExpiry = ConfigTools.parseTimespanSecs(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName()));
         final boolean cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
         final boolean insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
         final boolean ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));

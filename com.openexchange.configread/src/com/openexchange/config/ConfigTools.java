@@ -53,26 +53,62 @@ import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link ConfigTools} collect common parsing operations for configuration options.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ConfigTools {
 
+    private static final String NON_PERSISTENT_IDENTIFIER = "web-browser";
+
+    /**
+     * The cookie is not stored persistently and will be deleted when the Web browser exits
+     */
+    private static final int NON_PERSISTENT_VALUE = -1;
 
     /**
      * A timespan specification consists of a number and a unit of measurement. Units are:
-     * ms for miliseconds
-     * s for seconds
-     * m for minutes
-     * h for hours
-     * D for days
-     * W for weeks
-     *
+     * <ul>
+     * <li>ms for miliseconds</li>
+     * <li>s for seconds</li>
+     * <li>m for minutes</li>
+     * <li>h for hours</li>
+     * <li>D for days</li>
+     * <li>W for weeks</li>
+     * </ul>
      * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
-     * @param span
-     * @return
+     * 
+     * @param span The span description or special identifier <code>"web-browser"</code> to let the Cookie be deleted when the Web browser
+     *            exits
+     * @return The parsed time span in seconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
+     */
+    public static int parseTimespanSecs(final String span) {
+        if (null == span || NON_PERSISTENT_IDENTIFIER.equals(span.toLowerCase())) {
+            return NON_PERSISTENT_VALUE;
+        }
+        return (int) (TimeSpanParser.parseTimespan(span).longValue() / 1000);
+    }
+
+    /**
+     * A timespan specification consists of a number and a unit of measurement. Units are:
+     * <ul>
+     * <li>ms for miliseconds</li>
+     * <li>s for seconds</li>
+     * <li>m for minutes</li>
+     * <li>h for hours</li>
+     * <li>D for days</li>
+     * <li>W for weeks</li>
+     * </ul>
+     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
+     * 
+     * @param span The span description or special identifier <code>"web-browser"</code> to let the Cookie be deleted when the Web browser
+     *            exits
+     * @return The parsed time span in milliseconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
      */
     public static long parseTimespan(final String span) {
+        if (null == span || NON_PERSISTENT_IDENTIFIER.equals(span.toLowerCase())) {
+            return NON_PERSISTENT_VALUE;
+        }
         return TimeSpanParser.parseTimespan(span).longValue();
     }
 
