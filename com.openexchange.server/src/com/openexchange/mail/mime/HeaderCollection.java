@@ -54,10 +54,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -103,6 +105,40 @@ public class HeaderCollection implements Serializable {
     private static final HeaderName RECEIVED = MessageHeaders.RECEIVED;
 
     private static final HeaderName CONTENT_TYPE = MessageHeaders.CONTENT_TYPE;
+
+    private static final Locale ENGLISH = Locale.ENGLISH;
+
+    private static final Map<String, String> CASE_SENSITIVE_LOOKUP;
+
+    static {
+        final Map<String, String> map = new HashMap<String, String>(24);
+        final Locale l = ENGLISH;
+        map.put("From".toLowerCase(l), "From");
+        map.put("Sender".toLowerCase(l), "Sender");
+        map.put("Reply-To".toLowerCase(l), "Reply-To");
+        map.put("To".toLowerCase(l), "To");
+        map.put("Cc".toLowerCase(l), "Cc");
+        map.put("Bcc".toLowerCase(l), "Bcc");
+        map.put("Message-ID".toLowerCase(l), "Message-ID");
+        map.put("In-Reply-To".toLowerCase(l), "In-Reply-To");
+        map.put("References".toLowerCase(l), "References");
+        map.put("Subject".toLowerCase(l), "Subject");
+        map.put("Comments".toLowerCase(l), "Comments");
+        map.put("Keywords".toLowerCase(l), "Keywords");
+        map.put("Resent-Date".toLowerCase(l), "Resent-Date");
+        map.put("Resent-From".toLowerCase(l), "Resent-From");
+        map.put("Resent-Sender".toLowerCase(l), "Resent-Sender");
+        map.put("Resent-To".toLowerCase(l), "Resent-To");
+        map.put("Resent-Cc".toLowerCase(l), "Resent-Cc");
+        map.put("Resent-Bcc".toLowerCase(l), "Resent-Bcc");
+        map.put("Resent-Message-ID".toLowerCase(l), "Resent-Message-ID");
+        CASE_SENSITIVE_LOOKUP = Collections.unmodifiableMap(map);
+    }
+
+    private static String caseSensitiveHeadreNameFor(final String name) {
+        final String cshn = CASE_SENSITIVE_LOOKUP.get(name.toLowerCase(ENGLISH));
+        return null == cshn ? name : cshn;
+    }
 
     /*-
      * ------------------------ Member stuff ---------------------------------
@@ -401,7 +437,7 @@ public class HeaderCollection implements Serializable {
              */
             return;
         }
-        final HeaderName headerName = HeaderName.valueOf(name);
+        final HeaderName headerName = HeaderName.valueOf(caseSensitiveHeadreNameFor(name));
         List<String> values = map.get(headerName);
         if (values == null) {
             values = new ArrayList<String>(2);
