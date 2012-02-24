@@ -792,12 +792,36 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         @Override
         public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             if (hasBeenRemoved(participant)) {
+                if (existsInUpdate(participant)) {
+                    return null;
+                }
                 return delete(cancel(participant));
             }
             if (hasBeenAdded(participant)) {
+                if (existsInOriginal(participant)) {
+                    return null;
+                }
                 return create(request(participant, null, State.Type.NEW));
             }
             return update(request(participant, null, State.Type.MODIFIED	));
+        }
+        
+        protected boolean existsInUpdate(NotificationParticipant participant) {
+            for (UserParticipant userParticipant : appointment.getUsers()) {
+                if (participant.getIdentifier() == userParticipant.getIdentifier()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected boolean existsInOriginal(NotificationParticipant participant) {
+            for (UserParticipant userParticipant : original.getUsers()) {
+                if (participant.getIdentifier() == userParticipant.getIdentifier()) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         protected boolean hasBeenRemoved(final NotificationParticipant participant) {
