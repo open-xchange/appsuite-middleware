@@ -71,14 +71,14 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
     @Parameter(name = "timestamp", description = "Timestamp of the infostore object.")
 }, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. Only modified fields are present.",
 responseDescription = "The id of the newly created object.")
-@Action(method = RequestMethod.POST, name = "copy", description = "Copy an infoitem via POST", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the updated infoitem."),
-    @Parameter(name = "timestamp", description = "Timestamp of the updated infoitem. If the infoitem was modified after the specified timestamp, then the update must fail."),
-    @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. Only modified fields are present."),
-    @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
-}, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
-responseDescription = "The response is sent as a HTML document (see introduction).")
+//@Action(method = RequestMethod.POST, name = "copy", description = "Copy an infoitem via POST", parameters = {
+//    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+//    @Parameter(name = "id", description = "Object ID of the updated infoitem."),
+//    @Parameter(name = "timestamp", description = "Timestamp of the updated infoitem. If the infoitem was modified after the specified timestamp, then the update must fail."),
+//    @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. Only modified fields are present."),
+//    @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
+//}, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
+//responseDescription = "The response is sent as a HTML document (see introduction).")
 public class CopyAction extends AbstractWriteAction {
 
     @Override
