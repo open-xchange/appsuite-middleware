@@ -50,6 +50,16 @@
 package com.openexchange.mail.mime;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.BodyPart;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link IcsMimeFilter}
@@ -74,6 +84,54 @@ public final class IcsMimeFilter extends MimeFilter {
      */
     private IcsMimeFilter() {
         super(Arrays.asList("text/calendar", "application/ics"));
+    }
+
+    private static final Set<String> ITIP_METHODS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("REQUEST", "CANCEL", "REPLY")));
+
+    @Override
+    public boolean ignorable(final String contentType, final BodyPart bodyPart) {
+        for (final String baseType : ignorableContentTypes) {
+            if (contentType.startsWith(baseType)) {
+                /*
+                 * Check ICal part for a valid METHOD and its presence in Content-Type header
+                 */
+                final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+                if (iCalParser != null) {
+                    try {
+                        final String method = iCalParser.parseProperty("METHOD", MessageUtility.getPartInputStream(bodyPart));
+                        return null != method && ITIP_METHODS.contains(method.toUpperCase());
+                    } catch (final RuntimeException e) {
+                        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IcsMimeFilter.class));
+                        logger.warn("A runtime error occurred.", e);
+                    }
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean ignorable(final String contentType, final MailPart bodyPart) {
+        for (final String baseType : ignorableContentTypes) {
+            if (contentType.startsWith(baseType)) {
+                /*
+                 * Check ICal part for a valid METHOD and its presence in Content-Type header
+                 */
+                final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+                if (iCalParser != null) {
+                    try {
+                        final String method = iCalParser.parseProperty("METHOD", bodyPart.getInputStream());
+                        return null != method && ITIP_METHODS.contains(method.toUpperCase());
+                    } catch (final Exception e) {
+                        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IcsMimeFilter.class));
+                        logger.warn("An error occurred.", e);
+                    }
+                }
+                return false;
+            }
+        }
+        return false;
     }
 
 }

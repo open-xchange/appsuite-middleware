@@ -52,7 +52,6 @@ package com.openexchange.mail.json.writer;
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.TimeZone;
@@ -72,6 +71,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
@@ -157,7 +157,7 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, session, settings, warnings, token, tokenTimeout, Collections.<String> emptyList());
+        return writeMailMessage(accountId, mail, displayMode, session, settings, warnings, token, tokenTimeout, null);
     }
 
     /**
@@ -171,12 +171,12 @@ public final class MessageWriter {
      *            storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
      * @param tokenTimeout
-     * @param ignorableContentTypes The Content-Types to ignore
+     * @param mimeFilter The MIME filter
      * @token <code>true</code> to add attachment tokens
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final List<String> ignorableContentTypes) throws OXException {
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
         final MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
             mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
@@ -193,7 +193,7 @@ public final class MessageWriter {
             throw new OXException(e);
         }
         final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, session, usm, token, tokenTimeout);
-        final MailMessageParser parser = new MailMessageParser().addIgnorableContentTypes(null == ignorableContentTypes ? Collections.<String> emptyList() : ignorableContentTypes);
+        final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
         parser.parseMailMessage(mail, handler);
         if (null != warnings) {
             final List<OXException> list = parser.getWarnings();
