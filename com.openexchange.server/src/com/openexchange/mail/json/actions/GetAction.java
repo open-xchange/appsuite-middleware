@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -169,21 +168,27 @@ public final class GetAction extends AbstractMailAction {
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
             tmp = req.getParameter("ignorable");
-            final List<String> ignorableContentTypes;
+            final MimeFilter mimeFilter;
             if (isEmpty(tmp)) {
-                ignorableContentTypes = Collections.<String> emptyList();
+                mimeFilter = null;
             } else {
                 final String[] strings = SPLIT.split(tmp, 0);
                 final int length = strings.length;
-                ignorableContentTypes = new ArrayList<String>(length);
-                for (int i = 0; i < length; i++) {
-                    final String cts = strings[i];
-                    if ("ics".equalsIgnoreCase(cts)) {
-                        ignorableContentTypes.add("text/calendar");
-                        ignorableContentTypes.add("application/ics");
-                    } else {
-                        ignorableContentTypes.add(cts);
+                MimeFilter mf;
+                if (1 == length && (mf = MimeFilter.filterFor(strings[0])) != null) {
+                    mimeFilter = mf;
+                } else {
+                    final List<String> ignorableContentTypes = new ArrayList<String>(length);
+                    for (int i = 0; i < length; i++) {
+                        final String cts = strings[i];
+                        if ("ics".equalsIgnoreCase(cts)) {
+                            ignorableContentTypes.add("text/calendar");
+                            ignorableContentTypes.add("application/ics");
+                        } else {
+                            ignorableContentTypes.add(cts);
+                        }
                     }
+                    mimeFilter = MimeFilter.filterFor(ignorableContentTypes);
                 }
             }
             tmp = null;
@@ -231,9 +236,9 @@ public final class GetAction extends AbstractMailAction {
                     baos.reset();
                 }
                 // Filter
-                if (!ignorableContentTypes.isEmpty()) {
+                if (null != mimeFilter) {
                     MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
-                    mimeMessage = new MimeFilter(ignorableContentTypes).filter(mimeMessage);
+                    mimeMessage = mimeFilter.filter(mimeMessage);
                     baos.reset();
                     mimeMessage.writeTo(baos);
                 }

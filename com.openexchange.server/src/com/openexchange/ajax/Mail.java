@@ -1204,21 +1204,27 @@ public class Mail extends PermissionServlet implements UploadListener {
                 ttlMillis = -1;
             }
             tmp = paramContainer.getStringParam("ignorable");
-            final List<String> ignorableContentTypes;
+            final MimeFilter mimeFilter;
             if (isEmpty(tmp)) {
-                ignorableContentTypes = Collections.<String> emptyList();
+                mimeFilter = null;
             } else {
                 final String[] strings = SPLIT.split(tmp, 0);
                 final int length = strings.length;
-                ignorableContentTypes = new ArrayList<String>(length);
-                for (int i = 0; i < length; i++) {
-                    final String cts = strings[i];
-                    if ("ics".equalsIgnoreCase(cts)) {
-                        ignorableContentTypes.add("text/calendar");
-                        ignorableContentTypes.add("application/ics");
-                    } else {
-                        ignorableContentTypes.add(cts);
+                MimeFilter mf;
+                if (1 == length && (mf = MimeFilter.filterFor(strings[0])) != null) {
+                    mimeFilter = mf;
+                } else {
+                    final List<String> ignorableContentTypes = new ArrayList<String>(length);
+                    for (int i = 0; i < length; i++) {
+                        final String cts = strings[i];
+                        if ("ics".equalsIgnoreCase(cts)) {
+                            ignorableContentTypes.add("text/calendar");
+                            ignorableContentTypes.add("application/ics");
+                        } else {
+                            ignorableContentTypes.add(cts);
+                        }
                     }
+                    mimeFilter = MimeFilter.filterFor(ignorableContentTypes);
                 }
             }
             tmp = null;
@@ -1268,9 +1274,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                         baos.reset();
                     }
                     // Filter
-                    if (!ignorableContentTypes.isEmpty()) {
+                    if (null != mimeFilter) {
                         MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
-                        mimeMessage = new MimeFilter(ignorableContentTypes).filter(mimeMessage);                        
+                        mimeMessage = mimeFilter.filter(mimeMessage);                        
                         baos.reset();
                         mimeMessage.writeTo(baos);
                     }
@@ -1402,7 +1408,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
                     data =
-                        MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, ignorableContentTypes);
+                        MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, mimeFilter);
                     if (doUnseen) {
                         /*
                          * Leave mail as unseen

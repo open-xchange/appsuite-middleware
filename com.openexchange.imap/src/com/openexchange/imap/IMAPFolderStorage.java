@@ -134,7 +134,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     /**
      * The max. length for a mailbox name
      */
-    private static final int MAX_MAILBOX_NAME = 255;
+    private static final int MAX_MAILBOX_NAME = 60;
 
     private static final String STR_INBOX = "INBOX";
 

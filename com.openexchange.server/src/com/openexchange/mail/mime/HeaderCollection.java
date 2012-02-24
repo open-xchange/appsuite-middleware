@@ -114,6 +114,7 @@ public class HeaderCollection implements Serializable {
     static {
         final Map<String, String> map = new HashMap<String, String>(24);
         final Locale l = ENGLISH;
+        map.put("Date".toLowerCase(l), "Date");
         map.put("From".toLowerCase(l), "From");
         map.put("Sender".toLowerCase(l), "Sender");
         map.put("Reply-To".toLowerCase(l), "Reply-To");
@@ -137,7 +138,7 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Gets the case-sensitive header name.
+     * Gets the case-sensitive header name as per RFC2822.
      * 
      * @param name The header name to check
      * @return The case-sensitive header name
