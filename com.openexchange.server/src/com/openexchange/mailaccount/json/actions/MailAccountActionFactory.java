@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -63,6 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "account", description = "The mail account module is used to manage multiple mail accounts held by a user.")
 public final class MailAccountActionFactory implements AJAXActionServiceFactory {
 
     private static final MailAccountActionFactory SINGLETON = new MailAccountActionFactory();

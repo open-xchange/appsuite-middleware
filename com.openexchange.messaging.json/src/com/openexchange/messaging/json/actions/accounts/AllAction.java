@@ -55,6 +55,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
@@ -73,6 +76,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "all", description = "Get all messaging accounts", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, responseDescription = "A standard response object containing an array of messaging service objects.")
 public class AllAction extends AbstractMessagingAccountAction {
 
     public AllAction(final MessagingServiceRegistry registry) {

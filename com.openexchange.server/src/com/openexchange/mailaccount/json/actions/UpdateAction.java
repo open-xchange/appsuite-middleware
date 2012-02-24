@@ -57,6 +57,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
@@ -78,6 +81,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.") 
+}, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.",
+responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
