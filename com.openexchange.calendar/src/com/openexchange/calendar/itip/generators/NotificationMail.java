@@ -58,6 +58,7 @@ import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
+import com.openexchange.calendar.CalendarField;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.Difference;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.notify.State.Type;
 
 
@@ -295,6 +297,9 @@ public class NotificationMail {
     	if (! anInterestingFieldChanged()) {
     		return false;
     	}
+        if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
+            return false;
+        }
         if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
             return true;
         }
@@ -305,6 +310,48 @@ public class NotificationMail {
             return false;
         }
         return true;
+    }
+    
+    private boolean onlyPseudoChangesOnParticipants() {
+        AppointmentDiff appDiff = getDiff();
+        boolean onlyParticipantsChanged = appDiff.onlyTheseChanged(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+        if (onlyParticipantsChanged) {
+            FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+            Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();
+            Participant[] newParticipants = (Participant[]) participantUpdate.getNewValue();
+
+            for (Participant pOld : oldParticipants) {
+                if (pOld.getType() == Participant.RESOURCE) {
+                    boolean found = false;
+                    for (Participant pNew : newParticipants) {
+                        if (pNew.getType() == Participant.RESOURCE && pNew.getIdentifier() == pOld.getIdentifier()) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        return false;
+                    }
+                }
+            }
+
+            for (Participant pNew : newParticipants) {
+                if (pNew.getType() == Participant.RESOURCE) {
+                    boolean found = false;
+                    for (Participant pOld : oldParticipants) {
+                        if (pOld.getType() == Participant.RESOURCE && pOld.getIdentifier() == pNew.getIdentifier()) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
     
     private boolean isNotWorthUpdateNotification(final Appointment original, final Appointment modified) {
