@@ -200,18 +200,18 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage {
             final MailMessage[] messages = new MailMessage[mailIds.length];
             // Parse mail IDs
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
-            final int size = parsed.size();
             // Create completion service for simultaneous access
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<GetMessagesResult> completionService =
                 new UnifiedInboxCompletionService<GetMessagesResult>(executor);
             // Iterate parsed map and submit a task for each iteration
-            final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
-            for (int i = 0; i < size; i++) {
+            int numTasks = 0;
+            for (final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator(); iter.hasNext();) {
+                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
+                numTasks++;
                 completionService.submit(new LoggingCallable<GetMessagesResult>(session) {
 
                     public GetMessagesResult call() throws OXException {
-                        final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
@@ -291,7 +291,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage {
             }
             // Wait for completion of each submitted task
             try {
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < numTasks; i++) {
                     final GetMessagesResult result = completionService.take().get();
                     insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullName);
                 }
@@ -589,11 +589,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage {
             // Collection of Callables
             final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
             for (int i = 0; i < size; i++) {
-
+                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                 collection.add(new LoggingCallable<Object>(session) {
 
                     public Object call() throws Exception {
-                        final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
@@ -690,10 +689,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage {
             // Collection of Callables
             final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
             for (int i = 0; i < size; i++) {
+                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                 collection.add(new LoggingCallable<Object>(session) {
 
                     public Object call() throws Exception {
-                        final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
@@ -762,10 +761,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage {
             // Collection of Callables
             final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
             for (int i = 0; i < size; i++) {
+                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                 collection.add(new LoggingCallable<Object>(session) {
 
                     public Object call() throws Exception {
-                        final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
