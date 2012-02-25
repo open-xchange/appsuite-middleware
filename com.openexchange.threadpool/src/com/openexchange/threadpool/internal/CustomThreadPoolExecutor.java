@@ -54,6 +54,7 @@ import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -1262,11 +1263,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 @Override
                 public void run() {
                     final long stamp = System.currentTimeMillis() - 300000L;
+                    final Set<Worker> elapsed = new HashSet<Worker>();
                     for (final Worker worker : workerSet) {
                         if (worker.isActive() && worker.lastStart < stamp) {
                             // Elapsed thread detected
                             worker.interruptNow();
+                            elapsed.add(worker);
                         }
+                    }
+                    if (!elapsed.isEmpty()) {
+                        workerSet.removeAll(elapsed);
                     }
                 }
             };
