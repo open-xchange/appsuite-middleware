@@ -51,6 +51,9 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -61,6 +64,16 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Create an infoitem via PUT", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included.",
+responseDescription = "Object ID of the newly created infoitem.")
+//@Action(method = RequestMethod.POST, name = "new", description = "Create an infoitem via POST", parameters = {
+//    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+//    @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
+//    @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
+//}, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
+//responseDescription = "Object ID of the newly created infoitem. The response is sent as a HTML document (see introduction).")
 public class NewAction extends AbstractWriteAction {
 
     @Override

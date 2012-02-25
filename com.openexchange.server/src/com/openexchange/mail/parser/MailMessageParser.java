@@ -54,7 +54,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -98,6 +97,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
@@ -208,7 +208,7 @@ public final class MailMessageParser {
 
     private String subject;
 
-    private final List<ContentType> ignorableContentTypes;
+    private MimeFilter mimeFilter;
 
     private final List<OXException> warnings;
 
@@ -218,7 +218,7 @@ public final class MailMessageParser {
     public MailMessageParser() {
         super();
         inlineDetector = LENIENT_DETECTOR;
-        ignorableContentTypes = new ArrayList<ContentType>(2);
+        mimeFilter = null;
         warnings = new ArrayList<OXException>(2);
     }
 
@@ -234,63 +234,14 @@ public final class MailMessageParser {
     }
 
     /**
-     * Adds specified ignorable Content-Types.
+     * Adds specified MIME filter.
      * 
-     * @param contentTypes The ignorable Content-Types
-     * @return This parser with ignorable Content-Types added
+     * @param mimeFilter The MIME filter
+     * @return This parser with MIME filter applied
      */
-    public MailMessageParser addIgnorableContentTypes(final Collection<String> contentTypes) {
-        for (final String contentType : contentTypes) {
-            try {
-                final ContentType type = new ContentType(contentType);
-                if (!type.startsWith("multipart/") && !type.startsWith("message/")) {
-                    ignorableContentTypes.add(type);
-                }
-            } catch (final OXException e) {
-                LOG.warn("Couldn't parse ignorable Content-Type: " + contentType, e);
-            }
-        }
+    public MailMessageParser addMimeFilter(final MimeFilter mimeFilter) {
+        this.mimeFilter = mimeFilter;
         return this;
-    }
-
-    /**
-     * Adds specified ignorable Content-Type.
-     * 
-     * @param contentType The ignorable Content-Type
-     * @return This parser with ignorable Content-Type added
-     */
-    public MailMessageParser addIgnorableContentType(final String contentType) {
-        try {
-            return addIgnorableContentType(new ContentType(contentType));
-        } catch (final OXException e) {
-            LOG.warn("Couldn't parse ignorable Content-Type: " + contentType, e);
-            return this;
-        }
-    }
-
-    /**
-     * Adds specified ignorable Content-Type.
-     * 
-     * @param contentType The ignorable Content-Type
-     * @return This parser with ignorable Content-Type added
-     */
-    public MailMessageParser addIgnorableContentType(final ContentType contentType) {
-        if (!contentType.startsWith("multipart/") && !contentType.startsWith("message/")) {
-            ignorableContentTypes.add(contentType);
-        }
-        return this;
-    }
-
-    private boolean isIgnorable(final ContentType ct) {
-        if (ignorableContentTypes.isEmpty()) {
-            return false;
-        }
-        for (final ContentType ict : ignorableContentTypes) {
-            if (ict.getPrimaryType().equals(ct.getPrimaryType()) && ict.getSubType().equals(ct.getSubType())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -400,10 +351,10 @@ public final class MailMessageParser {
         final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
         final long size = mailPart.getSize();
         final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(APPL_OCTET);
-        if (isIgnorable(contentType)) {
+        final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
+        if (null != mimeFilter && mimeFilter.ignorable(lcct, mailPart)) {
             return;
         }
-        final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
         final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
         /*
          * Parse part dependent on its MIME type

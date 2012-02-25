@@ -1115,7 +1115,7 @@ public final class MimeMessageConverter {
             final MailField field = arr[i];
             final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(field);
             if (filler == null) {
-                if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
+                if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
                     if (DEBUG) {
                         LOG.debug("Ignoring mail field " + field);
                     }

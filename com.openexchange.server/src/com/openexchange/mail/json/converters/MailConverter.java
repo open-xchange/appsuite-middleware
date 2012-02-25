@@ -51,7 +51,6 @@ package com.openexchange.mail.json.converters;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -74,6 +73,7 @@ import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preferences.ServerUserSetting;
@@ -357,21 +357,27 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             ttlMillis = -1;
         }
         tmp = requestData.getParameter("ignorable");
-        final List<String> ignorableContentTypes;
+        final MimeFilter mimeFilter;
         if (isEmpty(tmp)) {
-            ignorableContentTypes = Collections.<String> emptyList();
+            mimeFilter = null;
         } else {
             final String[] strings = SPLIT.split(tmp, 0);
             final int length = strings.length;
-            ignorableContentTypes = new ArrayList<String>(length);
-            for (int i = 0; i < length; i++) {
-                final String cts = strings[i];
-                if ("ics".equalsIgnoreCase(cts)) {
-                    ignorableContentTypes.add("text/calendar");
-                    ignorableContentTypes.add("application/ics");
-                } else {
-                    ignorableContentTypes.add(cts);
+            MimeFilter mf;
+            if (1 == length && (mf = MimeFilter.filterFor(strings[0])) != null) {
+                mimeFilter = mf;
+            } else {
+                final List<String> ignorableContentTypes = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    final String cts = strings[i];
+                    if ("ics".equalsIgnoreCase(cts)) {
+                        ignorableContentTypes.add("text/calendar");
+                        ignorableContentTypes.add("application/ics");
+                    } else {
+                        ignorableContentTypes.add(cts);
+                    }
                 }
+                mimeFilter = MimeFilter.filterFor(ignorableContentTypes);
             }
         }
         tmp = null;
@@ -398,7 +404,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
         result.setResultObject(
-            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, ignorableContentTypes),
+            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, mimeFilter),
             "json");
         if (doUnseen) {
             /*-
