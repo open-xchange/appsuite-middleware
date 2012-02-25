@@ -91,6 +91,9 @@ public final class DBUtils {
      * @return The extracted SQL string
      */
     public static String getStatementString(final Statement statement) {
+        if (null == statement) {
+            return null;
+        }
         final String str = statement.toString();
         final int pos = str.indexOf(": ");
         return pos < 0 ? str : str.substring(pos + 2);
