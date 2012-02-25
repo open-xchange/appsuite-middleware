@@ -147,7 +147,7 @@ public class SecretActivator extends HousekeepingActivator {
                 tokenBasedSecretService = new TokenBasedSecretService(tl);
                 tokenList = TokenList.newInstance(Collections.singleton(tl));
             }
-            // Checks if SecretService is configured to use password
+            // Checks if SecretService is configured to use a password
             registerService(SecretUsesPasswordChecker.class, new SecretUsesPasswordChecker() {
                 
                 @Override
