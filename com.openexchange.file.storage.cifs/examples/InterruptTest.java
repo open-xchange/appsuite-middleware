@@ -7,28 +7,28 @@ public class InterruptTest extends Thread {
 
     String url;
 
-    public InterruptTest(String url) {
+    public InterruptTest(final String url) {
         this.url = url;
     }
     @Override
     public void run() {
         for (int i = 0; i < 100; i++) {
             try {
-                SmbFileInputStream in = new SmbFileInputStream(url);
+                final SmbFileInputStream in = new SmbFileInputStream(url);
 
-                byte[] b = new byte[10];
+                final byte[] b = new byte[10];
                 while(in.read( b ) > 0) {
                     ;
                 }
 
                 in.close();
-            } catch(InterruptedIOException iioe) {
+            } catch(final InterruptedIOException iioe) {
                 System.out.println("InterruptedIOException");
                 continue;
-            } catch(SmbException se) {
+            } catch(final SmbException se) {
                 Throwable t = se.getRootCause();
                 if (t instanceof TransportException) {
-                    TransportException te = (TransportException)t;
+                    final TransportException te = (TransportException)t;
                     t = te.getRootCause();
                     if (t instanceof InterruptedException) {
                         System.out.println("InterruptedException in constructor");
@@ -36,16 +36,16 @@ public class InterruptTest extends Thread {
                     }
                 }
                 se.printStackTrace();
-                try { Thread.sleep(500); } catch(InterruptedException ie) {}
-            } catch(Exception e) {
+                try { Thread.sleep(500); } catch(final InterruptedException ie) {Thread.currentThread().interrupt();}
+            } catch(final Exception e) {
                 e.printStackTrace();
                 break;
             }
         }
     }
 
-    public static void main( String argv[] ) throws Exception {
-        InterruptTest it = new InterruptTest(argv[0]);
+    public static void main( final String argv[] ) throws Exception {
+        final InterruptTest it = new InterruptTest(argv[0]);
         it.start();
         for (int i = 0; i < 20; i++) {
             Thread.sleep(200);

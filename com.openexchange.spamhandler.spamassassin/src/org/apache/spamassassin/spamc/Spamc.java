@@ -1081,6 +1081,8 @@ public class Spamc {
 		} catch (final InterruptedException e1) {
 		    // this should not occur, but if it does there is
 		    // nothing we can do about it
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
 		}
 	    }
 	} while (getFailover() && (socket == null)

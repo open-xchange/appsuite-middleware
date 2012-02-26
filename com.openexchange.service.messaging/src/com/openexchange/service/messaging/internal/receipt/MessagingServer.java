@@ -278,7 +278,6 @@ public final class MessagingServer implements Runnable {
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
                 logger.error(e.getMessage(), e);
-                Thread.currentThread().interrupt();
             }
         }
     }

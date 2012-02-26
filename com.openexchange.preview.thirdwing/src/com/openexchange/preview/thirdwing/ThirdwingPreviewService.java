@@ -236,7 +236,8 @@ public class ThirdwingPreviewService implements InternalPreviewService {
          // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
         } catch (final InterruptedException e) {
-         // TODO: throw proper exception
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
             throw PreviewExceptionCodes.ERROR.create();
         } catch (final ExecutionException e) {
          // TODO: throw proper exception
