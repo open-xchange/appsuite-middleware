@@ -709,7 +709,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);
 
-            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + ctx.getIdAsString() + " to database " + dbid);
+            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + ctx.getIdAsString() + " to database " + dbid, ctx.getId());
         } catch (final OXContextException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -790,7 +790,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     throw contextException;
                 }
                 final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
-                return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId());
+                return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId(), ctx.getId());
             } catch (final StorageException e) {
                 throw new OXContextException(e);
             } catch (final IOException e) {
