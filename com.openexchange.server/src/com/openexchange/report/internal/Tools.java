@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.management.MBeanException;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -16,7 +15,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class Tools {
     
-    public static final Map<String, Integer> getAllSchemata(final Log logger) throws MBeanException {
+    public static final Map<String, Integer> getAllSchemata(final Log logger) throws SQLException, OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Map<String, Integer> schemaMap = new LinkedHashMap<String, Integer>(50); // Keep insertion order
         {
@@ -25,7 +24,7 @@ public class Tools {
                 readcon = dbService.getReadOnly();
             } catch (final OXException e) {
                 logger.error(e.getMessage(), e);
-                throw new MBeanException(e, "Couldn't get connection to configdb.");
+                throw e;
             }
             /*
              * Get all schemas and put them into a map.
@@ -40,7 +39,7 @@ public class Tools {
                 }
             } catch (final SQLException e) {
                 logger.error(e.getMessage(), e);
-                throw new MBeanException(e, e.getMessage());
+                throw e;
             } finally {
                 DBUtils.closeSQLStuff(rs, statement);
                 dbService.backReadOnly(readcon);

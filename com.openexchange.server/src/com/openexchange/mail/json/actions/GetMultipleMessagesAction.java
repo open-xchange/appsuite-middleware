@@ -74,7 +74,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 @Action(method = RequestMethod.GET, name = "zip_messages", description = "Get multiple mails as a ZIP file.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "folder", description = "The folder identifier."),
-    @Parameter(name = "id", description = "A comma-separated list of Object IDs of the requested mails."),
+    @Parameter(name = "id", description = "A comma-separated list of Object IDs of the requested mails.")
 }, responseDescription = "The raw byte data of the ZIP file.")
 public final class GetMultipleMessagesAction extends AbstractMailAction {
 

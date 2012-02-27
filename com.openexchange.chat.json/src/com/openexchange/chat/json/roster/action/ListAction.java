@@ -61,6 +61,9 @@ import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
 import com.openexchange.chat.json.roster.JSONRosterWriter;
 import com.openexchange.chat.json.roster.RosterID;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -70,6 +73,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "list", description = "List a chat roster", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "user", description = "Name of requesting user.")
+}, requestBody = "Ids of the rosters to list",
+responseDescription = "A JSON array containing the requested roster.")
 public final class ListAction extends AbstractChatRosterAction {
 
     /**

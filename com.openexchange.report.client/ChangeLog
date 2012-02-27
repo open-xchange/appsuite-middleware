@@ -1,3 +1,13 @@
+* 2012-02-27 - choeger@open-xchange.com
+
+ - report client can now optionally save json string in local file
+ - Bugfix #20796: report client should only report total numbers, not details
+ 
+* 2011-11-15 - choeger@open-xchange.com
+
+ - Added output of login counts
+ - fixed groupware version output
+
 * 2011-05-24 - marcus.klein@open-xchange.com
 
  - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.

@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description ="Object ID of the to confirm task."),
     @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "timestamp", description =  "Timestamp of the last update of the to confirm task."),
+    @Parameter(name = "timestamp", description =  "Timestamp of the last update of the to confirm task.")
 }, requestBody = "An object with the fields \"confirmation\" and \"confirmmessage\" as described in User participant object.",
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the confirmed and thereby updated task, and maybe errors.")
 public class ConfirmAction extends TaskAction {
