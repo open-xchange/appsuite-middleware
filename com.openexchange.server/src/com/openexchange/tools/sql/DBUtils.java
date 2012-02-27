@@ -85,21 +85,6 @@ public final class DBUtils {
     }
 
     /**
-     * Gets the SQL statement from specified {@link Statement} instance.
-     *
-     * @param statement The statement
-     * @return The extracted SQL string
-     */
-    public static String getStatementString(final Statement statement) {
-        if (null == statement) {
-            return null;
-        }
-        final String str = statement.toString();
-        final int pos = str.indexOf(": ");
-        return pos < 0 ? str : str.substring(pos + 2);
-    }
-
-    /**
      * Closes the ResultSet.
      *
      * @param result <code>null</code> or a ResultSet to close.

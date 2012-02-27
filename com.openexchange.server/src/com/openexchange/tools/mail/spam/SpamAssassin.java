@@ -163,8 +163,6 @@ public class SpamAssassin {
         } catch (final MessagingException e) {
             LOG.error(e.getMessage(), e);
         } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             LOG.error(e.getMessage(), e);
         }
         return false;
@@ -255,8 +253,6 @@ public class SpamAssassin {
             } catch (final IOException e) {
                 LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
             } catch (final InterruptedException e) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
                 LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
             }
         }

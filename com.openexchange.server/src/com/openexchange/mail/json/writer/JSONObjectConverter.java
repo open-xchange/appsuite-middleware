@@ -160,7 +160,6 @@ public final class JSONObjectConverter {
             copyValue(FolderChildFields.FOLDER_ID, rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.UNREAD.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.ACCOUNT_NAME.getKey(), rawJSONMailObject, jsonObject);
-            copyValue(MailJSONField.ACCOUNT_ID.getKey(), rawJSONMailObject, jsonObject);
             raw2JsonMail0(rawJSONMailObject, jsonObject);
             return jsonObject;
         } catch (final JSONException e) {

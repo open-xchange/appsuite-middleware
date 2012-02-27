@@ -58,14 +58,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Interface for accessing configuration settings.
@@ -74,10 +71,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServerUserSetting {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerUserSetting.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>() {
 
@@ -588,9 +581,6 @@ public class ServerUserSetting {
             }
             stmt.setInt(pos++, cid);
             stmt.setInt(pos, user);
-            if (DEBUG) {
-                LOG.debug("INSERTing user settings: " + DBUtils.getStatementString(stmt));
-            }
             stmt.execute();
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);

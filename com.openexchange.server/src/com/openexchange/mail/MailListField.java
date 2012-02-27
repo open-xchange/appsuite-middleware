@@ -161,11 +161,7 @@ public enum MailListField {
     /**
      * Account name
      */
-    ACCOUNT_NAME(652, MailJSONField.ACCOUNT_NAME.getKey()),
-    /**
-     * Account identifier
-     */
-    ACCOUNT_ID(653, MailJSONField.ACCOUNT_ID.getKey());
+    ACCOUNT_NAME(652, MailJSONField.ACCOUNT_NAME.getKey());
 
     private final int field;
 

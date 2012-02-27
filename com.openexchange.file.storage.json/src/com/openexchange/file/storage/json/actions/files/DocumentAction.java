@@ -53,9 +53,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.ajax.requesthandler.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -66,13 +64,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "[filename]?action=document", description = "Get an infoitem document", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested infoitem."),
-    @Parameter(name = "folder", description = "Object ID of the infoitem's folder."),
-    @Parameter(name = "version", optional=true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
-    @Parameter(name = "content_type", optional=true, description = "If present the response declares the given content_type in the Content-Type header.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
+@Action(defaultFormat="file")
 public class DocumentAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {

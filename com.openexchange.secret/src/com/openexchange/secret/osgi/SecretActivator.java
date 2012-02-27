@@ -63,8 +63,8 @@ import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.impl.CryptoSecretEncryptionFactoryService;
 import com.openexchange.secret.impl.LiteralToken;
 import com.openexchange.secret.impl.ReservedToken;
+import com.openexchange.secret.impl.SessionSecretService;
 import com.openexchange.secret.impl.Token;
-import com.openexchange.secret.impl.TokenBasedSecretService;
 import com.openexchange.secret.impl.TokenList;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 
@@ -95,7 +95,7 @@ public class SecretActivator extends HousekeepingActivator {
          */
         final TokenList tokenList;
         {
-            TokenBasedSecretService.RANDOM.set(configurationService.getProperty("com.openexchange.secret.secretRandom", "unknown"));
+            SessionSecretService.RANDOM.set(configurationService.getProperty("com.openexchange.secret.secretRandom", "unknown"));
             /*
              * Get pattern from configuration
              */
@@ -115,15 +115,14 @@ public class SecretActivator extends HousekeepingActivator {
             /*
              * Check for "list"
              */
-            final TokenBasedSecretService tokenBasedSecretService;
+            final SessionSecretService sessionSecretService;
             if ("list".equals(pattern)) {
                 String text = configurationService.getText("secrets");
                 if (null == text) {
                     text = "\"<user-id> + '-' +  <random> + '-' + <context-id>\"";
                 }
                 tokenList = TokenList.parseText(text);
-                // SecretService based on last token in token list
-                tokenBasedSecretService = new TokenBasedSecretService(tokenList);
+                sessionSecretService = new SessionSecretService(tokenList.peekLast());
             } else {
                 final String[] tokens = pattern.split(" *\\+ *");
                 final List<Token> tl = new ArrayList<Token>(tokens.length);
@@ -144,10 +143,9 @@ public class SecretActivator extends HousekeepingActivator {
                         tl.add(rt);
                     }
                 }
-                tokenBasedSecretService = new TokenBasedSecretService(tl);
+                sessionSecretService = new SessionSecretService(tl);
                 tokenList = TokenList.newInstance(Collections.singleton(tl));
             }
-            // Checks if SecretService is configured to use a password
             registerService(SecretUsesPasswordChecker.class, new SecretUsesPasswordChecker() {
                 
                 @Override
@@ -157,13 +155,13 @@ public class SecretActivator extends HousekeepingActivator {
 
                 @Override
                 public SecretService passwordUsingSecretService() {
-                    return tokenBasedSecretService;
+                    return sessionSecretService;
                 }
             });
 
             final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-            registerService(SecretService.class, tokenBasedSecretService, properties);
+            registerService(SecretService.class, sessionSecretService, properties);
         }
         /*
          * Create & open whiteboard service
@@ -180,7 +178,7 @@ public class SecretActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        TokenBasedSecretService.RANDOM.set("unknown");
+        SessionSecretService.RANDOM.set("unknown");
         secretService.close();
         super.stopBundle();
     }

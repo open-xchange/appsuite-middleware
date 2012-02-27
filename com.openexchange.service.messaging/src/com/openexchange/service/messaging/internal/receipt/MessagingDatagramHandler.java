@@ -269,8 +269,6 @@ public class MessagingDatagramHandler {
                                  * Propagate to non-interrupted thread
                                  */
                                 lac.condition.signalAll();
-                                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                                Thread.currentThread().interrupt();
                                 throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                             }
                         } while (null == (prev = tTruncated.get(key)));

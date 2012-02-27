@@ -587,10 +587,6 @@ public final class MimeMessageUtility {
      * @return The possibly decoded header value
      */
     public static String decodeMultiEncodedHeader(final String headerValue) {
-        if ((null == headerValue) || (headerValue.indexOf("=?") < 0)) {
-            // In case of null, no "=?" marker
-            return unfold(headerValue);
-        }
         return decodeMultiEncodedHeader0(checkNonAscii(headerValue), true);
     }
 
@@ -598,11 +594,11 @@ public final class MimeMessageUtility {
         if (headerValue == null) {
             return null;
         }
-        final String hdrVal = unfold ? unfold(headerValue) : headerValue;
+        final String hdrVal = unfold ? MimeMessageUtility.unfold(headerValue) : headerValue;
         /*
          * Whether the sequence "=?" exists at all
          */
-        if (hdrVal.indexOf("=?") < 0) {
+        if (hdrVal.indexOf("=?") == -1) {
             return hdrVal;
         }
         final Matcher m = ENC_PATTERN.matcher(hdrVal);
@@ -698,13 +694,12 @@ public final class MimeMessageUtility {
      * @return The proper unicode string
      */
     public static String checkNonAscii(final String rawHeader) {
-        if (null == rawHeader || isAscii(rawHeader)) {
+        if (null == rawHeader) {
+            return null;
+        }
+        if (isAscii(rawHeader)) {
             return rawHeader;
         }
-        return convertNonAscii(rawHeader);
-    }
-
-    private static String convertNonAscii(final String rawHeader) {
         final int length = rawHeader.length();
         final byte[] bytes = new byte[length];
         for (int i = 0; i < length; i++) {
@@ -1228,7 +1223,7 @@ public final class MimeMessageUtility {
              * be discarded.
              */
             String s;
-            if (headerLine.indexOf("=?") < 0) {
+            if (headerLine.indexOf("=?") == -1) {
                 s = headerLine;
             } else {
                 s = unfoldEncodedWords(headerLine);

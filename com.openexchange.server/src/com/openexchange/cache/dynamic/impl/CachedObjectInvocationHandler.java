@@ -155,8 +155,6 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
                 load = false;
             }
         } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             load = true;
             LOG.error(e.getMessage(), e);
         } finally {

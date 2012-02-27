@@ -114,15 +114,13 @@ public class OfficeProcess extends Thread {
                 "-accept=" + getConnectString() + ";urp;", };
         try {
             _process = _runtime.exec(command);
-            if (_process != null) {
+            if (_process != null)
                 Logger.info("Worker instance " + _index + " started : " + _userId);
-            }
         } catch (final java.io.IOException ex) {
             Logger.fatalError("cannot launch OpenOffice Server instance (command=" + command + ") ");
             Logger.debug(ex);
-            if (_config.exitsWhenInstanceCannotBeCreated) {
+            if (_config.exitsWhenInstanceCannotBeCreated)
                 System.exit(1);
-            }
         }
     }
 
@@ -150,8 +148,6 @@ public class OfficeProcess extends Thread {
             try {
                 t.join(_config.sleepingDelay);
             } catch (final InterruptedException ex) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
                 Logger.debug(ex);
             }
             if (t.isAlive()) {
@@ -175,8 +171,6 @@ public class OfficeProcess extends Thread {
         try {
             Thread.sleep(_config.shutdownDelay);
         } catch (final InterruptedException ex) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             Logger.debug(ex);
         }
         _runtime.gc();
@@ -200,20 +194,17 @@ public class OfficeProcess extends Thread {
             // creating new connector because of a bug in jurt.jar/../Connector.java
             // see the issue at : http://www.openoffice.org/issues/show_bug.cgi?id=80947
             _connection = getNewConnector().connect(getConnectString());
-            if (_connection == null) {
+            if (_connection == null)
                 throw new NoConnectException("cannot connect (connector.connect(...) returned null)");
-            }
 
             _bridge = _daemon.getBridgeFactory().createBridge("", "urp", _connection, null);
-            if (_bridge == null) {
+            if (_bridge == null)
                 throw new NoConnectException("cannot create bridge from bridge factory");
-            }
 
             final Object contextObj = _bridge.getInstance("StarOffice.ComponentContext");
             _context = (XComponentContext) UnoRuntime.queryInterface(XComponentContext.class, contextObj);
-            if (_context == null) {
+            if (_context == null)
                 throw new NoConnectException("cannot get instance of ComponentContext");
-            }
 
             return _context != null;
         } catch (final com.sun.star.connection.NoConnectException ex) {
@@ -243,9 +234,7 @@ public class OfficeProcess extends Thread {
             }
             try {
                 Thread.sleep(_config.sleepingDelay);
-            } catch (final InterruptedException ex) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
+            } catch (final InterruptedException ex) { /* DO NOTHING */
             }
         }
 

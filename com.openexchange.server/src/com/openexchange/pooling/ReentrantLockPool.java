@@ -277,8 +277,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                                 idleAvailable.await();
                             }
                         } catch (final InterruptedException e) {
-                            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                            Thread.currentThread().interrupt();
                             LOG.error("Thread " + threadName + " was interrupted.", e);
                         }
                         if (writeWarning) {

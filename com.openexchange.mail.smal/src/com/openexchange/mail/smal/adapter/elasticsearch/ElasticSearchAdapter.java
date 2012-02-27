@@ -498,7 +498,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final IndexRange indexRange, final int optAccountId, final Session session, final boolean[] more) throws OXException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, IndexRange indexRange, final int optAccountId, final Session session, boolean[] more) throws OXException {
         try {
             ensureStarted();
             final int contextId = session.getContextId();

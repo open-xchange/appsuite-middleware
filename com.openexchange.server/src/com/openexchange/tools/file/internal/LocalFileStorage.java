@@ -175,7 +175,7 @@ public class LocalFileStorage implements FileStorage {
 	private File assignStorage() {
 		try {
         	return File.createTempFile("test-storage", "tmp");
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -689,8 +689,6 @@ public class LocalFileStorage implements FileStorage {
                     Thread.sleep(RELOCK_TIME);
                 } catch (final InterruptedException e) {
                     // Should not be interrupted.
-                    // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                    Thread.currentThread().interrupt();
                     LOG.error(e.getMessage(), e);
                 }
             }

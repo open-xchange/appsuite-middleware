@@ -278,7 +278,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
             }
         } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
             LOG.error("Interrupted text filler run.", e);
         } catch (final Exception e) {
             LOG.error("Failed text filler run.", e);

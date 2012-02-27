@@ -54,14 +54,12 @@ import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutorService;
@@ -232,8 +230,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CustomThreadPoolExecutor.class));
 
-    static final Object PRESENT = new Object();
-
     /**
      * Only used to force toArray() to produce a Runnable[].
      */
@@ -277,14 +273,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Set containing all worker threads in pool.
      */
-    private final ConcurrentMap<Worker, Object> workers = new ConcurrentHashMap<Worker, Object>();
-    private final Set<Worker> workerSet = workers.keySet();
-
-    /**
-     * The flag whether to monitor threads.
-     */
-    protected final boolean monitorThreads;
-    private volatile ScheduledFuture<?> monitorFuture;
+    private final HashSet<Worker> workers = new HashSet<Worker>();
 
     /**
      * The consumer thread to fetch from delayed work queue and add to work queue.
@@ -403,7 +392,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final Thread t = threadFactory.newThread(w);
         if (null != t) {
             w.thread = t;
-            workers.put(w, PRESENT);
+            workers.add(w);
             final int nt = ++poolSize;
             if (nt > largestPoolSize) {
                 largestPoolSize = nt;
@@ -547,7 +536,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            for (final Worker w : workerSet) {
+            for (final Worker w : workers) {
                 w.interruptIfIdle();
             }
         } finally {
@@ -704,11 +693,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         private Runnable firstTask;
 
         /**
-         * Per thread last-start time stamp.
-         */
-        volatile long lastStart;
-
-        /**
          * Per thread completed task counter; accumulated into completedTaskCount upon termination.
          */
         volatile long completedTasks;
@@ -758,10 +742,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 // committed to run this task.
                 if (runState == STOP) {
                     return;
-                }
-
-                if (monitorThreads) {
-                    lastStart = System.currentTimeMillis();
                 }
 
                 Thread.interrupted(); // clear interrupt status on entry
@@ -1248,39 +1228,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         delayedQueueConsumer = new DelayedQueueConsumer();
         consumerThread = new Thread(delayedQueueConsumer, "DelayedQueueConsumer");
         consumerThread.start();
-        /*
-         * Monitor threads
-         */
-        monitorThreads = false;
-    }
-
-    public void startMonitorThreads() {
-        if (monitorThreads) {
-            final Set<Worker> workerSet = this.workerSet;
-            final Runnable monitorThread = new Runnable() {
-                
-                @Override
-                public void run() {
-                    final long stamp = System.currentTimeMillis() - 300000L;
-                    for (final Worker worker : workerSet) {
-                        if (worker.isActive() && worker.lastStart < stamp) {
-                            // Elapsed worker detected
-                            worker.interruptNow();
-                            // worker calls itself workerDone(this); in its main run() loop to perform bookkeeping
-                        }
-                    }
-                }
-            };
-            monitorFuture = scheduleWithFixedDelay(monitorThread, 10000, 10000, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    public void stopChecker() {
-        final ScheduledFuture<?> monitorFuture = this.monitorFuture;
-        if (null != monitorFuture) {
-            monitorFuture.cancel(false);
-            this.monitorFuture = null;
-        }
     }
 
     @Override
@@ -1500,7 +1447,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 // might not be true even if passed above check, if
                 // the SecurityManager treats some threads specially.
                 if (null != security) {
-                    for (final Worker w : workerSet) {
+                    for (final Worker w : workers) {
                         security.checkAccess(w.thread);
                     }
                 }
@@ -1511,7 +1458,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
 
                 try {
-                    for (final Worker w : workerSet) {
+                    for (final Worker w : workers) {
                         w.interruptIfIdle();
                     }
                 } catch (final SecurityException se) {
@@ -1564,7 +1511,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             consumerThread.interrupt();
             if (workers.size() > 0) {
                 if (security != null) {
-                    for (final Worker w : workerSet) {
+                    for (final Worker w : workers) {
                         security.checkAccess(w.thread);
                     }
                 }
@@ -1574,7 +1521,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     runState = STOP;
                 }
                 try {
-                    for (final Worker w : workerSet) {
+                    for (final Worker w : workers) {
                         w.interruptNow();
                     }
                 } catch (final SecurityException se) {
@@ -1823,7 +1770,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             } else if (extra > 0 && poolSize > corePoolSize) {
-                final Iterator<Worker> it = workerSet.iterator();
+                final Iterator<Worker> it = workers.iterator();
                 while (it.hasNext() && extra-- > 0 && poolSize > corePoolSize && workQueue.remainingCapacity() == 0) {
                     it.next().interruptIfIdle();
                 }
@@ -1889,7 +1836,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             int extra = this.maximumPoolSize - maximumPoolSize;
             this.maximumPoolSize = maximumPoolSize;
             if (extra > 0 && poolSize > maximumPoolSize) {
-                final Iterator<Worker> it = workerSet.iterator();
+                final Iterator<Worker> it = workers.iterator();
                 while (it.hasNext() && extra > 0 && poolSize > maximumPoolSize) {
                     it.next().interruptIfIdle();
                     --extra;
@@ -2019,7 +1966,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         mainLock.lock();
         try {
             int n = 0;
-            for (final Worker w : workerSet) {
+            for (final Worker w : workers) {
                 if (w.isActive()) {
                     ++n;
                 }
@@ -2059,7 +2006,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         mainLock.lock();
         try {
             long n = completedTaskCount;
-            for (final Worker w : workerSet) {
+            for (final Worker w : workers) {
                 n += w.completedTasks;
                 if (w.isActive()) {
                     ++n;
@@ -2084,7 +2031,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         mainLock.lock();
         try {
             long n = completedTaskCount;
-            for (final Worker w : workerSet) {
+            for (final Worker w : workers) {
                 n += w.completedTasks;
             }
             return n;

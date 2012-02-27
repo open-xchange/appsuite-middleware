@@ -40,8 +40,6 @@ public class ResponsivenessChecker extends Thread {
         try {
             this.join(_config.sleepingDelay);
         } catch (final InterruptedException ex) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             Logger.debug(ex);
         }
         return getResponsive();

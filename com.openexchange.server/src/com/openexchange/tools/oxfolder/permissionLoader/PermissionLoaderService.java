@@ -376,8 +376,6 @@ public final class PermissionLoaderService implements Runnable {
                     try {
                         handlePairs(pairs, LOG.isDebugEnabled());
                     } catch (final InterruptedException e) {
-                        // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                        Thread.currentThread().interrupt();
                         LOG.error("Interrupted permission loader run.", e);
                     } catch (final Exception e) {
                         LOG.error("Failed permission loader run.", e);
@@ -429,8 +427,6 @@ public final class PermissionLoaderService implements Runnable {
                 }
             }
         } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             LOG.error("Interrupted permission loader run.", e);
         } catch (final Exception e) {
             LOG.error("Failed permission loader run.", e);

@@ -192,8 +192,6 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                 try {
                     tracker.waitForService(1000);
                 } catch (final InterruptedException e) {
-                    // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                    Thread.currentThread().interrupt();
                     return null;
                 }
                 if (tracker.size() == 0) {

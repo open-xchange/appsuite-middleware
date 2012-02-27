@@ -50,9 +50,6 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -63,13 +60,6 @@ import com.openexchange.file.storage.FileStorageFileAccess;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.PUT, name = "detach", description = "Delete versions of infostore documents", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the base Object."),
-    @Parameter(name = "folder", description = "The Folder of the Object."),
-    @Parameter(name = "timestamp", description = "Timestamp of the infostore object.")
-}, requestBody = "A List of arrays with the version numbers of the infoitems to detach.",
-responseDescription = "An array with version numbers that were not deleted.")
 public class DetachAction extends AbstractWriteAction {
 
     @Override

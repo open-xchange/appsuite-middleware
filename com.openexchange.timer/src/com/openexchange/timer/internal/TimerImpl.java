@@ -121,8 +121,6 @@ public final class TimerImpl implements TimerService {
             // TODO: Define a reasonable timeout
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             LOG.error(e.getMessage(), e);
         } finally {
             executorService = null;

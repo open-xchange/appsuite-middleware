@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -63,7 +62,6 @@ import com.openexchange.server.ServiceLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "quota", description = "The quota module allows accesssing information about the use and quota of the filestore/mailstorage.")
 public class QuotaActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;

@@ -76,7 +76,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
 
     private boolean finished = false;
 
-    public Pipe(final ThreadPoolService threadPool) {
+    public Pipe(ThreadPoolService threadPool) {
         super();
         this.threadPool = threadPool;
     }
@@ -87,27 +87,25 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
     }
 
     @Override
-    public int getData(final Collection<T> col) throws PipesAndFiltersException {
+    public int getData(Collection<T> col) throws PipesAndFiltersException {
         int retval = 0;
         if (queue.isEmpty()) {
             // Wait for at least 1 element.
             try {
                 pass(queue.take(), col);
-            } catch (final InterruptedException e) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
+            } catch (InterruptedException e) {
                 throw new PipesAndFiltersException(e);
             }
         }
-        final List<Object> tmps = new ArrayList<Object>(queue.size());
+        List<Object> tmps = new ArrayList<Object>(queue.size());
         retval += queue.drainTo(tmps);
-        for (final Object tmp : tmps) {
+        for (Object tmp : tmps) {
             retval += pass(tmp, col);
         }
         return retval;
     }
 
-    private int pass(final Object tmp, final Collection<T> col) throws PipesAndFiltersException {
+    private int pass(Object tmp, Collection<T> col) throws PipesAndFiltersException {
         int retval = 0;
         if (eof.equals(tmp)) {
             finished = true;
@@ -116,7 +114,6 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
             throw (PipesAndFiltersException) tmp;
         } else {
             @SuppressWarnings("unchecked")
-            final
             T obj = (T) tmp;
             col.add(obj);
             retval++;
@@ -125,23 +122,19 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
     }
 
     @Override
-    public void put(final T element) throws PipesAndFiltersException {
+    public void put(T element) throws PipesAndFiltersException {
         try {
             queue.put(element);
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
+        } catch (InterruptedException e) {
             throw new PipesAndFiltersException(e);
         }
     }
 
     @Override
-    public void exception(final PipesAndFiltersException e) {
+    public void exception(PipesAndFiltersException e) {
         try {
             queue.put(e);
-        } catch (final InterruptedException e1) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
+        } catch (InterruptedException e1) {
             LOG.error(e1.getMessage(), e1);
         }
     }
@@ -150,17 +143,15 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
     public void finished() throws PipesAndFiltersException {
         try {
             queue.put(eof);
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
+        } catch (InterruptedException e) {
             throw new PipesAndFiltersException(e);
         }
     }
 
     @Override
-    public <O> DataSource<O> addFilter(final Filter<T, O> filter) {
-        final Pipe<O> pipe = new Pipe<O>(threadPool);
-        final FilterTask<T, O> task = new FilterTask<T, O>(this, filter, pipe);
+    public <O> DataSource<O> addFilter(Filter<T, O> filter) {
+        Pipe<O> pipe = new Pipe<O>(threadPool);
+        FilterTask<T, O> task = new FilterTask<T, O>(this, filter, pipe);
         threadPool.submit(task);
         return pipe;
     }

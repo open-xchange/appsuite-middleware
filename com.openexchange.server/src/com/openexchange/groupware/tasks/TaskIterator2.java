@@ -170,8 +170,6 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         try {
             runner.join();
         } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
             throw TaskExceptionCode.THREAD_ISSUE.create(e);
         }
     }
@@ -225,8 +223,6 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 }
                 ready.addAll(tasks);
             } catch (final InterruptedException e) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
                 throw TaskExceptionCode.THREAD_ISSUE.create(e);
             }
         }

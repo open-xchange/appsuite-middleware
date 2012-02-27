@@ -82,7 +82,7 @@ public enum ReservedToken implements Token {
 
         @Override
         public String getFrom(final Session session) {
-            return TokenBasedSecretService.RANDOM.get();
+            return SessionSecretService.RANDOM.get();
         }
     }),
 

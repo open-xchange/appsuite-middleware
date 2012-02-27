@@ -135,8 +135,6 @@ public class PushMulticastSocket implements Runnable {
             try {
                 thread.join();
             } catch (final InterruptedException e) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
                 LOG.error(e.getMessage(), e);
             }
             thread = null;

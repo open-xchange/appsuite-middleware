@@ -3721,8 +3721,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                 exception = MimeMailException.handleMessagingException(e);
                 throw exception;
             } catch (final InterruptedException e) {
-                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                Thread.currentThread().interrupt();
                 exception = getWrappingOXException(e);
                 throw exception;
             } finally {

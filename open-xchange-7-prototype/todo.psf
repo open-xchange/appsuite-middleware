@@ -3,11 +3,6 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.authentication.ldap"/>
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/> core
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
-
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.group.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.resource.servlet"/>
 

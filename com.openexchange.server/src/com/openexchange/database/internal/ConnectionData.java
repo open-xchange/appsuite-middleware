@@ -57,34 +57,11 @@ import java.util.Properties;
  */
 public class ConnectionData {
 
-    /**
-     * The ASCII-only URL to database.
-     */
     String url;
-
-    /**
-     * The driver class name.
-     */
     String driverClass;
-
-    /**
-     * The properties.
-     */
     Properties props;
-
-    /**
-     * The block flag.
-     */
     boolean block;
-
-    /**
-     * The max. limit.
-     */
     int max;
-
-    /**
-     * The min. li9mit
-     */
     int min;
 
     public ConnectionData() {

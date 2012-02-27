@@ -301,6 +301,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
                 logger.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
             }
         }
     }

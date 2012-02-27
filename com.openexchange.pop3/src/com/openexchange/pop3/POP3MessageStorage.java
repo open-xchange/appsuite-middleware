@@ -154,7 +154,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
         if (null != sort) {
             mailFields.add(sort);
         }
-        if (mailFields.contains(MailField.ACCOUNT_NAME) || mailFields.contains(MailField.FULL)) {
+        if (mailFields.contains(MailField.ACCOUNT_NAME)) {
             setAccountInfo(mails);
         }
         return mails;
@@ -180,8 +180,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         final MailMessage[] mails = pop3MessageStorage.getMessages(folder, mailIds, fields);
-        final MailFields mailFields = new MailFields(fields);
-        if (mailFields.contains(MailField.ACCOUNT_NAME) || mailFields.contains(MailField.FULL)) {
+        if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
             setAccountInfo(mails);
         }
         return mails;
@@ -190,8 +189,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
     @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         final MailMessage[] mails = pop3MessageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
-        final MailFields mailFields = new MailFields(fields);
-        if (mailFields.contains(MailField.ACCOUNT_NAME) || mailFields.contains(MailField.FULL)) {
+        if (new MailFields(fields).contains(MailField.ACCOUNT_NAME)) {
             setAccountInfo(mails);
         }
         return mails;

@@ -129,7 +129,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
     @Override
     public String decrypt(final Session session, final String toDecrypt, final T customizationNote) throws OXException {
         /*
-         * Try with last list entry first
+         * Try with last list entry
          */
         try {
             return crypto.decrypt(toDecrypt, tokenList.peekLast().getSecret(session));

@@ -204,8 +204,6 @@ public class Executor extends Assert {
         try {
 			Thread.sleep(sleep);
 		} catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
 			System.out.println("InterruptedException while sleeping between test requests. Does that help?");
 			e.printStackTrace();
 		} //emulating HttpUnit to avoid the Apache bug that mixes package up

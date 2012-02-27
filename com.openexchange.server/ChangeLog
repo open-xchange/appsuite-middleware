@@ -1,14 +1,7 @@
-* 2012-02-24 - jan.bauerdick@open-xchange.com
-
- - Self documenting API in config, mail, groups, resource, infostore, attachments, reminder, quota, file upload, mail account,
-                           oauth, messaging
-
 * 2012-02-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 21643: Fixed possible NoSuchElementException in Unified Mail
  - Fix for bug 21630: Setting proper parent in requested Unified Mail folder
- - Fix for bug 21627: Introduced JSON field "account_id" (653)
- - Fix for bug 21622: Fixed MIME encoding/decoding of file names
 
 * 2012-02-23 - thorben.betten@open-xchange.com
 

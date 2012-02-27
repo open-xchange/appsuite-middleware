@@ -206,11 +206,7 @@ public enum MailJSONField {
     /**
      * Account name
      */
-    ACCOUNT_NAME("account_name"),
-    /**
-     * Account identifier
-     */
-    ACCOUNT_ID("account_id");
+    ACCOUNT_NAME("account_name");
 
     private final String key;
 

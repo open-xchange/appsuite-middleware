@@ -212,7 +212,6 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                     try {
                         Thread.sleep(2000);
                     } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
                         LOG.error(e.getMessage(), e);
                     }
                 }
