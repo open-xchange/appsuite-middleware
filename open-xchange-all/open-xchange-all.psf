@@ -2,8 +2,10 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-osgi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-log4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authorization-standard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-imap"/>
