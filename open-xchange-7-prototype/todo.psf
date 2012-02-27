@@ -17,8 +17,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.messaging"/>
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin.json"/> oauth
-
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pop3"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview.thirdwing"/>
