@@ -50,7 +50,7 @@
 package com.openexchange.server;
 
 /**
- * {@link ServiceLookup}
+ * {@link ServiceLookup} - A service look-up.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -65,5 +65,12 @@ public interface ServiceLookup {
      */
     public <S extends Object> S getService(final Class<? extends S> clazz);
     
+    /**
+     * Gets the optional service  of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz);
+
 }
