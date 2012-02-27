@@ -1275,7 +1275,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
-    public void stopChecker() {
+    public void stopMonitorThreads() {
         final ScheduledFuture<?> monitorFuture = this.monitorFuture;
         if (null != monitorFuture) {
             monitorFuture.cancel(false);
