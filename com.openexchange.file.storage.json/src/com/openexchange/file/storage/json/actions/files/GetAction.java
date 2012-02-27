@@ -66,7 +66,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 @Action(method = RequestMethod.GET, name = "get", description = "Get an infoitem", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the requested infoitem."),
-    @Parameter(name = "version", optional=true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned."),
+    @Parameter(name = "version", optional=true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned.")
 }, responseDescription = "Response with timestamp: An object containing all data of the requested infoitem. The fields of the object are listed in Common object data and Detailed infoitem data. The field id is not included.")
 public class GetAction extends AbstractFileAction {
 

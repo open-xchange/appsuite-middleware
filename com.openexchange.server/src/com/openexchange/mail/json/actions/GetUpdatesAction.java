@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.GET, name = "updates", description = "Get updated mails", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "Just an empty JSON array is going to be returned since this action cannot be applied to IMAP.")
 public final class GetUpdatesAction extends AbstractMailAction {
 

@@ -75,7 +75,7 @@ import com.openexchange.user.json.writer.UserWriter;
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a user.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "id", optional = true, description = "Object ID of the requested user. Since v6.18.1, this parameter is optional: the default is the currently logged in user."),
+		@Parameter(name = "id", optional = true, description = "Object ID of the requested user. Since v6.18.1, this parameter is optional: the default is the currently logged in user.")
 }, responseDescription = "Response with timestamp: An object containing all data of the requested user. The fields of the object are listed in Common object data, Detailed contact data and Detailed user data.")
 public final class GetAction extends AbstractUserAction {
 

@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "getUnread", description = "Get count of unread messages", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Id of the requested conversation."),
+    @Parameter(name = "id", description = "Id of the requested conversation.")
 }, responseDescription = "A JSON array containing the count of unread messages.")
 public class GetUnreadAction extends AbstractChatConversationAction {
 

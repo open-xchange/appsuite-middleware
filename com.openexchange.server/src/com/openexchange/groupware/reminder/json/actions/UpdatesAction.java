@@ -76,7 +76,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.GET, name = "updates", description = "Get updated reminders", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "")
 public final class UpdatesAction extends AbstractReminderAction {
 
