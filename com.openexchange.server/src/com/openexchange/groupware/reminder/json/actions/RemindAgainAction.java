@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "remindAgain", description = "Remind again (since v6.18.1).", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "The ID of the reminder whose date shall be changed.")
-}, requestBody = "The JSON representation of the reminder; mainly containing the field “alarm” which provides the new reminder date. E.g. { \"alarm\": 1283418027381 }",
+}, requestBody = "The JSON representation of the reminder; mainly containing the field \u201calarm\u201d which provides the new reminder date. E.g. { \"alarm\": 1283418027381 }",
 responseDescription = "The JSON representation of the updated reminder.")
 public final class RemindAgainAction extends AbstractReminderAction {
 

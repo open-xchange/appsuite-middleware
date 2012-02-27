@@ -66,7 +66,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
  */
 @Action(method = RequestMethod.GET, name = "lock", description = "Unlock an infoitem", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the infoitem that should be unlocked."),
+    @Parameter(name = "id", description = "Object ID of the infoitem that should be unlocked.")
 }, responseDescription = "Can only include errors.")
 public class UnlockAction extends AbstractWriteAction {
 

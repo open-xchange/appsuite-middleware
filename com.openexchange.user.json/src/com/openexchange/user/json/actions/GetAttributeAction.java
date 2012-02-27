@@ -72,7 +72,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
 @Action(method = RequestMethod.GET, name = "getAttribute", description = "Get user attribute (available with v6.20).", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "id", description = "ID of the user."),
-		@Parameter(name = "name", description = "The attribute name."),
+		@Parameter(name = "name", description = "The attribute name.")
 }, responseDescription = "Response without timestamp: A JSON object providing name and value of the requested attribute.")
 public final class GetAttributeAction extends AbstractUserAction {
 

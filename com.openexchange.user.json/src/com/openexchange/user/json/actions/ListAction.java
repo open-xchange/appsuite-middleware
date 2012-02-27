@@ -88,7 +88,7 @@ import com.openexchange.user.json.writer.UserWriter;
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of users.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for users are defined in Common object data, Detailed contact data and Detailed user data."),
+		@Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for users are defined in Common object data, Detailed contact data and Detailed user data.")
 }, requestBody = "An array of numbers. Each number is the ID of requested user. Since v6.18.1, a null value in the array is interpreted as the currently logged in user.",
 responseDescription = "Response with timestamp: An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class ListAction extends AbstractUserAction {
