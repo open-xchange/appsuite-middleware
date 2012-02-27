@@ -153,3 +153,4 @@ com.openexchange.preview.thirdwing/jars
 oxscripts/tmp
 com.openexchange.index/build
 /com.openexchange.admin.reseller/build
+openexchange-test/conf/test.properties
