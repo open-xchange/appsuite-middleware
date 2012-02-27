@@ -54,134 +54,123 @@ import java.util.List;
 
 public class ContextDetail {
 
-	private String id;
-	
-	private String users;
+    private String id;
 
-	private String age;
+    private String users;
 
-	private String created;
+    private String age;
 
-	private String mappings;
-	
-	private String adminmac;
+    private String created;
 
-	private List<ContextModuleAccessCombination> moduleAccessCombinations;
+    private String mappings;
 
-	public ContextDetail() {
-		this.moduleAccessCombinations =  new ArrayList<ContextModuleAccessCombination>();
-	}
+    private String adminmac;
 
-	public ContextDetail(String id, String users, String age,
-			String created, String mappings, String adminmac) {
-		this.id = id;
-		this.users = users;
-		this.age = age;
-		this.created = created;
-		this.mappings = mappings;
-		this.adminmac = adminmac;
-		this.moduleAccessCombinations =  new ArrayList<ContextModuleAccessCombination>();
-	}	
-	
-	public ContextDetail(String id, String users, String age,
-			String created, String mappings, String adminmac, 
-			List<ContextModuleAccessCombination> moduleAccessCombinations) {
-		this.id = id;
-		this.users = users;
-		this.age = age;
-		this.created = created;
-		this.mappings = mappings;
-		this.adminmac = adminmac;
-		this.moduleAccessCombinations = moduleAccessCombinations;
-	}
+    private List<ContextModuleAccessCombination> moduleAccessCombinations;
 
-	public String getId() {
-		return id;
-	}
+    public ContextDetail() {
+        this.moduleAccessCombinations = new ArrayList<ContextModuleAccessCombination>();
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public ContextDetail(final String id, final String users, final String age, final String created, final String mappings, final String adminmac) {
+        this.id = id;
+        this.users = users;
+        this.age = age;
+        this.created = created;
+        this.mappings = mappings;
+        this.adminmac = adminmac;
+        this.moduleAccessCombinations = new ArrayList<ContextModuleAccessCombination>();
+    }
 
-	public String getUsers() {
-		return users;
-	}
+    public ContextDetail(final String id, final String users, final String age, final String created, final String mappings, final String adminmac, final List<ContextModuleAccessCombination> moduleAccessCombinations) {
+        this.id = id;
+        this.users = users;
+        this.age = age;
+        this.created = created;
+        this.mappings = mappings;
+        this.adminmac = adminmac;
+        this.moduleAccessCombinations = moduleAccessCombinations;
+    }
 
-	public void setUsers(String users) {
-		this.users = users;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getAge() {
-		return age;
-	}
+    public void setId(final String id) {
+        this.id = id;
+    }
 
-	public void setAge(String age) {
-		this.age = age;
-	}
+    public String getUsers() {
+        return users;
+    }
 
-	public String getCreated() {
-		return created;
-	}
+    public void setUsers(final String users) {
+        this.users = users;
+    }
 
-	public void setCreated(String created) {
-		this.created = created;
-	}
+    public String getAge() {
+        return age;
+    }
 
-	public String getMappings() {
-		return mappings;
-	}
+    public void setAge(final String age) {
+        this.age = age;
+    }
 
-	public void setMappings(String mappings) {
-		this.mappings = mappings;
-	}
+    public String getCreated() {
+        return created;
+    }
 
-	public String getAdminmac() {
-		return adminmac;
-	}
+    public void setCreated(final String created) {
+        this.created = created;
+    }
 
-	public void setAdminmac(String adminmac) {
-		this.adminmac = adminmac;
-	}
+    public String getMappings() {
+        return mappings;
+    }
 
-	public List<ContextModuleAccessCombination> getModuleAccessCombinations() {
-		return moduleAccessCombinations;
-	}
+    public void setMappings(final String mappings) {
+        this.mappings = mappings;
+    }
 
-	public void setModuleAccessCombinations(
-			List<ContextModuleAccessCombination> moduleAccessCombinations) {
-		this.moduleAccessCombinations = moduleAccessCombinations;
-	}
+    public String getAdminmac() {
+        return adminmac;
+    }
 
-	public void clearModuleAccessCombinations() {
-		this.moduleAccessCombinations =  new ArrayList<ContextModuleAccessCombination>();
-	}
-	
-	public void addModuleAccessCombination(
-			ContextModuleAccessCombination moduleAccessCombination) {
-		moduleAccessCombinations.add(moduleAccessCombination);
-	}
-	
-	public ContextModuleAccessCombination getModuleAccessCombination(
-			int position) {
-		return moduleAccessCombinations.get(position);
-	}
-	
-	public void setModuleAccessCombination(
-			ContextModuleAccessCombination moduleAccessCombination,
-			int position) {
-		moduleAccessCombinations.set(position, moduleAccessCombination);
-	}
-	
-	public void removeModuleAccessCombination(int position) {
-		moduleAccessCombinations.remove(position);
-	}	
+    public void setAdminmac(final String adminmac) {
+        this.adminmac = adminmac;
+    }
 
-	@Override
-	public String toString() {
-		return "ContextDetailObject [age=" + age + ", created=" + created
-				+ ", id=" + id + ", mappings=" + mappings
-				+ ", moduleAccessCombinations=" + moduleAccessCombinations
-				+ ", users=" + users + "]";
-	}
+    public List<ContextModuleAccessCombination> getModuleAccessCombinations() {
+        return moduleAccessCombinations;
+    }
+
+    public void setModuleAccessCombinations(final List<ContextModuleAccessCombination> moduleAccessCombinations) {
+        this.moduleAccessCombinations = moduleAccessCombinations;
+    }
+
+    public void clearModuleAccessCombinations() {
+        this.moduleAccessCombinations = new ArrayList<ContextModuleAccessCombination>();
+    }
+
+    public void addModuleAccessCombination(final ContextModuleAccessCombination moduleAccessCombination) {
+        moduleAccessCombinations.add(moduleAccessCombination);
+    }
+
+    public ContextModuleAccessCombination getModuleAccessCombination(final int position) {
+        return moduleAccessCombinations.get(position);
+    }
+
+    public void setModuleAccessCombination(final ContextModuleAccessCombination moduleAccessCombination, final int position) {
+        moduleAccessCombinations.set(position, moduleAccessCombination);
+    }
+
+    public void removeModuleAccessCombination(final int position) {
+        moduleAccessCombinations.remove(position);
+    }
+
+    @Override
+    public String toString() {
+        return "ContextDetailObject [age=" + age + ", created=" + created + ", id=" + id + ", mappings=" + mappings + ", moduleAccessCombinations=" + moduleAccessCombinations + ", users=" + users + "]";
+    }
 
 }

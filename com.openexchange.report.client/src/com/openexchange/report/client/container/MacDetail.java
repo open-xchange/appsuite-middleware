@@ -49,89 +49,70 @@
 
 package com.openexchange.report.client.container;
 
-public class ClientLoginCount {
 
-    private String usmeas;
+public class MacDetail {
 
-    private String olox2;
-    
-    private String mobileapp;
-    
-    private String caldav;
-    
-    private String carddav;
+    private String id;
 
+    private String count;
+
+    private String nrAdm;
+    
+    private String nrDisabled;
+    
     
     /**
-     * @return the mobileapp
+     * @return the nrAdm
      */
-    public final String getMobileapp() {
-        return mobileapp;
-    }
-
-    
-    /**
-     * @param mobileapp the mobileapp to set
-     */
-    public final void setMobileapp(String mobileapp) {
-        this.mobileapp = mobileapp;
+    public final String getNrAdm() {
+        return nrAdm;
     }
 
     
     /**
-     * @return the caldav
+     * @param nrAdm the nrAdm to set
      */
-    public final String getCaldav() {
-        return caldav;
+    public final void setNrAdm(String nradm) {
+        this.nrAdm = nradm;
     }
 
     
     /**
-     * @param caldav the caldav to set
+     * @return the nrDisabled
      */
-    public final void setCaldav(String caldav) {
-        this.caldav = caldav;
+    public final String getNrDisabled() {
+        return nrDisabled;
     }
 
     
     /**
-     * @return the carddav
+     * @param nrDisabled the nrDisabled to set
      */
-    public final String getCarddav() {
-        return carddav;
+    public final void setNrDisabled(String nrdisabled) {
+        this.nrDisabled = nrdisabled;
     }
 
-    
-    /**
-     * @param carddav the carddav to set
-     */
-    public final void setCarddav(String carddav) {
-        this.carddav = carddav;
+    public MacDetail() {
     }
 
-    public String getUsmeas() {
-        return usmeas;
+    public MacDetail(final String id, final String count) {
+        this.id = id;
+        this.count = count;
     }
 
-    public void setUsmeas(final String usmeas) {
-        this.usmeas = usmeas;
+    public String getId() {
+        return id;
     }
 
-    public String getOlox2() {
-        return olox2;
+    public void setId(final String id) {
+        this.id = id;
     }
 
-    public void setOlox2(final String usmjson) {
-        this.olox2 = usmjson;
+    public String getCount() {
+        return count;
     }
 
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "ClientLoginCount [usmeas=" + usmeas + ", olox2=" + olox2 + ", mobileapp=" + mobileapp + ", caldav=" + caldav + ", carddav=" + carddav + "]";
+    public void setCount(final String count) {
+        this.count = count;
     }
-
 }
