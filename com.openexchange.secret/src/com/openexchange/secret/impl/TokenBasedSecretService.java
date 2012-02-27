@@ -57,12 +57,12 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionSecretService}
+ * {@link TokenBasedSecretService}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionSecretService implements SecretService {
+public class TokenBasedSecretService implements SecretService {
 
     /**
      * The random.
@@ -77,9 +77,9 @@ public class SessionSecretService implements SecretService {
     private volatile SecretService impl;
 
     /**
-     * Initializes a new {@link SessionSecretService}.
+     * Initializes a new {@link TokenBasedSecretService}.
      */
-    public SessionSecretService() {
+    public TokenBasedSecretService() {
         super();
         final List<Token> tl = DEFAULT_TOKEN_LIST;
         impl = new SecretService() {
@@ -96,19 +96,19 @@ public class SessionSecretService implements SecretService {
     }
 
     /**
-     * Initializes a new {@link SessionSecretService}.
+     * Initializes a new {@link TokenBasedSecretService}.
      */
-    public SessionSecretService(final List<Token> tokenList) {
+    public TokenBasedSecretService(final List<Token> tokenList) {
         super();
         applyTokenList(tokenList);
     }
 
     /**
-     * Initializes a new {@link SessionSecretService}.
+     * Initializes a new {@link TokenBasedSecretService}.
      */
-    public SessionSecretService(final SecretService impl) {
+    public TokenBasedSecretService(final TokenList tokenList) {
         super();
-        this.impl = impl;
+        this.impl = tokenList.peekLast();
     }
 
     /**

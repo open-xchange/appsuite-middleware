@@ -52,6 +52,7 @@ package com.openexchange.management.internal;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
@@ -203,6 +204,8 @@ public abstract class AbstractAgent {
 
     private final Map<JMXServiceURL, JMXConnectorServer> connectors;
 
+    protected final ThreadMXBean threadMXBean;
+
     protected final AtomicReference<GaugeMonitor> gaugeMonitorRef;
 
     protected RMISocketFactory rmiSocketFactory;
@@ -218,7 +221,18 @@ public abstract class AbstractAgent {
         initialized = new AtomicBoolean();
         registries = new HashMap<Integer, Registry>();
         connectors = new HashMap<JMXServiceURL, JMXConnectorServer>();
+        threadMXBean = ManagementFactory.getThreadMXBean();
         mbs = ManagementFactory.getPlatformMBeanServer();
+    }
+
+    
+    /**
+     * Gets the {@link ThreadMXBean} instance.
+     *
+     * @return The {@link ThreadMXBean} instance
+     */
+    public ThreadMXBean getThreadMXBean() {
+        return threadMXBean;
     }
 
     /**

@@ -50,6 +50,7 @@
 package com.openexchange.management.osgi;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
+import java.lang.management.ThreadMXBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -145,6 +146,7 @@ public final class ManagementActivator extends HousekeepingActivator {
          * Register management service
          */
         registerService(ManagementService.class, ManagementAgentImpl.getInstance(), null);
+        registerService(ThreadMXBean.class, ManagementAgentImpl.getInstance().getThreadMXBean(), null);
     }
 
     private void stopInternal() throws OXException {

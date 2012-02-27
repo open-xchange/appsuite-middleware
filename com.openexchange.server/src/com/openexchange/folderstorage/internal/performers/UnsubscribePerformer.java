@@ -64,14 +64,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UnsubscribePerformer} - Serves the <code>UNSUBSCRIBE</code> action.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     *
+     * 
      * @param session
      */
     public UnsubscribePerformer(final ServerSession session) {
@@ -80,7 +80,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     *
+     * 
      * @param user
      * @param context
      */
@@ -90,7 +90,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     *
+     * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -100,7 +100,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     *
+     * 
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -111,7 +111,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>UNSUBSCRIBE</code> action.
-     *
+     * 
      * @param treeId The virtual tree identifier
      * @param folderId The folder identifier
      * @throws OXException If a folder error occurs
@@ -129,42 +129,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             openedStorages.add(virtualStorage);
         }
         try {
-            if (!virtualStorage.containsFolder(treeId, folderId, storageParameters)) {
-                return;
-            }
-            /*
-             * Unsubscribe contained folder
-             */
-            final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
-            /*
-             * Check folder permission
-             */
-            final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
-            if (!permission.isVisible()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    getFolderInfo4Error(folder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
-            }
-            {
-                /*
-                 * No unsubscribe on a folder which has subfolders
-                 */
-                final String[] ids = folder.getSubfolderIDs();
-                if (null == ids) {
-                    final SortableId[] tmp = virtualStorage.getSubfolders(treeId, folderId, storageParameters);
-                    if (tmp.length > 0) {
-                        throw FolderExceptionErrorMessage.NO_UNSUBSCRIBE.create(folderId, treeId);
-                    }
-                } else {
-                    if (ids.length > 0) {
-                        throw FolderExceptionErrorMessage.NO_UNSUBSCRIBE.create(folderId, treeId);
-                    }
-                }
-            }
-
-            virtualStorage.deleteFolder(treeId, folderId, storageParameters);
-
+            unsubscribeFolder(treeId, folderId, virtualStorage, true);
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
@@ -180,6 +145,56 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
+    }
+
+    private void unsubscribeFolder(final String treeId, final String folderId, final FolderStorage virtualStorage, final boolean allowSubfolderUnsubscribe) throws OXException {
+        if (!virtualStorage.containsFolder(treeId, folderId, storageParameters)) {
+            return;
+        }
+        /*
+         * Unsubscribe contained folder
+         */
+        final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
+        /*
+         * Check folder permission
+         */
+        final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+        if (!permission.isVisible()) {
+            throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                getFolderInfo4Error(folder),
+                getUserInfo4Error(),
+                getContextInfo4Error());
+        }
+        /*
+         * Check subfolders
+         */
+        {
+            /*
+             * No unsubscribe on a folder which has subfolders
+             */
+            final String[] ids = folder.getSubfolderIDs();
+            if (null == ids) {
+                final SortableId[] sortableIds = virtualStorage.getSubfolders(treeId, folderId, storageParameters);
+                if (sortableIds.length > 0) {
+                    if (!allowSubfolderUnsubscribe) {
+                        throw FolderExceptionErrorMessage.NO_UNSUBSCRIBE.create(folderId, treeId);
+                    }
+                    for (final SortableId sortableId : sortableIds) {
+                        unsubscribeFolder(treeId, sortableId.getId(), virtualStorage, allowSubfolderUnsubscribe);
+                    }
+                }
+            } else {
+                if (ids.length > 0) {
+                    if (!allowSubfolderUnsubscribe) {
+                        throw FolderExceptionErrorMessage.NO_UNSUBSCRIBE.create(folderId, treeId);
+                    }
+                    for (final String id : ids) {
+                        unsubscribeFolder(treeId, id, virtualStorage, allowSubfolderUnsubscribe);
+                    }
+                }
+            }
+        }
+        virtualStorage.deleteFolder(treeId, folderId, storageParameters);
     }
 
 }

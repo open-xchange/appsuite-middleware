@@ -117,6 +117,8 @@ public final class CallerRunsCompletionService<V> implements CompletionService<V
             task.afterExecute(null);
         } catch (final InterruptedException e) {
             // Cannot occur
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
             task.afterExecute(e.getCause());
         }

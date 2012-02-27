@@ -588,6 +588,7 @@ public final class ListLsubCache {
             return future.get();
         } catch (final InterruptedException e) {
             // Cannot occur
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable t = e.getCause();

@@ -166,16 +166,17 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
                 mailAccess.connect();
                 final String nestedFullname = fa.getFullname();
                 final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(nestedFullname);
+                final String startingKnownFullname = getStartingKnownFullname(fullname);
                 mailFolder.setFullname(UnifiedInboxUtility.generateNestedFullname(
                     unifiedInboxId,
-                    getStartingKnownFullname(fullname),
+                    startingKnownFullname,
                     nestedAccountId,
                     nestedFullname));
                 mailFolder.setParentFullname(UnifiedInboxUtility.generateNestedFullname(
                     unifiedInboxId,
-                    getStartingKnownFullname(fullname),
+                    startingKnownFullname,
                     nestedAccountId,
-                    mailFolder.getParentFullname()));
+                    null));
                 mailFolder.setName(getMailAccountName(nestedAccountId));
                 mailFolder.setSubfolders(false);
                 mailFolder.setSubscribedSubfolders(false);
@@ -380,7 +381,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
                             unifiedInboxAccountId,
                             parentFullname,
                             mailAccount.getId(),
-                            mailFolder.getParentFullname()));
+                            null));
                         UnifiedInboxFolderConverter.setPermissions(mailFolder);
                         UnifiedInboxFolderConverter.setOwnPermission(mailFolder, s.getUserId());
                         mailFolder.setSubfolders(false);

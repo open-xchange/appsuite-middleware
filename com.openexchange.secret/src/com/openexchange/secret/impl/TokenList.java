@@ -147,7 +147,7 @@ public final class TokenList {
         List<Token> last = null;
         for (final List<Token> list : collection) {
             last = list;
-            queue.add(new SessionSecretService(list));
+            queue.add(new TokenBasedSecretService(list));
         }
         usesPassword = null == last ? false : last.contains(ReservedToken.PASSWORD);
     }
