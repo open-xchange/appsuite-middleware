@@ -73,6 +73,9 @@ import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -85,6 +88,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Create a new conversation", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "serviceId", optional=true, description = "Set the service Id."),
+    @Parameter(name = "accountId", optional=true, description = "Set the account Id.")
+}, requestBody = "JSON array describing the conversation.",
+responseDescription = "A JSON array containing the created conversation.")
 public final class NewAction extends AbstractChatConversationAction {
 
     /**
