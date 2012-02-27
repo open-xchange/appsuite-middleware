@@ -13,4 +13,4 @@ Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OX
 Conflicts: open-xchange-authentication-ldap
 Provides: open-xchange-authentication
 Description: The Open-Xchange database authentication
- This package implements an authentication mechnism using the Open-Xchange database.
+ This package implements an authentication mechanism using the Open-Xchange database.

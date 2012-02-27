@@ -87,7 +87,7 @@ public class TaskManager {
 
     // TODO: Find out how to invoke super with generic types
     private class Extended<V> extends ExtendedFutureTask<V> {
-        public Extended(final Callable callable, final String typeofjob, final String furtherinformation, final int id) { super(callable, typeofjob, furtherinformation, id); }
+        public Extended(final Callable callable, final String typeofjob, final String furtherinformation, final int id, final int cid) { super(callable, typeofjob, furtherinformation, id, cid); }
         @Override
         protected void done() {
             TaskManager.this.runningjobs--;
@@ -113,8 +113,8 @@ public class TaskManager {
         return JobManagerSingletonHolder.instance;
     }
 
-    public int addJob(final Callable<?> jobcall, final String typeofjob, final String furtherinformation) {
-        final Extended<?> job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID);
+    public int addJob(final Callable<?> jobcall, final String typeofjob, final String furtherinformation, final int cid) {
+        final Extended<?> job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID, cid);
         this.jobs.put(this.lastID, job);
         if (log.isDebugEnabled()) {
         log.debug("Adding job number " + this.lastID);
@@ -132,13 +132,25 @@ public class TaskManager {
         this.executor.shutdown();
     }
 
-    public ExtendedFutureTask<?> getTask(final int jid) {
+    public ExtendedFutureTask<?> getTask(final int jid) throws TaskManagerException {
+        return getTask(jid, null);
+    }
+    
+    public ExtendedFutureTask<?> getTask(final int jid, final Integer cid) throws TaskManagerException {
         synchronized (this.jobs) {
-            return this.jobs.get(jid);
+            final ExtendedFutureTask<?> job = this.jobs.get(jid); 
+            if( null != cid && job.cid != cid ) {
+                throw new TaskManagerException("The job with the id " + jid + " does not belong to context id " + cid);
+            }
+            return job;
         }
     }
 
     public String getJobList() {
+        return getJobList(null);
+    }
+
+    public String getJobList(final Integer cid) {
         final StringBuffer buf = new StringBuffer();
         final Enumeration<Integer> jids = this.jobs.keys();
     
@@ -152,13 +164,23 @@ public class TaskManager {
         while (jids.hasMoreElements()) {
             final Integer id = jids.nextElement();
             final ExtendedFutureTask<?> job = this.jobs.get(id);
+            if( null != cid && job.cid != cid ) {
+                continue;
+            }
             buf.append(String.format(VFORMAT, id, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
         }
         return buf.toString();
     }
     
     public void deleteJob(int id) throws TaskManagerException {
+        deleteJob(id, null);
+    }
+    
+    public void deleteJob(int id, final Integer cid) throws TaskManagerException {
         final ExtendedFutureTask<?> job = this.jobs.get(id);
+        if( null != cid && job.cid != cid ) {
+            throw new TaskManagerException("The job with the id " + id + " does not belong to context id " + cid);
+        }
         if (!job.isRunning()) {
             this.jobs.remove(id);
         } else {
@@ -167,9 +189,13 @@ public class TaskManager {
     }
     
     public void flush() throws TaskManagerException {
+        flush(null);
+    }
+    
+    public void flush(final Integer cid) throws TaskManagerException {
         while(!finishedJobs.isEmpty()) {
             final Integer jobid = finishedJobs.get(0);
-            deleteJob(jobid);
+            deleteJob(jobid, cid);
             finishedJobs.remove(0);
         }
     }
