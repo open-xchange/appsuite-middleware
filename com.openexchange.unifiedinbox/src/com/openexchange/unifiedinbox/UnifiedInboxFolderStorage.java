@@ -96,7 +96,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
 
     private final int unifiedInboxId;
 
-    private final Session session;
+    final Session session;
 
     private final Context ctx;
 
@@ -217,7 +217,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
         throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(parentFullname);
     }
 
-    private static final String[] FULLNAMES = {
+    static final String[] FULLNAMES = {
         UnifiedInboxAccess.INBOX, UnifiedInboxAccess.DRAFTS, UnifiedInboxAccess.SENT, UnifiedInboxAccess.SPAM, UnifiedInboxAccess.TRASH };
 
     private MailFolder[] getRootSubfolders(final boolean byAccount) throws OXException {
