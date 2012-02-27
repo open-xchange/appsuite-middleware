@@ -59,6 +59,9 @@ import com.openexchange.chat.Presence;
 import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
 import com.openexchange.chat.json.roster.JSONRosterParser;
 import com.openexchange.chat.json.roster.RosterID;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -68,6 +71,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Update presence in a chat roster", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Id of the requested roster.")
+}, requestBody = "New \"mode\" and \"presence\" as JSON object.",
+responseDescription = "Standardresponse.")
 public final class UpdateAction extends AbstractChatRosterAction {
 
     /**

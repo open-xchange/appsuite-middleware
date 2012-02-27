@@ -107,7 +107,18 @@ public class LoginCounter implements LoginCounterMBean {
          */
         int counter = 0;
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Map<String, Integer> schemaMap = Tools.getAllSchemata(logger);
+        Map<String, Integer> schemaMap = null;
+        try {
+            schemaMap = Tools.getAllSchemata(logger);
+        } catch (OXException e) {
+            logger.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        } catch (SQLException e) {
+            logger.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        }
 
         /*
          * Get all logins in every schema

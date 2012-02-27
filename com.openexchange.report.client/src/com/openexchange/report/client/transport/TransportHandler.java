@@ -51,6 +51,8 @@ package com.openexchange.report.client.transport;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Authenticator;
@@ -65,31 +67,32 @@ import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
+import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
 import com.openexchange.tools.encoding.Base64;
 
 public class TransportHandler {
-	
-	private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
-	
-	private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
-	
-	private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";
-	
-	private static final String POST_LICENSE_KEYS_KEY = "license_keys";
 
-	private static final String POST_METADATA_KEY = "client_information";
-	
-	private static final String URL_ENCODING = "UTF-8";
-	
-	public TransportHandler() {	}
-	
-    public void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, ClientLoginCount clc) throws IOException, JSONException {
-    	JSONObject metadata = buildJSONObject(totals, contextDetails, versions, clc);
-    	
-    	ReportConfiguration reportConfiguration = new ReportConfiguration();
-    	
-        StringBuffer report = new StringBuffer();
+    private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
+
+    private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
+
+    private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";
+
+    private static final String POST_LICENSE_KEYS_KEY = "license_keys";
+
+    private static final String POST_METADATA_KEY = "client_information";
+
+    private static final String URL_ENCODING = "UTF-8";
+
+    public TransportHandler() {	}
+
+    public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final boolean savereport) throws IOException, JSONException {
+        final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, versions, clc);
+
+        final ReportConfiguration reportConfiguration = new ReportConfiguration();
+
+        final StringBuffer report = new StringBuffer();
         report.append(POST_CLIENT_AUTHENTICATION_STRING_KEY);
         report.append("=");
         report.append(URLEncoder.encode(REPORT_SERVER_CLIENT_AUTHENTICATION_STRING, URL_ENCODING));
@@ -103,95 +106,129 @@ public class TransportHandler {
         report.append(URLEncoder.encode(metadata.toString(), URL_ENCODING));
 
         if ("true".equals(reportConfiguration.getUseProxy().trim())) {
-        	System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
-        	System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
+            System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
+            System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
         }
-        
-        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://"+REPORT_SERVER_URL+"/").openConnection();
-        httpsURLConnection.setUseCaches(false);
-        httpsURLConnection.setDoOutput(true);
-        httpsURLConnection.setDoInput(true);
-        httpsURLConnection.setRequestMethod("POST");
-        httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-        if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
-			String proxyAutorizationProperty = "Basic "
-					+ Base64.encode((reportConfiguration.getProxyUsername()
-							.trim()
-							+ ":" + reportConfiguration.getProxyPassword()
-							.trim()).getBytes());
-			
-            Authenticator.setDefault(new ProxyAuthenticator(
-            		reportConfiguration.getProxyUsername().trim(),
-            		reportConfiguration.getProxyPassword().trim()
-            		));
-            
-            httpsURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
-        }
-        
-        DataOutputStream stream = new DataOutputStream(httpsURLConnection.getOutputStream());
-        stream.writeBytes(report.toString());
-        stream.flush();
-        stream.close();
+        if( savereport ) {
+            File tmpfile = File.createTempFile("oxreport", ".json", new File("/tmp"));
+            System.out.println("Saving report to " + tmpfile.getAbsolutePath());
+            DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
+            tfo.writeBytes(report.toString());
+            tfo.close();
+        } else {
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://"+REPORT_SERVER_URL+"/").openConnection();
+            httpsURLConnection.setUseCaches(false);
+            httpsURLConnection.setDoOutput(true);
+            httpsURLConnection.setDoInput(true);
+            httpsURLConnection.setRequestMethod("POST");
+            httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-        if (httpsURLConnection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
-            throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
+            if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
+                final String proxyAutorizationProperty = "Basic "
+                    + Base64.encode((reportConfiguration.getProxyUsername()
+                        .trim()
+                        + ":" + reportConfiguration.getProxyPassword()
+                        .trim()).getBytes());
+
+                Authenticator.setDefault(new ProxyAuthenticator(
+                    reportConfiguration.getProxyUsername().trim(),
+                    reportConfiguration.getProxyPassword().trim()
+                    ));
+
+                httpsURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
+            }
+
+            final DataOutputStream stream = new DataOutputStream(httpsURLConnection.getOutputStream());
+            stream.writeBytes(report.toString());
+            stream.flush();
+            stream.close();
+
+            if (httpsURLConnection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+                throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
+            }
+            final BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
+            String buffer = "";
+            while ((buffer = in.readLine()) != null) {
+                System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
+            }
+            in.close();
         }
-        BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-        String buffer = "";
-        while ((buffer = in.readLine()) != null) {
-            System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
-        }
-        in.close();
     }
 
-    
-    private JSONObject buildJSONObject(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, ClientLoginCount clc) throws JSONException {
-    	JSONObject retval = new JSONObject();
 
-    	JSONObject total = new JSONObject();
-    	JSONObject detail = new JSONObject();
-    	JSONObject version = new JSONObject();
-    	JSONObject clientlogincount = new JSONObject();
+    private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc) throws JSONException {
+        final JSONObject retval = new JSONObject();
 
-    	for (Total tmp : totals) {
-    		total.put("contexts", tmp.getContexts());
-    		total.put("users", tmp.getUsers());
-    	}
-    	
-    	for (ContextDetail tmp : contextDetails) {
-    		JSONObject contextDetailObjectJSON = new JSONObject();
-    		contextDetailObjectJSON.put("id", tmp.getId());
-    		contextDetailObjectJSON.put("age", tmp.getAge());
-    		contextDetailObjectJSON.put("created", tmp.getCreated());
-    		contextDetailObjectJSON.put("adminmac", tmp.getAdminmac());
-    		
-    		JSONObject moduleAccessCombinations = new JSONObject();
-    		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
-    			JSONObject moduleAccessCombinationJSON = new JSONObject();
-    			moduleAccessCombinationJSON.put("mac", moduleAccessCombination.getUserAccessCombination());
-    			moduleAccessCombinationJSON.put("users", moduleAccessCombination.getUserCount());
-    			moduleAccessCombinationJSON.put("inactive", moduleAccessCombination.getInactiveCount());
-    			moduleAccessCombinations.put(moduleAccessCombination.getUserAccessCombination(), moduleAccessCombinationJSON);
-    		}
-    		contextDetailObjectJSON.put("macs", moduleAccessCombinations);
-    		detail.put(tmp.getId(), contextDetailObjectJSON);
-    	}
-    	
-    	version.put("admin", versions[0]);
-    	version.put("groupware", versions[1]);
-    	
-    	clientlogincount.put("usm-eas", clc.getUsmeas());
-    	clientlogincount.put("olox2", clc.getOlox2());
-    	    	
-    	retval.put("total", total);
-    	retval.put("detail", detail);
-    	retval.put("version", version);
-    	retval.put("clientlogincount", clientlogincount);
-    	
-    	
+        final JSONObject total = new JSONObject();
+        final JSONObject macdetail = new JSONObject();
+        final JSONObject detail = new JSONObject();
+        final JSONObject version = new JSONObject();
+        final JSONObject clientlogincount = new JSONObject();
 
-    	return retval;
+        final boolean wantsdetails = ( null != contextDetails );
+        
+        if( wantsdetails ) {
+            total.put("report-format", "long");
+        } else {
+            total.put("report-format", "short");
+        }
+        
+        for (final Total tmp : totals) {
+            total.put("contexts", tmp.getContexts());
+            total.put("users", tmp.getUsers());
+        }
+
+        for(final MacDetail tmp : macDetails) {
+            final JSONObject macDetailObjectJSON = new JSONObject();
+            macDetailObjectJSON.put("id", tmp.getId());
+            macDetailObjectJSON.put("count", tmp.getCount());
+            macDetailObjectJSON.put("adm", tmp.getNrAdm());
+            macDetailObjectJSON.put("disabled", tmp.getNrDisabled());
+            macdetail.put(tmp.getId(), macDetailObjectJSON);
+        }
+        
+        if( wantsdetails ) {
+            for (final ContextDetail tmp : contextDetails) {
+                final JSONObject contextDetailObjectJSON = new JSONObject();
+                contextDetailObjectJSON.put("id", tmp.getId());
+                contextDetailObjectJSON.put("age", tmp.getAge());
+                contextDetailObjectJSON.put("created", tmp.getCreated());
+                contextDetailObjectJSON.put("adminmac", tmp.getAdminmac());
+
+                final JSONObject moduleAccessCombinations = new JSONObject();
+                for (final ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
+                    final JSONObject moduleAccessCombinationJSON = new JSONObject();
+                    moduleAccessCombinationJSON.put("mac", moduleAccessCombination.getUserAccessCombination());
+                    moduleAccessCombinationJSON.put("users", moduleAccessCombination.getUserCount());
+                    moduleAccessCombinationJSON.put("inactive", moduleAccessCombination.getInactiveCount());
+                    moduleAccessCombinations.put(moduleAccessCombination.getUserAccessCombination(), moduleAccessCombinationJSON);
+                }
+                contextDetailObjectJSON.put("macs", moduleAccessCombinations);
+                detail.put(tmp.getId(), contextDetailObjectJSON);
+            }
+        }
+        
+        version.put("admin", versions[0]);
+        version.put("groupware", versions[1]);
+
+        clientlogincount.put("usm-eas", clc.getUsmeas());
+        clientlogincount.put("olox2", clc.getOlox2());
+        clientlogincount.put("mobileapp", clc.getMobileapp());
+        clientlogincount.put("carddav", clc.getCarddav());
+        clientlogincount.put("caldav", clc.getCarddav());
+
+        retval.put("total", total);
+        retval.put("macdetail", macdetail);
+        if( wantsdetails ) {
+            retval.put("detail", detail);
+        }
+        retval.put("version", version);
+        retval.put("clientlogincount", clientlogincount);
+
+
+
+        return retval;
     }
-    
+
 }
