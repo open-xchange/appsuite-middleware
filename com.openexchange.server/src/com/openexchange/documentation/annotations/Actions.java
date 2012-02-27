@@ -47,75 +47,24 @@
  *
  */
 
-package com.openexchange.documentation.internal;
+package com.openexchange.documentation.annotations;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.DescriptionFactory;
-import com.openexchange.documentation.descriptions.ModuleDescription;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * {@link DocumentationProcessor} - Processes services implementing {@link AJAXActionServiceFactory} 
- * and extracts their module description.
- * 
+ * {@link Actions} - Annotation for multiple actions.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DocumentationProcessor {
-	
-	private final DefaultDocumentationRegistry registry;
-	private final DescriptionFactory factory;
-
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Actions {
+    
     /**
-     * Initializes a new {@link DocumentationProcessor}.
-     */
-    public DocumentationProcessor(final DefaultDocumentationRegistry registry, final DescriptionFactory factory) {
-        super();
-        this.registry = registry;
-        this.factory = factory;
-    }
-
-    /**
-     * Processes the supplied service and adds the extracted description to the registry. 
+     * Specifies the actions. Required.
      * 
-     * @param service the service to add
+     * @return The actions
      */
-	public void add(final AJAXActionServiceFactory service) {
-		final DocumentationBuilder builder = new DocumentationBuilder(factory);
-		builder.add(service.getClass()).add(service.getSupportedServices());
-		this.add(builder.getModuleDescription());
-	}
-	
-	public void add(final ModuleDescription description) {		
-		this.registry.addModule(description);
-	}
-	
-	/**
-     * Processes the supplied service and removes the associated description from the registry. 
-	 * 
-	 * @param service the service to remove
-	 */
-	public void remove(final AJAXActionServiceFactory service) {
-		this.remove(this.getModuleName(service));
-	}
-	
-	public void remove(final ModuleDescription description) {
-		this.remove(description.getName());
-	}
+    Action[] value();
 
-	private void remove(final String module) {		
-		if (null != module) {
-			this.registry.removeModule(module);
-		}
-	}	
-	
-	private String getModuleName(final AJAXActionServiceFactory service) {
-		if (null != service) {
-			final DocumentationBuilder builder = new DocumentationBuilder(factory);
-			builder.add(service.getClass());
-			if (builder.hasModule()) {
-				return builder.getModuleDescription().getName();
-			}
-		}
-		return null;
-	}
-	
 }
