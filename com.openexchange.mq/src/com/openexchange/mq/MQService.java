@@ -56,6 +56,8 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MQService} - The generic Message Queue service.
+ * <p>
+ * See <a href="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/jms_tutorialTOC.html">JMS Tutorial</a>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
