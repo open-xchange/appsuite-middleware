@@ -75,6 +75,10 @@ public final class HornetQService implements MQService {
         this.jmsServer = jmsServer;
     }
 
+    /*-
+     * ----------------------- Methods for JMS-like access to message queue -----------------------
+     */
+
     @Override
     public ConnectionFactory lookupConnectionFactory(final String name) throws OXException {
         try {
