@@ -115,6 +115,13 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Missing client capabilities.
     public static final String MISSING_CAPABILITIES_MSG = "Missing client capabilities.";
 
+    // This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
+    // all translations or remove it from the PO file.
+    public static final String REDIRECT_MSG = "%1$s";
+
+    // Used to indicate that session for autologin can not be found.
+    public static final String NO_SESSION_FOUND_MSG = "No session found.";
+
     private LoginExceptionMessages() {
         super();
     }
