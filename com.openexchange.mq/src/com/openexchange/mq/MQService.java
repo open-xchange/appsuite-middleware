@@ -54,17 +54,19 @@ import javax.jms.Queue;
 import javax.jms.Topic;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link MQService} - The generic Message Queue service.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQService {
 
     /**
      * Lookup in the registry for registered {@link ConnectionFactory}.
-     *
+     * <p>
+     * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
+     * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
+     * 
      * @param name The name of the {@link ConnectionFactory}
      * @return The look-up {@link ConnectionFactory} instance.
      */
@@ -72,7 +74,16 @@ public interface MQService {
 
     /**
      * Lookup in the registry for registered {@link Queue}.
-     *
+     * <p>
+     * A queue follows the Point-to-Point Messaging Domain:<br>
+     * <ul>
+     * <li>Each message has only one consumer.</li>
+     * <li>A sender and a receiver of a message have no timing dependencies. The receiver can fetch the message whether or not it was
+     * running when the client sent the message.</li>
+     * <li>The receiver acknowledges the successful processing of a message.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
+     * 
      * @param name The name of the queue
      * @return The look-up {@link Queue} instance.
      */
@@ -80,7 +91,15 @@ public interface MQService {
 
     /**
      * Lookup in the registry for registered {@link Topic}.
-     *
+     * <p>
+     * A topic follows the Publish/Subscribe Messaging Domain:<br>
+     * <ul>
+     * <li>Each message may have multiple consumers.</li>
+     * <li>Publishers and subscribers have a timing dependency. A client that subscribes to a topic can consume only messages published
+     * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
+     * 
      * @param name The name of the topic
      * @return The look-up {@link Topic} instance.
      */
