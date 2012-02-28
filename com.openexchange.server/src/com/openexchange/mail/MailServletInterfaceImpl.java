@@ -999,6 +999,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
         if (mail != null) {
+            mail.setAccountId(accountId);
             /*
              * Post event for possibly switched \Seen flag
              */
@@ -1495,6 +1496,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
         }
         /*
+         * Set account information
+         */
+        for (final MailMessage mail : mails) {
+            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                mail.setAccountId(accountId);
+            }
+        }
+        /*
          * Put message information into cache
          */
         try {
@@ -1801,6 +1810,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 fetchedMails[i].setThreadLevel(mails[i].getThreadLevel());
             }
             mails = fetchedMails;
+        }
+        /*
+         * Set account information
+         */
+        for (final MailMessage mail : mails) {
+            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                mail.setAccountId(accountId);
+            }
         }
         try {
             /*
