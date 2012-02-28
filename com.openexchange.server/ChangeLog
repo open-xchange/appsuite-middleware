@@ -212,6 +212,10 @@
  - Fix for bug 21149: Introduced reentrant-sensitive semaphore
  - Fix for bug 20066: Fixed counter of reporting tool (except for *DAV)
 
+* 2012-01-05 - marcus.klein@open-xchange.com
+
+ - Added AutoLoginAuthenticationService to create a session on autologin request if the browser contains some global web services session.
+
 * 2011-01-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21125: Lowered strictness of redundant recurrence check

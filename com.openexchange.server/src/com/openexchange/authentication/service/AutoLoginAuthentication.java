@@ -47,28 +47,69 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.authentication.service;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.security.auth.login.LoginException;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.AutoLoginAuthenticationService;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 
 /**
- * This interface defines the methods for handling the login information. E.g. the login information <code>user@domain.tld</code> is split
- * into <code>user</code> and <code>domain.tld</code> and the context part will be used to resolve the context while the user part will be
- * used to authenticate the user.
+ * Provides a static method for the login servlet to do the auto login authentication.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
-public interface AuthenticationService {
+public final class AutoLoginAuthentication {
+
+    private static final AtomicReference<AutoLoginAuthenticationService> SERVICE_REF = new AtomicReference<AutoLoginAuthenticationService>();
+
+    private AutoLoginAuthentication() {
+        super();
+    }
 
     /**
-     * This method maps the login information from the login screen to the both parts needed to resolve the context and the user of that
-     * context.
-     *
-     * @param loginInfo the complete login information from the login screen.
-     * @return an {@link Authenticated} containing context information to resolve the context and user information to resolve the user.
-     * This return type can be enhanced with {@link SessionEnhancement} and/or {@link ResponseEnhancement}.
-     * @throws OXException If something with the login info is wrong.
+     * Performs a login using an authentication service.
+     * @param login entered login.
+     * @param pass entered password.
+     * @param properties The optional properties
+     * @return a string array with two elements in which the first contains the login info for the context and the second contains the
+     * login info for the user.
+     * @throws LoginException if something with the login info is wrong.
      */
-    Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
+    public static Authenticated login(final String login, final String pass, final Map<String, Object> properties) throws OXException {
+        final AutoLoginAuthenticationService auth = SERVICE_REF.get();
+        if (null == auth) {
+            return null;
+        }
+        return auth.handleAutoLoginInfo(new LoginInfo() {
+            @Override
+            public String getPassword() {
+                return pass;
+            }
+            @Override
+            public String getUsername() {
+                return login;
+            }
+            @Override
+            public Map<String, Object> getProperties() {
+                return properties;
+            }
+        });
+    }
 
+    public static AutoLoginAuthenticationService getService() {
+        return SERVICE_REF.get();
+    }
+
+    public static boolean setService(final AutoLoginAuthenticationService service) {
+        return SERVICE_REF.compareAndSet(null, service);
+    }
+
+    public static boolean dropService(final AutoLoginAuthenticationService service) {
+        return SERVICE_REF.compareAndSet(service, null);
+    }
 }

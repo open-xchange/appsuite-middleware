@@ -47,38 +47,29 @@
  *
  */
 
-package com.openexchange.login;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
+package com.openexchange.authentication;
 
 /**
- * Data to process a login request.
+ * This enum signals the three possible return values of an autologin authentication process.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public interface LoginRequest {
+public enum ResultCode {
 
-    String getLogin();
+    /**
+     * Signals that the incoming autologin request does not contain any information about a web services session.
+     */
+    FAILED,
 
-    String getPassword();
+    /**
+     * Signals that the autologin request contains a web services session and the returned {@link Authenticated} contains information
+     * about the OX session to create.
+     */
+    SUCCEEDED,
 
-    String getClientIP();
+    /**
+     * Signals that the client should be redirected to another URL instead of showing the user the OX login interface.
+     */
+    REDIRECT;
 
-    String getUserAgent();
-
-    String getAuthId();
-
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-    
-    Cookie[] getCookies();
 }

@@ -88,9 +88,9 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * Bad request. The server is unable to handle the request.
      */
-    BAD_REQUEST("Bad request. The server is unable to handle the request.", Category.CATEGORY_ERROR, 20),
+    BAD_REQUEST("Bad request. The server is unable to handle the request.", Category.CATEGORY_ERROR, 20);
 
-    ;
+    public static final String PREFIX = "SVL";
 
     /**
      * Message of the exception.
@@ -122,7 +122,7 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SVL";
+        return PREFIX;
     }
 
     @Override

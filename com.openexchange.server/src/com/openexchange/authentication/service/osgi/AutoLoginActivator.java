@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,32 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.authentication.service.osgi;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.authentication.AutoLoginAuthenticationService;
 
 /**
- * Data to process a login request.
+ * Activator to start {@link ServiceTracker} to listen for {@link AutoLoginAuthenticationService}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface LoginRequest {
+public final class AutoLoginActivator implements BundleActivator {
 
-    String getLogin();
+    private ServiceTracker tracker;
 
-    String getPassword();
+    public AutoLoginActivator() {
+        super();
+    }
 
-    String getClientIP();
+    public void start(final BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, AutoLoginAuthenticationService.class.getName(), new AutoLoginAuthenticationCustomizer(context));
+        tracker.open();
+    }
 
-    String getUserAgent();
-
-    String getAuthId();
-
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-    
-    Cookie[] getCookies();
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
+    }
 }

@@ -52,6 +52,9 @@ package com.openexchange.login.internal;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.Header;
+import com.openexchange.authentication.ResultCode;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -72,6 +75,10 @@ final class LoginResultImpl implements LoginResult {
     private User user;
     private Session session;
     private final List<OXException> warnings;
+    private ResultCode code;
+    private String redirect;
+    private Cookie[] cookies;
+    private Header[] headers;
 
     LoginResultImpl() {
         super();
@@ -120,6 +127,42 @@ final class LoginResultImpl implements LoginResult {
 
     public void setSession(final Session session) {
         this.session = session;
+    }
+
+    void setCookies(Cookie[] cookies) {
+        this.cookies = cookies;
+    }
+
+    @Override
+    public Cookie[] getCookies() {
+        return this.cookies;
+    }
+
+    void setHeaders(Header[] headers) {
+        this.headers = headers;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return this.headers;
+    }
+
+    @Override
+    public String getRedirect() {
+        return redirect;
+    }
+
+    @Override
+    public ResultCode getCode() {
+        return code;
+    }
+
+    public void setRedirect(final String redirect) {
+        this.redirect = redirect;
+    }
+
+    public void setCode(final ResultCode code) {
+        this.code = code;
     }
 
     @Override

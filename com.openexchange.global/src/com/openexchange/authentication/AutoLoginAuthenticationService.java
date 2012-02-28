@@ -47,38 +47,30 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.authentication;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
+import com.openexchange.exception.OXException;
 
 /**
- * Data to process a login request.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * This service is called when the UI does an autologin request and the login servlet is not able to find OX session cookies. Therefore the
+ * {@link LoginInfo} will not contain login and password. Only header and cookies can be investigated to find a global web services session.
+ * Use that information to return the necessary {@link Authenticated} data. If the {@link LoginInfo} does not contain a session, through a
+ * {@link LoginException}.
+ * 
+ * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
-public interface LoginRequest {
+public interface AutoLoginAuthenticationService {
 
-    String getLogin();
+    /**
+     * This method authenticates a user using a global web services session which is useful in single sign on scenarios. If no such global
+     * web services session exists either throw a {@link LoginException} or redirect the browser to some global login site with
+     * {@link ResultCode#REDIRECT}. This method should never return <code>null</code>.
+     *
+     * @param loginInfo the complete login information from the autologin request. It does never contain login and password.
+     * @return an {@link Authenticated} containing context information to resolve the context and user information to resolve the user.
+     * This return type can be enhanced with {@link SessionEnhancement} and/or {@link ResponseEnhancement}.
+     * @throws OXException if something with the login info is wrong and no {@link Authenticated} can be returned.
+     */
+    Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException;
 
-    String getPassword();
-
-    String getClientIP();
-
-    String getUserAgent();
-
-    String getAuthId();
-
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-    
-    Cookie[] getCookies();
 }

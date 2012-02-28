@@ -73,11 +73,6 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     /** Invalid credentials. */
     INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /** Instantiating the class failed. */
-    @Deprecated
-    INSTANTIATION_FAILED(INSTANTIATION_FAILED_MSG, Category.CATEGORY_ERROR, 7),
-    /** Class %1$s can not be found. */
-    @Deprecated
-    CLASS_NOT_FOUND(CLASS_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 8),
     /** Missing property %1$s. */
     MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.CATEGORY_CONFIGURATION, 9),
     /** database down. */
@@ -92,9 +87,12 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     CLIENT_DENIED(CLIENT_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
     /** Method "%1$s" in HTTP header authorization is not supported. */
     UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.CATEGORY_TRY_AGAIN, 15),
+    /** Only used as workaround for a redirection, This is <b>no</b> real error. */
+    REDIRECT(REDIRECT_MSG, Category.CATEGORY_WARNING, 16),
+    /** No session found. */
+    NO_SESSION_FOUND(NO_SESSION_FOUND_MSG, Category.CATEGORY_USER_INPUT, 17),
     /** Missing client capabilities. */
-    MISSING_CAPABILITIES(MISSING_CAPABILITIES_MSG, Category.CATEGORY_WARNING, 15),
-    ;
+    MISSING_CAPABILITIES(MISSING_CAPABILITIES_MSG, Category.CATEGORY_WARNING, 18);
 
     private final String message;
 

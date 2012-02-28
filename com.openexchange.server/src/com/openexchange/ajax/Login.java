@@ -126,6 +126,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class Login extends AJAXServlet {
 
+    private interface LoginClosure {
+        LoginResult doLogin(final HttpServletRequest request) throws OXException;
+    }
+
     private static final long serialVersionUID = 7680745138705836499L;
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
@@ -133,7 +137,6 @@ public class Login extends AJAXServlet {
     protected static final boolean INFO = LOG.isInfoEnabled();
 
     private static interface JSONRequestHandler {
-
         void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException;
     }
 
@@ -573,7 +576,10 @@ public class Login extends AJAXServlet {
                 try {
                     final LoginConfiguration conf = confReference.get();
                     if (!conf.sessiondAutoLogin) {
-                        throw AjaxExceptionCodes.DISABLED_ACTION.create( "autologin");
+                        if (doAutoLogin(req, resp)) {
+                            throw AjaxExceptionCodes.DISABLED_ACTION.create( "autologin");
+                        }
+                        return;
                     }
 
                     final Cookie[] cookies = req.getCookies();
@@ -639,7 +645,10 @@ public class Login extends AJAXServlet {
                     if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
                         SessionServlet.removeOXCookies(hash, req, resp);
                         SessionServlet.removeJSESSIONID(req, resp);
-                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                        if (doAutoLogin(req, resp)) {
+                            throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                        }
+                        return;
                     }
                 } catch (final OXException e) {
                     e.log(LOG);
@@ -805,7 +814,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    protected String addFragmentParameter(final String usedUIWebPath, final String param, final String value) {
+    protected static String addFragmentParameter(final String usedUIWebPath, final String param, final String value) {
         String retval = usedUIWebPath;
         final int fragIndex = retval.indexOf('#');
 
@@ -880,7 +889,7 @@ public class Login extends AJAXServlet {
         doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
-    protected void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
+    protected static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -932,11 +941,32 @@ public class Login extends AJAXServlet {
         cookie.setMaxAge(conf.cookieExpiry);
     }
 
-    protected void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
+    protected boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+        return loginOperation(req, resp, new LoginClosure() {
+            @Override
+            public LoginResult doLogin(HttpServletRequest req2) throws OXException {
+                final LoginRequest request = parseAutoLoginRequest(req2);
+                return LoginPerformer.getInstance().doAutoLogin(request);
+            }
+        });
+    }
+
+    protected void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+        loginOperation(req, resp, new LoginClosure() {
+            @Override
+            public LoginResult doLogin(HttpServletRequest req2) throws OXException {
+                final LoginRequest request = parseLogin(req2, LoginFields.NAME_PARAM, false);
+                return LoginPerformer.getInstance().doLogin(request);
+            }
+        });
+    }
+
+    /**
+     * @return a boolean value indicated if an auto login should proceed afterwards
+     */
+    private boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-
-        final LoginRequest request = parseLogin(req, LoginFields.NAME_PARAM, false);
         // Perform the login
         final Response response = new Response();
         LoginResult result = null;
@@ -949,7 +979,21 @@ public class Login extends AJAXServlet {
                     properties.put("client.capabilities", capabilities);
                 }
             }
-            result = LoginPerformer.getInstance().doLogin(request, properties);
+            result = login.doLogin(req);
+            if (null == result) {
+                return true;
+            }
+            addHeadersAndCookies(result, resp);
+            if (null != result.getCode()) {
+                switch (result.getCode()) {
+                case FAILED:
+                    return true;
+                case REDIRECT:
+                    throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
+                default:
+                    break;
+                }
+            }
             result.getSession().setParameter("user-agent", req.getHeader("user-agent"));
             // Write response
             final JSONObject json = new JSONObject();
@@ -959,6 +1003,9 @@ public class Login extends AJAXServlet {
             appendModules(result.getSession(), json, req);
             response.setData(json);
         } catch (final OXException e) {
+            if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
+                throw e;
+            }
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final JSONException e) {
@@ -969,16 +1016,14 @@ public class Login extends AJAXServlet {
         try {
             if (response.hasError() || null == result) {
                 ResponseWriter.write(response, resp.getWriter());
-            } else {
-                final Session session = result.getSession();
-                // Store associated session
-                SessionServlet.rememberSession(req, ServerSessionAdapter.valueOf(session, result.getContext(), result.getUser()));
-                writeSecretCookie(resp, session, session.getHash(), req.isSecure());
-                writeSessionCookie(resp, session, session.getHash(), req.isSecure());
-
-                // Login response is unfortunately not conform to default responses.
-                ((JSONObject) response.getData()).write(resp.getWriter());
+                return false;
             }
+            final Session session = result.getSession();
+            // Store associated session
+            SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
+            writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+            // Login response is unfortunately not conform to default responses.
+            ((JSONObject) response.getData()).write(resp.getWriter());
         } catch (final JSONException e) {
             if (e.getCause() instanceof IOException) {
                 // Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
@@ -987,12 +1032,33 @@ public class Login extends AJAXServlet {
             }
             LOG.error(RESPONSE_ERROR, e);
             sendError(resp);
+            return false;
         } finally {
             LogProperties.putLogProperty("com.openexchange.session.session", null);
         }
+        return false;
     }
 
-    private LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws OXException {
+    private static void addHeadersAndCookies(final LoginResult result, final HttpServletResponse resp) {
+        final com.openexchange.authentication.Cookie[] cookies = result.getCookies();
+        if (null != cookies) {
+            for (final com.openexchange.authentication.Cookie cookie : cookies) {
+                resp.addCookie(wrapCookie(cookie));
+            }
+        }
+        final com.openexchange.authentication.Header[] headers = result.getHeaders();
+        if (null != headers) {
+            for (final com.openexchange.authentication.Header header : headers) {
+                resp.addHeader(header.getName(), header.getValue());
+            }
+        }
+    }
+
+    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie) {
+        return new Cookie(cookie.getName(), cookie.getValue());
+    }
+
+    protected LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws OXException {
         final String login = req.getParameter(loginParamName);
         if (null == login) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( loginParamName);
@@ -1015,61 +1081,111 @@ public class Login extends AJAXServlet {
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
+        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final LoginRequest loginRequest = new LoginRequest() {
-
             private final String hash = HashCalculator.getHash(req, userAgent, client);
-
             @Override
             public String getLogin() {
                 return login;
             }
-
             @Override
             public String getPassword() {
                 return password;
             }
-
             @Override
             public String getClientIP() {
                 return clientIP;
             }
-
             @Override
             public String getUserAgent() {
                 return userAgent;
             }
-
             @Override
             public String getAuthId() {
                 return authId;
             }
-
             @Override
             public String getClient() {
                 return client;
             }
-
             @Override
             public String getVersion() {
                 return version;
             }
-
             @Override
             public Interface getInterface() {
                 return HTTP_JSON;
             }
-
             @Override
             public String getHash() {
                 return hash;
             }
-
             @Override
             public Map<String, List<String>> getHeaders() {
                 return headers;
             }
+            @Override
+            public com.openexchange.authentication.Cookie[] getCookies() {
+                return cookies;
+            }
         };
         return loginRequest;
+    }
+
+    protected LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
+        final String authId = parseAuthId(req, false);
+        final String client = parseClient(req, false);
+        final String clientIP = parseClientIP(req);
+        final String userAgent = parseUserAgent(req);
+        final Map<String, List<String>> headers = copyHeaders(req);
+        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+        return new LoginRequest() {
+            private final String hash = HashCalculator.getHash(req, client);
+            @Override
+            public String getVersion() {
+                return null;
+            }
+            @Override
+            public String getUserAgent() {
+                return userAgent;
+            }
+            @Override
+            public String getPassword() {
+                return null;
+            }
+            @Override
+            public String getLogin() {
+                return null;
+            }
+            @Override
+            public Interface getInterface() {
+                return HTTP_JSON;
+            }
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                return headers;
+            }
+            @Override
+            public String getHash() {
+                return hash;
+            }
+            @Override
+            public String getClientIP() {
+                return clientIP;
+            }
+            @Override
+            public String getClient() {
+                return client;
+            }
+            @Override
+            public String getAuthId() {
+                return authId;
+            }
+            @Override
+            public com.openexchange.authentication.Cookie[] getCookies() {
+                return cookies;
+            }
+        };
     }
 
     private static String parseUserAgent(final HttpServletRequest req) {
@@ -1172,6 +1288,7 @@ public class Login extends AJAXServlet {
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
+        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final LoginRequest request = new LoginRequest() {
             private final String hash = HashCalculator.getHash(req, userAgent, client);
             @Override
@@ -1213,6 +1330,10 @@ public class Login extends AJAXServlet {
             @Override
             public Map<String, List<String>> getHeaders() {
                 return headers;
+            }
+            @Override
+            public com.openexchange.authentication.Cookie[] getCookies() {
+                return cookies;
             }
         };
         final Map<String, Object> properties = new HashMap<String, Object>(1);

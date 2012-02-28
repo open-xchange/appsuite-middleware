@@ -50,6 +50,9 @@
 package com.openexchange.login;
 
 import java.util.Collection;
+import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.Header;
+import com.openexchange.authentication.ResultCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -61,6 +64,35 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LoginResult {
+
+    /**
+     * Get the cookies which should be set on the response
+     * 
+     * @return A {@link Cookie} object or null if the underlying implementation did not provide any cookies to set 
+     */
+    Cookie[] getCookies();
+
+    /**
+     * Get the headers which should be set on the response
+     * 
+     * @return A {@link Header} object of null if the underlying implementation did not provide any headers to set
+     */
+    Header[] getHeaders();
+
+    /**
+     * If the {@link ResultCode} indicates a {@link ResultCode#REDIRECT} this value will be used to redirect the browser to.
+     *
+     * @return the URL to redirect the browser to in case of {@link ResultCode#REDIRECT}.
+     */
+    String getRedirect();
+
+    /**
+     * A code indicating the result of the {@link AuthenticationService} or the {@link AutoLoginAuthenticationService} when the returned
+     * object implements the {@link ResponseEnhancement}.
+     *
+     * @return the {@link ResultCode} provided from the {@link AuthenticationService} or the {@link AutoLoginAuthenticationService}.
+     */
+    ResultCode getCode();
 
     /**
      * Remembers the according {@link LoginRequest login request}
@@ -87,6 +119,7 @@ public interface LoginResult {
      * @return The resolved user.
      */
     User getUser();
+
 
     /**
      * Checks if this result has warnings.

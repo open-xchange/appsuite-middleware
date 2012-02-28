@@ -47,38 +47,23 @@
  *
  */
 
-package com.openexchange.login;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
+package com.openexchange.authentication;
 
 /**
- * Data to process a login request.
+ * An interface which will represent a cookie from an HTTP request
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public interface LoginRequest {
+public interface Cookie {
 
-    String getLogin();
-
-    String getPassword();
-
-    String getClientIP();
-
-    String getUserAgent();
-
-    String getAuthId();
-
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
+    /**
+     * @return the name of the cookie.
+     */
+    String getName();
     
-    Cookie[] getCookies();
+    /**
+     * @return the cookies value.
+     */
+    String getValue();
+
 }

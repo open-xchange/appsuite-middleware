@@ -47,38 +47,43 @@
  *
  */
 
-package com.openexchange.login;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
+package com.openexchange.authentication;
 
 /**
- * Data to process a login request.
+ * An interface which can be used to add further response details to the {@link Authenticated} return object of a authentication bundle.
+ * This information is used to redirect the client or add additional headers and/or cookies to the response for the client. 
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public interface LoginRequest {
+public interface ResponseEnhancement {
 
-    String getLogin();
+    /**
+     * Indicates how the response to the client should look like. See {@link ResultCode} for possible options.
+     *
+     * @return how to modify the response to the client.
+     */
+    ResultCode getCode();
 
-    String getPassword();
+    /**
+     * Headers that should be part of the response to the client.
+     *
+     * @return headers that should be added to the client response. Never return <code>null</code> but an empty array.
+     */
+    Header[] getHeaders();
 
-    String getClientIP();
-
-    String getUserAgent();
-
-    String getAuthId();
-
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-    
+    /**
+     * Cookies that should be part of the response to the client.
+     *
+     * @return cookies that should be added to the client response. Never return <code>null</code> but an empty array.
+     */
     Cookie[] getCookies();
+
+    /**
+     * Contains the URL the client should be redirected to if {@link #getCode()} indicates {@link ResultCode#REDIRECT}. If {@link #getCode()}
+     * indicates another result, this value can be <code>null</code>.
+     *
+     * @return URL to that the client should be redirected.
+     */
+    String getRedirect();
+
 }

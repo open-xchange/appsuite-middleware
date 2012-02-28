@@ -47,38 +47,51 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.authentication.service.osgi;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.authentication.AutoLoginAuthenticationService;
+import com.openexchange.authentication.service.AutoLoginAuthentication;
 
 /**
- * Data to process a login request.
+ * {@link AutoLoginAuthenticationService} tracker putting the service into the static authentication class.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface LoginRequest {
+public class AutoLoginAuthenticationCustomizer implements ServiceTrackerCustomizer {
 
-    String getLogin();
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AutoLoginAuthenticationCustomizer.class));
 
-    String getPassword();
+    private final BundleContext context;
 
-    String getClientIP();
+    public AutoLoginAuthenticationCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    String getUserAgent();
+    public Object addingService(final ServiceReference reference) {
+        final AutoLoginAuthenticationService auth = (AutoLoginAuthenticationService) context.getService(reference);
+        if (AutoLoginAuthentication.setService(auth)) {
+            return auth;
+        }
+        context.ungetService(reference);
+        LOG.error("Several authentication services found. Remove all except one!");
+        return null;
+    }
 
-    String getAuthId();
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do.
+    }
 
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-    
-    Cookie[] getCookies();
+    public void removedService(final ServiceReference reference, final Object service) {
+        final AutoLoginAuthenticationService auth = (AutoLoginAuthenticationService) service;
+        if (!AutoLoginAuthentication.dropService(auth)) {
+            LOG.error("Removed authentication services was not active!");
+        }
+        context.ungetService(reference);
+    }
 }
