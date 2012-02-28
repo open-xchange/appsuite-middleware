@@ -214,10 +214,6 @@ piv_password = Base64.decode64("dHlnZ2Vy")
 mail_username = Base64.decode64("dG9iaWFzLnByaW56QG9wZW4teGNoYW5nZS5jb20=")
 mail_password = Base64.decode64("dHlnZ2Vy")
 
-@piv_con = PivotalConnection.new( piv_username, piv_password )
-@mail_con = MailConnection.new( mail_username, mail_password )
-@handlers = [ QualityEventHandler.new ]
-
 #
 # classes
 #
@@ -254,7 +250,7 @@ class MailConnection
   end
   
   def send_qa_message(title,link)
-    recipient = "tierlieb@open-xchange.com" #qualityassurance@open-xchange.com
+    recipient = "tierlieb@open-xchange.com" #qa@open-xchange.com
     message = <<-MESSAGE_END
 From: Pivotal Events<#{@login}>
 To: QA <#{recipient}>
@@ -292,6 +288,14 @@ class QualityEventHandler
     end
   end
 end
+
+
+
+
+@piv_con = PivotalConnection.new( piv_username, piv_password )
+@mail_con = MailConnection.new( mail_username, mail_password )
+@handlers = [ QualityEventHandler.new ]
+
 
 #
 # main
