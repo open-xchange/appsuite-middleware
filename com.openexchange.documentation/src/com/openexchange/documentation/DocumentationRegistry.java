@@ -98,12 +98,4 @@ public interface DocumentationRegistry {
      */
 	ContainerDescription getContainer(String name) throws OXException;
 	
-	/**
-	 * Adds the module description to the registry. 
-	 * 
-	 * @param module the module description to add
-	 * @throws OXException if module description can't be added
-	 */
-	void addModule(ModuleDescription module) throws OXException;
-
 }

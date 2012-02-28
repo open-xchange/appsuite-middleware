@@ -73,7 +73,6 @@ public class DocumentationListener implements SimpleRegistryListener<Object> {
     @Override
     public void added(ServiceReference<Object> ref, Object service) {
         this.processor.add(service);
-        
     }
 
     @Override

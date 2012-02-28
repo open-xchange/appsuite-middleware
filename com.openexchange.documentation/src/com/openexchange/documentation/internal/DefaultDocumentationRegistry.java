@@ -91,7 +91,7 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
     @Override
 	public ModuleDescription getModule(final String name) throws OXException {
         if (false == this.modules.containsKey(name)) {
-        	throw OXException.notFound(name);
+            throw DocumentationExceptionCode.MODULE_NOT_REGISTERED.create(name);
         }
         return modules.get(name);
     }
@@ -104,7 +104,7 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
     @Override
 	public ContainerDescription getContainer(final String name) throws OXException {
         if (false == this.containers.containsKey(name)) {
-            throw OXException.notFound(name);
+            throw DocumentationExceptionCode.CONTAINER_NOT_REGISTERED.create(name);
         }
         return containers.get(name);
     }
@@ -114,21 +114,23 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
      * 
      * @param module the module description to add
      */
-    @Override
-    public void addModule(final ModuleDescription module) {
+    public void addModule(final ModuleDescription module) throws OXException {
         if (null == module || null == module.getName()) {
-            //TODO: Documentation exceptions
-        	LOG.warn("Not adding missing module or a module description without name.");
-            return;
+            throw DocumentationExceptionCode.MODULE_NAME_MISSING.create();
         }
         if (this.modules.containsKey(module.getName())) {
-            //TODO: Documentation exceptions
-            throw new IllegalArgumentException(module.getName());
+            throw DocumentationExceptionCode.MODULE_ALREADY_REGISTERED.create(module.getName());
         }        
+        LOG.debug("Adding module: " + module.getName());
         this.modules.put(module.getName(), module);
         final ContainerDescription[] containers = module.getContainers();
         if (null != containers) {
             for (final ContainerDescription container : containers) {
+                if (null == container || null == container.getName()) {
+                    throw DocumentationExceptionCode.CONTAINER_NAME_MISSING.create();
+                } else if (this.containers.containsKey(container.getName())) {
+                    throw DocumentationExceptionCode.CONTAINER_ALREADY_REGISTERED.create(container.getName());
+                }
                 this.containers.put(container.getName(), container);
             }
         }
@@ -139,18 +141,17 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
      * 
      * @param name the name of the module description to remove
      */
-    public void removeModule(final String name) {
-    	if (null != name && this.modules.containsKey(name)) {
-	        final ModuleDescription removed = modules.remove(name);
-	        final ContainerDescription[] containers = removed.getContainers();
-	        if (null != containers) {
-	        	for (final ContainerDescription container : containers) {
-	        		this.containers.remove(container.getName());
-	        	}
-	        }
-    	} else {
-    		LOG.warn("Module '" + name + "' not registered.");
-    	}
+    public void removeModule(final String name) throws OXException {
+        if (null == name || false == modules.containsKey(name)) {
+            throw DocumentationExceptionCode.MODULE_NOT_REGISTERED.create(name);
+        }
+        final ModuleDescription removed = modules.remove(name);
+        final ContainerDescription[] containers = removed.getContainers();
+        if (null != containers) {
+        	for (final ContainerDescription container : containers) {
+        		this.containers.remove(container.getName());
+        	}
+        }
     }
     
 }
