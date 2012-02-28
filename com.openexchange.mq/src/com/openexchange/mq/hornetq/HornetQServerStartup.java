@@ -50,6 +50,7 @@
 package com.openexchange.mq.hornetq;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.core.TransportConfiguration;
@@ -101,7 +102,7 @@ public final class HornetQServerStartup implements MQServerStartup {
             final JMSConfiguration jmsConfig = new JMSConfigurationImpl();
 
             // Step 3. Configure the JMS ConnectionFactory
-            final ArrayList<String> connectorNames = new ArrayList<String>();
+            final List<String> connectorNames = new ArrayList<String>();
             connectorNames.add("connector");
             final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("cf", false, connectorNames, "/cf");
             jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);

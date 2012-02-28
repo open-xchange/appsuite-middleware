@@ -17,7 +17,8 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework
-Export-Package: com.openexchange.mq
+Export-Package: com.openexchange.mq,
+ javax.jms
 Bundle-ClassPath: lib/hornetq-core.jar,
  lib/hornetq-jms.jar,
  lib/hornetq-logging.jar,
