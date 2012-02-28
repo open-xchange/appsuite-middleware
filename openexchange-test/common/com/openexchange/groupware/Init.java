@@ -83,6 +83,9 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
+import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
+import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
@@ -357,6 +360,7 @@ public final class Init {
         startAndInjectXMLServices();
         startAndInjectImportExportServices();
         startAndInjectSubscribeServices();
+        startAndInjectContactStorageServices();
     }
 
     public static void startAndInjectConfigBundle() {
@@ -537,6 +541,14 @@ public final class Init {
         final ContextService contextService = (ContextService) services.get(ContextService.class);
         final FolderUpdaterRegistry registry = new SubscriptionExecutionServiceImpl(new SimSubscriptionSourceDiscoveryService(), folderUpdaters, contextService);
         TestServiceRegistry.getInstance().addService(FolderUpdaterRegistry.class, registry);
+    }
+
+    private static void startAndInjectContactStorageServices() {
+        if (null == TestServiceRegistry.getInstance().getService(ContactStorageRegistry.class)) {
+            DefaultContactStorageRegistry registry = new DefaultContactStorageRegistry();
+            registry.addStorage(new RdbContactStorage());
+            TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
+        }
     }
 
     public static void startAndInjectI18NBundle() throws FileNotFoundException {

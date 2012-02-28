@@ -62,4 +62,9 @@ public interface MQConstants {
      */
     public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
 
+    /**
+     * The symbolic name of the Message Queue bundle.
+     */
+    public static final int MQ_LISTEN_PORT = 5445;
+
 }

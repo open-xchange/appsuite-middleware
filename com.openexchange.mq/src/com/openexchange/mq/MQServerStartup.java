@@ -70,4 +70,12 @@ public interface MQServerStartup {
      */
     void stop();
 
+    /**
+     * Gets the currently active Message Queue service.
+     * 
+     * @return The service
+     * @throws OXException If service cannot be returned
+     */
+    MQService getService() throws OXException;
+
 }

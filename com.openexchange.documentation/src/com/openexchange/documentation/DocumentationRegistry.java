@@ -50,7 +50,6 @@
 package com.openexchange.documentation;
 
 import java.util.Collection;
-
 import com.openexchange.documentation.descriptions.ContainerDescription;
 import com.openexchange.documentation.descriptions.ModuleDescription;
 import com.openexchange.exception.OXException;

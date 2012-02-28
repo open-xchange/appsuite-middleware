@@ -58,9 +58,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.documentation.DescriptionFactory;
 import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Attribute;
 import com.openexchange.documentation.annotations.Container;
 import com.openexchange.documentation.annotations.Module;
@@ -222,7 +222,9 @@ public class DocumentationBuilder {
             } else if (Container.class.isInstance(annotation)) {
             	this.knownContainers.add(this.getContainer((Container)annotation));
             } else if (Action.class.isInstance(annotation)) {
-            	this.knownActions.add(this.getAction((Action)annotation));
+                this.knownActions.add(this.getAction((Action)annotation));
+            } else if (Actions.class.isInstance(annotation)) {
+                this.knownActions.addAll(this.getActions((Actions)annotation));
             } 
         }
     }
@@ -256,8 +258,18 @@ public class DocumentationBuilder {
     }
     
     protected ActionDescription getAction(final Action action) {
-    	return factory.action(action.name(), action.description(), action.method(), action.defaultFormat(),
-    			action.requestBody(), action.responseDescription(), action.deprecated(), getParameters(action.parameters()));
+        return factory.action(action.name(), action.description(), action.method(), action.defaultFormat(),
+                action.requestBody(), action.responseDescription(), action.deprecated(), getParameters(action.parameters()));
+    }
+    
+    protected Collection<ActionDescription> getActions(final Actions actions) {
+        final Collection<ActionDescription> actionDescriptions = new ArrayList<ActionDescription>();
+        if (null != actions.value()) {
+            for (final Action action : actions.value()) {
+                actionDescriptions.add(this.getAction(action));
+            }
+        }
+        return actionDescriptions;
     }
     
     public boolean hasModule() {

@@ -51,13 +51,17 @@ package com.openexchange.contact.storage.rdb.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.DBPool;
@@ -92,32 +96,35 @@ public class RdbContactStorage extends DefaultContactStorage {
         final Connection connection = DBPool.pickup(getContext(session));
         try {
             /*
+             * check fields
+             */
+            final QueryFields queryFields = new QueryFields(fields);
+            if (false == queryFields.needsContactData()) {
+                return null; // nothing to do
+            }
+            /*
              * get contact data
              */        
-            Contact contact = null;
-            final ContactField[] contactDataFields = Tools.filterFields(fields, Table.CONTACTS);
-            if (null != contactDataFields && 0 < contactDataFields.length) {
-                contact = executor.selectSingle(connection, Table.CONTACTS, contextID, objectID, fields);
-                if (null == contact) {
-                    throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
-                }
+            Contact contact = executor.selectSingle(connection, Table.CONTACTS, contextID, objectID, queryFields.getContactDataFields());
+            if (null == contact) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
             }
+            contact.setObjectID(objectID);
+            contact.setContextId(contextID);
             /*
              * merge image data if needed
              */
-            final ContactField[] imageDataFields = Tools.filterFields(fields, Table.IMAGES);
-            if (null != imageDataFields && 0 < imageDataFields.length) {
-                final Contact imageData = executor.selectSingle(connection, Table.IMAGES, session.getContextId(), objectID, imageDataFields);
+            if (queryFields.needsImageData() && 0 < contact.getNumberOfImages()) {
+                final Contact imageData = executor.selectSingle(connection, Table.IMAGES, contextID, objectID, 
+                    queryFields.getImageDataFields());
                 if (null != imageData) {
-                    contact = null == contact ? imageData : super.merge(contact, imageData);
-                } else if (null == contact) {
-                    throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
+                    contact = super.merge(contact, imageData);
                 }
             }
             /*
              * merge distribution list data if needed
              */
-            if (contact.containsNumberOfDistributionLists() && 0 < contact.getNumberOfDistributionLists()) {
+            if (queryFields.needsDistListData() && 0 < contact.getNumberOfDistributionLists()) {
                 contact.setDistributionList(executor.select(connection, Table.DISTLIST, contextID, objectID));
             }            
             return contact;
@@ -140,22 +147,23 @@ public class RdbContactStorage extends DefaultContactStorage {
             final Date now = new Date();
             contact.setLastModified(now);
             contact.setCreationDate(now);
+            contact.setCreatedBy(session.getUserId());
             contact.setModifiedBy(session.getUserId());
             contact.setParentFolderID(parse(folderId));
             contact.setContextId(session.getContextId());
             /*
              * insert contact data
              */
-            this.executor.insert(connection, Table.CONTACTS, contact, Tools.CONTACT_DATABASE_FIELDS);
+            this.executor.insert(connection, Table.CONTACTS, contact, Tools.CONTACT_DATABASE_FIELDS_ARRAY);
             /*
              * insert image data if needed 
              */
             if (contact.containsImage1()) {
                 contact.setImageLastModified(now);
-                this.executor.insert(connection, Table.IMAGES, contact, Tools.IMAGE_DATABASE_FIELDS);
+                this.executor.insert(connection, Table.IMAGES, contact, Tools.IMAGE_DATABASE_FIELDS_ARRAY);
             }
             /*
-             * insert distribution list if needed
+             * insert distribution list data if needed
              */
             if (contact.containsDistributionLists()) {
                 this.executor.insert(connection, Table.DISTLIST, contact.getObjectID(), session.getContextId(), contact.getDistributionList());
@@ -250,7 +258,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * update contact data
              */
-            final ContactField[] contactDataFields = Tools.filterFields(assignedFields, Table.CONTACTS);
+            final ContactField[] contactDataFields = Tools.filter(assignedFields, Tools.CONTACT_DATABASE_FIELDS);
             if (null != contactDataFields && 0 < contactDataFields.length) {
                 if (0 == executor.update(connection, Table.CONTACTS, minLastModified, contact, contactDataFields)) {
                     throw ContactExceptionCodes.NO_CHANGES.create(contextID, objectID);
@@ -259,7 +267,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * update image data
              */
-            final ContactField[] imageDataFields = Tools.filterFields(assignedFields, Table.IMAGES);
+            final ContactField[] imageDataFields = Tools.filter(assignedFields, Tools.IMAGE_DATABASE_FIELDS_ADDITIONAL);
             if (null != imageDataFields && 0 < imageDataFields.length) {
                 if (false == contact.containsImage1()) {
                     // delete previous image
@@ -273,7 +281,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                         }
                     } else {
                         // create new image
-                        this.executor.insert(connection, Table.CONTACTS, contact, Tools.IMAGE_DATABASE_FIELDS);                        
+                        this.executor.insert(connection, Table.CONTACTS, contact, Tools.IMAGE_DATABASE_FIELDS_ARRAY);                        
                     }
                 }
             }
@@ -311,7 +319,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              * get contact data
              */        
             Collection<Contact> contacts = null;
-            final ContactField[] contactDataFields = Tools.filterFields(fields, Table.CONTACTS);
+            final ContactField[] contactDataFields = Tools.filter(fields, Tools.CONTACT_DATABASE_FIELDS, ContactField.OBJECT_ID);
             if (null != contactDataFields && 0 < contactDataFields.length) {
                 contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, minLastModified, contactDataFields);
             }
@@ -337,6 +345,86 @@ public class RdbContactStorage extends DefaultContactStorage {
         return null;
     }
     
+    @Override
+    public Collection<Contact> all(final Session session, final String folderId, final ContactField[] fields) throws OXException {
+        final int contextID = session.getContextId();
+        final int parentFolderID = parse(folderId);
+        final Connection connection = DBPool.pickup(getContext(session));
+        try {
+            /*
+             * check fields
+             */
+            final QueryFields queryFields = new QueryFields(fields);
+            if (false == queryFields.needsContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */        
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, parentFolderID, queryFields.getContactDataFields());
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.needsImageData()) {
+                    final int[] objectIDs = getObjectIDsWithImages(contacts);
+                    final List<Contact> imagaDataList = executor.select(connection, Table.IMAGES, contextID, objectIDs, queryFields.getImageDataFields());
+                    if (null != imagaDataList && 0 < imagaDataList.size()) {
+                        contacts = mergeByID(contacts, imagaDataList);
+                    }
+                }               
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.needsDistListData()) {
+                    final int[] objectIDs = getObjectIDsWithDistLists(contacts);
+                    final Map<Integer, List<DistributionListEntryObject>> distListData = executor.select(connection, Table.DISTLIST, contextID, objectIDs);
+                    for (final Contact contact : contacts) {
+                        final List<DistributionListEntryObject> distList = distListData.get(Integer.valueOf(contact.getObjectID()));
+                        if (null != distList) {
+                            contact.setDistributionList(distList.toArray(new DistributionListEntryObject[distList.size()]));
+                        }
+                    }
+                }
+            }
+            return contacts;
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create();
+        } finally {
+            DBPool.closeReaderSilent(getContext(session), connection);
+        }
+    }
+    
+    private int[] getObjectIDsWithImages(final List<Contact> contacts) {
+        int i = 0;
+        final int[] objectIDs = new int[contacts.size()];
+        for (final Contact contact : contacts) {
+            if (0 < contact.getNumberOfImages()) {
+                objectIDs[++i] = contact.getObjectID();
+            }
+        }
+        return Arrays.copyOf(objectIDs, i);
+    }
+    
+    private int[] getObjectIDsWithDistLists(final List<Contact> contacts) {
+        int i = 0;
+        final int[] objectIDs = new int[contacts.size()];
+        for (final Contact contact : contacts) {
+            if (0 < contact.getNumberOfDistributionLists()) {
+                objectIDs[++i] = contact.getObjectID();
+            }
+        }
+        return Arrays.copyOf(objectIDs, i);
+    }
+    
+    @Override
+    public Collection<Contact> list(final Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+        
+        
+        
+        return null;
+    }
+
     private static int parse(final String id) throws OXException {
         try {
             return Integer.parseInt(id);

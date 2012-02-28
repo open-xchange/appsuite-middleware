@@ -49,33 +49,52 @@
 
 package com.openexchange.mq.hornetq;
 
-import java.util.ArrayList;
+import java.io.Reader;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import javax.jms.Queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.core.TransportConfiguration;
+import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.core.config.Configuration;
 import org.hornetq.core.config.impl.ConfigurationImpl;
+import org.hornetq.core.deployers.impl.FileConfigurationParser;
+import org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory;
+import org.hornetq.core.remoting.impl.invm.InVMConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
 import org.hornetq.jms.server.config.JMSConfiguration;
 import org.hornetq.jms.server.config.JMSQueueConfiguration;
+import org.hornetq.jms.server.config.TopicConfiguration;
 import org.hornetq.jms.server.config.impl.ConnectionFactoryConfigurationImpl;
 import org.hornetq.jms.server.config.impl.JMSConfigurationImpl;
 import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
+import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
 import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import org.hornetq.utils.XMLUtil;
+import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQServerStartup;
+import com.openexchange.mq.MQService;
 
 /**
- * {@link HornetQServerStartup} - The start-up implementation for hornetq message queue.
+ * {@link HornetQServerStartup} - The start-up implementation for HornetQ message queue.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HornetQServerStartup implements MQServerStartup {
 
-    private volatile EmbeddedJMS jmsServer;
+    private EmbeddedJMS jmsServer; // Set in synchronized context
+
+    private HornetQService hornetQService;
+
+    private volatile Queue managementQueue;
 
     /**
      * Initializes a new {@link HornetQServerStartup}.
@@ -84,45 +103,130 @@ public final class HornetQServerStartup implements MQServerStartup {
         super();
     }
 
+    /**
+     * Gets the special queue for managing HornetQ.
+     * 
+     * @return The special queue for managing HornetQ.
+     */
+    public Queue getManagementQueue() {
+        Queue managementQueue = this.managementQueue;
+        if (null == managementQueue) {
+            synchronized (this) {
+                managementQueue = this.managementQueue;
+                if (null == managementQueue) {
+                    this.managementQueue = managementQueue = HornetQJMSClient.createQueue("hornetq.management");
+                }
+            }
+        }
+        return managementQueue;
+    }
+
     @Override
-    public void start() throws OXException {
+    public MQService getService() throws OXException {
+        return hornetQService;
+    }
+
+    @Override
+    public synchronized void start() throws OXException {
         try {
+            if (null != this.jmsServer) {
+                // Already started
+                return;
+            }
             // Step 1. Create HornetQ core configuration, and set the properties accordingly
             final Configuration configuration = new ConfigurationImpl();
             configuration.setPersistenceEnabled(false);
             configuration.setSecurityEnabled(false);
-            configuration.getAcceptorConfigurations().add(new TransportConfiguration(NettyAcceptorFactory.class.getName()));
+            // Set acceptor: An acceptor defines a way in which connections can be made to the HornetQ server.
+            {
+                final Map<String, Object> params = new HashMap<String, Object>(2);
+                params.put(org.hornetq.core.remoting.impl.netty.TransportConstants.PORT_PROP_NAME, Integer.valueOf(MQConstants.MQ_LISTEN_PORT));
+                params.put(org.hornetq.core.remoting.impl.netty.TransportConstants.USE_NIO_PROP_NAME, Boolean.TRUE);
+                final TransportConfiguration transportConfig = new TransportConfiguration(NettyAcceptorFactory.class.getName(), params, "netty-connector");
+                configuration.getAcceptorConfigurations().add(transportConfig);
 
-            final TransportConfiguration connectorConfig = new TransportConfiguration(NettyConnectorFactory.class.getName());
+                configuration.getAcceptorConfigurations().add(new TransportConfiguration(InVMAcceptorFactory.class.getName(), new HashMap<String, Object>(1), "in-vm-connector"));
+            }
+            // Set connector: Whereas acceptors are used on the server to define how we accept connections, connectors are used by a client to define how it connects to a server.
+            {
+                final Map<String, Object> params = new HashMap<String, Object>(2);
+                params.put(org.hornetq.core.remoting.impl.netty.TransportConstants.PORT_PROP_NAME, Integer.valueOf(MQConstants.MQ_LISTEN_PORT));
+                params.put(org.hornetq.core.remoting.impl.netty.TransportConstants.USE_NIO_PROP_NAME, Boolean.TRUE);
+                final TransportConfiguration transportConfig = new TransportConfiguration(NettyConnectorFactory.class.getName(), params, "netty-connector");
+                configuration.getConnectorConfigurations().put("netty-connector", transportConfig);
 
-            configuration.getConnectorConfigurations().put("connector", connectorConfig);
+                configuration.getConnectorConfigurations().put("in-vm-connector", new TransportConfiguration(InVMConnectorFactory.class.getName(), new HashMap<String, Object>(1), "in-vm-connector"));
+            }
+
+            {
+                /*-
+                 * <broadcast-groups>
+                       <broadcast-group name="my-broadcast-group">
+                           <local-bind-address>172.16.9.3</local-bind-address>
+                           <local-bind-port>5432</local-bind-port>
+                           <group-address>231.7.7.7</group-address>
+                           <group-port>9876</group-port>
+                           <broadcast-period>2000</broadcast-period>
+                           <connector-ref connector-name="netty-connector"/>
+                       </broadcast-group>
+                    </broadcast-groups>
+                 */
+
+                
+                final Reader reader = new UnsynchronizedStringReader("" +
+                		"<configuration xmlns=\"urn:hornetq\"\n" + 
+                		"               xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" + 
+                		"               xsi:schemaLocation=\"urn:hornetq /schema/hornetq-configuration.xsd\">" +
+                		"  <broadcast-groups>\n" + 
+                		"   <broadcast-group name=\"my-broadcast-group\">\n" + 
+                		"       <local-bind-address>172.16.9.3</local-bind-address>\n" + 
+                		"       <local-bind-port>5432</local-bind-port>\n" + 
+                		"       <group-address>231.7.7.7</group-address>\n" + 
+                		"       <group-port>9876</group-port>\n" + 
+                		"       <broadcast-period>2000</broadcast-period>\n" + 
+                		"       <connector-ref>netty-connector</connector-ref>\n" + 
+                		"   </broadcast-group>\n" + 
+                		"  </broadcast-groups>\n" +
+                		"</configuration>");
+                String xml = org.hornetq.utils.XMLUtil.readerToString(reader);
+                xml = XMLUtil.replaceSystemProps(xml);
+                final Element e = org.hornetq.utils.XMLUtil.stringToElement(xml);
+
+                final FileConfigurationParser parser = new FileConfigurationParser();
+                parser.setValidateAIO(true);
+                parser.parseMainConfig(e, configuration);
+            }
 
             // Step 2. Create the JMS configuration
             final JMSConfiguration jmsConfig = new JMSConfigurationImpl();
 
             // Step 3. Configure the JMS ConnectionFactory
-            final ArrayList<String> connectorNames = new ArrayList<String>();
-            connectorNames.add("connector");
-            final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("cf", false, connectorNames, "/cf");
+            final ConnectionFactoryConfiguration cfConfig =
+                new ConnectionFactoryConfigurationImpl("ConnectionFactory", false, Arrays.asList("in-vm-connector"), "/ConnectionFactory");
             jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
-            // Step 4. Configure the JMS Queue
-            final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, "/queue/queue1");
+            // Step 4. Configure the JMS Queue & Topic
+            final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, "/queues/queue1");
             jmsConfig.getQueueConfigurations().add(queueConfig);
+
+            final TopicConfiguration topicConfiguration = new TopicConfigurationImpl("topic1", "/topics/topic1");
+            jmsConfig.getTopicConfigurations().add(topicConfiguration);
 
             // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
             final EmbeddedJMS jmsServer = new EmbeddedJMS();
             jmsServer.setConfiguration(configuration);
             jmsServer.setJmsConfiguration(jmsConfig);
             jmsServer.start();
+
             this.jmsServer = jmsServer;
+            hornetQService = new HornetQService(jmsServer);
         } catch (final Exception e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
         final EmbeddedJMS jmsServer = this.jmsServer;
         if (null != jmsServer) {
             try {
@@ -132,6 +236,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                 final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(HornetQServerStartup.class));
                 log.error("Stopping HornetQ server failed.", e);
             }
+            hornetQService = null;
             this.jmsServer = null;
         }
     }

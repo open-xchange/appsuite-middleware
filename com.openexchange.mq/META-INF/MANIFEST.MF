@@ -17,11 +17,18 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework
-Export-Package: com.openexchange.mq
-Bundle-ClassPath: lib/hornetq-core.jar,
+Export-Package: com.openexchange.mq,
+ javax.jms,
+ org.jboss.naming,
+ org.jnp.interfaces,
+ org.jnp.interfaces.java,
+ org.jnp.interfaces.jnp
+Bundle-ClassPath: lib/hornetq-bootstrap.jar,
+ lib/hornetq-core.jar,
  lib/hornetq-jms.jar,
  lib/hornetq-logging.jar,
  lib/jboss-jms-api.jar,
+ lib/jnp-client.jar,
  lib/netty.jar,
  .
 Bundle-Activator: com.openexchange.mq.osgi.MQActivator

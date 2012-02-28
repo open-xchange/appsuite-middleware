@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,65 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.mq.hornetq;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.DescriptionFactory;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.descriptions.ModuleDescription;
-import com.openexchange.documentation.internal.DefaultDescriptionFactory;
-import com.openexchange.documentation.internal.DefaultDocumentationRegistry;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.HousekeepingActivator;
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
+import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQExceptionCodes;
+import com.openexchange.mq.MQService;
+
 
 /**
- * {@link DocumentationActivator}
+ * {@link HornetQService} - The HornetQ Message Queue service.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DocumentationActivator extends HousekeepingActivator {
-	
+public final class HornetQService implements MQService {
+
+    private final EmbeddedJMS jmsServer;
+
     /**
-     * Initializes a new {@link DocumentationActivator}.
+     * Initializes a new {@link HornetQService}.
      */
-    public DocumentationActivator() {
+    public HornetQService(final EmbeddedJMS jmsServer) {
         super();
+        this.jmsServer = jmsServer;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public ConnectionFactory lookupConnectionFactory(final String name) throws OXException {
+        try {
+            return (ConnectionFactory) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
+        }
     }
 
     @Override
-    protected void startBundle() throws Exception {
-    	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
-    	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
-    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
-    	super.track(AJAXActionServiceFactory.class, new AJAXActionServiceFactoryListener(processor));
-    	super.track(ModuleDescription.class, new ModuleDescriptionListener(processor));    	
-    	super.openTrackers();
-    	super.registerService(DocumentationRegistry.class, registry);
-    	super.registerService(DescriptionFactory.class, factory);
+    public Queue lookupQueue(final String name) throws OXException {
+        try {
+            return (Queue) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
+        }
     }
-    
+
+    @Override
+    public Topic lookupTopic(final String name) throws OXException {
+        try {
+            return (Topic) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
+        }
+    }
+
 }

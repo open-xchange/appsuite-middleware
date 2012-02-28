@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,22 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.documentation;
 
-import org.osgi.framework.ServiceReference;
-
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.SimpleRegistryListener;
+import java.util.Collection;
 
 /**
- * {@link DocumentationListener} - Recognizes services with documentation annotations.
- * 
+ * {@link AnnotatedServices}
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DocumentationListener implements SimpleRegistryListener<AJAXActionServiceFactory> {
-	
-	private final DocumentationProcessor processor;
+public interface AnnotatedServices {
 
     /**
-     * Initializes a new {@link DocumentationListener}.
+     * Gets the supported services, which may be decorated with {@link Action} annotations.
+     * 
+     * @return The supported services
      */
-    public DocumentationListener(final DocumentationProcessor processor) {
-        super();
-        this.processor = processor;
-    }
-	
-	@Override
-	public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.add(service);
-	}
-
-	@Override
-	public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.remove(service);
-	}
+    Collection<?> getSupportedServices();
 
 }

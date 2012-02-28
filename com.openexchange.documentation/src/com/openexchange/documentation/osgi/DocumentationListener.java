@@ -50,36 +50,35 @@
 package com.openexchange.documentation.osgi;
 
 import org.osgi.framework.ServiceReference;
-
-import com.openexchange.documentation.descriptions.ModuleDescription;
 import com.openexchange.documentation.internal.DocumentationProcessor;
 import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link ModuleDescriptionListener} - Recognizes services providing a module description directly.
+ * {@link DocumentationListener} - Recognizes services with documentation annotations.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ModuleDescriptionListener implements SimpleRegistryListener<ModuleDescription> {
+public class DocumentationListener implements SimpleRegistryListener<Object> {
 	
 	private final DocumentationProcessor processor;
 
     /**
-     * Initializes a new {@link ModuleDescriptionListener}.
+     * Initializes a new {@link DocumentationListener}.
      */
-    public ModuleDescriptionListener(final DocumentationProcessor processor) {
+    public DocumentationListener(final DocumentationProcessor processor) {
         super();
         this.processor = processor;
     }
-	
-	@Override
-	public void added(final ServiceReference<ModuleDescription> ref, final ModuleDescription service) {
-		this.processor.add(service);
-	}
 
-	@Override
-	public void removed(final ServiceReference<ModuleDescription> ref, final ModuleDescription service) {
-		this.processor.remove(service);
-	}
+    @Override
+    public void added(ServiceReference<Object> ref, Object service) {
+        this.processor.add(service);
+    }
+
+    @Override
+    public void removed(ServiceReference<Object> ref, Object service) {
+        this.processor.remove(service);
+        
+    }
 
 }

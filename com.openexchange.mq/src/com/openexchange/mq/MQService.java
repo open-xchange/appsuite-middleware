@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,43 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.mq;
 
-import org.osgi.framework.ServiceReference;
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
+import com.openexchange.exception.OXException;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link AJAXActionServiceFactoryListener} - Recognizes services with documentation annotations.
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link MQService} - The generic Message Queue service.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJAXActionServiceFactoryListener implements SimpleRegistryListener<AJAXActionServiceFactory> {
-	
-	private final DocumentationProcessor processor;
+public interface MQService {
 
     /**
-     * Initializes a new {@link AJAXActionServiceFactoryListener}.
+     * Lookup in the registry for registered {@link ConnectionFactory}.
+     *
+     * @param name The name of the {@link ConnectionFactory}
+     * @return The look-up {@link ConnectionFactory} instance.
      */
-    public AJAXActionServiceFactoryListener(final DocumentationProcessor processor) {
-        super();
-        this.processor = processor;
-    }
-	
-	@Override
-	public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.add(service);
-	}
+    public ConnectionFactory lookupConnectionFactory(String name) throws OXException;
 
-	@Override
-	public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.remove(service);
-	}
+    /**
+     * Lookup in the registry for registered {@link Queue}.
+     *
+     * @param name The name of the queue
+     * @return The look-up {@link Queue} instance.
+     */
+    public Queue lookupQueue(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered {@link Topic}.
+     *
+     * @param name The name of the topic
+     * @return The look-up {@link Topic} instance.
+     */
+    public Topic lookupTopic(String name) throws OXException;
 
 }

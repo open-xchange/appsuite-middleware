@@ -47,75 +47,62 @@
  *
  */
 
-package com.openexchange.documentation.internal;
+package com.openexchange.documentation.osgi;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.documentation.DescriptionFactory;
+import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ModuleDescription;
+import com.openexchange.documentation.internal.DefaultDescriptionFactory;
+import com.openexchange.documentation.internal.DefaultDocumentationRegistry;
+import com.openexchange.documentation.internal.DocumentationProcessor;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link DocumentationProcessor} - Processes services implementing {@link AJAXActionServiceFactory} 
- * and extracts their module description.
- * 
+ * {@link DocumentationActivator}
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DocumentationProcessor {
+public class DocumentationActivator extends HousekeepingActivator {
+    
+    private final String[] TRACKED_CLASSES = {
+        AnnotatedServices.class.getName(),
+        ModuleDescription.class.getName(),
+        "com.openexchange.ajax.requesthandler.AJAXActionServiceFactory"
+    };    
 	
-	private final DefaultDocumentationRegistry registry;
-	private final DescriptionFactory factory;
-
     /**
-     * Initializes a new {@link DocumentationProcessor}.
+     * Initializes a new {@link DocumentationActivator}.
      */
-    public DocumentationProcessor(final DefaultDocumentationRegistry registry, final DescriptionFactory factory) {
+    public DocumentationActivator() {
         super();
-        this.registry = registry;
-        this.factory = factory;
     }
 
-    /**
-     * Processes the supplied service and adds the extracted description to the registry. 
-     * 
-     * @param service the service to add
-     */
-	public void add(final AJAXActionServiceFactory service) {
-		DocumentationBuilder builder = new DocumentationBuilder(factory);
-		builder.add(service.getClass()).add(service.getSupportedServices());
-		this.add(builder.getModuleDescription());
-	}
-	
-	public void add(final ModuleDescription description) {		
-		this.registry.addModule(description);
-	}
-	
-	/**
-     * Processes the supplied service and removes the associated description from the registry. 
-	 * 
-	 * @param service the service to remove
-	 */
-	public void remove(final AJAXActionServiceFactory service) {
-		this.remove(this.getModuleName(service));
-	}
-	
-	public void remove(final ModuleDescription description) {
-		this.remove(description.getName());
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
 
-	private void remove(final String module) {		
-		if (null != module) {
-			this.registry.removeModule(module);
-		}
-	}	
-	
-	private String getModuleName(final AJAXActionServiceFactory service) {
-		if (null != service) {
-			final DocumentationBuilder builder = new DocumentationBuilder(factory);
-			builder.add(service.getClass());
-			if (builder.hasModule()) {
-				return builder.getModuleDescription().getName();
-			}
-		}
-		return null;
-	}
-	
+    @Override
+    protected void startBundle() throws Exception {
+    	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
+    	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
+    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
+    	super.track(constructFilter(), new DocumentationListener(processor));
+    	super.openTrackers();
+    	super.registerService(DocumentationRegistry.class, registry);
+    	super.registerService(DescriptionFactory.class, factory);
+    }
+    
+    private Filter constructFilter() throws InvalidSyntaxException {
+        final StringBuilder stringBuilder = new StringBuilder("(|");
+        for (final String className : TRACKED_CLASSES) {
+            stringBuilder.append('(').append(Constants.OBJECTCLASS).append('=').append(className).append(')');
+        }
+        stringBuilder.append(')');
+        return context.createFilter(stringBuilder.toString());
+    }
 }

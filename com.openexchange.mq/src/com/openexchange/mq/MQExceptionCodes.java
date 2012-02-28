@@ -69,6 +69,18 @@ public enum MQExceptionCodes implements OXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR(MQExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    /**
+     * No connection factory found for name: %1$s
+     */
+    CF_NOT_FOUND(MQExceptionMessages.CF_NOT_FOUND_MSG, CATEGORY_ERROR, 3),
+    /**
+     * No queue found for name: %1$s
+     */
+    QUEUE_NOT_FOUND(MQExceptionMessages.QUEUE_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
+    /**
+     * No topicfound for name: %1$s
+     */
+    TOPIC_NOT_FOUND(MQExceptionMessages.TOPIC_NOT_FOUND_MSG, CATEGORY_ERROR, 5),
 
     ;
 

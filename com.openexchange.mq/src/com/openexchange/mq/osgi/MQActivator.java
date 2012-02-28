@@ -53,6 +53,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mq.MQConstants;
+import com.openexchange.mq.MQServerStartup;
+import com.openexchange.mq.MQService;
 import com.openexchange.mq.hornetq.HornetQServerStartup;
 import com.openexchange.mq.services.MQServices;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -63,6 +65,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQActivator extends HousekeepingActivator {
+
+    private volatile MQServerStartup serverStartup;
 
     /**
      * Initializes a new {@link MQActivator}.
@@ -81,9 +85,14 @@ public final class MQActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
         log.info("Starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
         try {
+            // Set service look-up
             MQServices.setServiceLookup(this);
-            new HornetQServerStartup().start();
-            
+            // Start MQ server
+            final MQServerStartup serverStartup = new HornetQServerStartup();
+            serverStartup.start();
+            this.serverStartup = serverStartup;
+            // Register service(s)
+            registerService(MQService.class, serverStartup.getService());
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;
@@ -92,6 +101,11 @@ public final class MQActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        final MQServerStartup serverStartup = this.serverStartup;
+        if (null != serverStartup) {
+            serverStartup.stop();
+            this.serverStartup = null;
+        }
         MQServices.setServiceLookup(null);
         super.stopBundle();
     }
