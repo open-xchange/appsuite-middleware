@@ -21,5 +21,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-mailfilter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-zeroconf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-pop3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-preview"/>
 </provider>
 </psf>
