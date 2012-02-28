@@ -65,6 +65,15 @@ public final class MQExceptionMessages implements LocalizableStrings {
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
+    // No connection factory found for name: %1$s
+    public static final String CF_NOT_FOUND_MSG = "No connection factory found for name: %1$s";
+    
+    // No queue found for name: %1$s
+    public static final String QUEUE_NOT_FOUND_MSG = "No queue found for name: %1$s";
+    
+    // No topic found for name: %1$s
+    public static final String TOPIC_NOT_FOUND_MSG = "No topic found for name: %1$s";
+
     /**
      * Initializes a new {@link MQExceptionMessages}.
      */

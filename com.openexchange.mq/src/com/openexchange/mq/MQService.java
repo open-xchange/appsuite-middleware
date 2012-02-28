@@ -49,22 +49,41 @@
 
 package com.openexchange.mq;
 
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
+ * {@link MQService} - The generic Message Queue service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQConstants {
+public interface MQService {
 
     /**
-     * The symbolic name of the Message Queue bundle.
+     * Lookup in the registry for registered {@link ConnectionFactory}.
+     *
+     * @param name The name of the {@link ConnectionFactory}
+     * @return The look-up {@link ConnectionFactory} instance.
      */
-    public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
+    public ConnectionFactory lookupConnectionFactory(String name) throws OXException;
 
     /**
-     * The symbolic name of the Message Queue bundle.
+     * Lookup in the registry for registered {@link Queue}.
+     *
+     * @param name The name of the queue
+     * @return The look-up {@link Queue} instance.
      */
-    public static final int MQ_LISTEN_PORT = 5445;
+    public Queue lookupQueue(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered {@link Topic}.
+     *
+     * @param name The name of the topic
+     * @return The look-up {@link Topic} instance.
+     */
+    public Topic lookupTopic(String name) throws OXException;
 
 }

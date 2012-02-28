@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/jnp-client.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hornetq-bootstrap.jar" sourcepath="sources/hornetq-2.2.5-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hornetq-logging.jar" sourcepath="sources/hornetq-2.2.5-src.zip"/>

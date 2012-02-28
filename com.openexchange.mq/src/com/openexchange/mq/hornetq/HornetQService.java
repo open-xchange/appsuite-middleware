@@ -47,24 +47,65 @@
  *
  */
 
-package com.openexchange.mq;
+package com.openexchange.mq.hornetq;
+
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
+import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQExceptionCodes;
+import com.openexchange.mq.MQService;
 
 
 /**
- * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
+ * {@link HornetQService} - The HornetQ Message Queue service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQConstants {
+public final class HornetQService implements MQService {
+
+    private final EmbeddedJMS jmsServer;
 
     /**
-     * The symbolic name of the Message Queue bundle.
+     * Initializes a new {@link HornetQService}.
      */
-    public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
+    public HornetQService(final EmbeddedJMS jmsServer) {
+        super();
+        this.jmsServer = jmsServer;
+    }
 
-    /**
-     * The symbolic name of the Message Queue bundle.
-     */
-    public static final int MQ_LISTEN_PORT = 5445;
+    @Override
+    public ConnectionFactory lookupConnectionFactory(final String name) throws OXException {
+        try {
+            return (ConnectionFactory) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
+        }
+    }
+
+    @Override
+    public Queue lookupQueue(final String name) throws OXException {
+        try {
+            return (Queue) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
+        }
+    }
+
+    @Override
+    public Topic lookupTopic(final String name) throws OXException {
+        try {
+            return (Topic) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
+        }
+    }
 
 }
