@@ -1499,7 +1499,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Set account information
          */
         for (final MailMessage mail : mails) {
-            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
                 mail.setAccountId(accountId);
             }
         }
@@ -1815,7 +1815,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Set account information
          */
         for (final MailMessage mail : mails) {
-            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
                 mail.setAccountId(accountId);
             }
         }
