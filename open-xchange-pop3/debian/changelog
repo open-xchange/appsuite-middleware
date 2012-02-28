@@ -1,0 +1,5 @@
+open-xchange-pop3 (7.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Feb 2012 16:46:16 +0100

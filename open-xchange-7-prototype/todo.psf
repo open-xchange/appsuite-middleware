@@ -2,8 +2,6 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pop3"/>
-
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview.thirdwing"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.json"/>
