@@ -51,9 +51,11 @@ package com.openexchange.mq.hornetq;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.jms.Queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.core.TransportConfiguration;
+import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.core.config.Configuration;
 import org.hornetq.core.config.impl.ConfigurationImpl;
 import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
@@ -61,16 +63,18 @@ import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
 import org.hornetq.jms.server.config.JMSConfiguration;
 import org.hornetq.jms.server.config.JMSQueueConfiguration;
+import org.hornetq.jms.server.config.TopicConfiguration;
 import org.hornetq.jms.server.config.impl.ConnectionFactoryConfigurationImpl;
 import org.hornetq.jms.server.config.impl.JMSConfigurationImpl;
 import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
+import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
 import org.hornetq.jms.server.embedded.EmbeddedJMS;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQServerStartup;
 
 /**
- * {@link HornetQServerStartup} - The start-up implementation for hornetq message queue.
+ * {@link HornetQServerStartup} - The start-up implementation for HornetQ message queue.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -78,11 +82,31 @@ public final class HornetQServerStartup implements MQServerStartup {
 
     private volatile EmbeddedJMS jmsServer;
 
+    private volatile Queue managementQueue;
+
     /**
      * Initializes a new {@link HornetQServerStartup}.
      */
     public HornetQServerStartup() {
         super();
+    }
+
+    /**
+     * Gets the special queue for managing HornetQ.
+     * 
+     * @return The special queue for managing HornetQ.
+     */
+    public Queue getManagementQueue() {
+        Queue managementQueue = this.managementQueue;
+        if (null == managementQueue) {
+            synchronized (this) {
+                managementQueue = this.managementQueue;
+                if (null == managementQueue) {
+                    this.managementQueue = managementQueue = HornetQJMSClient.createQueue("hornetq.management");
+                }
+            }
+        }
+        return managementQueue;
     }
 
     @Override
@@ -92,10 +116,10 @@ public final class HornetQServerStartup implements MQServerStartup {
             final Configuration configuration = new ConfigurationImpl();
             configuration.setPersistenceEnabled(false);
             configuration.setSecurityEnabled(false);
+            // Set acceptor: An acceptor defines a way in which connections can be made to the HornetQ server.
             configuration.getAcceptorConfigurations().add(new TransportConfiguration(NettyAcceptorFactory.class.getName()));
-
-            final TransportConfiguration connectorConfig = new TransportConfiguration(NettyConnectorFactory.class.getName());
-            configuration.getConnectorConfigurations().put("connector", connectorConfig);
+            // Set connector: Whereas acceptors are used on the server to define how we accept connections, connectors are used by a client to define how it connects to a server.
+            configuration.getConnectorConfigurations().put("connector", new TransportConfiguration(NettyConnectorFactory.class.getName()));
 
             // Step 2. Create the JMS configuration
             final JMSConfiguration jmsConfig = new JMSConfigurationImpl();
@@ -103,12 +127,16 @@ public final class HornetQServerStartup implements MQServerStartup {
             // Step 3. Configure the JMS ConnectionFactory
             final List<String> connectorNames = new ArrayList<String>();
             connectorNames.add("connector");
-            final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("ConnectionFactory", false, connectorNames, "/ConnectionFactory");
+            final ConnectionFactoryConfiguration cfConfig =
+                new ConnectionFactoryConfigurationImpl("ConnectionFactory", false, connectorNames, "/ConnectionFactory");
             jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
-            // Step 4. Configure the JMS Queue
+            // Step 4. Configure the JMS Queue & Topic
             final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, "/queue/queue1");
             jmsConfig.getQueueConfigurations().add(queueConfig);
+
+            final TopicConfiguration topicConfiguration = new TopicConfigurationImpl("topic1", "/topic/topic1");
+            jmsConfig.getTopicConfigurations().add(topicConfiguration);
 
             // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
             final EmbeddedJMS jmsServer = new EmbeddedJMS();
