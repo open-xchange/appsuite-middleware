@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,24 +64,40 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.taskmanagement.ExtendedFutureTask;
 import com.openexchange.admin.taskmanagement.TaskManager;
+import com.openexchange.admin.tools.AdminCache;
 
 public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface {
-    
+
+    private final AdminCache cache;
+
     public OXTaskMgmtImpl() throws StorageException {
         super();
+        this.cache = ClientAdminThread.cache;
     }
 
     private static final Log log = LogFactory.getLog(OXTaskMgmtImpl.class);
+
+    private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException {
+        if( cache.isMasterAdmin(creds) ) {
+            new BasicAuthenticator().doAuthentication(creds);
+        } else {
+            contextcheck(ctx);
+            new BasicAuthenticator().doAuthentication(creds, ctx);
+        }
+    }
     
     public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            new BasicAuthenticator().doAuthentication(cred, ctx);
+            doAuth(cred, ctx);
             if (id < 0) {
                 throw new InvalidDataException("Job ID must be > 0.");
             }
-            TaskManager.getInstance().deleteJob(id);
+            if( cache.isMasterAdmin(cred) ) {
+                TaskManager.getInstance().deleteJob(id);
+            } else {
+                contextcheck(ctx);
+                TaskManager.getInstance().deleteJob(id, ctx.getId());
+            }
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -98,10 +115,13 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
     public void flush(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            new BasicAuthenticator().doAuthentication(cred, ctx);
-            TaskManager.getInstance().flush();
+            doAuth(cred, ctx);
+            if( cache.isMasterAdmin(cred) ) {
+                TaskManager.getInstance().flush();
+            } else {
+                contextcheck(ctx);
+                TaskManager.getInstance().flush(ctx.getId());
+            }
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -119,10 +139,13 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
     
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
         try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            new BasicAuthenticator().doAuthentication(cred, ctx);
-            return TaskManager.getInstance().getJobList();
+            doAuth(cred, ctx);
+            if( cache.isMasterAdmin(cred) ) {
+                return TaskManager.getInstance().getJobList();
+            } else {
+                contextcheck(ctx);
+                return TaskManager.getInstance().getJobList(ctx.getId());
+            }
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -137,10 +160,13 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
     
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
         try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            new BasicAuthenticator().doAuthentication(cred, ctx);
-            return getTaskResults(id);
+            doAuth(cred, ctx);
+            if( cache.isMasterAdmin(cred) ) {
+                return getTaskResults(id, null);
+            } else {
+                contextcheck(ctx);
+                return getTaskResults(id, ctx.getId());
+            }
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -153,32 +179,23 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         } catch (final InterruptedException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } // We needn't catch the ExecutionException because this is logged before
+        } catch (TaskManagerException e) {
+            log.error(e.getMessage(), e);
+            throw new InvalidDataException(e.getMessage());
+        }
     }
 
-    public Object getTaskResults(final int id) throws InterruptedException, ExecutionException, InvalidDataException {
+    private Object getTaskResults(final int id, final Integer cid) throws InterruptedException, ExecutionException, InvalidDataException, TaskManagerException {
         if (id < 0) {
             throw new InvalidDataException("Task must be a value >= 0");
         }
-        final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id);
+        final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id, cid);
         if (null != task) {
             if (task.isDone()) {
                 return task.get();
             } else {
                 return null;
             }
-        } else {
-            throw new InvalidDataException("No such Task ID");
-        }
-    }
-
-    public boolean isTaskDone(final int id) throws InvalidDataException {
-        if (id < 0) {
-            throw new InvalidDataException("Task must be a value >= 0");
-        }
-        final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id);
-        if (null != task) {
-            return task.isDone();
         } else {
             throw new InvalidDataException("No such Task ID");
         }

@@ -73,7 +73,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "List groups", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "An array with group identifiers.",
 responseDescription = "An array of group objects as described in Group data.")
 public final class ListAction extends AbstractGroupAction {

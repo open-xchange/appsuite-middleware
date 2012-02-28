@@ -1254,14 +1254,20 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         monitorThreads = false;
     }
 
-    public void startMonitorThreads() {
+    /**
+     * Starts to monitor active threads for elapsed ones.
+     * 
+     * @param maxRunningMillis The max. allowed number if milliseconds a thread is allowed to be active
+     * @param delayMillis The frequency in milliseconds when to check for possible elapsed threads
+     */
+    public void startMonitorThreads(final long maxRunningMillis, final long delayMillis) {
         if (monitorThreads) {
             final Set<Worker> workerSet = this.workerSet;
             final Runnable monitorThread = new Runnable() {
                 
                 @Override
                 public void run() {
-                    final long stamp = System.currentTimeMillis() - 300000L;
+                    final long stamp = System.currentTimeMillis() - maxRunningMillis;
                     for (final Worker worker : workerSet) {
                         if (worker.isActive() && worker.lastStart < stamp) {
                             // Elapsed worker detected
@@ -1271,11 +1277,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             };
-            monitorFuture = scheduleWithFixedDelay(monitorThread, 10000, 10000, TimeUnit.MILLISECONDS);
+            monitorFuture = scheduleWithFixedDelay(monitorThread, delayMillis, delayMillis, TimeUnit.MILLISECONDS);
         }
     }
 
-    public void stopChecker() {
+    /**
+     * Stops to monitor threads.
+     */
+    public void stopMonitorThreads() {
         final ScheduledFuture<?> monitorFuture = this.monitorFuture;
         if (null != monitorFuture) {
             monitorFuture.cancel(false);

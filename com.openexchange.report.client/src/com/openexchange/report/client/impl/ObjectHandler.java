@@ -57,7 +57,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
-
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -69,154 +68,199 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
-
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
+import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
 
 public class ObjectHandler {
-	
-	protected static List<Total> getTotalObjects(MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
-    	TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Total");
-        
-    	List<Total> retval = new ArrayList<Total>();
-    	int count = 0;
-    	for (Object tmp : data.keySet()) {
-        	retval.add(new Total(
-        			((List<Object>) tmp).get(0).toString(),
-        			((List<Object>) tmp).get(1).toString())
-        	);
-        	count++;
+
+    protected static List<Total> getTotalObjects(final MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        final TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Total");
+
+        final List<Total> retval = new ArrayList<Total>();
+        for (final Object tmp : data.keySet()) {
+            retval.add(new Total(
+                ((List<Object>) tmp).get(0).toString(),
+                ((List<Object>) tmp).get(1).toString())
+            );
         }
-    	
-    	return (retval);
+
+        return (retval);
     }
- 
-	public static ClientLoginCount getClientLoginCount(MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
-		
-		ClientLoginCount retval = new ClientLoginCount();
-		
-		// method parameters for LoginCounterMBean.getNumberOfLogins()
-		Object[] gnl_params    = new Object[2];
-		String[] gnl_signature = new String[2];
-	
-		gnl_signature[0] = "java.util.Date";
-		gnl_signature[1] = "java.util.Date";
-		
-		Calendar c = Calendar.getInstance();
-		gnl_params[1] = c.getTime();  // endDate
-		c.add(Calendar.DATE, -30);
-		gnl_params[0] = c.getTime();  // startDate
-		
-		mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "USM-EAS"));
-		int usmeas = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
+
+    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
+
+        final ClientLoginCount retval = new ClientLoginCount();
+
+        // method parameters for LoginCounterMBean.getNumberOfLogins()
+        final Object[] gnl_params    = new Object[2];
+        final String[] gnl_signature = new String[2];
+
+        gnl_signature[0] = "java.util.Date";
+        gnl_signature[1] = "java.util.Date";
+
+        final Calendar c = Calendar.getInstance();
+        gnl_params[1] = c.getTime();  // endDate
+        c.add(Calendar.DATE, -30);
+        gnl_params[0] = c.getTime();  // startDate
+
+        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "USM-EAS"));
+        final int usmeas = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
         retval.setUsmeas(Integer.toString(usmeas));
-  
+
         mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "OpenXchange.HTTPClient.OXAddIn"));
-		int olox2 = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
-	    retval.setOlox2(Integer.toString(olox2));
-	    
-		return retval;
-	}
-	
-    protected static List<ContextDetail> getDetailObjects(MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
-    	TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(
-    			new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Detail");
+        final int olox2 = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
+        retval.setOlox2(Integer.toString(olox2));
 
-    	List<ContextDetail> retval = new ArrayList<ContextDetail>();
-    	for (Object tmp : data.values()) {
-    		CompositeDataSupport context = (CompositeDataSupport) tmp;
-    		TabularDataSupport moduleAccessCombinations =
-    			(TabularDataSupport)context.get("module access combinations");
+        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "com.openexchange.mobileapp"));
+        final int mobileapp = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
+        retval.setMobileapp(Integer.toString(mobileapp));
 
-    		ContextDetail contextDetail = new ContextDetail();
-    		contextDetail.setId(context.get("identifier").toString());
-    		contextDetail.setAge(context.get("age").toString());
-    		contextDetail.setCreated(context.get("created").toString());
-    		contextDetail.setAdminmac(context.get("admin permission").toString());
-    		for (Object tmp2 : moduleAccessCombinations.values()) {
-    			CompositeDataSupport moduleAccessCombination = (CompositeDataSupport) tmp2;
+        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "CARDDAV"));
+        final int carddav = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
+        retval.setCarddav(Integer.toString(carddav));
 
-    			contextDetail.addModuleAccessCombination(
-    					new ContextModuleAccessCombination(
-    							moduleAccessCombination.get("module access combination").toString(),
-    							moduleAccessCombination.get("users").toString(),
-    							moduleAccessCombination.get("inactive").toString()
-    					));
-    		}
-    		retval.add(contextDetail);
-    	}	
+        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "CALDAV"));
+        final int caldav = (Integer) mbsc.invoke(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), "getNumberOfLogins", gnl_params, gnl_signature);
+        retval.setCaldav(Integer.toString(caldav));
 
-    	return (retval);
-    }
-    
-    protected static List<List<Object>> createTotalList(List<Total> totals) {
-    	List<List<Object>> retval = new ArrayList<List<Object>>();
-    	retval.add(Arrays.asList((Object)"contexts", "users"));
-
-    	for (Total tmp : totals) {
-    		retval.add(Arrays.asList((Object)
-    				tmp.getContexts(),
-    				tmp.getUsers())
-    				);
-    	}
-
-    	return retval;
+        return retval;
     }
 
-    protected static List<List<Object>> createDetailList(List<ContextDetail> contextDetails) {
-    	List<List<Object>> retval = new ArrayList<List<Object>>();
-    	retval.add(Arrays.asList((Object) "id", "age", "created", "admin permission", "module access combination", "users", "inactive" ));
+    protected static List<MacDetail> getMacObjects(final MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        final TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(
+            new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Macs");
 
-    	TreeSet<Integer> sorted = new TreeSet<Integer>(new Comparator<Integer>() {
-			public int compare(Integer o1, Integer o2) {
-				return o1.compareTo(o2);
-			}
-    	});
-    	
-    	HashMap<String, List<List<Object>>> sortDetails = new HashMap<String, List<List<Object>>>();
+        final List<MacDetail> retval = new ArrayList<MacDetail>();
+        for (final Object tmp : data.values()) {
+            final CompositeDataSupport context = (CompositeDataSupport) tmp;
 
-    	for (ContextDetail tmp : contextDetails) {         
-    		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
-    			
-    			sorted.add(new Integer(tmp.getId()));
-    			
-    			List<List<Object>> tmpList;
-    			if (!sortDetails.containsKey(tmp.getId())) {
-    				tmpList = new ArrayList<List<Object>>();
-    			} else {
-    				tmpList = sortDetails.get(tmp.getId());
-    			}
-				tmpList.add(Arrays.asList((Object) 
-    					new Integer(tmp.getId()),
-    					tmp.getAge(),
-    					tmp.getCreated(),
-    					tmp.getAdminmac(),
-    					moduleAccessCombination.getUserAccessCombination(),
-    					moduleAccessCombination.getUserCount(),
-    					moduleAccessCombination.getInactiveCount()
-    				));
-				sortDetails.put(tmp.getId(), tmpList);
-    		}
-    	}
+            final MacDetail macDetail = new MacDetail();
+            macDetail.setId(context.get("mac").toString());
+            macDetail.setCount(context.get("count").toString());
+            macDetail.setNrAdm(context.get("nradmin").toString());
+            macDetail.setNrDisabled(context.get("nrdisabled").toString());
+            retval.add(macDetail);
+        }
 
-    	for (Integer tmp : sorted) {
-    		for (List<Object> tmpList : sortDetails.get(String.valueOf(tmp))) {
-    			retval.add(tmpList);
-    		}
-    	}
-
-    	return retval;
-    }
-    
-    protected static List<List<Object>> createVersionList(String[] versions) {
-    	List<List<Object>> retval = new ArrayList<List<Object>>();
-    	retval.add(Arrays.asList((Object)"module", "version"));
-    	retval.add(Arrays.asList((Object)"admin", versions[0]));
-    	retval.add(Arrays.asList((Object)"groupware", versions[0]));
-    	return retval;
+        return (retval);
     }
 
-	
+    protected static List<ContextDetail> getDetailObjects(final MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        final TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(
+            new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Detail");
+
+        final List<ContextDetail> retval = new ArrayList<ContextDetail>();
+        for (final Object tmp : data.values()) {
+            final CompositeDataSupport context = (CompositeDataSupport) tmp;
+            final TabularDataSupport moduleAccessCombinations =
+                (TabularDataSupport)context.get("module access combinations");
+
+            final ContextDetail contextDetail = new ContextDetail();
+            contextDetail.setId(context.get("identifier").toString());
+            contextDetail.setAge(context.get("age").toString());
+            contextDetail.setCreated(context.get("created").toString());
+            contextDetail.setAdminmac(context.get("admin permission").toString());
+            for (final Object tmp2 : moduleAccessCombinations.values()) {
+                final CompositeDataSupport moduleAccessCombination = (CompositeDataSupport) tmp2;
+
+                contextDetail.addModuleAccessCombination(
+                    new ContextModuleAccessCombination(
+                        moduleAccessCombination.get("module access combination").toString(),
+                        moduleAccessCombination.get("users").toString(),
+                        moduleAccessCombination.get("inactive").toString()
+                    ));
+            }
+            retval.add(contextDetail);
+        }
+
+        return (retval);
+    }
+
+    protected static List<List<Object>> createTotalList(final List<Total> totals) {
+        final List<List<Object>> retval = new ArrayList<List<Object>>();
+        retval.add(Arrays.asList((Object)"contexts", "users"));
+
+        for (final Total tmp : totals) {
+            retval.add(Arrays.asList((Object)
+                tmp.getContexts(),
+                tmp.getUsers())
+            );
+        }
+
+        return retval;
+    }
+
+    protected static List<List<Object>> createDetailList(final List<ContextDetail> contextDetails) {
+        final List<List<Object>> retval = new ArrayList<List<Object>>();
+        retval.add(Arrays.asList((Object) "id", "age", "created", "admin permission", "module access combination", "users", "inactive" ));
+
+        final TreeSet<Integer> sorted = new TreeSet<Integer>(new Comparator<Integer>() {
+            public int compare(final Integer o1, final Integer o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        final HashMap<String, List<List<Object>>> sortDetails = new HashMap<String, List<List<Object>>>();
+
+        for (final ContextDetail tmp : contextDetails) {
+            for (final ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
+
+                sorted.add(new Integer(tmp.getId()));
+
+                List<List<Object>> tmpList;
+                if (!sortDetails.containsKey(tmp.getId())) {
+                    tmpList = new ArrayList<List<Object>>();
+                } else {
+                    tmpList = sortDetails.get(tmp.getId());
+                }
+                tmpList.add(Arrays.asList((Object)
+                    new Integer(tmp.getId()),
+                    tmp.getAge(),
+                    tmp.getCreated(),
+                    tmp.getAdminmac(),
+                    moduleAccessCombination.getUserAccessCombination(),
+                    moduleAccessCombination.getUserCount(),
+                    moduleAccessCombination.getInactiveCount()
+                ));
+                sortDetails.put(tmp.getId(), tmpList);
+            }
+        }
+
+        for (final Integer tmp : sorted) {
+            for (final List<Object> tmpList : sortDetails.get(String.valueOf(tmp))) {
+                retval.add(tmpList);
+            }
+        }
+
+        return retval;
+    }
+
+    protected static List<List<Object>> createMacList(final List<MacDetail> macDetails) {
+        final List<List<Object>> retval = new ArrayList<List<Object>>();
+        retval.add(Arrays.asList((Object) "mac", "count", "adm", "disabled" ));
+
+        for (final MacDetail tmp : macDetails) {
+            retval.add(Arrays.asList((Object) tmp.getId(), tmp.getCount(), tmp.getNrAdm(), tmp.getNrDisabled() ));
+        }
+        return retval;
+    }
+
+    protected static List<List<Object>> createVersionList(final String[] versions) {
+        final List<List<Object>> retval = new ArrayList<List<Object>>();
+        retval.add(Arrays.asList((Object)"module", "version"));
+        retval.add(Arrays.asList((Object)"admin", versions[0]));
+        retval.add(Arrays.asList((Object)"groupware", versions[1]));
+        return retval;
+    }
+
+    protected static List<List<Object>> createLogincountList(final ClientLoginCount lcount) {
+        final List<List<Object>> retval = new ArrayList<List<Object>>();
+        retval.add(Arrays.asList((Object)"usmeas", "olox2", "mobileapp", "carddav", "caldav"));
+        retval.add(Arrays.asList((Object)lcount.getUsmeas(), lcount.getOlox2(), lcount.getMobileapp(), lcount.getCarddav(), lcount.getCaldav()));
+        return retval;
+    }
+
 }

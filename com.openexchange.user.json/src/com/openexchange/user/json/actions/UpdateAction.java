@@ -82,7 +82,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a user.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "id", description = "Object ID of the updated user."),
-		@Parameter(name = "timestamp", type = Type.NUMBER, description = "Timestamp of the updated user. If the user was modified after the specified timestamp, then the update must fail."),
+		@Parameter(name = "timestamp", type = Type.NUMBER, description = "Timestamp of the updated user. If the user was modified after the specified timestamp, then the update must fail.")
 }, requestBody = "User object as described in Common object data, Detailed contact data and Detailed user data. Only modified fields are present. Note: \"timezone\" and \"locale\" are the only fields from Detailed user data which are allowed to be updated.", 
 responseDescription = "Response with timestamp: An empty object.")
 public final class UpdateAction extends AbstractUserAction {

@@ -100,7 +100,7 @@ import com.openexchange.user.json.writer.UserWriter;
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "columns", description = "The requested fields."),
 		@Parameter(name = "sort", optional = true, type = Type.NUMBER, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected users with global address book) the parameter \"order\" ist NOT necessary and will be ignored."),
-		@Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
+		@Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, requestBody = "An Object as described in Search users. Alternative request body: An Object as described in Search users alternative.", 
 responseDescription = "An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class SearchAction extends AbstractUserAction {

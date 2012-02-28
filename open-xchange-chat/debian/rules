@@ -12,7 +12,7 @@ configure-stamp:
 
 build: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
 	touch build-stamp
 
@@ -21,12 +21,12 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
-	dh_clean 
+	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
 	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-chat -f build/build.xml build
 

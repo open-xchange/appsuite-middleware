@@ -139,6 +139,35 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         final static String TEXT = "text";
     }
 
+    enum EnotifyActionFields {
+        MESSAGE("message",":message"),
+        METHOD("method",null);
+
+        private final String fieldname;
+
+        private final String tagname;
+
+        private EnotifyActionFields(final String fieldname, final String tagname) {
+            this.fieldname = fieldname;
+            this.tagname = tagname;
+        }
+
+        /**
+         * @return the fieldname
+         */
+        public final String getFieldname() {
+            return fieldname;
+        }
+
+        /**
+         * @return the tagname
+         */
+        public final String getTagname() {
+            return tagname;
+        }
+
+    }
+    
     enum VacationActionFields {
         DAYS("days",":days"),
         ADDRESSES("addresses",":addresses"),
@@ -207,6 +236,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return new TagArgument(token);
     }
 
+    static TagArgument createTagArg(final EnotifyActionFields fields) {
+        final Token token = new Token();
+        token.image = fields.getTagname();
+        return new TagArgument(token);
+    }
+    
     public static TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;

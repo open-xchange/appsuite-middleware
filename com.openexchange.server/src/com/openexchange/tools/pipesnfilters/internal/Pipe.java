@@ -116,8 +116,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
             throw (PipesAndFiltersException) tmp;
         } else {
             @SuppressWarnings("unchecked")
-            final
-            T obj = (T) tmp;
+            final T obj = (T) tmp;
             col.add(obj);
             retval++;
         }

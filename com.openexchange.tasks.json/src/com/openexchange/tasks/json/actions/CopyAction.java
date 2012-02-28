@@ -74,7 +74,7 @@ import com.openexchange.tasks.json.TaskRequest;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "")
 public class CopyAction extends TaskAction {
 

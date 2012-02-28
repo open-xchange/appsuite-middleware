@@ -1,108 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="org.apache.log4j.configuration" default="install" basedir=".">
+<project name="org.apache.log4j.configuration overrides" basedir=".">
 
-    <!-- Customizable values -->
-    <property name="destdir" value=""/>
-    <property name="prefix" value="/opt/open-xchange"/>
+    <description>
+        Special build for the org.apache.log4j.configuration fragment. Conffile 
+    </description>
 
-    <!-- Constants -->
-    <property name="tmp.dir" value="tmp"/>
+	<import file="build-project.xml"/>
 
-    <property file="META-INF/MANIFEST.MF"/>
-    <property file="build.properties"/>
-
-    <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name.gw" value="${Bundle-SymbolicName}-groupware"/>
-    <property name="bundle.name.ad" value="${Bundle-SymbolicName}-admindaemon"/>
-    <property name="composite.name" value="open-xchange-log4j-${version}" />
-
-    <!-- Install Constants -->
-    <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
-
-    <fileset dir="." id="metainf">
-        <include name="META-INF/**"/>
-        <exclude name="CVS"/>
-    </fileset>
-
-    <fileset dir="jars" id="log4jFiles">
-        <include name="org.apache.log4j*.jar"/>
-    </fileset>
-
-    <!-- Install -->
-    <target name="install">
-        <antcall target="installConfig"/>
-        <antcall target="installJar"/>
+    <target name="testFor3rdPartyLib" description="We need a directory for this bundle to be able to link log4j.xml into configuration directory">
+        <property name="3rdPartyLib" value="true"/>
     </target>
 
-    <target name="installConfig">
-        <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/org.apache.log4j.ini" message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${gwbundle.d}/${bundle.name.gw}.ini" message="${bundlesdir}/${bundle.name.gw}${line.separator}"/>
-        <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini" message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${adbundle.d}/${bundle.name.ad}.ini" message="${bundlesdir}/${bundle.name.ad}${line.separator}"/>
-    </target>
-
-    <target name="installJar">
-        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
-        <mkdir dir="${bundlesdestdir}"/>
-        <!-- log4j bundle -->
-        <copy todir="${bundlesdestdir}">
-            <fileset refid="log4jFiles"/>
-        </copy>
-        <!-- conf bundle -->
-        <antcall target="installConfigBundleGW"/>
-        <antcall target="installConfigBundleAD"/>
-    </target>
-
-    <target name="installConfigBundleGW">
-        <!-- conf bundle -->
-        <property name="log4jconfigurationdirgw" value="${bundlesdestdir}/${bundle.name.gw}"/>
-        <mkdir dir="${log4jconfigurationdirgw}"/>
-        <copy todir="${log4jconfigurationdirgw}">
-            <fileset refid="metainf"/>
-        </copy>
-        <copy tofile="${destdir}${prefix}/etc/groupware/log4j.xml" file="log4j.xml"/>
-        <!-- <chmod perm="640" file="${destdir}${prefix}/etc/groupware/log4j.xml"/>-->
-        <symlink link="${log4jconfigurationdirgw}/log4j.xml" resource="${prefix}/etc/groupware/log4j.xml"/>
-    </target>
-
-    <target name="installConfigBundleAD">
-        <!-- conf bundle -->
-        <property name="log4jconfigurationdirad" value="${bundlesdestdir}/${bundle.name.ad}"/>
-        <mkdir dir="${log4jconfigurationdirad}"/>
-        <copy todir="${log4jconfigurationdirad}">
-            <fileset refid="metainf"/>
-        </copy>
-        <copy tofile="${destdir}${prefix}/etc/admindaemon/log4j.xml" file="log4j-admin.xml"/>
-        <!-- <chmod perm="640" file="${destdir}${prefix}/etc/admindaemon/log4j.xml"/>-->
-        <symlink link="${log4jconfigurationdirad}/log4j.xml" resource="${prefix}/etc/admindaemon/log4j.xml"/>
-    </target>
-
-    <!-- Dist -->
-    <target name="dist" depends="clean">
-        <property name="dist-package" value="dist-package"/>
-        <delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${composite.name}"/>
-        <copy todir="${dist-package}/${composite.name}">
-            <fileset dir=".">
-                <exclude name="**${dist-package}/**"/>
-                <exclude name="**debian/**"/>
-                <exclude name="**CVS/**"/>
-                <exclude name="Todo"/>
-            </fileset>
-        </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-            basedir="${dist-package}"
-            includes="${composite.name}/"
-            compression="gzip"/>        <!-- dpkg-source does not like anything else -->
-        <delete dir="${dist-package}"/>
-    </target>
-
-    <target name="clean">
-        <delete dir="${tmp.dir}"/>
+    <target name="postInstall">
+        <symlink link="${destDir}/${bundlesDir}/${Bundle-SymbolicName}/log4j.xml" resource="${confInstallDir}/log4j.xml"/>
     </target>
 
 </project>

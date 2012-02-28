@@ -50,29 +50,88 @@
 package com.openexchange.report.client.container;
 
 public class ClientLoginCount {
-	
-	private String usmeas;
-	
-	private String olox2;
 
-	public String getUsmeas() {
-		return usmeas;
-	}
+    private String usmeas;
 
-	public void setUsmeas(String usmeas) {
-		this.usmeas = usmeas;
-	}
+    private String olox2;
+    
+    private String mobileapp;
+    
+    private String caldav;
+    
+    private String carddav;
 
-	public String getOlox2() {
-		return olox2;
-	}
+    
+    /**
+     * @return the mobileapp
+     */
+    public final String getMobileapp() {
+        return mobileapp;
+    }
 
-	public void setOlox2(String usmjson) {
-		this.olox2 = usmjson;
-	}
-	
-	@Override
-	public String toString() {
-		return "ClientLoginCountObject [usm-eas=" + usmeas + ", olox2=" + olox2 + "]";
-	}
+    
+    /**
+     * @param mobileapp the mobileapp to set
+     */
+    public final void setMobileapp(String mobileapp) {
+        this.mobileapp = mobileapp;
+    }
+
+    
+    /**
+     * @return the caldav
+     */
+    public final String getCaldav() {
+        return caldav;
+    }
+
+    
+    /**
+     * @param caldav the caldav to set
+     */
+    public final void setCaldav(String caldav) {
+        this.caldav = caldav;
+    }
+
+    
+    /**
+     * @return the carddav
+     */
+    public final String getCarddav() {
+        return carddav;
+    }
+
+    
+    /**
+     * @param carddav the carddav to set
+     */
+    public final void setCarddav(String carddav) {
+        this.carddav = carddav;
+    }
+
+    public String getUsmeas() {
+        return usmeas;
+    }
+
+    public void setUsmeas(final String usmeas) {
+        this.usmeas = usmeas;
+    }
+
+    public String getOlox2() {
+        return olox2;
+    }
+
+    public void setOlox2(final String usmjson) {
+        this.olox2 = usmjson;
+    }
+
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "ClientLoginCount [usmeas=" + usmeas + ", olox2=" + olox2 + ", mobileapp=" + mobileapp + ", caldav=" + caldav + ", carddav=" + carddav + "]";
+    }
+
 }

@@ -56,6 +56,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -85,6 +86,8 @@ public class Create extends CreateCore {
     protected void setFurtherOptions(final AdminParser parser) {
     	 parser.setExtendedOptions();
     	 ctxabs.setAddMappingOption(parser, false);
+    	 ctxabs.setDestinationStoreIdOption(parser, false);
+    	 ctxabs.setDestinationDatabaseIdOption(parser, false);
     	 setAddAccessRightCombinationNameOption(parser);
     	 setModuleAccessOptions(parser);
     	 
@@ -97,9 +100,16 @@ public class Create extends CreateCore {
 
         // add login mappings
         ctxabs.parseAndSetAddLoginMapping(parser);
+        ctxabs.parseAndSetDestinationStoreId(parser);
+        ctxabs.parseAndSetDestinationDatabaseId(parser);
 
         ctxabs.changeMappingSetting(oxctx, ctx, auth, false);
-
+        ctx.setFilestoreId(ctxabs.getStoreid());
+        final Integer db = ctxabs.getDatabaseid();
+        if( null != db ) {
+            ctx.setWriteDatabase(new Database(db));
+        }
+        
         Context createdctx = null;
         
         // needed for comparison

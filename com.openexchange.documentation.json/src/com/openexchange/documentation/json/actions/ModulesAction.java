@@ -68,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "modules", description = "Get the descriptions of all modules.", parameters = { 
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+		@Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "An array containing objects of all module descriptions.")
 public final class ModulesAction extends DocumentationAction {
 
