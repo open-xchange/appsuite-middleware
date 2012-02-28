@@ -55,8 +55,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -69,6 +73,8 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Executor {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Executor.class));
     
     /**
      * Initializes a new {@link Executor}.
@@ -87,18 +93,18 @@ public class Executor {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
-            resultSet = stmt.executeQuery();
+            resultSet = logExecuteQuery(stmt);
             return resultSet.next() ? Tools.fromResultSet(resultSet, fields) : null; 
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
     }
     
-    public Collection<Contact> select(final Connection connection, final Table table, final int contextID, final int folderID, final ContactField[] fields) throws SQLException, OXException {
+    public List<Contact> select(final Connection connection, final Table table, final int contextID, final int folderID, final ContactField[] fields) throws SQLException, OXException {
         return this.select(connection, table, contextID, folderID, Long.MIN_VALUE, fields);
     }
     
-    public Collection<Contact> select(final Connection connection, final Table table, final int contextID, final int folderID, final long minLastModified, final ContactField[] fields) throws SQLException, OXException {
+    public List<Contact> select(final Connection connection, final Table table, final int contextID, final int folderID, final long minLastModified, final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Tools.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.FOLDER_ID.getFieldName()).append("=?");
@@ -117,7 +123,7 @@ public class Executor {
             if (Long.MIN_VALUE != minLastModified) {
                 stmt.setLong(3, minLastModified);
             }
-            resultSet = stmt.executeQuery();
+            resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
                 contacts.add(Tools.fromResultSet(resultSet, fields));
             }
@@ -127,9 +133,30 @@ public class Executor {
         }
     }
 
+    public List<Contact> select(final Connection connection, final Table table, final int contextID, final int[] objectIDs, final ContactField[] fields) throws SQLException, OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT ").append(Tools.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID).append(" IN (")
+            .append(Arrays.toString(objectIDs)).append(");");
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        final List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                contacts.add(Tools.fromResultSet(resultSet, fields));
+            }
+            return contacts; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+    
     public DistributionListEntryObject[] select(final Connection connection, final Table table, final int contextID, final int objectID) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS)).append(" FROM ").append(table).append(" WHERE ")
+        stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
             .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append("=?;"); 
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -138,11 +165,36 @@ public class Executor {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
-            resultSet = stmt.executeQuery();
+            resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
                 members.add(Tools.fromDistListResultSet(resultSet));
             }
             return members.toArray(new DistributionListEntryObject[members.size()]); 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    public Map<Integer, List<DistributionListEntryObject>> select(final Connection connection, final Table table, final int contextID, final int[] objectIDs) throws SQLException, OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
+            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append(" IN (")
+            .append(Arrays.toString(objectIDs)).append(");");
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        final Map<Integer, List<DistributionListEntryObject>> members = new HashMap<Integer, List<DistributionListEntryObject>>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                final int parentContactObjectID = resultSet.getInt(1);
+                if (false == members.containsKey(parentContactObjectID)) {
+                    members.put(parentContactObjectID, new ArrayList<DistributionListEntryObject>());
+                }
+                members.get(parentContactObjectID).add(Tools.fromDistListResultSet(resultSet));
+            }
+            return members; 
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -156,7 +208,7 @@ public class Executor {
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             Tools.setParameters(stmt, contact, fields);
-            return stmt.executeUpdate();
+            return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -164,13 +216,13 @@ public class Executor {
     
     public int insert(final Connection connection, final Table table, final int contactID, final int contextID, final DistributionListEntryObject member) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS))
-            .append(") VALUES (").append(Tools.getParameters(Tools.DISTLIST_DATABASE_FIELDS.length)).append(");");
+        stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY))
+            .append(") VALUES (").append(Tools.getParameters(Tools.DISTLIST_DATABASE_FIELDS_ARRAY.length)).append(");");
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             Tools.setParameters(stmt, member, contactID, contextID);
-            return stmt.executeUpdate();
+            return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -201,7 +253,7 @@ public class Executor {
             if (Long.MIN_VALUE != minLastModified) {
                 stmt.setLong(3, minLastModified);
             }
-            return stmt.executeUpdate();
+            return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -223,7 +275,7 @@ public class Executor {
             stmt.setInt(1 + fields.length, contact.getContextId());
             stmt.setInt(2 + fields.length, contact.getObjectID());
             stmt.setLong(3 + fields.length, minLastModified);
-            return stmt.executeUpdate();
+            return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -246,7 +298,7 @@ public class Executor {
             if (Long.MIN_VALUE != minLastModified) {
                 stmt.setLong(3, minLastModified);
             }
-            return stmt.executeUpdate();
+            return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -255,5 +307,24 @@ public class Executor {
     public int delete(final Connection connection, final Table table, final int contextID, final int objectID) throws SQLException {
         return this.delete(connection, table, contextID, objectID, Long.MIN_VALUE);
     } 
+    
+    private static ResultSet logExecuteQuery(final PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeQuery();
+        } else {
+            LOG.debug("executeUpdate: " + stmt.toString());
+            return stmt.executeQuery();
+        }   
+    }
+    
+    private static int logExecuteUpdate(final PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeUpdate();
+        } else {
+            final int rowCount = stmt.executeUpdate();
+            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected.");
+            return rowCount;
+        }   
+    }
 
 }

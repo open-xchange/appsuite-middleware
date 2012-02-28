@@ -89,7 +89,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
     
     @Override
     public Contact get(final Session session, final String folderId, final String id) throws OXException {
-        return this.get(session, id, folderId, allFields());
+        return this.get(session, folderId, id, allFields());
     }
 
     @Override
@@ -169,7 +169,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
 
     /**
-     * Create a clone from an existing contact and merges the attributes from another contact into that clone.
+     * Creates a clone from an existing contact and merges the attributes from another contact into that clone.
      * 
      * @param into the original contact that is used as base for the clone
      * @param from the contact containing the changes to be merged into the clone
@@ -182,6 +182,40 @@ public abstract class DefaultContactStorage implements ContactStorage {
             throw new IllegalArgumentException("from");
         }        
         return MERGER.merge(into, from);
+    }
+    
+    /**
+     * 
+     * @param into
+     * @param from
+     * @return
+     */
+    protected static List<Contact> merge(final List<Contact> into, final List<Contact> from) {
+        if (null == into) {
+            throw new IllegalArgumentException("into");
+        } else if (null == from) {
+            throw new IllegalArgumentException("from");
+        }
+        return MERGER.merge(into, from);
+    }
+
+    protected static List<Contact> mergeByID(final List<Contact> into, final List<Contact> from) {
+        if (null == into) {
+            throw new IllegalArgumentException("into");
+        } else if (null == from) {
+            throw new IllegalArgumentException("from");
+        }        
+        for (final Contact fromData : from) {
+            final int objectID = fromData.getObjectID();
+            for (int i = 0; i < into.size(); i++) {
+                final Contact intoData = into.get(i);
+                if (objectID == intoData.getObjectID()) {
+                    into.set(i, merge(intoData, fromData));
+                    break;
+                }
+            }
+        }
+        return into;
     }
     
     /**

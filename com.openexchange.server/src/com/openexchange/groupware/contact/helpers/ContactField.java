@@ -53,7 +53,6 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -178,7 +177,7 @@ public enum ContactField{
     NUMBER_OF_DISTRIBUTIONLIST (594 , "intfield02" , "NUMBER_OF_DISTRIBUTIONLIST" , "Number of distributionlists"  , ContactFields.NUMBER_OF_DISTRIBUTIONLIST, Types.INTEGER),
     NUMBER_OF_LINKS (103 , "intfield03" , "NUMBER_OF_LINKS" , "Number of links"  , ContactFields.NUMBER_OF_LINKS, Types.INTEGER),
     DISTRIBUTIONLIST (592 , "" , "DISTRIBUTIONLIST" , ""  , ContactFields.DISTRIBUTIONLIST, 0),
-    LINKS (591 , "intfield03" , "LINKS" , ""  , ContactFields.LINKS, Types.INTEGER),
+    LINKS (591 , "" , "LINKS" , ""  , ContactFields.LINKS, 0),
     FOLDER_ID (20 , "fid" , "FOLDER_ID" , "Folder id"  , ContactFields.FOLDER_ID, Types.INTEGER),
     CONTEXTID (593 , "cid" , "CONTEXTID" , "Context id"  , "", Types.INTEGER),
     PRIVATE_FLAG (101 , "pflag" , "PRIVATE_FLAG" , "private"  , ContactFields.PRIVATE_FLAG, Types.INTEGER),
@@ -188,9 +187,9 @@ public enum ContactField{
     LAST_MODIFIED (5 , "changing_date" , "LAST_MODIFIED" , "Changing date"  , ContactFields.LAST_MODIFIED, Types.BIGINT),
     BIRTHDAY (511 , "timestampfield01" , "BIRTHDAY" , "Birthday" , ContactFields.BIRTHDAY, Types.DATE),
     ANNIVERSARY (517 , "timestampfield02" , "ANNIVERSARY" , "Anniversary" , ContactFields.ANNIVERSARY, Types.DATE),
-    IMAGE1 (570 , "" , "IMAGE1" , ""  , ContactFields.IMAGE1, 0),
-    IMAGE_LAST_MODIFIED (597 , "" , "IMAGE_LAST_MODIFIED" , ""  ,"image_last_modified", 0),
-    IMAGE1_CONTENT_TYPE (601 , "" , "IMAGE1_CONTENT_TYPE" , ""  , "image1_content_type", 0),
+    IMAGE1 (570 , "image1" , "IMAGE1" , ""  , ContactFields.IMAGE1, Types.BLOB),
+    IMAGE_LAST_MODIFIED (597 , "changing_date" , "IMAGE_LAST_MODIFIED" , ""  ,"image_last_modified", Types.DATE),
+    IMAGE1_CONTENT_TYPE (601 , "mime_type" , "IMAGE1_CONTENT_TYPE" , ""  , "image1_content_type", Types.VARCHAR),
     INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ContactFields.USER_ID, Types.INTEGER),
     COLOR_LABEL (102 , "intfield05" , "COLOR_LABEL" , ""  , CommonFields.COLORLABEL, Types.INTEGER),
     FILE_AS (599 , "field90" , "FILE_AS" , ""  , ContactFields.FILE_AS, Types.VARCHAR),
@@ -208,7 +207,15 @@ public enum ContactField{
     HOME_ADDRESS(Contact.ADDRESS_HOME, "homeAddress", "ADDRESS_HOME", "homeAddress", ContactFields.ADDRESS_HOME, Types.VARCHAR),
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
-    UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR);
+    UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
+//    DLIST_ID(-1, "intfield02", "ID", "Member's contact object ID", DistributionListFields.ID, Types.INTEGER),
+//    DLIST_FOLDER_ID(-1, "intfield04", "FOLDER_ID", "Member's contact parent folder ID", DistributionListFields.FOLDER_ID, Types.INTEGER),
+//    DLIST_DISPLAY_NAME(-1, "field01", "DISPLAY_NAME", "Display name", DistributionListFields.DISPLAY_NAME, Types.VARCHAR),
+//    DLIST_LAST_NAME(-1, "field02", "LAST NAME", "Last name", DistributionListFields.LAST_NAME, Types.VARCHAR),
+//    DLIST_FIRST_NAME(-1, "field03", "FIRST NAME", "First name", DistributionListFields.FIRST_NAME, Types.VARCHAR),
+//    DLIST_MAIL(-1, "field04", "MAIL", "Email address", DistributionListFields.MAIL, Types.VARCHAR),
+//    DLIST_MAIL_FIELD(-1, "intfield03", "MAIL_FIELD", "Mail field", DistributionListFields.MAIL_FIELD, Types.INTEGER),
+    ;
 
     private int columnNumber, sqlType;
     private String dbName, readableName, fieldName, ajaxName;
@@ -353,8 +360,9 @@ public enum ContactField{
 				field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
 				field.getDBName().replaceAll("[_\\. ]", "").toLowerCase()
 			});
-			if(haystack.contains(needle))
-				return field;
+			if(haystack.contains(needle)) {
+                return field;
+            }
 		}
 		return null;
 	}
@@ -492,7 +500,7 @@ public enum ContactField{
         return VIRTUAL_FIELDS.contains(this);
     }
     
-    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST);
+    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS);
     public boolean isDBField() {
         return !NON_DB_FIELDS.contains(this);
     }
