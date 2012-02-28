@@ -49,8 +49,7 @@
 
 package com.openexchange.mq.hornetq;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import javax.jms.Queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,7 +79,7 @@ import com.openexchange.mq.MQServerStartup;
  */
 public final class HornetQServerStartup implements MQServerStartup {
 
-    private volatile EmbeddedJMS jmsServer;
+    private EmbeddedJMS jmsServer; // Set in synchronized context
 
     private volatile Queue managementQueue;
 
@@ -110,8 +109,12 @@ public final class HornetQServerStartup implements MQServerStartup {
     }
 
     @Override
-    public void start() throws OXException {
+    public synchronized void start() throws OXException {
         try {
+            if (null != this.jmsServer) {
+                // Already started
+                return;
+            }
             // Step 1. Create HornetQ core configuration, and set the properties accordingly
             final Configuration configuration = new ConfigurationImpl();
             configuration.setPersistenceEnabled(false);
@@ -125,10 +128,8 @@ public final class HornetQServerStartup implements MQServerStartup {
             final JMSConfiguration jmsConfig = new JMSConfigurationImpl();
 
             // Step 3. Configure the JMS ConnectionFactory
-            final List<String> connectorNames = new ArrayList<String>();
-            connectorNames.add("connector");
             final ConnectionFactoryConfiguration cfConfig =
-                new ConnectionFactoryConfigurationImpl("ConnectionFactory", false, connectorNames, "/ConnectionFactory");
+                new ConnectionFactoryConfigurationImpl("ConnectionFactory", false, Arrays.asList("connector"), "/ConnectionFactory");
             jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
             // Step 4. Configure the JMS Queue & Topic
@@ -143,6 +144,7 @@ public final class HornetQServerStartup implements MQServerStartup {
             jmsServer.setConfiguration(configuration);
             jmsServer.setJmsConfiguration(jmsConfig);
             jmsServer.start();
+
             this.jmsServer = jmsServer;
         } catch (final Exception e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -150,7 +152,7 @@ public final class HornetQServerStartup implements MQServerStartup {
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
         final EmbeddedJMS jmsServer = this.jmsServer;
         if (null != jmsServer) {
             try {
