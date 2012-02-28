@@ -95,7 +95,6 @@ public final class HornetQServerStartup implements MQServerStartup {
             configuration.getAcceptorConfigurations().add(new TransportConfiguration(NettyAcceptorFactory.class.getName()));
 
             final TransportConfiguration connectorConfig = new TransportConfiguration(NettyConnectorFactory.class.getName());
-
             configuration.getConnectorConfigurations().put("connector", connectorConfig);
 
             // Step 2. Create the JMS configuration
