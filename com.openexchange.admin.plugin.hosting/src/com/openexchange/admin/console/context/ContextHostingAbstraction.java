@@ -77,9 +77,13 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
     
     private String[] remove_mappings = null;
     private String[] add_mappings = null;
+    private Integer storeid = null;
+    private Integer databaseid = null;
     
     private CLIOption addLoginMappingOption = null;
     private CLIOption removeLoginMappingOption = null;
+    private CLIOption destinationStoreIdMappingOption = null;
+    private CLIOption destinationDatabaseIdMappingOption = null;
     
     @Override
     protected String getObjectName() {
@@ -96,6 +100,26 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
         if (parser.getOptionValue(this.addLoginMappingOption) != null) {
             this.add_mappings = ((String) parser.getOptionValue(this.addLoginMappingOption)).split(",");
         }
+    }
+
+    public void parseAndSetDestinationStoreId(final AdminParser parser) {
+        if (parser.getOptionValue(this.destinationStoreIdMappingOption) != null) {
+            this.storeid = Integer.parseInt((String)parser.getOptionValue(this.destinationStoreIdMappingOption));
+        }
+    }
+
+    public void parseAndSetDestinationDatabaseId(final AdminParser parser) {
+        if (parser.getOptionValue(this.destinationDatabaseIdMappingOption) != null) {
+            this.databaseid = Integer.parseInt((String)parser.getOptionValue(this.destinationDatabaseIdMappingOption));
+        }
+    }
+    
+    public void setDestinationStoreIdOption(final AdminParser parser,final boolean required) {
+        this.destinationStoreIdMappingOption = setShortLongOpt(parser, ContextAbstraction.OPT_CONTEXT_DESTINATION_STORE_ID_SHORT, ContextAbstraction.OPT_CONTEXT_DESTINATION_STORE_ID_LONG,"Create context in the given filestore",true, convertBooleantoTriState(required));
+    }
+
+    public void setDestinationDatabaseIdOption(final AdminParser parser,final boolean required) {
+        this.destinationDatabaseIdMappingOption = setShortLongOpt(parser, ContextAbstraction.OPT_CONTEXT_DESTINATION_DATABASE_ID_SHORT, ContextAbstraction.OPT_CONTEXT_DESTINATION_DATABASE_ID_LONG,"Create context in the given database",true, convertBooleantoTriState(required));
     }
 
     public void setAddMappingOption(final AdminParser parser,final boolean required) {
@@ -126,6 +150,22 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
                 ctx.removeLoginMappings(Arrays.asList(remove_mappings));
             }
         }
+    }
+
+    
+    /**
+     * @return the storeid
+     */
+    public final Integer getStoreid() {
+        return storeid;
+    }
+
+    
+    /**
+     * @return the databaseid
+     */
+    public final Integer getDatabaseid() {
+        return databaseid;
     }
 
     @Override

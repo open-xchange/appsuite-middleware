@@ -1000,7 +1000,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Find filestore for context.
         ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
-        ctx.setFilestoreId(OXUtilStorageInterface.getInstance().findFilestoreForContext().getId());
+        final Integer storeId = ctx.getFilestoreId();
+        if( null == storeId ) {
+            ctx.setFilestoreId(OXUtilStorageInterface.getInstance().findFilestoreForContext().getId());
+        } else {
+            if( ! OXToolStorageInterface.getInstance().existsStore(storeId) ) {
+                StorageException e = new StorageException("Filestore with id " + storeId + " does not exist"); 
+                LOG.error(e);
+                throw e;
+            }
+        }
 
         final Connection configCon;
         try {
@@ -1010,7 +1019,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e.getMessage(), e);
         }
         try {
-            final Database db = getNextDBHandleByWeight(configCon);
+            Integer dbId = null;
+            if( null != ctx.getWriteDatabase() ) {
+                dbId = ctx.getWriteDatabase().getId();
+            }
+            final Database db;
+            if( null == dbId ) {
+                db = getNextDBHandleByWeight(configCon);
+            } else {
+                db = OXToolStorageInterface.getInstance().loadDatabaseById(dbId);
+                if( null == db ) {
+                    StorageException e = new StorageException("Database with id " + dbId + " does not exist"); 
+                    LOG.error(e);
+                    throw e;
+                }
+            }
             startTransaction(configCon);
             findOrCreateSchema(configCon, db);
             contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);

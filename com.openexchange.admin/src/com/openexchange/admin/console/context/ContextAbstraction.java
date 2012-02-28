@@ -124,6 +124,12 @@ public abstract class ContextAbstraction extends UserAbstraction {
     public final static char OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT = 'L';
     public final static String OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG = "addmapping";
     
+    public final static char OPT_CONTEXT_DESTINATION_STORE_ID_SHORT = 'F';
+    public final static String OPT_CONTEXT_DESTINATION_STORE_ID_LONG = "destination-store-id";
+
+    public final static char OPT_CONTEXT_DESTINATION_DATABASE_ID_SHORT = 'D';
+    public final static String OPT_CONTEXT_DESTINATION_DATABASE_ID_LONG = "destination-database-id";
+    
     public final static char OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT = 'R';
     public final static String OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG = "removemapping";
     static final char OPT_FILESTORE_SHORT = 'f';
