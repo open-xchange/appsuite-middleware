@@ -103,7 +103,7 @@ public final class HornetQServerStartup implements MQServerStartup {
             // Step 3. Configure the JMS ConnectionFactory
             final List<String> connectorNames = new ArrayList<String>();
             connectorNames.add("connector");
-            final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("cf", false, connectorNames, "/cf");
+            final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("ConnectionFactory", false, connectorNames, "/ConnectionFactory");
             jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
             // Step 4. Configure the JMS Queue
