@@ -47,39 +47,55 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.documentation;
 
-import org.osgi.framework.ServiceReference;
-
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.SimpleRegistryListener;
+import java.util.Collection;
+import com.openexchange.documentation.descriptions.ContainerDescription;
+import com.openexchange.documentation.descriptions.ModuleDescription;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link AJAXActionServiceFactoryListener} - Recognizes services with documentation annotations.
- * 
+ * {@link DocumentationRegistry} - Provides access to descriptions for modules and containers.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AJAXActionServiceFactoryListener implements SimpleRegistryListener<AJAXActionServiceFactory> {
+public interface DocumentationRegistry {
 	
-	private final DocumentationProcessor processor;
-
     /**
-     * Initializes a new {@link AJAXActionServiceFactoryListener}.
+     * Gets the module descriptions contained in this registry.
+     * 
+     * @return the module descriptions
+     * @throws OXException If module descriptions cannot be returned
      */
-    public AJAXActionServiceFactoryListener(final DocumentationProcessor processor) {
-        super();
-        this.processor = processor;
-    }
+	Collection<ModuleDescription> getModules() throws OXException;
 	
-	@Override
-	public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.add(service);
-	}
-
-	@Override
-	public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.remove(service);
-	}
-
+    /**
+     * Gets the module description associated with given name.
+     * 
+     * @param name The name of the module description
+     * @return the module description associated with given name
+     * @throws OXException if module description cannot be returned
+     */
+	ModuleDescription getModule(String name) throws OXException;
+	
+    /**
+     * Gets the container descriptions contained in this registry.
+     * 
+     * @return the container descriptions
+     * @throws OXException if container descriptions cannot be returned
+     */
+	Collection<ContainerDescription> getContainers() throws OXException;
+	
+    /**
+     * Gets the container description associated with given name.
+     * 
+     * @param name the name of the container description
+     * @return the container description associated with given name
+     * @throws OXException if container description cannot be returned
+     */
+	ContainerDescription getContainer(String name) throws OXException;
+	
 }

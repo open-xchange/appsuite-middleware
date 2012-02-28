@@ -47,56 +47,62 @@
  *
  */
 
-package com.openexchange.documentation;
+package com.openexchange.documentation.osgi;
 
-import java.util.Collection;
-
-import com.openexchange.documentation.descriptions.ContainerDescription;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import com.openexchange.documentation.AnnotatedServices;
+import com.openexchange.documentation.DescriptionFactory;
+import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ModuleDescription;
-import com.openexchange.exception.OXException;
+import com.openexchange.documentation.internal.DefaultDescriptionFactory;
+import com.openexchange.documentation.internal.DefaultDocumentationRegistry;
+import com.openexchange.documentation.internal.DocumentationProcessor;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link DocumentationRegistry} - Provides access to descriptions for modules and containers.
+ * {@link DocumentationActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DocumentationRegistry {
+public class DocumentationActivator extends HousekeepingActivator {
+    
+    private final String[] TRACKED_CLASSES = {
+        AnnotatedServices.class.getName(),
+        ModuleDescription.class.getName(),
+        "com.openexchange.ajax.requesthandler.AJAXActionServiceFactory"
+    };    
 	
     /**
-     * Gets the module descriptions contained in this registry.
-     * 
-     * @return the module descriptions
-     * @throws OXException If module descriptions cannot be returned
+     * Initializes a new {@link DocumentationActivator}.
      */
-	Collection<ModuleDescription> getModules() throws OXException;
-	
-    /**
-     * Gets the module description associated with given name.
-     * 
-     * @param name The name of the module description
-     * @return the module description associated with given name
-     * @throws OXException if module description cannot be returned
-     */
-	ModuleDescription getModule(String name) throws OXException;
-	
-    /**
-     * Gets the container descriptions contained in this registry.
-     * 
-     * @return the container descriptions
-     * @throws OXException if container descriptions cannot be returned
-     */
-	Collection<ContainerDescription> getContainers() throws OXException;
-	
-    /**
-     * Gets the container description associated with given name.
-     * 
-     * @param name the name of the container description
-     * @return the container description associated with given name
-     * @throws OXException if container description cannot be returned
-     */
-	ContainerDescription getContainer(String name) throws OXException;
-	
+    public DocumentationActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+    	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
+    	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
+    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
+    	super.track(constructFilter(), new DocumentationListener(processor));
+    	super.openTrackers();
+    	super.registerService(DocumentationRegistry.class, registry);
+    	super.registerService(DescriptionFactory.class, factory);
+    }
+    
+    private Filter constructFilter() throws InvalidSyntaxException {
+        final StringBuilder stringBuilder = new StringBuilder("(|");
+        for (final String className : TRACKED_CLASSES) {
+            stringBuilder.append('(').append(Constants.OBJECTCLASS).append('=').append(className).append(')');
+        }
+        stringBuilder.append(')');
+        return context.createFilter(stringBuilder.toString());
+    }
 }

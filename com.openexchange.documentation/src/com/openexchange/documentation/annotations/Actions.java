@@ -47,46 +47,24 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.documentation.annotations;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.DescriptionFactory;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.descriptions.ModuleDescription;
-import com.openexchange.documentation.internal.DefaultDescriptionFactory;
-import com.openexchange.documentation.internal.DefaultDocumentationRegistry;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * {@link DocumentationActivator}
+ * {@link Actions} - Annotation for multiple actions.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DocumentationActivator extends HousekeepingActivator {
-	
-    /**
-     * Initializes a new {@link DocumentationActivator}.
-     */
-    public DocumentationActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-    	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
-    	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
-    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
-    	super.track(AJAXActionServiceFactory.class, new AJAXActionServiceFactoryListener(processor));
-    	super.track(ModuleDescription.class, new ModuleDescriptionListener(processor));    	
-    	super.openTrackers();
-    	super.registerService(DocumentationRegistry.class, registry);
-    	super.registerService(DescriptionFactory.class, factory);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Actions {
     
+    /**
+     * Specifies the actions. Required.
+     * 
+     * @return The actions
+     */
+    Action[] value();
+
 }
