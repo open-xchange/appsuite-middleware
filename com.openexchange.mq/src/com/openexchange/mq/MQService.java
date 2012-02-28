@@ -58,6 +58,18 @@ import com.openexchange.exception.OXException;
  * {@link MQService} - The generic Message Queue service.
  * <p>
  * See <a href="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/jms_tutorialTOC.html">JMS Tutorial</a>.
+ * <p>
+ * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+ * <h3>Hint</h3>
+ * <p>
+ * Please note that JMS connections, sessions, producers and consumers are <span class="emphasis"><em>designed to be re-used</em></span>.
+ * </p>
+ * <p>
+ * It's an anti-pattern to create new connections, sessions, producers and consumers for each message you produce or consume. If you do
+ * this, your application will perform very poorly. This is discussed further in the section on performance tuning <a
+ * title="Chapter 46. Performance Tuning" href="perf-tuning.html">Chapter 46, <i>Performance Tuning</i></a>.
+ * </p>
+ * </div>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
