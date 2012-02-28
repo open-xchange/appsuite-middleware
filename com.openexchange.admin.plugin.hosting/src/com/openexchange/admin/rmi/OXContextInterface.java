@@ -115,6 +115,11 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Create a new context.
+     * 
+     * If setFilestoreId() or setWriteDatabase() has been used in the given context object, the context will be created
+     * in the corresponding database or filestore.
+     * The assigned limits to the database/filestore are ignored, though. 
+     * 
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param auth Credentials for authenticating against server.

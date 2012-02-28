@@ -1,3 +1,7 @@
+* 2012-02-28 - choeger@open-xchange.com
+
+ - SCR968: Define destination database/filestore on context creation
+
 * 2012-02-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 21167: Creating sorted list of databases (new algorithm) and check each database for availability before creating a context.
