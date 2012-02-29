@@ -47,41 +47,35 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.mq.topic;
 
-import java.io.Serializable;
-import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
 
 /**
- * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
+ * {@link MQTopicListener} - A listener for a topic.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQQueueSender extends MQCloseable {
+public interface MQTopicListener extends MQCloseable {
 
     /**
-     * Sends a message containing a <code>java.lang.String</code>.
+     * Passes published text to the listener.
      * 
-     * @param text The <code>java.lang.String</code> to send
-     * @throws OXException If send operation fails
+     * @param text The text passed to the listener
      */
-    public void sendTextMessage(final String text) throws OXException;
+    void onText(String text);
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Passes published Java object to the listener.
      * 
-     * @param object The serializable object to send
-     * @throws OXException If send operation fails
+     * @param object The object passed to the listener
      */
-    public void sendObjectMessage(final Serializable object) throws OXException;
+    void onObject(Object object);
 
     /**
-     * Sends a message containing <code>byte</code>s.
+     * Passes published bytes to the listener.
      * 
-     * @param bytes The <code>byte</code> array to send
-     * @throws OXException If send operation fails
+     * @param bytes The bytes passed to the listener
      */
-    public void sendBytesMessage(final byte[] bytes) throws OXException;
-
+    void onBytes(byte[] bytes);
 }

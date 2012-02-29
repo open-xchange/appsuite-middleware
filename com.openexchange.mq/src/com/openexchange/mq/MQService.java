@@ -139,6 +139,26 @@ public interface MQService {
     Queue lookupQueue(String name) throws OXException;
 
     /**
+     * Lookup in the registry for registered {@link Queue}.
+     * <p>
+     * A queue follows the Point-to-Point Messaging Domain:<br>
+     * <ul>
+     * <li>Each message has only one consumer.</li>
+     * <li>A sender and a receiver of a message have no timing dependencies. The receiver can fetch the message whether or not it was
+     * running when the client sent the message.</li>
+     * <li>The receiver acknowledges the successful processing of a message.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
+     * 
+     * @param name The name of the queue
+     * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
+     * @return The look-up {@link Queue} instance.
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    Queue lookupQueue(String name, boolean createIfAbsent) throws OXException;
+
+    /**
      * Lookup in the registry for registered {@link Topic}.
      * <p>
      * A topic follows the Publish/Subscribe Messaging Domain:<br>
@@ -155,5 +175,24 @@ public interface MQService {
      * @see MQJmsTopicExample
      */
     Topic lookupTopic(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered {@link Topic}.
+     * <p>
+     * A topic follows the Publish/Subscribe Messaging Domain:<br>
+     * <ul>
+     * <li>Each message may have multiple consumers.</li>
+     * <li>Publishers and subscribers have a timing dependency. A client that subscribes to a topic can consume only messages published
+     * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
+     * 
+     * @param name The name of the topic
+     * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
+     * @return The look-up {@link Topic} instance.
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    Topic lookupTopic(String name, boolean createIfAbsent) throws OXException;
 
 }

@@ -47,41 +47,47 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.mq.topic;
 
-import java.io.Serializable;
+import javax.jms.JMSException;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQCloseable;
+import com.openexchange.mq.topic.internal.MQTopicResource;
+import com.openexchange.mq.topic.internal.WrappingMessageListener;
 
 /**
- * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
- *
+ * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
+ * listener} to given topic.
+ * <p>
+ * Invoke {@link #close()} method when done.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQQueueSender extends MQCloseable {
+public final class MQTopicAsyncSubscriber extends MQTopicResource {
+
+    private TopicSubscriber topicSubscriber;
+
+    private final MQTopicListener listener;
 
     /**
-     * Sends a message containing a <code>java.lang.String</code>.
+     * Initializes a new {@link MQTopicAsyncSubscriber}.
      * 
-     * @param text The <code>java.lang.String</code> to send
-     * @throws OXException If send operation fails
+     * @param topicName The name of topic to subscribe from
+     * @throws OXException If initialization fails
      */
-    public void sendTextMessage(final String text) throws OXException;
+    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
+        super(topicName);
+        this.listener = listener;
+    }
 
-    /**
-     * Sends a message containing a serializable Java object.
-     * 
-     * @param object The serializable object to send
-     * @throws OXException If send operation fails
-     */
-    public void sendObjectMessage(final Serializable object) throws OXException;
-
-    /**
-     * Sends a message containing <code>byte</code>s.
-     * 
-     * @param bytes The <code>byte</code> array to send
-     * @throws OXException If send operation fails
-     */
-    public void sendBytesMessage(final byte[] bytes) throws OXException;
+    @Override
+    protected synchronized void initResource(final Topic topic) throws JMSException {
+        topicSubscriber = topicSession.createSubscriber(topic);
+        final WrappingMessageListener msgListener = new WrappingMessageListener(listener);
+        topicSubscriber.setMessageListener(msgListener);
+        topicConnection.setExceptionListener(msgListener);
+        topicConnection.start();
+    }
 
 }

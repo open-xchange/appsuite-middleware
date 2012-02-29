@@ -47,41 +47,42 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.mq.hornetq;
 
-import java.io.Serializable;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQCloseable;
+import org.hornetq.jms.server.JMSServerManager;
+import org.hornetq.jms.server.config.JMSConfiguration;
+import org.hornetq.jms.server.embedded.EmbeddedJMS;
 
 /**
- * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
- *
+ * {@link HornetQEmbeddedJMS}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQQueueSender extends MQCloseable {
+public class HornetQEmbeddedJMS extends EmbeddedJMS {
 
     /**
-     * Sends a message containing a <code>java.lang.String</code>.
-     * 
-     * @param text The <code>java.lang.String</code> to send
-     * @throws OXException If send operation fails
+     * Initializes a new {@link HornetQEmbeddedJMS}.
      */
-    public void sendTextMessage(final String text) throws OXException;
+    public HornetQEmbeddedJMS() {
+        super();
+    }
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Gets the associated {@link JMSConfiguration} instance.
      * 
-     * @param object The serializable object to send
-     * @throws OXException If send operation fails
+     * @return The associated {@link JMSConfiguration} instance
      */
-    public void sendObjectMessage(final Serializable object) throws OXException;
+    public JMSConfiguration getJMSConfiguration() {
+        return jmsConfiguration;
+    }
 
     /**
-     * Sends a message containing <code>byte</code>s.
+     * Gets the associated {@link JMSServerManager} instance.
      * 
-     * @param bytes The <code>byte</code> array to send
-     * @throws OXException If send operation fails
+     * @return The associated {@link JMSServerManager} instance.
      */
-    public void sendBytesMessage(final byte[] bytes) throws OXException;
+    public JMSServerManager getServerManager() {
+        return serverManager;
+    }
 
 }

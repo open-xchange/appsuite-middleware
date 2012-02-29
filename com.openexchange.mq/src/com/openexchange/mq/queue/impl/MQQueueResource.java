@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq.queue.impl;
 
 import static com.openexchange.mq.serviceLookup.MQServiceLookup.getMQService;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueSession;
 import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
 import com.openexchange.mq.MQConstants;
@@ -64,43 +64,43 @@ import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 
 /**
- * {@link MQTopicResource}
+ * {@link MQQueueResource}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-abstract class MQTopicResource implements MQCloseable {
+abstract class MQQueueResource implements MQCloseable {
 
-    protected volatile TopicConnection topicConnection;
+    protected volatile QueueConnection queueConnection;
 
-    protected final String topicName;
+    protected final String queueName;
 
-    protected volatile TopicSession topicSession;
+    protected volatile QueueSession queueSession;
 
     /**
-     * Initializes a new {@link MQTopicResource}.
+     * Initializes a new {@link MQQueueResource}.
      */
-    MQTopicResource(final String topicName) throws OXException {
+    MQQueueResource(final String queueName) throws OXException {
         super();
-        if (null == topicName) {
-            throw MQExceptionCodes.UNEXPECTED_ERROR.create("Topic name is null.");
+        if (null == queueName) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create("Queue name is null.");
         }
-        this.topicName = topicName;
+        this.queueName = queueName;
         boolean errorOccurred = true;
         try {
             final MQService service = getMQService();
             // Now we'll look up the connection factory:
-            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
-            // And look up the TOpic:
-            final Topic topic = service.lookupTopic(MQConstants.PREFIX_TOPIC + topicName);
+            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+            // And look up the Queue:
+            final Queue queue = service.lookupQueue(MQConstants.PREFIX_QUEUE + queueName);
             // Setup connection, session & sender
-            final TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
-            this.topicConnection = topicConnection;
-            final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            this.topicSession = topicSession;
-            initResource(topic);
+            final QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
+            this.queueConnection = queueConnection;
+            final QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+            this.queueSession = queueSession;
+            initResource(queue);
             errorOccurred = false;
         } catch (final InvalidDestinationException e) {
-            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, topicName);
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, queueName);
         } catch (final JMSException e) {
             throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
         } finally {
@@ -115,40 +115,40 @@ abstract class MQTopicResource implements MQCloseable {
      * 
      * @throws JMSException If initialization fails
      */
-    protected abstract void initResource(Topic topic) throws JMSException;
+    protected abstract void initResource(Queue queue) throws JMSException;
 
     /**
-     * Gets the name of the topic associated with this sender.
+     * Gets the name of the queue associated with this receiver.
      * 
-     * @return The topic name
+     * @return The queue name
      */
-    public String getTopicName() {
-        return topicName;
+    public String getQueueName() {
+        return queueName;
     }
 
     /**
-     * Closes this queue sender orderly.
+     * Closes this queue resource orderly.
      */
     @Override
     public final void close() {
-        final TopicSession topicSession = this.topicSession;
-        if (null != topicSession) {
+        final QueueSession queueSession = this.queueSession;
+        if (null != queueSession) {
             try {
-                topicSession.close();
+                queueSession.close();
             } catch (final Exception e) {
                 // Ignore
             }
-            this.topicSession = null;
+            this.queueSession = null;
         }
 
-        final TopicConnection topicConnection = this.topicConnection;
-        if (null != topicConnection) {
+        final QueueConnection queueConnection = this.queueConnection;
+        if (null != queueConnection) {
             try {
-                topicConnection.close();
+                queueConnection.close();
             } catch (final Exception e) {
                 // Ignore
             }
-            this.topicConnection = null;
+            this.queueConnection = null;
         }
     }
 

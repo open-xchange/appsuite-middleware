@@ -47,108 +47,62 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq.topic.internal;
 
 import java.io.ByteArrayOutputStream;
 import javax.jms.BytesMessage;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.mq.topic.MQTopicListener;
 
 /**
- * {@link MQTopicSubscriber} - A topic publisher intended to be re-used. Invoke {@link #close()} method when done.
+ * {@link WrappingMessageListener} - A {@link MessageListener} that wraps a given {@link MQTopicListener}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQTopicSubscriber extends MQTopicResource {
+public final class WrappingMessageListener implements MessageListener, ExceptionListener {
 
-    public static interface MQTopicListener {
-
-        /**
-         * Passes published text to the listener.
-         * 
-         * @param text The text passed to the listener
-         */
-        void onText(String text);
-
-        /**
-         * Passes published Java object to the listener.
-         * 
-         * @param object The object passed to the listener
-         */
-        void onObject(Object object);
-
-        /**
-         * Passes published bytes to the listener.
-         * 
-         * @param bytes The bytes passed to the listener
-         */
-        void onBytes(byte[] bytes);
-    }
-
-    private TopicSubscriber topicSubscriber;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WrappingMessageListener.class));
 
     private final MQTopicListener listener;
 
     /**
-     * Initializes a new {@link MQTopicSubscriber}.
+     * Initializes a new {@link WrappingMessageListener}.
      * 
-     * @param topicName The name of topic to subscribe from
-     * @throws OXException If initialization fails
+     * @param listener The topic listener to delegate the callbacks to
      */
-    public MQTopicSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName);
+    public WrappingMessageListener(final MQTopicListener listener) {
+        super();
         this.listener = listener;
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        topicSubscriber.setMessageListener(new WrappingMessageListener(listener));
-        topicConnection.start();
-    }
-
-    private static final class WrappingMessageListener implements MessageListener {
-
-        private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQTopicSubscriber.WrappingMessageListener.class));
-
-        private final MQTopicListener listener;
-
-        protected WrappingMessageListener(final MQTopicListener listener) {
-            super();
-            this.listener = listener;
-        }
-
-        @Override
-        public void onMessage(final Message message) {
-            try {
-                if (message instanceof TextMessage) {
-                    listener.onText(((TextMessage) message).getText());
-                } else if (message instanceof ObjectMessage) {
-                    listener.onObject(((ObjectMessage) message).getObject());
-                } else if (message instanceof BytesMessage) {
-                    listener.onBytes(readBytesFrom((BytesMessage) message));
-                } else {
-                    throw new IllegalArgumentException("Unhandled message: " + message.getClass().getName());
-                }
-            } catch (final JMSException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+    public void onMessage(final Message message) {
+        try {
+            if (message instanceof TextMessage) {
+                listener.onText(((TextMessage) message).getText());
+            } else if (message instanceof ObjectMessage) {
+                listener.onObject(((ObjectMessage) message).getObject());
+            } else if (message instanceof BytesMessage) {
+                listener.onBytes(readBytesFrom((BytesMessage) message));
+            } else {
+                throw new IllegalArgumentException("Unhandled message: " + message.getClass().getName());
             }
+        } catch (final JMSException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
         }
-
     }
 
-    protected static byte[] readBytesFrom(final BytesMessage bytesMessage) throws JMSException {
+    private static byte[] readBytesFrom(final BytesMessage bytesMessage) throws JMSException {
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
         final int buflen = 2048;
         final byte[] buf = new byte[buflen];
@@ -156,6 +110,11 @@ public class MQTopicSubscriber extends MQTopicResource {
             out.write(buf, 0, read);
         }
         return out.toByteArray();
+    }
+
+    @Override
+    public void onException(final JMSException e) {
+        LOG.error("A JMS error occurred.", e);
     }
 
 }

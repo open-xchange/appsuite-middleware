@@ -47,17 +47,17 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.mq.topic;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
 
 /**
- * {@link MQQueueReceiver} - A queue receiver intended to be re-used. Invoke {@link #close()} method when done.
+ * {@link MQTopicSyncSubscriber} - A synchronous topic subscriber.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQQueueReceiver extends MQCloseable {
+public interface MQTopicSyncSubscriber extends MQCloseable {
 
     /**
      * Receives the next text message produced for this receiver.
