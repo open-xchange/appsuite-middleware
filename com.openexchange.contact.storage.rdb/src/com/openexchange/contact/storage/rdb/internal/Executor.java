@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +85,7 @@ public class Executor {
     public Contact selectSingle(final Connection connection, final Table table, final int contextID, final int objectID, final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Tools.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append("=?;");
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append("=?;");
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
@@ -107,11 +106,11 @@ public class Executor {
     public List<Contact> select(final Connection connection, final Table table, final int contextID, final int folderID, final long minLastModified, final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Tools.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.FOLDER_ID.getFieldName()).append("=?");
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.FOLDER_ID.getDbName()).append("=?");
         if (Long.MIN_VALUE == minLastModified) {
             stringBuilder.append(";");
         } else {
-            stringBuilder.append(" AND ").append(ContactField.LAST_MODIFIED.getFieldName()).append("<=?;");
+            stringBuilder.append(" AND ").append(ContactField.LAST_MODIFIED.getDbName()).append("<=?;");
         }             
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -136,8 +135,8 @@ public class Executor {
     public List<Contact> select(final Connection connection, final Table table, final int contextID, final int[] objectIDs, final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Tools.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID).append(" IN (")
-            .append(Arrays.toString(objectIDs)).append(");");
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append(" IN (")
+            .append(Tools.toCSV(objectIDs)).append(");");
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -157,7 +156,7 @@ public class Executor {
     public DistributionListEntryObject[] select(final Connection connection, final Table table, final int contextID, final int objectID) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append("=?;"); 
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append("=?;"); 
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         final List<DistributionListEntryObject> members = new ArrayList<DistributionListEntryObject>();
@@ -178,8 +177,8 @@ public class Executor {
     public Map<Integer, List<DistributionListEntryObject>> select(final Connection connection, final Table table, final int contextID, final int[] objectIDs) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append(" IN (")
-            .append(Arrays.toString(objectIDs)).append(");");
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append(" IN (")
+            .append(Tools.toCSV(objectIDs)).append(");");
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         final Map<Integer, List<DistributionListEntryObject>> members = new HashMap<Integer, List<DistributionListEntryObject>>();
@@ -188,7 +187,7 @@ public class Executor {
             stmt.setInt(1, contextID);
             resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                final int parentContactObjectID = resultSet.getInt(1);
+                final int parentContactObjectID = resultSet.getInt(ContactField.OBJECT_ID.getDbName());
                 if (false == members.containsKey(parentContactObjectID)) {
                     members.put(parentContactObjectID, new ArrayList<DistributionListEntryObject>());
                 }
@@ -221,7 +220,7 @@ public class Executor {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            Tools.setParameters(stmt, member, contactID, contextID);
+            Tools.setParameters(stmt, Tools.DISTLIST_DATABASE_FIELDS_ARRAY, member, contactID, contextID);
             return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
@@ -231,7 +230,7 @@ public class Executor {
     public int insert(final Connection connection, final Table table, final int contactID, final int contextID, final DistributionListEntryObject[] distributionList) throws SQLException, OXException {
         int rowCount = 0;
         for (final DistributionListEntryObject member : distributionList) {
-            this.insert(connection, table, contactID, contextID, member);            
+            rowCount += this.insert(connection, table, contactID, contextID, member);            
         }
         return rowCount;
     }    
@@ -239,11 +238,11 @@ public class Executor {
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, final long minLastModified) throws SQLException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("INSERT INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append("=?");
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append("=?");
         if (Long.MIN_VALUE == minLastModified) {
             stringBuilder.append(";");
         } else {
-            stringBuilder.append(" AND ").append(ContactField.LAST_MODIFIED.getFieldName()).append("<=?;");
+            stringBuilder.append(" AND ").append(ContactField.LAST_MODIFIED.getDbName()).append("<=?;");
         }             
         PreparedStatement stmt = null;
         try {
@@ -266,8 +265,8 @@ public class Executor {
     public int update(final Connection connection, final Table table, final long minLastModified, final Contact contact, final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Tools.getAssignments(fields)).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName())
-            .append("=? AND ").append(ContactField.LAST_MODIFIED.getFieldName()).append("<=?;"); 
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName())
+            .append("=? AND ").append(ContactField.LAST_MODIFIED.getDbName()).append("<=?;"); 
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
@@ -284,11 +283,11 @@ public class Executor {
     public int delete(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified) throws SQLException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
-            .append(ContactField.CONTEXTID.getFieldName()).append("=? AND ").append(ContactField.OBJECT_ID.getFieldName()).append("=?");
+            .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append("=?");
         if (Long.MIN_VALUE == minLastModified) {
             stringBuilder.append(";");
         } else {
-            stringBuilder.append(" AND ").append(ContactField.LAST_MODIFIED.getFieldName()).append("<=?;");
+            stringBuilder.append(" AND ").append(ContactField.LAST_MODIFIED.getDbName()).append("<=?;");
         }             
         PreparedStatement stmt = null;
         try {

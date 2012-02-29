@@ -158,12 +158,23 @@ public final class Tools {
     public static String getColumns(final ContactField[] fields) {
         final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);                
         if (null != fields && 0 < fields.length) {
-            columnsBuilder.append(fields[0].getFieldName());
+            columnsBuilder.append(fields[0].getDbName());
             for (int i = 1; i < fields.length; i++) {
-                columnsBuilder.append(',').append(fields[i].getFieldName());
+                columnsBuilder.append(',').append(fields[i].getDbName());
             }
         }
         return columnsBuilder.toString();
+    }
+    
+    public static String toCSV(final int[] values) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null != values && 0 < values.length) {
+            stringBuilder.append(values[0]);
+            for (int i = 1; i < values.length; i++) {
+                stringBuilder.append(',').append(values[i]);
+            }
+        }
+        return stringBuilder.toString();
     }
 
     /**
@@ -211,9 +222,9 @@ public final class Tools {
     public static String getAssignments(final ContactField[] fields) {
         final StringBuilder columnsParamsBuilder = new StringBuilder(10 * fields.length); 
         if (null != fields && 0 < fields.length) {
-            columnsParamsBuilder.append(fields[0].getFieldName()).append("=?,");
+            columnsParamsBuilder.append(fields[0].getDbName()).append("=?,");
             for (int i = 1; i < fields.length; i++) {
-                columnsParamsBuilder.append(fields[i].getFieldName()).append("=?,");
+                columnsParamsBuilder.append(fields[i].getDbName()).append("=?,");
             }
         }
         return columnsParamsBuilder.toString();
@@ -231,7 +242,7 @@ public final class Tools {
     public static Contact fromResultSet(final ResultSet resultSet, final ContactField[] fields) throws OXException, SQLException {
         final Contact contact = new Contact();
         for (final ContactField field : fields) {
-            final Object value = resultSet.getObject(field.getFieldName());
+            final Object value = resultSet.getObject(field.getDbName());
             if (false == resultSet.wasNull()) {
                 field.doSwitch(Tools.SETTER, contact, value);    
             }
@@ -283,15 +294,99 @@ public final class Tools {
      */
     public static DistributionListEntryObject fromDistListResultSet(final ResultSet resultSet) throws SQLException, OXException {
         final DistributionListEntryObject member = new DistributionListEntryObject();
-        member.setEntryID(resultSet.getInt(2));
-        member.setEmailfield(resultSet.getInt(3));
-        member.setFolderID(resultSet.getInt(4));
-        member.setDisplayname(resultSet.getString(5));
-        member.setLastname(resultSet.getString(6));
-        member.setFirstname(resultSet.getString(7));
-        member.setEmailaddress(resultSet.getString(8));
+        int entryID = resultSet.getInt(ContactField.NUMBER_OF_DISTRIBUTIONLIST.getDbName()); // intfield02
+        if (false == resultSet.wasNull()) {
+            member.setEntryID(entryID);
+        }
+        final int emailField = resultSet.getInt(ContactField.NUMBER_OF_LINKS.getDbName()); // intfield03
+        if (false == resultSet.wasNull()) {
+            member.setEmailfield(emailField);
+        }
+        final int folderID = resultSet.getInt(ContactField.NUMBER_OF_IMAGES.getDbName()); // intfield04
+        if (false == resultSet.wasNull()) {
+            member.setFolderID(folderID);
+        }
+        final String displayName = resultSet.getString(ContactField.DISPLAY_NAME.getDbName()); // field01
+        if (false == resultSet.wasNull()) {
+            member.setDisplayname(displayName);
+        }
+        final String lastName = resultSet.getString(ContactField.SUR_NAME.getDbName()); // field02
+        if (false == resultSet.wasNull()) {
+            member.setLastname(lastName);
+        }
+        final String firstName = resultSet.getString(ContactField.GIVEN_NAME.getDbName()); // field03
+        if (false == resultSet.wasNull()) {
+            member.setFirstname(firstName);
+        }
+        final String emailAddress = resultSet.getString(ContactField.MIDDLE_NAME.getDbName()); // field04
+        if (false == resultSet.wasNull()) {
+            member.setEmailaddress(emailAddress);
+        }
         return member;
     }   
+    
+    public static void setParameters(final PreparedStatement stmt, final ContactField[] fields, final DistributionListEntryObject member, final int contactID, final int contextID) throws SQLException, OXException {
+        for (int i = 0; i < fields.length; i++) {
+            final int parameterIndex = i + 1; 
+            switch (fields[i]) {
+            case OBJECT_ID: // intfield01
+                stmt.setInt(parameterIndex, contactID); 
+                break;
+            case NUMBER_OF_DISTRIBUTIONLIST: // intfield02 
+                if (member.containsEntryID()) { 
+                    stmt.setInt(parameterIndex, member.getEntryID());
+                } else {
+                    stmt.setNull(parameterIndex, Types.INTEGER);
+                }
+                break;
+            case NUMBER_OF_LINKS: // intfield03
+                if (member.containsEmailfield()) {
+                    stmt.setInt(parameterIndex, member.getEmailfield());
+                }
+                break;
+            case NUMBER_OF_IMAGES: // intfield04
+                if (member.containsFolderld()) {
+                    stmt.setInt(parameterIndex, member.getFolderID());
+                } else {
+                    stmt.setNull(parameterIndex, Types.INTEGER);
+                }
+                break;
+            case DISPLAY_NAME: // field01
+                if (member.containsDisplayname()) {
+                    stmt.setString(parameterIndex, member.getDisplayname());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case SUR_NAME: // field02
+                if (member.containsLastname()) {
+                    stmt.setString(parameterIndex, member.getLastname());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case GIVEN_NAME: // field03
+                if (member.containsFistname()) {
+                    stmt.setString(parameterIndex, member.getFirstname());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case MIDDLE_NAME: // field04
+                if (member.containsEmailaddress()) {
+                    stmt.setString(parameterIndex, member.getEmailaddress());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case CONTEXTID: // cid
+                stmt.setInt(parameterIndex, contextID);
+                break;
+            default:
+                throw new IllegalArgumentException(fields[i].toString());
+            }
+        }        
+    }
     
     /**
      * Sets the supplied statement's database parameters from the properties found in the supplied contact. 

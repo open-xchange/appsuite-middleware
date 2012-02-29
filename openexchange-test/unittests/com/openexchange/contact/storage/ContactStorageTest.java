@@ -71,7 +71,7 @@ public class ContactStorageTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         if (null != this.rememberedContacts && 0 < rememberedContacts.size()) {
-            for (Contact contact : rememberedContacts) {
+            for (final Contact contact : rememberedContacts) {
                 try {
                     this.getStorage().delete(getSession(), Integer.toString(contact.getParentFolderID()), 
                         Integer.toString(contact.getObjectID()), new Date(0));
@@ -92,6 +92,15 @@ public class ContactStorageTest extends TestCase {
         return registry.getStorage(this.getSession(), null);
     }
 
+    protected Contact findContact(final String uid, final String folderID) throws OXException {
+        for (final Contact c : getStorage().all(getSession(), folderID)) {
+            if (uid.equals(c.getUid())) {
+                return c;
+            }
+        }
+        return null;
+    }
+    
     protected Session getSession() {
         return this.session;
     }

@@ -187,7 +187,7 @@ public enum ContactField{
     LAST_MODIFIED (5 , "changing_date" , "LAST_MODIFIED" , "Changing date"  , ContactFields.LAST_MODIFIED, Types.BIGINT),
     BIRTHDAY (511 , "timestampfield01" , "BIRTHDAY" , "Birthday" , ContactFields.BIRTHDAY, Types.DATE),
     ANNIVERSARY (517 , "timestampfield02" , "ANNIVERSARY" , "Anniversary" , ContactFields.ANNIVERSARY, Types.DATE),
-    IMAGE1 (570 , "image1" , "IMAGE1" , ""  , ContactFields.IMAGE1, Types.BLOB),
+    IMAGE1 (570 , "image1" , "IMAGE1" , ""  , ContactFields.IMAGE1, Types.VARBINARY),
     IMAGE_LAST_MODIFIED (597 , "changing_date" , "IMAGE_LAST_MODIFIED" , ""  ,"image_last_modified", Types.DATE),
     IMAGE1_CONTENT_TYPE (601 , "mime_type" , "IMAGE1_CONTENT_TYPE" , ""  , "image1_content_type", Types.VARCHAR),
     INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ContactFields.USER_ID, Types.INTEGER),
@@ -208,25 +208,18 @@ public enum ContactField{
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
     UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
-//    DLIST_ID(-1, "intfield02", "ID", "Member's contact object ID", DistributionListFields.ID, Types.INTEGER),
-//    DLIST_FOLDER_ID(-1, "intfield04", "FOLDER_ID", "Member's contact parent folder ID", DistributionListFields.FOLDER_ID, Types.INTEGER),
-//    DLIST_DISPLAY_NAME(-1, "field01", "DISPLAY_NAME", "Display name", DistributionListFields.DISPLAY_NAME, Types.VARCHAR),
-//    DLIST_LAST_NAME(-1, "field02", "LAST NAME", "Last name", DistributionListFields.LAST_NAME, Types.VARCHAR),
-//    DLIST_FIRST_NAME(-1, "field03", "FIRST NAME", "First name", DistributionListFields.FIRST_NAME, Types.VARCHAR),
-//    DLIST_MAIL(-1, "field04", "MAIL", "Email address", DistributionListFields.MAIL, Types.VARCHAR),
-//    DLIST_MAIL_FIELD(-1, "intfield03", "MAIL_FIELD", "Mail field", DistributionListFields.MAIL_FIELD, Types.INTEGER),
     ;
 
     private int columnNumber, sqlType;
-    private String dbName, readableName, fieldName, ajaxName;
+    private String fieldName, readableName, dbName, ajaxName;
     private static final ContactFieldMapper frenchOutlook = new FrenchOutlookMapper();
     private static final ContactFieldMapper germanOutlook = new GermanOutlookMapper();
     private static final ContactFieldMapper englishOutlook = new EnglishOutlookMapper();
 
-    private ContactField(final int columnNumber, final String fieldName, final String dbName, final String readableName, final String ajaxString, final int sqlType){
-        this.fieldName = fieldName;
+    private ContactField(final int columnNumber, final String dbName, final String fieldName, final String readableName, final String ajaxString, final int sqlType){
+        this.dbName = dbName;
         this.columnNumber = columnNumber;
-        this.dbName = dbName ;
+        this.fieldName = fieldName ;
         this.readableName = readableName;
         this.ajaxName = ajaxString;
         this.sqlType = sqlType;
@@ -236,16 +229,26 @@ public enum ContactField{
 		return columnNumber;
 	}
 
-	public String getDBName(){
-		return dbName;
+	/**
+	 * Gets the field name
+	 * 
+	 * @return the field name
+	 */
+	public String getFieldName(){
+		return fieldName;
 	}
 
 	public String getReadableName(){
 		return readableName;
 	}
 
-	public String getFieldName(){
-		return fieldName;
+	/**
+	 * Gets the name of the corresponding database columns
+	 * 
+	 * @return the database name, or <code>""</code> if there's no database column associated with this field
+	 */
+	public String getDbName(){
+		return dbName;
 	}
 
 	public String getEnglishOutlookName(){
@@ -282,7 +285,7 @@ public enum ContactField{
         }
 
         for(final ContactField field: values()){
-			if(dbFieldName.equals( field.getDBName() )){
+			if(dbFieldName.equals( field.getFieldName() )){
 				return field;
 			}
 		}
@@ -314,7 +317,7 @@ public enum ContactField{
             }
 
 		for(final ContactField field : values()){
-			if(fieldName.equals( field.getFieldName() ) ){
+			if(fieldName.equals( field.getDbName() ) ){
 				return field;
 			}
 		}
@@ -358,7 +361,7 @@ public enum ContactField{
 			List<String> haystack = Arrays.asList(new String[]{
 				field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
 				field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
-				field.getDBName().replaceAll("[_\\. ]", "").toLowerCase()
+				field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
 			});
 			if(haystack.contains(needle)) {
                 return field;
@@ -491,6 +494,7 @@ public enum ContactField{
         case BUSINESS_ADDRESS: return switcher.businessaddress(objects);
         case OTHER_ADDRESS: return switcher.otheraddress(objects);
         case UID: return switcher.uid(objects);
+        case IMAGE1: return switcher.image1(objects);
         default: return null;
         }
     }

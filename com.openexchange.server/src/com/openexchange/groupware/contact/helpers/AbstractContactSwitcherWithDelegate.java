@@ -666,20 +666,29 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
         return delegate.image1contenttype(objects);
     }
     
+    @Override
     public Object homeaddress(Object[] objects) throws OXException {
         return delegate.homeaddress(objects);
     }
 
+    @Override
     public Object businessaddress(Object[] objects) throws OXException {
         return delegate.businessaddress(objects);
     }
 
+    @Override
     public Object otheraddress(Object[] objects) throws OXException {
         return delegate.otheraddress(objects);
     }
 
+    @Override
     public Object uid(Object[] objects) throws OXException {
         return delegate.uid(objects);
+    }
+
+    @Override
+    public Object image1(Object[] objects) throws OXException {
+        return delegate.image1(objects);
     }
 
     @Override

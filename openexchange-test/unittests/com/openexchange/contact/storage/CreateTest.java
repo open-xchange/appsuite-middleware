@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 
 /**
  * {@link CreateTest}
@@ -82,13 +84,7 @@ public class CreateTest extends ContactStorageTest {
         /*
          * verify contact
          */
-        Contact savedContact = null;
-        for (final Contact c : getStorage().all(getSession(), folderId)) {
-            if (contact.getUid().equals(c.getUid())) {
-                savedContact = c;
-                break;
-            }
-        }
+        Contact savedContact = super.findContact(contact.getUid(), folderId);
         assertNotNull("contact not found", savedContact);
         assertEquals("display name wrong", contact.getDisplayName(), savedContact.getDisplayName());
         assertEquals("surname wrong", contact.getSurName(), savedContact.getSurName());
@@ -115,18 +111,42 @@ public class CreateTest extends ContactStorageTest {
         /*
          * verify contact
          */
-        Contact savedContact = null;
-        for (final Contact c : getStorage().all(getSession(), folderId)) {
-            if (contact.getUid().equals(c.getUid())) {
-                savedContact = c;
-                break;
-            }
-        }
+        Contact savedContact = super.findContact(contact.getUid(), folderId);
         assertNotNull("contact not found", savedContact);
         assertNotNull("no image found", savedContact.getImage1());
         assertEquals("number of images wrong", 1, savedContact.getNumberOfImages());
-        assertEquals("image wrong", contact.getImage1(), savedContact.getImage1());
+        assertTrue("image wrong", Arrays.equals(contact.getImage1(), savedContact.getImage1()));
         assertEquals("image content type wrong", contact.getImageContentType(), savedContact.getImageContentType());
+    }
+    
+    @Test
+    public void testCreateDistList() throws Exception {
+        /*
+         * create contact        
+         */
+        final String folderId = "500003";
+        final Contact contact = new Contact();
+        contact.setSurName("Distributionlist 77");
+        contact.setUid(UUID.randomUUID().toString());
+        contact.setDistributionList(new DistributionListEntryObject[] {
+            new DistributionListEntryObject("Horst Otto", "horst.otto@example.com", 0),            
+            new DistributionListEntryObject("Werner Otto", "werner.otto@example.com", 0),            
+            new DistributionListEntryObject("Dieter Otto", "dieter.otto@example.com", 0),            
+            new DistributionListEntryObject("Klaus Otto", "klaus.otto@example.com", 0),            
+            new DistributionListEntryObject("Kurt Otto", "kurt.otto@example.com", 0),            
+        });
+        getStorage().create(getSession(), folderId, contact);
+        super.rememberForCleanUp(contact);
+        /*
+         * verify contact
+         */
+        Contact savedContact = super.findContact(contact.getUid(), folderId);
+        assertNotNull("contact not found", savedContact);
+        assertTrue("not marked as distribution list", savedContact.getMarkAsDistribtuionlist());
+        assertNotNull("distribution list not found", savedContact.getDistributionList());
+        assertEquals("number of distribution list members wrong", 5, savedContact.getNumberOfDistributionLists());
+        assertEquals("number of distribution list members wrong", 5, savedContact.getDistributionList().length);
+        assertTrue("distribution list wrong", Arrays.equals(contact.getDistributionList(), savedContact.getDistributionList()));
     }
     
     @Test
@@ -146,13 +166,7 @@ public class CreateTest extends ContactStorageTest {
         /*
          * verify contact
          */
-        Contact savedContact = null;
-        for (final Contact c : getStorage().all(getSession(), folderId)) {
-            if (contact.getUid().equals(c.getUid())) {
-                savedContact = c;
-                break;
-            }
-        }
+        Contact savedContact = super.findContact(contact.getUid(), folderId);
         assertNotNull("contact not found", savedContact);
         assertEquals("display name wrong", contact.getDisplayName(), savedContact.getDisplayName());
         assertEquals("surname wrong", contact.getSurName(), savedContact.getSurName());
@@ -168,7 +182,7 @@ public class CreateTest extends ContactStorageTest {
         final Map<String, List<Contact>> contactsInFolders = new HashMap<String, List<Contact>>();
         for (int i = 500004; i <= 500005; i++) {
             contactsInFolders.put(Integer.toString(i), new ArrayList<Contact>());
-            for (int j = 1; j <= 100; j++) {
+            for (int j = 1; j <= 33; j++) {
                 final Contact contact = new Contact();
                 contact.setDisplayName("Kontakt_" + i + " Test_" + j);
                 contact.setGivenName("Kontakt_" + i);

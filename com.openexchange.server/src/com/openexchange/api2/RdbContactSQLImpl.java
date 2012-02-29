@@ -1530,7 +1530,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         try {
             con = DBPool.pickup(ctx);
 
-            stmt = con.prepareStatement("SELECT fid,intfield01 FROM prg_contacts WHERE "+ ContactField.USERFIELD20.getFieldName() +" = ?");
+            stmt = con.prepareStatement("SELECT fid,intfield01 FROM prg_contacts WHERE "+ ContactField.USERFIELD20.getDbName() +" = ?");
             stmt.setString(1, uuid.toString());
             res = stmt.executeQuery();
             final boolean found = res.next();
@@ -1600,7 +1600,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     	final StringBuffer buffy = new StringBuffer();
     	final List<ContactField> fieldsToCheck = java.util.Arrays.asList(ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2 );
     	for(final ContactField field: fieldsToCheck) {
-            buffy.append("IFNULL(").append(prefix).append(field.getFieldName()).append(',');
+            buffy.append("IFNULL(").append(prefix).append(field.getDbName()).append(',');
         }
     	buffy.append("NULL");
     	for(final ContactField field: fieldsToCheck) {
