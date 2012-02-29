@@ -18,6 +18,7 @@ Import-Package: com.openexchange.config,
  org.eclipse.osgi.framework.console,
  org.osgi.framework
 Export-Package: com.openexchange.mq,
+ com.openexchange.mq.queue,
  javax.jms,
  org.jboss.naming,
  org.jnp.interfaces,
