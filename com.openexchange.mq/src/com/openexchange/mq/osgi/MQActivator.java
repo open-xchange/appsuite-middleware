@@ -51,16 +51,16 @@ package com.openexchange.mq.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQServerStartup;
 import com.openexchange.mq.MQService;
 import com.openexchange.mq.hornetq.HornetQServerStartup;
-import com.openexchange.mq.services.MQServices;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MQActivator}
+ * {@link MQActivator} - The {@link BundleActivator activator} for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -85,8 +85,6 @@ public final class MQActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
         log.info("Starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
         try {
-            // Set service look-up
-            MQServices.setServiceLookup(this);
             // Start MQ server
             final MQServerStartup serverStartup = new HornetQServerStartup();
             serverStartup.start();
@@ -106,7 +104,6 @@ public final class MQActivator extends HousekeepingActivator {
             serverStartup.stop();
             this.serverStartup = null;
         }
-        MQServices.setServiceLookup(null);
         super.stopBundle();
     }
 

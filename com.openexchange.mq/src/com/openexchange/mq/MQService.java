@@ -53,6 +53,8 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.example.MQQueueExample;
+import com.openexchange.mq.example.MQTopicExample;
 
 /**
  * {@link MQService} - The generic Message Queue service.
@@ -83,8 +85,10 @@ public interface MQService {
      * 
      * @param name The name of the {@link ConnectionFactory}
      * @return The look-up {@link ConnectionFactory} instance.
+     * @see MQQueueExample
+     * @see MQTopicExample
      */
-    public ConnectionFactory lookupConnectionFactory(String name) throws OXException;
+    public <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
 
     /**
      * Lookup in the registry for registered {@link Queue}.
@@ -100,6 +104,8 @@ public interface MQService {
      * 
      * @param name The name of the queue
      * @return The look-up {@link Queue} instance.
+     * @see MQQueueExample
+     * @see MQTopicExample
      */
     public Queue lookupQueue(String name) throws OXException;
 
@@ -116,6 +122,8 @@ public interface MQService {
      * 
      * @param name The name of the topic
      * @return The look-up {@link Topic} instance.
+     * @see MQQueueExample
+     * @see MQTopicExample
      */
     public Topic lookupTopic(String name) throws OXException;
 

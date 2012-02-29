@@ -82,10 +82,11 @@ public final class HornetQService implements MQService {
      * 
      */
 
+    @SuppressWarnings("unchecked")
     @Override
-    public ConnectionFactory lookupConnectionFactory(final String name) throws OXException {
+    public <CF extends ConnectionFactory> CF lookupConnectionFactory(final String name) throws OXException {
         try {
-            return (ConnectionFactory) jmsServer.lookup(name);
+            return (CF) jmsServer.lookup(name);
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
         } catch (final RuntimeException e) {
