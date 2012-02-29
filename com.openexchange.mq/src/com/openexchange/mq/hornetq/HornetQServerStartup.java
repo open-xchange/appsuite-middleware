@@ -161,8 +161,19 @@ public final class HornetQServerStartup implements MQServerStartup {
                  */
 
                 final Reader reader =
-                    new UnsynchronizedStringReader(
-                        "" + "<configuration xmlns=\"urn:hornetq\"\n" + "               xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" + "               xsi:schemaLocation=\"urn:hornetq /schema/hornetq-configuration.xsd\">" + "  <broadcast-groups>\n" + "   <broadcast-group name=\"my-broadcast-group\">\n" + "       <local-bind-address>172.16.9.3</local-bind-address>\n" + "       <local-bind-port>5432</local-bind-port>\n" + "       <group-address>231.7.7.7</group-address>\n" + "       <group-port>9876</group-port>\n" + "       <broadcast-period>2000</broadcast-period>\n" + "       <connector-ref>netty-connector</connector-ref>\n" + "   </broadcast-group>\n" + "  </broadcast-groups>\n" + "</configuration>");
+                    new UnsynchronizedStringReader("" + 
+                        "<configuration xmlns=\"urn:hornetq\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:hornetq /schema/hornetq-configuration.xsd\">" + 
+                        "  <broadcast-groups>\n" + 
+                        "   <broadcast-group name=\"my-broadcast-group\">\n" + 
+                        "       <local-bind-address>172.16.9.3</local-bind-address>\n" + 
+                        "       <local-bind-port>5432</local-bind-port>\n" + 
+                        "       <group-address>231.7.7.7</group-address>\n" + 
+                        "       <group-port>9876</group-port>\n" + 
+                        "       <broadcast-period>2000</broadcast-period>\n" + 
+                        "       <connector-ref>netty-connector</connector-ref>\n" + 
+                        "   </broadcast-group>\n" + 
+                        "  </broadcast-groups>\n" + 
+                        "</configuration>");
                 String xml = org.hornetq.utils.XMLUtil.readerToString(reader);
                 xml = XMLUtil.replaceSystemProps(xml);
                 final Element e = org.hornetq.utils.XMLUtil.stringToElement(xml);
