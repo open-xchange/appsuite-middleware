@@ -49,19 +49,23 @@
 
 package com.openexchange.mq.hornetq;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
 import org.hornetq.api.jms.HornetQJMSClient;
+import org.hornetq.api.jms.management.ConnectionFactoryControl;
+import org.hornetq.api.jms.management.JMSQueueControl;
+import org.hornetq.api.jms.management.TopicControl;
 import org.hornetq.jms.server.embedded.EmbeddedJMS;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 
-
 /**
  * {@link HornetQService} - The HornetQ Message Queue service.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HornetQService implements MQService {
@@ -95,6 +99,36 @@ public final class HornetQService implements MQService {
             }
         }
         return managementQueue;
+    }
+
+    @Override
+    public List<String> getQueueNames() {
+        final Object[] queueControls = jmsServer.getHornetQServer().getManagementService().getResources(JMSQueueControl.class);
+        final List<String> names = new ArrayList<String>(queueControls.length);
+        for (int i = 0; i < queueControls.length; i++) {
+            names.add(((JMSQueueControl) queueControls[i]).getName());
+        }
+        return names;
+    }
+
+    @Override
+    public List<String> getTopicNames() {
+        final Object[] topicControls = jmsServer.getHornetQServer().getManagementService().getResources(TopicControl.class);
+        final List<String> names = new ArrayList<String>(topicControls.length);
+        for (int i = 0; i < topicControls.length; i++) {
+            names.add(((TopicControl) topicControls[i]).getName());
+        }
+        return names;
+    }
+
+    @Override
+    public List<String> getConnectionFactoryNames() {
+        final Object[] cfControls = jmsServer.getHornetQServer().getManagementService().getResources(ConnectionFactoryControl.class);
+        final List<String> names = new ArrayList<String>(cfControls.length);
+        for (int i = 0; i < cfControls.length; i++) {
+            names.add(((ConnectionFactoryControl) cfControls[i]).getName());
+        }
+        return names;
     }
 
     /*-

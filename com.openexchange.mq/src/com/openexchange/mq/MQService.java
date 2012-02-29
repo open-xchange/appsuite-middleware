@@ -49,6 +49,7 @@
 
 package com.openexchange.mq;
 
+import java.util.List;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -82,7 +83,22 @@ public interface MQService {
      * 
      * @return The special queue for managing Message Queue system.
      */
-    public Queue getManagementQueue() throws OXException;
+    Queue getManagementQueue() throws OXException;
+
+    /**
+     * Returns the names of the JMS topics available on this server.
+     */
+    List<String> getTopicNames();
+
+    /**
+     * Returns the names of the JMS queues available on this server.
+     */
+    List<String> getQueueNames();
+
+    /**
+     * Returns the names of the JMS connection factories available on this server.
+     */
+    List<String> getConnectionFactoryNames();
 
     /**
      * Lookup in the registry for registered {@link ConnectionFactory}.
@@ -95,7 +111,7 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    public <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
+    <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
 
     /**
      * Lookup in the registry for registered {@link Queue}.
@@ -114,7 +130,7 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    public Queue lookupQueue(String name) throws OXException;
+    Queue lookupQueue(String name) throws OXException;
 
     /**
      * Lookup in the registry for registered {@link Topic}.
@@ -132,6 +148,6 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    public Topic lookupTopic(String name) throws OXException;
+    Topic lookupTopic(String name) throws OXException;
 
 }

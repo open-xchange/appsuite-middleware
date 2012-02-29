@@ -47,72 +47,21 @@
  *
  */
 
-package com.openexchange.mq.serviceLookup;
+package com.openexchange.mq;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.mq.MQConstants;
-import com.openexchange.mq.MQService;
 
 /**
- * {@link ServiceLookup} - The static service lookup for Message Queue bundle.
- * 
+ * {@link MQCloseable} - Represents a closeable Message Queue resource.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ServiceLookup {
+public interface MQCloseable {
 
     /**
-     * Initializes a new {@link ServiceLookup}.
+     * Closes this Message Queue resource.
+     * <p>
+     * Must not throw anything.
      */
-    private ServiceLookup() {
-        super();
-    }
-
-    private static final AtomicReference<MQService> SERVICE = new AtomicReference<MQService>();
-
-    /**
-     * Sets the {@link MQService} instance.
-     * 
-     * @param service The service instance or <code>null</code>
-     */
-    public static void setMQService(final MQService service) {
-        SERVICE.set(service);
-    }
-
-    /**
-     * Gets the {@link MQService} instance.
-     * 
-     * @return The {@link MQService} instance.
-     */
-    public static MQService getMQService() {
-        return SERVICE.get();
-    }
-
-    private static final AtomicReference<com.openexchange.server.ServiceLookup> REF =
-        new AtomicReference<com.openexchange.server.ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     * 
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final com.openexchange.server.ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException(
-                "Missing ServiceLookup instance. Bundle \"" + MQConstants.BUNDLE_SYMBOLIC_NAME + "\" not staretd?");
-        }
-        return serviceLookup.getService(clazz);
-    }
+    void close();
 
 }

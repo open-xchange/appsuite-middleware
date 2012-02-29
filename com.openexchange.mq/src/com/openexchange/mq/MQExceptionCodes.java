@@ -81,6 +81,10 @@ public enum MQExceptionCodes implements OXExceptionCode {
      * No topicfound for name: %1$s
      */
     TOPIC_NOT_FOUND(MQExceptionMessages.TOPIC_NOT_FOUND_MSG, CATEGORY_ERROR, 5),
+    /**
+     * A JMS error occurred: %1$s
+     */
+    JMS_ERROR(MQExceptionMessages.JMS_ERROR_MSG, CATEGORY_ERROR, 6),
 
     ;
 
