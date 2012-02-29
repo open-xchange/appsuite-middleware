@@ -96,6 +96,7 @@ public final class MQActivator extends HousekeepingActivator {
             registerService(MQService.class, service);
             addService(MQService.class, service);
             MQServiceLookup.setMQService(service);
+            MQService.SERVICE_REFERENCE.set(service);
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;
@@ -112,6 +113,7 @@ public final class MQActivator extends HousekeepingActivator {
         removeService(MQService.class);
         MQServiceLookup.setServiceLookup(null);
         MQServiceLookup.setMQService(null);
+        MQService.SERVICE_REFERENCE.set(null);
         super.stopBundle();
     }
 

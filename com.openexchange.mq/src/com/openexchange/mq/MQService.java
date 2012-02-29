@@ -50,6 +50,7 @@
 package com.openexchange.mq;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -77,6 +78,11 @@ import com.openexchange.mq.example.MQJmsTopicExample;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQService {
+
+    /**
+     * The service reference.
+     */
+    public static final AtomicReference<MQService> SERVICE_REFERENCE = new AtomicReference<MQService>();
 
     /**
      * Gets the special queue for managing Message Queue system.
