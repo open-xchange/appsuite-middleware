@@ -71,6 +71,7 @@ public class MQQueueSender extends MQQueueResource {
     /**
      * Initializes a new {@link MQQueueSender}.
      * 
+     * @param queueName The name of the queue to send to
      * @throws OXException If initialization fails
      */
     public MQQueueSender(final String queueName) throws OXException {

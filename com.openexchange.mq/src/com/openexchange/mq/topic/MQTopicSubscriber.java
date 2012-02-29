@@ -101,6 +101,7 @@ public class MQTopicSubscriber extends MQTopicResource {
     /**
      * Initializes a new {@link MQTopicSubscriber}.
      * 
+     * @param topicName The name of topic to subscribe from
      * @throws OXException If initialization fails
      */
     public MQTopicSubscriber(final String topicName, final MQTopicListener listener) throws OXException {

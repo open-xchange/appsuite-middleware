@@ -71,6 +71,7 @@ public class MQTopicPublisher extends MQTopicResource {
     /**
      * Initializes a new {@link MQTopicPublisher}.
      * 
+     * @param topicName The name of topic to publish to
      * @throws OXException If initialization fails
      */
     public MQTopicPublisher(final String topicName) throws OXException {

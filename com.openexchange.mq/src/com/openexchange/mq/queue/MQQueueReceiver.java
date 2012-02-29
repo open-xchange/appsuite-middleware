@@ -73,6 +73,7 @@ public class MQQueueReceiver extends MQQueueResource {
     /**
      * Initializes a new {@link MQQueueReceiver}.
      * 
+     * @param queueName The name of the queue to receive from
      * @throws OXException If initialization fails
      */
     public MQQueueReceiver(final String queueName) throws OXException {
