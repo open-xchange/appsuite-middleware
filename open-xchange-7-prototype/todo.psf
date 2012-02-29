@@ -16,6 +16,5 @@ subscribe.*
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.unifiedinbox"/>
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xerces.sun"/>
 </provider>
 </psf>
