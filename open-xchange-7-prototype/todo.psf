@@ -9,9 +9,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck.servlet"/>
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
-subscribe.*
-
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.unifiedinbox"/>
 
 </provider>
