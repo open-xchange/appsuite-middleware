@@ -8,7 +8,7 @@
     <!-- Constants -->
     <property name="templatesDir" value="templates"/>
 
-    <import file="../build/build-project.xml"/>
+    <import file="build-project.xml"/>
 
     <target name="postInstall">
         <copy todir="${destDir}/${prefix}/${templatesDir}">

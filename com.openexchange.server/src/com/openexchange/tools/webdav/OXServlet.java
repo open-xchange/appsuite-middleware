@@ -75,6 +75,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.webdav.digest.Authorization;
 import com.openexchange.tools.webdav.digest.DigestUtility;
 import com.openexchange.webdav.WebdavExceptionCode;
@@ -160,6 +161,11 @@ public abstract class OXServlet extends WebDavServlet {
         @Override
         public Map<String, List<String>> getHeaders() {
             return copyHeaders(req);
+        }
+
+        @Override
+        public com.openexchange.authentication.Cookie[] getCookies() {
+            return Tools.getCookieFromHeader(req);
         }
     }
 
@@ -373,7 +379,7 @@ public abstract class OXServlet extends WebDavServlet {
 //        resp.addHeader("WWW-Authenticate", builder.toString());
     }
 
-    private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException, IOException {
+    private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {

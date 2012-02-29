@@ -439,6 +439,9 @@ public final class InternalList {
 
         // Checks for missing folder 'public_infostore' (15) in any available context
         new com.openexchange.groupware.update.tasks.CheckForPublicInfostoreFolderTask(),
-        
+
+        // Migrate "replyTo" information from properties table to account tables
+        new com.openexchange.groupware.update.tasks.MailAccountMigrateReplyToTask(),
+
     };
 }

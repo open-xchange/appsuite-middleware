@@ -282,8 +282,8 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 
 	public String translateFromJSONtoDB(String fieldname) {
  		ContactField field = ContactField.getByAjaxName(fieldname);
- 		if((field != null) && (field.getFieldName() != null))
- 			return field.getFieldName();
+ 		if((field != null) && (field.getDbName() != null))
+ 			return field.getDbName();
  		else
  			return fieldname;
  	}

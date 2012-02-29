@@ -196,7 +196,7 @@ public final class ImageServlet extends HttpServlet {
                 }
             }
             if (null == registrationName) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknwon image location.");
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown image location.");
                 return;
             }
         }

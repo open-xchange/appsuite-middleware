@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseGetter;
@@ -81,36 +82,72 @@ public final class Tools {
      */
     public static final ContactSwitcher GETTER = new ContactDatabaseGetter();
     
+    
+    
+    /**
+     * A set of all contact fields as used by the contacts database table.
+     */
+    public static final EnumSet<ContactField> CONTACT_DATABASE_FIELDS = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL, 
+        ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST, 
+        ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.LAST_MODIFIED_UTC, ContactField.LINKS));
+    
     /**
      * An array of all contact fields as used by the contacts database table.
      */
-    public static final ContactField[] CONTACT_DATABASE_FIELDS;
-    static {
-        final EnumSet<ContactField> dbFields = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL, ContactField.IMAGE1_CONTENT_TYPE, 
-            ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST));
-        CONTACT_DATABASE_FIELDS = dbFields.toArray(new ContactField[dbFields.size()]);        
-    }
+    public static final ContactField[] CONTACT_DATABASE_FIELDS_ARRAY = 
+        CONTACT_DATABASE_FIELDS.toArray(new ContactField[CONTACT_DATABASE_FIELDS.size()]);
+    
+    /**
+     * A set of all contact fields as used by the images database table.
+     */
+    public static final EnumSet<ContactField> IMAGE_DATABASE_FIELDS = EnumSet.of(ContactField.OBJECT_ID, ContactField.IMAGE1, 
+        ContactField.LAST_MODIFIED, ContactField.IMAGE1_CONTENT_TYPE, ContactField.CONTEXTID);
+    
+    /**
+     * A set of all additional contact fields as used by the images database table.
+     */
+    public static final EnumSet<ContactField> IMAGE_DATABASE_FIELDS_ADDITIONAL = EnumSet.of(ContactField.IMAGE1, 
+        ContactField.LAST_MODIFIED, ContactField.IMAGE1_CONTENT_TYPE);
     
     /**
      * An array of all contact fields as used by the images database table.
      */
-    public static final ContactField[] IMAGE_DATABASE_FIELDS = { ContactField.OBJECT_ID, ContactField.IMAGE1, ContactField.LAST_MODIFIED, 
-        ContactField.IMAGE1_CONTENT_TYPE, ContactField.CONTEXTID };
+    public static final ContactField[] IMAGE_DATABASE_FIELDS_ARRAY = 
+        IMAGE_DATABASE_FIELDS.toArray(new ContactField[IMAGE_DATABASE_FIELDS.size()]);
+
+    /**
+     * A set of all contact fields as used by the distribution list database table.
+     */
+    public static final EnumSet<ContactField> DISTLIST_DATABASE_FIELDS = EnumSet.of(ContactField.OBJECT_ID, 
+        ContactField.NUMBER_OF_DISTRIBUTIONLIST /* fake intfield02 */, ContactField.NUMBER_OF_LINKS /* fake intfield03 */, 
+        ContactField.NUMBER_OF_IMAGES /* fake intfield04 */, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
+        ContactField.MIDDLE_NAME /* fake field03 */, ContactField.CONTEXTID);
 
     /**
      * An array of all contact fields as used by the distribution list database table.
      */
-    public static final ContactField[] DISTLIST_DATABASE_FIELDS = { ContactField.OBJECT_ID, 
-        ContactField.NUMBER_OF_DISTRIBUTIONLIST /* fake intfield02 */, ContactField.NUMBER_OF_LINKS /* fake intfield03 */, 
-        ContactField.NUMBER_OF_IMAGES /* fake intfield04 */, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
-        ContactField.MIDDLE_NAME  /* fake field03 */, ContactField.CONTEXTID };
+    public static final ContactField[] DISTLIST_DATABASE_FIELDS_ARRAY = 
+        DISTLIST_DATABASE_FIELDS.toArray(new ContactField[DISTLIST_DATABASE_FIELDS.size()]);
 
-    /**
-     * A set of contact fields containing those fields that are outsourced to the image table.
-     */
-    private static final EnumSet<ContactField> ADDITIONAL_IMAGE_FIELDS = EnumSet.of(ContactField.IMAGE1_CONTENT_TYPE, 
-        ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1);
+    
         
+    /**
+     * Constructs an array containing the object IDs of the supplied {@link Contact}s.
+     *  
+     * @param contacts the contacts to get the IDs from
+     * @return the IDs
+     */
+    public static int[] getObjectIDs(final List<Contact> contacts) {
+        if (null == contacts) {
+            return null;
+        }
+        final int[] objectIDs = new int[contacts.size()];
+        for (int i = 0; i < objectIDs.length; i++) {
+            objectIDs[i] = contacts.get(i).getObjectID();                        
+        }
+        return objectIDs;
+    }
+    
     /**
      * Gets the database column names mapped to the supplied contact fields separated by ','-chars; ready to be used in 
      * <code>SELECT</code> clauses.  
@@ -119,57 +156,63 @@ public final class Tools {
      * @return the ','-separated database column names without parenthesis, e.g. "field01,field02,field03"
      */
     public static String getColumns(final ContactField[] fields) {
-        final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length); 
+        final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);                
         if (null != fields && 0 < fields.length) {
-            columnsBuilder.append(fields[0].getFieldName());
+            columnsBuilder.append(fields[0].getDbName());
             for (int i = 1; i < fields.length; i++) {
-                columnsBuilder.append(',').append(fields[i].getFieldName());
+                columnsBuilder.append(',').append(fields[i].getDbName());
             }
         }
         return columnsBuilder.toString();
     }
     
+    public static String toCSV(final int[] values) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null != values && 0 < values.length) {
+            stringBuilder.append(values[0]);
+            for (int i = 1; i < values.length; i++) {
+                stringBuilder.append(',').append(values[i]);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
     /**
-     * Constructs an array of those fields that are relevant for the specific table.  
-     *  
+     * 
      * @param fields
-     * @param table
+     * @param validFields
      * @return
      */
-    public static ContactField[] filterFields(final ContactField[] fields, final Table table) {
-        if (table.isContactTable()) {
-            return filterContactTableFields(fields);
-        } else if (table.isImageTable()) {
-            return filterImageTableFields(fields);
-        } else {
-            throw new IllegalArgumentException("fields not known for table " + table);
-        }
+    public static ContactField[] filter(final ContactField[] fields, final EnumSet<ContactField> validFields) {
+        return filter(fields, validFields, (ContactField[])null);
     }
-    
-    private static ContactField[] filterImageTableFields(final ContactField[] fields) {
+        
+    /**
+     * Filters a given array of {@link ContactField}s by a defined set of valid fields. Optionally adds additional mandatory fields to 
+     * the result. 
+     *  
+     * @param fields the fields to filter
+     * @param validFields the set of valid fields in the filtered result
+     * @param mandatoryFields the mandatory fields to be always added to the result
+     * @return the filtered fields
+     */
+    public static ContactField[] filter(final ContactField[] fields, final EnumSet<ContactField> validFields, final ContactField... mandatoryFields) {
         final Set<ContactField> filteredFields = new HashSet<ContactField>();
         if (null != fields) {
             for (final ContactField field : fields) {
-                if (ADDITIONAL_IMAGE_FIELDS.contains(field)) {
+                if (validFields.contains(field)) {
                     filteredFields.add(field);
                 }
             }
         }
-        return filteredFields.toArray(new ContactField[filteredFields.size()]);
-    }
-
-    private static ContactField[] filterContactTableFields(final ContactField[] fields) {
-        final Set<ContactField> filteredFields = new HashSet<ContactField>();
-        if (null != fields) {
-            for (final ContactField field : fields) {
-                if (field.isDBField()) {
-                    filteredFields.add(field);
-                }
+        if (null != mandatoryFields) {
+            for (final ContactField field : mandatoryFields) {
+                filteredFields.add(field);
             }
         }
         return filteredFields.toArray(new ContactField[filteredFields.size()]);
     }
-
+        
     /**
      * Gets a string containing assignments of database column names to parameter values. 
      * 
@@ -179,9 +222,9 @@ public final class Tools {
     public static String getAssignments(final ContactField[] fields) {
         final StringBuilder columnsParamsBuilder = new StringBuilder(10 * fields.length); 
         if (null != fields && 0 < fields.length) {
-            columnsParamsBuilder.append(fields[0].getFieldName()).append("=?,");
+            columnsParamsBuilder.append(fields[0].getDbName()).append("=?,");
             for (int i = 1; i < fields.length; i++) {
-                columnsParamsBuilder.append(fields[i].getFieldName()).append("=?,");
+                columnsParamsBuilder.append(fields[i].getDbName()).append("=?,");
             }
         }
         return columnsParamsBuilder.toString();
@@ -199,12 +242,10 @@ public final class Tools {
     public static Contact fromResultSet(final ResultSet resultSet, final ContactField[] fields) throws OXException, SQLException {
         final Contact contact = new Contact();
         for (final ContactField field : fields) {
-            if (field.isDBField()) {
-                final Object value = resultSet.getObject(field.getFieldName());
-                if (false == resultSet.wasNull()) {
-                    field.doSwitch(Tools.SETTER, contact, value);    
-                }
-            }                    
+            final Object value = resultSet.getObject(field.getDbName());
+            if (false == resultSet.wasNull()) {
+                field.doSwitch(Tools.SETTER, contact, value);    
+            }
         }
         return contact;
     }
@@ -235,10 +276,10 @@ public final class Tools {
      * @throws SQLException
      * @throws OXException
      */
-    public static void setParameters(final PreparedStatement stmt, Contact contact, ContactField[] fields) throws SQLException, OXException {
+    public static void setParameters(final PreparedStatement stmt, final Contact contact, final ContactField[] fields) throws SQLException, OXException {
         for (int i = 0; i < fields.length; i++) {
-            final Object value = fields[i].doSwitch(Tools.GETTER, contact);                           
-            stmt.setObject(i, value, fields[i].getSQLType());
+            final Object value = fields[i].doSwitch(Tools.GETTER, contact);
+            stmt.setObject(i + 1, value, fields[i].getSQLType());
         }
     }
 
@@ -253,15 +294,99 @@ public final class Tools {
      */
     public static DistributionListEntryObject fromDistListResultSet(final ResultSet resultSet) throws SQLException, OXException {
         final DistributionListEntryObject member = new DistributionListEntryObject();
-        member.setEntryID(resultSet.getInt(2));
-        member.setEmailfield(resultSet.getInt(3));
-        member.setFolderID(resultSet.getInt(4));
-        member.setDisplayname(resultSet.getString(5));
-        member.setLastname(resultSet.getString(6));
-        member.setFirstname(resultSet.getString(7));
-        member.setEmailaddress(resultSet.getString(8));
+        int entryID = resultSet.getInt(ContactField.NUMBER_OF_DISTRIBUTIONLIST.getDbName()); // intfield02
+        if (false == resultSet.wasNull()) {
+            member.setEntryID(entryID);
+        }
+        final int emailField = resultSet.getInt(ContactField.NUMBER_OF_LINKS.getDbName()); // intfield03
+        if (false == resultSet.wasNull()) {
+            member.setEmailfield(emailField);
+        }
+        final int folderID = resultSet.getInt(ContactField.NUMBER_OF_IMAGES.getDbName()); // intfield04
+        if (false == resultSet.wasNull()) {
+            member.setFolderID(folderID);
+        }
+        final String displayName = resultSet.getString(ContactField.DISPLAY_NAME.getDbName()); // field01
+        if (false == resultSet.wasNull()) {
+            member.setDisplayname(displayName);
+        }
+        final String lastName = resultSet.getString(ContactField.SUR_NAME.getDbName()); // field02
+        if (false == resultSet.wasNull()) {
+            member.setLastname(lastName);
+        }
+        final String firstName = resultSet.getString(ContactField.GIVEN_NAME.getDbName()); // field03
+        if (false == resultSet.wasNull()) {
+            member.setFirstname(firstName);
+        }
+        final String emailAddress = resultSet.getString(ContactField.MIDDLE_NAME.getDbName()); // field04
+        if (false == resultSet.wasNull()) {
+            member.setEmailaddress(emailAddress);
+        }
         return member;
     }   
+    
+    public static void setParameters(final PreparedStatement stmt, final ContactField[] fields, final DistributionListEntryObject member, final int contactID, final int contextID) throws SQLException, OXException {
+        for (int i = 0; i < fields.length; i++) {
+            final int parameterIndex = i + 1; 
+            switch (fields[i]) {
+            case OBJECT_ID: // intfield01
+                stmt.setInt(parameterIndex, contactID); 
+                break;
+            case NUMBER_OF_DISTRIBUTIONLIST: // intfield02 
+                if (member.containsEntryID()) { 
+                    stmt.setInt(parameterIndex, member.getEntryID());
+                } else {
+                    stmt.setNull(parameterIndex, Types.INTEGER);
+                }
+                break;
+            case NUMBER_OF_LINKS: // intfield03
+                if (member.containsEmailfield()) {
+                    stmt.setInt(parameterIndex, member.getEmailfield());
+                }
+                break;
+            case NUMBER_OF_IMAGES: // intfield04
+                if (member.containsFolderld()) {
+                    stmt.setInt(parameterIndex, member.getFolderID());
+                } else {
+                    stmt.setNull(parameterIndex, Types.INTEGER);
+                }
+                break;
+            case DISPLAY_NAME: // field01
+                if (member.containsDisplayname()) {
+                    stmt.setString(parameterIndex, member.getDisplayname());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case SUR_NAME: // field02
+                if (member.containsLastname()) {
+                    stmt.setString(parameterIndex, member.getLastname());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case GIVEN_NAME: // field03
+                if (member.containsFistname()) {
+                    stmt.setString(parameterIndex, member.getFirstname());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case MIDDLE_NAME: // field04
+                if (member.containsEmailaddress()) {
+                    stmt.setString(parameterIndex, member.getEmailaddress());
+                } else {
+                    stmt.setNull(parameterIndex, Types.VARCHAR);
+                }
+                break;
+            case CONTEXTID: // cid
+                stmt.setInt(parameterIndex, contextID);
+                break;
+            default:
+                throw new IllegalArgumentException(fields[i].toString());
+            }
+        }        
+    }
     
     /**
      * Sets the supplied statement's database parameters from the properties found in the supplied contact. 

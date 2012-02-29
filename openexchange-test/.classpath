@@ -92,5 +92,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contacts.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tasks.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.storage.rdb"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

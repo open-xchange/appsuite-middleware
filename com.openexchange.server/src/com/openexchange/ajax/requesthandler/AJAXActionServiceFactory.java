@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.Collection;
+import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.exception.OXException;
 
 /**
@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface AJAXActionServiceFactory {
+public interface AJAXActionServiceFactory extends AnnotatedServices {
 
     /**
      * Creates the action service for performing the request.
@@ -67,12 +67,5 @@ public interface AJAXActionServiceFactory {
      * @throws OXException If an action service can not be created for the given name.
      */
     AJAXActionService createActionService(String action) throws OXException;
-
-    /**
-     * Gets the supported action services.
-     * 
-     * @return The supported action services
-     */
-    Collection<? extends AJAXActionService> getSupportedServices();
 
 }

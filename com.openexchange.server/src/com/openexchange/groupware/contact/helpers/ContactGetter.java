@@ -1116,6 +1116,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getImageContentType();
     }
     
+    @Override
     public Object homeaddress(Object[] objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.HOME_ADDRESS.getReadableName()); 
@@ -1124,6 +1125,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getAddressHome();
     }
 
+    @Override
     public Object businessaddress(Object[] objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.BUSINESS_ADDRESS.getReadableName()); 
@@ -1132,6 +1134,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getAddressBusiness();
     }
 
+    @Override
     public Object otheraddress(Object[] objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.OTHER_ADDRESS.getReadableName()); 
@@ -1140,12 +1143,22 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getAddressOther();
     }
 
+    @Override
     public Object uid(Object[] objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.UID.getReadableName()); 
         }
         final Contact conObj = (Contact) objects[0];
         return conObj.getUid();
+    }
+
+    @Override
+    public Object image1(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.IMAGE1.getReadableName()); 
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getImage1();
     }
 
     @Override

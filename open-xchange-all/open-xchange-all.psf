@@ -17,5 +17,11 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-manage-group-resource"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-dataretrieval"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-indexing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-mailfilter"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-zeroconf"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-pop3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-preview"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-publish"/>
 </provider>
 </psf>

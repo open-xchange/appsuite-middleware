@@ -51,18 +51,23 @@ package com.openexchange.mq.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mq.MQConstants;
+import com.openexchange.mq.MQServerStartup;
+import com.openexchange.mq.MQService;
 import com.openexchange.mq.hornetq.HornetQServerStartup;
-import com.openexchange.mq.services.MQServices;
+import com.openexchange.mq.serviceLookup.MQServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MQActivator}
+ * {@link MQActivator} - The {@link BundleActivator activator} for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQActivator extends HousekeepingActivator {
+
+    private volatile MQServerStartup serverStartup;
 
     /**
      * Initializes a new {@link MQActivator}.
@@ -81,9 +86,17 @@ public final class MQActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
         log.info("Starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
         try {
-            MQServices.setServiceLookup(this);
-            new HornetQServerStartup().start();
-            
+            MQServiceLookup.setServiceLookup(this);
+            // Start MQ server
+            final MQServerStartup serverStartup = new HornetQServerStartup();
+            serverStartup.start();
+            this.serverStartup = serverStartup;
+            // Register service(s)
+            final MQService service = serverStartup.getService();
+            registerService(MQService.class, service);
+            addService(MQService.class, service);
+            MQServiceLookup.setMQService(service);
+            MQService.SERVICE_REFERENCE.set(service);
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;
@@ -92,7 +105,15 @@ public final class MQActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        MQServices.setServiceLookup(null);
+        final MQServerStartup serverStartup = this.serverStartup;
+        if (null != serverStartup) {
+            serverStartup.stop();
+            this.serverStartup = null;
+        }
+        removeService(MQService.class);
+        MQServiceLookup.setServiceLookup(null);
+        MQServiceLookup.setMQService(null);
+        MQService.SERVICE_REFERENCE.set(null);
         super.stopBundle();
     }
 

@@ -65,8 +65,8 @@ public interface AuthenticationService {
      * context.
      *
      * @param loginInfo the complete login information from the login screen.
-     * @return a string array with two elements in which the first contains the login info for the context and the second contains the login
-     *         info for the user.
+     * @return an {@link Authenticated} containing context information to resolve the context and user information to resolve the user.
+     * This return type can be enhanced with {@link SessionEnhancement} and/or {@link ResponseEnhancement}.
      * @throws OXException If something with the login info is wrong.
      */
     Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
