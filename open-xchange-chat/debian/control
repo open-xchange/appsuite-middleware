@@ -10,5 +10,5 @@ Package: open-xchange-chat
 Architecture: all
 Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
 Description: Backend chat extension
- Package contains the backend components for the chat feature. This include database storage, chat logic and HTTP/JSON chat interface for
+ Package contains the backend components for the chat feature. This includes database storage, chat logic and HTTP/JSON chat interface for
  clients.

@@ -61,6 +61,9 @@ import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -71,6 +74,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.GET, name = "getUnread", description = "Get count of unread messages", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Id of the requested conversation.")
+}, responseDescription = "A JSON array containing the count of unread messages.")
 public class GetUnreadAction extends AbstractChatConversationAction {
 
     /**

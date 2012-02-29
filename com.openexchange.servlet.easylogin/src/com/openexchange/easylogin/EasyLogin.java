@@ -69,6 +69,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.authentication.Cookie;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
@@ -352,6 +353,12 @@ public class EasyLogin extends HttpServlet {
                 @Override
                 public Map<String, List<String>> getHeaders() {
                     return headers;
+                }
+
+                @Override
+                public Cookie[] getCookies() {
+                    // TODO Auto-generated method stub
+                    return null;
                 }
             }, properties);
         } catch (final OXException e) {

@@ -163,6 +163,8 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));
 		} catch (final InterruptedException e) {
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
 			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));
 		}

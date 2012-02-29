@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -60,23 +61,69 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailExceptionCode;
-
+import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link MimeFilter}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MimeFilter {
 
-    private final List<String> ignorableContentTypes;
+    /**
+     * Gets the MIME filter for specified alias.
+     * 
+     * @param alias The alias
+     * @return The appropriate MIME filter or <code>null</code> if alias is unknown
+     */
+    public static MimeFilter filterFor(final String alias) {
+        if ("ics".equalsIgnoreCase(alias)) {
+            return IcsMimeFilter.getInstance();
+        }
+        return null;
+    }
+
+    /**
+     * Gets the MIME filter for specified ignorable <code>Content-Type</code>s
+     * 
+     * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
+     * @return The appropriate MIME filter
+     */
+    public static MimeFilter filterFor(final String... ignorableContentTypes) {
+        return new MimeFilter(Arrays.asList(ignorableContentTypes));
+    }
+
+    /**
+     * Gets the MIME filter for specified ignorable <code>Content-Type</code>s
+     * 
+     * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
+     * @return The appropriate MIME filter
+     */
+    public static MimeFilter filterFor(final List<String> ignorableContentTypes) {
+        return new MimeFilter(ignorableContentTypes);
+    }
+
+    /*-
+     * ---------------------------------------------------------------------
+     */
+
+    protected final List<String> ignorableContentTypes;
 
     /**
      * Initializes a new {@link MimeFilter}.
      */
-    public MimeFilter(final List<String> ignorableContentTypes) {
+    protected MimeFilter(final List<String> ignorableContentTypes) {
         super();
         this.ignorableContentTypes = ignorableContentTypes;
+    }
+
+    /**
+     * Gets the ignorable <code>Content-Type</code>s
+     * 
+     * @return The ignorable <code>Content-Type</code>s
+     */
+    public List<String> getIgnorableContentTypes() {
+        return ignorableContentTypes;
     }
 
     /**
@@ -107,6 +154,38 @@ public class MimeFilter {
         }
     }
 
+    /**
+     * Invoked to detect if passed body part should be ignored.
+     * 
+     * @param contentType The part's Content-Type
+     * @param bodyPart The body part
+     * @return <code>true</code> to ignore; otherwise <code>false</code>
+     */
+    public boolean ignorable(final String contentType, @SuppressWarnings("unused") final BodyPart bodyPart) {
+        for (final String baseType : ignorableContentTypes) {
+            if (contentType.startsWith(baseType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Invoked to detect if passed body part should be ignored.
+     * 
+     * @param contentType The part's Content-Type
+     * @param bodyPart The body part
+     * @return <code>true</code> to ignore; otherwise <code>false</code>
+     */
+    public boolean ignorable(final String contentType, @SuppressWarnings("unused") final MailPart bodyPart) {
+        for (final String baseType : ignorableContentTypes) {
+            if (contentType.startsWith(baseType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void handlePart(final Multipart multipart, final MimeMultipart newMultipart) throws MessagingException, IOException, OXException {
         final int count = multipart.getCount();
         for (int i = 0; i < count; i++) {
@@ -128,7 +207,7 @@ public class MimeFilter {
                     final MimeBodyPart mimeBodyPart = new MimeBodyPart();
                     mimeBodyPart.setContent(filteredMessage, "message/rfc822");
                     newMultipart.addBodyPart(mimeBodyPart);
-                } else if (!ignorable(contentType)) {
+                } else if (!ignorable(contentType, bodyPart)) {
                     newMultipart.addBodyPart(bodyPart);
                 }
             }
@@ -141,15 +220,6 @@ public class MimeFilter {
         } catch (final Exception e) {
             return defaultType;
         }
-    }
-
-    private boolean ignorable(final String contentType) {
-        for (final String baseType : ignorableContentTypes) {
-            if (contentType.startsWith(baseType)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static boolean isEmpty(final String string) {

@@ -321,6 +321,7 @@ public abstract class ServiceHolder<S> {
                             countActive.wait();
                         }
                     } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         LOG.error(e.getMessage(), e);
                     } finally {
                         waiting.set(false);

@@ -80,6 +80,7 @@ public class ActionCommand extends ControlOrActionCommand {
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
         VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
+        ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags"));
 
         private static Hashtable<String, Integer> vacationtags() {
@@ -95,6 +96,24 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
+        private static Hashtable<String, Integer> enotifytags() {
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            /*
+             * http://tools.ietf.org/html/rfc5435
+             * 
+             *    Usage:  notify [":from" string]
+             * [":importance" <"1" / "2" / "3">]
+             * [":options" string-list]
+             * [":message" string]
+             * <method: string>
+             * 
+             * only :message is supported
+             *
+             */
+            retval.put(":message", Integer.valueOf(1));
+            return retval;
+        }
+        
         /**
          * The number of arguments which this command takes at least
          */

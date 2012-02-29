@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "getuser", description = "Get contact by user ID.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "User ID (not Object ID) of the requested user."),
+    @Parameter(name = "id", description = "User ID (not Object ID) of the requested user.")
 }, responseDescription = "Response with timestamp: An object containing all data of the requested contact. The fields of the object are listed in Common object data and Detailed contact data.")
 public class GetUserAction extends ContactAction {
 

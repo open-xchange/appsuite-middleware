@@ -77,6 +77,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -998,6 +999,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
         if (mail != null) {
+            mail.setAccountId(accountId);
             /*
              * Post event for possibly switched \Seen flag
              */
@@ -1494,6 +1496,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
         }
         /*
+         * Set account information
+         */
+        for (final MailMessage mail : mails) {
+            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
+                mail.setAccountId(accountId);
+            }
+        }
+        /*
          * Put message information into cache
          */
         try {
@@ -1800,6 +1810,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 fetchedMails[i].setThreadLevel(mails[i].getThreadLevel());
             }
             mails = fetchedMails;
+        }
+        /*
+         * Set account information
+         */
+        for (final MailMessage mail : mails) {
+            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
+                mail.setAccountId(accountId);
+            }
         }
         try {
             /*
@@ -2369,7 +2387,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     retentionData.setStartTime(new Date(startTransport));
                     retentionData.setIdentifier(transport.getTransportConfig().getLogin());
                     retentionData.setIPAddress(s.getLocalIp());
-                    retentionData.setSenderAddress(sentMail.getFrom()[0].getAddress());
+                    retentionData.setSenderAddress(IDNA.toIDN(sentMail.getFrom()[0].getAddress()));
                     final Set<InternetAddress> recipients = new HashSet<InternetAddress>(Arrays.asList(sentMail.getTo()));
                     recipients.addAll(Arrays.asList(sentMail.getCc()));
                     recipients.addAll(Arrays.asList(sentMail.getBcc()));
@@ -2377,7 +2395,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final String[] recipientsArr = new String[size];
                     final Iterator<InternetAddress> it = recipients.iterator();
                     for (int i = 0; i < size; i++) {
-                        recipientsArr[i] = it.next().getAddress();
+                        recipientsArr[i] = IDNA.toIDN(it.next().getAddress());
                     }
                     retentionData.setRecipientAddresses(recipientsArr);
                     /*

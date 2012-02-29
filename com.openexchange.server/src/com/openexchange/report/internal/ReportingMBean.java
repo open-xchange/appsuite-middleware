@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.management.Attribute;
@@ -105,6 +104,12 @@ public class ReportingMBean implements DynamicMBean {
 
     private TabularType totalType;
 
+    private final String[] macsNames = { "mac", "count", "nradmin", "nrdisabled" };
+
+    private CompositeType macsRow;
+
+    private TabularType macsType;
+
     private final String[] moduleAccessCombinationNames = { "module access combination", "users", "inactive" };
 
     private final String[] detailNames = { "identifier", "admin permission", "users", "age", "created", "module access combinations" };
@@ -143,37 +148,13 @@ public class ReportingMBean implements DynamicMBean {
             configurationService = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new MBeanException(new Exception(e.getMessage()));
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
         }
         if ("Total".equals(attribute)) {
-            final TabularDataSupport total = new TabularDataSupport(totalType);
-            try {
-                final List<Integer> allContextIds = contextService.getAllContextIds();
-                int userCount = 0;
-                for (final Integer contextId : allContextIds) {
-                    int length;
-                    try {
-                        length = userService.listAllUser(contextService.getContext(contextId.intValue())).length;
-                    } catch (final OXException e) {
-                        if (!ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                            throw e;
-                        }
-                        length = 0;
-                    }
-                    userCount += length;
-                }
-                final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] {
-                    I(allContextIds.size()), I(userCount) });
-                total.put(value);
-            } catch (final OpenDataException e) {
-                LOG.error(e.getMessage(), e);
-                throw new MBeanException(e);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-                final Exception wrapMe = new Exception(e.getMessage());
-                throw new MBeanException(wrapMe);
-            }
-            return total;
+            return generateTotalTabular(contextService, userService, configurationService);
+        } else if ("Macs".equals(attribute)) {
+            return generateMacsTabular(contextService, userService, configurationService);
         } else if ("Detail".equals(attribute)) {
             return generateDetailTabular(contextService, userService, configurationService);
         }
@@ -206,7 +187,7 @@ public class ReportingMBean implements DynamicMBean {
                         rc.setCreated(new Date(rs.getLong(2)));
                         rc.setAdminId(I(rs.getInt(3)));
                         rc.setAdminPermission(I(rs.getInt(4)));
-                        allctx.put(rc.getId(), rc);
+                        allctx.put(I(rc.getId()), rc);
                     }
                     rs.close();
                     stmt.close();
@@ -251,6 +232,148 @@ public class ReportingMBean implements DynamicMBean {
         } catch (final MBeanException e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        }
+    }
+
+    private TabularDataSupport generateTotalTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
+        final TabularDataSupport total = new TabularDataSupport(totalType);
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        try {
+            final Map<String, Integer> schemaMap = Tools.getAllSchemata(LOG);
+            int nrctx  = 0;
+            int nruser = 0;
+            for (final String schema : schemaMap.keySet()) {
+                final int readPool = schemaMap.get(schema).intValue();
+                final Connection connection;
+                try {
+                    connection = dbService.get(readPool, schema);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
+                }
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = connection.prepareStatement("SELECT COUNT(DISTINCT cid) AS cid, COUNT(id) AS id FROM user");
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        nrctx += rs.getInt(1);
+                        nruser += rs.getInt(2);
+                    }
+                    rs.close();
+                    stmt.close();
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new MBeanException(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    dbService.back(readPool, connection);
+                }
+            }
+            final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] {
+                I(nrctx), I(nruser) });
+            total.put(value);
+            return total;
+        } catch (final MBeanException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (OpenDataException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        }
+    }
+
+    private TabularDataSupport generateMacsTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
+        final TabularDataSupport total = new TabularDataSupport(macsType);
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        try {
+            final Map<String, Integer> schemaMap = Tools.getAllSchemata(LOG);
+            HashMap<Integer, Integer> macMap = new HashMap<Integer, Integer>();
+            HashMap<Integer, Integer> admMap = new HashMap<Integer, Integer>();
+            HashMap<Integer, Integer> disabledMap = new HashMap<Integer, Integer>();
+            for (final String schema : schemaMap.keySet()) {
+                final int readPool = schemaMap.get(schema).intValue();
+                final Connection connection;
+                try {
+                    connection = dbService.get(readPool, schema);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
+                }
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = connection.prepareStatement("SELECT c.permissions,COUNT(c.permissions) AS count,COUNT(IF(c.user=2,1,null)) AS nradm,COUNT(IF(u.mailEnabled=0,1,null)) AS nrdisabled FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user GROUP BY c.permissions");
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        Integer mac = rs.getInt(1);
+                        Integer count = rs.getInt(2);
+                        Integer nradm = rs.getInt(3);
+                        Integer nrdisabled = rs.getInt(4);
+                        if( macMap.containsKey(mac) ) {
+                            macMap.put(mac, macMap.get(mac)+count);
+                        } else {
+                            macMap.put(mac, count);
+                        }
+                        if( admMap.containsKey(mac) ) {
+                            admMap.put(mac, admMap.get(mac)+nradm);
+                        } else {
+                            admMap.put(mac, nradm);
+                        }
+                        if( disabledMap.containsKey(mac) ) {
+                            disabledMap.put(mac, disabledMap.get(mac)+nrdisabled);
+                        } else {
+                            disabledMap.put(mac, nrdisabled);
+                        }
+                    }
+                    rs.close();
+                    stmt.close();
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new MBeanException(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    dbService.back(readPool, connection);
+                }
+            }
+            for(final Integer key : macMap.keySet() ) {
+                final CompositeDataSupport value = new CompositeDataSupport(macsRow, macsNames, new Object[] {
+                    key, macMap.get(key), admMap.get(key), disabledMap.get(key) });
+                total.put(value);
+            }
+            return total;
+        } catch (final MBeanException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (OpenDataException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe,e.getMessage());
         }
     }
 
@@ -349,6 +472,11 @@ public class ReportingMBean implements DynamicMBean {
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 
+            final String[] macsDescriptions = { "Access combination", "Count", "Admins", "Disabled" };
+            final OpenType[] macsTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+            macsRow = new CompositeType("Macs row", "A macs row", macsNames, macsDescriptions, macsTypes);
+            macsType = new TabularType("Macs", "Macs view", macsRow, macsNames);
+
             final String[] moduleAccessCombinationDescriptions = {
                 "Integer value of the module access combination", "number of users configured with this module access combination",
                 "inactive subset of useres configured with this module access combination" };
@@ -381,6 +509,13 @@ public class ReportingMBean implements DynamicMBean {
                 true,
                 false,
                 false);
+            final OpenMBeanAttributeInfo macsAttribute = new OpenMBeanAttributeInfoSupport(
+                "Macs",
+                "List of macs and their count.",
+                macsType,
+                true,
+                false,
+                false);
             final OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport(
                 "Detail",
                 "Detailed report about contexts and users",
@@ -389,7 +524,7 @@ public class ReportingMBean implements DynamicMBean {
                 false,
                 false);
             return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] {
-                totalAttribute, detailAttribute }, null, null, null);
+                totalAttribute, macsAttribute, detailAttribute }, null, null, null);
         } catch (final OpenDataException e) {
             LOG.error(e.getMessage(), e);
         }

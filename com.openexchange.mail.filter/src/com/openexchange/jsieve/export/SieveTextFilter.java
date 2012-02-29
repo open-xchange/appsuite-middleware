@@ -433,8 +433,8 @@ public final class SieveTextFilter {
 
     private static Set<String> requiredList(final Set<String> requireds) {
         if (requireds.contains("imapflags") && requireds.contains("imap4flags")) {
-            // Prefer "imapflags" if both supported
-            requireds.remove("imap4flags");
+            // Prefer "imap4flags" if both supported
+            requireds.remove("imapflags");
         }
         return requireds;
     }
@@ -533,8 +533,8 @@ public final class SieveTextFilter {
     private int getActionCommandSize(final List<ActionCommand> actioncommands) {
         int size = 0;
         for (final ActionCommand actionCommand : actioncommands) {
-            if (Commands.VACATION.equals(actionCommand.getCommand())) {
-                // The text arguments for vacation is the last one in the list
+            if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand())) {
+                // The text arguments for vacation end method for enotify are the last in the list
                 final ArrayList<Object> arguments = actionCommand.getArguments();
                 final int size2 = arguments.size();
                 if (0 < size2) {

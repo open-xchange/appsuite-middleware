@@ -100,6 +100,9 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         for (ITipChange change : changes) {
             
             CalendarDataObject appointment = change.getNewAppointment();
+            if (appointment == null) {
+            	continue;
+            }
             appointment.setNotification(true);
             ensureParticipant(appointment, action, session);
             Appointment original = determineOriginalAppointment(change, processed, session);

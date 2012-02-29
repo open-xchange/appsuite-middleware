@@ -57,8 +57,9 @@ public class ProcessPool {
     public void initializationFinished() {
         final Object[] array = _list.toArray();
         _all = new OfficeProcess[array.length];
-        for (int i = 0; i < array.length; i++)
+        for (int i = 0; i < array.length; i++) {
             _all[i] = (OfficeProcess) array[i];
+        }
     }
 
     /**
@@ -74,8 +75,9 @@ public class ProcessPool {
      * Ask all office process (ready or not) to terminate
      */
     public void terminate() {
-        for (int i = 0; i < _all.length; i++)
+        for (int i = 0; i < _all.length; i++) {
             _all[i].terminate();
+        }
     }
 
     /**
@@ -86,13 +88,15 @@ public class ProcessPool {
     public synchronized OfficeProcess pop() {
         OfficeProcess ret = null;
         while (ret == null) {
-            if (_list.size() != 0)
+            if (_list.size() != 0) {
                 ret = (OfficeProcess) _list.removeFirst();
-            else {
+            } else {
                 // waiting for a process to reenter pool
                 try {
                     wait(_config.sleepingDelay);
                 } catch (final InterruptedException ex) {
+                    // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+                    Thread.currentThread().interrupt();
                     Logger.detailedDebug(ex);
                 }
             }

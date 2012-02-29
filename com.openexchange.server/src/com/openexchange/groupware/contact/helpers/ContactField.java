@@ -53,7 +53,6 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -178,7 +177,7 @@ public enum ContactField{
     NUMBER_OF_DISTRIBUTIONLIST (594 , "intfield02" , "NUMBER_OF_DISTRIBUTIONLIST" , "Number of distributionlists"  , ContactFields.NUMBER_OF_DISTRIBUTIONLIST, Types.INTEGER),
     NUMBER_OF_LINKS (103 , "intfield03" , "NUMBER_OF_LINKS" , "Number of links"  , ContactFields.NUMBER_OF_LINKS, Types.INTEGER),
     DISTRIBUTIONLIST (592 , "" , "DISTRIBUTIONLIST" , ""  , ContactFields.DISTRIBUTIONLIST, 0),
-    LINKS (591 , "intfield03" , "LINKS" , ""  , ContactFields.LINKS, Types.INTEGER),
+    LINKS (591 , "" , "LINKS" , ""  , ContactFields.LINKS, 0),
     FOLDER_ID (20 , "fid" , "FOLDER_ID" , "Folder id"  , ContactFields.FOLDER_ID, Types.INTEGER),
     CONTEXTID (593 , "cid" , "CONTEXTID" , "Context id"  , "", Types.INTEGER),
     PRIVATE_FLAG (101 , "pflag" , "PRIVATE_FLAG" , "private"  , ContactFields.PRIVATE_FLAG, Types.INTEGER),
@@ -188,9 +187,9 @@ public enum ContactField{
     LAST_MODIFIED (5 , "changing_date" , "LAST_MODIFIED" , "Changing date"  , ContactFields.LAST_MODIFIED, Types.BIGINT),
     BIRTHDAY (511 , "timestampfield01" , "BIRTHDAY" , "Birthday" , ContactFields.BIRTHDAY, Types.DATE),
     ANNIVERSARY (517 , "timestampfield02" , "ANNIVERSARY" , "Anniversary" , ContactFields.ANNIVERSARY, Types.DATE),
-    IMAGE1 (570 , "" , "IMAGE1" , ""  , ContactFields.IMAGE1, 0),
-    IMAGE_LAST_MODIFIED (597 , "" , "IMAGE_LAST_MODIFIED" , ""  ,"image_last_modified", 0),
-    IMAGE1_CONTENT_TYPE (601 , "" , "IMAGE1_CONTENT_TYPE" , ""  , "image1_content_type", 0),
+    IMAGE1 (570 , "image1" , "IMAGE1" , ""  , ContactFields.IMAGE1, Types.VARBINARY),
+    IMAGE_LAST_MODIFIED (597 , "changing_date" , "IMAGE_LAST_MODIFIED" , ""  ,"image_last_modified", Types.DATE),
+    IMAGE1_CONTENT_TYPE (601 , "mime_type" , "IMAGE1_CONTENT_TYPE" , ""  , "image1_content_type", Types.VARCHAR),
     INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ContactFields.USER_ID, Types.INTEGER),
     COLOR_LABEL (102 , "intfield05" , "COLOR_LABEL" , ""  , CommonFields.COLORLABEL, Types.INTEGER),
     FILE_AS (599 , "field90" , "FILE_AS" , ""  , ContactFields.FILE_AS, Types.VARCHAR),
@@ -208,18 +207,19 @@ public enum ContactField{
     HOME_ADDRESS(Contact.ADDRESS_HOME, "homeAddress", "ADDRESS_HOME", "homeAddress", ContactFields.ADDRESS_HOME, Types.VARCHAR),
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
-    UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR);
+    UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
+    ;
 
     private int columnNumber, sqlType;
-    private String dbName, readableName, fieldName, ajaxName;
+    private String fieldName, readableName, dbName, ajaxName;
     private static final ContactFieldMapper frenchOutlook = new FrenchOutlookMapper();
     private static final ContactFieldMapper germanOutlook = new GermanOutlookMapper();
     private static final ContactFieldMapper englishOutlook = new EnglishOutlookMapper();
 
-    private ContactField(final int columnNumber, final String fieldName, final String dbName, final String readableName, final String ajaxString, final int sqlType){
-        this.fieldName = fieldName;
+    private ContactField(final int columnNumber, final String dbName, final String fieldName, final String readableName, final String ajaxString, final int sqlType){
+        this.dbName = dbName;
         this.columnNumber = columnNumber;
-        this.dbName = dbName ;
+        this.fieldName = fieldName ;
         this.readableName = readableName;
         this.ajaxName = ajaxString;
         this.sqlType = sqlType;
@@ -229,16 +229,26 @@ public enum ContactField{
 		return columnNumber;
 	}
 
-	public String getDBName(){
-		return dbName;
+	/**
+	 * Gets the field name
+	 * 
+	 * @return the field name
+	 */
+	public String getFieldName(){
+		return fieldName;
 	}
 
 	public String getReadableName(){
 		return readableName;
 	}
 
-	public String getFieldName(){
-		return fieldName;
+	/**
+	 * Gets the name of the corresponding database columns
+	 * 
+	 * @return the database name, or <code>""</code> if there's no database column associated with this field
+	 */
+	public String getDbName(){
+		return dbName;
 	}
 
 	public String getEnglishOutlookName(){
@@ -275,7 +285,7 @@ public enum ContactField{
         }
 
         for(final ContactField field: values()){
-			if(dbFieldName.equals( field.getDBName() )){
+			if(dbFieldName.equals( field.getFieldName() )){
 				return field;
 			}
 		}
@@ -307,7 +317,7 @@ public enum ContactField{
             }
 
 		for(final ContactField field : values()){
-			if(fieldName.equals( field.getFieldName() ) ){
+			if(fieldName.equals( field.getDbName() ) ){
 				return field;
 			}
 		}
@@ -351,10 +361,11 @@ public enum ContactField{
 			List<String> haystack = Arrays.asList(new String[]{
 				field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
 				field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
-				field.getDBName().replaceAll("[_\\. ]", "").toLowerCase()
+				field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
 			});
-			if(haystack.contains(needle))
-				return field;
+			if(haystack.contains(needle)) {
+                return field;
+            }
 		}
 		return null;
 	}
@@ -483,6 +494,7 @@ public enum ContactField{
         case BUSINESS_ADDRESS: return switcher.businessaddress(objects);
         case OTHER_ADDRESS: return switcher.otheraddress(objects);
         case UID: return switcher.uid(objects);
+        case IMAGE1: return switcher.image1(objects);
         default: return null;
         }
     }
@@ -492,7 +504,7 @@ public enum ContactField{
         return VIRTUAL_FIELDS.contains(this);
     }
     
-    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST);
+    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS);
     public boolean isDBField() {
         return !NON_DB_FIELDS.contains(this);
     }

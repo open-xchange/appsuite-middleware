@@ -273,10 +273,10 @@ public final class ServerConfig {
             value = SINGLETON.uploadDirectory;
             break;
         case MaxFileUploadSize:
-            value = String.valueOf(SINGLETON.maxFileUploadSize);
+            value = Integer.toString(SINGLETON.maxFileUploadSize);
             break;
         case MaxUploadIdleTimeMillis:
-            value = String.valueOf(SINGLETON.maxUploadIdleTimeMillis);
+            value = Integer.toString(SINGLETON.maxUploadIdleTimeMillis);
             break;
         case PrefetchEnabled:
             value = String.valueOf(SINGLETON.prefetchEnabled);
@@ -285,7 +285,7 @@ public final class ServerConfig {
             value = SINGLETON.defaultEncoding;
             break;
         case JMX_PORT:
-            value = String.valueOf(SINGLETON.jmxPort);
+            value = Integer.toString(SINGLETON.jmxPort);
             break;
         case JMX_BIND_ADDRESS:
             value = SINGLETON.jmxBindAddress;
@@ -294,7 +294,7 @@ public final class ServerConfig {
             value = SINGLETON.uiWebPath;
             break;
         case COOKIE_TTL:
-            value = String.valueOf(SINGLETON.cookieTTL);
+            value = Integer.toString(SINGLETON.cookieTTL);
             break;
         case COOKIE_HTTP_ONLY:
             value = String.valueOf(SINGLETON.cookieHttpOnly);
@@ -303,10 +303,10 @@ public final class ServerConfig {
             value = SINGLETON.checkIP.toString();
             break;
         case MAX_BODY_SIZE:
-            value = String.valueOf(SINGLETON.maxBodySize);
+            value = Integer.toString(SINGLETON.maxBodySize);
             break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
-            value = String.valueOf(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            value = Integer.toString(SINGLETON.defaultMaxConcurrentAJAXRequests);
             break;
         default:
             value = getProperty(property.getPropertyName());

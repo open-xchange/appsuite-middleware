@@ -64,6 +64,9 @@ import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.chat.util.ChatUserImpl;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
@@ -74,6 +77,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "allMessages", description = "Get all messages", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Conversation Id."),
+    @Parameter(name = "since", optional=true, description = "If set, get all messages since this timestamp.")
+}, responseDescription = "A JSON array containing chat messages.")
 public final class AllMessagesAction extends AbstractChatConversationAction {
 
     /**

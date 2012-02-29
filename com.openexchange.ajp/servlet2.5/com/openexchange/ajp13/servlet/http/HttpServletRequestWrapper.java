@@ -291,8 +291,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         /*
          * First look-up HttpSessionManagement if a session already exists
          */
-        final Cookie sessionCookie = ajpRequestHandler.getHttpSessionCookie();
-        final String httpSessionId = sessionCookie.getValue();
+        final Cookie jsessionIdCookie = ajpRequestHandler.getHttpSessionCookie();
+        final String httpSessionId = jsessionIdCookie.getValue();
         final HttpSessionWrapper httpSession = HttpSessionManagement.getHttpSession(httpSessionId);
         if (httpSession != null) {
             if (!HttpSessionManagement.isHttpSessionExpired(httpSession)) {
@@ -325,25 +325,25 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
             /*
              * Add JSESSIONID cookie
              */
-            configureCookie(sessionCookie);
-            ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
+            configureCookie(jsessionIdCookie);
+            ajpRequestHandler.getServletResponse().addCookie(jsessionIdCookie);
         }
         return session;
     }
 
     private static final String DEFAULT_PATH = "/";
 
-    private static void configureCookie(final Cookie sessionCookie) {
-        sessionCookie.setPath(DEFAULT_PATH);
+    private static void configureCookie(final Cookie jsessionIdCookie) {
+        jsessionIdCookie.setPath(DEFAULT_PATH);
         final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
         /*
          * Check if auto-login is enabled
          */
         if (null != configurationService && configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false)) {
-            final int maxAge = (int) (ConfigTools.parseTimespan(configurationService.getProperty("com.openexchange.cookie.ttl", "1W")) / 1000);
-            sessionCookie.setMaxAge(maxAge);
+            final int maxAge = ConfigTools.parseTimespanSecs(configurationService.getProperty("com.openexchange.cookie.ttl", "1W"));
+            jsessionIdCookie.setMaxAge(maxAge);
         } else {
-            sessionCookie.setMaxAge(-1); // cookies auto-expire
+            jsessionIdCookie.setMaxAge(-1); // cookies auto-expire
         }
     }
 

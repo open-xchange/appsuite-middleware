@@ -89,11 +89,11 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -271,6 +271,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
                 jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
+                jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

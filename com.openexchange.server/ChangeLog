@@ -1,6 +1,39 @@
+* 2012-02-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21639: Checking for possibly missing account information in returned messages
+
+* 2012-02-24 - jan.bauerdick@open-xchange.com
+
+ - Self documenting API in config, mail, groups, resource, infostore, attachments, reminder, quota, file upload, mail account,
+                           oauth, messaging
+
+* 2012-02-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21643: Fixed possible NoSuchElementException in Unified Mail
+ - Fix for bug 21630: Setting proper parent in requested Unified Mail folder
+ - Fix for bug 21627: Introduced JSON field "account_id" (653)
+ - Fix for bug 21622: Fixed MIME encoding/decoding of file names
+
+* 2012-02-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21625: Sanitize header names before message transport
+
+* 2012-02-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21615: Honor max. retry count in Compare&Set condition
+ - Fix for bug 21539: Dropped obsolete "Error: "/"Fatal: " prefix from error messages
+ - Fix for bug 21436: Proper display of a user's mail with umlauts contained
+
+* 2012-02-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21604: Prefer "imap4flags" over "imapflags" if both supported
+ - Fix for bug 21602: Fixed possible deadlock when checking for elapsed sessions
+ - Fix for bug 21598: Fixed possible NPE
+ - Fix for bug 21610: Restoring subscription status on failed rename/move operation
+
 * 2012-02-20 - thorben.betten@open-xchange.com
 
- - Fix for bug 21590: Maintaining a multiupart's subtype while filtering parts
+ - Fix for bug 21590: Maintaining a multipart's subtype while filtering parts
  - Fix for bug 21603: Fixed possible NPE
 
 * 2012-02-20 - jan.bauerdick@open-xchange.com
@@ -182,6 +215,10 @@
 
  - Fix for bug 21149: Introduced reentrant-sensitive semaphore
  - Fix for bug 20066: Fixed counter of reporting tool (except for *DAV)
+
+* 2012-01-05 - marcus.klein@open-xchange.com
+
+ - Added AutoLoginAuthenticationService to create a session on autologin request if the browser contains some global web services session.
 
 * 2011-01-06 - tobias.friedrich@open-xchange.com
 

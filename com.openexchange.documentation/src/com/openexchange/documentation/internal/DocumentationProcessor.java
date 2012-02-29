@@ -49,18 +49,22 @@
 
 package com.openexchange.documentation.internal;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.documentation.DescriptionFactory;
 import com.openexchange.documentation.descriptions.ModuleDescription;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DocumentationProcessor} - Processes services implementing {@link AJAXActionServiceFactory} 
- * and extracts their module description.
+ * {@link DocumentationProcessor} - Adds or removes the documentation from service objects to/from the registry.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DocumentationProcessor {
 	
+    private static final Log LOG = LogFactory.getLog(DocumentationProcessor.class);
+    
 	private final DefaultDocumentationRegistry registry;
 	private final DescriptionFactory factory;
 
@@ -73,19 +77,29 @@ public class DocumentationProcessor {
         this.factory = factory;
     }
 
+	public void add(final ModuleDescription description) {		
+		try {
+            this.registry.addModule(description);
+        } catch (final OXException e) {
+            LOG.error("error adding module description", e);
+        }
+	}
+	
     /**
-     * Processes the supplied service and adds the extracted description to the registry. 
+     * Processes the supplied service and adds the associated description to the registry. 
      * 
      * @param service the service to add
      */
-	public void add(final AJAXActionServiceFactory service) {
-		DocumentationBuilder builder = new DocumentationBuilder(factory);
-		builder.add(service.getClass()).add(service.getSupportedServices());
-		this.add(builder.getModuleDescription());
-	}
-	
-	public void add(final ModuleDescription description) {		
-		this.registry.addModule(description);
+	public void add(final Object service) {
+	    if (AnnotatedServices.class.isInstance(service)) {
+	        final DocumentationBuilder builder = new DocumentationBuilder(factory);
+	        builder.add(service.getClass()).add(((AnnotatedServices)service).getSupportedServices());
+	        if (builder.hasModule()) {
+	            this.add(builder.getModuleDescription());
+	        }
+	    } else if (ModuleDescription.class.isInstance(service)) {
+	        this.add(((ModuleDescription)service));
+	    }
 	}
 	
 	/**
@@ -93,8 +107,18 @@ public class DocumentationProcessor {
 	 * 
 	 * @param service the service to remove
 	 */
-	public void remove(final AJAXActionServiceFactory service) {
-		this.remove(this.getModuleName(service));
+	public void remove(final Object service) {
+       if (AnnotatedServices.class.isInstance(service)) {
+            final DocumentationBuilder builder = new DocumentationBuilder(factory);
+            builder.add(service.getClass());
+            if (builder.hasModule()) {
+                this.remove(builder.getModuleDescription());
+            }
+        } else if (ModuleDescription.class.isInstance(service)) {
+            this.remove(((ModuleDescription)service));
+        } else {
+            LOG.warn("Unable to get extract documentation from " + service);
+        }
 	}
 	
 	public void remove(final ModuleDescription description) {
@@ -103,19 +127,12 @@ public class DocumentationProcessor {
 
 	private void remove(final String module) {		
 		if (null != module) {
-			this.registry.removeModule(module);
+			try {
+                this.registry.removeModule(module);
+            } catch (final OXException e) {
+                LOG.error("error removing module description", e);
+            }
 		}
 	}	
-	
-	private String getModuleName(final AJAXActionServiceFactory service) {
-		if (null != service) {
-			final DocumentationBuilder builder = new DocumentationBuilder(factory);
-			builder.add(service.getClass());
-			if (builder.hasModule()) {
-				return builder.getModuleDescription().getName();
-			}
-		}
-		return null;
-	}
 	
 }

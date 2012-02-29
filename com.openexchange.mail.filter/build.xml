@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.mail.filter" basedir=".">
 
+    <description>
+        This script adds the additional step using javacc to create the code from the parser description.
+    </description>
+
     <!-- Constants -->
     <property name="jSievePrefix" value="org/apache"/>
     <property name="javaccDir" value="javacc"/>

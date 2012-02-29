@@ -84,9 +84,7 @@ public class MessagingSecretHandling implements EncryptedItemDetectorService, Se
     public boolean hasEncryptedItems(final ServerSession session) throws OXException {
         final Collection<MessagingService> messagingServices = getMessagingServices();
         for (final MessagingService messagingService : messagingServices) {
-            final MessagingAccountManager accountManager = messagingService.getAccountManager();
-            final boolean hasAccount = accountManager.hasAccount(session);
-            if (hasAccount) {
+            if (messagingService.getAccountManager().hasAccount(session)) {
                 return true;
             }
         }

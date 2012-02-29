@@ -51,16 +51,20 @@ package net.freeutils.charset.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * {@link JCharsetActivator} - Activator for <a href="http://www.freeutils.net/source/jcharset/">JCharset</a>'s charset provider
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JCharsetActivator extends HousekeepingActivator {
+public final class JCharsetActivator implements BundleActivator {
 
     private final CharsetProvider charsetProvider;
+
+    private volatile ServiceRegistration<CharsetProvider> registration;
 
     /**
      * Default constructor
@@ -71,14 +75,14 @@ public final class JCharsetActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public void start(final BundleContext context) throws Exception {
         LogFactory.getLog(JCharsetActivator.class).info("starting bundle: net.freeutils.jcharset");
 
         try {
             /*
              * Register jcharset's charset provider
              */
-            registerService(CharsetProvider.class, charsetProvider, null);
+            registration = context.registerService(CharsetProvider.class, charsetProvider, null);
             if (LogFactory.getLog(JCharsetActivator.class).isInfoEnabled()) {
                 LogFactory.getLog(JCharsetActivator.class).info("JCharset charset providers registered");
             }
@@ -89,14 +93,18 @@ public final class JCharsetActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         LogFactory.getLog(JCharsetActivator.class).info("stopping bundle: net.freeutils.jcharset");
 
         try {
             /*
              * Unregister jcharset's charset provider
              */
-            unregisterServices();
+            final ServiceRegistration<CharsetProvider> registration = this.registration;
+            if (null != registration) {
+                registration.unregister();
+                this.registration = null;
+            }
             if (LogFactory.getLog(JCharsetActivator.class).isInfoEnabled()) {
                 LogFactory.getLog(JCharsetActivator.class).info("JCharset charset providers unregistered");
             }
@@ -106,10 +114,5 @@ public final class JCharsetActivator extends HousekeepingActivator {
         }
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
 }

@@ -45,6 +45,8 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
      */
     MISSING_FIELD("Missing field \"%1$s\" in JSON data.", Category.CATEGORY_ERROR, 9);
 
+    private static final String PREFIX = "SVL";
+    
     private final String message;
     private final Category category;
     private final int number;
@@ -72,7 +74,7 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "JSON";
+        return PREFIX;
     }
 
     @Override

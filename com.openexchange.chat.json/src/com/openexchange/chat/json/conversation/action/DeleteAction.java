@@ -58,6 +58,9 @@ import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -67,6 +70,9 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete chats", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "A JSON array containing the conversation Ids to delete.")
 public final class DeleteAction extends AbstractChatConversationAction {
 
     /**

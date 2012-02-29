@@ -49,7 +49,10 @@
 
 package com.openexchange.documentation.osgi;
 
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.documentation.DescriptionFactory;
 import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ModuleDescription;
@@ -64,6 +67,12 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DocumentationActivator extends HousekeepingActivator {
+    
+    private final String[] TRACKED_CLASSES = {
+        AnnotatedServices.class.getName(),
+        ModuleDescription.class.getName(),
+        "com.openexchange.ajax.requesthandler.AJAXActionServiceFactory"
+    };    
 	
     /**
      * Initializes a new {@link DocumentationActivator}.
@@ -82,11 +91,18 @@ public class DocumentationActivator extends HousekeepingActivator {
     	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
     	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
     	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
-    	super.track(AJAXActionServiceFactory.class, new AJAXActionServiceFactoryListener(processor));
-    	super.track(ModuleDescription.class, new ModuleDescriptionListener(processor));    	
+    	super.track(constructFilter(), new DocumentationListener(processor));
     	super.openTrackers();
     	super.registerService(DocumentationRegistry.class, registry);
     	super.registerService(DescriptionFactory.class, factory);
     }
     
+    private Filter constructFilter() throws InvalidSyntaxException {
+        final StringBuilder stringBuilder = new StringBuilder("(|");
+        for (final String className : TRACKED_CLASSES) {
+            stringBuilder.append('(').append(Constants.OBJECTCLASS).append('=').append(className).append(')');
+        }
+        stringBuilder.append(')');
+        return context.createFilter(stringBuilder.toString());
+    }
 }

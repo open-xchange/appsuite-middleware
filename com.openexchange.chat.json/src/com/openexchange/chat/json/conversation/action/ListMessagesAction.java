@@ -62,6 +62,9 @@ import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -71,6 +74,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "listMessages", description = "List chat messages", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Id of the requested conversation.")
+}, requestBody = "Ids of the chat messages to list.",
+responseDescription = "A JSON array containing the requested chat messages.")
 public final class ListMessagesAction extends AbstractChatConversationAction {
 
     /**

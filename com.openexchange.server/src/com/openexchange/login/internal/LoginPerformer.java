@@ -54,15 +54,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.ResponseEnhancement;
+import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.authentication.service.AutoLoginAuthentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.exception.OXException;
@@ -95,9 +100,20 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class LoginPerformer {
 
+    private interface LoginPerformerClosure {
+        public Authenticated doAuthentication(LoginResultImpl retval) throws OXException;
+    }
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
+
+    /**
+     * Initializes a new {@link LoginPerformer}.
+     */
+    private LoginPerformer() {
+        super();
+    }
 
     /**
      * Gets the {@link LoginPerformer} instance.
@@ -109,10 +125,29 @@ public final class LoginPerformer {
     }
 
     /**
-     * Initializes a new {@link LoginPerformer}.
+     * Performs the login for specified login request.
+     *
+     * @param request The login request
+     * @return The login providing login information
+     * @throws LoginException If login fails
      */
-    private LoginPerformer() {
-        super();
+    public LoginResult doLogin(final LoginRequest request) throws OXException {
+        final HashMap<String, Object> properties = new HashMap<String, Object>();
+        return doLogin(request, properties, new LoginPerformerClosure() {
+            @Override
+            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
+                return Authentication.login(request.getLogin(), request.getPassword(), properties);
+            }
+        });
+    }
+
+    public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
+        return doLogin(request, properties, new LoginPerformerClosure() {
+            @Override
+            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
+                return Authentication.login(request.getLogin(), request.getPassword(), properties);
+            }
+        });
     }
 
     /**
@@ -122,8 +157,14 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    public LoginResult doLogin(final LoginRequest request) throws OXException {
-        return doLogin(request, new HashMap<String, Object>());
+    public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
+        final HashMap<String, Object> properties = new HashMap<String, Object>();
+        return doLogin(request, properties, new LoginPerformerClosure() {
+            @Override
+            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
+                return AutoLoginAuthentication.login(request.getLogin(), request.getPassword(), properties);
+            }
+        });
     }
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
@@ -135,14 +176,32 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
+    private LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties, final LoginPerformerClosure loginPerfClosure) throws OXException {
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
-            if (request.getHeaders() != null) {
-                properties.put("headers", request.getHeaders());
+            final Map<String, List<String>> headers = request.getHeaders();
+            if (headers != null) {
+                properties.put("headers", headers);
             }
-            final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword(), properties);
+            final Cookie[] cookies = request.getCookies();
+            if (null != cookies) {
+                properties.put("cookies", cookies);
+            }
+            final Authenticated authed = loginPerfClosure.doAuthentication(retval);
+            if (null == authed) {
+                return null;
+            }
+            if (authed instanceof ResponseEnhancement) {
+                final ResponseEnhancement responseEnhancement = (ResponseEnhancement) authed;
+                retval.setHeaders(responseEnhancement.getHeaders());
+                retval.setCookies(responseEnhancement.getCookies());
+                retval.setRedirect(responseEnhancement.getRedirect());
+                retval.setCode(responseEnhancement.getCode());
+                if (ResultCode.REDIRECT.equals(responseEnhancement.getCode()) || ResultCode.FAILED.equals(responseEnhancement.getCode())) {
+                    return retval;
+                }
+            }
             final Context ctx = findContext(authed.getContextInfo());
             retval.setContext(ctx);
             final String username = authed.getUserInfo();
@@ -151,8 +210,7 @@ public final class LoginPerformer {
             // Checks if something is deactivated.
             final AuthorizationService authService = Authorization.getService();
             if (null == authService) {
-                // FIXME: what todo??
-                final OXException e = ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
+                final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
                 LOG.error("unable to find AuthorizationService", e);
                 throw e;
             }
@@ -200,16 +258,12 @@ public final class LoginPerformer {
     private void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
         try {
             final String client = request.getClient();
-            /*
-             * Check for OLOX v2.0
-             */
+            // Check for OLOX v2.0
             if ("USM-JSON".equalsIgnoreCase(client)) {
                 final UserConfigurationStorage ucs = UserConfigurationStorage.getInstance();
                 final UserConfiguration userConfiguration = ucs.getUserConfiguration(user.getId(), user.getGroups(), ctx);
                 if (!userConfiguration.hasOLOX20()) {
-                    /*
-                     * Deny login for OLOX v2.0 client since disabled as per user configuration
-                     */
+                    // Deny login for OLOX v2.0 client since disabled as per user configuration
                     throw LoginExceptionCodes.CLIENT_DENIED.create(client);
                 }
             }
@@ -237,8 +291,8 @@ public final class LoginPerformer {
         final User u;
         try {
             int userId = 0;
-            if( proxyDelimiter != null && userInfo.contains(proxyDelimiter)) {
-                userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter)+proxyDelimiter.length(), userInfo.length()), ctx);
+            if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
+                userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
             } else {
                 userId = us.getUserId(userInfo, ctx);
             }
@@ -306,7 +360,6 @@ public final class LoginPerformer {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 executor.submit(new LoginPerformerTask() {
-
                     @Override
                     public Object call() {
                         try {

@@ -67,6 +67,9 @@ import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -76,6 +79,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a conversation", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "The conversation Id where to post message.")
+}, requestBody = "A JSON array describing the updated chat.")
 public final class UpdateAction extends AbstractChatConversationAction {
 
     /**

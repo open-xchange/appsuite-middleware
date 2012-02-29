@@ -1,0 +1,237 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mq.hornetq;
+
+import java.io.Reader;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hornetq.api.core.TransportConfiguration;
+import org.hornetq.core.config.Configuration;
+import org.hornetq.core.config.impl.ConfigurationImpl;
+import org.hornetq.core.deployers.impl.FileConfigurationParser;
+import org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory;
+import org.hornetq.core.remoting.impl.invm.InVMConnectorFactory;
+import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
+import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
+import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
+import org.hornetq.jms.server.config.JMSConfiguration;
+import org.hornetq.jms.server.config.JMSQueueConfiguration;
+import org.hornetq.jms.server.config.TopicConfiguration;
+import org.hornetq.jms.server.config.impl.ConnectionFactoryConfigurationImpl;
+import org.hornetq.jms.server.config.impl.JMSConfigurationImpl;
+import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
+import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
+import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import org.hornetq.utils.XMLUtil;
+import org.w3c.dom.Element;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.mq.MQConstants;
+import com.openexchange.mq.MQExceptionCodes;
+import com.openexchange.mq.MQServerStartup;
+import com.openexchange.mq.MQService;
+
+/**
+ * {@link HornetQServerStartup} - The start-up implementation for HornetQ message queue.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class HornetQServerStartup implements MQServerStartup {
+
+    private EmbeddedJMS jmsServer; // Set in synchronized context
+
+    private HornetQService hornetQService;
+
+    /**
+     * Initializes a new {@link HornetQServerStartup}.
+     */
+    public HornetQServerStartup() {
+        super();
+    }
+
+    @Override
+    public MQService getService() throws OXException {
+        return hornetQService;
+    }
+
+    @Override
+    public synchronized void start() throws OXException {
+        try {
+            if (null != this.jmsServer) {
+                // Already started
+                return;
+            }
+            // Step 1. Create HornetQ core configuration, and set the properties accordingly
+            final Configuration configuration = new ConfigurationImpl();
+            configuration.setPersistenceEnabled(false);
+            configuration.setSecurityEnabled(false);
+            // Set acceptor: An acceptor defines a way in which connections can be made to the HornetQ server.
+            {
+                final Map<String, Object> params = new HashMap<String, Object>(2);
+                params.put(
+                    org.hornetq.core.remoting.impl.netty.TransportConstants.PORT_PROP_NAME,
+                    Integer.valueOf(MQConstants.MQ_LISTEN_PORT));
+                params.put(org.hornetq.core.remoting.impl.netty.TransportConstants.USE_NIO_PROP_NAME, Boolean.TRUE);
+                final TransportConfiguration transportConfig =
+                    new TransportConfiguration(NettyAcceptorFactory.class.getName(), params, "netty-connector");
+                configuration.getAcceptorConfigurations().add(transportConfig);
+
+                configuration.getAcceptorConfigurations().add(
+                    new TransportConfiguration(InVMAcceptorFactory.class.getName(), new HashMap<String, Object>(1), "in-vm-connector"));
+            }
+            // Set connector: Whereas acceptors are used on the server to define how we accept connections, connectors are used by a client
+            // to define how it connects to a server.
+            {
+                final Map<String, Object> params = new HashMap<String, Object>(2);
+                params.put(
+                    org.hornetq.core.remoting.impl.netty.TransportConstants.PORT_PROP_NAME,
+                    Integer.valueOf(MQConstants.MQ_LISTEN_PORT));
+                params.put(org.hornetq.core.remoting.impl.netty.TransportConstants.USE_NIO_PROP_NAME, Boolean.TRUE);
+                final TransportConfiguration transportConfig =
+                    new TransportConfiguration(NettyConnectorFactory.class.getName(), params, "netty-connector");
+                configuration.getConnectorConfigurations().put("netty-connector", transportConfig);
+
+                configuration.getConnectorConfigurations().put(
+                    "in-vm-connector",
+                    new TransportConfiguration(InVMConnectorFactory.class.getName(), new HashMap<String, Object>(1), "in-vm-connector"));
+            }
+
+            {
+                /*-
+                 * <broadcast-groups>
+                       <broadcast-group name="my-broadcast-group">
+                           <local-bind-address>172.16.9.3</local-bind-address>
+                           <local-bind-port>5432</local-bind-port>
+                           <group-address>231.7.7.7</group-address>
+                           <group-port>9876</group-port>
+                           <broadcast-period>2000</broadcast-period>
+                           <connector-ref connector-name="netty-connector"/>
+                       </broadcast-group>
+                    </broadcast-groups>
+                 */
+
+                final Reader reader =
+                    new UnsynchronizedStringReader("" + 
+                        "<configuration xmlns=\"urn:hornetq\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:hornetq /schema/hornetq-configuration.xsd\">" + 
+                        "  <broadcast-groups>\n" + 
+                        "   <broadcast-group name=\"my-broadcast-group\">\n" + 
+                        "       <local-bind-address>172.16.9.3</local-bind-address>\n" + 
+                        "       <local-bind-port>5432</local-bind-port>\n" + 
+                        "       <group-address>231.7.7.7</group-address>\n" + 
+                        "       <group-port>9876</group-port>\n" + 
+                        "       <broadcast-period>2000</broadcast-period>\n" + 
+                        "       <connector-ref>netty-connector</connector-ref>\n" + 
+                        "   </broadcast-group>\n" + 
+                        "  </broadcast-groups>\n" + 
+                        "</configuration>");
+                String xml = org.hornetq.utils.XMLUtil.readerToString(reader);
+                xml = XMLUtil.replaceSystemProps(xml);
+                final Element e = org.hornetq.utils.XMLUtil.stringToElement(xml);
+
+                final FileConfigurationParser parser = new FileConfigurationParser();
+                parser.setValidateAIO(true);
+                parser.parseMainConfig(e, configuration);
+            }
+
+            // Step 2. Create the JMS configuration
+            final JMSConfiguration jmsConfig = new JMSConfigurationImpl();
+
+            // Step 3. Configure the JMS ConnectionFactory
+            final ConnectionFactoryConfiguration cfConfig =
+                new ConnectionFactoryConfigurationImpl(
+                    MQConstants.NAME_CONNECTION_FACTORY,
+                    false,
+                    Arrays.asList("in-vm-connector"),
+                    MQConstants.PATH_CONNECTION_FACTORY);
+            jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
+
+            // Step 4. Configure the JMS Queue & Topic
+            final String queueName = "queue1";
+            final JMSQueueConfiguration queueConfig =
+                new JMSQueueConfigurationImpl(queueName, null, false, MQConstants.PREFIX_QUEUE + queueName);
+            jmsConfig.getQueueConfigurations().add(queueConfig);
+
+            final String topicName = "topic1";
+            final TopicConfiguration topicConfiguration = new TopicConfigurationImpl(topicName, MQConstants.PREFIX_TOPIC + topicName);
+            jmsConfig.getTopicConfigurations().add(topicConfiguration);
+
+            // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
+            final EmbeddedJMS jmsServer = new EmbeddedJMS();
+            jmsServer.setConfiguration(configuration);
+            jmsServer.setJmsConfiguration(jmsConfig);
+            jmsServer.start();
+
+            this.jmsServer = jmsServer;
+            hornetQService = new HornetQService(jmsServer);
+        } catch (final Exception e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public synchronized void stop() {
+        final EmbeddedJMS jmsServer = this.jmsServer;
+        if (null != jmsServer) {
+            try {
+                jmsServer.stop();
+            } catch (final Exception e) {
+                // Stop failed
+                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(HornetQServerStartup.class));
+                log.error("Stopping HornetQ server failed.", e);
+            }
+            hornetQService = null;
+            this.jmsServer = null;
+        }
+    }
+
+}

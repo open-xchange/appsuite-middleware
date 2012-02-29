@@ -67,6 +67,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.ajax.fields.RuleFields;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object.Mapper;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.AddFlagsActionFields;
+import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.EnotifyActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.GeneralFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.MoveActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RedirectActionFields;
@@ -160,6 +161,21 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             arrayList.add(stringToList(text.replaceAll("(\r)?\n", "\r\n")));
             return new ActionCommand(ActionCommand.Commands.VACATION, arrayList);
+        } else if (ActionCommand.Commands.ENOTIFY.getJsonname().equals(id)) {
+            final ArrayList<Object> arrayList = new ArrayList<Object>();
+            final String messageFieldName = EnotifyActionFields.MESSAGE.getFieldname();
+            if (object.has(messageFieldName)) {
+                final String message = object.getString(messageFieldName);
+                arrayList.add(Rule2JSON2Rule.createTagArg(EnotifyActionFields.MESSAGE));
+                arrayList.add(stringToList(message));
+            }
+            final String method = object.getString(EnotifyActionFields.METHOD.getFieldname());
+            if (null == method) {
+                throw new JSONException(
+                    "Parameter " + EnotifyActionFields.METHOD.getFieldname() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
+            }
+            arrayList.add(stringToList(method.replaceAll("(\r)?\n", "\r\n")));
+            return new ActionCommand(ActionCommand.Commands.ENOTIFY, arrayList);
         } else if (ActionCommand.Commands.ADDFLAG.getJsonname().equals(id)) {
             final JSONArray array = object.getJSONArray(AddFlagsActionFields.FLAGS);
             if (null == array) {
@@ -266,6 +282,14 @@ final class ActionCommandMapper implements Mapper<Rule> {
                     tmp.put(VacationActionFields.SUBJECT.getFieldname(), subject.get(0));
                 }
                 tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
+            } else if (ActionCommand.Commands.ENOTIFY.equals(actionCommand.getCommand())) {
+                tmp.put(GeneralFields.ID, ActionCommand.Commands.ENOTIFY.getJsonname());
+                final Hashtable<String, List<String>> tagarguments = actionCommand.getTagarguments();
+                final List<String> message = tagarguments.get(EnotifyActionFields.MESSAGE.getTagname());
+                if (null != message) {
+                    tmp.put(EnotifyActionFields.MESSAGE.getFieldname(), message.get(0));
+                }
+                tmp.put(EnotifyActionFields.METHOD.getFieldname(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
             } else if (ActionCommand.Commands.ADDFLAG.equals(actionCommand.getCommand())) {
                 tmp.put(GeneralFields.ID, ActionCommand.Commands.ADDFLAG.getJsonname());
                 tmp.put(AddFlagsActionFields.FLAGS, (List<String>) arguments.get(0));

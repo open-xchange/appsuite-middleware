@@ -74,6 +74,8 @@ public class MobileConfigSigner extends Writer {
                 try {
                     waitFor = process.waitFor();
                 } catch (final InterruptedException e) {
+                    // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+                    Thread.currentThread().interrupt();
                     throw new IOException("openssl process was interrupted");
                 }
                 if (waitFor != 0) {
@@ -87,6 +89,8 @@ public class MobileConfigSigner extends Writer {
             final Integer property = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.OpensslTimeout);
             submit.get(property, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
             throw new IOException("openssl process was interrupted");
         } catch (final ExecutionException e) {
             throw new IOException(e.getCause().getMessage());

@@ -61,7 +61,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -364,14 +363,6 @@ public final class Tools {
         resp.setHeader("Content-Disposition", cd);
     }
 
-    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
-
-    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
-
-    private static String escapeBackslashAndQuote(final String str) {
-        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
-    }
-
     public static interface CookieNameMatcher {
 
         /**
@@ -432,5 +423,30 @@ public final class Tools {
 
         }
         return headers;
+    }
+
+    public static com.openexchange.authentication.Cookie[] getCookieFromHeader(final HttpServletRequest req) {
+        final Cookie[] cookies = req.getCookies();
+        if (null == cookies) {
+            return new com.openexchange.authentication.Cookie[0];
+        }
+        com.openexchange.authentication.Cookie[] retval = new com.openexchange.authentication.Cookie[cookies.length];
+        for (int i = 0; i < cookies.length; i++) {
+            retval[i] = getCookie(cookies[i]);
+        }
+        return retval;
+    }
+
+    private static com.openexchange.authentication.Cookie getCookie(final Cookie cookie) {
+        return new com.openexchange.authentication.Cookie() {
+            @Override
+            public String getValue() {
+                return cookie.getValue();
+            }
+            @Override
+            public String getName() {
+                return cookie.getName();
+            }
+        };
     }
 }

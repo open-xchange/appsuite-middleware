@@ -51,9 +51,9 @@ package com.openexchange.tools.webdav;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.authentication.Cookie;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
-
 
 /**
  * {@link AllowAsteriskAsSeparatorCustomizer}
@@ -116,6 +116,10 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
                 return loginReq.getVersion();
             }
 
+            @Override
+            public Cookie[] getCookies() {
+                return loginReq.getCookies();
+            }
         };
     }
 }

@@ -50,8 +50,6 @@
 package com.openexchange.documentation.osgi;
 
 import org.osgi.framework.ServiceReference;
-
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.internal.DocumentationProcessor;
 import com.openexchange.osgi.SimpleRegistryListener;
 
@@ -60,7 +58,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DocumentationListener implements SimpleRegistryListener<AJAXActionServiceFactory> {
+public class DocumentationListener implements SimpleRegistryListener<Object> {
 	
 	private final DocumentationProcessor processor;
 
@@ -71,15 +69,16 @@ public class DocumentationListener implements SimpleRegistryListener<AJAXActionS
         super();
         this.processor = processor;
     }
-	
-	@Override
-	public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.add(service);
-	}
 
-	@Override
-	public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-		this.processor.remove(service);
-	}
+    @Override
+    public void added(ServiceReference<Object> ref, Object service) {
+        this.processor.add(service);
+    }
+
+    @Override
+    public void removed(ServiceReference<Object> ref, Object service) {
+        this.processor.remove(service);
+        
+    }
 
 }

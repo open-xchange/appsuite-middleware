@@ -51,6 +51,7 @@ package com.openexchange.login;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.authentication.Cookie;
 
 /**
  * Data to process a login request.
@@ -78,4 +79,6 @@ public interface LoginRequest {
     Interface getInterface();
 
     Map<String, List<String>> getHeaders();
+    
+    Cookie[] getCookies();
 }

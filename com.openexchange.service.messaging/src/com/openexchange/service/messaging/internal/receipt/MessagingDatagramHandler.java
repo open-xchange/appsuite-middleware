@@ -105,7 +105,7 @@ public class MessagingDatagramHandler {
         locks.clear();
     }
 
-    private static final RefusedExecutionBehavior<Object> BEHAVIOR = CallerRunsBehavior.getInstance();
+    private static final RefusedExecutionBehavior<Void> BEHAVIOR = CallerRunsBehavior.getInstance();
 
     /**
      * Handles given datagram in a separate task.
@@ -123,7 +123,7 @@ public class MessagingDatagramHandler {
         }
     }
 
-    private static final class MSSocketHandlerTask implements Callable<Object> {
+    private static final class MSSocketHandlerTask implements Callable<Void> {
 
         private final DatagramPacket datagramPacket;
 
@@ -153,7 +153,7 @@ public class MessagingDatagramHandler {
         }
 
         @Override
-        public Object call() {
+        public Void call() {
             try {
                 /*
                  * Parse socket package
@@ -183,7 +183,7 @@ public class MessagingDatagramHandler {
                                 public void run() {
                                     handler.handleMessage(message);
                                 }
-                            }, "MessagingListener-"), BEHAVIOR);
+                            }, "MessagingListener-"), CallerRunsBehavior.getInstance());
                         }
                     }
                 }
@@ -269,6 +269,8 @@ public class MessagingDatagramHandler {
                                  * Propagate to non-interrupted thread
                                  */
                                 lac.condition.signalAll();
+                                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+                                Thread.currentThread().interrupt();
                                 throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                             }
                         } while (null == (prev = tTruncated.get(key)));

@@ -69,12 +69,15 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
     
     protected final int id;
     
-    public ExtendedFutureTask(final Callable<V> callable, final String typeofjob, final String furtherinformation, final int id) {
+    protected final int cid;
+    
+    public ExtendedFutureTask(final Callable<V> callable, final String typeofjob, final String furtherinformation, final int id, final int cid) {
         super(callable);
         this.callable = callable;
         this.typeofjob = typeofjob;
         this.furtherinformation = furtherinformation;
         this.id = id;
+        this.cid = cid;
     }
 
     /**

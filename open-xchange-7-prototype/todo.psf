@@ -1,47 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.authentication.ldap"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/> core
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.group.management"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.resource.servlet"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval.attachments"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval.mail"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.url.mail.attachment"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.appointments"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino.apiBridge"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.index"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.langdetect"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.filter"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mdns"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.messaging"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin.json"/> oauth
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pop3"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview.thirdwing"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating.json"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.recaptcha"/>
 

@@ -60,6 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -444,7 +445,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final LoginKey key;
         try {
             final POP3Config config = getPOP3Config();
-            key = LoginKey.N(new InetSocketAddress(InetAddress.getByName(config.getServer()), config.getPort()), config.getLogin());
+            key = LoginKey.N(new InetSocketAddress(InetAddress.getByName(IDNA.toASCII(config.getServer())), config.getPort()), config.getLogin());
         } catch (final UnknownHostException e) {
             throw MimeMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }

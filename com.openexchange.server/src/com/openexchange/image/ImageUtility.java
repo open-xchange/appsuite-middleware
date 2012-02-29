@@ -130,7 +130,7 @@ public final class ImageUtility {
         if (null == registrationName) {
             registrationName = ImageServlet.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
-                throw new IllegalArgumentException("No knwon registration name for: " + imageUri);
+                throw new IllegalArgumentException("No known registration name for: " + imageUri);
             }
         }
         il.setRegistrationName(registrationName);
@@ -152,10 +152,23 @@ public final class ImageUtility {
      * @param session The session
      * @param imageDataSource The data source
      * @param preferRelativeUrl Whether to prefer a relative image URL
-     * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
      * @param sb The string builder to write to
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final StringBuilder sb) {
+        startImageUrl(imageLocation, session, imageDataSource, preferRelativeUrl, false, sb);
+    }
+
+    /**
+     * Starts the image URL in given {@link StringBuilder} instance.
+     *
+     * @param imageLocation The image location
+     * @param session The session
+     * @param imageDataSource The data source
+     * @param preferRelativeUrl Whether to prefer a relative image URL
+     * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
+     * @param sb The string builder to write to
+     */
+    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
         final String prefix;
         final String route;
         {
@@ -194,9 +207,11 @@ public final class ImageUtility {
         if (null != alias) {
             sb.append(alias);
         }
-        final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
-        if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
-            sb.append(";jsessionid=").append(route);
+        if (addRoute) {
+            final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
+            if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
+                sb.append(";jsessionid=").append(route);
+            }
         }
         boolean first = true;
         if (null == alias) {

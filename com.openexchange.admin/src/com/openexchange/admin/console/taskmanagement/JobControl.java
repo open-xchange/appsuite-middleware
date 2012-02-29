@@ -109,9 +109,10 @@ public class JobControl extends BasicCommandlineOptions {
         try {
             parser.ownparse(args2);
 
-            final Context ctx = new Context(DEFAULT_CONTEXT);
-
+            Context ctx = null;
+            
             if (parser.getOptionValue(this.contextOption) != null) {
+                ctx = new Context();
                 ctx.setId(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
             }
 
@@ -193,8 +194,9 @@ public class JobControl extends BasicCommandlineOptions {
 
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
-        
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setContextOption(parser, NeededQuadState.notneeded);
+
         this.list = setShortLongOpt(parser, OPT_LIST_SHORT, OPT_LIST_LONG, "list the jobs of this open-xchange server", false, NeededQuadState.notneeded);
         this.delete = setShortLongOpt(parser, OPT_DELETE_SHORT, OPT_DELETE_LONG, "id", "delete the the given job id", false);
         this.details = setShortLongOpt(parser, OPT_DETAILS_SHORT, OPT_DETAILS_LONG, "id", "show details for the given job", false);

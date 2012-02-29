@@ -60,6 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.cache.RightsCache;
@@ -116,7 +117,7 @@ public final class Entity2ACLAutoDetector {
      * @throws OXException - if a server greeting could not be mapped to a supported IMAP server
      */
     public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, OXException {
-        final InetSocketAddress key = new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort());
+        final InetSocketAddress key = new InetSocketAddress(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort());
         Future<Entity2ACL> cached = map.get(key);
         if (null == cached) {
             final FutureTask<Entity2ACL> ft = new FutureTask<Entity2ACL>(new Entity2ACLCallable(key, imapConfig));

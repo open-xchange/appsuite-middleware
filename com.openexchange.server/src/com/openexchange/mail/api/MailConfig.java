@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -345,7 +346,7 @@ public abstract class MailConfig {
             return mailAccount.generateMailServerURL();
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-            return MailProperties.getInstance().getMailServer();
+            return IDNA.toASCII(MailProperties.getInstance().getMailServer());
         }
         return mailAccount.generateMailServerURL();
     }
@@ -360,7 +361,7 @@ public abstract class MailConfig {
      */
     public static final String getMailServerURL(final Session session, final int accountId) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-            return MailProperties.getInstance().getMailServer();
+            return IDNA.toASCII(MailProperties.getInstance().getMailServer());
         }
         final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();

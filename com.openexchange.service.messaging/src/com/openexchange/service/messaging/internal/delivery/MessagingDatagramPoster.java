@@ -110,7 +110,7 @@ public final class MessagingDatagramPoster {
         }
     }
 
-    private static final RefusedExecutionBehavior<Object> BEHAVIOR = CallerRunsBehavior.getInstance();
+    private static final RefusedExecutionBehavior<Void> BEHAVIOR = CallerRunsBehavior.getInstance();
 
     /**
      * Posts the passed message.
@@ -137,7 +137,7 @@ public final class MessagingDatagramPoster {
         }
     }
 
-    private static final class PosterCallable implements Callable<Object> {
+    private static final class PosterCallable implements Callable<Void> {
 
         private final List<byte[]> chunks;
 
@@ -153,7 +153,7 @@ public final class MessagingDatagramPoster {
         }
 
         @Override
-        public Object call() throws OXException {
+        public Void call() throws OXException {
             try {
                 for (final byte[] chunk : chunks) {
                     datagramSocket.send(new DatagramPacket(chunk, chunk.length, server));

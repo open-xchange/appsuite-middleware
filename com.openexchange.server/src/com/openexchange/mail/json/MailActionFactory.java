@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.AJAXStateHandler;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
@@ -88,6 +89,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "mail", description = "Used to access mail data. When mails are stored on an IMAP server, some functionality is not available due to restrictions of the IMAP protocol. Such functionality is marked with \"not IMAP\".")
 public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler, MailActionConstants {
 
     private final Map<String, AbstractMailAction> actions;

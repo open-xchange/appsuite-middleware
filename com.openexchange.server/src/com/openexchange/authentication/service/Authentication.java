@@ -49,7 +49,6 @@
 
 package com.openexchange.authentication.service;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.authentication.Authenticated;
@@ -60,18 +59,13 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * Provides a static method for the login servlet to do the authentication.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Authentication {
 
-    /**
-     * Handles the reference to the authentication service.
-     */
     private static final AtomicReference<AuthenticationService> SERVICE_REF = new AtomicReference<AuthenticationService>();
 
-    /**
-     * Default constructor.
-     */
     private Authentication() {
         super();
     }
@@ -80,30 +74,13 @@ public final class Authentication {
      * Performs a login using an authentication service.
      * @param login entered login.
      * @param pass entered password.
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
-     * @throws OXException if something with the login info is wrong.
-     * @throws OXException if the authentication service is not available.
-     */
-    public static Authenticated login(final String login, final String pass)
-        throws OXException {
-        return login(login, pass, Collections.<String, Object> emptyMap());
-    }
-
-    /**
-     * Performs a login using an authentication service.
-     * @param login entered login.
-     * @param pass entered password.
      * @param properties The optional properties
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
+     * @return a string array with two elements in which the first contains the login info for the context and the second contains the
+     * login info for the user.
      * @throws OXException if something with the login info is wrong.
      * @throws OXException if the authentication service is not available.
      */
-    public static Authenticated login(final String login, final String pass, final Map<String, Object> properties)
-        throws OXException {
+    public static Authenticated login(final String login, final String pass, final Map<String, Object> properties) throws OXException {
         final AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
@@ -124,25 +101,15 @@ public final class Authentication {
         });
     }
 
-    /**
-     * @return the service
-     */
     public static AuthenticationService getService() {
         return SERVICE_REF.get();
     }
 
-    /**
-     * @param service the service to set
-     */
     public static boolean setService(final AuthenticationService service) {
         return SERVICE_REF.compareAndSet(null, service);
     }
 
-    /**
-     * @param service the service to set
-     */
     public static boolean dropService(final AuthenticationService service) {
         return SERVICE_REF.compareAndSet(service, null);
     }
-
 }

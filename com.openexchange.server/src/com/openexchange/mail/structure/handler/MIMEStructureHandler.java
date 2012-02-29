@@ -73,6 +73,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeMessage;
@@ -93,11 +94,11 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -786,7 +787,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         hdrObject.put(name, ja);
                     }
                     for (final InternetAddress internetAddress : internetAddresses) {
-                        final String address = QuotedInternetAddress.toIDN(internetAddress.getAddress());
+                        final String address = IDNA.toIDN(internetAddress.getAddress());
                         if (!isEmpty(address)) {
                             final JSONObject addressJsonObject = new JSONObject();
                             final String personal = internetAddress.getPersonal();

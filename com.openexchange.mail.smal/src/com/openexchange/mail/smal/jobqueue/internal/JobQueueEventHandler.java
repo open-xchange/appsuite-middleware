@@ -221,12 +221,12 @@ public final class JobQueueEventHandler implements EventHandler {
                     }
                     filter.add(fn);
 
-                    fn = acc.getTrashFullname();
-                    if (null == fn) {
-                        acc = Tools.checkFullNames(acc, storageService, session, null);
-                        fn = acc.getTrashFullname();
-                    }
-                    filter.add(fn);
+                    // fn = acc.getTrashFullname();
+                    // if (null == fn) {
+                    // acc = Tools.checkFullNames(acc, storageService, session, null);
+                    // fn = acc.getTrashFullname();
+                    // }
+                    // filter.add(fn);
 
                     /*
                      * TODO: Add custom user folders specified by user
@@ -258,7 +258,7 @@ public final class JobQueueEventHandler implements EventHandler {
             final List<String> fullNames = new ArrayList<String>(3);
             fullNames.add(folderStorage.getDraftsFolder());
             fullNames.add(folderStorage.getSentFolder());
-            fullNames.add(folderStorage.getTrashFolder());
+            // fullNames.add(folderStorage.getTrashFolder());
             return fullNames;
         } finally {
             SMALMailAccess.closeUnwrappedInstance(mailAccess);

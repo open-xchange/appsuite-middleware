@@ -67,7 +67,7 @@ public class ContactFieldTester extends TestCase {
 
 	public void testDatabase(){
 		final String value = "ANNIVERSARY";
-		assertEquals(value, ContactField.ANNIVERSARY.getDBName());
+		assertEquals(value, ContactField.ANNIVERSARY.getFieldName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDBFieldName(value));
 	}
 
@@ -79,7 +79,7 @@ public class ContactFieldTester extends TestCase {
 
 	public void testFieldName(){
 		final String value = "timestampfield02";
-		assertEquals(value, ContactField.ANNIVERSARY.getFieldName());
+		assertEquals(value, ContactField.ANNIVERSARY.getDbName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByFieldName(value));
 	}
 }

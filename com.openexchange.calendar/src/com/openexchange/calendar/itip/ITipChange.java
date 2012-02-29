@@ -122,7 +122,7 @@ public class ITipChange {
                         originalOcurrence.setTimezone("UTC");
                     }
                     RecurringResultsInterface recurring = calCol.calculateRecurring(originalOcurrence, startOfTheDay(newAppointment.getRecurrenceDatePosition()), endOfTheDay(newAppointment.getRecurrenceDatePosition()), 0);
-                    if (recurring.size() > 0) {
+                    if (recurring != null && recurring.size() > 0) {
                         RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
                         originalOcurrence.setStartDate(new Date(recurringResult.getStart()));
                         originalOcurrence.setEndDate(new Date(recurringResult.getEnd()));
