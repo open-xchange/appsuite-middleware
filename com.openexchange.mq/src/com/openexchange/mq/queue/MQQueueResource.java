@@ -68,7 +68,7 @@ import com.openexchange.mq.MQService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MQQueueResource implements MQCloseable {
+abstract class MQQueueResource implements MQCloseable {
 
     protected volatile QueueConnection queueConnection;
 
@@ -79,7 +79,7 @@ public abstract class MQQueueResource implements MQCloseable {
     /**
      * Initializes a new {@link MQQueueResource}.
      */
-    protected MQQueueResource(final String queueName) throws OXException {
+    MQQueueResource(final String queueName) throws OXException {
         super();
         if (null == queueName) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create("Queue name is null.");

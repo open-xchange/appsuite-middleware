@@ -68,7 +68,7 @@ import com.openexchange.mq.MQService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MQTopicResource implements MQCloseable {
+abstract class MQTopicResource implements MQCloseable {
 
     protected volatile TopicConnection topicConnection;
 
@@ -79,7 +79,7 @@ public abstract class MQTopicResource implements MQCloseable {
     /**
      * Initializes a new {@link MQTopicResource}.
      */
-    protected MQTopicResource(final String topicName) throws OXException {
+    MQTopicResource(final String topicName) throws OXException {
         super();
         if (null == topicName) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create("Topic name is null.");
