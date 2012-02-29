@@ -437,7 +437,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             while (rs.next()) {
                 final Contact contact = new Contact();
                 for (final ContactField field : contactFields) {
-                    final Object value = rs.getObject(field.getFieldName());
+                    final Object value = rs.getObject(field.getDbName());
                     if (field.isDBField() && !rs.wasNull()) {
                         field.doSwitch(setter, contact, value);
                     }
@@ -465,7 +465,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         boolean first = true;
         for (final ContactField field : contactFields) {
             if (field.isDBField()) {
-                final String dbName = field.getFieldName();
+                final String dbName = field.getDbName();
                 if (first) {
                     sb.append(dbName);
                     first = false;
@@ -486,7 +486,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         boolean first = true;
         for (final ContactField field : contactFields) {
             if (field.isDBField()) {
-                final String dbName = field.getFieldName();
+                final String dbName = field.getDbName();
                 if (first) {
                     sb.append(dbName);
                     first = false;
@@ -513,10 +513,10 @@ public class ContactCopyTask implements CopyUserTaskService {
         final List<ContactField> fields = new ArrayList<ContactField>();
         final List<String> dbFields = new ArrayList<String>();
         for (final ContactField field : ContactField.values()) {
-            final String fieldName = field.getFieldName();
+            final String fieldName = field.getDbName();
             if (fieldName != null && fieldName != "" && !dbFields.contains(fieldName)) {
                 fields.add(field);
-                dbFields.add(field.getFieldName());
+                dbFields.add(field.getDbName());
             }
         }
         

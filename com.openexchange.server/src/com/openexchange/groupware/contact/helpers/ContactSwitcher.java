@@ -306,6 +306,8 @@ public interface ContactSwitcher {
     
     public Object uid(Object[] objects) throws OXException;
 
+    public Object image1(Object[] objects) throws OXException;
+
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws OXException;
 
 }

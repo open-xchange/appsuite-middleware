@@ -105,7 +105,7 @@ public class ContactSearchtermSqlConverterTest extends TestCase {
 		term.addOperand(new ColumnOperand(field .getAjaxName()));
 		term.addOperand(new ConstantOperand<String>("value1"));
 
-		String expected = "( co."+field.getFieldName()+" = ? )";
+		String expected = "( co."+field.getDbName()+" = ? )";
 
 		ContactSearchtermSqlConverter converter = new ContactSearchtermSqlConverter();
 		converter.parse(term);
@@ -144,7 +144,7 @@ public class ContactSearchtermSqlConverterTest extends TestCase {
 		ContactSearchtermSqlConverter converter = new ContactSearchtermSqlConverter();
 		converter.parse(term);
 
-		String expected = "( ( co.fid = ? ) OR ( co."+distractingField.getFieldName()+" < ? ) OR ( co.fid > ? ) OR ( co.fid > ? ) )";
+		String expected = "( ( co.fid = ? ) OR ( co."+distractingField.getDbName()+" < ? ) OR ( co.fid > ? ) OR ( co.fid > ? ) )";
 		String actualString = converter.getPreparedWhereString();
 		assertEquals(expected, actualString);
 

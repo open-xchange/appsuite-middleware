@@ -1612,8 +1612,8 @@ public class ContactSetter implements ContactSwitcher {
     private boolean isMatching(final String needle, final ContactField haystack){
         return(
             needle.matches(haystack.getAjaxName())
-         || needle.matches(haystack.getDBName())
          || needle.matches(haystack.getFieldName())
+         || needle.matches(haystack.getDbName())
          || needle.matches(String.valueOf(haystack.getNumber()))
         );
     }
@@ -1741,6 +1741,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
     
+    @Override
     public Object homeaddress(Object[] objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.HOME_ADDRESS.getReadableName());
@@ -1754,6 +1755,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object businessaddress(Object[] objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.BUSINESS_ADDRESS.getReadableName());
@@ -1767,6 +1769,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object otheraddress(Object[] objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.OTHER_ADDRESS.getReadableName());
@@ -1780,6 +1783,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object uid(Object[] objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.UID.getReadableName());
@@ -1790,6 +1794,20 @@ public class ContactSetter implements ContactSwitcher {
         }
         final String value = (String) objects[1];
         conObj.setUid(value);
+        return conObj;
+    }
+
+    @Override
+    public Object image1(Object[] objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.IMAGE1.getReadableName());
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final byte[] value = (byte[])objects[1];
+        conObj.setImage1(value);
         return conObj;
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.rdb.internal;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -84,7 +85,7 @@ public class QueryFields {
         } else {
             imageDataFields = new ContactField[0]; // never null
         }
-        needsDistListData = 0 < Tools.filter(fields, null, ContactField.DISTRIBUTIONLIST).length;
+        needsDistListData = 0 < Tools.filter(fields, EnumSet.of(ContactField.DISTRIBUTIONLIST)).length;
         if (needsDistListData) {
             distListDataFields = Tools.DISTLIST_DATABASE_FIELDS_ARRAY;
             if (needsImageData) {

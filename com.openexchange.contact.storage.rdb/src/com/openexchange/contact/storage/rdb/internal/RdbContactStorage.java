@@ -367,24 +367,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                  * merge image data if needed
                  */
                 if (queryFields.needsImageData()) {
-                    final int[] objectIDs = getObjectIDsWithImages(contacts);
-                    final List<Contact> imagaDataList = executor.select(connection, Table.IMAGES, contextID, objectIDs, queryFields.getImageDataFields());
-                    if (null != imagaDataList && 0 < imagaDataList.size()) {
-                        contacts = mergeByID(contacts, imagaDataList);
-                    }
-                }               
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
                 /*
                  * merge distribution list data if needed
                  */
                 if (queryFields.needsDistListData()) {
-                    final int[] objectIDs = getObjectIDsWithDistLists(contacts);
-                    final Map<Integer, List<DistributionListEntryObject>> distListData = executor.select(connection, Table.DISTLIST, contextID, objectIDs);
-                    for (final Contact contact : contacts) {
-                        final List<DistributionListEntryObject> distList = distListData.get(Integer.valueOf(contact.getObjectID()));
-                        if (null != distList) {
-                            contact.setDistributionList(distList.toArray(new DistributionListEntryObject[distList.size()]));
-                        }
-                    }
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
                 }
             }
             return contacts;
@@ -395,12 +384,75 @@ public class RdbContactStorage extends DefaultContactStorage {
         }
     }
     
+    @Override
+    public Collection<Contact> list(final Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+        final int contextID = session.getContextId();
+        final Connection connection = DBPool.pickup(getContext(session));
+        try {
+            /*
+             * check fields
+             */
+            final QueryFields queryFields = new QueryFields(fields);
+            if (false == queryFields.needsContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */        
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, parse(ids), queryFields.getContactDataFields());
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.needsImageData()) {
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.needsDistListData()) {
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
+                }
+            }
+            return contacts;
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create();
+        } finally {
+            DBPool.closeReaderSilent(getContext(session), connection);
+        }
+    }
+
+    private List<Contact> mergeDistListData(final Connection connection, final Table table, final int contextID, final List<Contact> contacts) throws SQLException, OXException {
+        final int[] objectIDs = getObjectIDsWithDistLists(contacts);
+        if (null != objectIDs && 0 < objectIDs.length) {
+            final Map<Integer, List<DistributionListEntryObject>> distListData = executor.select(connection, table, contextID, objectIDs);
+            for (final Contact contact : contacts) {
+                final List<DistributionListEntryObject> distList = distListData.get(Integer.valueOf(contact.getObjectID()));
+                if (null != distList) {
+                    contact.setDistributionList(distList.toArray(new DistributionListEntryObject[distList.size()]));
+                }
+            }
+        }
+        return contacts;
+    }
+
+    private List<Contact> mergeImageData(final Connection connection, final Table table, final int contextID, final List<Contact> contacts, final ContactField[] fields) throws SQLException, OXException {
+        final int[] objectIDs = getObjectIDsWithImages(contacts);
+        if (null != objectIDs && 0 < objectIDs.length) {
+            final List<Contact> imagaDataList = executor.select(connection, table, contextID, objectIDs, fields);
+            if (null != imagaDataList && 0 < imagaDataList.size()) {
+                return mergeByID(contacts, imagaDataList);
+            }
+        }
+        return contacts;
+    }    
+
     private int[] getObjectIDsWithImages(final List<Contact> contacts) {
         int i = 0;
         final int[] objectIDs = new int[contacts.size()];
         for (final Contact contact : contacts) {
             if (0 < contact.getNumberOfImages()) {
-                objectIDs[++i] = contact.getObjectID();
+                objectIDs[i++] = contact.getObjectID();
             }
         }
         return Arrays.copyOf(objectIDs, i);
@@ -411,23 +463,27 @@ public class RdbContactStorage extends DefaultContactStorage {
         final int[] objectIDs = new int[contacts.size()];
         for (final Contact contact : contacts) {
             if (0 < contact.getNumberOfDistributionLists()) {
-                objectIDs[++i] = contact.getObjectID();
+                objectIDs[i++] = contact.getObjectID();
             }
         }
         return Arrays.copyOf(objectIDs, i);
     }
     
-    @Override
-    public Collection<Contact> list(final Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
-        
-        
-        
-        return null;
-    }
-
     private static int parse(final String id) throws OXException {
         try {
             return Integer.parseInt(id);
+        } catch (final NumberFormatException e) {
+            throw new OXException(e);
+        }
+    }
+    
+    private static int[] parse(final String[] ids) throws OXException {
+        try {
+            final int[] intIDs = new int[ids.length];
+            for (int i = 0; i < intIDs.length; i++) {
+                intIDs[i] = Integer.parseInt(ids[i]);
+            }
+            return intIDs;
         } catch (final NumberFormatException e) {
             throw new OXException(e);
         }
