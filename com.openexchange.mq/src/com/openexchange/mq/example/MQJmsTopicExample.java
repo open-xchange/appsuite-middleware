@@ -49,77 +49,74 @@
 
 package com.openexchange.mq.example;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueReceiver;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
+import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicPublisher;
+import javax.jms.TopicSession;
+import javax.jms.TopicSubscriber;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQService;
 
 /**
- * {@link MQQueueExample} - Example class for a simple Point-to-Point example.
+ * {@link MQJmsTopicExample} - Example class for a simple Publish/Subscribe example using JMS classes.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQQueueExample {
+public final class MQJmsTopicExample {
 
     final MQService service;
 
     /**
-     * Initializes a new {@link MQQueueExample}.
+     * Initializes a new {@link MQJmsTopicExample}.
      */
-    public MQQueueExample(final MQService service) {
+    public MQJmsTopicExample(final MQService service) {
         super();
         this.service = service;
     }
 
     /**
-     * Test the MQ server for a Point-to-Point scenario.
+     * Test the MQ server for a Publish/Subscribe scenario.
      */
     public void test() {
         Thread t = null;
         try {
             // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
+            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
             // And look up the Queue:
-            final Queue queue = service.lookupQueue("/queues/queue1");
+            final Topic topic = service.lookupTopic("/topics/topic1");
 
-            QueueConnection queueConnection = null;
+            TopicConnection topicConnection = null;
             try {
                 /*-
                  * 1. Create connection.
                  * 2. Create session from connection; false means session is not transacted.
-                 * 3. Create sender and text message.
+                 * 3. Create publisher and text message.
                  * 4. Send messages, varying text slightly.
-                 * 5. Send end-of-messages message.
-                 * 6. Finally, close connection.
+                 * 5. Finally, close connection.
                  */
-                queueConnection = queueConnectionFactory.createQueueConnection();
-                final QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-                final QueueSender queueSender = queueSession.createSender(queue);
-                final TextMessage message = queueSession.createTextMessage();
+                topicConnection = topicConnectionFactory.createTopicConnection();
+                final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+                final TopicPublisher topicPublisher = topicSession.createPublisher(topic);
+                final TextMessage message = topicSession.createTextMessage();
                 for (int i = 0; i < 10; i++) {
                     message.setText("This is message " + (i + 1));
-                    System.out.println("Sending message: " + message.getText());
-                    queueSender.send(message);
+                    System.out.println("Publishing message: " + message.getText());
+                    topicPublisher.publish(message);
                 }
-
-                /*
-                 * Send a non-text control message indicating end of messages.
-                 */
-                queueSender.send(queueSession.createMessage());
             } catch (final JMSException e) {
                 System.out.println("Exception occurred: " + e.toString());
             } finally {
-                if (queueConnection != null) {
+                if (topicConnection != null) {
                     try {
-                        queueConnection.close();
+                        topicConnection.close();
                     } catch (final JMSException e) {
                         // Ignore
                     }
@@ -129,48 +126,68 @@ public final class MQQueueExample {
             /*
              * Receive messages in another thread
              */
+
             t = new Thread(new Runnable() {
 
                 @Override
                 public void run() {
                     try {
                         // Now we'll look up the connection factory:
-                        final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
+                        final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
                         // And look up the Queue:
-                        final Queue queue = service.lookupQueue("/queues/queue1");
+                        final Topic topic = service.lookupTopic("/topics/topic1");
 
-                        QueueConnection queueConnection = null;
+                        TopicConnection topicConnection = null;
                         try {
                             /*-
                              * 1. Create connection.
                              * 2. Create session from connection; false means session is not transacted.
-                             * 3. Create receiver, then start message delivery.
-                             * 4. Receive all text messages from queue until
-                             *    a non-text message is received indicating end of
-                             *    message stream.
-                             * 5. Close connection.
+                             * 3. Create subscriber.
+                             * 4. Register message listener (TextListener).
+                             * 5. Receive text messages from topic.
+                             * 6. When all messages have been received, enter Q to quit.
+                             * 7. Close connection.
                              */
-                            queueConnection = queueConnectionFactory.createQueueConnection();
-                            final QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-                            final QueueReceiver queueReceiver = queueSession.createReceiver(queue);
-                            queueConnection.start();
-                            while (true) {
-                                final Message m = queueReceiver.receive(1);
-                                if (m != null) {
-                                    if (m instanceof TextMessage) {
-                                        final TextMessage message = (TextMessage) m;
-                                        System.out.println("Reading message: " + message.getText());
-                                    } else {
-                                        break;
+                            topicConnection = topicConnectionFactory.createTopicConnection();
+                            final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+                            final TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
+                            topicSubscriber.setMessageListener(new MessageListener() {
+
+                                @Override
+                                public void onMessage(final Message message) {
+                                    TextMessage msg = null;
+                                    try {
+                                        if (message instanceof TextMessage) {
+                                            msg = (TextMessage) message;
+                                            System.out.println("Reading message: " + msg.getText());
+                                        } else {
+                                            System.out.println("Message of wrong type: " + message.getClass().getName());
+                                        }
+                                    } catch (final JMSException e) {
+                                        System.out.println("JMSException in onMessage(): " + e.toString());
+                                    } catch (final Throwable t) {
+                                        System.out.println("Exception in onMessage():" + t.getMessage());
                                     }
                                 }
+                            });
+                            topicConnection.start();
+                            System.out.println("To end program, enter Q or q, " + "then <return>");
+                            final InputStreamReader inputStreamReader = new InputStreamReader(System.in);
+                            char answer = '\0';
+                            while (!((answer == 'q') || (answer == 'Q'))) {
+                                try {
+                                    answer = (char) inputStreamReader.read();
+                                } catch (final IOException e) {
+                                    System.out.println("I/O exception: " + e.toString());
+                                }
                             }
+
                         } catch (final JMSException e) {
                             System.out.println("Exception occurred: " + e.toString());
                         } finally {
-                            if (queueConnection != null) {
+                            if (topicConnection != null) {
                                 try {
-                                    queueConnection.close();
+                                    topicConnection.close();
                                 } catch (final JMSException e) {
                                     // Ignore
                                 }
