@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "get", description = "Get a messaging account", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "messagingService", description = "The messaging service id that the account belongs to."),
-    @Parameter(name = "id", description = "An account ID to load.") 
+    @Parameter(name = "id", description = "An account ID to load.")
 }, responseDescription = "A response object containing the JSON Object representing the loaded account as its data.")
 public class GetAction extends AbstractMessagingAccountAction {
 

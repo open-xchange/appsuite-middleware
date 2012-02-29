@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a messaging account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "A JSON Object describing the update to the account. Note that the \"id\" and \"messagingService\" must always be set.",
 responseDescription = "A response object containing the number 1 as its data on success.")
 public class UpdateAction extends AbstractMessagingAccountAction {

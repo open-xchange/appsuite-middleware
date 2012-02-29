@@ -24,5 +24,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-xerces-sun"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-messaging"/>
 </provider>
 </psf>
