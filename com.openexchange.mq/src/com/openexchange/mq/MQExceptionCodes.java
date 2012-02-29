@@ -78,7 +78,7 @@ public enum MQExceptionCodes implements OXExceptionCode {
      */
     QUEUE_NOT_FOUND(MQExceptionMessages.QUEUE_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
     /**
-     * No topicfound for name: %1$s
+     * No topic found for name: %1$s
      */
     TOPIC_NOT_FOUND(MQExceptionMessages.TOPIC_NOT_FOUND_MSG, CATEGORY_ERROR, 5),
     /**

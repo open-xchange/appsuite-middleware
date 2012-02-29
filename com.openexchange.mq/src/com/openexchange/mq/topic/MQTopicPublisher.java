@@ -47,95 +47,95 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.mq.topic;
 
 import java.io.Serializable;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicPublisher;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
 
 /**
- * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
+ * {@link MQTopicPublisher} - A topic publisher intended to be re-used. Invoke {@link #close()} method when done.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueSender extends MQQueueResource {
+public class MQTopicPublisher extends MQTopicResource {
 
-    private QueueSender queueSender; // Within synchronized, no volatile needed
+    private TopicPublisher topicPublisher;
 
     /**
-     * Initializes a new {@link MQQueueSender}.
+     * Initializes a new {@link MQTopicPublisher}.
      * 
      * @throws OXException If initialization fails
      */
-    public MQQueueSender(final String queueName) throws OXException {
-        super(queueName);
+    public MQTopicPublisher(final String topicName) throws OXException {
+        super(topicName);
     }
 
     @Override
-    protected synchronized void initResource(final Queue queue) throws JMSException {
-        queueSender = queueSession.createSender(queue);
+    protected synchronized void initResource(final Topic topic) throws JMSException {
+        topicPublisher = topicSession.createPublisher(topic);
     }
 
     /**
-     * Sends a message containing a <code>java.lang.String</code>.
+     * Publishes a message containing a <code>java.lang.String</code>.
      * 
-     * @param text The <code>java.lang.String</code> to send
-     * @throws OXException If send operation fails
+     * @param text The <code>java.lang.String</code> to publish
+     * @throws OXException If publish operation fails
      */
-    public void sendTextMessage(final String text) throws OXException {
+    public void publishTextMessage(final String text) throws OXException {
         if (null == text) {
             return;
         }
         try {
-            final TextMessage message = queueSession.createTextMessage(text);
-            queueSender.send(message);
+            final TextMessage message = topicSession.createTextMessage(text);
+            topicPublisher.publish(message);
         } catch (final JMSException e) {
             throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Publishes a message containing a serializable Java object.
      * 
-     * @param object The serializable object to send
-     * @throws OXException If send operation fails
+     * @param object The serializable Java object to publish
+     * @throws OXException If publish operation fails
      */
-    public void sendObjectMessage(final Serializable object) throws OXException {
+    public void publishObjectMessage(final Serializable object) throws OXException {
         if (object instanceof String) {
-            sendTextMessage((String) object);
+            publishTextMessage((String) object);
             return;
         }
         if (null == object) {
             return;
         }
         try {
-            final ObjectMessage message = queueSession.createObjectMessage(object);
-            queueSender.send(message);
+            final ObjectMessage message = topicSession.createObjectMessage(object);
+            topicPublisher.publish(message);
         } catch (final JMSException e) {
             throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
-     * Sends a message containing <code>byte</code>s.
+     * Publishes a message containing <code>byte</code>s.
      * 
-     * @param bytes The <code>byte</code> array to send
-     * @throws OXException If send operation fails
+     * @param bytes The <code>byte</code> array to publish
+     * @throws OXException If publish operation fails
      */
-    public void sendBytesMessage(final byte[] bytes) throws OXException {
+    public void publishBytesMessage(final byte[] bytes) throws OXException {
         if (null == bytes) {
             return;
         }
         try {
-            final BytesMessage bytesMessage = queueSession.createBytesMessage();
+            final BytesMessage bytesMessage = topicSession.createBytesMessage();
             bytesMessage.writeBytes(bytes, 0, bytes.length);
-            queueSender.send(bytesMessage);
+            topicPublisher.publish(bytesMessage);
         } catch (final JMSException e) {
             throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
         }

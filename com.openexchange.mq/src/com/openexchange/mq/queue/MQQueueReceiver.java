@@ -49,37 +49,26 @@
 
 package com.openexchange.mq.queue;
 
-import static com.openexchange.mq.serviceLookup.MQServiceLookup.getMQService;
-import javax.jms.InvalidDestinationException;
+import java.io.ByteArrayOutputStream;
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueReceiver;
-import javax.jms.QueueSession;
-import javax.jms.Session;
 import javax.jms.TextMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQCloseable;
-import com.openexchange.mq.MQConstants;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mq.MQExceptionCodes;
-import com.openexchange.mq.MQService;
 
 /**
  * {@link MQQueueReceiver} - A queue receiver intended to be re-used. Invoke {@link #close()} method when done.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueReceiver implements MQCloseable {
+public class MQQueueReceiver extends MQQueueResource {
 
-    private volatile QueueConnection queueConnection;
-
-    private final String queueName;
-
-    private volatile QueueSession queueSession;
-
-    private final QueueReceiver queueReceiver;
+    private QueueReceiver queueReceiver; // Within synchronized, no volatile needed
 
     /**
      * Initializes a new {@link MQQueueReceiver}.
@@ -87,50 +76,25 @@ public class MQQueueReceiver implements MQCloseable {
      * @throws OXException If initialization fails
      */
     public MQQueueReceiver(final String queueName) throws OXException {
-        super();
-        if (null == queueName) {
-            throw MQExceptionCodes.UNEXPECTED_ERROR.create("Queue name is null.");
-        }
-        this.queueName = queueName;
-        boolean errorOccurred = true;
-        try {
-            final MQService service = getMQService();
-            // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
-            // And look up the Queue:
-            final Queue queue = service.lookupQueue(MQConstants.PREFIX_QUEUE + queueName);
-            // Setup connection, session & sender
-            final QueueConnection queueConnection = this.queueConnection = queueConnectionFactory.createQueueConnection();
-            final QueueSession queueSession = this.queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-            queueReceiver = queueSession.createReceiver(queue);
-            errorOccurred = false;
-        } catch (final InvalidDestinationException e) {
-            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, queueName);
-        } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
-        } finally {
-            if (errorOccurred) {
-                close();
-            }
-        }
+        super(queueName);
     }
 
-    /**
-     * Gets the name of the queue associated with this receiver.
-     * 
-     * @return The queue name
+    @Override
+    protected synchronized void initResource(final Queue queue) throws JMSException {
+        queueReceiver = queueSession.createReceiver(queue);
+    }
+
+    /*-
+     * ----------------------- Receive text methods --------------------------
      */
-    public String getQueueName() {
-        return queueName;
-    }
 
     /**
-     * Receives the next text message produced for this message consumer.
+     * Receives the next text message produced for this receiver.
      * <p>
-     * This call blocks indefinitely until a message is produced or until this message consumer is closed.
+     * This call blocks indefinitely until a message is produced or until this receiver is closed.
      * 
-     * @return The next text produced for this message consumer, or <code>null</code> if this message consumer is concurrently closed
-     * @exception OXException If receiver fails to receive the next message
+     * @return The next text produced for this receiver, or <code>null</code> if this receiver is concurrently closed
+     * @exception OXException If receiver fails to receive the next text
      */
     public String receiveText() throws OXException {
         try {
@@ -147,13 +111,12 @@ public class MQQueueReceiver implements MQCloseable {
     /**
      * Receives the next message that arrives within the specified timeout interval.
      * <p>
-     * This call blocks until a message arrives, the timeout expires, or this message consumer is closed. A timeout of zero never expires,
-     * and the call blocks indefinitely.
+     * This call blocks until a message arrives, the timeout expires, or this receiver is closed. A timeout of zero never expires, and the
+     * call blocks indefinitely.
      * 
      * @param timeout The timeout value in milliseconds
-     * @return The next text produced for this message consumer, or null if the timeout expires or this message consumer is concurrently
-     *         closed
-     * @throws OXException If receiver fails to receive the next message
+     * @return The next text produced for this receiver, or null if the timeout expires or this receiver is concurrently closed
+     * @throws OXException If receiver fails to receive the next text
      */
     public String receiveText(final long timeout) throws OXException {
         try {
@@ -171,7 +134,7 @@ public class MQQueueReceiver implements MQCloseable {
      * Receives the next text if one is immediately available.
      * 
      * @return The next text produced for this message consumer, or null if one is not available
-     * @throws OXException If the receiver fails to receive the next message
+     * @throws OXException If the receiver fails to receive the next text
      */
     public String receiveTextNoWait() throws OXException {
         try {
@@ -185,36 +148,144 @@ public class MQQueueReceiver implements MQCloseable {
         }
     }
 
-    /**
-     * Closes this queue receiver orderly.
+    /*-
+     * ----------------------- Receive Java object methods --------------------------
      */
-    @Override
-    public final void close() {
-        final QueueSession queueSession = this.queueSession;
-        if (null != queueSession) {
-            try {
-                queueSession.close();
-            } catch (final Exception e) {
-                // Ignore
-            }
-            this.queueSession = null;
-        }
 
-        final QueueConnection queueConnection = this.queueConnection;
-        if (null != queueConnection) {
-            try {
-                queueConnection.close();
-            } catch (final Exception e) {
-                // Ignore
+    /**
+     * Receives the next Java object produced for this receiver.
+     * <p>
+     * This call blocks indefinitely until a Java object is produced or until this receiver is closed.
+     * 
+     * @return The next Java object produced for this receiver, or <code>null</code> if this receiver is concurrently closed
+     * @exception OXException If receiver fails to receive the next Java object
+     */
+    public Object receiveObject() throws OXException {
+        try {
+            final Message message = queueReceiver.receive();
+            if (!(message instanceof ObjectMessage)) {
+                return null;
             }
-            this.queueConnection = null;
+            return ((ObjectMessage) message).getObject();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
+    /**
+     * Receives the next Java object that arrives within the specified timeout interval.
+     * <p>
+     * This call blocks until a Java object arrives, the timeout expires, or this receiver is closed. A timeout of zero never expires, and
+     * the call blocks indefinitely.
+     * 
+     * @param timeout The timeout value in milliseconds
+     * @return The next Java object produced for this receiver, or <code>null</code> if the timeout expires or this receiver is concurrently
+     *         closed
+     * @throws OXException If receiver fails to receive the next Java object
+     */
+    public Object receiveObject(final long timeout) throws OXException {
+        try {
+            final Message message = queueReceiver.receive(timeout);
+            if (!(message instanceof ObjectMessage)) {
+                return null;
+            }
+            return ((ObjectMessage) message).getObject();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Receives the next Java object if one is immediately available.
+     * 
+     * @return The next Java object produced for this receiver, or <code>null</code> if one is not available
+     * @throws OXException If the receiver fails to receive the next Java object
+     */
+    public Object receiveObjectNoWait() throws OXException {
+        try {
+            final Message message = queueReceiver.receiveNoWait();
+            if (!(message instanceof ObjectMessage)) {
+                return null;
+            }
+            return ((ObjectMessage) message).getObject();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /*-
+     * ----------------------- Receive bytes methods --------------------------
+     */
+
+    /**
+     * Receives the next bytes produced for this receiver.
+     * <p>
+     * This call blocks indefinitely until bytes are produced or until this receiver is closed.
+     * 
+     * @return The next bytes produced for this receiver, or <code>null</code> if this receiver is concurrently closed
+     * @exception OXException If receiver fails to receive the next bytes
+     */
+    public byte[] receiveBytes() throws OXException {
+        try {
+            final Message message = queueReceiver.receive();
+            if (!(message instanceof BytesMessage)) {
+                return null;
+            }
+            return readBytesFrom((BytesMessage) message);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Receives the next bytes that arrives within the specified timeout interval.
+     * <p>
+     * This call blocks until bytes arrive, the timeout expires, or this receiver is closed. A timeout of zero never expires, and the call
+     * blocks indefinitely.
+     * 
+     * @param timeout The timeout value in milliseconds
+     * @return The next bytes produced for this receiver, or <code>null</code> if the timeout expires or this receiver is concurrently
+     *         closed
+     * @throws OXException If receiver fails to receive the next bytes
+     */
+    public byte[] receiveBytes(final long timeout) throws OXException {
+        try {
+            final Message message = queueReceiver.receive(timeout);
+            if (!(message instanceof BytesMessage)) {
+                return null;
+            }
+            return readBytesFrom((BytesMessage) message);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Receives the next bytes if one is immediately available.
+     * 
+     * @return The next bytes produced for this receiver, or <code>null</code> if one is not available
+     * @throws OXException If the receiver fails to receive the next bytes
+     */
+    public byte[] receiveBytesNoWait() throws OXException {
+        try {
+            final Message message = queueReceiver.receiveNoWait();
+            if (!(message instanceof BytesMessage)) {
+                return null;
+            }
+            return readBytesFrom((BytesMessage) message);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static byte[] readBytesFrom(final BytesMessage bytesMessage) throws JMSException {
+        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+        final int buflen = 2048;
+        final byte[] buf = new byte[buflen];
+        for (int read; (read = bytesMessage.readBytes(buf, buflen)) > 0;) {
+            out.write(buf, 0, read);
+        }
+        return out.toByteArray();
     }
 
 }
