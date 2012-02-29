@@ -52,6 +52,7 @@ package com.openexchange.mq.hornetq;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
+import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.jms.server.embedded.EmbeddedJMS;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
@@ -67,12 +68,33 @@ public final class HornetQService implements MQService {
 
     private final EmbeddedJMS jmsServer;
 
+    private volatile Queue managementQueue;
+
     /**
      * Initializes a new {@link HornetQService}.
      */
     public HornetQService(final EmbeddedJMS jmsServer) {
         super();
         this.jmsServer = jmsServer;
+    }
+
+    /**
+     * Gets the special queue for managing HornetQ.
+     * 
+     * @return The special queue for managing HornetQ.
+     */
+    @Override
+    public Queue getManagementQueue() {
+        Queue managementQueue = this.managementQueue;
+        if (null == managementQueue) {
+            synchronized (this) {
+                managementQueue = this.managementQueue;
+                if (null == managementQueue) {
+                    this.managementQueue = managementQueue = HornetQJMSClient.createQueue("hornetq.management");
+                }
+            }
+        }
+        return managementQueue;
     }
 
     /*-

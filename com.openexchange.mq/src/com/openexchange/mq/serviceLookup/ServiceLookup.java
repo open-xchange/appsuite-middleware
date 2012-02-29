@@ -47,44 +47,72 @@
  *
  */
 
-package com.openexchange.mq;
+package com.openexchange.mq.serviceLookup;
 
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.mq.MQConstants;
+import com.openexchange.mq.MQService;
 
 /**
- * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
+ * {@link ServiceLookup} - The static service lookup for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQConstants {
+public final class ServiceLookup {
 
     /**
-     * The symbolic name of the Message Queue bundle.
+     * Initializes a new {@link ServiceLookup}.
      */
-    public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
+    private ServiceLookup() {
+        super();
+    }
+
+    private static final AtomicReference<MQService> SERVICE = new AtomicReference<MQService>();
 
     /**
-     * The default name for connection factory.
+     * Sets the {@link MQService} instance.
+     * 
+     * @param service The service instance or <code>null</code>
      */
-    public static final String NAME_CONNECTION_FACTORY = "ConnectionFactory";
+    public static void setMQService(final MQService service) {
+        SERVICE.set(service);
+    }
 
     /**
-     * The default path to lookup registered {@link javax.jms.ConnectionFactory} instance.
+     * Gets the {@link MQService} instance.
+     * 
+     * @return The {@link MQService} instance.
      */
-    public static final String PATH_CONNECTION_FACTORY = "/" + NAME_CONNECTION_FACTORY;
+    public static MQService getMQService() {
+        return SERVICE.get();
+    }
+
+    private static final AtomicReference<com.openexchange.server.ServiceLookup> REF =
+        new AtomicReference<com.openexchange.server.ServiceLookup>();
 
     /**
-     * The default prefix to lookup registered {@link javax.jms.Queue} instance.
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public static final String PREFIX_QUEUE = "/queues/";
+    public static void setServiceLookup(final com.openexchange.server.ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * The default prefix to lookup registered {@link Tjavax.jms.opic} instance.
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static final String PREFIX_TOPIC = "/topics/";
-
-    /**
-     * The default port for socket-based acceptors/connectors.
-     */
-    public static final int MQ_LISTEN_PORT = 5445;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"" + MQConstants.BUNDLE_SYMBOLIC_NAME + "\" not staretd?");
+        }
+        return serviceLookup.getService(clazz);
+    }
 
 }

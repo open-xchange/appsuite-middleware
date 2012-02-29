@@ -78,6 +78,13 @@ import com.openexchange.mq.example.MQJmsTopicExample;
 public interface MQService {
 
     /**
+     * Gets the special queue for managing Message Queue system.
+     * 
+     * @return The special queue for managing Message Queue system.
+     */
+    public Queue getManagementQueue() throws OXException;
+
+    /**
      * Lookup in the registry for registered {@link ConnectionFactory}.
      * <p>
      * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
