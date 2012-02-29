@@ -74,6 +74,9 @@ public final class MQExceptionMessages implements LocalizableStrings {
     // No topic found for name: %1$s
     public static final String TOPIC_NOT_FOUND_MSG = "No topic found for name: %1$s";
 
+    // A JMS error occurred: %1$s
+    public static final String JMS_ERROR_MSG = "A JMS error occurred: %1$s";
+
     /**
      * Initializes a new {@link MQExceptionMessages}.
      */

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,21 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.mq;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
- * {@link Action} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link MQCloseable} - Represents a closeable Message Queue resource.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Action {
+public interface MQCloseable {
 
     /**
-     * Gets the default format.
-     *
-     * @return The default format
+     * Closes this Message Queue resource.
+     * <p>
+     * Must not throw anything.
      */
-    String defaultFormat() default "apiResponse";
+    void close();
+
 }

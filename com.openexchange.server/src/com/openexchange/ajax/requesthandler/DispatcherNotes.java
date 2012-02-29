@@ -47,48 +47,23 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.ajax.requesthandler;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * {@link DocumentAction}
+ * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, defaultFormat = "file", name = "[filename]?action=document", description = "Get an infoitem document", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested infoitem."),
-    @Parameter(name = "folder", description = "Object ID of the infoitem's folder."),
-    @Parameter(name = "version", optional=true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
-    @Parameter(name = "content_type", optional=true, description = "If present the response declares the given content_type in the Content-Type header.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
-@DispatcherNotes(defaultFormat = "file")
-public class DocumentAction extends AbstractFileAction {
-    @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
-        request.require(Param.ID);
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DispatcherNotes {
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
-
-        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-
-        final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
-
-        final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
-
-
-        return new AJAXRequestResult(fileHolder, "file");
-    }
+    /**
+     * Gets the default format.
+     *
+     * @return The default format
+     */
+    String defaultFormat() default "apiResponse";
 }

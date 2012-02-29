@@ -49,6 +49,8 @@
 
 package com.openexchange.mq;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -78,6 +80,33 @@ import com.openexchange.mq.example.MQJmsTopicExample;
 public interface MQService {
 
     /**
+     * The service reference.
+     */
+    public static final AtomicReference<MQService> SERVICE_REFERENCE = new AtomicReference<MQService>();
+
+    /**
+     * Gets the special queue for managing Message Queue system.
+     * 
+     * @return The special queue for managing Message Queue system.
+     */
+    Queue getManagementQueue() throws OXException;
+
+    /**
+     * Returns the names of the JMS topics available on this server.
+     */
+    List<String> getTopicNames();
+
+    /**
+     * Returns the names of the JMS queues available on this server.
+     */
+    List<String> getQueueNames();
+
+    /**
+     * Returns the names of the JMS connection factories available on this server.
+     */
+    List<String> getConnectionFactoryNames();
+
+    /**
      * Lookup in the registry for registered {@link ConnectionFactory}.
      * <p>
      * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
@@ -88,7 +117,7 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    public <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
+    <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
 
     /**
      * Lookup in the registry for registered {@link Queue}.
@@ -107,7 +136,7 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    public Queue lookupQueue(String name) throws OXException;
+    Queue lookupQueue(String name) throws OXException;
 
     /**
      * Lookup in the registry for registered {@link Topic}.
@@ -125,6 +154,6 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    public Topic lookupTopic(String name) throws OXException;
+    Topic lookupTopic(String name) throws OXException;
 
 }

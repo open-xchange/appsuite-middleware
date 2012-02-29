@@ -63,6 +63,7 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQService;
 
 /**
@@ -89,7 +90,7 @@ public final class MQJmsTopicExample {
         Thread t = null;
         try {
             // Now we'll look up the connection factory:
-            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
+            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
             // And look up the Queue:
             final Topic topic = service.lookupTopic("/topics/topic1");
 
@@ -133,7 +134,7 @@ public final class MQJmsTopicExample {
                 public void run() {
                     try {
                         // Now we'll look up the connection factory:
-                        final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
+                        final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
                         // And look up the Queue:
                         final Topic topic = service.lookupTopic("/topics/topic1");
 

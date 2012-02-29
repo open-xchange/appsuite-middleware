@@ -55,7 +55,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import com.openexchange.ajax.container.TmpFileFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Action;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
@@ -68,7 +68,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(defaultFormat = "file")
+@DispatcherNotes(defaultFormat = "file")
 public class DocumentSigAction extends AbstractFileAction {
 
     @Override

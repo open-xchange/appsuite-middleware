@@ -235,7 +235,7 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the name of the draft folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the draft folder
      */
@@ -244,7 +244,7 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the name of the sent folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the sent folder
      */
@@ -253,7 +253,7 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the name of the spam folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the spam folder
      */
@@ -262,7 +262,7 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the name of the trash folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the trash folder
      */
@@ -271,7 +271,7 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the name of the confirmed ham folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the confirmed ham folder
      */
@@ -280,7 +280,7 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the name of the confirmed spam folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the confirmed spam folder
      */
@@ -294,44 +294,44 @@ public interface MailAccount extends Serializable {
     public boolean isUnifiedINBOXEnabled();
 
     /**
-     * Gets the trash fullname
+     * Gets the trash full name
      *
-     * @return The trash fullname
+     * @return The trash full name
      */
     public String getTrashFullname();
 
     /**
-     * Gets the sent fullname
+     * Gets the sent full name
      *
-     * @return The sent fullname
+     * @return The sent full name
      */
     public String getSentFullname();
 
     /**
-     * Gets the drafts fullname
+     * Gets the drafts full name
      *
-     * @return The drafts fullname
+     * @return The drafts full name
      */
     public String getDraftsFullname();
 
     /**
-     * Gets the spam fullname
+     * Gets the spam full name
      *
-     * @return The spam fullname
+     * @return The spam full name
      */
     public String getSpamFullname();
 
     /**
-     * Gets the confirmed-spam fullname
+     * Gets the confirmed-spam full name
      *
-     * @return The confirmed-spam fullname
+     * @return The confirmed-spam full name
      */
     public String getConfirmedSpamFullname();
 
     /**
-     * Gets the confirmed-ham fullname
+     * Gets the confirmed-ham full name
      *
-     * @return The confirmed-ham fullname
+     * @return The confirmed-ham full name
      */
     public String getConfirmedHamFullname();
 
