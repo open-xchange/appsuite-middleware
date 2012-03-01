@@ -66,7 +66,7 @@ public interface MQTopicPublisher extends MQCloseable {
      * @param text The <code>java.lang.String</code> to publish
      * @throws OXException If publish operation fails
      */
-    public void publishTextMessage(final String text) throws OXException;
+    public void publishTextMessage(String text) throws OXException;
 
     /**
      * Publishes a message containing a serializable Java object.
@@ -74,7 +74,7 @@ public interface MQTopicPublisher extends MQCloseable {
      * @param object The serializable Java object to publish
      * @throws OXException If publish operation fails
      */
-    public void publishObjectMessage(final Serializable object) throws OXException;
+    public void publishObjectMessage(Serializable object) throws OXException;
 
     /**
      * Publishes a message containing <code>byte</code>s.
@@ -82,6 +82,33 @@ public interface MQTopicPublisher extends MQCloseable {
      * @param bytes The <code>byte</code> array to publish
      * @throws OXException If publish operation fails
      */
-    public void publishBytesMessage(final byte[] bytes) throws OXException;
+    public void publishBytesMessage(byte[] bytes) throws OXException;
+
+    /**
+     * Publishes a message containing a <code>java.lang.String</code>.
+     * 
+     * @param text The <code>java.lang.String</code> to publish
+     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If publish operation fails
+     */
+    public void publishTextMessage(String text, int priority) throws OXException;
+
+    /**
+     * Publishes a message containing a serializable Java object.
+     * 
+     * @param object The serializable Java object to publish
+     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If publish operation fails
+     */
+    public void publishObjectMessage(Serializable object, int priority) throws OXException;
+
+    /**
+     * Publishes a message containing <code>byte</code>s.
+     * 
+     * @param bytes The <code>byte</code> array to publish
+     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If publish operation fails
+     */
+    public void publishBytesMessage(byte[] bytes, int priority) throws OXException;
 
 }

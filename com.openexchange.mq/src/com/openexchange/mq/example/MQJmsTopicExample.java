@@ -99,7 +99,7 @@ public final class MQJmsTopicExample {
                         // Now we'll look up the connection factory:
                         final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
                         // And look up the Queue:
-                        final Topic topic = service.lookupTopic("genericTopic");
+                        final Topic topic = service.lookupTopic(MQConstants.NAME_TOPIC);
 
                         TopicConnection topicConnection = null;
                         try {
@@ -184,7 +184,7 @@ public final class MQJmsTopicExample {
             // Now we'll look up the connection factory:
             final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
             // And look up the Queue:
-            final Topic topic = service.lookupTopic("genericTopic");
+            final Topic topic = service.lookupTopic(MQConstants.NAME_TOPIC);
 
             TopicConnection topicConnection = null;
             try {

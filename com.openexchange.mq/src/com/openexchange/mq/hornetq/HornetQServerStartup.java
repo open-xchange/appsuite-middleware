@@ -142,6 +142,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                         configuration = new ConfigurationImpl();
                         configuration.setPersistenceEnabled(false);
                         configuration.setSecurityEnabled(false);
+                        configuration.setJournalSyncNonTransactional(false);
     
                         final FileConfigurationParser parser = new FileConfigurationParser();
                         parser.setValidateAIO(true);
@@ -161,6 +162,15 @@ public final class HornetQServerStartup implements MQServerStartup {
     
                             final JMSServerConfigParser jmsServerConfigParser = new JMSServerConfigParserImpl();
                             jmsConfiguration = jmsServerConfigParser.parseConfiguration(e);
+
+                            /*-
+                             * 
+                            for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfiguration.getConnectionFactoryConfigurations()) {
+                                connectionFactoryConfiguration.setBlockOnDurableSend(false);
+                                connectionFactoryConfiguration.setBlockOnNonDurableSend(false);
+                            }
+                             * 
+                             */
                         }
                     }
                     /*
@@ -280,6 +290,10 @@ public final class HornetQServerStartup implements MQServerStartup {
         // Step 5. Create the JMS Server using the HornetQ core server and the JMS configuration
         final HornetQEmbeddedJMS jmsServer = new HornetQEmbeddedJMS();
         jmsServer.setConfiguration(configuration);
+        for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfig.getConnectionFactoryConfigurations()) {
+            connectionFactoryConfiguration.setBlockOnDurableSend(false);
+            connectionFactoryConfiguration.setBlockOnNonDurableSend(false);
+        }
         jmsServer.setJmsConfiguration(jmsConfig);
         return jmsServer;
     }

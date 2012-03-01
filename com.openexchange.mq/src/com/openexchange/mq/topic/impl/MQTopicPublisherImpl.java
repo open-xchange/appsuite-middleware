@@ -52,6 +52,7 @@ package com.openexchange.mq.topic.impl;
 import java.io.Serializable;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -127,6 +128,57 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
+    }
+
+    @Override
+    public void publishTextMessage(final String text, final int priority) throws OXException {
+        if (null == text) {
+            return;
+        }
+        try {
+            final TextMessage message = topicSession.createTextMessage(text);
+            topicPublisher.publish(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        }
+    }
+
+    @Override
+    public void publishObjectMessage(final Serializable object, final int priority) throws OXException {
+        if (object instanceof String) {
+            publishTextMessage((String) object);
+            return;
+        }
+        if (null == object) {
+            return;
+        }
+        try {
+            final ObjectMessage message = topicSession.createObjectMessage(object);
+            topicPublisher.publish(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        }
+    }
+
+    @Override
+    public void publishBytesMessage(final byte[] bytes, final int priority) throws OXException {
+        if (null == bytes) {
+            return;
+        }
+        try {
+            final BytesMessage bytesMessage = topicSession.createBytesMessage();
+            bytesMessage.writeBytes(bytes, 0, bytes.length);
+            topicPublisher.publish(bytesMessage, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        }
+    }
+
+    private static int checkPriority(final int priority) {
+        if (priority >= 0 && priority <= 9) {
+            return priority;
+        }
+        return Message.DEFAULT_PRIORITY;
     }
 
 }

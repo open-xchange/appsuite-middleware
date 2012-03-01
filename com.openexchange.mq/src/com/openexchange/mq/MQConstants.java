@@ -49,7 +49,6 @@
 
 package com.openexchange.mq;
 
-
 /**
  * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
  * 
@@ -76,6 +75,16 @@ public interface MQConstants {
      * The default prefix to lookup registered {@link Tjavax.jms.opic} instance.
      */
     public static final String PREFIX_TOPIC = "/topics/";
+
+    /**
+     * The name for the general-purpose {@link javax.jms.Queue} instance.
+     */
+    public static final String NAME_QUEUE = "genericQueue";
+
+    /**
+     * The name for the general-purpose {@link Tjavax.jms.opic} instance.
+     */
+    public static final String NAME_TOPIC = "genericTopic";
 
     /**
      * The default port for socket-based acceptors/connectors.
