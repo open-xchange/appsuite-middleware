@@ -90,9 +90,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
      * ----------------------- Receive text methods --------------------------
      */
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveText()
-     */
     @Override
     public String receiveText() throws OXException {
         try {
@@ -106,9 +103,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveText(long)
-     */
     @Override
     public String receiveText(final long timeout) throws OXException {
         try {
@@ -122,9 +116,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveTextNoWait()
-     */
     @Override
     public String receiveTextNoWait() throws OXException {
         try {
@@ -142,9 +133,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
      * ----------------------- Receive Java object methods --------------------------
      */
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveObject()
-     */
     @Override
     public Object receiveObject() throws OXException {
         try {
@@ -158,9 +146,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveObject(long)
-     */
     @Override
     public Object receiveObject(final long timeout) throws OXException {
         try {
@@ -174,9 +159,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveObjectNoWait()
-     */
     @Override
     public Object receiveObjectNoWait() throws OXException {
         try {
@@ -194,9 +176,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
      * ----------------------- Receive bytes methods --------------------------
      */
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveBytes()
-     */
     @Override
     public byte[] receiveBytes() throws OXException {
         try {
@@ -210,9 +189,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveBytes(long)
-     */
     @Override
     public byte[] receiveBytes(final long timeout) throws OXException {
         try {
@@ -226,9 +202,6 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueReceiver#receiveBytesNoWait()
-     */
     @Override
     public byte[] receiveBytesNoWait() throws OXException {
         try {

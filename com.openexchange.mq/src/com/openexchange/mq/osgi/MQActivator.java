@@ -56,8 +56,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQServerStartup;
 import com.openexchange.mq.MQService;
-import com.openexchange.mq.example.MQJmsQueueExample;
-import com.openexchange.mq.example.MQJmsTopicExample;
 import com.openexchange.mq.hornetq.HornetQServerStartup;
 import com.openexchange.mq.serviceLookup.MQServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -101,8 +99,8 @@ public final class MQActivator extends HousekeepingActivator {
             MQService.SERVICE_REFERENCE.set(service);
 
             // --------- Test service ----------
-            new MQJmsQueueExample(service).test();
-            new MQJmsTopicExample(service).test();
+            // new com.openexchange.mq.example.MQJmsQueueExample(service).test();
+            new com.openexchange.mq.example.MQJmsTopicExample(service).test();
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;

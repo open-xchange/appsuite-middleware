@@ -84,9 +84,6 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         queueSender = queueSession.createSender(queue);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueSender#sendTextMessage(java.lang.String)
-     */
     @Override
     public void sendTextMessage(final String text) throws OXException {
         if (null == text) {
@@ -100,9 +97,6 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueSender#sendObjectMessage(java.io.Serializable)
-     */
     @Override
     public void sendObjectMessage(final Serializable object) throws OXException {
         if (object instanceof String) {
@@ -120,9 +114,6 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueSender#sendBytesMessage(byte[])
-     */
     @Override
     public void sendBytesMessage(final byte[] bytes) throws OXException {
         if (null == bytes) {
