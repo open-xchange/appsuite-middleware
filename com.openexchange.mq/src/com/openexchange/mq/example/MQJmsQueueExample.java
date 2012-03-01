@@ -87,7 +87,7 @@ public final class MQJmsQueueExample {
         Thread t = null;
         try {
             // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
+            final QueueConnectionFactory queueConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the Queue:
             final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
 
@@ -136,7 +136,7 @@ public final class MQJmsQueueExample {
                 public void run() {
                     try {
                         // Now we'll look up the connection factory:
-                        final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
+                        final QueueConnectionFactory queueConnectionFactory = service.lookupDefaultConnectionFactory();
                         // And look up the Queue:
                         final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
 

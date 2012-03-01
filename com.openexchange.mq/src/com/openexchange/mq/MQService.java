@@ -113,11 +113,23 @@ public interface MQService {
      * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
      * 
      * @param name The name of the {@link ConnectionFactory}
-     * @return The look-up {@link ConnectionFactory} instance.
+     * @return The looked-up {@link ConnectionFactory} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
     <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered default {@link ConnectionFactory}.
+     * <p>
+     * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
+     * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
+     * 
+     * @return The default {@link ConnectionFactory} instance.
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    <CF extends ConnectionFactory> CF lookupDefaultConnectionFactory() throws OXException;
 
     /**
      * Lookup in the registry for registered {@link Queue}.
@@ -132,7 +144,7 @@ public interface MQService {
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
      * 
      * @param name The name of the queue
-     * @return The look-up {@link Queue} instance.
+     * @return The looked-up {@link Queue} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
@@ -152,7 +164,7 @@ public interface MQService {
      * 
      * @param name The name of the queue
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
-     * @return The look-up {@link Queue} instance.
+     * @return The looked-up {@link Queue} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
@@ -170,7 +182,7 @@ public interface MQService {
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
      * 
      * @param name The name of the topic
-     * @return The look-up {@link Topic} instance.
+     * @return The looked-up {@link Topic} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
@@ -189,7 +201,7 @@ public interface MQService {
      * 
      * @param name The name of the topic
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
-     * @return The look-up {@link Topic} instance.
+     * @return The looked-up {@link Topic} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */

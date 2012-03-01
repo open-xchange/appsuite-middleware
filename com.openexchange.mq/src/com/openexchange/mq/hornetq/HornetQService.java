@@ -77,6 +77,8 @@ public final class HornetQService implements MQService {
 
     private final HornetQEmbeddedJMS jmsServer;
 
+    private final ConnectionFactory defaultConnectionFactory;
+
     private volatile Queue managementQueue;
 
     /**
@@ -85,6 +87,8 @@ public final class HornetQService implements MQService {
     public HornetQService(final HornetQEmbeddedJMS jmsServer) {
         super();
         this.jmsServer = jmsServer;
+        // org.hornetq.jms.client.HornetQJMSConnectionFactory
+        defaultConnectionFactory = (ConnectionFactory) jmsServer.lookup(MQConstants.NAME_CONNECTION_FACTORY);
     }
 
     /**
@@ -146,9 +150,7 @@ public final class HornetQService implements MQService {
     @Override
     public <CF extends ConnectionFactory> CF lookupConnectionFactory(final String name) throws OXException {
         try {
-            @SuppressWarnings("unchecked")
-            final
-            CF connectionFactory = (CF) jmsServer.lookup(name);
+            @SuppressWarnings("unchecked") final CF connectionFactory = (CF) jmsServer.lookup(name);
             if (null == connectionFactory) {
                 throw MQExceptionCodes.CF_NOT_FOUND.create(name);
             }
@@ -158,6 +160,12 @@ public final class HornetQService implements MQService {
         } catch (final RuntimeException e) {
             throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <CF extends ConnectionFactory> CF lookupDefaultConnectionFactory() throws OXException {
+        return (CF) defaultConnectionFactory;
     }
 
     @Override

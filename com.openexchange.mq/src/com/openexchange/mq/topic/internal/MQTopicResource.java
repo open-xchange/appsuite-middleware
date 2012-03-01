@@ -59,7 +59,6 @@ import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
-import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 
@@ -89,7 +88,7 @@ public abstract class MQTopicResource implements MQCloseable {
         try {
             final MQService service = getMQService();
             // Now we'll look up the connection factory:
-            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
+            final TopicConnectionFactory topicConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the TOpic:
             final Topic topic = service.lookupTopic(topicName);
             // Setup connection, session & sender

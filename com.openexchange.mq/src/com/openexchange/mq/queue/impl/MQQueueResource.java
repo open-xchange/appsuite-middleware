@@ -59,7 +59,6 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
-import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 
@@ -89,7 +88,7 @@ abstract class MQQueueResource implements MQCloseable {
         try {
             final MQService service = getMQService();
             // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
+            final QueueConnectionFactory queueConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the Queue:
             final Queue queue = service.lookupQueue(queueName);
             // Setup connection, session & sender
