@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -73,10 +74,9 @@ import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.console.JMXAuthenticatorImpl;
 
-
 /**
  * {@link DeferredActivatorCLT}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DeferredActivatorCLT {
@@ -86,13 +86,12 @@ public class DeferredActivatorCLT {
      */
     public DeferredActivatorCLT() {
         super();
-        // TODO Auto-generated constructor stub
-
     }
 
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
         String bundleName = null;
+        boolean testAll = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -121,10 +120,7 @@ public class DeferredActivatorCLT {
 
             if (cmd.hasOption('n')) {
                 bundleName = cmd.getOptionValue('n');
-            } else {
-                System.err.println("Missing bundle identifier.");
-                printHelp();
-                System.exit(0);
+                testAll = false;
             }
 
             String jmxLogin = null;
@@ -144,27 +140,59 @@ public class DeferredActivatorCLT {
                 environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
             }
 
-            final JMXServiceURL url =
-                new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append("/server").toString());
+            final JMXServiceURL url = new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append(
+                "/server").toString());
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-                final String[] signature = new String[] { String.class.getName() };
-                final Object[] params = new Object[] { bundleName };
-                final Object result = mbsc.invoke(getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN), "getMissingServices", params, signature);
-                if (result instanceof ArrayList<?>) {
-                    final ArrayList<?> missing = (ArrayList<?>) result;
-                    if (missing.isEmpty()) {
-                        System.out.println("No services missing for bundle " + bundleName);
-                    } else {
-                        System.out.println("Services missing for bundle " + bundleName + ":");
-                        final StringBuilder sb = new StringBuilder();
-                        for (final Object o : missing) {
-                            sb.append(o.toString()).append(",");
+                if (testAll) {
+                    final Object result = mbsc.invoke(
+                        getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN),
+                        "listAllMissingServices",
+                        null,
+                        null);
+                    if (result instanceof Map<?, ?>) {
+                        if (((Map) result).isEmpty()) {
+                            System.out.println("No services missing");
+                            System.exit(0);
                         }
-                        sb.deleteCharAt(sb.length() - 1);
-                        System.out.println(sb.toString());
+                        for (Object bundle : ((Map) result).keySet()) {
+                            Object list = ((Map) result).get(bundle);
+                            if (list instanceof List<?>) {
+                                System.out.println("Services missing for bundle " + bundle.toString() + ":");
+                                final StringBuilder sb = new StringBuilder();
+                                for (final Object o : (List) list) {
+                                    sb.append(o.toString()).append(",");
+                                }
+                                sb.deleteCharAt(sb.length() - 1);
+                                System.out.println(sb.toString());
+                            }
+                            System.out.println();
+                        }
+                        System.exit(0);
+                    }
+                } else {
+                    final String[] signature = new String[] { String.class.getName() };
+                    final Object[] params = new Object[] { bundleName };
+                    final Object result = mbsc.invoke(
+                        getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN),
+                        "listMissingServices",
+                        params,
+                        signature);
+                    if (result instanceof ArrayList<?>) {
+                        final ArrayList<?> missing = (ArrayList<?>) result;
+                        if (missing.isEmpty()) {
+                            System.out.println("No services missing for bundle " + bundleName);
+                        } else {
+                            System.out.println("Services missing for bundle " + bundleName + ":");
+                            final StringBuilder sb = new StringBuilder();
+                            for (final Object o : missing) {
+                                sb.append(o.toString()).append(",");
+                            }
+                            sb.deleteCharAt(sb.length() - 1);
+                            System.out.println(sb.toString());
+                        }
                     }
                 }
             } finally {
@@ -210,7 +238,7 @@ public class DeferredActivatorCLT {
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     *
+     * 
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}
@@ -227,7 +255,7 @@ public class DeferredActivatorCLT {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
 
-        toolkitOptions.addOption("n", "name", true, "The bundle's symbolic name");
+        toolkitOptions.addOption("n", "name", true, "The optional bundle's symbolic name");
 
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
