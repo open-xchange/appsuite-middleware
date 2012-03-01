@@ -70,7 +70,7 @@ public interface MQConstants {
     /**
      * The default path to lookup registered {@link javax.jms.ConnectionFactory} instance.
      */
-    public static final String PATH_CONNECTION_FACTORY = "/" + NAME_CONNECTION_FACTORY;
+    public static final String PATH_CONNECTION_FACTORY = NAME_CONNECTION_FACTORY;
 
     /**
      * The default prefix to lookup registered {@link javax.jms.Queue} instance.

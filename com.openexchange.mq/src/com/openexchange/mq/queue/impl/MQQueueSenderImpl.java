@@ -84,9 +84,6 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         queueSender = queueSession.createSender(queue);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueSender#sendTextMessage(java.lang.String)
-     */
     @Override
     public void sendTextMessage(final String text) throws OXException {
         if (null == text) {
@@ -96,13 +93,10 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
             final TextMessage message = queueSession.createTextMessage(text);
             queueSender.send(message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueSender#sendObjectMessage(java.io.Serializable)
-     */
     @Override
     public void sendObjectMessage(final Serializable object) throws OXException {
         if (object instanceof String) {
@@ -116,13 +110,10 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
             final ObjectMessage message = queueSession.createObjectMessage(object);
             queueSender.send(message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mq.queue.MQQueueSender#sendBytesMessage(byte[])
-     */
     @Override
     public void sendBytesMessage(final byte[] bytes) throws OXException {
         if (null == bytes) {
@@ -133,7 +124,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
             bytesMessage.writeBytes(bytes, 0, bytes.length);
             queueSender.send(bytesMessage);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 

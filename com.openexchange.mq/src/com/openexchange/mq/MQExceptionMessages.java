@@ -68,14 +68,26 @@ public final class MQExceptionMessages implements LocalizableStrings {
     // No connection factory found for name: %1$s
     public static final String CF_NOT_FOUND_MSG = "No connection factory found for name: %1$s";
     
-    // No queue found for name: %1$s
-    public static final String QUEUE_NOT_FOUND_MSG = "No queue found for name: %1$s";
+    // No such queue or could not be created: %1$s
+    public static final String QUEUE_NOT_FOUND_MSG = "No such queue or could not be created: %1$s";
     
-    // No topic found for name: %1$s
-    public static final String TOPIC_NOT_FOUND_MSG = "No topic found for name: %1$s";
+    // No such topic or could not be created: %1$s
+    public static final String TOPIC_NOT_FOUND_MSG = "No such topic or could not be created: %1$s";
 
     // A JMS error occurred: %1$s
     public static final String JMS_ERROR_MSG = "A JMS error occurred: %1$s";
+
+    // Illegal state: %1$s
+    public static final String ILLEGAL_STATE_MSG = "Illegal state: %1$s";
+
+    // A filter expression has not been validated.
+    public static final String INVALID_SELECTOR_MSG = "A filter expression has not been validated.";
+
+    // Either no such queue or a topic or could not be created: %1$s
+    public static final String DESTINATION_NOT_FOUND_MSG = "Either no such queue or a topic or could not be created: %1$s";
+
+    // A security problem occurred (authentication issues, permission issues,...)
+    public static final String SECURITY_ERROR_MSG = "A security problem occurred: %1$s";
 
     /**
      * Initializes a new {@link MQExceptionMessages}.
