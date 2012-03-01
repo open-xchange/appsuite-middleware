@@ -130,7 +130,7 @@ public final class ImageUtility {
         if (null == registrationName) {
             registrationName = ImageServlet.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
-                throw new IllegalArgumentException("No knwon registration name for: " + imageUri);
+                throw new IllegalArgumentException("No known registration name for: " + imageUri);
             }
         }
         il.setRegistrationName(registrationName);

@@ -2,20 +2,12 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.recaptcha"/>
-
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.security"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck.servlet"/>
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
-subscribe.*
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.twitter"/>
-
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.unifiedinbox"/>
 
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xerces.sun"/>
 </provider>
 </psf>

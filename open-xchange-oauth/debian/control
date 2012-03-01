@@ -10,5 +10,8 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 Package: open-xchange-oauth
 Architecture: all
 Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
-Provides: open-xchange-oauth
+Pre-Depends: dpkg (>= 1.15.7.2)
+Breaks: open-xchange-http-deferrer (<< 7.0.0), open-xchange-oauth-facebook (<< 7.0.0), open-xchange-oauth-json (<< 7.0.0), open-xchange-oauth-linkedin (<< 7.0.0), open-xchange-oauth-msn (<< 7.0.0), open-xchange-oauth-twitter (<< 7.0.0), open-xchange-oauth-yahoo (<< 7.0.0)
+Conflicts: open-xchange-http-deferrer (<< 7.0.0), open-xchange-oauth-facebook (<< 7.0.0), open-xchange-oauth-json (<< 7.0.0), open-xchange-oauth-linkedin (<< 7.0.0), open-xchange-oauth-msn (<< 7.0.0), open-xchange-oauth-twitter (<< 7.0.0), open-xchange-oauth-yahoo (<< 7.0.0)
+Replaces: open-xchange-http-deferrer (<< 7.0.0), open-xchange-oauth-facebook (<< 7.0.0), open-xchange-oauth-json (<< 7.0.0), open-xchange-oauth-linkedin (<< 7.0.0), open-xchange-oauth-msn (<< 7.0.0), open-xchange-oauth-twitter (<< 7.0.0), open-xchange-oauth-yahoo (<< 7.0.0)
 Description: The Open-Xchange OAuth implementation

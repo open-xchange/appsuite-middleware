@@ -60,6 +60,7 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQService;
 
 /**
@@ -86,7 +87,7 @@ public final class MQJmsQueueExample {
         Thread t = null;
         try {
             // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
+            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
             // And look up the Queue:
             final Queue queue = service.lookupQueue("/queues/queue1");
 
@@ -135,7 +136,7 @@ public final class MQJmsQueueExample {
                 public void run() {
                     try {
                         // Now we'll look up the connection factory:
-                        final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory("/ConnectionFactory");
+                        final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
                         // And look up the Queue:
                         final Queue queue = service.lookupQueue("/queues/queue1");
 

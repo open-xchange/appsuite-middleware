@@ -166,7 +166,7 @@ public class DefaultDispatcher implements Dispatcher {
          * Check for Action annotation
          */
         if (modifiedRequestData.getFormat() == null) {
-            final Action actionMetadata = getActionMetadata(action);
+            final DispatcherNotes actionMetadata = getActionMetadata(action);
             modifiedRequestData.setFormat(actionMetadata == null ? "apiResponse" : actionMetadata.defaultFormat());
         }
         /*
@@ -225,8 +225,8 @@ public class DefaultDispatcher implements Dispatcher {
         return serviceFactory;
     }
 
-    private Action getActionMetadata(final AJAXActionService action) {
-        return action.getClass().getAnnotation(Action.class);
+    private DispatcherNotes getActionMetadata(final AJAXActionService action) {
+        return action.getClass().getAnnotation(DispatcherNotes.class);
     }
 
     /**

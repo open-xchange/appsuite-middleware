@@ -49,30 +49,91 @@
 
 package com.openexchange.mq.hornetq;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
-import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import org.hornetq.api.jms.HornetQJMSClient;
+import org.hornetq.api.jms.management.ConnectionFactoryControl;
+import org.hornetq.api.jms.management.JMSQueueControl;
+import org.hornetq.api.jms.management.TopicControl;
+import org.hornetq.jms.server.JMSServerManager;
+import org.hornetq.jms.server.config.JMSQueueConfiguration;
+import org.hornetq.jms.server.config.TopicConfiguration;
+import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
+import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 
-
 /**
  * {@link HornetQService} - The HornetQ Message Queue service.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HornetQService implements MQService {
 
-    private final EmbeddedJMS jmsServer;
+    private final HornetQEmbeddedJMS jmsServer;
+
+    private volatile Queue managementQueue;
 
     /**
      * Initializes a new {@link HornetQService}.
      */
-    public HornetQService(final EmbeddedJMS jmsServer) {
+    public HornetQService(final HornetQEmbeddedJMS jmsServer) {
         super();
         this.jmsServer = jmsServer;
+    }
+
+    /**
+     * Gets the special queue for managing HornetQ.
+     * 
+     * @return The special queue for managing HornetQ.
+     */
+    @Override
+    public Queue getManagementQueue() {
+        Queue managementQueue = this.managementQueue;
+        if (null == managementQueue) {
+            synchronized (this) {
+                managementQueue = this.managementQueue;
+                if (null == managementQueue) {
+                    this.managementQueue = managementQueue = HornetQJMSClient.createQueue("hornetq.management");
+                }
+            }
+        }
+        return managementQueue;
+    }
+
+    @Override
+    public List<String> getQueueNames() {
+        final Object[] queueControls = jmsServer.getHornetQServer().getManagementService().getResources(JMSQueueControl.class);
+        final List<String> names = new ArrayList<String>(queueControls.length);
+        for (int i = 0; i < queueControls.length; i++) {
+            names.add(((JMSQueueControl) queueControls[i]).getName());
+        }
+        return names;
+    }
+
+    @Override
+    public List<String> getTopicNames() {
+        final Object[] topicControls = jmsServer.getHornetQServer().getManagementService().getResources(TopicControl.class);
+        final List<String> names = new ArrayList<String>(topicControls.length);
+        for (int i = 0; i < topicControls.length; i++) {
+            names.add(((TopicControl) topicControls[i]).getName());
+        }
+        return names;
+    }
+
+    @Override
+    public List<String> getConnectionFactoryNames() {
+        final Object[] cfControls = jmsServer.getHornetQServer().getManagementService().getResources(ConnectionFactoryControl.class);
+        final List<String> names = new ArrayList<String>(cfControls.length);
+        for (int i = 0; i < cfControls.length; i++) {
+            names.add(((ConnectionFactoryControl) cfControls[i]).getName());
+        }
+        return names;
     }
 
     /*-
@@ -106,6 +167,35 @@ public final class HornetQService implements MQService {
     }
 
     @Override
+    public Queue lookupQueue(final String name, final boolean createIfAbsent) throws OXException {
+        if (!createIfAbsent) {
+            return lookupQueue(name);
+        }
+        // Create if absent
+        Queue queue;
+        try {
+            queue = (Queue) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            queue = null;
+        } catch (final Exception e) {
+            queue = null;
+        }
+        if (null == queue) {
+            try {
+                final JMSServerManager serverManager = jmsServer.getServerManager();
+                final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, null, false, MQConstants.PREFIX_QUEUE + name);
+                final String[] bindings = config.getBindings();
+                serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
+            } catch (final Exception e) {
+                throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return lookupQueue(name);
+    }
+
+    @Override
     public Topic lookupTopic(final String name) throws OXException {
         try {
             return (Topic) jmsServer.lookup(name);
@@ -114,6 +204,35 @@ public final class HornetQService implements MQService {
         } catch (final RuntimeException e) {
             throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
         }
+    }
+
+    @Override
+    public Topic lookupTopic(final String name, final boolean createIfAbsent) throws OXException {
+        if (!createIfAbsent) {
+            return lookupTopic(name);
+        }
+        // Create if absent
+        Topic topic;
+        try {
+            topic = (Topic) jmsServer.lookup(name);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            topic = null;
+        } catch (final Exception e) {
+            topic = null;
+        }
+        if (null == topic) {
+            try {
+                final JMSServerManager serverManager = jmsServer.getServerManager();
+                final TopicConfiguration config = new TopicConfigurationImpl(name, MQConstants.PREFIX_TOPIC + name);
+                final String[] bindings = config.getBindings();
+                serverManager.createTopic(false, config.getName(), bindings);
+            } catch (final Exception e) {
+                throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return lookupTopic(name);
     }
 
 }

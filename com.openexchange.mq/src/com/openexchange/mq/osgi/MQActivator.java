@@ -57,6 +57,7 @@ import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQServerStartup;
 import com.openexchange.mq.MQService;
 import com.openexchange.mq.hornetq.HornetQServerStartup;
+import com.openexchange.mq.serviceLookup.MQServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -85,12 +86,17 @@ public final class MQActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
         log.info("Starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
         try {
+            MQServiceLookup.setServiceLookup(this);
             // Start MQ server
             final MQServerStartup serverStartup = new HornetQServerStartup();
             serverStartup.start();
             this.serverStartup = serverStartup;
             // Register service(s)
-            registerService(MQService.class, serverStartup.getService());
+            final MQService service = serverStartup.getService();
+            registerService(MQService.class, service);
+            addService(MQService.class, service);
+            MQServiceLookup.setMQService(service);
+            MQService.SERVICE_REFERENCE.set(service);
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;
@@ -104,6 +110,10 @@ public final class MQActivator extends HousekeepingActivator {
             serverStartup.stop();
             this.serverStartup = null;
         }
+        removeService(MQService.class);
+        MQServiceLookup.setServiceLookup(null);
+        MQServiceLookup.setMQService(null);
+        MQService.SERVICE_REFERENCE.set(null);
         super.stopBundle();
     }
 
