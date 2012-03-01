@@ -91,7 +91,7 @@ abstract class MQQueueResource implements MQCloseable {
             // Now we'll look up the connection factory:
             final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
             // And look up the Queue:
-            final Queue queue = service.lookupQueue(MQConstants.PREFIX_QUEUE + queueName);
+            final Queue queue = service.lookupQueue(queueName);
             // Setup connection, session & sender
             final QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
             this.queueConnection = queueConnection;
