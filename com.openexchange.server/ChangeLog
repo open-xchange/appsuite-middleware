@@ -1,6 +1,7 @@
 * 2012-03-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 21664: Fixed parsing of CSS content
+ - Fix for bug 21076: Dealing with "[NONEXISTENT]" error code returned by IMAP server
 
 * 2012-02-29 - thorben.betten@open-xchange.com
 
