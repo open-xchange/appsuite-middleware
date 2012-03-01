@@ -47,62 +47,70 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.storage.rdb.fields;
 
-import java.util.Arrays;
 import java.util.EnumSet;
+import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link QueryFields} - Determines which {@link ContactField}s are needed from each of the database tables where contact information 
- * is stored. Also ensures that the <code>ContactField.NUMBER_OF_IMAGES</code> and <code>ContactField.NUMBER_OF_DISTRIBUTIONLIST</code> 
- * are queried automatically when needed.    
+ * {@link QueryFields} - Determines which {@link ContactField}s are needed in database query statements from each of the database 
+ * tables where contact information is stored. By adding the appropriate fields on demand, it also ensures that the 
+ * <code>ContactField.NUMBER_OF_IMAGES</code> and <code>ContactField.NUMBER_OF_DISTRIBUTIONLIST</code> are queried automatically when 
+ * needed.    
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class QueryFields {
     
-    private final ContactField[] contactDataFields;
-    private final ContactField[] imageDataFields;
-    private final ContactField[] distListDataFields;
-    private final boolean needsImageData;
-    private final boolean needsContactData;
-    private final boolean needsDistListData;
+    private ContactField[] contactDataFields;
+    private ContactField[] imageDataFields;
+    private ContactField[] distListDataFields;
+    private boolean hasImageData;
+    private boolean hasContactData;
+    private boolean hasDistListData;
     
     /**
      * Initializes a new {@link QueryFields}.
+     * 
      * @param fields
      */
     public QueryFields(final ContactField[] fields) {
+        this.update(fields);
+    }
+    
+    public void update(final ContactField[] fields) {
         if (null == fields) {
             throw new IllegalArgumentException("fields");
         }        
-        final ContactField[] imageDataFieldsAdditional = Tools.filter(fields, Tools.IMAGE_DATABASE_FIELDS_ADDITIONAL);
-        needsImageData = 0 < imageDataFieldsAdditional.length;
-        if (needsImageData) {
-            imageDataFields = Arrays.copyOf(imageDataFieldsAdditional, imageDataFieldsAdditional.length + 1);
-            imageDataFields[imageDataFieldsAdditional.length] = ContactField.OBJECT_ID;            
-        } else {
-            imageDataFields = new ContactField[0]; // never null
-        }
-        needsDistListData = 0 < Tools.filter(fields, EnumSet.of(ContactField.DISTRIBUTIONLIST)).length;
-        if (needsDistListData) {
-            distListDataFields = Tools.DISTLIST_DATABASE_FIELDS_ARRAY;
-            if (needsImageData) {
-                contactDataFields = Tools.filter(fields, Tools.CONTACT_DATABASE_FIELDS, ContactField.NUMBER_OF_IMAGES, 
+        /*
+         * determine image data fields
+         */
+        final ContactField[] imageDataFields = Tools.filter(fields, Fields.IMAGE_DATABASE_ADDITIONAL, ContactField.OBJECT_ID);
+        hasImageData = 1 < imageDataFields.length;
+        /*
+         * determine distlist data fields
+         */
+        hasDistListData = 0 < Tools.filter(fields, EnumSet.of(ContactField.DISTRIBUTIONLIST)).length;
+        distListDataFields = hasDistListData ? Fields.DISTLIST_DATABASE_ARRAY : new ContactField[0];
+        /*
+         * build required contact data fields
+         */
+        if (hasDistListData) {
+            if (hasImageData) {
+                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES, 
                     ContactField.NUMBER_OF_DISTRIBUTIONLIST);
             } else {
-                contactDataFields = Tools.filter(fields, Tools.CONTACT_DATABASE_FIELDS, ContactField.NUMBER_OF_DISTRIBUTIONLIST);
+                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_DISTRIBUTIONLIST);
             }
         } else {
-            distListDataFields = new ContactField[0]; // never null
-            if (needsImageData) {
-                contactDataFields = Tools.filter(fields, Tools.CONTACT_DATABASE_FIELDS, ContactField.NUMBER_OF_IMAGES);
+            if (hasImageData) {
+                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES);
             } else {
-                contactDataFields = Tools.filter(fields, Tools.CONTACT_DATABASE_FIELDS);
+                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE);
             }
         }
-        needsContactData = 0 < contactDataFields.length;
+        hasContactData = 0 < contactDataFields.length;
     }
     
     public ContactField[] getContactDataFields() {
@@ -117,16 +125,16 @@ public class QueryFields {
         return this.distListDataFields;
     }    
     
-    public boolean needsImageData() {
-        return this.needsImageData;
+    public boolean hasImageData() {
+        return this.hasImageData;
     }
 
-    public boolean needsContactData() {
-        return this.needsContactData;
+    public boolean hasContactData() {
+        return this.hasContactData;
     }
 
-    public boolean needsDistListData() {
-        return this.needsDistListData;
+    public boolean hasDistListData() {
+        return this.hasDistListData;
     }
 
 }

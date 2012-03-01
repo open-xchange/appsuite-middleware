@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,58 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
+package com.openexchange.contact.storage.rdb.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RdbContactStorageActivator}
+ * {@link RdbServiceLookup} - Provides access to services.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorageActivator.class));
+public class RdbServiceLookup {
 
     /**
-     * Initializes a new {@link RdbContactStorageActivator}.
+     * Initializes a new {@link DBChatServiceLookup}.
      */
-    public RdbContactStorageActivator() {
+    private RdbServiceLookup() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);            
-            super.registerService(ContactStorage.class, new RdbContactStorage());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;            
+    public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
+        return RdbServiceLookup.getService(c, false);
+    }
+    
+    public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        final ServiceLookup serviceLookup = ref.get();
+        final S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
+        return service;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);            
-        super.stopBundle();
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(final ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
 }

@@ -150,6 +150,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -548,6 +549,16 @@ public final class Init {
             DefaultContactStorageRegistry registry = new DefaultContactStorageRegistry();
             registry.addStorage(new RdbContactStorage());
             TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
+            com.openexchange.contact.storage.rdb.internal.RdbServiceLookup.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(Class<? extends S> clazz) {
+                    return null;
+                }
+            });                
         }
     }
 
