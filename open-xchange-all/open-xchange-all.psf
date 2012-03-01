@@ -27,5 +27,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-recaptcha"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-unifiedmail"/>
 </provider>
 </psf>
