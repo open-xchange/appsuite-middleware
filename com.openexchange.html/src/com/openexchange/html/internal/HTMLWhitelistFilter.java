@@ -51,7 +51,6 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
-import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -389,7 +388,7 @@ public final class HTMLWhitelistFilter {
             return;
         }
         final Segment textSegment = new Segment(source, begin, end);
-        checkCSSElements(cssBuffer.append(textSegment.toString()), styleMap, true);
+        checkCSS(cssBuffer.append(textSegment.toString()), styleMap, true);
         String checkedCSS = cssBuffer.toString();
         cssBuffer.setLength(0);
         if (dropExternalImages) {
@@ -435,7 +434,7 @@ public final class HTMLWhitelistFilter {
                     /*
                      * Handle style attribute
                      */
-                    checkCSSElements(cssBuffer.append(attribute.getValue()), styleMap, true);
+                    checkCSS(cssBuffer.append(attribute.getValue()), styleMap, true);
                     String checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                     if (dropExternalImages) {

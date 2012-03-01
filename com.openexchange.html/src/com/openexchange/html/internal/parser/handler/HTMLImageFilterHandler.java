@@ -51,7 +51,6 @@ package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
-import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -269,7 +268,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
                 /*
                  * Handle style attribute
                  */
-                imageURLFound |= checkCSSElements(cssBuffer.append(e.getValue()), STYLE_MAP, false);
+                imageURLFound |= checkCSS(cssBuffer.append(e.getValue()), STYLE_MAP, false);
                 final String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (containsCSSElement(checkedCSS)) {
