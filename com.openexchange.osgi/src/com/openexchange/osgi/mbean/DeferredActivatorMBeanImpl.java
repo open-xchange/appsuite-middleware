@@ -50,6 +50,8 @@
 package com.openexchange.osgi.mbean;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.osgi.DeferredActivator;
@@ -73,9 +75,22 @@ public final class DeferredActivatorMBeanImpl extends StandardMBean implements D
     }
 
     @Override
-    public List<String> getMissingServices(final String name) {
+    public List<String> listMissingServices(final String name) {
         final ServiceState serviceState = DeferredActivator.getLookup().determineState(name);
         return serviceState.getMissingServices();
+    }
+    
+    @Override
+    public Map<String, List<String>> listAllMissingServices() {
+        final Map<String, List<String>> res = new ConcurrentHashMap<String, List<String>>();
+        for (final String bundleName : DeferredActivator.getLookup().getNames()) {
+            final ServiceState serviceState = DeferredActivator.getLookup().determineState(bundleName);
+            final List<String> list = serviceState.getMissingServices();
+            if (!list.isEmpty()) {
+                res.put(bundleName, list);
+            }
+        }
+        return res;
     }
 
     @Override
