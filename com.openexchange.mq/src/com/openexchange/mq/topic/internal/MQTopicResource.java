@@ -89,7 +89,7 @@ public abstract class MQTopicResource implements MQCloseable {
         try {
             final MQService service = getMQService();
             // Now we'll look up the connection factory:
-            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
             // And look up the TOpic:
             final Topic topic = service.lookupTopic(topicName);
             // Setup connection, session & sender

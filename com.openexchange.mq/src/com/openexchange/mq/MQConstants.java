@@ -63,14 +63,9 @@ public interface MQConstants {
     public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
 
     /**
-     * The default name for connection factory.
+     * The default name for registered {@link javax.jms.ConnectionFactory} instance.
      */
     public static final String NAME_CONNECTION_FACTORY = "ConnectionFactory";
-
-    /**
-     * The default path to lookup registered {@link javax.jms.ConnectionFactory} instance.
-     */
-    public static final String PATH_CONNECTION_FACTORY = NAME_CONNECTION_FACTORY;
 
     /**
      * The default prefix to lookup registered {@link javax.jms.Queue} instance.

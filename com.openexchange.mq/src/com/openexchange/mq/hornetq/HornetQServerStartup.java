@@ -264,7 +264,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                 MQConstants.NAME_CONNECTION_FACTORY,
                 false,
                 Arrays.asList("in-vm-connector"),
-                MQConstants.PATH_CONNECTION_FACTORY);
+                MQConstants.NAME_CONNECTION_FACTORY);
         jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
         // Step 4. Configure the JMS Queue & Topic
