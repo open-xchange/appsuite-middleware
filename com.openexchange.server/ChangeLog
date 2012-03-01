@@ -1,3 +1,7 @@
+* 2012-02-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21668: Fixed quoting of plain-text part generated from HTML part
+
 * 2012-02-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 21639: Checking for possibly missing account information in returned messages

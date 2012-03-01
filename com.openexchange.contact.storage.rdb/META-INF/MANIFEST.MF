@@ -6,15 +6,18 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.contact.storage,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.groupware.impl,
+ com.openexchange.id,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.search,
+ com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
  com.openexchange.tools.sql,

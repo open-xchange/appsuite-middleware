@@ -437,9 +437,11 @@ public class ContactCopyTask implements CopyUserTaskService {
             while (rs.next()) {
                 final Contact contact = new Contact();
                 for (final ContactField field : contactFields) {
-                    final Object value = rs.getObject(field.getDbName());
-                    if (field.isDBField() && !rs.wasNull()) {
-                        field.doSwitch(setter, contact, value);
+                    if (field.isDBField()) {
+                        final Object value = rs.getObject(field.getDbName());
+                        if (!rs.wasNull()) {
+                            field.doSwitch(setter, contact, value);
+                        }
                     }
                 }
 
@@ -498,11 +500,13 @@ public class ContactCopyTask implements CopyUserTaskService {
         }
         sb.append(") VALUES (");
         for (int i = 0; i < contactFields.size(); i++) {
-            if (i == 0) {
-                sb.append("?");
-            } else {
-                sb.append(", ?");
-            } 
+            if (contactFields.get(i).isDBField()) {
+                if (i == 0) {
+                    sb.append("?");
+                } else {
+                    sb.append(", ?");
+                }
+            }
         }
         sb.append(")");
         
@@ -513,10 +517,12 @@ public class ContactCopyTask implements CopyUserTaskService {
         final List<ContactField> fields = new ArrayList<ContactField>();
         final List<String> dbFields = new ArrayList<String>();
         for (final ContactField field : ContactField.values()) {
-            final String fieldName = field.getDbName();
-            if (fieldName != null && fieldName != "" && !dbFields.contains(fieldName)) {
-                fields.add(field);
-                dbFields.add(field.getDbName());
+            if (field.isDBField()) {
+                final String fieldName = field.getDbName();
+                if (fieldName != null && fieldName != "" && !dbFields.contains(fieldName)) {
+                    fields.add(field);
+                    dbFields.add(field.getDbName());
+                }
             }
         }
         

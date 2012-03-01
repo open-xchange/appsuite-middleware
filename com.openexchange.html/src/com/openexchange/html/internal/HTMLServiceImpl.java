@@ -530,19 +530,25 @@ public final class HTMLServiceImpl implements HTMLService {
         if (text.indexOf(SPECIAL) < 0) {
             return text;
         }
-        final int len = BLOCKQUOTE_MARKER.length();
+        final String marker = BLOCKQUOTE_MARKER;
+        final int len = marker.length();
         final String[] lines = text.split("\r?\n", 0);
         final StringBuilder sb = new StringBuilder(text.length());
         int quote = 0;
         String prefix = "";
         for (String line : lines) {
-            if (line.startsWith(BLOCKQUOTE_MARKER)) {
-                if (line.length() >= len && line.startsWith(END, len)) { // Marker for blockquote end
+            final int pos = line.indexOf(marker);
+            if (pos >= 0) {
+                if (pos > 0) {
+                    sb.append(prefix).append(line.substring(0, pos));
+                }
+                final int endPos = len + pos;
+                if (line.length() >= endPos && line.startsWith(END, endPos)) { // Marker for blockquote end
                     quote--;
-                    line = line.substring(BLOCKQUOTE_MARKER.length() + 2).trim();
+                    line = line.substring(endPos + 2).trim();
                 } else {
                     quote++;
-                    line = line.substring(BLOCKQUOTE_MARKER.length()).trim();
+                    line = line.substring(endPos).trim();
                 }
                 prefix = getPrefixFor(quote);
                 if (isEmpty(line)) {

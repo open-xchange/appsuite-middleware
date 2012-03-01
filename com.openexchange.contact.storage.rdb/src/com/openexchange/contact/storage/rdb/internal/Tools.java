@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -58,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseGetter;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseSetter;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -81,54 +84,6 @@ public final class Tools {
      * A {@link ContactSwitcher} to get properties from a contact to put into the database
      */
     public static final ContactSwitcher GETTER = new ContactDatabaseGetter();
-    
-    
-    
-    /**
-     * A set of all contact fields as used by the contacts database table.
-     */
-    public static final EnumSet<ContactField> CONTACT_DATABASE_FIELDS = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL, 
-        ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST, 
-        ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.LAST_MODIFIED_UTC, ContactField.LINKS));
-    
-    /**
-     * An array of all contact fields as used by the contacts database table.
-     */
-    public static final ContactField[] CONTACT_DATABASE_FIELDS_ARRAY = 
-        CONTACT_DATABASE_FIELDS.toArray(new ContactField[CONTACT_DATABASE_FIELDS.size()]);
-    
-    /**
-     * A set of all contact fields as used by the images database table.
-     */
-    public static final EnumSet<ContactField> IMAGE_DATABASE_FIELDS = EnumSet.of(ContactField.OBJECT_ID, ContactField.IMAGE1, 
-        ContactField.LAST_MODIFIED, ContactField.IMAGE1_CONTENT_TYPE, ContactField.CONTEXTID);
-    
-    /**
-     * A set of all additional contact fields as used by the images database table.
-     */
-    public static final EnumSet<ContactField> IMAGE_DATABASE_FIELDS_ADDITIONAL = EnumSet.of(ContactField.IMAGE1, 
-        ContactField.LAST_MODIFIED, ContactField.IMAGE1_CONTENT_TYPE);
-    
-    /**
-     * An array of all contact fields as used by the images database table.
-     */
-    public static final ContactField[] IMAGE_DATABASE_FIELDS_ARRAY = 
-        IMAGE_DATABASE_FIELDS.toArray(new ContactField[IMAGE_DATABASE_FIELDS.size()]);
-
-    /**
-     * A set of all contact fields as used by the distribution list database table.
-     */
-    public static final EnumSet<ContactField> DISTLIST_DATABASE_FIELDS = EnumSet.of(ContactField.OBJECT_ID, 
-        ContactField.NUMBER_OF_DISTRIBUTIONLIST /* fake intfield02 */, ContactField.NUMBER_OF_LINKS /* fake intfield03 */, 
-        ContactField.NUMBER_OF_IMAGES /* fake intfield04 */, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
-        ContactField.MIDDLE_NAME /* fake field03 */, ContactField.CONTEXTID);
-
-    /**
-     * An array of all contact fields as used by the distribution list database table.
-     */
-    public static final ContactField[] DISTLIST_DATABASE_FIELDS_ARRAY = 
-        DISTLIST_DATABASE_FIELDS.toArray(new ContactField[DISTLIST_DATABASE_FIELDS.size()]);
-
     
         
     /**
@@ -212,7 +167,19 @@ public final class Tools {
         }
         return filteredFields.toArray(new ContactField[filteredFields.size()]);
     }
-        
+
+    public static ContactField[] filterOut(final ContactField[] fields, final EnumSet<ContactField> forbiddenFields) {
+        final Set<ContactField> filteredFields = new HashSet<ContactField>();
+        if (null != fields) {
+            for (final ContactField field : fields) {
+                if (false == forbiddenFields.contains(field)) {
+                    filteredFields.add(field);
+                }
+            }
+        }
+        return filteredFields.toArray(new ContactField[filteredFields.size()]);
+    }
+    
     /**
      * Gets a string containing assignments of database column names to parameter values. 
      * 
@@ -222,9 +189,9 @@ public final class Tools {
     public static String getAssignments(final ContactField[] fields) {
         final StringBuilder columnsParamsBuilder = new StringBuilder(10 * fields.length); 
         if (null != fields && 0 < fields.length) {
-            columnsParamsBuilder.append(fields[0].getDbName()).append("=?,");
+            columnsParamsBuilder.append(fields[0].getDbName()).append("=?");
             for (int i = 1; i < fields.length; i++) {
-                columnsParamsBuilder.append(fields[i].getDbName()).append("=?,");
+                columnsParamsBuilder.append(',').append(fields[i].getDbName()).append("=?");
             }
         }
         return columnsParamsBuilder.toString();
@@ -449,7 +416,11 @@ public final class Tools {
         }
         stmt.setInt(9, contextID);
     }
-
+    
+    public static OXException truncation(final Connection connection, final DataTruncation e, final Contact contact, final Table table) {
+        //TODO
+        return ContactExceptionCodes.DATA_TRUNCATION.create();
+    }
 
     
     private Tools() {
