@@ -89,9 +89,9 @@ public abstract class MQTopicResource implements MQCloseable {
         try {
             final MQService service = getMQService();
             // Now we'll look up the connection factory:
-            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
             // And look up the TOpic:
-            final Topic topic = service.lookupTopic(MQConstants.PREFIX_TOPIC + topicName);
+            final Topic topic = service.lookupTopic(topicName);
             // Setup connection, session & sender
             final TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
             this.topicConnection = topicConnection;
@@ -102,7 +102,7 @@ public abstract class MQTopicResource implements MQCloseable {
         } catch (final InvalidDestinationException e) {
             throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, topicName);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         } finally {
             if (errorOccurred) {
                 close();

@@ -47,55 +47,63 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
+package com.openexchange.contact.storage.rdb.fields;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link RdbContactStorageActivator}
+ * {@link UpdateFields} - Determines which {@link ContactField}s are needed from each of the database tables where contact information 
+ * is stored. Also ensures that the <code>ContactField.NUMBER_OF_IMAGES</code> and <code>ContactField.NUMBER_OF_DISTRIBUTIONLIST</code> 
+ * are queried automatically when needed.    
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorageActivator.class));
-
+public class UpdateFields {
+    
+    private ContactField[] contactDataFields;
+    private ContactField[] imageDataFields;
+    private ContactField[] distListDataFields;
+    private boolean hasImageData;
+    private boolean hasContactData;
+    private boolean hasDistListData;
+    
     /**
-     * Initializes a new {@link RdbContactStorageActivator}.
+     * Initializes a new {@link UpdateFields}.
+     * 
+     * @param fields
      */
-    public RdbContactStorageActivator() {
-        super();
+    public UpdateFields(final ContactField[] fields) {
+        this.update(fields);
+    }
+    
+    public void update(ContactField[] fields) {
+        if (null == fields) {
+            throw new IllegalArgumentException("fields");
+        }        
+    }
+    
+    public ContactField[] getContactDataFields() {
+        return this.contactDataFields;
+    }
+    
+    public ContactField[] getImageDataFields() {
+        return this.imageDataFields;
+    }
+    
+    public ContactField[] getDistListDataFields() {
+        return this.distListDataFields;
+    }    
+    
+    public boolean hasImageData() {
+        return this.hasImageData;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    public boolean hasContactData() {
+        return this.hasContactData;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);            
-            super.registerService(ContactStorage.class, new RdbContactStorage());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);            
-        super.stopBundle();
+    public boolean hasDistListData() {
+        return this.hasDistListData;
     }
 
 }

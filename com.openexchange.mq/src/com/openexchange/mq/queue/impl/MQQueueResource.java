@@ -89,9 +89,9 @@ abstract class MQQueueResource implements MQCloseable {
         try {
             final MQService service = getMQService();
             // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
             // And look up the Queue:
-            final Queue queue = service.lookupQueue(MQConstants.PREFIX_QUEUE + queueName);
+            final Queue queue = service.lookupQueue(queueName);
             // Setup connection, session & sender
             final QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
             this.queueConnection = queueConnection;
@@ -102,7 +102,7 @@ abstract class MQQueueResource implements MQCloseable {
         } catch (final InvalidDestinationException e) {
             throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, queueName);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         } finally {
             if (errorOccurred) {
                 close();

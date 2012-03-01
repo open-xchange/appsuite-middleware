@@ -143,11 +143,16 @@ public final class HornetQService implements MQService {
      * 
      */
 
-    @SuppressWarnings("unchecked")
     @Override
     public <CF extends ConnectionFactory> CF lookupConnectionFactory(final String name) throws OXException {
         try {
-            return (CF) jmsServer.lookup(name);
+            @SuppressWarnings("unchecked")
+            final
+            CF connectionFactory = (CF) jmsServer.lookup(name);
+            if (null == connectionFactory) {
+                throw MQExceptionCodes.CF_NOT_FOUND.create(name);
+            }
+            return connectionFactory;
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.CF_NOT_FOUND.create(e, name);
         } catch (final RuntimeException e) {
@@ -158,7 +163,11 @@ public final class HornetQService implements MQService {
     @Override
     public Queue lookupQueue(final String name) throws OXException {
         try {
-            return (Queue) jmsServer.lookup(name);
+            final Queue queue = (Queue) jmsServer.lookup(MQConstants.PREFIX_QUEUE + name);
+            if (null == queue) {
+                throw MQExceptionCodes.QUEUE_NOT_FOUND.create(name);
+            }
+            return queue;
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
         } catch (final RuntimeException e) {
@@ -174,7 +183,7 @@ public final class HornetQService implements MQService {
         // Create if absent
         Queue queue;
         try {
-            queue = (Queue) jmsServer.lookup(name);
+            queue = (Queue) jmsServer.lookup(MQConstants.PREFIX_QUEUE + name);
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -198,7 +207,11 @@ public final class HornetQService implements MQService {
     @Override
     public Topic lookupTopic(final String name) throws OXException {
         try {
-            return (Topic) jmsServer.lookup(name);
+            final Topic topic = (Topic) jmsServer.lookup(name);
+            if (null == topic) {
+                throw MQExceptionCodes.TOPIC_NOT_FOUND.create(MQConstants.PREFIX_TOPIC + name);
+            }
+            return topic;
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
         } catch (final RuntimeException e) {
@@ -214,7 +227,7 @@ public final class HornetQService implements MQService {
         // Create if absent
         Topic topic;
         try {
-            topic = (Topic) jmsServer.lookup(name);
+            topic = (Topic) jmsServer.lookup(MQConstants.PREFIX_TOPIC + name);
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
