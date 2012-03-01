@@ -102,7 +102,7 @@ public abstract class MQTopicResource implements MQCloseable {
         } catch (final InvalidDestinationException e) {
             throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, topicName);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         } finally {
             if (errorOccurred) {
                 close();

@@ -102,7 +102,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return ((TextMessage) message).getText();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -118,7 +118,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return ((TextMessage) message).getText();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -134,7 +134,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return ((TextMessage) message).getText();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -154,7 +154,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return ((ObjectMessage) message).getObject();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -170,7 +170,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return ((ObjectMessage) message).getObject();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -186,7 +186,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return ((ObjectMessage) message).getObject();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -206,7 +206,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return readBytesFrom((BytesMessage) message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -222,7 +222,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return readBytesFrom((BytesMessage) message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -238,7 +238,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
             }
             return readBytesFrom((BytesMessage) message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 

@@ -138,10 +138,13 @@ public final class HornetQServerStartup implements MQServerStartup {
                     final Configuration configuration;
                     {
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
+
+                        configuration = new ConfigurationImpl();
+                        configuration.setPersistenceEnabled(false);
+                        configuration.setSecurityEnabled(false);
     
                         final FileConfigurationParser parser = new FileConfigurationParser();
                         parser.setValidateAIO(true);
-                        configuration = new ConfigurationImpl();
                         parser.parseMainConfig(e, configuration);
                         hornetqConfigXml = null; // Help GC
                     }

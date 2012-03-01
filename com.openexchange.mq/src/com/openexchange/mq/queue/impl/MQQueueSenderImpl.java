@@ -96,7 +96,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
             final TextMessage message = queueSession.createTextMessage(text);
             queueSender.send(message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -116,7 +116,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
             final ObjectMessage message = queueSession.createObjectMessage(object);
             queueSender.send(message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -133,7 +133,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
             bytesMessage.writeBytes(bytes, 0, bytes.length);
             queueSender.send(bytesMessage);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 

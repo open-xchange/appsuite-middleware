@@ -94,7 +94,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
             final TextMessage message = topicSession.createTextMessage(text);
             topicPublisher.publish(message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -111,7 +111,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
             final ObjectMessage message = topicSession.createObjectMessage(object);
             topicPublisher.publish(message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -125,7 +125,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
             bytesMessage.writeBytes(bytes, 0, bytes.length);
             topicPublisher.publish(bytesMessage);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 

@@ -114,7 +114,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return ((TextMessage) message).getText();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -127,7 +127,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return ((TextMessage) message).getText();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -144,7 +144,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return ((ObjectMessage) message).getObject();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -157,7 +157,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return ((ObjectMessage) message).getObject();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -170,7 +170,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return ((ObjectMessage) message).getObject();
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -187,7 +187,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return readBytesFrom((BytesMessage) message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -200,7 +200,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return readBytesFrom((BytesMessage) message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
@@ -213,7 +213,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
             }
             return readBytesFrom((BytesMessage) message);
         } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
+            throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
