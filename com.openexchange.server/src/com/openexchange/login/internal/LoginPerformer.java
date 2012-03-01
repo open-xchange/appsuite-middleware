@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -169,6 +170,8 @@ public final class LoginPerformer {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
+    private static final int MAX_RETRY = 3;
+
     /**
      * Performs the login for specified login request.
      *
@@ -219,8 +222,18 @@ public final class LoginPerformer {
             checkClient(request, user, ctx);
             // Create session
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-            final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-            final Session session = sessiondService.getSession(sessionId);
+            Session session = null;
+            {
+                int cnt = 0;
+                while (null == session && cnt++ < MAX_RETRY) {
+                    final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
+                    session = sessiondService.getSession(sessionId);
+                }
+                if (null == session) {
+                    // Session could not be created
+                    throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
+                }
+            }
             // Initial parameters
             {
                 final HttpServletRequest req = (HttpServletRequest) properties.get("http.request");
