@@ -52,6 +52,7 @@ package com.openexchange.mq.queue.impl;
 import java.io.Serializable;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueSender;
@@ -126,6 +127,57 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
+    }
+
+    @Override
+    public void sendTextMessage(final String text, final int priority) throws OXException {
+        if (null == text) {
+            return;
+        }
+        try {
+            final TextMessage message = queueSession.createTextMessage(text);
+            queueSender.send(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        }
+    }
+
+    @Override
+    public void sendObjectMessage(final Serializable object, final int priority) throws OXException {
+        if (object instanceof String) {
+            sendTextMessage((String) object);
+            return;
+        }
+        if (null == object) {
+            return;
+        }
+        try {
+            final ObjectMessage message = queueSession.createObjectMessage(object);
+            queueSender.send(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        }
+    }
+
+    @Override
+    public void sendBytesMessage(final byte[] bytes, final int priority) throws OXException {
+        if (null == bytes) {
+            return;
+        }
+        try {
+            final BytesMessage bytesMessage = queueSession.createBytesMessage();
+            bytesMessage.writeBytes(bytes, 0, bytes.length);
+            queueSender.send(bytesMessage, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        }
+    }
+
+    private static int checkPriority(final int priority) {
+        if (priority >= 0 && priority <= 9) {
+            return priority;
+        }
+        return Message.DEFAULT_PRIORITY;
     }
 
 }

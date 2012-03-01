@@ -100,7 +100,9 @@ public final class MQActivator extends HousekeepingActivator {
 
             // --------- Test service ----------
             // new com.openexchange.mq.example.MQJmsQueueExample(service).test();
-            new com.openexchange.mq.example.MQJmsTopicExample(service).test();
+            // new com.openexchange.mq.example.MQJmsQueueExample2(service).test();
+            // new com.openexchange.mq.example.MQJmsTopicExample(service).test();
+            new com.openexchange.mq.example.MQJmsPriorizedQueueExample(service).test();
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;
@@ -109,16 +111,23 @@ public final class MQActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final MQServerStartup serverStartup = this.serverStartup;
-        if (null != serverStartup) {
-            serverStartup.stop();
-            this.serverStartup = null;
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
+        log.info("Stopping bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+        try {
+            final MQServerStartup serverStartup = this.serverStartup;
+            if (null != serverStartup) {
+                serverStartup.stop();
+                this.serverStartup = null;
+            }
+            removeService(MQService.class);
+            MQServiceLookup.setServiceLookup(null);
+            MQServiceLookup.setMQService(null);
+            MQService.SERVICE_REFERENCE.set(null);
+            super.stopBundle();
+        } catch (final Exception e) {
+            log.error("Error stopping bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+            throw e;
         }
-        removeService(MQService.class);
-        MQServiceLookup.setServiceLookup(null);
-        MQServiceLookup.setMQService(null);
-        MQService.SERVICE_REFERENCE.set(null);
-        super.stopBundle();
     }
 
 }

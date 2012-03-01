@@ -8,9 +8,11 @@
       	 <!-- Entry for Netty connector -->
          <!--  <connector-ref connector-name="netty-connector"/> -->
 
+		 <!-- Entry for In-VM connector -->
          <connector-ref connector-name="in-vm-connector"/>
-         <!--  <connector-ref>netty-connector</connector-ref> -->
       </connectors>
+      <block-on-durable-send>false</block-on-durable-send>
+      <block-on-non-durable-send>false</block-on-non-durable-send>
       <entries>
          <entry name="ConnectionFactory"/>
       </entries>
@@ -25,5 +27,6 @@
    <topic name="genericTopic">
       <entry name="/topics/genericTopic"/>
    </topic>
+   
 
 </configuration>

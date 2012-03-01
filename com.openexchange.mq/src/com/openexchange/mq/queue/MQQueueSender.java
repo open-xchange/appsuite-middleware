@@ -66,7 +66,16 @@ public interface MQQueueSender extends MQCloseable {
      * @param text The <code>java.lang.String</code> to send
      * @throws OXException If send operation fails
      */
-    public void sendTextMessage(final String text) throws OXException;
+    public void sendTextMessage(String text) throws OXException;
+
+    /**
+     * Sends a message containing a <code>java.lang.String</code>.
+     * 
+     * @param text The <code>java.lang.String</code> to send
+     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendTextMessage(String text, int priority) throws OXException;
 
     /**
      * Sends a message containing a serializable Java object.
@@ -77,11 +86,29 @@ public interface MQQueueSender extends MQCloseable {
     public void sendObjectMessage(final Serializable object) throws OXException;
 
     /**
+     * Sends a message containing a serializable Java object.
+     * 
+     * @param object The serializable object to send
+     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendObjectMessage(final Serializable object, int priority) throws OXException;
+
+    /**
      * Sends a message containing <code>byte</code>s.
      * 
      * @param bytes The <code>byte</code> array to send
      * @throws OXException If send operation fails
      */
     public void sendBytesMessage(final byte[] bytes) throws OXException;
+
+    /**
+     * Sends a message containing <code>byte</code>s.
+     * 
+     * @param bytes The <code>byte</code> array to send
+     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendBytesMessage(final byte[] bytes, int priority) throws OXException;
 
 }

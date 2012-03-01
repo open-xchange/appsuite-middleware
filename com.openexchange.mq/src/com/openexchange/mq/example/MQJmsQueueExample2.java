@@ -64,18 +64,18 @@ import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQService;
 
 /**
- * {@link MQJmsQueueExample} - Example class for a simple Point-to-Point example using JMS classes.
+ * {@link MQJmsQueueExample2} - Example class for a simple Point-to-Point example using JMS classes.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQJmsQueueExample {
+public final class MQJmsQueueExample2 {
 
     final MQService service;
 
     /**
-     * Initializes a new {@link MQJmsQueueExample}.
+     * Initializes a new {@link MQJmsQueueExample2}.
      */
-    public MQJmsQueueExample(final MQService service) {
+    public MQJmsQueueExample2(final MQService service) {
         super();
         this.service = service;
     }
@@ -89,7 +89,7 @@ public final class MQJmsQueueExample {
             // Now we'll look up the connection factory:
             final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
             // And look up the Queue:
-            final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
+            final Queue queue = service.lookupQueue("myNewQueue", true);
 
             QueueConnection queueConnection = null;
             try {
@@ -138,7 +138,7 @@ public final class MQJmsQueueExample {
                         // Now we'll look up the connection factory:
                         final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
                         // And look up the Queue:
-                        final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
+                        final Queue queue = service.lookupQueue("myNewQueue");
 
                         QueueConnection queueConnection = null;
                         try {

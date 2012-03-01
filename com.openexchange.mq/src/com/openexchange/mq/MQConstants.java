@@ -49,7 +49,6 @@
 
 package com.openexchange.mq;
 
-
 /**
  * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
  * 
@@ -63,14 +62,9 @@ public interface MQConstants {
     public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
 
     /**
-     * The default name for connection factory.
+     * The default name for registered {@link javax.jms.ConnectionFactory} instance.
      */
     public static final String NAME_CONNECTION_FACTORY = "ConnectionFactory";
-
-    /**
-     * The default path to lookup registered {@link javax.jms.ConnectionFactory} instance.
-     */
-    public static final String PATH_CONNECTION_FACTORY = NAME_CONNECTION_FACTORY;
 
     /**
      * The default prefix to lookup registered {@link javax.jms.Queue} instance.
@@ -81,6 +75,16 @@ public interface MQConstants {
      * The default prefix to lookup registered {@link Tjavax.jms.opic} instance.
      */
     public static final String PREFIX_TOPIC = "/topics/";
+
+    /**
+     * The name for the general-purpose {@link javax.jms.Queue} instance.
+     */
+    public static final String NAME_QUEUE = "genericQueue";
+
+    /**
+     * The name for the general-purpose {@link Tjavax.jms.opic} instance.
+     */
+    public static final String NAME_TOPIC = "genericTopic";
 
     /**
      * The default port for socket-based acceptors/connectors.

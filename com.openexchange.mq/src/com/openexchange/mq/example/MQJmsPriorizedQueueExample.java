@@ -64,24 +64,26 @@ import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQService;
 
 /**
- * {@link MQJmsQueueExample} - Example class for a simple Point-to-Point example using JMS classes.
+ * {@link MQJmsPriorizedQueueExample} - Example class for a simple Point-to-Point example using JMS classes.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQJmsQueueExample {
+public final class MQJmsPriorizedQueueExample {
 
     final MQService service;
 
     /**
-     * Initializes a new {@link MQJmsQueueExample}.
+     * Initializes a new {@link MQJmsPriorizedQueueExample}.
      */
-    public MQJmsQueueExample(final MQService service) {
+    public MQJmsPriorizedQueueExample(final MQService service) {
         super();
         this.service = service;
     }
 
     /**
-     * Test the MQ server for a Point-to-Point scenario.
+     * Test the MQ server for a Point-to-Point scenario testing various message priorities.
+     * <p>
+     * See <a href="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/advanced.html#1024730">here</a>
      */
     public void test() {
         Thread t = null;
@@ -89,7 +91,7 @@ public final class MQJmsQueueExample {
             // Now we'll look up the connection factory:
             final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
             // And look up the Queue:
-            final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
+            final Queue queue = service.lookupQueue("myNewQueue", true);
 
             QueueConnection queueConnection = null;
             try {
@@ -108,13 +110,13 @@ public final class MQJmsQueueExample {
                 for (int i = 0; i < 10; i++) {
                     message.setText("This is message " + (i + 1));
                     System.out.println("Sending message: " + message.getText());
-                    queueSender.send(message);
+                    queueSender.send(message, Message.DEFAULT_DELIVERY_MODE, i, Message.DEFAULT_TIME_TO_LIVE);
                 }
 
                 /*
-                 * Send a non-text control message indicating end of messages.
+                 * Send a non-text control message indicating end of messages. Send with lowest priority to not suppress actual text message.
                  */
-                queueSender.send(queueSession.createMessage());
+                queueSender.send(queueSession.createMessage(), Message.DEFAULT_DELIVERY_MODE, 0, Message.DEFAULT_TIME_TO_LIVE);
             } catch (final JMSException e) {
                 System.out.println("Exception occurred: " + e.toString());
             } finally {
@@ -138,7 +140,7 @@ public final class MQJmsQueueExample {
                         // Now we'll look up the connection factory:
                         final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.NAME_CONNECTION_FACTORY);
                         // And look up the Queue:
-                        final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
+                        final Queue queue = service.lookupQueue("myNewQueue");
 
                         QueueConnection queueConnection = null;
                         try {
