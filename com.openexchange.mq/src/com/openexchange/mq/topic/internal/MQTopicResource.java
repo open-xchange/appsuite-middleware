@@ -78,7 +78,7 @@ public abstract class MQTopicResource implements MQCloseable {
     /**
      * Initializes a new {@link MQTopicResource}.
      */
-    public MQTopicResource(final String topicName) throws OXException {
+    protected MQTopicResource(final String topicName, final Object arg) throws OXException {
         super();
         if (null == topicName) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create("Topic name is null.");
@@ -96,7 +96,7 @@ public abstract class MQTopicResource implements MQCloseable {
             this.topicConnection = topicConnection;
             final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             this.topicSession = topicSession;
-            initResource(topic);
+            initResource(topic, arg);
             errorOccurred = false;
         } catch (final InvalidDestinationException e) {
             throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, topicName);
@@ -115,7 +115,7 @@ public abstract class MQTopicResource implements MQCloseable {
      * @throws JMSException If initialization fails
      * @throws OXException If initialization fails
      */
-    protected abstract void initResource(Topic topic) throws JMSException, OXException;
+    protected abstract void initResource(Topic topic, Object arg) throws JMSException, OXException;
 
     /**
      * Gets the name of the topic associated with this sender.
@@ -130,7 +130,7 @@ public abstract class MQTopicResource implements MQCloseable {
      * Closes this queue sender orderly.
      */
     @Override
-    public final void close() {
+    public void close() {
         final TopicSession topicSession = this.topicSession;
         if (null != topicSession) {
             try {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mq.queue.impl;
+package com.openexchange.mq.queue.internal;
 
 import static com.openexchange.mq.serviceLookup.MQServiceLookup.getMQService;
 import javax.jms.InvalidDestinationException;
@@ -67,7 +67,7 @@ import com.openexchange.mq.MQService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-abstract class MQQueueResource implements MQCloseable {
+public abstract class MQQueueResource implements MQCloseable {
 
     protected volatile QueueConnection queueConnection;
 
@@ -78,7 +78,7 @@ abstract class MQQueueResource implements MQCloseable {
     /**
      * Initializes a new {@link MQQueueResource}.
      */
-    MQQueueResource(final String queueName) throws OXException {
+    protected MQQueueResource(final String queueName, final Object arg) throws OXException {
         super();
         if (null == queueName) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create("Queue name is null.");
@@ -96,7 +96,7 @@ abstract class MQQueueResource implements MQCloseable {
             this.queueConnection = queueConnection;
             final QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
             this.queueSession = queueSession;
-            initResource(queue);
+            initResource(queue, arg);
             errorOccurred = false;
         } catch (final InvalidDestinationException e) {
             throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, queueName);
@@ -114,7 +114,7 @@ abstract class MQQueueResource implements MQCloseable {
      * 
      * @throws JMSException If initialization fails
      */
-    protected abstract void initResource(Queue queue) throws JMSException;
+    protected abstract void initResource(Queue queue, Object arg) throws JMSException;
 
     /**
      * Gets the name of the queue associated with this receiver.
@@ -129,7 +129,7 @@ abstract class MQQueueResource implements MQCloseable {
      * Closes this queue resource orderly.
      */
     @Override
-    public final void close() {
+    public void close() {
         final QueueSession queueSession = this.queueSession;
         if (null != queueSession) {
             try {

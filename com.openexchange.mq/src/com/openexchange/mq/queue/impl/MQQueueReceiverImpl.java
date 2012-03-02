@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.queue.MQQueueReceiver;
+import com.openexchange.mq.queue.internal.MQQueueResource;
 
 /**
  * {@link MQQueueReceiverImpl} - A queue receiver intended to be re-used. Invoke {@link #close()} method when done.
@@ -78,11 +79,11 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
      * @throws OXException If initialization fails
      */
     public MQQueueReceiverImpl(final String queueName) throws OXException {
-        super(queueName);
+        super(queueName, null);
     }
 
     @Override
-    protected synchronized void initResource(final Queue queue) throws JMSException {
+    protected synchronized void initResource(final Queue queue, final Object ignore) throws JMSException {
         queueReceiver = queueSession.createReceiver(queue);
     }
 

@@ -47,53 +47,35 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq.queue;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
+import com.openexchange.mq.MQCloseable;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
- * 
+ * {@link MQQueueListener} - A listener for a queue.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
-
-    private TopicSubscriber topicSubscriber;
-
-    private final MQTopicListener listener;
+public interface MQQueueListener extends MQCloseable {
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
+     * Passes sent text to the listener.
      * 
-     * @param topicName The name of topic to subscribe from
-     * @throws OXException If initialization fails
+     * @param text The text passed to the listener
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
-        this.listener = listener;
-    }
+    void onText(String text);
 
-    @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
-    }
+    /**
+     * Passes sent Java object to the listener.
+     * 
+     * @param object The object passed to the listener
+     */
+    void onObject(Object object);
 
-    @Override
-    public void close() {
-        listener.close();
-        super.close();
-    }
-
+    /**
+     * Passes sent bytes to the listener.
+     * 
+     * @param bytes The bytes passed to the listener
+     */
+    void onBytes(byte[] bytes);
 }

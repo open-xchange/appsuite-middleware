@@ -47,47 +47,47 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq.queue;
 
 import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
+import javax.jms.Queue;
+import javax.jms.QueueReceiver;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
+import com.openexchange.mq.queue.internal.MQQueueResource;
+import com.openexchange.mq.queue.internal.WrappingMessageListener;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
+ * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
  * listener} to given topic.
  * <p>
  * Invoke {@link #close()} method when done.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
+public final class MQQueueAsyncReceiver extends MQQueueResource {
 
-    private TopicSubscriber topicSubscriber;
+    private QueueReceiver queueReceiver;
 
-    private final MQTopicListener listener;
+    private final MQQueueListener listener;
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
+     * Initializes a new {@link MQQueueAsyncReceiver}.
      * 
-     * @param topicName The name of topic to subscribe from
+     * @param queueName The name of queue to receive from
      * @throws OXException If initialization fails
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
+    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
+        super(queueName, listener);
         this.listener = listener;
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
+    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
+        queueReceiver = queueSession.createReceiver(queue);
+        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
+        queueReceiver.setMessageListener(msgListener);
+        queueConnection.setExceptionListener(msgListener);
+        queueConnection.start();
     }
 
     @Override

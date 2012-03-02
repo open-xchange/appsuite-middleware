@@ -83,7 +83,7 @@ public interface MQQueueSender extends MQCloseable {
      * @param object The serializable object to send
      * @throws OXException If send operation fails
      */
-    public void sendObjectMessage(final Serializable object) throws OXException;
+    public void sendObjectMessage(Serializable object) throws OXException;
 
     /**
      * Sends a message containing a serializable Java object.
@@ -92,7 +92,7 @@ public interface MQQueueSender extends MQCloseable {
      * @param priority The priority; range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
      */
-    public void sendObjectMessage(final Serializable object, int priority) throws OXException;
+    public void sendObjectMessage(Serializable object, int priority) throws OXException;
 
     /**
      * Sends a message containing <code>byte</code>s.
@@ -100,7 +100,7 @@ public interface MQQueueSender extends MQCloseable {
      * @param bytes The <code>byte</code> array to send
      * @throws OXException If send operation fails
      */
-    public void sendBytesMessage(final byte[] bytes) throws OXException;
+    public void sendBytesMessage(byte[] bytes) throws OXException;
 
     /**
      * Sends a message containing <code>byte</code>s.
@@ -109,6 +109,6 @@ public interface MQQueueSender extends MQCloseable {
      * @param priority The priority; range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
      */
-    public void sendBytesMessage(final byte[] bytes, int priority) throws OXException;
+    public void sendBytesMessage(byte[] bytes, int priority) throws OXException;
 
 }

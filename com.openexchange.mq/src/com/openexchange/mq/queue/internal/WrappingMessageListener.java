@@ -47,53 +47,75 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq.queue.internal;
 
+import java.io.ByteArrayOutputStream;
+import javax.jms.BytesMessage;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.mq.queue.MQQueueListener;
+import com.openexchange.mq.topic.MQTopicListener;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link WrappingMessageListener} - A {@link MessageListener} that wraps a given {@link MQTopicListener}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
+public final class WrappingMessageListener implements MessageListener, ExceptionListener {
 
-    private TopicSubscriber topicSubscriber;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WrappingMessageListener.class));
 
-    private final MQTopicListener listener;
+    private final MQQueueListener listener;
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
+     * Initializes a new {@link WrappingMessageListener}.
      * 
-     * @param topicName The name of topic to subscribe from
-     * @throws OXException If initialization fails
+     * @param listener The topic listener to delegate the callbacks to
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
+    public WrappingMessageListener(final MQQueueListener listener) {
+        super();
         this.listener = listener;
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
+    public void onMessage(final Message message) {
+        try {
+            if (message instanceof TextMessage) {
+                listener.onText(((TextMessage) message).getText());
+            } else if (message instanceof ObjectMessage) {
+                listener.onObject(((ObjectMessage) message).getObject());
+            } else if (message instanceof BytesMessage) {
+                listener.onBytes(readBytesFrom((BytesMessage) message));
+            } else {
+                throw new IllegalArgumentException("Unhandled message: " + message.getClass().getName());
+            }
+        } catch (final JMSException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private static byte[] readBytesFrom(final BytesMessage bytesMessage) throws JMSException {
+        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+        final int buflen = 2048;
+        final byte[] buf = new byte[buflen];
+        for (int read; (read = bytesMessage.readBytes(buf, buflen)) > 0;) {
+            out.write(buf, 0, read);
+        }
+        return out.toByteArray();
     }
 
     @Override
-    public void close() {
-        listener.close();
-        super.close();
+    public void onException(final JMSException e) {
+        LOG.error("A JMS error occurred.", e);
     }
 
 }

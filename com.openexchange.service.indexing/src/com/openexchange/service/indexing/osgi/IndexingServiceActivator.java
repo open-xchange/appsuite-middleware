@@ -47,85 +47,67 @@
  *
  */
 
-package com.openexchange.mq.osgi;
+package com.openexchange.service.indexing.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mq.MQConstants;
-import com.openexchange.mq.MQServerStartup;
 import com.openexchange.mq.MQService;
-import com.openexchange.mq.hornetq.HornetQServerStartup;
-import com.openexchange.mq.serviceLookup.MQServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.service.indexing.internal.IndexingServiceInit;
 
 /**
- * {@link MQActivator} - The {@link BundleActivator activator} for Message Queue bundle.
+ * {@link IndexingServiceActivator} - The activator for indexing service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQActivator extends HousekeepingActivator {
+public final class IndexingServiceActivator extends HousekeepingActivator {
 
-    private volatile MQServerStartup serverStartup;
+    private volatile IndexingServiceInit serviceInit;
 
     /**
-     * Initializes a new {@link MQActivator}.
+     * Initializes a new {@link IndexingServiceActivator}.
      */
-    public MQActivator() {
+    public IndexingServiceActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { MQService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
-        log.info("Starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
+        log.info("Starting bundle: com.openexchange.service.indexing");
         try {
-            MQServiceLookup.setServiceLookup(this);
-            // Start MQ server
-            final MQServerStartup serverStartup = new HornetQServerStartup();
-            serverStartup.start();
-            this.serverStartup = serverStartup;
-            // Register service(s)
-            final MQService service = serverStartup.getService();
-            addService(MQService.class, service);
-            MQServiceLookup.setMQService(service);
-            MQService.SERVICE_REFERENCE.set(service);
-            registerService(MQService.class, service);
+            final IndexingServiceInit serviceInit = new IndexingServiceInit(this);
+            serviceInit.init();
+            this.serviceInit = serviceInit;
 
-            // --------- Test service ----------
-            // new com.openexchange.mq.example.MQJmsQueueExample(service).test();
-            // new com.openexchange.mq.example.MQJmsQueueExample2(service).test();
-            // new com.openexchange.mq.example.MQJmsTopicExample(service).test();
-            // new com.openexchange.mq.example.MQJmsPriorizedQueueExample(service).test();
+            /*-
+             * ------------------- Test ---------------------
+             */
+            serviceInit.getSender().sendTextMessage("Startup test");
         } catch (final Exception e) {
-            log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+            log.error("Error starting bundle: com.openexchange.service.indexing");
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MQActivator.class));
-        log.info("Stopping bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
+        log.info("Stopping bundle: com.openexchange.service.indexing");
         try {
-            final MQServerStartup serverStartup = this.serverStartup;
-            if (null != serverStartup) {
-                serverStartup.stop();
-                this.serverStartup = null;
+            final IndexingServiceInit serviceInit = this.serviceInit;
+            if (null != serviceInit) {
+                serviceInit.drop();
+                this.serviceInit = null;
             }
-            removeService(MQService.class);
-            MQServiceLookup.setServiceLookup(null);
-            MQServiceLookup.setMQService(null);
-            MQService.SERVICE_REFERENCE.set(null);
             super.stopBundle();
         } catch (final Exception e) {
-            log.error("Error stopping bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+            log.error("Error stopping bundle: com.openexchange.service.indexing");
             throw e;
         }
     }

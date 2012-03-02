@@ -47,53 +47,37 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.service.indexing;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link IndexingService} - The indexing service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
-
-    private TopicSubscriber topicSubscriber;
-
-    private final MQTopicListener listener;
+public interface IndexingService {
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
-     * 
-     * @param topicName The name of topic to subscribe from
-     * @throws OXException If initialization fails
+     * The name of the indexing queue.
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
-        this.listener = listener;
-    }
+    public static final String INDEXING_QUEUE = "indexingQueue";
 
-    @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
-    }
+    /**
+     * Adds specified job.
+     * 
+     * @param job The job to add
+     * @throws OXException If job cannot be added
+     */
+    public void addJob(IndexingJob job) throws OXException;
 
-    @Override
-    public void close() {
-        listener.close();
-        super.close();
-    }
+    /**
+     * Adds specified job.
+     * 
+     * @param job The job to add
+     * @param priority The job's priority; range from 0 (lowest) to 9 (highest)
+     * @throws OXException If job cannot be added
+     */
+    public void addJob(IndexingJob job, int priority) throws OXException;
 
 }

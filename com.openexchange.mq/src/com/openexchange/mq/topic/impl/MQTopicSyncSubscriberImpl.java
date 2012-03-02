@@ -83,11 +83,11 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
      * @throws OXException If initialization fails
      */
     public MQTopicSyncSubscriberImpl(final String topicName) throws OXException {
-        super(topicName);
+        super(topicName, null);
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic) throws JMSException {
+    protected synchronized void initResource(final Topic topic, final Object ignore) throws JMSException {
         topicSubscriber = topicSession.createSubscriber(topic);
         topicConnection.start();
     }

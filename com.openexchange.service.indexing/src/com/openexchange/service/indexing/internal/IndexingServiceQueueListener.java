@@ -47,53 +47,46 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.service.indexing.internal;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.mq.queue.MQQueueListener;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link IndexingServiceQueueListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
+public final class IndexingServiceQueueListener implements MQQueueListener {
 
-    private TopicSubscriber topicSubscriber;
-
-    private final MQTopicListener listener;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceQueueListener.class));
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
-     * 
-     * @param topicName The name of topic to subscribe from
-     * @throws OXException If initialization fails
+     * Initializes a new {@link IndexingServiceQueueListener}.
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
-        this.listener = listener;
-    }
-
-    @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
+    public IndexingServiceQueueListener() {
+        super();
     }
 
     @Override
     public void close() {
-        listener.close();
-        super.close();
+        // Nothing to do
+    }
+
+    @Override
+    public void onText(final String text) {
+        LOG.warn("Invalid indexing message type: text");
+    }
+
+    @Override
+    public void onObject(final Object object) {
+        System.out.println(object);
+    }
+
+    @Override
+    public void onBytes(final byte[] bytes) {
+        LOG.warn("Invalid indexing message type: binary");
     }
 
 }

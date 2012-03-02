@@ -47,53 +47,26 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.service.indexing;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
+import java.io.Serializable;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link IndexingJob} - Represents an indexing job described only using POJO (plain old Java objects) for the sake of reliability and
+ * consistency throughout clustered nodes.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
+public interface IndexingJob extends Serializable {
 
-    private TopicSubscriber topicSubscriber;
-
-    private final MQTopicListener listener;
+    // Account access
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
+     * Performs this job's task.
      * 
-     * @param topicName The name of topic to subscribe from
-     * @throws OXException If initialization fails
+     * @throws OXException If performing job fails for any reason
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
-        this.listener = listener;
-    }
-
-    @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
-    }
-
-    @Override
-    public void close() {
-        listener.close();
-        super.close();
-    }
+    void performJob() throws OXException;
 
 }

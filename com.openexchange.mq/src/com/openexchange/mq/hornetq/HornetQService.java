@@ -214,7 +214,15 @@ public final class HornetQService implements MQService {
             try {
                 final JMSServerManager serverManager = jmsServer.getServerManager();
                 final String selector = (String) (null == params ? null : params.get(QUEUE_PARAM_SELECTOR));
-                final boolean durable = null == params ? false : Boolean.parseBoolean((String) params.get(QUEUE_PARAM_DURABLE));
+                final boolean durable;
+                {
+                    if (null == params) {
+                        durable = false;
+                    } else {
+                        final Object object = params.get(QUEUE_PARAM_DURABLE);
+                        durable = null == object ? false : Boolean.parseBoolean(object.toString());
+                    }
+                }
                 final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, selector, durable, identifier);
                 final String[] bindings = config.getBindings();
                 serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
@@ -261,7 +269,15 @@ public final class HornetQService implements MQService {
             try {
                 final JMSServerManager serverManager = jmsServer.getServerManager();
                 final String selector = (String) (null == params ? null : params.get(QUEUE_PARAM_SELECTOR));
-                final boolean durable = null == params ? false : Boolean.parseBoolean((String) params.get(QUEUE_PARAM_DURABLE));
+                final boolean durable;
+                {
+                    if (null == params) {
+                        durable = false;
+                    } else {
+                        final Object object = params.get(QUEUE_PARAM_DURABLE);
+                        durable = null == object ? false : Boolean.parseBoolean(object.toString());
+                    }
+                }
                 final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, selector, durable, identifier);
                 final String[] bindings = config.getBindings();
                 serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
