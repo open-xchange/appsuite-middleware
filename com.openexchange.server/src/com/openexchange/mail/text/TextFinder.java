@@ -61,7 +61,7 @@ import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
@@ -95,7 +95,7 @@ public final class TextFinder {
 
     private final TextXtractService textXtractService;
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
     /**
      * Initializes a new {@link TextFinder}.
@@ -103,7 +103,7 @@ public final class TextFinder {
     public TextFinder() {
         super();
         textXtractService = ServerServiceRegistry.getInstance().getService(TextXtractService.class);
-        htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+        htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
     }
 
     private String extractPlainText(final String content) throws OXException {

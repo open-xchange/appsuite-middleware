@@ -5,7 +5,7 @@ define("com.openexchange.oauth.linkedin.json/main", ["osgi", "httpAPI"], functio
 
         var utils = {
             getAccount: function (req, session) {
-                var accounts = oauth.getAccounts("com.openexchange.socialplugin.linkedin", session.getPassword(), session.getUserId(), session.getContextId());
+                var accounts = oauth.getAccounts("com.openexchange.socialplugin.linkedin", session, session.getUserId(), session.getContextId());
                 if (accounts.isEmpty()) {
                     return null;
                 }

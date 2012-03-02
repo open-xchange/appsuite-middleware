@@ -104,7 +104,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
@@ -199,7 +199,7 @@ public class MimeMessageFiller {
 
     private Set<String> uploadFileIDs;
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
     /**
      * Initializes a new {@link MimeMessageFiller}
@@ -220,7 +220,7 @@ public class MimeMessageFiller {
      */
     public MimeMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
         super();
-        htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+        htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         this.session = session;
         this.ctx = ctx;
         this.usm = usm;

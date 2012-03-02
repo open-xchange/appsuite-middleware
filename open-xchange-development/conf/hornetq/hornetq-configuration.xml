@@ -9,23 +9,42 @@
    <connectors>
       <connector name="netty-connector">
          <factory-class>org.hornetq.core.remoting.impl.netty.NettyConnectorFactory</factory-class>
+         <!-- In-VM based -->
+         <!-- 
+         <param key="use-invm" value="true"/>
+         <param key="host" value="org.hornetq"/>
+         -->
+         
+         <!-- Socket based -->
+         <param key="host" value="localhost"/>
          <param key="port" value="5445"/>
-         <param key="use-nio" value="true"/>
+         <!-- <param key="use-nio" value="true"/> -->
       </connector>
-      <connector name="in-vm-connector">
-         <factory-class>org.hornetq.core.remoting.impl.invm.InVMConnectorFactory</factory-class>
+      
+      <!-- Connector to other server -->
+      <!--
+      <connector name="other-server-connector">
+         <factory-class>org.hornetq.core.remoting.impl.netty.NettyConnectorFactory</factory-class>
+         <param key="host" value="localhost"/>
+         <param key="port" value="5446"/>
       </connector>
+      -->
    </connectors>
    
    <!-- Acceptors -->
    <acceptors>
       <acceptor name="netty-acceptor">
          <factory-class>org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory</factory-class>
+         <!-- In-VM based -->
+         <!-- 
+         <param key="use-invm" value="true"/>
+         <param key="host" value="org.hornetq"/>
+         -->
+         
+         <!-- Socket based -->
+         <param key="host" value="localhost"/>
          <param key="port" value="5445"/>
-         <param key="use-nio" value="true"/>
-      </acceptor>
-      <acceptor name="in-vm-acceptor">
-         <factory-class>org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory</factory-class>
+         <!-- <param key="use-nio" value="true"/> -->
       </acceptor>
    </acceptors>
    
@@ -55,7 +74,17 @@
          <use-duplicate-detection>true</use-duplicate-detection>
          <forward-when-no-consumers>true</forward-when-no-consumers>
          <max-hops>1</max-hops>
+         
+         <!-- Discovery here -->
          <discovery-group-ref discovery-group-name="ox-discovery-group"/>
+         
+         <!-- Static configuration -->
+         <!--
+         <static-connectors>
+            <connector-ref>other-server-connector</connector-ref>
+         </static-connectors>
+         -->
+         
       </cluster-connection>
    </cluster-connections>
 

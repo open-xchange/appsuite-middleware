@@ -74,7 +74,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -119,7 +119,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static ContactInterfaceDiscoveryService contacts;
 
-    private static HTMLService htmlService;
+    private static HtmlService htmlService;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
@@ -163,7 +163,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         contacts = service;
     }
 
-    public static void setHtmlService(final HTMLService htmlService2) {
+    public static void setHtmlService(final HtmlService htmlService2) {
         htmlService = htmlService2;
     }
 

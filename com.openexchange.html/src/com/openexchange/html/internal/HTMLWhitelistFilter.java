@@ -49,7 +49,7 @@
 
 package com.openexchange.html.internal;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
@@ -84,20 +84,20 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 
 /**
- * {@link HTMLWhitelistFilter}
+ * {@link HtmlWhitelistFilter}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLWhitelistFilter {
+public final class HtmlWhitelistFilter {
 
     /**
-     * Gets the default {@link HTMLWhitelistFilter} instance.
+     * Gets the default {@link HtmlWhitelistFilter} instance.
      * @param capacity The capacity
      * 
-     * @return The default {@link HTMLWhitelistFilter} instance
+     * @return The default {@link HtmlWhitelistFilter} instance
      */
-    public static HTMLWhitelistFilter newDefaultHtmlWhitelistFilter(final int capacity) {
-        return new HTMLWhitelistFilter(capacity);
+    public static HtmlWhitelistFilter newDefaultHtmlWhitelistFilter(final int capacity) {
+        return new HtmlWhitelistFilter(capacity);
     }
 
     private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
@@ -164,9 +164,9 @@ public final class HTMLWhitelistFilter {
     private boolean imageURLFound;
 
     /**
-     * Initializes a new {@link HTMLWhitelistFilter}.
+     * Initializes a new {@link HtmlWhitelistFilter}.
      */
-    public HTMLWhitelistFilter(final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
+    public HtmlWhitelistFilter(final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
         super();
         sb = new StringBuilder(256);
         cssBuffer = new StringBuilder(256);
@@ -184,9 +184,9 @@ public final class HTMLWhitelistFilter {
     }
 
     /**
-     * Initializes a new {@link HTMLWhitelistFilter}.
+     * Initializes a new {@link HtmlWhitelistFilter}.
      */
-    public HTMLWhitelistFilter(final int capacity, final String mapStr) {
+    public HtmlWhitelistFilter(final int capacity, final String mapStr) {
         super();
         sb = new StringBuilder(capacity);
         cssBuffer = new StringBuilder(256);
@@ -205,9 +205,9 @@ public final class HTMLWhitelistFilter {
     }
 
     /**
-     * Initializes a new {@link HTMLWhitelistFilter}.
+     * Initializes a new {@link HtmlWhitelistFilter}.
      */
-    private HTMLWhitelistFilter(final int capacity) {
+    private HtmlWhitelistFilter(final int capacity) {
         super();
         sb = new StringBuilder(capacity);
         cssBuffer = new StringBuilder(256);
@@ -532,7 +532,7 @@ public final class HTMLWhitelistFilter {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTMLWhitelistFilter.class));
+            final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HtmlWhitelistFilter.class));
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {

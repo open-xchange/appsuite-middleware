@@ -52,7 +52,7 @@ package com.openexchange.messaging.rss.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.rss.HTMLServiceProvider;
 
 /**
@@ -60,7 +60,7 @@ import com.openexchange.messaging.rss.HTMLServiceProvider;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer<HTMLService,HTMLService> {
+public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer<HtmlService,HtmlService> {
 
     private final BundleContext context;
 
@@ -73,19 +73,19 @@ public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer<HT
     }
 
     @Override
-    public HTMLService addingService(final ServiceReference<HTMLService> reference) {
-        final HTMLService service = context.getService(reference);
+    public HtmlService addingService(final ServiceReference<HtmlService> reference) {
+        final HtmlService service = context.getService(reference);
         HTMLServiceProvider.getInstance().setHTMLService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<HTMLService> reference, final HTMLService service) {
+    public void modifiedService(final ServiceReference<HtmlService> reference, final HtmlService service) {
         // Nope
     }
 
     @Override
-    public void removedService(final ServiceReference<HTMLService> reference, final HTMLService service) {
+    public void removedService(final ServiceReference<HtmlService> reference, final HtmlService service) {
         HTMLServiceProvider.getInstance().setHTMLService(null);
         context.ungetService(reference);
     }

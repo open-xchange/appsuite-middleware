@@ -98,13 +98,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.mail"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.security"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.smtp"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sso"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe"/>

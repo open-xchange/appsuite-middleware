@@ -50,7 +50,7 @@
 package com.openexchange.messaging.rss;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 
 /**
  * {@link HTMLServiceProvider}
@@ -65,21 +65,21 @@ public final class HTMLServiceProvider {
         return INSTANCE;
     }
 
-    private final AtomicReference<HTMLService> ref;
+    private final AtomicReference<HtmlService> ref;
 
     /**
      * Initializes a new {@link HTMLServiceProvider}.
      */
     private HTMLServiceProvider() {
         super();
-        ref = new AtomicReference<HTMLService>();
+        ref = new AtomicReference<HtmlService>();
     }
 
-    public HTMLService getHTMLService() {
+    public HtmlService getHTMLService() {
         return ref.get();
     }
 
-    public void setHTMLService(final HTMLService htmlService) {
+    public void setHTMLService(final HtmlService htmlService) {
         ref.set(htmlService);
     }
 

@@ -73,8 +73,6 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
 
     private CharsetProvider backupStandardCharsetProvider;
 
-    private BundleContext context;
-
     /**
      * Default constructor
      */

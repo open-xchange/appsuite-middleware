@@ -51,11 +51,11 @@ package com.openexchange.html;
 
 
 /**
- * {@link HTMLService} - The HTML service provides several methods concerning processing of HTML content.
+ * {@link HtmlService} - The HTML service provides several methods concerning processing of HTML content.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface HTMLService {
+public interface HtmlService {
 
     /**
      * Replaces image URLs with a proxy URI to ensure safe loading of image content.

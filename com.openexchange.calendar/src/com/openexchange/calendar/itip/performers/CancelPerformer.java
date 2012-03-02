@@ -101,7 +101,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
                 appointment.setRecurrencePosition(determineRecurrencePosition(change.getDeletedAppointment(), appointment));
             }
             deleted.add(appointment);
-            util.deleteAppointment(appointment, session, appointment.getLastModified());
+            util.deleteAppointment(appointment, session, new Date(Long.MAX_VALUE));
         }
         return deleted;
     }

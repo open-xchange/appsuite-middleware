@@ -1,447 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="open-xchange-admin" default="jar" basedir=".">
+<project name="com.openexchange.admin overrides">
 
-    <!-- Customizable values -->
-    <property name="destdir" value=""/>
-    <property name="prefix" value="/opt/open-xchange"/>
+    <description>
+        Patches path into configuration files and installs the scripts for the CLTs.
+    </description>
 
-	<property name="rmi_test_host" value="localhost"/>
-    <property name="rmi_lib_dir" location="/opt/open-xchange/lib"/>
-    <property name="test.xml.dir" location="test-results"/>
+    <import file="build-project.xml"/>
 
-    <!-- Constants -->
-    <property file="META-INF/MANIFEST.MF"/>
-    <property file="build.properties"/>
-    <property name="version" value="${Bundle-Version}"/>
-    <property file="PVERSION"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-admin-${version}"/>
-
-    <property name="client.jar" value="ox_admin_rmiclient.jar"/>
-    <property name="cli.jar" value="ox_admin_cli.jar"/>
-    <property name="logdir"  value="/var/log/open-xchange"/>
-    <property name="etcdir"  value="etc"/>
-    <property name="distribution" value="debian"/>
-    <property name="oxconfdir" value="etc/admindaemon"/>
-    <property name="serverconfdir" value="etc/groupware"/>
-    <property name="commonConfDir" value="etc/common"/>
-    <property name="masterauthfile" value="mpasswd"/>
-    <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
-
-    <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
-    <property name="cachingBundle" value="com.openexchange.caching"/>
-
-    <!-- Install Constants -->
-    <property name="bundlesdir" value="${prefix}/bundles"/>
-
-    <!-- required osgi bundles -->
-    <property name="osgibundle"           value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
-    <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
-    <property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
-    <property name="commonsclijar"        value="org.apache.commons.cli_1.0.0.v20080604-1500.jar"/>
-    <property name="commonjar"            value="common.jar"/>
-    <property name="globalbundle"         value="com.openexchange.global.jar"/>
-    <property name="configbundle"         value="com.openexchange.config.jar"/>
-    <property name="cachebundle"          value="com.openexchange.caching.jar"/>
-    <property name="serverbundle"         value="com.openexchange.server.jar"/>
-    <property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
-    <property name="managementbundle"     value="com.openexchange.management.jar"/>
-    <property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
-    <property name="sqljar"               value="com.openexchange.sql.jar" />
-    <property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
-
-    <!-- non-osgi jars -->
-    <property name="oxlanguages"        value="ox_languages.jar"/>
-    <property name="commons-fileupload" value="commons-fileupload-1.2.1.jar"/>
-    <property name="commons-httpclient" value="commons-httpclient-2.0.2.jar"/>
-    <property name="commons-io"         value="commons-io-1.4.jar"/>
-    <property name="concurrent"         value="concurrent.jar"/>
-    <property name="activation"         value="activation-1.1.1.jar"/>
-    <property name="jcs"                value="jcs-1.2.7.9.2.jar"/>
-    <property name="mail"               value="mail-1.4.3.jar"/>
-    <property name="junit"              value="junit-4.6.jar"/>
-    <property name="mysql-connector"    value="mysql-connector-java-5.1.18-bin.jar"/>
-    <property name="jdom"               value="jdom-1.1.1.jar"/>
-    <property name="csv"               value="opencsv-2.0.jar"/>
-
-
-    <path id="project.classpath">
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-fileupload}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-httpclient}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-io}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${concurrent}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${activation}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jcs}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${junit}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mysql-connector}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jdom}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-        <pathelement location="${bundlesdir}/${commonsclijar}"/>
-        <pathelement location="${bundlesdir}/${osgibundle}"/>
-        <pathelement location="${bundlesdir}/${commonsloggingbundle}"/>
-        <pathelement location="${bundlesdir}/${globalbundle}"/>
-        <pathelement location="${bundlesdir}/${cachingBundle}/${cachebundle}"/>
-        <pathelement location="${bundlesdir}/${configbundle}"/>
-        <pathelement location="${bundlesdir}/${serverbundle}"/>
-        <pathelement location="${bundlesdir}/${sqljar}"/>
-        <pathelement location="lib/${csv}"/>
-    </path>
-
-    <filterset id="pathsubst">
-        <filter token="oxprefix"          value="${prefix}"/>
-        <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
-        <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
-        <filter token="systemproperties"  value="${prefix}/${oxconfdir}/system.properties"/>
-        <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
-        <filter token="oxlibpath"         value="${prefix}/lib"/>
-        <filter token="serverconfdir"     value="${serverconfdir}"/>
-        <filter token="commonConfDir"     value="${commonConfDir}"/>
-        <filter token="oxconfdir"         value="${oxconfdir}"/>
-        <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
-        <filter token="adminlogfile"      value="${logdir}/open-xchange-admin.log"/>
-        <filter token="consolelogfile"    value="${logdir}/open-xchange-admin-console.log"/>
-        <filter token="osgilogfile"       value="${logdir}/osgi-admin.log"/>
-        <filter token="admin_major"       value="${admin_major}"/>
-        <filter token="admin_minor"       value="${admin_minor}"/>
-        <filter token="admin_patch"       value="${admin_patch}"/>
-        <filter token="admin_name"        value="${project.name}"/>
-        <filter token="buildnumber"       value="${pversion}"/>
-        <filter token="templates"          value="/opt/open-xchange/var/templates"/>
-
-        <filter token="oxosgibundle"           value="${bundlesdir}/${osgibundle}"/>
-        <filter token="oxadminbundle"           value="${bundlesdir}/${bundle.name}"/>
-        <filter token="oxcommonbundle"           value="${bundlesdir}/${commonBundle}"/>
-        <filter token="oxserverbundle"           value="${bundlesdir}/${serverbundle}"/>
-        <filter token="oxglobalbundle"           value="${bundlesdir}/${globalbundle}"/>
-        <filter token="oxconfigbundle"           value="${bundlesdir}/${configbundle}"/>
-        <filter token="oxsessiondbundle"       value="${bundlesdir}/${sessiondbundle}"/>
-        <filter token="oxmonitoringbundle"       value="${bundlesdir}/${monitoringbundle}"/>
-        <filter token="oxmanagementbundle"       value="${bundlesdir}/${managementbundle}"/>
-        <filter token="servletbundle"           value="${bundlesdir}/${servletbundle}"/>
-        <filter token="loggingbundle"           value="${bundlesdir}/${commonsloggingbundle}"/>
-        <filter token="osgiservicesbundle"       value="${bundlesdir}/${osgiservicesbundle}"/>
-        <filter token="oxcommonbundlelib"       value="${bundlesdir}/${commonBundle}/lib"/>
-    </filterset>
-
-
-	<path id="rmi.classpath">
-		<fileset dir="${rmi_lib_dir}" includes="ox_admin*"/>
-		<fileset dir="lib" includes="${junit}"/>
-	</path>
-
-    <!--                    TARGETS                      -->
-
-    <target name="compile-console">
-        <subant failonerror="true" inheritall="false" target="compile">
-            <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="install-console">
-        <subant failonerror="true" inheritall="false" target="install">
-            <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="clean-console">
-        <subant failonerror="true" inheritall="false" target="clean">
-            <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
-        </subant>
-    </target>
-
-    <!-- START FIXME: did not find another way to solve this
-         license plugin depends on sw-update, so sw-update must be compiled first
-         sw-update depends on mail and context_light -->
-    <property name="ctx.build" value="../open-xchange-admin-plugin-context_light/build.xml"/>
-    <available file="${ctx.build}" property="ctx.available"/>
-
-    <target name="compile-context-plugin" if="ctx.available">
-        <subant failonerror="true" inheritall="false" target="compile">
-            <fileset dir="../" includes="open-xchange-admin-plugin-context_light/build.xml"/>
-        </subant>
-    </target>
-
-    <property name="mail.build" value="../open-xchange-admin-plugin-mail/build.xml"/>
-    <available file="${mail.build}" property="mail.available"/>
-
-    <target name="compile-mail-plugin" if="mail.available">
-        <subant failonerror="true" inheritall="false" target="compile">
-            <fileset dir="../" includes="open-xchange-admin-plugin-mail/build.xml"/>
-        </subant>
-    </target>
-
-    <property name="swupdate.build" value="../open-xchange-admin-plugin-sw-update/build.xml"/>
-    <available file="${swupdate.build}" property="swupdate.available"/>
-
-    <condition property="swupdate.complete">
-        <and>
-            <available file="${ctx.build}"/>
-            <available file="${mail.build}"/>
-            <available file="${swupdate.build}"/>
-        </and>
-    </condition>
-
-
-    <target name="compile-sw-update-plugin" depends="compile-mail-plugin,compile-context-plugin" if="swupdate.complete">
-        <subant failonerror="true" inheritall="false" target="compile">
-            <fileset dir="../" includes="open-xchange-admin-plugin-sw-update/build.xml"/>
-        </subant>
-    </target>
-
-    <property name="license.build" value="../open-xchange-admin-plugin-license/build.xml"/>
-    <available file="${license.build}" property="license.available"/>
-
-    <target name="compile-license-plugin" depends="compile-sw-update-plugin" if="swupdate.complete">
-        <subant failonerror="true" inheritall="false" target="compile">
-            <fileset dir="../" includes="open-xchange-admin-plugin-license/build.xml"/>
-        </subant>
-    </target>
-    <!-- END FIXME -->
-
-    <target name="compile-plugins" depends="compile-license-plugin">
-        <subant failonerror="true" inheritall="false" target="compile">
-            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="jar-plugins">
-        <subant failonerror="true" inheritall="false" target="jar">
-            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="install-plugins">
-        <subant failonerror="true" inheritall="false" target="install">
-            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="clean-plugins">
-        <subant failonerror="true" inheritall="false" target="clean">
-            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="dist-plugins">
-        <subant failonerror="true" inheritall="false" target="dist">
-            <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="manifest">
-        <copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
-        <manifest mode="update" file="META-INF/MANIFEST.MF.package">
-                <attribute name="Bundle-ClassPath" value=".,
-                     external:$libdir$/${oxlanguages},
-                     external:$libdir$/${commons-fileupload},
-                     external:$libdir$/${commons-httpclient},
-                     external:$libdir$/${commons-io},
-                     external:$libdir$/${concurrent},
-                     external:$libdir$/${jcs},
-                     external:$libdir$/${jdom},
-                     external:$libdir$/${mail},
-                     external:$libdir$/${mysql-connector},
-                     external:$log4j$"/>
-                <attribute name="Build" value="${pversion}"/>
-        </manifest>
-    </target>
-
-    <target name="compile">
-        <mkdir dir="classes"/>
-        <javac srcdir="src" destdir="classes" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <exclude name="**/*ResourceGroup*"/>
-            <classpath>
-                <path refid="project.classpath"/>
-            </classpath>
-        </javac>
-        <antcall target="compile-plugins"></antcall>
-        <antcall target="compile-console"></antcall>
-    </target>
-
-    <target name="jar" depends="compile,manifest">
-        <mkdir dir="jar"/>
-        <jar update="true" jarfile="jar/${bundle.name}"
-        excludes="com/openexchange/admin/test**"
-        basedir="classes"
-        manifest="META-INF/MANIFEST.MF.package"/>
-        <antcall target="jar-plugins"></antcall>
-    </target>
-
-    <target name="client" depends="compile">
-        <mkdir dir="jar"/>
-        <jar update="true" jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/,com/openexchange/admin/plugins/"
-         excludes="com/openexchange/admin/rmi/impl/"
-         basedir="classes"/>
-        <copy file="${bundlesdir}/${commonsclijar}" tofile="jar/${cli.jar}"/>
-    </target>
-
-    <target name="doc">
-        <property name="plugdocpath" value="open-xchange-admin-plugin**/src/com/openexchange/admin/rmi"/>
-        <mkdir dir="doc"/>
-        <copy todir="doc/resources" file="javadoc/OX_Logo.jpg"/>
-        <javadoc
-            failonerror="true"
-            sourcepath="src"
-            destdir="doc"
-            author="true"
-            public="true"
-            Windowtitle="ox_admin_interface">
-            <Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
-            <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
-                <include name="*Interface*"/>
-                <include name="dataobjects/*"/>
-                <exclude name="*ResourceGroup*"/>
-            </fileset>
-            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
-            </fileset>
-            <fileset dir="../" defaultexcludes="yes">
-                <include name="${plugdocpath}/*Interface*"/>
-                <include name="${plugdocpath}/dataobjects/*"/>
-                <include name="${plugdocpath}/extensions/*"/>
-                <include name="${plugdocpath}/exceptions/*"/>
-                <exclude name="${plugdocpath}/*ResourceGroup*"/>
-            </fileset>
-            <link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
-        </javadoc>
-    </target>
-
-    <target name="clean">
-        <delete dir="classes"/>
-        <delete dir="test-classes"/>
-        <delete dir="test-results"/>
-        <delete dir="doc"/>
-        <delete dir="jar"/>
-        <antcall target="clean-plugins"></antcall>
-        <antcall target="clean-console"></antcall>
-    </target>
-
-    <target name="dist-clean" depends="clean">
-        <delete>
-            <fileset dir="sbin" excludes="*.in"/>
-        </delete>
-        <delete>
-            <fileset dir="etc" includes="file-logging.properties,ox-admin-scriptconf.sh,AdminDaemon.properties,system.properties,Sql.properties"/>
-        </delete>
-    </target>
-
-    <target name="dist" depends="dist-clean">
-        <property name="dist-package" value="dist-package"/>
-        <delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${composite.name}"/>
-        <copy todir="${dist-package}/${composite.name}">
-            <fileset dir=".">
-                <exclude name="**${dist-package}/**"/>
-                <exclude name="**debian/**"/>
-                <exclude name="**CVS/**"/>
-                <exclude name="Todo"/>
+    <target name="installConf" depends="patchConfig">
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${patchConfDir}"/>
+        </copy>
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${confDir}">
+                <include name="**"/>
+                <exclude name="*.in"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-        basedir="${dist-package}"
-        includes="${composite.name}/"
-        compression="gzip"/>
-        <delete dir="${dist-package}"/>
-        <antcall target="dist-plugins"></antcall>
     </target>
 
-    <target name="replacer">
-        <copy todir="." overwrite="true">
+    <target name="patchConfig">
+        <mkdir dir="${patchConfDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${confDir}">
+                <include name="*.in"/>
+            </fileset>
+        </copy>
+        <antcall target="patchConfigFiles"/>
+    </target>
+
+    <target name="patchConfigFiles">
+        <antcall target="patchPathInProperties"/>
+    </target>
+
+    <target name="patchPathInProperties">
+        <move todir="${patchConfDir}">
+            <fileset dir="${patchConfDir}">
+                <include name="*.in"/>
+            </fileset>
             <mapper type="glob" from="*.in" to="*"/>
-            <fileset dir="."/>
-            <filterset refid="pathsubst"/>
-        </copy>
-    </target>
+        </move>
 
-    <target name="install" depends="replacer">
-        <mkdir dir="${destdir}/var/log/open-xchange"/>
-        <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
-        <chmod perm="750" dir="${destdir}/var/log/open-xchange"/>
-        <copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
-            <fileset dir="etc" excludes="**/*.in"/>
-        </copy>
-        <chmod perm="640">
-            <fileset dir="${destdir}/${prefix}/${oxconfdir}">
-                <include name="configdb.properties"/>
-            </fileset>
-        </chmod>
-        <chmod perm="640" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
-        <mkdir dir="${destdir}/etc/init.d"/>
-        <!-- copy all dist specific files from below system/ to $prefix/ -->
-        <copy todir="${destdir}/" overwrite="true">
-            <fileset dir="system"/>
-            <mapper type="glob" from="*.${distribution}" to="*"/>
-        </copy>
-        <chmod perm="755" file="${destdir}/etc/init.d/open-xchange-admin"/>
-        <!-- add here all dist specific install tasks -->
-        <!-- <antcall target="install-debian"/> -->
-        <!-- EXAMPLE -->
-        <!-- <antcall target="install-suse"/> -->
-        <!-- <antcall target="install-redhat"/> -->
+        <replace dir="${patchConfDir}" includes="*.properties">
+            <replacefilter token="@confDir@" value="${confInstallDir}"/>
+        </replace>
+    </target>    
 
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-
-        <antcall target="install-plugins"></antcall>
-        <antcall target="install-console"></antcall>
-    </target>
-
-    <target name="install-jar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
-    </target>
-
-    <target name="install-bundle">
-    <antcall target="install-jar"></antcall>
-    </target>
-
-    <target name="install-client" depends="client">
-        <mkdir dir="${destdir}/${prefix}/sbin"/>
-        <mkdir dir="${destdir}/${prefix}/lib"/>
-        <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
-        <copy file="jar/${cli.jar}" todir="${destdir}/${prefix}/lib"/>
-        <copy file="lib/${csv}" tofile="${destdir}/${prefix}/lib/ox_admin_${csv}"/>
-        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
-        </copy>
-        <chmod perm="755">
-            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
-        </chmod>
-    </target>
-
-    <target name="install-doc" depends="doc">
-        <mkdir dir="${destdir}/${prefix}/doc/oxadmin"/>
-        <copy todir="${destdir}/${prefix}/doc/oxadmin">
-            <fileset dir="doc"/>
-        </copy>
-    </target>
-
-    <target name="compileTests" depends="clean">
-        <mkdir dir="test-classes"/>
-        <javac srcdir="test/com/openexchange/admin/rmi" destdir="test-classes" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath>
-                <path refid="rmi.classpath"/>
-            </classpath>
-        </javac>
-    </target>
-
-	<target name="runTests">
-        <delete dir="${test.xml.dir}"/>
-        <mkdir dir="${test.xml.dir}"/>
-        <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="yes">
-            <classpath>
-                <path refid="rmi.classpath"/>
-            	<pathelement path="test-classes"/>
-            </classpath>
-			<test name="com.openexchange.admin.rmi.AdminCoreTest" todir="${test.xml.dir}"/>
-			<test name="com.openexchange.admin.rmi.ResourceTest" todir="${test.xml.dir}"/>
-			<test name="com.openexchange.admin.rmi.UserTest" todir="${test.xml.dir}"/>
-			<test name="com.openexchange.admin.rmi.GroupTest" todir="${test.xml.dir}"/>
-            <formatter type="xml"/>
-            <sysproperty key="rmi_test_host" value="${rmi_test_host}"/>
-        </junit>
-    </target>
+    <!-- TODO CLTs -->
 
 </project>

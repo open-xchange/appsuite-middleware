@@ -63,7 +63,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookURLConnectionContent;
@@ -691,7 +691,7 @@ public final class FacebookFQLStreamParser {
         final String htmlContent;
         try {
             htmlContent =
-                FacebookMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class, true).replaceImages(
+                FacebookMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class, true).replaceImages(
                     messageText.toString(),
                     session.getSessionID());
         } catch (final OXException e) {

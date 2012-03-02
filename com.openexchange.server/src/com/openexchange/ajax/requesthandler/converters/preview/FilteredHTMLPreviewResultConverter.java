@@ -55,7 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
@@ -110,7 +110,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         final Map<String, String> metaData = previewDocument.getMetaData();
         final String sanitizedHtml;
         {
-            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             String content = previewDocument.getContent();
             content = htmlService.dropScriptTagsInHeader(content);
             final String charset = metaData.get("charset");

@@ -88,7 +88,7 @@ public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Excepti
         }
     }
 
-    private static <E extends Exception> E valueOf(final Exception e) {
+    private E valueOf(final Exception e) {
         try {
             return (E) e;
         } catch (final ClassCastException cce) {
