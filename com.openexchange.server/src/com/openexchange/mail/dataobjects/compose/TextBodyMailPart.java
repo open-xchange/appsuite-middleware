@@ -55,7 +55,7 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -217,7 +217,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
             return mailBody.toString();
         }
         if (null != plainText) {
-            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             return htmlService.htmlFormat(plainText.toString());
         }
         throw MailExceptionCode.UNEXPECTED_ERROR.create("Missing text.");

@@ -52,11 +52,11 @@ package com.openexchange.html.internal.parser;
 import java.util.Map;
 
 /**
- * {@link HTMLHandler}
+ * {@link HtmlHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface HTMLHandler {
+public interface HtmlHandler {
 
     /**
      * Handles the <i>&lt;?xml... ?&gt;</i> declaration.

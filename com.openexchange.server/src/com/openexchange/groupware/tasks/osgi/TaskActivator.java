@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,37 @@
  *
  */
 
-package com.openexchange.publish.microformats.tools;
+package com.openexchange.groupware.tasks.osgi;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.html.HtmlService;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.tasks.ModifyThroughDependant;
 
 /**
- * {@link HTMLUtils}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link TaskActivator}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class HTMLUtils {
+public class TaskActivator extends AJAXModuleActivator {
 
-    private static final Pattern BR = Pattern.compile("<br />( *)");
-
-    private final HtmlService htmlService;
-
-    public HTMLUtils(final HtmlService htmlService) {
+    public TaskActivator() {
         super();
-        this.htmlService = htmlService;
     }
 
-    public String htmlFormat(final String plainText) {
-        String html = htmlService.htmlFormat(plainText);
-        final StringBuffer sb = new StringBuffer(html.length());
-        final Matcher matcher = BR.matcher(html);
-        while (matcher.find()) {
-            final String spaces = matcher.group(1);
-            final StringBuilder replacement = new StringBuilder("<br />");
-            for (int i = 0; i < spaces.length(); i++) {
-                replacement.append("&#160;");
-            }
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement.toString()));
-        }
-        html = matcher.appendTail(sb).toString();
-        return html;
+    @Override
+    protected void startBundle() throws Exception {
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
+        registerService(TargetService.class, new ModifyThroughDependant(), props);
     }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
+    }
+
 }

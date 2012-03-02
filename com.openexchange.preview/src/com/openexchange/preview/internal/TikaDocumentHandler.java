@@ -86,7 +86,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -254,7 +254,7 @@ public final class TikaDocumentHandler {
             final ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
             type.process(stream, bout, this);
             if (HTML_ALIKE.contains(output)) {
-                return serviceLookup.getService(HTMLService.class).getConformHTML(new String(bout.toByteArray(), Charsets.forName(encoding)), encoding);
+                return serviceLookup.getService(HtmlService.class).getConformHTML(new String(bout.toByteArray(), Charsets.forName(encoding)), encoding);
             }
             return new String(bout.toByteArray(), Charsets.forName(encoding));
         } catch (final UnsupportedCharsetException e) {

@@ -103,6 +103,7 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
             change.setType(Type.CREATE);
             change.setException(true);
             if (master == null) {
+            	analysis.setUid(exception.getUid());
                 master = util.resolveUid(exception.getUid(), session);
                 if (master == null) {
                     analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));

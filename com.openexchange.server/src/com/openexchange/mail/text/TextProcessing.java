@@ -51,7 +51,7 @@ package com.openexchange.mail.text;
 
 import java.io.IOException;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -268,7 +268,7 @@ public final class TextProcessing {
              * Handle HTML content
              */
             final String html = readContent(mailPart, contentType);
-            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             return htmlService.html2text(htmlService.getConformHTML(html, (String) null), true);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

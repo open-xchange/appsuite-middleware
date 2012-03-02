@@ -92,6 +92,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.mailaccount.json.osgi.MailAccountJSONActivator(),
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
+        new com.openexchange.groupware.tasks.osgi.TaskActivator()
     };
 
     public ServerCompositeActivator() {

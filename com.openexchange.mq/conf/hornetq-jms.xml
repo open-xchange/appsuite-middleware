@@ -5,11 +5,7 @@
    <!-- The connection factory -->
    <connection-factory name="ConnectionFactory">
       <connectors>
-      	 <!-- Entry for Netty connector -->
-         <!--  <connector-ref connector-name="netty-connector"/> -->
-
-		 <!-- Entry for In-VM connector -->
-         <connector-ref connector-name="in-vm-connector"/>
+         <connector-ref connector-name="netty-connector"/>
       </connectors>
       <block-on-durable-send>false</block-on-durable-send>
       <block-on-non-durable-send>false</block-on-non-durable-send>

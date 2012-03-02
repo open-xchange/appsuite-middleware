@@ -49,8 +49,8 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL_SOLE;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
@@ -77,7 +77,7 @@ import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.internal.HTMLServiceImpl;
+import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
@@ -536,7 +536,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
          */
         final int restoreLen = builder.length();
         try {
-            builder.append(HTMLServiceImpl.checkURL(url));
+            builder.append(HtmlServiceImpl.checkURL(url));
         } catch (final MalformedURLException e) {
             /*
              * Not a valid URL

@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +67,7 @@ public class ITipAnalysis {
     private List<ITipAnnotation> annotations = new ArrayList<ITipAnnotation>();
     private Set<ITipAction> actions = EnumSet.noneOf(ITipAction.class);
     private ITipMessage message = null;
+	private String uid;
     
     public ITipMessage getMessage() {
         return message;
@@ -104,5 +106,13 @@ public class ITipAnalysis {
             this.actions.add(action);
         }
     }
+    
+    public void setUid(String uid) {
+		this.uid = uid;
+	}
+    
+	public String getUid() {
+		return uid;
+	}
 
 }

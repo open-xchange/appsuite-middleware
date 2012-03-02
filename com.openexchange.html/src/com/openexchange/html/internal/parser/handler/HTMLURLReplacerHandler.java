@@ -49,7 +49,7 @@
 
 package com.openexchange.html.internal.parser.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL_SOLE;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
@@ -57,16 +57,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.internal.HTMLServiceImpl;
-import com.openexchange.html.internal.parser.HTMLHandler;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.internal.parser.HtmlHandler;
 
 /**
  * {@link HTMLURLReplacerHandler} - Replaces any URL containing non-ASCII characters to ASCII using the procedure in RFC3490 section 4.1.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLURLReplacerHandler implements HTMLHandler {
+public final class HTMLURLReplacerHandler implements HtmlHandler {
 
     private static final String COMMENT_END = "-->";
 
@@ -78,7 +78,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
      * ----------------- Member stuff -----------------
      */
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
     private final StringBuilder htmlBuilder;
 
@@ -91,7 +91,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
      *
      * @param capacity The initial capacity
      */
-    public HTMLURLReplacerHandler(final HTMLService htmlService, final int capacity) {
+    public HTMLURLReplacerHandler(final HtmlService htmlService, final int capacity) {
         super();
         this.htmlService = htmlService;
         htmlBuilder = new StringBuilder(capacity);
@@ -194,7 +194,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
          */
         final int restoreLen = builder.length();
         try {
-            builder.append(HTMLServiceImpl.checkURL(url));
+            builder.append(HtmlServiceImpl.checkURL(url));
         } catch (final MalformedURLException e) {
             /*
              * Not a valid URL

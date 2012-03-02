@@ -68,7 +68,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
@@ -161,7 +161,7 @@ public class MailAttachment extends AJAXServlet {
                     final String cs =
                         contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                     final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                    final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     attachmentInputStream =
                         new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
                             htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
