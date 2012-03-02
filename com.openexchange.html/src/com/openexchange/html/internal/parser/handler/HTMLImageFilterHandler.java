@@ -49,7 +49,7 @@
 
 package com.openexchange.html.internal.parser.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.net.URI;
@@ -62,8 +62,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.internal.parser.HTMLHandler;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.parser.HtmlHandler;
 
 /**
  * {@link HTMLImageFilterHandler} - Removes all possible sources of externally loaded images inside HTML content.
@@ -79,7 +79,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HTMLImageFilterHandler implements HTMLHandler {
+public class HTMLImageFilterHandler implements HtmlHandler {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLImageFilterHandler.class));
 
@@ -127,7 +127,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         STYLE_MAP.put("background-image", values);
     }
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
     private final StringBuilder htmlBuilder;
 
@@ -139,7 +139,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     private final StringBuilder cssBuffer;
 
-    public HTMLImageFilterHandler(final HTMLService htmlService, final int capacity) {
+    public HTMLImageFilterHandler(final HtmlService htmlService, final int capacity) {
         super();
         this.htmlService = htmlService;
         cssBuffer = new StringBuilder(256);

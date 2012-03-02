@@ -51,7 +51,7 @@ package com.openexchange.publish.microformats.tools;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 
 /**
  * {@link HTMLUtils}
@@ -62,9 +62,9 @@ public final class HTMLUtils {
 
     private static final Pattern BR = Pattern.compile("<br />( *)");
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
-    public HTMLUtils(final HTMLService htmlService) {
+    public HTMLUtils(final HtmlService htmlService) {
         super();
         this.htmlService = htmlService;
     }

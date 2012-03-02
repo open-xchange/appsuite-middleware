@@ -77,7 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -592,7 +592,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                         /*
                          * Try to convert the given HTML to regular text
                          */
-                        final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
                         jsonObject.put("plain_text", plainText);
                     } catch (final JSONException e) {
@@ -1201,7 +1201,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
              */
             final String content;
             {
-                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
                 jsonObject.put("plain_text", plainText);
                 content = HTMLProcessing.formatTextForDisplay(plainText, usm, displayMode);

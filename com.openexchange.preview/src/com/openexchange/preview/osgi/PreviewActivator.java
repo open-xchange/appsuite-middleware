@@ -67,7 +67,7 @@ import com.itextpdf.text.pdf.PdfDocument;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewService;
@@ -158,7 +158,7 @@ public class PreviewActivator extends HousekeepingActivator {
          * Trackers
          */
         trackService(ManagedFileManagement.class);
-        trackService(HTMLService.class);
+        trackService(HtmlService.class);
         track(InternalPreviewService.class, delegationPreviewService);
         openTrackers();
         /*

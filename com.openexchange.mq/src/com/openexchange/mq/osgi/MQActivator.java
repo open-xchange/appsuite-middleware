@@ -102,7 +102,7 @@ public final class MQActivator extends HousekeepingActivator {
             // new com.openexchange.mq.example.MQJmsQueueExample(service).test();
             // new com.openexchange.mq.example.MQJmsQueueExample2(service).test();
             // new com.openexchange.mq.example.MQJmsTopicExample(service).test();
-            new com.openexchange.mq.example.MQJmsPriorizedQueueExample(service).test();
+            // new com.openexchange.mq.example.MQJmsPriorizedQueueExample(service).test();
         } catch (final Exception e) {
             log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
             throw e;

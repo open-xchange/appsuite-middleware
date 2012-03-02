@@ -58,7 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -87,7 +87,7 @@ public class ServletActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HTMLService.class};
+        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -130,7 +130,7 @@ public class ServletActivator extends HousekeepingActivator {
         final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         final UserService users = getService(UserService.class);
         final ConfigurationService configService = getService(ConfigurationService.class);
-        final HTMLService htmlService = getService(HTMLService.class);
+        final HtmlService htmlService = getService(HtmlService.class);
 
         if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null || htmlService == null) {
             return;

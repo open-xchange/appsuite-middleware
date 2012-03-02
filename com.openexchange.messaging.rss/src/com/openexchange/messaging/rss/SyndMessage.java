@@ -61,7 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -156,7 +156,7 @@ public class SyndMessage implements MessagingMessage {
             multipart.addBodyPart(textPart);
 
             final MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
-            final HTMLService htmlService = HTMLServiceProvider.getInstance().getHTMLService();
+            final HtmlService htmlService = HTMLServiceProvider.getInstance().getHTMLService();
             if (null == htmlService) {
                 htmlPart.setContent(new StringContent(content.getValue()), type);
             } else {

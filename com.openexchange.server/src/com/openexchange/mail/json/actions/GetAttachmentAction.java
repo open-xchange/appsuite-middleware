@@ -73,7 +73,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -182,7 +182,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     final String cs =
                         contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                     final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                    final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     attachmentInputStream =
                         new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
                             htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));

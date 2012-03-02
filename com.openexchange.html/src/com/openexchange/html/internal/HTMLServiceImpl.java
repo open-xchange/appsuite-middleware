@@ -77,10 +77,10 @@ import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
-import com.openexchange.html.internal.parser.HTMLParser;
+import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
@@ -91,13 +91,13 @@ import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
- * {@link HTMLServiceImpl}
+ * {@link HtmlServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLServiceImpl implements HTMLService {
+public final class HtmlServiceImpl implements HtmlService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLServiceImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HtmlServiceImpl.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -122,13 +122,13 @@ public final class HTMLServiceImpl implements HTMLService {
     private final Map<String, Character> htmlEntityMap;
 
     /**
-     * Initializes a new {@link HTMLServiceImpl}.
+     * Initializes a new {@link HtmlServiceImpl}.
      * 
      * @param tidyConfiguration The jTidy configuration
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
      */
-    public HTMLServiceImpl(final Properties tidyConfiguration, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
+    public HtmlServiceImpl(final Properties tidyConfiguration, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
         this.tidyConfiguration = tidyConfiguration;
         this.htmlCharMap = htmlCharMap;
@@ -424,7 +424,7 @@ public final class HTMLServiceImpl implements HTMLService {
     @Override
     public String filterWhitelist(final String htmlContent) {
         final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length());
-        HTMLParser.parse(htmlContent, handler);
+        HtmlParser.parse(htmlContent, handler);
         return handler.getHTML();
     }
 
@@ -440,7 +440,7 @@ public final class HTMLServiceImpl implements HTMLService {
             return filterWhitelist(htmlContent);
         }
         final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length(), definition);
-        HTMLParser.parse(htmlContent, handler);
+        HtmlParser.parse(htmlContent, handler);
         return handler.getHTML();
     }
 
@@ -451,7 +451,7 @@ public final class HTMLServiceImpl implements HTMLService {
     @Override
     public String filterExternalImages(final String htmlContent, final boolean[] modified) {
         final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(this, htmlContent.length());
-        HTMLParser.parse(htmlContent, handler);
+        HtmlParser.parse(htmlContent, handler);
         modified[0] |= handler.isImageURLFound();
         return handler.getHTML();
     }
@@ -1014,7 +1014,7 @@ public final class HTMLServiceImpl implements HTMLService {
             return html;
         }
         final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-        HTMLParser.parse(html, handler);
+        HtmlParser.parse(html, handler);
         return handler.getHTML();
     }
 
