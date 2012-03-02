@@ -87,6 +87,9 @@ public class ITipAnalysisWriter {
     	if (analysis.getMessage() != null && analysis.getMessage().getMethod() != null) {
             object.put("messageType", analysis.getMessage().getMethod().toString().toLowerCase());
     	}
+    	if (analysis.getUid() != null) {
+    		object.put("uid", analysis.getUid());
+    	}
         writeAnnotations(analysis, object);
         writeChanges(analysis, object);
         writeActions(analysis, object);
