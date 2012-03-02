@@ -113,8 +113,9 @@ public abstract class MQTopicResource implements MQCloseable {
      * Initializes the resource.
      * 
      * @throws JMSException If initialization fails
+     * @throws OXException If initialization fails
      */
-    protected abstract void initResource(Topic topic) throws JMSException;
+    protected abstract void initResource(Topic topic) throws JMSException, OXException;
 
     /**
      * Gets the name of the topic associated with this sender.

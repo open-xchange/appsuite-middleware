@@ -64,7 +64,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "account", description = "Management of messaging accounts")
+@Module(name = "messagingaccount", description = "Management of messaging accounts")
 public class AccountActionFactory implements AJAXActionServiceFactory {
 
     public static volatile AccountActionFactory INSTANCE; // Initialize in Activator

@@ -50,6 +50,7 @@
 package com.openexchange.mq;
 
 import java.util.PriorityQueue;
+import javax.jms.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.queue.MQQueueReceiver;
 
@@ -60,11 +61,20 @@ import com.openexchange.mq.queue.MQQueueReceiver;
  */
 public class SimQueueReceiver implements MQQueueReceiver {
 
-    private static final class QueueElement implements Comparable<QueueElement> {
+    /**
+     * A queue element.
+     */
+    public static final class QueueElement implements Comparable<QueueElement> {
 
         public final Object value;
 
         public final int priority;
+
+        public QueueElement(final Object value) {
+            super();
+            this.value = value;
+            this.priority = Message.DEFAULT_PRIORITY;
+        }
 
         public QueueElement(final Object value, final int priority) {
             super();
@@ -80,14 +90,23 @@ public class SimQueueReceiver implements MQQueueReceiver {
         }
     }
 
-    private final PriorityQueue<QueueElement> priorityQueue;
+    private final PriorityQueue<QueueElement> queue;
 
     /**
      * Initializes a new {@link SimQueueReceiver}.
      */
     public SimQueueReceiver() {
         super();
-        priorityQueue = new PriorityQueue<QueueElement>();
+        queue = new PriorityQueue<QueueElement>();
+    }
+
+    /**
+     * Creates the associated sender.
+     * 
+     * @return The sender
+     */
+    public SimQueueSender createSimSender() {
+        return new SimQueueSender(queue);
     }
 
     @Override
@@ -97,7 +116,7 @@ public class SimQueueReceiver implements MQQueueReceiver {
 
     @Override
     public String receiveText() throws OXException {
-        final QueueElement queueElement = priorityQueue.poll();
+        final QueueElement queueElement = queue.poll();
         if (null == queueElement) {
             return null;
         }
@@ -116,7 +135,7 @@ public class SimQueueReceiver implements MQQueueReceiver {
 
     @Override
     public Object receiveObject() throws OXException {
-        final QueueElement queueElement = priorityQueue.poll();
+        final QueueElement queueElement = queue.poll();
         if (null == queueElement) {
             return null;
         }
@@ -135,7 +154,7 @@ public class SimQueueReceiver implements MQQueueReceiver {
 
     @Override
     public byte[] receiveBytes() throws OXException {
-        final QueueElement queueElement = priorityQueue.poll();
+        final QueueElement queueElement = queue.poll();
         if (null == queueElement) {
             return null;
         }
