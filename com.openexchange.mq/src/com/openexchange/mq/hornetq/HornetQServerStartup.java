@@ -156,7 +156,30 @@ public final class HornetQServerStartup implements MQServerStartup {
                     {
                         final String hornetqJmsXml = service.getText("hornetq-jms.xml");
                         if (null == hornetqJmsXml) {
-                            jmsConfiguration = null;
+                            jmsConfiguration = new JMSConfigurationImpl();
+                            /*
+                             * Configure the JMS ConnectionFactory
+                             */
+                            final ConnectionFactoryConfiguration cfConfig =
+                                new ConnectionFactoryConfigurationImpl(
+                                    MQConstants.NAME_CONNECTION_FACTORY,
+                                    false,
+                                    Arrays.asList("in-vm-connector"),
+                                    MQConstants.NAME_CONNECTION_FACTORY);
+                            cfConfig.setBlockOnDurableSend(false);
+                            cfConfig.setBlockOnNonDurableSend(false);
+                            jmsConfiguration.getConnectionFactoryConfigurations().add(cfConfig);
+                            /*
+                             * Configure JMS queue & topic
+                             */
+                            jmsConfiguration.getQueueConfigurations().add(
+                                new JMSQueueConfigurationImpl(
+                                    MQConstants.NAME_QUEUE,
+                                    null,
+                                    false,
+                                    MQConstants.PREFIX_QUEUE + MQConstants.NAME_QUEUE));
+                            jmsConfiguration.getTopicConfigurations().add(
+                                new TopicConfigurationImpl(MQConstants.NAME_TOPIC, MQConstants.PREFIX_TOPIC + MQConstants.NAME_TOPIC));
                         } else {
                             final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqJmsXml));
     
