@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "resource", description = "Allows to query available resources. It is mainly used by the dialog for the selection of participants.")
+@Module(name = "resource.json", description = "Allows to query available resources. It is mainly used by the dialog for the selection of participants.")
 public class ResourceActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractResourceAction> actions;
