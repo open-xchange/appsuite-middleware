@@ -692,7 +692,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
 
         final boolean isInsert = !cdao.containsObjectID();
-        handleSequence(cdao, edao, isInsert);
         if (isInsert) {
             checkInsertMandatoryFields(cdao);
             handleFullTime(cdao, null);
@@ -874,35 +873,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         return isInsert;
-    }
-
-    /**
-     * @param cdao
-     * @param edao
-     * @param isInsert
-     * @throws OXException
-     */
-    private void handleSequence(final CalendarDataObject cdao, final CalendarDataObject edao, final boolean isInsert) throws OXException {
-        if (isInsert) {
-            // if (cdao.containsSequence() && cdao.getSequence() != 0)
-            // throw new OXException(OXException.Code.INVALID_SEQUENCE, cdao.getSequence());
-            //
-            // cdao.setSequence(0);
-        } else {
-            if (!cdao.containsSequence() && !edao.containsSequence()) {
-                cdao.setSequence(1);
-            } else if (!cdao.containsSequence() && edao.containsSequence()) {
-                cdao.setSequence(edao.getSequence() + 1);
-            } else if (cdao.containsSequence() && edao.containsSequence() && cdao.getSequence() <= edao.getSequence()) {
-                cdao.setSequence(edao.getSequence() + 1);
-                // TODO: throw new OXException(OXException.Code.INVALID_SEQUENCE, cdao.getSequence());
-            } else if (cdao.containsSequence() && edao.containsSequence() && cdao.getSequence() > edao.getSequence()) {
-                ;
-            } else if (cdao.containsSequence() && !edao.containsSequence()) {
-                ;
-            }
-
-        }
     }
 
     /**
