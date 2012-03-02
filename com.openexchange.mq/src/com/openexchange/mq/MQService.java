@@ -50,6 +50,7 @@
 package com.openexchange.mq;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
@@ -77,7 +78,7 @@ import com.openexchange.mq.example.MQJmsTopicExample;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQService {
+public interface MQService extends MQConstants {
 
     /**
      * The service reference.
@@ -171,12 +172,14 @@ public interface MQService {
      * 
      * @param name The name of the queue
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
+     * @param params Optional parameters for the queue in case of creation; pass <code>null</code> to create with default parameters (e.g.
+     *            see {@link MQConstants#QUEUE_PARAM_DURABLE}
      * @return The looked-up {@link Queue} instance.
      * @throws OXException If such a queue does not exist or could not be created
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    Queue lookupQueue(String name, boolean createIfAbsent) throws OXException;
+    Queue lookupQueue(String name, boolean createIfAbsent, Map<String, Object> params) throws OXException;
 
     /**
      * Lookup in the registry for registered local-only {@link Queue}; meaning sent messages are not distributed within cluster, and
@@ -214,12 +217,22 @@ public interface MQService {
      * 
      * @param name The name of the queue
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
+     * @param params Optional parameters for the queue in case of creation; pass <code>null</code> to create with default parameters (e.g.
+     *            see {@link MQConstants#QUEUE_PARAM_DURABLE}
      * @return The looked-up {@link Queue} instance.
      * @throws OXException If such a queue does not exist or could not be created
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    Queue lookupLocalOnlyQueue(String name, boolean createIfAbsent) throws OXException;
+    Queue lookupLocalOnlyQueue(String name, boolean createIfAbsent, Map<String, Object> params) throws OXException;
+
+    /**
+     * Checks if the denoted queue is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isLocalOnlyQueue(String name) throws OXException;
 
     /*-
      * -------------------------------------------------------------------------------------------------
@@ -306,5 +319,13 @@ public interface MQService {
      * @see MQJmsTopicExample
      */
     Topic lookupLocalOnlyTopic(String name, boolean createIfAbsent) throws OXException;
+
+    /**
+     * Checks if the denoted topic is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isLocalOnlyTopic(String name) throws OXException;
 
 }

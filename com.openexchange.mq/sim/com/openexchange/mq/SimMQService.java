@@ -119,7 +119,7 @@ public class SimMQService implements MQService {
     }
 
     @Override
-    public Queue lookupQueue(final String name, final boolean createIfAbsent) throws OXException {
+    public Queue lookupQueue(final String name, final boolean createIfAbsent, final Map<String, Object> params) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -149,7 +149,7 @@ public class SimMQService implements MQService {
      * @see com.openexchange.mq.MQService#lookupLocalOnlyQueue(java.lang.String, boolean)
      */
     @Override
-    public Queue lookupLocalOnlyQueue(final String name, final boolean createIfAbsent) throws OXException {
+    public Queue lookupLocalOnlyQueue(final String name, final boolean createIfAbsent, final Map<String, Object> params) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -170,6 +170,24 @@ public class SimMQService implements MQService {
     public Topic lookupLocalOnlyTopic(final String name, final boolean createIfAbsent) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mq.MQService#isLocalOnlyQueue(java.lang.String)
+     */
+    @Override
+    public boolean isLocalOnlyQueue(final String name) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mq.MQService#isLocalOnlyTopic(java.lang.String)
+     */
+    @Override
+    public boolean isLocalOnlyTopic(final String name) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

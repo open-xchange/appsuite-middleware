@@ -301,12 +301,12 @@ public final class HornetQServerStartup implements MQServerStartup {
         jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
         // Step 4. Configure the JMS Queue & Topic
-        final String queueName = "queue1";
+        final String queueName = MQConstants.NAME_QUEUE;
         final JMSQueueConfiguration queueConfig =
             new JMSQueueConfigurationImpl(queueName, null, false, MQConstants.PREFIX_QUEUE + queueName);
         jmsConfig.getQueueConfigurations().add(queueConfig);
 
-        final String topicName = "topic1";
+        final String topicName = MQConstants.NAME_TOPIC;
         final TopicConfiguration topicConfiguration = new TopicConfigurationImpl(topicName, MQConstants.PREFIX_TOPIC + topicName);
         jmsConfig.getTopicConfigurations().add(topicConfiguration);
 

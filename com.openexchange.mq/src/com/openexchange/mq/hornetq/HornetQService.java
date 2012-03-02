@@ -51,6 +51,7 @@ package com.openexchange.mq.hornetq;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
@@ -66,7 +67,6 @@ import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
 import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 
@@ -92,7 +92,7 @@ public final class HornetQService implements MQService {
         super();
         this.jmsServer = jmsServer;
         // org.hornetq.jms.client.HornetQJMSConnectionFactory
-        defaultConnectionFactory = (ConnectionFactory) jmsServer.lookup(MQConstants.NAME_CONNECTION_FACTORY);
+        defaultConnectionFactory = (ConnectionFactory) jmsServer.lookup(NAME_CONNECTION_FACTORY);
     }
 
     /**
@@ -181,7 +181,7 @@ public final class HornetQService implements MQService {
     @Override
     public Queue lookupQueue(final String name) throws OXException {
         try {
-            final Queue queue = (Queue) jmsServer.lookup(MQConstants.PREFIX_QUEUE + name);
+            final Queue queue = (Queue) jmsServer.lookup(PREFIX_QUEUE + name);
             if (null == queue) {
                 throw MQExceptionCodes.QUEUE_NOT_FOUND.create(name);
             }
@@ -194,12 +194,12 @@ public final class HornetQService implements MQService {
     }
 
     @Override
-    public Queue lookupQueue(final String name, final boolean createIfAbsent) throws OXException {
+    public Queue lookupQueue(final String name, final boolean createIfAbsent, final Map<String, Object> params) throws OXException {
         if (!createIfAbsent) {
             return lookupQueue(name);
         }
         // Create if absent
-        final String identifier = MQConstants.PREFIX_QUEUE + name;
+        final String identifier = PREFIX_QUEUE + name;
         Queue queue;
         try {
             queue = (Queue) jmsServer.lookup(identifier);
@@ -213,7 +213,9 @@ public final class HornetQService implements MQService {
         if (null == queue) {
             try {
                 final JMSServerManager serverManager = jmsServer.getServerManager();
-                final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, null, false, identifier);
+                final String selector = (String) (null == params ? null : params.get(QUEUE_PARAM_SELECTOR));
+                final boolean durable = null == params ? false : Boolean.parseBoolean((String) params.get(QUEUE_PARAM_DURABLE));
+                final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, selector, durable, identifier);
                 final String[] bindings = config.getBindings();
                 serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
             } catch (final Exception e) {
@@ -226,7 +228,7 @@ public final class HornetQService implements MQService {
     @Override
     public Queue lookupLocalOnlyQueue(final String name) throws OXException {
         try {
-            final Queue queue = (Queue) jmsServer.lookup(MQConstants.PREFIX_QUEUE + name + SERVER);
+            final Queue queue = (Queue) jmsServer.lookup(PREFIX_QUEUE + name + SERVER);
             if (null == queue) {
                 throw MQExceptionCodes.QUEUE_NOT_FOUND.create(name);
             }
@@ -239,12 +241,12 @@ public final class HornetQService implements MQService {
     }
 
     @Override
-    public Queue lookupLocalOnlyQueue(final String name, final boolean createIfAbsent) throws OXException {
+    public Queue lookupLocalOnlyQueue(final String name, final boolean createIfAbsent, final Map<String, Object> params) throws OXException {
         if (!createIfAbsent) {
             return lookupQueue(name);
         }
         // Create if absent
-        final String identifier = MQConstants.PREFIX_QUEUE + name + SERVER;
+        final String identifier = PREFIX_QUEUE + name + SERVER;
         Queue queue;
         try {
             queue = (Queue) jmsServer.lookup(identifier);
@@ -258,8 +260,9 @@ public final class HornetQService implements MQService {
         if (null == queue) {
             try {
                 final JMSServerManager serverManager = jmsServer.getServerManager();
-                final JMSQueueConfiguration config =
-                    new JMSQueueConfigurationImpl(name, null, false, identifier);
+                final String selector = (String) (null == params ? null : params.get(QUEUE_PARAM_SELECTOR));
+                final boolean durable = null == params ? false : Boolean.parseBoolean((String) params.get(QUEUE_PARAM_DURABLE));
+                final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, selector, durable, identifier);
                 final String[] bindings = config.getBindings();
                 serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
             } catch (final Exception e) {
@@ -267,6 +270,15 @@ public final class HornetQService implements MQService {
             }
         }
         return lookupQueue(name);
+    }
+
+    @Override
+    public boolean isLocalOnlyQueue(final String name) throws OXException {
+        try {
+            return null != ((Queue) jmsServer.lookup(PREFIX_QUEUE + name + SERVER));
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /*-
@@ -280,7 +292,7 @@ public final class HornetQService implements MQService {
         try {
             final Topic topic = (Topic) jmsServer.lookup(name);
             if (null == topic) {
-                throw MQExceptionCodes.TOPIC_NOT_FOUND.create(MQConstants.PREFIX_TOPIC + name);
+                throw MQExceptionCodes.TOPIC_NOT_FOUND.create(PREFIX_TOPIC + name);
             }
             return topic;
         } catch (final ClassCastException e) {
@@ -296,7 +308,7 @@ public final class HornetQService implements MQService {
             return lookupTopic(name);
         }
         // Create if absent
-        final String identifier = MQConstants.PREFIX_TOPIC + name;
+        final String identifier = PREFIX_TOPIC + name;
         Topic topic;
         try {
             topic = (Topic) jmsServer.lookup(identifier);
@@ -325,7 +337,7 @@ public final class HornetQService implements MQService {
         try {
             final Topic topic = (Topic) jmsServer.lookup(name);
             if (null == topic) {
-                throw MQExceptionCodes.TOPIC_NOT_FOUND.create(MQConstants.PREFIX_TOPIC + name + SERVER);
+                throw MQExceptionCodes.TOPIC_NOT_FOUND.create(PREFIX_TOPIC + name + SERVER);
             }
             return topic;
         } catch (final ClassCastException e) {
@@ -341,7 +353,7 @@ public final class HornetQService implements MQService {
             return lookupTopic(name);
         }
         // Create if absent
-        final String identifier = MQConstants.PREFIX_TOPIC + name + SERVER;
+        final String identifier = PREFIX_TOPIC + name + SERVER;
         Topic topic;
         try {
             topic = (Topic) jmsServer.lookup(identifier);
@@ -363,6 +375,15 @@ public final class HornetQService implements MQService {
             }
         }
         return lookupTopic(name);
+    }
+
+    @Override
+    public boolean isLocalOnlyTopic(final String name) throws OXException {
+        try {
+            return null != ((Queue) jmsServer.lookup(PREFIX_TOPIC + name + SERVER));
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
