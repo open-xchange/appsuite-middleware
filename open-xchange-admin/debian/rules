@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange
+installroot=$(CURDIR)/debian/open-xchange-admin
 
 configure: configure-stamp
 configure-stamp:
@@ -12,7 +12,7 @@ configure-stamp:
 
 build: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
 	touch build-stamp
 
@@ -21,14 +21,14 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
-	dh_clean 
+	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_prep 
+	dh_prep
 	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-admin -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -48,7 +48,7 @@ binary-arch: build install
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-	dh_installinit --no-start
+#	dh_installinit
 #	dh_installcron
 #	dh_installinfo
 	dh_installman

@@ -1,25 +1,25 @@
 #! /bin/bash
 ### BEGIN INIT INFO
-# Provides:          open-xchange-groupware
+# Provides:          open-xchange
 # Required-Start:    $local_fs $remote_fs $network $syslog
 # Should-Start:      mysql
 # Required-Stop:     $local_fs $remote_fs $network $syslog
 # Should-Stop:       mysql
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start/stop open-xchange-groupware
+# Short-Description: Start/stop open-xchange
 ### END INIT INFO
 
-# Open-Xchange Groupware Initscript
+# Open-Xchange Initscript
 
 STARTSCRIPT=/opt/open-xchange/sbin/open-xchange-groupware
-NAME=open-xchange-groupware
-DESC="Open-Xchange Groupware"
-DEFAULTS=/etc/default/open-xchange-groupware
+NAME=open-xchange
+DESC="Open-Xchange"
+DEFAULTS=/etc/default/open-xchange
 OXFUNCTIONS=/opt/open-xchange/lib/oxfunctions.sh
 OXCONFIG=/opt/open-xchange/etc/ox-scriptconf.sh
 
-# Defaults - don't touch, edit /etc/default/open-xchange-groupware
+# Defaults - don't touch, edit /etc/default/open-xchange
 ENABLED=0
 
 test -f $DEFAULTS && . $DEFAULTS
@@ -64,7 +64,7 @@ case "$1" in
 
   status)
 	echo -n "Checking for $DESC: "
-	if ox_daemon_status /var/run/open-xchange-groupware.pid ;then
+	if ox_daemon_status /var/run/open-xchange.pid ;then
 	    echo "running."
 	else
 	    echo "not running"

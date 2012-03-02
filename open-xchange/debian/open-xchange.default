@@ -1,0 +1,6 @@
+# Defaults for open-xchange initscript
+# sourced by /etc/init.d/open-xchange
+# installed at /etc/default/open-xchange by the maintainer scripts
+
+# Enable or disable Open-Xchange start skript
+ENABLED=1
