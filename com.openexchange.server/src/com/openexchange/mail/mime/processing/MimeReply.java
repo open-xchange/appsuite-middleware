@@ -646,7 +646,7 @@ public final class MimeReply {
         return found;
     }
 
-    private static final Pattern PATTERN_BODY_TAG = Pattern.compile("(<body.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY_TAG = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static int getBodyTagEndPos(final StringBuilder textBuilder) {
         final Matcher m = PATTERN_BODY_TAG.matcher(textBuilder);
