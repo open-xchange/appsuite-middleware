@@ -60,7 +60,7 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -438,7 +438,7 @@ public final class JSONObjectConverter {
              */
             final String content;
             {
-                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
                 content = HTMLProcessing.formatTextForDisplay(plainText, usm, displayMode);
             }

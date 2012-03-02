@@ -87,7 +87,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -669,7 +669,7 @@ public final class MessageParser {
                          * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content
                          * type.
                          */
-                        final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         final String conformHTML =
                             htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "ISO-8859-1");
                         if (MimeTypes.MIME_TEXT_PLAIN.equals(contentType)) {

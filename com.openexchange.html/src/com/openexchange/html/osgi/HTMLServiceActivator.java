@@ -64,8 +64,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.tidy.Report;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.internal.HTMLServiceImpl;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -171,7 +171,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         /*
          * Register HTML service
          */
-        registerService(HTMLService.class, new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
+        registerService(HtmlService.class, new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
     }
 
     public static Object[] getHTMLEntityMaps(final String htmlEntityFilename) {

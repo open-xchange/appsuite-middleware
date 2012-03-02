@@ -140,7 +140,7 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.servlet.ImageServlet;
@@ -250,7 +250,7 @@ public final class ServerActivator extends HousekeepingActivator {
         {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
+            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class,
             ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
         };

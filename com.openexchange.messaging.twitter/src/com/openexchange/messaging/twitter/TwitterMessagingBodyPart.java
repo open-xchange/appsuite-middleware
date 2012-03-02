@@ -60,7 +60,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
@@ -149,7 +149,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
                 htmlContent = m.replaceAll(MessageFormat.format("$1\r\n    <img src=\"{0}\" />", status.getUser().getProfileImageURL()));
             }
 
-            final HTMLService htmlService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class);
+            final HtmlService htmlService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class);
             content = new StringContent(null == htmlService ? htmlContent: htmlService.replaceImages(htmlContent, session.getSessionID()));
             sectionId = "2";
             size = htmlContent.length();

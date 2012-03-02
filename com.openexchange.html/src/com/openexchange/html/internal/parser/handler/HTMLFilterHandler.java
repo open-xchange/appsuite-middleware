@@ -65,8 +65,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.internal.parser.HTMLHandler;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 
 /**
@@ -74,7 +74,7 @@ import com.openexchange.html.services.ServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLFilterHandler implements HTMLHandler {
+public final class HTMLFilterHandler implements HtmlHandler {
 
     private static final String COMMENT_END = "-->";
 
@@ -115,7 +115,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      * ----------------- Member stuff -----------------
      */
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
     private final Map<String, Map<String, Set<String>>> htmlMap;
 
@@ -152,7 +152,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      * @param htmlMap The HTML map
      * @param styleMap The CSS style map
      */
-    public HTMLFilterHandler(final HTMLService htmlService, final int capacity, final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
+    public HTMLFilterHandler(final HtmlService htmlService, final int capacity, final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
         super();
         this.htmlService = htmlService;
         cssBuffer = new StringBuilder(256);
@@ -169,7 +169,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      * @param capacity The initial capacity
      * @param mapStr The map as string representation
      */
-    public HTMLFilterHandler(final HTMLService htmlService, final int capacity, final String mapStr) {
+    public HTMLFilterHandler(final HtmlService htmlService, final int capacity, final String mapStr) {
         super();
         this.htmlService = htmlService;
         cssBuffer = new StringBuilder(256);
@@ -185,7 +185,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      *
      * @param capacity The initial capacity
      */
-    public HTMLFilterHandler(final HTMLService htmlService, final int capacity) {
+    public HTMLFilterHandler(final HtmlService htmlService, final int capacity) {
         super();
         this.htmlService = htmlService;
         cssBuffer = new StringBuilder(256);

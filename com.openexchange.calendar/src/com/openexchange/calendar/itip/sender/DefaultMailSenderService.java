@@ -84,7 +84,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -105,7 +105,7 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private final ITipEmitter iTipEmitter;
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
 	private AttachmentBase attachments;
 
@@ -115,7 +115,7 @@ public class DefaultMailSenderService implements MailSenderService {
 
 	private UserConfigurationStorage userConfigurations;
 
-    public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HTMLService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
+    public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
         this.iTipEmitter = iTipEmitter;
         this.htmlService = htmlService;
         this.attachments = attachments;

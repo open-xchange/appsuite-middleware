@@ -59,12 +59,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * {@link HTMLParser} - Parses a well-formed HTML document based on {@link XmlPullParser}. The corresponding events are delegated to a given
- * instance of {@link HTMLHandler}.
+ * {@link HtmlParser} - Parses a well-formed HTML document based on {@link XmlPullParser}. The corresponding events are delegated to a given
+ * instance of {@link HtmlHandler}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLParser {
+public final class HtmlParser {
 
     private static final String PROPERTY_XMLDECL_STANDALONE = "http://xmlpull.org/v1/doc/features.html#xmldecl-standalone";
 
@@ -74,24 +74,24 @@ public final class HTMLParser {
 
     private static final String FEATURE_PRESERVE_TEXT = "open-xchange.org/preserveText";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HtmlParser.class));
 
     private static final int INT_IS_EMPTY_TAG = 1;
 
     /**
-     * Initializes a new {@link HTMLParser}
+     * Initializes a new {@link HtmlParser}
      */
-    private HTMLParser() {
+    private HtmlParser() {
         super();
     }
 
     /**
-     * Parses specified well-formed HTML document and delegates events to given instance of {@link HTMLHandler}
+     * Parses specified well-formed HTML document and delegates events to given instance of {@link HtmlHandler}
      *
      * @param html The well-formed HTML document
      * @param handler The HTML handler
      */
-    public static void parse(final String html, final HTMLHandler handler) {
+    public static void parse(final String html, final HtmlHandler handler) {
         final XmlPullParser parser = new KXmlParser();
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
