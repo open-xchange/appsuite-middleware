@@ -47,30 +47,37 @@
  *
  */
 
-package com.openexchange.tasks.json.osgi;
+package com.openexchange.groupware.tasks.osgi;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.tasks.json.TaskActionFactory;
-import com.openexchange.tasks.json.converters.TaskResultConverter;
-import com.openexchange.user.UserService;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.tasks.ModifyThroughDependant;
 
 /**
- * {@link TaskJSONActivator}
- *
+ * {@link TaskActivator}
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskJSONActivator extends AJAXModuleActivator {
+public class TaskActivator extends AJAXModuleActivator {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+    public TaskActivator() {
+        super();
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new TaskActionFactory(this), "tasks");
-        registerService(ResultConverter.class, new TaskResultConverter());
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
+        registerService(TargetService.class, new ModifyThroughDependant(), props);
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
 
 }
