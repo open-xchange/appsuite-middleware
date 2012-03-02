@@ -52,7 +52,7 @@
         <chmod perm="755" file="${sbinInstallDir}/forceupdatetask"/>
         <chmod perm="755" file="${sbinInstallDir}/listExecutedUpdateTasks"/>
         <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
-        <chmod perm="755" file="${sbinInstallDir}/open-xchange-groupware"/>
+        <chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
         <chmod perm="755" file="${sbinInstallDir}/oxreport"/>
         <chmod perm="755" file="${sbinInstallDir}/restoregabdefaults"/>
         <chmod perm="755" file="${sbinInstallDir}/runupdate"/>
@@ -73,7 +73,7 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency forceupdatetask listExecutedUpdateTasks logincounter open-xchange-groupware restoregabdefaults runupdate">
+        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency forceupdatetask listExecutedUpdateTasks logincounter open-xchange restoregabdefaults runupdate">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
@@ -88,6 +88,5 @@
             <fileset dir="system"/>
             <mapper type="glob" from="*.${distribution}" to="*"/>
         </copy>
-        <!-- chmod perm="755" file="${destDir}/etc/init.d/open-xchange-groupware"/ -->
 	</target>
 </project>
