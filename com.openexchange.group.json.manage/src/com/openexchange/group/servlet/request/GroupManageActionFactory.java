@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "group", description = "The group module allows to query available groups. It is mainly used by the dialog for the selection of participants.")
+@Module(name = "group.json", description = "The group module allows to query available groups. It is mainly used by the dialog for the selection of participants.")
 public final class GroupManageActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractGroupAction> actions;
