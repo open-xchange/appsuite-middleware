@@ -71,6 +71,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -89,10 +90,10 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -104,6 +105,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -595,24 +597,60 @@ public final class MimeReply {
                         new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
-            /*
+            /*-
              * Surround with quote
+             * 
+             * Check whether reply prefix is included in quoted text or is prepended (not quoted)
              */
-            final String replyTextBody;
-            if (isHtml) {
-                final String tmp = quoteHtml(textBuilder.toString());
-                textBuilder.setLength(0);
-                replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
-            } else {
-                replyTextBody = quoteText(textBuilder.toString());
+            final boolean prependReplyPrefx;
+            {
+                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                prependReplyPrefx = null == service ? false : service.getBoolProperty("com.openexchange.mail.prependReplyPrefx", false);
             }
-            textBuilder.setLength(0);
-            textBuilder.append(replyPrefix);
-            textBuilder.append(replyTextBody);
+
+            if (prependReplyPrefx) {
+                /*
+                 * Prepend to quoted reply text
+                 */
+                final String replyTextBody;
+                if (isHtml) {
+                    final String tmp = quoteHtml(textBuilder.toString());
+                    textBuilder.setLength(0);
+                    replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
+                } else {
+                    replyTextBody = quoteText(textBuilder.toString());
+                }
+                textBuilder.setLength(0);
+                textBuilder.append(replyPrefix);
+                textBuilder.append(replyTextBody);
+            } else {
+                /*
+                 * Include in quoted reply text
+                 */
+                final String replyTextBody;
+                if (isHtml) {
+                    textBuilder.insert(getBodyTagEndPos(textBuilder), replyPrefix);
+                    final String tmp = quoteHtml(textBuilder.toString());
+                    textBuilder.setLength(0);
+                    replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
+                } else {
+                    textBuilder.insert(0, replyPrefix);
+                    replyTextBody = quoteText(textBuilder.toString());
+                }
+                textBuilder.setLength(0);
+                textBuilder.append(replyTextBody);
+            }
         }
         replyTexts.add(textBuilder.toString());
         // parentTextBuilder.append(textBuilder);
         return found;
+    }
+
+    private static final Pattern PATTERN_BODY_TAG = Pattern.compile("(<body.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static int getBodyTagEndPos(final StringBuilder textBuilder) {
+        final Matcher m = PATTERN_BODY_TAG.matcher(textBuilder);
+        return m.find() ? m.end() : 0;
     }
 
     /**
