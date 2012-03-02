@@ -53,6 +53,8 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.core.TransportConfiguration;
@@ -63,6 +65,7 @@ import org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory;
 import org.hornetq.core.remoting.impl.invm.InVMConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
+import org.hornetq.jms.server.JMSServerConfigParser;
 import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
 import org.hornetq.jms.server.config.JMSConfiguration;
 import org.hornetq.jms.server.config.JMSQueueConfiguration;
@@ -72,8 +75,11 @@ import org.hornetq.jms.server.config.impl.JMSConfigurationImpl;
 import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
 import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
 import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import org.hornetq.jms.server.impl.JMSServerConfigParserImpl;
 import org.hornetq.utils.XMLUtil;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedStringReader;
@@ -113,45 +119,94 @@ public final class HornetQServerStartup implements MQServerStartup {
                 // Already started
                 return;
             }
-            /*
-             * Create HornetQ core configuration, and set the properties accordingly
-             */
-            final ConfigurationService service = MQServiceLookup.getService(ConfigurationService.class);
-            
-            
-            final String hornetqConfigXml = service.getText("hornetq-configuration.xml");
-            if (null == hornetqConfigXml) {
-                
-            } else {
+            final HornetQEmbeddedJMS jmsServer;
+            {
                 /*
-                 * Parse into configuration
+                 * Create HornetQ core configuration, and set the properties accordingly
                  */
-                final Configuration configuration;
-                {
-                    String xml = hornetqConfigXml;
-                    xml = XMLUtil.replaceSystemProps(xml);
-                    final Element e = org.hornetq.utils.XMLUtil.stringToElement(xml);
+                final ConfigurationService service = MQServiceLookup.getService(ConfigurationService.class);
+                /*
+                 * Look for a possible "hornetq-configuration.xml" file
+                 */
+                String hornetqConfigXml = service.getText("hornetq-configuration.xml");
+                if (null == hornetqConfigXml) {
+                    jmsServer = createEmbeddedJms();
+                } else {
+                    /*
+                     * Parse into configuration
+                     */
+                    final Configuration configuration;
+                    {
+                        final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
-                    final FileConfigurationParser parser = new FileConfigurationParser();
-                    parser.setValidateAIO(true);
-                    configuration = new ConfigurationImpl();
-                    parser.parseMainConfig(e, configuration);
+                        configuration = new ConfigurationImpl();
+                        configuration.setPersistenceEnabled(false);
+                        configuration.setSecurityEnabled(false);
+                        configuration.setJournalSyncNonTransactional(false);
+    
+                        final FileConfigurationParser parser = new FileConfigurationParser();
+                        parser.setValidateAIO(true);
+                        parser.parseMainConfig(e, configuration);
+                        hornetqConfigXml = null; // Help GC
+                    }
+                    /*
+                     * Parse possible JMS configuration
+                     */
+                    final JMSConfiguration jmsConfiguration;
+                    {
+                        final String hornetqJmsXml = service.getText("hornetq-jms.xml");
+                        if (null == hornetqJmsXml) {
+                            jmsConfiguration = new JMSConfigurationImpl();
+                            /*
+                             * Configure the JMS ConnectionFactory
+                             */
+                            final ConnectionFactoryConfiguration cfConfig =
+                                new ConnectionFactoryConfigurationImpl(
+                                    MQConstants.NAME_CONNECTION_FACTORY,
+                                    false,
+                                    Arrays.asList("in-vm-connector"),
+                                    MQConstants.NAME_CONNECTION_FACTORY);
+                            cfConfig.setBlockOnDurableSend(false);
+                            cfConfig.setBlockOnNonDurableSend(false);
+                            jmsConfiguration.getConnectionFactoryConfigurations().add(cfConfig);
+                            /*
+                             * Configure JMS queue & topic
+                             */
+                            jmsConfiguration.getQueueConfigurations().add(
+                                new JMSQueueConfigurationImpl(
+                                    MQConstants.NAME_QUEUE,
+                                    null,
+                                    false,
+                                    MQConstants.PREFIX_QUEUE + MQConstants.NAME_QUEUE));
+                            jmsConfiguration.getTopicConfigurations().add(
+                                new TopicConfigurationImpl(MQConstants.NAME_TOPIC, MQConstants.PREFIX_TOPIC + MQConstants.NAME_TOPIC));
+                        } else {
+                            final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqJmsXml));
+    
+                            final JMSServerConfigParser jmsServerConfigParser = new JMSServerConfigParserImpl();
+                            jmsConfiguration = jmsServerConfigParser.parseConfiguration(e);
+
+                            /*-
+                             * 
+                            for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfiguration.getConnectionFactoryConfigurations()) {
+                                connectionFactoryConfiguration.setBlockOnDurableSend(false);
+                                connectionFactoryConfiguration.setBlockOnNonDurableSend(false);
+                            }
+                             * 
+                             */
+                        }
+                    }
+                    /*
+                     * Create the JMS Server using the HornetQ core server and the JMS configuration
+                     */
+                    jmsServer = new HornetQEmbeddedJMS();
+                    jmsServer.setConfiguration(configuration);
+                    jmsServer.setJmsConfiguration(jmsConfiguration);
                 }
-                
-                
-                
-                
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            final HornetQEmbeddedJMS jmsServer = createEmbeddedJms();
+            /*
+             * Start the JMS Server
+             */
             jmsServer.start();
 
             this.jmsServer = jmsServer;
@@ -242,22 +297,26 @@ public final class HornetQServerStartup implements MQServerStartup {
                 MQConstants.NAME_CONNECTION_FACTORY,
                 false,
                 Arrays.asList("in-vm-connector"),
-                MQConstants.PATH_CONNECTION_FACTORY);
+                MQConstants.NAME_CONNECTION_FACTORY);
         jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
         // Step 4. Configure the JMS Queue & Topic
-        final String queueName = "queue1";
+        final String queueName = MQConstants.NAME_QUEUE;
         final JMSQueueConfiguration queueConfig =
             new JMSQueueConfigurationImpl(queueName, null, false, MQConstants.PREFIX_QUEUE + queueName);
         jmsConfig.getQueueConfigurations().add(queueConfig);
 
-        final String topicName = "topic1";
+        final String topicName = MQConstants.NAME_TOPIC;
         final TopicConfiguration topicConfiguration = new TopicConfigurationImpl(topicName, MQConstants.PREFIX_TOPIC + topicName);
         jmsConfig.getTopicConfigurations().add(topicConfiguration);
 
-        // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
+        // Step 5. Create the JMS Server using the HornetQ core server and the JMS configuration
         final HornetQEmbeddedJMS jmsServer = new HornetQEmbeddedJMS();
         jmsServer.setConfiguration(configuration);
+        for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfig.getConnectionFactoryConfigurations()) {
+            connectionFactoryConfiguration.setBlockOnDurableSend(false);
+            connectionFactoryConfiguration.setBlockOnNonDurableSend(false);
+        }
         jmsServer.setJmsConfiguration(jmsConfig);
         return jmsServer;
     }
@@ -276,6 +335,15 @@ public final class HornetQServerStartup implements MQServerStartup {
             hornetQService = null;
             this.jmsServer = null;
         }
+    }
+
+    private static Element stringToElement(final String xml) throws Exception {
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        // see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6529766
+        factory.setNamespaceAware(true);
+        final DocumentBuilder parser = factory.newDocumentBuilder();
+        final Document doc = parser.parse(new InputSource(new UnsynchronizedStringReader(xml)));
+        return doc.getDocumentElement();
     }
 
 }

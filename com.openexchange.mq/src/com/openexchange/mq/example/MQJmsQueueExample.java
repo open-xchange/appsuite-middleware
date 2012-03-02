@@ -87,9 +87,9 @@ public final class MQJmsQueueExample {
         Thread t = null;
         try {
             // Now we'll look up the connection factory:
-            final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+            final QueueConnectionFactory queueConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the Queue:
-            final Queue queue = service.lookupQueue("/queues/queue1");
+            final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
 
             QueueConnection queueConnection = null;
             try {
@@ -136,9 +136,9 @@ public final class MQJmsQueueExample {
                 public void run() {
                     try {
                         // Now we'll look up the connection factory:
-                        final QueueConnectionFactory queueConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+                        final QueueConnectionFactory queueConnectionFactory = service.lookupDefaultConnectionFactory();
                         // And look up the Queue:
-                        final Queue queue = service.lookupQueue("/queues/queue1");
+                        final Queue queue = service.lookupQueue(MQConstants.NAME_QUEUE);
 
                         QueueConnection queueConnection = null;
                         try {
@@ -160,7 +160,7 @@ public final class MQJmsQueueExample {
                                 if (m != null) {
                                     if (m instanceof TextMessage) {
                                         final TextMessage message = (TextMessage) m;
-                                        System.out.println("Reading message: " + message.getText());
+                                        System.out.println("Reading sent message: " + message.getText());
                                     } else {
                                         break;
                                     }

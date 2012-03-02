@@ -101,6 +101,9 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     public static final String WRONG_SESSION_SECRET_MSG = "Your session was invalidated. Please try again.";
 
+    // Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded
+    public static final String MAX_SESSION_PER_CLIENT_EXCEPTION_MSG = "Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded";
+
     private SessionExceptionMessages() {
         super();
     }

@@ -877,7 +877,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     updateAction.setProvider(this);
                     updateAction.setQueryCatalog(QUERIES);
                     updateAction.setModified(modifiedColumns);
-                    updateAction.setTimestamp(sequenceNumber);
+                    updateAction.setTimestamp(Long.MAX_VALUE);
                     perform(updateAction, true);
                 }
             } finally {

@@ -49,8 +49,6 @@
 
 package com.openexchange.mq.example;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -89,10 +87,104 @@ public final class MQJmsTopicExample {
     public void test() {
         Thread t = null;
         try {
+            /*
+             * Receive messages in another thread
+             */
+
+            t = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        // Now we'll look up the connection factory:
+                        final TopicConnectionFactory topicConnectionFactory = service.lookupDefaultConnectionFactory();
+                        // And look up the Queue:
+                        final Topic topic = service.lookupTopic(MQConstants.NAME_TOPIC);
+
+                        TopicConnection topicConnection = null;
+                        try {
+                            /*-
+                             * 1. Create connection.
+                             * 2. Create session from connection; false means session is not transacted.
+                             * 3. Create subscriber.
+                             * 4. Register message listener (TextListener).
+                             * 5. Receive text messages from topic.
+                             * 6. When all messages have been received, enter Q to quit.
+                             * 7. Close connection.
+                             */
+                            topicConnection = topicConnectionFactory.createTopicConnection();
+                            final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+                            final TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
+                            topicSubscriber.setMessageListener(new MessageListener() {
+
+                                @Override
+                                public void onMessage(final Message message) {
+                                    TextMessage msg = null;
+                                    try {
+                                        if (message instanceof TextMessage) {
+                                            msg = (TextMessage) message;
+                                            System.out.println("Reading published message: " + msg.getText());
+                                        } else {
+                                            System.out.println("Message of wrong type: " + message.getClass().getName());
+                                        }
+                                    } catch (final JMSException e) {
+                                        System.out.println("JMSException in onMessage(): " + e.toString());
+                                    } catch (final Throwable t) {
+                                        System.out.println("Exception in onMessage():" + t.getMessage());
+                                    }
+                                }
+                            });
+                            topicConnection.start();
+
+                            /*-
+                             * 
+                            System.out.println("To end program, enter Q or q, " + "then <return>");
+                            final InputStreamReader inputStreamReader = new InputStreamReader(System.in);
+                            char answer = '\0';
+                            while (!((answer == 'q') || (answer == 'Q'))) {
+                                try {
+                                    answer = (char) inputStreamReader.read();
+                                } catch (final IOException e) {
+                                    System.out.println("I/O exception: " + e.toString());
+                                }
+                            }
+                             * 
+                             */
+
+                            try {
+                                final long millis = 3000L;
+                                System.out.println("Awaiting published messages for " + millis + "msec.");
+                                Thread.sleep(millis);
+                                System.out.println("Finished subscription for topic " + topic.getTopicName());
+                            } catch (final InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+
+                        } catch (final JMSException e) {
+                            System.out.println("Exception occurred: " + e.toString());
+                        } finally {
+                            if (topicConnection != null) {
+                                try {
+                                    topicConnection.close();
+                                } catch (final JMSException e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+                    } catch (final OXException e) {
+                        System.err.println(e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            });
+            t.start();
+
+
+            
             // Now we'll look up the connection factory:
-            final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
+            final TopicConnectionFactory topicConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the Queue:
-            final Topic topic = service.lookupTopic("/topics/topic1");
+            final Topic topic = service.lookupTopic(MQConstants.NAME_TOPIC);
 
             TopicConnection topicConnection = null;
             try {
@@ -123,84 +215,6 @@ public final class MQJmsTopicExample {
                     }
                 }
             }
-
-            /*
-             * Receive messages in another thread
-             */
-
-            t = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        // Now we'll look up the connection factory:
-                        final TopicConnectionFactory topicConnectionFactory = service.lookupConnectionFactory(MQConstants.PATH_CONNECTION_FACTORY);
-                        // And look up the Queue:
-                        final Topic topic = service.lookupTopic("/topics/topic1");
-
-                        TopicConnection topicConnection = null;
-                        try {
-                            /*-
-                             * 1. Create connection.
-                             * 2. Create session from connection; false means session is not transacted.
-                             * 3. Create subscriber.
-                             * 4. Register message listener (TextListener).
-                             * 5. Receive text messages from topic.
-                             * 6. When all messages have been received, enter Q to quit.
-                             * 7. Close connection.
-                             */
-                            topicConnection = topicConnectionFactory.createTopicConnection();
-                            final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-                            final TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
-                            topicSubscriber.setMessageListener(new MessageListener() {
-
-                                @Override
-                                public void onMessage(final Message message) {
-                                    TextMessage msg = null;
-                                    try {
-                                        if (message instanceof TextMessage) {
-                                            msg = (TextMessage) message;
-                                            System.out.println("Reading message: " + msg.getText());
-                                        } else {
-                                            System.out.println("Message of wrong type: " + message.getClass().getName());
-                                        }
-                                    } catch (final JMSException e) {
-                                        System.out.println("JMSException in onMessage(): " + e.toString());
-                                    } catch (final Throwable t) {
-                                        System.out.println("Exception in onMessage():" + t.getMessage());
-                                    }
-                                }
-                            });
-                            topicConnection.start();
-                            System.out.println("To end program, enter Q or q, " + "then <return>");
-                            final InputStreamReader inputStreamReader = new InputStreamReader(System.in);
-                            char answer = '\0';
-                            while (!((answer == 'q') || (answer == 'Q'))) {
-                                try {
-                                    answer = (char) inputStreamReader.read();
-                                } catch (final IOException e) {
-                                    System.out.println("I/O exception: " + e.toString());
-                                }
-                            }
-
-                        } catch (final JMSException e) {
-                            System.out.println("Exception occurred: " + e.toString());
-                        } finally {
-                            if (topicConnection != null) {
-                                try {
-                                    topicConnection.close();
-                                } catch (final JMSException e) {
-                                    // Ignore
-                                }
-                            }
-                        }
-                    } catch (final OXException e) {
-                        System.err.println(e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            });
-            t.start();
 
         } catch (final OXException e) {
             System.err.println(e.getMessage());

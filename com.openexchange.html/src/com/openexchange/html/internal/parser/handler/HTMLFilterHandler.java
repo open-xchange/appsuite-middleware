@@ -50,7 +50,6 @@
 package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
-import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -500,7 +499,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSSElements(cssBuffer.append(val), styleMap, true);
+                checkCSS(cssBuffer.append(val), styleMap, true);
                 final String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (containsCSSElement(checkedCSS)) {

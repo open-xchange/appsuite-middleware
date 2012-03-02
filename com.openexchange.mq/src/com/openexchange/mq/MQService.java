@@ -50,6 +50,7 @@
 package com.openexchange.mq;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
@@ -77,7 +78,7 @@ import com.openexchange.mq.example.MQJmsTopicExample;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQService {
+public interface MQService extends MQConstants {
 
     /**
      * The service reference.
@@ -113,11 +114,29 @@ public interface MQService {
      * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
      * 
      * @param name The name of the {@link ConnectionFactory}
-     * @return The look-up {@link ConnectionFactory} instance.
+     * @return The looked-up {@link ConnectionFactory} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
+    <F extends ConnectionFactory> F lookupConnectionFactory(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered default {@link ConnectionFactory}.
+     * <p>
+     * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
+     * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
+     * 
+     * @return The default {@link ConnectionFactory} instance.
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    <F extends ConnectionFactory> F lookupDefaultConnectionFactory() throws OXException;
+
+    /*-
+     * -------------------------------------------------------------------------------------------------
+     * ----------------------------------- Lookup methods for Queues -----------------------------------
+     * -------------------------------------------------------------------------------------------------
+     */
 
     /**
      * Lookup in the registry for registered {@link Queue}.
@@ -132,7 +151,8 @@ public interface MQService {
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
      * 
      * @param name The name of the queue
-     * @return The look-up {@link Queue} instance.
+     * @return The looked-up {@link Queue} instance.
+     * @throws OXException If such a queue does not exist
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
@@ -152,11 +172,73 @@ public interface MQService {
      * 
      * @param name The name of the queue
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
-     * @return The look-up {@link Queue} instance.
+     * @param params Optional parameters for the queue in case of creation; pass <code>null</code> to create with default parameters (e.g.
+     *            see {@link MQConstants#QUEUE_PARAM_DURABLE}
+     * @return The looked-up {@link Queue} instance.
+     * @throws OXException If such a queue does not exist or could not be created
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    Queue lookupQueue(String name, boolean createIfAbsent) throws OXException;
+    Queue lookupQueue(String name, boolean createIfAbsent, Map<String, Object> params) throws OXException;
+
+    /**
+     * Lookup in the registry for registered local-only {@link Queue}; meaning sent messages are not distributed within cluster, and
+     * therefore only receivable on the same server.
+     * <p>
+     * A queue follows the Point-to-Point Messaging Domain:<br>
+     * <ul>
+     * <li>Each message has only one consumer.</li>
+     * <li>A sender and a receiver of a message have no timing dependencies. The receiver can fetch the message whether or not it was
+     * running when the client sent the message.</li>
+     * <li>The receiver acknowledges the successful processing of a message.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
+     * 
+     * @param name The name of the queue
+     * @return The looked-up {@link Queue} instance.
+     * @throws OXException If such a queue does not exist
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    Queue lookupLocalOnlyQueue(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered {@link Queue}; meaning sent messages are not distributed within cluster, and therefore only
+     * receivable on the same server.
+     * <p>
+     * A queue follows the Point-to-Point Messaging Domain:<br>
+     * <ul>
+     * <li>Each message has only one consumer.</li>
+     * <li>A sender and a receiver of a message have no timing dependencies. The receiver can fetch the message whether or not it was
+     * running when the client sent the message.</li>
+     * <li>The receiver acknowledges the successful processing of a message.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
+     * 
+     * @param name The name of the queue
+     * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
+     * @param params Optional parameters for the queue in case of creation; pass <code>null</code> to create with default parameters (e.g.
+     *            see {@link MQConstants#QUEUE_PARAM_DURABLE}
+     * @return The looked-up {@link Queue} instance.
+     * @throws OXException If such a queue does not exist or could not be created
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    Queue lookupLocalOnlyQueue(String name, boolean createIfAbsent, Map<String, Object> params) throws OXException;
+
+    /**
+     * Checks if the denoted queue is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isLocalOnlyQueue(String name) throws OXException;
+
+    /*-
+     * -------------------------------------------------------------------------------------------------
+     * ----------------------------------- Lookup methods for Topics -----------------------------------
+     * -------------------------------------------------------------------------------------------------
+     */
 
     /**
      * Lookup in the registry for registered {@link Topic}.
@@ -170,7 +252,8 @@ public interface MQService {
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
      * 
      * @param name The name of the topic
-     * @return The look-up {@link Topic} instance.
+     * @return The looked-up {@link Topic} instance.
+     * @throws OXException If such a topic does not exist
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
@@ -189,10 +272,60 @@ public interface MQService {
      * 
      * @param name The name of the topic
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
-     * @return The look-up {@link Topic} instance.
+     * @return The looked-up {@link Topic} instance.
+     * @throws OXException If such a topic does not exist or could not be created
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
     Topic lookupTopic(String name, boolean createIfAbsent) throws OXException;
+
+    /**
+     * Lookup in the registry for registered {@link Topic}; meaning published messages are not distributed within cluster, and therefore can
+     * only be subscribed on the same server.
+     * <p>
+     * A topic follows the Publish/Subscribe Messaging Domain:<br>
+     * <ul>
+     * <li>Each message may have multiple consumers.</li>
+     * <li>Publishers and subscribers have a timing dependency. A client that subscribes to a topic can consume only messages published
+     * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
+     * 
+     * @param name The name of the topic
+     * @return The looked-up {@link Topic} instance.
+     * @throws OXException If such a topic does not exist
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    Topic lookupLocalOnlyTopic(String name) throws OXException;
+
+    /**
+     * Lookup in the registry for registered {@link Topic}; meaning published messages are not distributed within cluster, and therefore can
+     * only be subscribed on the same server.
+     * <p>
+     * A topic follows the Publish/Subscribe Messaging Domain:<br>
+     * <ul>
+     * <li>Each message may have multiple consumers.</li>
+     * <li>Publishers and subscribers have a timing dependency. A client that subscribes to a topic can consume only messages published
+     * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
+     * </ul>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
+     * 
+     * @param name The name of the topic
+     * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
+     * @return The looked-up {@link Topic} instance.
+     * @throws OXException If such a topic does not exist or could not be created
+     * @see MQJmsQueueExample
+     * @see MQJmsTopicExample
+     */
+    Topic lookupLocalOnlyTopic(String name, boolean createIfAbsent) throws OXException;
+
+    /**
+     * Checks if the denoted topic is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isLocalOnlyTopic(String name) throws OXException;
 
 }

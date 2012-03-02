@@ -49,7 +49,6 @@
 
 package com.openexchange.mq;
 
-
 /**
  * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
  * 
@@ -63,14 +62,9 @@ public interface MQConstants {
     public static final String BUNDLE_SYMBOLIC_NAME = "com.openexchange.mq";
 
     /**
-     * The default name for connection factory.
+     * The default name for registered {@link javax.jms.ConnectionFactory} instance.
      */
     public static final String NAME_CONNECTION_FACTORY = "ConnectionFactory";
-
-    /**
-     * The default path to lookup registered {@link javax.jms.ConnectionFactory} instance.
-     */
-    public static final String PATH_CONNECTION_FACTORY = "/" + NAME_CONNECTION_FACTORY;
 
     /**
      * The default prefix to lookup registered {@link javax.jms.Queue} instance.
@@ -83,8 +77,53 @@ public interface MQConstants {
     public static final String PREFIX_TOPIC = "/topics/";
 
     /**
+     * The name for the general-purpose {@link javax.jms.Queue} instance.
+     */
+    public static final String NAME_QUEUE = "genericQueue";
+
+    /**
+     * The name for the general-purpose {@link Tjavax.jms.opic} instance.
+     */
+    public static final String NAME_TOPIC = "genericTopic";
+
+    /**
      * The default port for socket-based acceptors/connectors.
      */
     public static final int MQ_LISTEN_PORT = 5445;
+
+    /*
+     * ------------------------------ Queue parameters --------------------------------
+     */
+
+    /**
+     * The name of the selector parameter.
+     * <p>
+     * The selector defines what JMS message selector the predefined queue will have. Only messages that match the selector will be added to
+     * the queue. This is an optional element with a default of <code>null</code> when omitted.
+     * 
+     * <pre>
+     *  &lt;queue name="selectorQueue"&gt;
+     *       &lt;entry name="/queue/selectorQueue"/&gt;
+     *       <b>&lt;selector string="color='red'"/&gt;</b>
+     *       &lt;durable>true&lt;/durable&gt;
+     *  &lt;/queue&gt;
+     * </pre>
+     */
+    public static final String QUEUE_PARAM_SELECTOR = "selector";
+
+    /**
+     * The name of the durable flag parameter.
+     * <p>
+     * The durable flag specifies whether the queue will be persisted. This again is optional and defaults to <code>true</code> if omitted.
+     * 
+     * <pre>
+     *  &lt;queue name="selectorQueue"&gt;
+     *       &lt;entry name="/queue/selectorQueue"/&gt;
+     *       selector string="color='red'"/&gt;
+     *       <b>&lt;durable>true&lt;/durable&gt;</b>
+     *  &lt;/queue&gt;
+     * </pre>
+     */
+    public static final String QUEUE_PARAM_DURABLE = "durable";
 
 }
