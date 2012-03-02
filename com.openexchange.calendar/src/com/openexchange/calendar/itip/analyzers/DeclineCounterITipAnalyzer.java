@@ -99,6 +99,7 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
                 break;
             }
         }
+        analysis.setUid(appointment.getUid());
         
         Appointment declinedFor = util.resolveUid(appointment.getUid(), session);
         if (declinedFor == null) {

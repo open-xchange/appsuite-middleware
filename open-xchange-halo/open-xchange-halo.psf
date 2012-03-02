@@ -5,6 +5,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.appointments"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.linkedin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino.apiBridge"/>
