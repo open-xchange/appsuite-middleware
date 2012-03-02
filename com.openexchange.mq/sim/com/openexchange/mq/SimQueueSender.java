@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,66 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.mq;
+
+import java.io.Serializable;
+import com.openexchange.exception.OXException;
+import com.openexchange.mq.queue.MQQueueSender;
+
 
 /**
- * SessionConfig
+ * {@link SimQueueSender}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessiondConfigInterface {
-
-    long getSessionContainerTimeout();
-
-    long getLongTermSessionContainerTimeout();
-
-    long getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerUser();
-
-    int getMaxSessionsPerClient();
-
-    long getLifeTime();
-
-    long getLongLifeTime();
-
-    long getRandomTokenTimeout();
-
-    long getNumberOfLongTermSessionContainers();
+public class SimQueueSender implements MQQueueSender {
 
     /**
-     * @return <code>true</code> if autologin is enabled.
+     * Initializes a new {@link SimQueueSender}.
      */
-    boolean isAutoLogin();
+    public SimQueueSender() {
+        super();
+    }
+
+    @Override
+    public void close() {
+        // Nothing to close
+    }
+
+    @Override
+    public void sendTextMessage(final String text) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void sendTextMessage(final String text, final int priority) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void sendObjectMessage(final Serializable object) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void sendObjectMessage(final Serializable object, final int priority) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void sendBytesMessage(final byte[] bytes) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void sendBytesMessage(final byte[] bytes, final int priority) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

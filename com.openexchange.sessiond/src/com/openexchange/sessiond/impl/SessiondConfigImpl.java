@@ -68,7 +68,8 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private static final long LONG_CONTAINER_LIFE_TIME = 60l * 60l * 1000l;
 
     private int maxSession = 5000;
-    private int maxSessionPerUser = 100;
+    private int maxSessionsPerUser = 100;
+    private int maxSessionsPerClient = 0;
     private long sessionShortLifeTime = 60l * 60l * 1000l;
     private long randomTokenTimeout = 60l * 1000l;
     private long longLifeTime = 7l * 24l * 60l * 60l * 1000l;
@@ -80,9 +81,14 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession=" + maxSession);
         }
 
-        maxSessionPerUser = parseProperty(conf, "com.openexchange.sessiond.maxSessionPerUser", maxSessionPerUser);
+        maxSessionsPerUser = parseProperty(conf, "com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
         if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser=" + maxSessionPerUser);
+            LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser=" + maxSessionsPerUser);
+        }
+
+        maxSessionsPerClient = parseProperty(conf, "com.openexchange.sessiond.maxSessionPerClient", maxSessionsPerClient);
+        if (DEBUG) {
+            LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient=" + maxSessionsPerClient);
         }
 
         sessionShortLifeTime = parseProperty(conf, "com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
@@ -120,7 +126,12 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     @Override
     public int getMaxSessionsPerUser() {
-        return maxSessionPerUser;
+        return maxSessionsPerUser;
+    }
+
+    @Override
+    public int getMaxSessionsPerClient() {
+        return maxSessionsPerClient;
     }
 
     @Override

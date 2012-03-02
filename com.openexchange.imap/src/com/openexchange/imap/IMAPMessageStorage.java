@@ -1378,7 +1378,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     command.doCommand();
                 }
             } catch (final MessagingException e) {
-                if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                final String err = e.getMessage().toLowerCase(Locale.US);
+                if (err.indexOf("[nonexistent]") >= 0) {
+                    // Obviously message does not/no more exist
+                    return;
+                }
+                if (err.indexOf("quota") >= 0) {
                     /*
                      * We face an Over-Quota-Exception
                      */
