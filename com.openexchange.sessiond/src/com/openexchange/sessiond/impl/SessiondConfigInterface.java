@@ -66,6 +66,8 @@ public interface SessiondConfigInterface {
 
     int getMaxSessionsPerUser();
 
+    int getMaxSessionsPerClient();
+
     long getLifeTime();
 
     long getLongLifeTime();

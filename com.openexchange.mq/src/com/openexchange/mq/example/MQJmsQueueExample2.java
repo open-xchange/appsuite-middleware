@@ -88,7 +88,7 @@ public final class MQJmsQueueExample2 {
             // Now we'll look up the connection factory:
             final QueueConnectionFactory queueConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the Queue:
-            final Queue queue = service.lookupQueue("myNewQueue", true);
+            final Queue queue = service.lookupQueue("myNewQueue", true, null);
 
             QueueConnection queueConnection = null;
             try {

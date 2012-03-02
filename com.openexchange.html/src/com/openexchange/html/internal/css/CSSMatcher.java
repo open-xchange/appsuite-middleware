@@ -261,6 +261,50 @@ public final class CSSMatcher {
     }
 
     /**
+     * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
+     *
+     * @param cssBuilder A {@link StringBuilder} containing CSS content
+     * @param styleMap The style map
+     * @param removeIfAbsent <code>true</code> to completely remove CSS element if not contained in specified style map; otherwise
+     *            <code>false</code>
+     * @return <code>true</code> if modified; otherwise <code>false</code>
+     */
+    public static boolean checkCSS(final StringBuilder cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
+        boolean modified = false;
+        final StringBuilder cssElemsBuffer = new StringBuilder(128);
+        /*
+         * Feed matcher with buffer's content and reset
+         */
+        final String css = cssBuilder.toString();
+        final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+        cssBuilder.setLength(0);
+        int lastPos = 0;
+        while (m.find()) {
+            // Check prefix part
+            cssElemsBuffer.append(css.substring(lastPos, m.start()));
+            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+            final String prefix = cssElemsBuffer.toString();
+            cssElemsBuffer.setLength(0);
+            // Check block part
+            cssElemsBuffer.append(m.group(2));
+            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+            cssElemsBuffer.insert(0, m.group(1)).append('}'); // Surround with block definition
+            final String block = cssElemsBuffer.toString();
+            cssElemsBuffer.setLength(0);
+            // Add to main builder
+            cssBuilder.append(prefix);
+            cssBuilder.append(block);
+            lastPos = m.end();
+        }
+        cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+        final String tail = cssElemsBuffer.toString();
+        cssElemsBuffer.setLength(0);
+        cssBuilder.append(tail);
+        return modified;
+    }
+
+    /**
      * Iterates over CSS blocks contained in specified string argument and checks each block against given style map
      *
      * @param cssBuilder A {@link StringBuilder} containing CSS content
@@ -329,7 +373,7 @@ public final class CSSMatcher {
      *            <code>false</code>
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
-    public static boolean checkCSSElements(final StringBuilder cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
+    private static boolean checkCSSElements(final StringBuilder cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
         boolean modified = false;
         correctRGBFunc(cssBuilder);
         /*

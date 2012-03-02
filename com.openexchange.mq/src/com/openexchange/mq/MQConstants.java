@@ -91,4 +91,39 @@ public interface MQConstants {
      */
     public static final int MQ_LISTEN_PORT = 5445;
 
+    /*
+     * ------------------------------ Queue parameters --------------------------------
+     */
+
+    /**
+     * The name of the selector parameter.
+     * <p>
+     * The selector defines what JMS message selector the predefined queue will have. Only messages that match the selector will be added to
+     * the queue. This is an optional element with a default of <code>null</code> when omitted.
+     * 
+     * <pre>
+     *  &lt;queue name="selectorQueue"&gt;
+     *       &lt;entry name="/queue/selectorQueue"/&gt;
+     *       <b>&lt;selector string="color='red'"/&gt;</b>
+     *       &lt;durable>true&lt;/durable&gt;
+     *  &lt;/queue&gt;
+     * </pre>
+     */
+    public static final String QUEUE_PARAM_SELECTOR = "selector";
+
+    /**
+     * The name of the durable flag parameter.
+     * <p>
+     * The durable flag specifies whether the queue will be persisted. This again is optional and defaults to <code>true</code> if omitted.
+     * 
+     * <pre>
+     *  &lt;queue name="selectorQueue"&gt;
+     *       &lt;entry name="/queue/selectorQueue"/&gt;
+     *       selector string="color='red'"/&gt;
+     *       <b>&lt;durable>true&lt;/durable&gt;</b>
+     *  &lt;/queue&gt;
+     * </pre>
+     */
+    public static final String QUEUE_PARAM_DURABLE = "durable";
+
 }

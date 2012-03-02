@@ -1,6 +1,0 @@
-# Defaults for open-xchange-groupware initscript
-# sourced by /etc/init.d/open-xchange-groupware
-# installed at /etc/default/open-xchange-groupware by the maintainer scripts
-
-# Enable or disable Open-Xchange start skript
-ENABLED=1

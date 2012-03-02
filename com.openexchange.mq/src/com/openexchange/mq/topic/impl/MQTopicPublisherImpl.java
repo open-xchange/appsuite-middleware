@@ -51,6 +51,7 @@ package com.openexchange.mq.topic.impl;
 
 import java.io.Serializable;
 import javax.jms.BytesMessage;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
@@ -59,6 +60,7 @@ import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
+import com.openexchange.mq.serviceLookup.MQServiceLookup;
 import com.openexchange.mq.topic.MQTopicPublisher;
 import com.openexchange.mq.topic.internal.MQTopicResource;
 
@@ -68,6 +70,12 @@ import com.openexchange.mq.topic.internal.MQTopicResource;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPublisher {
+
+    private final int defaultPriority;
+    
+    private final long defaultTimeToLive;
+
+    private int deliveryMode;
 
     private TopicPublisher topicPublisher;
 
@@ -79,11 +87,14 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
      */
     public MQTopicPublisherImpl(final String topicName) throws OXException {
         super(topicName);
+        defaultPriority = Message.DEFAULT_PRIORITY;
+        defaultTimeToLive = Message.DEFAULT_TIME_TO_LIVE;
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic) throws JMSException {
+    protected synchronized void initResource(final Topic topic) throws JMSException, OXException {
         topicPublisher = topicSession.createPublisher(topic);
+        deliveryMode = MQServiceLookup.getMQService().isLocalOnlyTopic(topicName) ? DeliveryMode.NON_PERSISTENT : DeliveryMode.PERSISTENT;
     }
 
     @Override
@@ -93,7 +104,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         }
         try {
             final TextMessage message = topicSession.createTextMessage(text);
-            topicPublisher.publish(message);
+            topicPublisher.publish(message, deliveryMode, defaultPriority, defaultTimeToLive);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -110,7 +121,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         }
         try {
             final ObjectMessage message = topicSession.createObjectMessage(object);
-            topicPublisher.publish(message);
+            topicPublisher.publish(message, deliveryMode, defaultPriority, defaultTimeToLive);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -124,7 +135,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         try {
             final BytesMessage bytesMessage = topicSession.createBytesMessage();
             bytesMessage.writeBytes(bytes, 0, bytes.length);
-            topicPublisher.publish(bytesMessage);
+            topicPublisher.publish(bytesMessage, deliveryMode, defaultPriority, defaultTimeToLive);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -137,7 +148,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         }
         try {
             final TextMessage message = topicSession.createTextMessage(text);
-            topicPublisher.publish(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+            topicPublisher.publish(message, deliveryMode, checkPriority(priority), defaultTimeToLive);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -154,7 +165,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         }
         try {
             final ObjectMessage message = topicSession.createObjectMessage(object);
-            topicPublisher.publish(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+            topicPublisher.publish(message, deliveryMode, checkPriority(priority), defaultTimeToLive);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -168,7 +179,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         try {
             final BytesMessage bytesMessage = topicSession.createBytesMessage();
             bytesMessage.writeBytes(bytes, 0, bytes.length);
-            topicPublisher.publish(bytesMessage, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+            topicPublisher.publish(bytesMessage, deliveryMode, checkPriority(priority), defaultTimeToLive);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
