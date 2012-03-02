@@ -116,18 +116,19 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
 
             }
             if (requestData.getIntParameter("save") == 1) {
-                /*-
-                 * Preview document should be saved.
-                 * We set the request format to file and return a FileHolder
-                 * containing the preview document.
-                 */
-                requestData.setFormat("file");
-                final byte[] documentBytes = previewDocument.getContent().getBytes();
-                final InputStream is = new ByteArrayInputStream(documentBytes);
-                final String contentType = previewDocument.getMetaData().get("content-type");
-                final String fileName = previewDocument.getMetaData().get("resourcename");
-                final FileHolder responseFileHolder = new FileHolder(is, documentBytes.length, contentType, fileName);
-                result.setResultObject(responseFileHolder, "file");
+                // TODO:
+//                /*-
+//                 * Preview document should be saved.
+//                 * We set the request format to file and return a FileHolder
+//                 * containing the preview document.
+//                 */
+//                requestData.setFormat("file");
+//                final byte[] documentBytes = previewDocument.getContent().getBytes();
+//                final InputStream is = new ByteArrayInputStream(documentBytes);
+//                final String contentType = previewDocument.getMetaData().get("content-type");
+//                final String fileName = previewDocument.getMetaData().get("resourcename");
+//                final FileHolder responseFileHolder = new FileHolder(is, documentBytes.length, contentType, fileName);
+//                result.setResultObject(responseFileHolder, "file");
             } else {
                 result.setResultObject(previewDocument, getOutputFormat());
             }

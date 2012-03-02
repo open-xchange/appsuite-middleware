@@ -51,6 +51,7 @@ package com.openexchange.preview.internal;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
 
@@ -63,7 +64,7 @@ public final class TikaPreviewDocument implements PreviewDocument {
 
     private final Map<String, String> map;
 
-    private final String content;
+    private final List<String> content;
 
     /**
      * Initializes a new {@link TikaPreviewDocument}.
@@ -71,7 +72,7 @@ public final class TikaPreviewDocument implements PreviewDocument {
      * @param content
      * @param map
      */
-    public TikaPreviewDocument(final String content, final Map<String, String> map) {
+    public TikaPreviewDocument(final List<String> content, final Map<String, String> map) {
         super();
         this.content = content;
         this.map = Collections.unmodifiableMap(map);
@@ -88,7 +89,7 @@ public final class TikaPreviewDocument implements PreviewDocument {
     }
 
     @Override
-    public String getContent() {
+    public List<String> getContent() {
         return content;
     }
 

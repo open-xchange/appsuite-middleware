@@ -109,6 +109,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
             ;
         }
 
+        done.set(false);
         return content;
     }
 
@@ -121,11 +122,6 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
         final UpdateMessages message = (UpdateMessages) obj;
         if (message.getKey().equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED)) {
             try {
-//                final String content = streamProvider.getDocumentContent();
-//                String tmp = replaceUrlLinks(content);
-//                tmp = replaceHrefLinks(tmp);
-//                tmp = replaceRelLinks(tmp);
-//                this.content = replaceImgLinks(tmp);
                 this.content = streamProvider.getDocumentContent();
             } catch (final OXException e) {
                 exception = e;
@@ -142,164 +138,5 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
         }
     }
 
-//    private String replaceImgLinks(final String content) throws OXException {
-//        String retval = content;
-//        final Matcher imgMatcher = IMG_PATTERN.matcher(retval);
-//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
-//        final StringBuilder sb = new StringBuilder(retval.length());
-//        if (imgMatcher.find()) {
-//            final StringBuilder strBuffer = new StringBuilder(256);
-//            final MatcherReplacer mr = new MatcherReplacer();
-//            final StringBuilder linkBuilder = new StringBuilder(256);
-//            do {
-//                final String imgTag = imgMatcher.group();
-//                strBuffer.setLength(0);
-//                final Matcher m = IMG_FILENAME_PATTERN.matcher(imgTag);
-//                mr.resetTo(m, imgTag);
-//                if (m.find()) {
-//                    final String fileName = m.group(1);
-//                    /*
-//                     * Compose corresponding image data
-//                     */
-//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
-//                    if (imageURL == null) {
-//                        imageURL = fileName;
-//                    }
-//
-//                    linkBuilder.setLength(0);
-//                    linkBuilder.append("src=").append('"').append(imageURL).append('"');
-//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//
-//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
-//                    strBuffer.setLength(0);
-//                }
-//                mr.appendTail(strBuffer);
-//            } while (imgMatcher.find());
-//        }
-//        imgReplacer.appendTail(sb);
-//        retval = sb.toString();
-//
-//        return retval;
-//    }
-
-//    private String replaceUrlLinks(final String content) throws OXException {
-//        String retval = content;
-//        final Matcher imgMatcher = URL_PATTERN.matcher(retval);
-//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
-//        final StringBuilder sb = new StringBuilder(retval.length());
-//        if (imgMatcher.find()) {
-//            final StringBuilder strBuffer = new StringBuilder(256);
-//            final MatcherReplacer mr = new MatcherReplacer();
-//            final StringBuilder linkBuilder = new StringBuilder(256);
-//            do {
-//                final String imgTag = imgMatcher.group();
-//                strBuffer.setLength(0);
-//                final Matcher m = URL_FILENAME_PATTERN.matcher(imgTag);
-//                mr.resetTo(m, imgTag);
-//                if (m.find()) {
-//                    final String fileName = m.group(1);
-//                    /*
-//                     * Compose corresponding image data
-//                     */
-//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
-//                    if (imageURL == null) {
-//                        imageURL = fileName;
-//                    }
-//
-//                    linkBuilder.setLength(0);
-//                    linkBuilder.append("url(").append(imageURL).append(")");
-//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//
-//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
-//                    strBuffer.setLength(0);
-//                }
-//                mr.appendTail(strBuffer);
-//            } while (imgMatcher.find());
-//        }
-//        imgReplacer.appendTail(sb);
-//        retval = sb.toString();
-//
-//        return retval;
-//    }
-//
-//    private String replaceHrefLinks(final String content) throws OXException {
-//        String retval = content;
-//        final Matcher imgMatcher = HREF_PATTERN.matcher(retval);
-//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
-//        final StringBuilder sb = new StringBuilder(retval.length());
-//        if (imgMatcher.find()) {
-//            final StringBuilder strBuffer = new StringBuilder(256);
-//            final MatcherReplacer mr = new MatcherReplacer();
-//            final StringBuilder linkBuilder = new StringBuilder(256);
-//            do {
-//                final String imgTag = imgMatcher.group();
-//                strBuffer.setLength(0);
-//                final Matcher m = HREF_FILENAME_PATTERN.matcher(imgTag);
-//                mr.resetTo(m, imgTag);
-//                if (m.find()) {
-//                    final String fileName = m.group(1);
-//                    /*
-//                     * Compose corresponding image data
-//                     */
-//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
-//                    if (imageURL == null) {
-//                        imageURL = fileName;
-//                    }
-//
-//                    linkBuilder.setLength(0);
-//                    linkBuilder.append("href=").append('"').append(imageURL).append('"');
-//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//
-//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
-//                    strBuffer.setLength(0);
-//                }
-//                mr.appendTail(strBuffer);
-//            } while (imgMatcher.find());
-//        }
-//        imgReplacer.appendTail(sb);
-//        retval = sb.toString();
-//
-//        return retval;
-//    }
-//
-//    private String replaceRelLinks(final String content) throws OXException {
-//        String retval = content;
-//        final Matcher imgMatcher = REL_PATTERN.matcher(retval);
-//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
-//        final StringBuilder sb = new StringBuilder(retval.length());
-//        if (imgMatcher.find()) {
-//            final StringBuilder strBuffer = new StringBuilder(256);
-//            final MatcherReplacer mr = new MatcherReplacer();
-//            final StringBuilder linkBuilder = new StringBuilder(256);
-//            do {
-//                final String imgTag = imgMatcher.group();
-//                strBuffer.setLength(0);
-//                final Matcher m = REL_FILENAME_PATTERN.matcher(imgTag);
-//                mr.resetTo(m, imgTag);
-//                if (m.find()) {
-//                    final String fileName = m.group(1);
-//                    /*
-//                     * Compose corresponding image data
-//                     */
-//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
-//                    if (imageURL == null) {
-//                        imageURL = fileName;
-//                    }
-//
-//                    linkBuilder.setLength(0);
-//                    linkBuilder.append("rel=").append('"').append(imageURL).append('"');
-//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//
-//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
-//                    strBuffer.setLength(0);
-//                }
-//                mr.appendTail(strBuffer);
-//            } while (imgMatcher.find());
-//        }
-//        imgReplacer.appendTail(sb);
-//        retval = sb.toString();
-//
-//        return retval;
-//    }
 
 }
