@@ -75,6 +75,8 @@ import com.openexchange.mq.MQService;
  */
 public final class HornetQService implements MQService {
 
+    private static final String SERVER = Integer.toString(OXException.getServerId());
+
     private final HornetQEmbeddedJMS jmsServer;
 
     private final ConnectionFactory defaultConnectionFactory;
@@ -168,6 +170,12 @@ public final class HornetQService implements MQService {
         return (CF) defaultConnectionFactory;
     }
 
+    /*-
+     * -------------------------------------------------------------------------------------------------
+     * ----------------------------------- Lookup methods for Queues -----------------------------------
+     * -------------------------------------------------------------------------------------------------
+     */
+
     @Override
     public Queue lookupQueue(final String name) throws OXException {
         try {
@@ -189,9 +197,10 @@ public final class HornetQService implements MQService {
             return lookupQueue(name);
         }
         // Create if absent
+        final String identifier = MQConstants.PREFIX_QUEUE + name;
         Queue queue;
         try {
-            queue = (Queue) jmsServer.lookup(MQConstants.PREFIX_QUEUE + name);
+            queue = (Queue) jmsServer.lookup(identifier);
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -202,7 +211,7 @@ public final class HornetQService implements MQService {
         if (null == queue) {
             try {
                 final JMSServerManager serverManager = jmsServer.getServerManager();
-                final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, null, false, MQConstants.PREFIX_QUEUE + name);
+                final JMSQueueConfiguration config = new JMSQueueConfigurationImpl(name, null, false, identifier);
                 final String[] bindings = config.getBindings();
                 serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
             } catch (final Exception e) {
@@ -211,6 +220,58 @@ public final class HornetQService implements MQService {
         }
         return lookupQueue(name);
     }
+
+    @Override
+    public Queue lookupLocalOnlyQueue(final String name) throws OXException {
+        try {
+            final Queue queue = (Queue) jmsServer.lookup(MQConstants.PREFIX_QUEUE + name + SERVER);
+            if (null == queue) {
+                throw MQExceptionCodes.QUEUE_NOT_FOUND.create(name);
+            }
+            return queue;
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(e, name);
+        }
+    }
+
+    @Override
+    public Queue lookupLocalOnlyQueue(final String name, final boolean createIfAbsent) throws OXException {
+        if (!createIfAbsent) {
+            return lookupQueue(name);
+        }
+        // Create if absent
+        final String identifier = MQConstants.PREFIX_QUEUE + name + SERVER;
+        Queue queue;
+        try {
+            queue = (Queue) jmsServer.lookup(identifier);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            queue = null;
+        } catch (final Exception e) {
+            queue = null;
+        }
+        if (null == queue) {
+            try {
+                final JMSServerManager serverManager = jmsServer.getServerManager();
+                final JMSQueueConfiguration config =
+                    new JMSQueueConfigurationImpl(name, null, false, identifier);
+                final String[] bindings = config.getBindings();
+                serverManager.createQueue(false, config.getName(), config.getSelector(), config.isDurable(), bindings);
+            } catch (final Exception e) {
+                throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return lookupQueue(name);
+    }
+
+    /*-
+     * -------------------------------------------------------------------------------------------------
+     * ----------------------------------- Lookup methods for Topics -----------------------------------
+     * -------------------------------------------------------------------------------------------------
+     */
 
     @Override
     public Topic lookupTopic(final String name) throws OXException {
@@ -233,9 +294,10 @@ public final class HornetQService implements MQService {
             return lookupTopic(name);
         }
         // Create if absent
+        final String identifier = MQConstants.PREFIX_TOPIC + name;
         Topic topic;
         try {
-            topic = (Topic) jmsServer.lookup(MQConstants.PREFIX_TOPIC + name);
+            topic = (Topic) jmsServer.lookup(identifier);
         } catch (final ClassCastException e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -246,7 +308,52 @@ public final class HornetQService implements MQService {
         if (null == topic) {
             try {
                 final JMSServerManager serverManager = jmsServer.getServerManager();
-                final TopicConfiguration config = new TopicConfigurationImpl(name, MQConstants.PREFIX_TOPIC + name);
+                final TopicConfiguration config = new TopicConfigurationImpl(name, identifier);
+                final String[] bindings = config.getBindings();
+                serverManager.createTopic(false, config.getName(), bindings);
+            } catch (final Exception e) {
+                throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return lookupTopic(name);
+    }
+
+    @Override
+    public Topic lookupLocalOnlyTopic(final String name) throws OXException {
+        try {
+            final Topic topic = (Topic) jmsServer.lookup(name);
+            if (null == topic) {
+                throw MQExceptionCodes.TOPIC_NOT_FOUND.create(MQConstants.PREFIX_TOPIC + name + SERVER);
+            }
+            return topic;
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.TOPIC_NOT_FOUND.create(e, name);
+        }
+    }
+
+    @Override
+    public Topic lookupLocalOnlyTopic(final String name, final boolean createIfAbsent) throws OXException {
+        if (!createIfAbsent) {
+            return lookupTopic(name);
+        }
+        // Create if absent
+        final String identifier = MQConstants.PREFIX_TOPIC + name + SERVER;
+        Topic topic;
+        try {
+            topic = (Topic) jmsServer.lookup(identifier);
+        } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            topic = null;
+        } catch (final Exception e) {
+            topic = null;
+        }
+        if (null == topic) {
+            try {
+                final JMSServerManager serverManager = jmsServer.getServerManager();
+                final TopicConfiguration config = new TopicConfigurationImpl(name, identifier);
                 final String[] bindings = config.getBindings();
                 serverManager.createTopic(false, config.getName(), bindings);
             } catch (final Exception e) {
