@@ -81,9 +81,11 @@ public final class AppointmentJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
+        // FIXME registering task logic layer classes within calendar JSON activator is somehow wrong...
+//        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+//        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+//        registerService(TargetService.class, new ModifyThroughDependant(), props);
+
 //        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
 //        registerService(ResultConverter.class, new AppointmentResultConverter());
     }
