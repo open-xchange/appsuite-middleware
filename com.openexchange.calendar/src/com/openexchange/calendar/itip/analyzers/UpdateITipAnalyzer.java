@@ -109,7 +109,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (update == null) {
             update = original;
         }
-        CalendarDataObject master = update;
+    	analysis.setUid(update.getUid());
+
+    	CalendarDataObject master = update;
         List<Appointment> exceptions = Collections.emptyList();
 
         boolean differ = true;

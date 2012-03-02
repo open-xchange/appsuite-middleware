@@ -129,6 +129,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				}
 			}
 		}
+		
+		analysis.setUid(uid);
 
 		CalendarDataObject original = util.resolveUid(uid, session);
 		if (original == null) {
