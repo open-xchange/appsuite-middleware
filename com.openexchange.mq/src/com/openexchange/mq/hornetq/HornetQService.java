@@ -51,6 +51,7 @@ package com.openexchange.mq.hornetq;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -64,6 +65,7 @@ import org.hornetq.jms.server.config.TopicConfiguration;
 import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
 import org.hornetq.jms.server.config.impl.TopicConfigurationImpl;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
@@ -75,7 +77,7 @@ import com.openexchange.mq.MQService;
  */
 public final class HornetQService implements MQService {
 
-    private static final String SERVER = Integer.toString(OXException.getServerId());
+    private static final String SERVER = "-" + UUIDs.getUnformattedString(UUID.randomUUID());
 
     private final HornetQEmbeddedJMS jmsServer;
 
