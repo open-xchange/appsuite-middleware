@@ -50,22 +50,28 @@
 package com.openexchange.mq;
 
 import java.io.Serializable;
+import java.util.PriorityQueue;
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.SimQueueReceiver.QueueElement;
 import com.openexchange.mq.queue.MQQueueSender;
 
-
 /**
- * {@link SimQueueSender}
- *
+ * {@link SimQueueSender} - A queue sender for testing purpose.
+ * <p>
+ * Obtain via {@link SimQueueReceiver#createSimSender()}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SimQueueSender implements MQQueueSender {
 
+    private final PriorityQueue<QueueElement> queue;
+
     /**
      * Initializes a new {@link SimQueueSender}.
      */
-    public SimQueueSender() {
+    SimQueueSender(final PriorityQueue<QueueElement> queue) {
         super();
+        this.queue = queue;
     }
 
     @Override
@@ -75,38 +81,32 @@ public class SimQueueSender implements MQQueueSender {
 
     @Override
     public void sendTextMessage(final String text) throws OXException {
-        // TODO Auto-generated method stub
-
+        queue.offer(new QueueElement(text));
     }
 
     @Override
     public void sendTextMessage(final String text, final int priority) throws OXException {
-        // TODO Auto-generated method stub
-
+        queue.offer(new QueueElement(text, priority));
     }
 
     @Override
     public void sendObjectMessage(final Serializable object) throws OXException {
-        // TODO Auto-generated method stub
-
+        queue.offer(new QueueElement(object));
     }
 
     @Override
     public void sendObjectMessage(final Serializable object, final int priority) throws OXException {
-        // TODO Auto-generated method stub
-
+        queue.offer(new QueueElement(object, priority));
     }
 
     @Override
     public void sendBytesMessage(final byte[] bytes) throws OXException {
-        // TODO Auto-generated method stub
-
+        queue.offer(new QueueElement(bytes));
     }
 
     @Override
     public void sendBytesMessage(final byte[] bytes, final int priority) throws OXException {
-        // TODO Auto-generated method stub
-
+        queue.offer(new QueueElement(bytes, priority));
     }
 
 }
