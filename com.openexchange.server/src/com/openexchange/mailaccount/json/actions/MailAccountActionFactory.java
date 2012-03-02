@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "account", description = "The mail account module is used to manage multiple mail accounts held by a user.")
+@Module(name = "mailaccount", description = "The mail account module is used to manage multiple mail accounts held by a user.")
 public final class MailAccountActionFactory implements AJAXActionServiceFactory {
 
     private static final MailAccountActionFactory SINGLETON = new MailAccountActionFactory();
