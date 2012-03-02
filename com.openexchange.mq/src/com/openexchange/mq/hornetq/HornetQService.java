@@ -152,9 +152,9 @@ public final class HornetQService implements MQService {
      */
 
     @Override
-    public <CF extends ConnectionFactory> CF lookupConnectionFactory(final String name) throws OXException {
+    public <F extends ConnectionFactory> F lookupConnectionFactory(final String name) throws OXException {
         try {
-            @SuppressWarnings("unchecked") final CF connectionFactory = (CF) jmsServer.lookup(name);
+            @SuppressWarnings("unchecked") final F connectionFactory = (F) jmsServer.lookup(name);
             if (null == connectionFactory) {
                 throw MQExceptionCodes.CF_NOT_FOUND.create(name);
             }
@@ -168,8 +168,8 @@ public final class HornetQService implements MQService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <CF extends ConnectionFactory> CF lookupDefaultConnectionFactory() throws OXException {
-        return (CF) defaultConnectionFactory;
+    public <F extends ConnectionFactory> F lookupDefaultConnectionFactory() throws OXException {
+        return (F) defaultConnectionFactory;
     }
 
     /*-

@@ -117,7 +117,7 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    <CF extends ConnectionFactory> CF lookupConnectionFactory(String name) throws OXException;
+    <F extends ConnectionFactory> F lookupConnectionFactory(String name) throws OXException;
 
     /**
      * Lookup in the registry for registered default {@link ConnectionFactory}.
@@ -129,7 +129,7 @@ public interface MQService {
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
      */
-    <CF extends ConnectionFactory> CF lookupDefaultConnectionFactory() throws OXException;
+    <F extends ConnectionFactory> F lookupDefaultConnectionFactory() throws OXException;
 
     /*-
      * -------------------------------------------------------------------------------------------------
