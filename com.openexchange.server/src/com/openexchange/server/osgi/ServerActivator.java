@@ -138,7 +138,6 @@ import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterR
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
@@ -250,7 +249,7 @@ public final class ServerActivator extends HousekeepingActivator {
         {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-            CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
+            CalendarCollectionService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class,
             ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
         };
@@ -339,6 +338,15 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        if (!started.compareAndSet(false, true)) {
+            /*
+             * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
+             * re-availability causes to trigger this method again.
+             */
+            LOG.info("A temporary absent service is available again");
+            return;
+        }
+        
         CONTEXT = context;
         JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 1000));
         // get version information from MANIFEST file
@@ -356,15 +364,7 @@ public final class ServerActivator extends HousekeepingActivator {
                     registry.addService(classes[i], service);
                 }
             }
-        }
-        if (!started.compareAndSet(false, true)) {
-            /*
-             * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
-             * re-availability causes to trigger this method again.
-             */
-            LOG.info("A temporary absent service is available again");
-            return;
-        }
+        }        
         LOG.info("starting bundle: com.openexchange.server");
         /*
          * Add service trackers
