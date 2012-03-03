@@ -69,6 +69,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -82,10 +83,10 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
@@ -98,6 +99,7 @@ import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -581,23 +583,108 @@ public final class MimeForward {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
         }
         final String linebreak = html ? "<br>" : "\r\n";
+        
+        
+        /*-
+         * Surround with quote
+         * 
+         * Check whether forward text shall be surrounded with quotes or not
+         */
+        final boolean forwardUnquoted;
+        {
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            forwardUnquoted = null == service ? false : service.getBoolProperty("com.openexchange.mail.forwardUnquoted", false);
+        }
+
+        if (forwardUnquoted) {
+            /*
+             * Don't quote
+             */
+            if (html) {
+                final Matcher m = PATTERN_BODY.matcher(firstSeenText);
+                final MatcherReplacer mr = new MatcherReplacer(m, firstSeenText);
+                final StringBuilder replaceBuffer = new StringBuilder(firstSeenText.length() + 256);
+                if (m.find()) {
+                    mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(
+                        m.group()).append(forwardPrefix).append(linebreak).append(linebreak).toString());
+                } else {
+                    replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
+                }
+                replaceBuffer.append("<div style=\"position:relative\">");
+                mr.appendTail(replaceBuffer);
+                replaceBuffer.append("</div>");
+                return replaceBuffer.toString();
+            }
+            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak).append(
+                firstSeenText).toString();
+        }
+        /*
+         * Surround with quotes
+         */
         if (html) {
             final Matcher m = PATTERN_BODY.matcher(firstSeenText);
             final MatcherReplacer mr = new MatcherReplacer(m, firstSeenText);
             final StringBuilder replaceBuffer = new StringBuilder(firstSeenText.length() + 256);
             if (m.find()) {
-                mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(
+                mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(
                     m.group()).append(forwardPrefix).append(linebreak).append(linebreak).toString());
             } else {
-                replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
+                replaceBuffer.append(forwardPrefix).append(linebreak).append(linebreak);
             }
-            replaceBuffer.append("<div style=\"position:relative\">");
             mr.appendTail(replaceBuffer);
+            
+            final String tmp = quoteHtml(replaceBuffer.toString());
+            replaceBuffer.setLength(0);
+            replaceBuffer.append(linebreak);
+            replaceBuffer.append("<div style=\"position:relative\">");
+            replaceBuffer.append(tmp);
             replaceBuffer.append("</div>");
             return replaceBuffer.toString();
         }
-        return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak).append(
-            firstSeenText).toString();
+        final StringBuilder builder = new StringBuilder(firstSeenText.length() + 256);
+        final String tmp = builder.append(forwardPrefix).append(linebreak).append(linebreak).append(firstSeenText).toString();
+        builder.setLength(0);
+        builder.append(linebreak).append(quoteText(tmp));
+        return builder.toString();
+    }
+
+    private static String quoteText(final String textContent) {
+        return textContent.replaceAll("(?m)^", "> ");
+    }
+
+    private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
+
+    private static final String BLOCKQUOTE_START =
+        "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
+
+    private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
+
+    private static String quoteHtml(final String htmlContent) {
+        Matcher m = PATTERN_HTML_START.matcher(htmlContent);
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        if (m.find()) {
+            mr.appendLiteralReplacement(sb, BLOCKQUOTE_START);
+        } else {
+            sb.append(BLOCKQUOTE_START);
+        }
+        mr.appendTail(sb);
+        {
+            final String s = sb.toString();
+            m = PATTERN_HTML_END.matcher(s);
+            mr.resetTo(m, s);
+        }
+        sb.setLength(0);
+        if (m.find()) {
+            mr.appendLiteralReplacement(sb, BLOCKQUOTE_END);
+            mr.appendTail(sb);
+        } else {
+            mr.appendTail(sb);
+            sb.append(BLOCKQUOTE_END);
+        }
+        return sb.toString();
     }
 
     /*-
