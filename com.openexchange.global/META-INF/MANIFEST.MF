@@ -42,3 +42,6 @@ Import-Package: com.openexchange.exception,
  org.osgi.service.event,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.server.GlobalActivator
+Bundle-ClassPath: lib/stringsearch-2.jar,
+ lib/stringsearch-1.0.0.jar,
+ .
