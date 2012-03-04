@@ -57,6 +57,7 @@ import com.openexchange.secret.Decrypter;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.session.Session;
 
 /**
@@ -77,6 +78,11 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     private final CryptoService crypto;
 
+    /**
+     * The {@link SecretService} reference with the highest ranking.
+     * <p>
+     * See {@link WhiteboardSecretService} implementation.
+     */
     private final SecretService secretService;
 
     private final int off;
