@@ -74,6 +74,14 @@ public class WhiteboardSecretService implements SecretService {
 
     @Override
     public String getSecret(final Session session) {
+        /*-
+         * If multiple services are being tracked, the service with the highest
+         * ranking (as specified in its {@code service.ranking} property) is
+         * returned. If there is a tie in ranking, the service with the lowest
+         * service ID (as specified in its {@code service.id} property); that
+         * is, the service that was registered first is returned. This is the same
+         * algorithm used by {@code BundleContext.getServiceReference}.
+         */
         final SecretService secretService = tracker.getService();
         if (secretService == null) {
             return null;
