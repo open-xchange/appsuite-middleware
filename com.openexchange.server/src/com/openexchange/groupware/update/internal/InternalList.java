@@ -443,5 +443,8 @@ public final class InternalList {
         // Migrate "replyTo" information from properties table to account tables
         new com.openexchange.groupware.update.tasks.MailAccountMigrateReplyToTask(),
 
+        // Drops useless foreign keys from 'malPollHash' table
+        new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask(),
+
     };
 }
