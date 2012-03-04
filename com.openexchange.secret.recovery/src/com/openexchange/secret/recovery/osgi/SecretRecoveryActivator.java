@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
@@ -72,6 +73,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
 
     private volatile WhiteboardSecretMigrator migrator;
     private volatile WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
+    private volatile WhiteboardSecretService whiteboardSecretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -80,10 +82,17 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        /*
+         * Get ranking of currently applicable SecretService reference
+         */
+        final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService = new WhiteboardSecretService(context);
+        whiteboardSecretService.open();
+
         final SecretUsesPasswordChecker checker = getService(SecretUsesPasswordChecker.class);
-        final boolean usesPassword = checker != null && checker.usesPassword();
-        if (usesPassword) {
-            /*
+        if (whiteboardSecretService.getRanking() < 0 && null != checker && checker.usesPassword()) {
+            /*-
+             * Token list in use and main entry uses password for secret retrieval.
+             * 
              * Initialize whiteboard services
              */
             final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
@@ -138,6 +147,11 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
         if (null != detector) {
             detector.close();
             whiteboardEncryptedItemDetector = null;
+        }
+        final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
+        if (whiteboardSecretService != null) {
+            whiteboardSecretService.close();
+            this.whiteboardSecretService = null;
         }
     }
 
