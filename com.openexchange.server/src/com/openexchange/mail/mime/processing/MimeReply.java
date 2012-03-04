@@ -112,12 +112,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeReply} - MIME message reply.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeReply {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeReply.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeReply.class));
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -130,7 +131,7 @@ public final class MimeReply {
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
-     *
+     * 
      * @param originalMail The referenced original mail
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
      * @param session The session containing needed user data
@@ -144,7 +145,7 @@ public final class MimeReply {
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
-     *
+     * 
      * @param originalMail The referenced original mail
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
      * @param session The session containing needed user data
@@ -192,7 +193,7 @@ public final class MimeReply {
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
-     *
+     * 
      * @param originalMsg The referenced original message
      * @param msgref The message reference
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
@@ -383,9 +384,9 @@ public final class MimeReply {
                  */
                 replyMsg.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
-                    "#CS#",
-                    MailProperties.getInstance().getDefaultMimeCharset()));
+                replyMsg.setHeader(
+                    MessageHeaders.HDR_CONTENT_TYPE,
+                    MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
                 final MailMessage replyMail = MimeMessageConverter.convertMessage(replyMsg);
                 if (null != msgref) {
                     replyMail.setMsgref(msgref);
@@ -489,7 +490,7 @@ public final class MimeReply {
     /**
      * Filters given address array against given filter set. All addresses currently contained in filter set are removed from specified
      * <code>addrs</code> and all addresses not contained in filter set are added to filter set for future invocations.
-     *
+     * 
      * @param filter The current address filter
      * @param addrs The address list to filter
      * @return The filtered set of addresses
@@ -526,7 +527,7 @@ public final class MimeReply {
 
     /**
      * Gathers all text bodies and appends them to given text builder.
-     *
+     * 
      * @param msg The root message
      * @param retvalContentType The return value's content type
      * @param strHelper The i18n string helper
@@ -562,7 +563,11 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
+                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(
+                                date,
+                                DateFormat.LONG,
+                                ltz.locale,
+                                ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -573,7 +578,11 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
+                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(
+                                date,
+                                DateFormat.SHORT,
+                                ltz.locale,
+                                ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -584,7 +593,8 @@ public final class MimeReply {
             {
                 final InternetAddress[] from = msg.getFrom();
                 replyPrefix =
-                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
+                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
+                        from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
             }
             {
                 final char nextLine = '\n';
@@ -614,9 +624,7 @@ public final class MimeReply {
                  */
                 final String replyTextBody;
                 if (isHtml) {
-                    final String tmp = quoteHtml(textBuilder.toString());
-                    textBuilder.setLength(0);
-                    replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
+                    replyTextBody = quoteHtml(textBuilder.toString());
                 } else {
                     replyTextBody = quoteText(textBuilder.toString());
                 }
@@ -630,9 +638,7 @@ public final class MimeReply {
                 final String replyTextBody;
                 if (isHtml) {
                     textBuilder.insert(getBodyTagEndPos(textBuilder), replyPrefix);
-                    final String tmp = quoteHtml(textBuilder.toString());
-                    textBuilder.setLength(0);
-                    replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
+                    replyTextBody = quoteHtml(textBuilder.toString());
                 } else {
                     textBuilder.insert(0, replyPrefix);
                     replyTextBody = quoteText(textBuilder.toString());
@@ -655,7 +661,7 @@ public final class MimeReply {
 
     /**
      * Gathers all text bodies and appends them to given text builder.
-     *
+     * 
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
      * @throws OXException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
@@ -750,7 +756,7 @@ public final class MimeReply {
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
 
     private static final String BLOCKQUOTE_START =
-        "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
+        "<blockquote type=\"cite\" style=\"position: relative; margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 

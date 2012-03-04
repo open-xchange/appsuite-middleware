@@ -107,12 +107,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeForward} - MIME message forward.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeForward {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeForward.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeForward.class));
 
     private static final String PREFIX_FWD = "Fwd: ";
 
@@ -127,7 +128,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     *
+     * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
@@ -142,7 +143,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     *
+     * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
@@ -168,7 +169,7 @@ public final class MimeForward {
      * <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     *
+     * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountIDs The account IDs of the referenced original mails
@@ -193,7 +194,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     *
+     * 
      * @param originalMsgs The referenced original messages
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
@@ -294,9 +295,11 @@ public final class MimeForward {
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(
-                    generateForwardText(firstSeenText, new LocaleAndTimeZone(UserStorage.getStorageUser(
-                        session.getUserId(),
-                        ctx)), originalMsg, isHtml),
+                    generateForwardText(
+                        firstSeenText,
+                        new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)),
+                        originalMsg,
+                        isHtml),
                     contentType.getCharsetParameter(),
                     contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -331,9 +334,11 @@ public final class MimeForward {
             }
             final String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
             forwardMsg.setText(
-                generateForwardText(content == null ? "" : content, new LocaleAndTimeZone(UserStorage.getStorageUser(
-                    session.getUserId(),
-                    ctx)), originalMsg, originalContentType.startsWith(TEXT_HTM)),
+                generateForwardText(
+                    content == null ? "" : content,
+                    new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)),
+                    originalMsg,
+                    originalContentType.startsWith(TEXT_HTM)),
                 originalContentType.getCharsetParameter(),
                 originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -352,11 +357,10 @@ public final class MimeForward {
                 final ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
                 contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                 final MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText(generateForwardText(
-                    "",
-                    new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)),
-                    originalMsg,
-                    false), MailProperties.getInstance().getDefaultMimeCharset(), "plain");
+                textPart.setText(
+                    generateForwardText("", new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)), originalMsg, false),
+                    MailProperties.getInstance().getDefaultMimeCharset(),
+                    "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
@@ -420,9 +424,9 @@ public final class MimeForward {
             final MimeBodyPart textPart = new MimeBodyPart();
             textPart.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
             textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
-                "#CS#",
-                MailProperties.getInstance().getDefaultMimeCharset()));
+            textPart.setHeader(
+                MessageHeaders.HDR_CONTENT_TYPE,
+                MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
             multipart.addBodyPart(textPart);
             forwardMsg.setContent(multipart);
             forwardMsg.saveChanges();
@@ -451,7 +455,7 @@ public final class MimeForward {
 
     /**
      * Determines the first seen text in given multipart content with recursive iteration over enclosed multipart contents.
-     *
+     * 
      * @param mp The multipart object
      * @param retvalContentType The return value's content type (gets filled during processing and should therefore be empty)
      * @return The first seen text content
@@ -523,7 +527,7 @@ public final class MimeForward {
 
     /**
      * Generates the forward text on an inline-forward operation.
-     *
+     * 
      * @param firstSeenText The first seen text from original message
      * @param ltz The locale that determines format of date and time strings and time zone as well
      * @param msg The original message
@@ -536,12 +540,14 @@ public final class MimeForward {
         {
             final InternetAddress[] from = msg.getFrom();
             forwardPrefix =
-                PATTERN_FROM.matcher(forwardPrefix).replaceFirst(from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
+                PATTERN_FROM.matcher(forwardPrefix).replaceFirst(
+                    from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
         }
         {
             final InternetAddress[] to = msg.getTo();
             forwardPrefix =
-                PATTERN_TO.matcher(forwardPrefix).replaceFirst(to == null || to.length == 0 ? "" : quoteReplacement(MimeProcessingUtility.addrs2String(to)));
+                PATTERN_TO.matcher(forwardPrefix).replaceFirst(
+                    to == null || to.length == 0 ? "" : quoteReplacement(MimeProcessingUtility.addrs2String(to)));
         }
         {
             final InternetAddress[] cc = msg.getCc();
@@ -555,7 +561,11 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
+                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(
+                            date,
+                            DateFormat.LONG,
+                            ltz.locale,
+                            ltz.timeZone)));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -565,7 +575,11 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
+                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(
+                            date,
+                            DateFormat.SHORT,
+                            ltz.locale,
+                            ltz.timeZone)));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -583,8 +597,7 @@ public final class MimeForward {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
         }
         final String linebreak = html ? "<br>" : "\r\n";
-        
-        
+
         /*-
          * Surround with quote
          * 
@@ -605,8 +618,10 @@ public final class MimeForward {
                 final MatcherReplacer mr = new MatcherReplacer(m, firstSeenText);
                 final StringBuilder replaceBuffer = new StringBuilder(firstSeenText.length() + 256);
                 if (m.find()) {
-                    mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(
-                        m.group()).append(forwardPrefix).append(linebreak).append(linebreak).toString());
+                    mr.appendLiteralReplacement(
+                        replaceBuffer,
+                        new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(m.group()).append(forwardPrefix).append(
+                            linebreak).append(linebreak).toString());
                 } else {
                     replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
                 }
@@ -615,8 +630,8 @@ public final class MimeForward {
                 replaceBuffer.append("</div>");
                 return replaceBuffer.toString();
             }
-            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak).append(
-                firstSeenText).toString();
+            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(
+                linebreak).append(firstSeenText).toString();
         }
         /*
          * Surround with quotes
@@ -626,19 +641,19 @@ public final class MimeForward {
             final MatcherReplacer mr = new MatcherReplacer(m, firstSeenText);
             final StringBuilder replaceBuffer = new StringBuilder(firstSeenText.length() + 256);
             if (m.find()) {
-                mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(
-                    m.group()).append(forwardPrefix).append(linebreak).append(linebreak).toString());
+                mr.appendLiteralReplacement(
+                    replaceBuffer,
+                    new StringBuilder(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
+                        linebreak).toString());
             } else {
                 replaceBuffer.append(forwardPrefix).append(linebreak).append(linebreak);
             }
             mr.appendTail(replaceBuffer);
-            
+
             final String tmp = quoteHtml(replaceBuffer.toString());
             replaceBuffer.setLength(0);
             replaceBuffer.append(linebreak);
-            replaceBuffer.append("<div style=\"position:relative\">");
             replaceBuffer.append(tmp);
-            replaceBuffer.append("</div>");
             return replaceBuffer.toString();
         }
         final StringBuilder builder = new StringBuilder(firstSeenText.length() + 256);
@@ -657,7 +672,7 @@ public final class MimeForward {
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
 
     private static final String BLOCKQUOTE_START =
-        "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
+        "<blockquote type=\"cite\" style=\"position: relative; margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
