@@ -5,10 +5,10 @@
         Patches the path in the crawler.properties configuration file before installing it.
     </description>
 
+    <import file="build-project.xml"/>
+
     <!-- Constants -->
     <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
-
-    <import file="build-project.xml"/>
 
     <target name="installConf" depends="patchConfig">
         <copy todir="${destDir}/${confInstallDir}">
@@ -35,6 +35,10 @@
         <replace dir="${patchConfDir}" includes="crawler.properties">
             <replacefilter token="@confDir@" value="${confInstallDir}"/>
         </replace>
-    </target>    
+    </target>
+
+    <target name="postClean">
+        <delete dir="${tmpDir}"/>
+    </target>
 
 </project>

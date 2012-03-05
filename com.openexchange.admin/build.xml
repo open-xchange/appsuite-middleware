@@ -7,6 +7,9 @@
 
     <import file="build-project.xml"/>
 
+    <!-- Constants -->
+    <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
+
     <target name="installConf" depends="patchConfig">
         <copy todir="${destDir}/${confInstallDir}">
             <fileset dir="${patchConfDir}"/>
@@ -47,5 +50,9 @@
     </target>    
 
     <!-- TODO CLTs -->
+
+    <target name="postClean">
+        <delete dir="${tmpDir}"/>
+    </target>
 
 </project>

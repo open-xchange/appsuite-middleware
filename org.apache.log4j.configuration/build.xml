@@ -12,7 +12,7 @@
     </target>
 
     <target name="postInstall">
-        <symlink link="${destDir}/${bundlesDir}/${Bundle-SymbolicName}/log4j.xml" resource="${confInstallDir}/log4j.xml"/>
+        <symlink link="${destDir}/${bundlesDir}/${Bundle-SymbolicName}/log4j.xml" resource="${confInstallDir}/log4j.xml" overwrite="true"/>
     </target>
 
 </project>
