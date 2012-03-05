@@ -6,5 +6,5 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry exported="true" kind="lib" path="lib/freemarker.jar" sourcepath="lib/freemarker-2.3.15-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="output" path="build"/>
 </classpath>
