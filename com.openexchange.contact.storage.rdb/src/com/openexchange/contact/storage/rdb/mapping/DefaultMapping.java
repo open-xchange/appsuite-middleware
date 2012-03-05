@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,70 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
+package com.openexchange.contact.storage.rdb.mapping;
 
-import com.openexchange.contact.storage.ContactStorage;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link DefaultMapping} - 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @param <T>
+ * @param <O>
  */
-public interface ContactStorageRegistry {
+public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
+	
+	private final String columnName;
+	private final int sqlType;
+	
+	public DefaultMapping(final String columnName, final int sqlType) {
+		this.sqlType = sqlType;
+		this.columnName = columnName;
+	}
 
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
+	@Override
+	public void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException {
+		final T value = this.get(object);
+		if (null != value) {
+			statement.setObject(parameterIndex, value, this.getSqlType());
+		} else {
+			statement.setNull(parameterIndex, this.getSqlType());
+		}
+	}
+
+	@Override
+	public void set(ResultSet resultSet, O object) throws SQLException, OXException {
+		final T value = this.get(resultSet);
+		if (false == resultSet.wasNull()) {
+			this.set(object, value);
+		}
+	}
+
+	@Override
+	public boolean equals(O object1, O object2) {
+		final T value1 = this.get(object1);
+		final T value2 = this.get(object2);
+		return null == value1 ? null == value2 : value1.equals(value2);
+	}
+	
+	@Override
+	public String getColumnLabel() {
+		return this.columnName;
+	}
+
+	@Override
+	public int getSqlType() {
+		return this.sqlType;
+	}
+
+	@Override
+	public String toString() {
+		return this.getColumnLabel();
+	}
 
 }
