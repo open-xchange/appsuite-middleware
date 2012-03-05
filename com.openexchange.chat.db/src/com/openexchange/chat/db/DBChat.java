@@ -474,10 +474,10 @@ public final class DBChat implements Chat {
             closeSQLStuff(stmt);
         }
         /*
-         * Drop chat chunks
+         * Drop chat entry for each chat identifier
          */
         try {
-            stmt = con.prepareStatement("DELETE FROM chatChunk WHERE cid = ? AND chatId = ?");
+            stmt = con.prepareStatement("DELETE FROM chat WHERE cid = ? AND chatId = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
@@ -491,10 +491,10 @@ public final class DBChat implements Chat {
             closeSQLStuff(stmt);
         }
         /*
-         * Drop chat entry for each chat identifier
+         * Drop chat chunks
          */
         try {
-            stmt = con.prepareStatement("DELETE FROM chat WHERE cid = ? AND chatId = ?");
+            stmt = con.prepareStatement("DELETE FROM chatChunk WHERE cid = ? AND chatId = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
@@ -974,18 +974,6 @@ public final class DBChat implements Chat {
             stmt.setInt(pos, chunkId);
             stmt.executeUpdate();
             closeSQLStuff(stmt);
-            stmt = con.prepareStatement("SELECT COUNT(cm.user) FROM chatMember AS cm WHERE cm.cid = ? AND cm.chatId = ? AND chunkId = ?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, chatId);
-            stmt.setInt(pos, chunkId);
-            rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-            if (count > 1) {
-                dropChat = true;
-            }
-            closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
             /*
@@ -994,10 +982,23 @@ public final class DBChat implements Chat {
             final TIntList list = new TIntArrayList(1);
             list.add(chatId);
             DBChat.removeDBChats(list, contextId, con);
+            stmt = con.prepareStatement("SELECT COUNT(cm.user) FROM chatMember AS cm WHERE cm.cid = ? AND cm.chatId = ? AND chunkId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setInt(pos, chunkId);
+            rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+            if (count == 0) {
+                dropChat = true;
+            }
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
         }
 
         if (dropChat) {
