@@ -152,7 +152,7 @@ public class SieveHandler {
     protected final int sieve_host_port;
 
     private Capabilities capa = null;
-
+    
     private boolean punycode = false;
 
     private Socket s_sieve = null;
@@ -259,6 +259,9 @@ public class SieveHandler {
         final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
 
         final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
+        
+        punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
+
 
         punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
 

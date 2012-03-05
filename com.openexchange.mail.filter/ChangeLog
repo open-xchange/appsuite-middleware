@@ -6,6 +6,10 @@
 
  - SCR963: New backend only api action: notify
  
+* 2012-02-02 - dennis.sieben@open-xchange.com
+
+ - Bugfix 21391 - [L3] Mailfilter should support punycode encoding
+
 * 2011-06-16 - dennis.sieben@open-xchange.com
 
  - Bugfix #19454 - [L3] Using '"' character in mail filter condition removes vacation message
