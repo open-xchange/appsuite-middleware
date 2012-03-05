@@ -56,7 +56,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
@@ -94,7 +94,7 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HTMLService.class, OAuthService.class, SecretService.class};
+            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HtmlService.class, OAuthService.class, SecretService.class};
     }
 
     @Override

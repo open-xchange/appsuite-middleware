@@ -71,7 +71,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -154,7 +154,7 @@ public final class HTMLProcessing {
      */
     public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
         String retval = null;
-        final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
             if (DisplayMode.RAW.equals(mode)) {
                 retval = content;
@@ -245,12 +245,12 @@ public final class HTMLProcessing {
      * @param optHtmlService The optional HTML service
      * @return The HTML content with sanitized CSS style sheets
      */
-    public static String saneCss(final String htmlContent, final HTMLService optHtmlService) {
+    public static String saneCss(final String htmlContent, final HtmlService optHtmlService) {
         if (null == htmlContent) {
             return null;
         }
         String retval = htmlContent;
-        final String css = (optHtmlService == null ? ServerServiceRegistry.getInstance().getService(HTMLService.class) : optHtmlService).getCSSFromHTMLHeader(retval);
+        final String css = (optHtmlService == null ? ServerServiceRegistry.getInstance().getService(HtmlService.class) : optHtmlService).getCSSFromHTMLHeader(retval);
         final Matcher cssClassMatcher = PATTERN_CSS_CLASS_NAME.matcher(css);
         if (cssClassMatcher.find()) {
             // Examine body tag
@@ -330,7 +330,7 @@ public final class HTMLProcessing {
      * @return The plain text representation of specified HTML content
      */
     public static String html2text(final String htmlContent, final boolean appendHref) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).html2text(htmlContent, appendHref);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).html2text(htmlContent, appendHref);
     }
 
     /**
@@ -343,7 +343,7 @@ public final class HTMLProcessing {
      * @return The given content with all non-HTML links converted to valid HTML links
      */
     public static String formatHrefLinks(final String content) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).formatHrefLinks(content);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).formatHrefLinks(content);
     }
 
     /**
@@ -365,7 +365,7 @@ public final class HTMLProcessing {
      * @return The HTML content conform to W3C standards
      */
     public static String getConformHTML(final String htmlContent, final String charset) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).getConformHTML(htmlContent, charset);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).getConformHTML(htmlContent, charset);
     }
 
     /**
@@ -453,7 +453,7 @@ public final class HTMLProcessing {
      * @return Pretty printed HTML content
      */
     public static String prettyPrint(final String htmlContent) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).prettyPrint(htmlContent);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).prettyPrint(htmlContent);
     }
 
     /**
@@ -463,7 +463,7 @@ public final class HTMLProcessing {
      * @return The content with HTML entities replaced
      */
     public static String replaceHTMLEntities(final String content) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).replaceHTMLEntities(content);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).replaceHTMLEntities(content);
     }
 
     /**
@@ -473,7 +473,7 @@ public final class HTMLProcessing {
      * @return The corresponding ASCII character or <code>null</code>
      */
     public static Character getHTMLEntity(final String entity) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).getHTMLEntity(entity);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).getHTMLEntity(entity);
     }
 
     /**
@@ -485,7 +485,7 @@ public final class HTMLProcessing {
      * @return properly escaped HTML content
      */
     public static String htmlFormat(final String plainText, final boolean withQuote) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).htmlFormat(plainText, withQuote);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).htmlFormat(plainText, withQuote);
     }
 
     /**
@@ -500,7 +500,7 @@ public final class HTMLProcessing {
      * @see #htmlFormat(String, boolean)
      */
     public static String htmlFormat(final String plainText) {
-        return ServerServiceRegistry.getInstance().getService(HTMLService.class).htmlFormat(plainText);
+        return ServerServiceRegistry.getInstance().getService(HtmlService.class).htmlFormat(plainText);
     }
 
     private static final String DEFAULT_COLOR = "#0026ff";

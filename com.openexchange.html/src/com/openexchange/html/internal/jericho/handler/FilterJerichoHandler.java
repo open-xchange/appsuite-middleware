@@ -49,10 +49,9 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL_SOLE;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
-import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -78,7 +77,7 @@ import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.internal.HTMLServiceImpl;
+import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
@@ -311,7 +310,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSSElements(cssBuffer.append(content), styleMap, true);
+                checkCSS(cssBuffer.append(content), styleMap, true);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -431,7 +430,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSSElements(cssBuffer.append(attribute.getValue()), styleMap, true);
+                checkCSS(cssBuffer.append(attribute.getValue()), styleMap, true);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -537,7 +536,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
          */
         final int restoreLen = builder.length();
         try {
-            builder.append(HTMLServiceImpl.checkURL(url));
+            builder.append(HtmlServiceImpl.checkURL(url));
         } catch (final MalformedURLException e) {
             /*
              * Not a valid URL
@@ -568,7 +567,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSSElements(cssBuffer.append(cdata), styleMap, true);
+                checkCSS(cssBuffer.append(cdata), styleMap, true);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -586,7 +585,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleComment(final String comment) {
         if (isCss) {
-            checkCSSElements(cssBuffer.append(comment), styleMap, true);
+            checkCSS(cssBuffer.append(comment), styleMap, true);
             String checkedCSS = cssBuffer.toString();
             cssBuffer.setLength(0);
             if (dropExternalImages) {

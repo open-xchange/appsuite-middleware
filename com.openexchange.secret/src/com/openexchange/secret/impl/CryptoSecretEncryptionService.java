@@ -54,9 +54,11 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.Decrypter;
+import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.session.Session;
 
 /**
@@ -77,7 +79,12 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     private final CryptoService crypto;
 
-    private final SecretService secretService;
+    /**
+     * The {@link SecretService} reference with the highest ranking.
+     * <p>
+     * See {@link WhiteboardSecretService} implementation.
+     */
+    private final RankingAwareSecretService secretService;
 
     private final int off;
 
@@ -91,7 +98,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
      * @param strategy The strategy to use
      * @param tokenList The token list
      */
-    public CryptoSecretEncryptionService(final CryptoService crypto, final SecretService secretService, final SecretEncryptionStrategy<T> strategy, final TokenList tokenList) {
+    public CryptoSecretEncryptionService(final CryptoService crypto, final RankingAwareSecretService secretService, final SecretEncryptionStrategy<T> strategy, final TokenList tokenList) {
         super();
         this.crypto = crypto;
         this.secretService = secretService;
@@ -103,6 +110,16 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     @Override
     public String encrypt(final Session session, final String toEncrypt) throws OXException {
+        /*
+         * Check currently applicable SecretService
+         */
+        final int ranking = secretService.getRanking();
+        if (ranking >= 0) { // Greater than or equal to default ranking of zero
+            return crypto.encrypt(toEncrypt, secretService.getSecret(session));
+        }
+        /*
+         * Use token-based entry
+         */
         return crypto.encrypt(toEncrypt, tokenList.peekLast().getSecret(session));
     }
 
@@ -129,6 +146,19 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
     @Override
     public String decrypt(final Session session, final String toDecrypt, final T customizationNote) throws OXException {
         /*
+         * Check currently applicable SecretService
+         */
+        final int ranking = secretService.getRanking();
+        if (ranking >= 0) { // Greater than or equal to default ranking of zero
+            try {
+                return crypto.decrypt(toDecrypt, secretService.getSecret(session));
+            } catch (final OXException x) {
+                // Ignore and try other
+            }
+        }
+        /*-
+         * Use token-based entries.
+         * 
          * Try with last list entry first
          */
         try {
@@ -180,7 +210,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          * At last, re-crypt password using current secret service & store it
          */
         {
-            final String recrypted = crypto.encrypt(decrypted, tokenList.peekLast().getSecret(session));
+            final String recrypted = crypto.encrypt(decrypted, ranking >= 0 ? secretService.getSecret(session) : tokenList.peekLast().getSecret(session));
             strategy.update(recrypted, customizationNote);
         }
         /*

@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "new", description = "Create a new messaging account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "A JSON Object describing the account to be created. Response: A response object containing the new account id as its data.",
 responseDescription = "A response object containing the new account id as its data.")
 public class NewAction extends AbstractMessagingAccountAction {

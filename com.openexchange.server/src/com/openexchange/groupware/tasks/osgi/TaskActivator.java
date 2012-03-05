@@ -59,8 +59,8 @@ import com.openexchange.groupware.tasks.ModifyThroughDependant;
 
 /**
  * {@link TaskActivator}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskActivator extends AJAXModuleActivator {
 
@@ -73,13 +73,11 @@ public class TaskActivator extends AJAXModuleActivator {
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
         registerService(TargetService.class, new ModifyThroughDependant(), props);
-
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[0];
     }
+
 }

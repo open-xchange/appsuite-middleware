@@ -50,38 +50,15 @@
 package com.openexchange.mq.queue;
 
 import java.io.Serializable;
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
-import javax.jms.TextMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQExceptionCodes;
+import com.openexchange.mq.MQCloseable;
 
 /**
  * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueSender extends MQQueueResource {
-
-    private QueueSender queueSender; // Within synchronized, no volatile needed
-
-    /**
-     * Initializes a new {@link MQQueueSender}.
-     * 
-     * @param queueName The name of the queue to send to
-     * @throws OXException If initialization fails
-     */
-    public MQQueueSender(final String queueName) throws OXException {
-        super(queueName);
-    }
-
-    @Override
-    protected synchronized void initResource(final Queue queue) throws JMSException {
-        queueSender = queueSession.createSender(queue);
-    }
+public interface MQQueueSender extends MQCloseable {
 
     /**
      * Sends a message containing a <code>java.lang.String</code>.
@@ -89,39 +66,33 @@ public class MQQueueSender extends MQQueueResource {
      * @param text The <code>java.lang.String</code> to send
      * @throws OXException If send operation fails
      */
-    public void sendTextMessage(final String text) throws OXException {
-        if (null == text) {
-            return;
-        }
-        try {
-            final TextMessage message = queueSession.createTextMessage(text);
-            queueSender.send(message);
-        } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
-        }
-    }
+    public void sendTextMessage(String text) throws OXException;
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Sends a message containing a <code>java.lang.String</code>.
+     * 
+     * @param text The <code>java.lang.String</code> to send
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendTextMessage(String text, int priority) throws OXException;
+
+    /**
+     * Sends a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable object to send
      * @throws OXException If send operation fails
      */
-    public void sendObjectMessage(final Serializable object) throws OXException {
-        if (object instanceof String) {
-            sendTextMessage((String) object);
-            return;
-        }
-        if (null == object) {
-            return;
-        }
-        try {
-            final ObjectMessage message = queueSession.createObjectMessage(object);
-            queueSender.send(message);
-        } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
-        }
-    }
+    public void sendObjectMessage(Serializable object) throws OXException;
+
+    /**
+     * Sends a message containing a {@link Serializable serializable} Java object.
+     * 
+     * @param object The serializable object to send
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendObjectMessage(Serializable object, int priority) throws OXException;
 
     /**
      * Sends a message containing <code>byte</code>s.
@@ -129,17 +100,15 @@ public class MQQueueSender extends MQQueueResource {
      * @param bytes The <code>byte</code> array to send
      * @throws OXException If send operation fails
      */
-    public void sendBytesMessage(final byte[] bytes) throws OXException {
-        if (null == bytes) {
-            return;
-        }
-        try {
-            final BytesMessage bytesMessage = queueSession.createBytesMessage();
-            bytesMessage.writeBytes(bytes, 0, bytes.length);
-            queueSender.send(bytesMessage);
-        } catch (final JMSException e) {
-            throw MQExceptionCodes.JMS_ERROR.create(e, e.getMessage());
-        }
-    }
+    public void sendBytesMessage(byte[] bytes) throws OXException;
+
+    /**
+     * Sends a message containing <code>byte</code>s.
+     * 
+     * @param bytes The <code>byte</code> array to send
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendBytesMessage(byte[] bytes, int priority) throws OXException;
 
 }

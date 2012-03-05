@@ -1,0 +1,4 @@
+opt/open-xchange/etc/facebookmessaging.properties
+opt/open-xchange/etc/rssmessaging.properties
+opt/open-xchange/etc/twittermessaging.properties
+opt/open-xchange/etc/twitter.properties

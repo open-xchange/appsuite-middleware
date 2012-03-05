@@ -1,0 +1,112 @@
+<configuration xmlns="urn:hornetq"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:hornetq /schema/hornetq-configuration.xsd">
+
+   <!-- Clustered flag -->
+   <clustered>false</clustered>
+
+   <!-- Connectors -->
+   <connectors>
+      <connector name="netty-connector">
+         <factory-class>org.hornetq.core.remoting.impl.netty.NettyConnectorFactory</factory-class>
+         <!-- In-VM based -->
+         <!-- 
+         <param key="use-invm" value="true"/>
+         <param key="host" value="org.hornetq"/>
+         -->
+         
+         <!-- Socket based -->
+         <param key="host" value="localhost"/>
+         <param key="port" value="5445"/>
+         <!-- <param key="use-nio" value="true"/> -->
+      </connector>
+      
+      <!-- Connector to other server -->
+      <!--
+      <connector name="other-server-connector">
+         <factory-class>org.hornetq.core.remoting.impl.netty.NettyConnectorFactory</factory-class>
+         <param key="host" value="localhost"/>
+         <param key="port" value="5446"/>
+      </connector>
+      -->
+   </connectors>
+   
+   <!-- Acceptors -->
+   <acceptors>
+      <acceptor name="netty-acceptor">
+         <factory-class>org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory</factory-class>
+         <!-- In-VM based -->
+         <!-- 
+         <param key="use-invm" value="true"/>
+         <param key="host" value="org.hornetq"/>
+         -->
+         
+         <!-- Socket based -->
+         <param key="host" value="localhost"/>
+         <param key="port" value="5445"/>
+         <!-- <param key="use-nio" value="true"/> -->
+      </acceptor>
+   </acceptors>
+   
+   <!-- Clustering configuration -->
+   <broadcast-groups>
+      <broadcast-group name="ox-broadcast-group">
+         <group-address>231.7.7.7</group-address>
+         <group-port>9876</group-port>
+         <broadcast-period>100</broadcast-period>
+         <connector-ref>netty-connector</connector-ref>
+     </broadcast-group>
+   </broadcast-groups>
+   
+   <discovery-groups>
+      <discovery-group name="ox-discovery-group">
+         <group-address>231.7.7.7</group-address>
+         <group-port>9876</group-port>
+         <refresh-timeout>10000</refresh-timeout>
+      </discovery-group>
+   </discovery-groups>
+   
+   <cluster-connections>
+      <cluster-connection name="ox-cluster">
+         <address>jms</address>
+         <connector-ref>netty-connector</connector-ref>
+         <retry-interval>500</retry-interval>
+         <use-duplicate-detection>true</use-duplicate-detection>
+         <forward-when-no-consumers>true</forward-when-no-consumers>
+         <max-hops>1</max-hops>
+         
+         <!-- Discovery here -->
+         <discovery-group-ref discovery-group-name="ox-discovery-group"/>
+         
+         <!-- Static configuration -->
+         <!--
+         <static-connectors>
+            <connector-ref>other-server-connector</connector-ref>
+         </static-connectors>
+         -->
+         
+      </cluster-connection>
+   </cluster-connections>
+
+   <grouping-handler name="ox-grouping-handler">
+      <type>LOCAL</type>
+      <address>jms</address>
+      <timeout>5000</timeout>
+   </grouping-handler>
+   
+   <!-- Other config -->
+   <security-settings>
+      <!--security for general-purpose queue-->
+      <!--
+      <security-setting match="jms.queue.genericQueue">
+         <permission type="createDurableQueue" roles="guest"/>
+         <permission type="deleteDurableQueue" roles="guest"/>
+         <permission type="createNonDurableQueue" roles="guest"/>
+         <permission type="deleteNonDurableQueue" roles="guest"/>
+         <permission type="consume" roles="guest"/>
+         <permission type="send" roles="guest"/>
+      </security-setting>
+      -->
+   </security-settings>
+
+</configuration>

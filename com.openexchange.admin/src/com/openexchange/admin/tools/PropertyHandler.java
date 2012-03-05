@@ -325,11 +325,11 @@ public class PropertyHandler {
     private void loadProps(final Properties sysprops) throws FileNotFoundException, IOException {
         this.allPropValues.put( AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL" );
         
-        if ( sysprops.getProperty( "configdir" ) != null ) {
-            this.configdirname = sysprops.getProperty("configdir");
+        if ( sysprops.getProperty( "openexchange.propdir" ) != null ) {
+            this.configdirname = sysprops.getProperty("openexchange.propdir");
             addpropsfromfile(this.configdirname + File.separatorChar + "AdminDaemon.properties");
         } else {
-            log.error("Parameter '-Dconfigdir' not given in system properties!");
+            log.error("Parameter '-Dopenexchange.propdir' not given in system properties!");
             log.error("Now, using default parameter!");
         }
     }

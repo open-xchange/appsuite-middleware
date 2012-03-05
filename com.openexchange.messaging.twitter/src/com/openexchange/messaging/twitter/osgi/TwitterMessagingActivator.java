@@ -54,7 +54,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.twitter.TwitterMessagingService;
 import com.openexchange.messaging.twitter.TwitterOAuthAccountDeleteListener;
@@ -88,7 +88,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TwitterService.class, SessiondService.class, HTMLService.class, OAuthService.class, SecretService.class };
+        return new Class<?>[] { TwitterService.class, SessiondService.class, HtmlService.class, OAuthService.class, SecretService.class };
     }
 
     @Override

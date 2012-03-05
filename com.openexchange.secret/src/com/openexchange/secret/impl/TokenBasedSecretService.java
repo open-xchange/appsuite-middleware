@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TokenBasedSecretService implements SecretService {
+public class TokenBasedSecretService implements RankingAwareSecretService {
 
     /**
      * The random.
@@ -76,30 +77,13 @@ public class TokenBasedSecretService implements SecretService {
 
     private volatile SecretService impl;
 
-    /**
-     * Initializes a new {@link TokenBasedSecretService}.
-     */
-    public TokenBasedSecretService() {
-        super();
-        final List<Token> tl = DEFAULT_TOKEN_LIST;
-        impl = new SecretService() {
-
-            @Override
-            public String getSecret(final Session session) {
-                final StringBuilder sb = new StringBuilder(16);
-                for (final Token token : tl) {
-                    sb.append(token.getFrom(session));
-                }
-                return sb.toString();
-            }
-        };
-    }
-
+    private final int ranking;
     /**
      * Initializes a new {@link TokenBasedSecretService}.
      */
     public TokenBasedSecretService(final List<Token> tokenList) {
         super();
+        ranking = Integer.MIN_VALUE;
         applyTokenList(tokenList);
     }
 
@@ -108,7 +92,13 @@ public class TokenBasedSecretService implements SecretService {
      */
     public TokenBasedSecretService(final TokenList tokenList) {
         super();
+        ranking = Integer.MIN_VALUE;
         this.impl = tokenList.peekLast();
+    }
+
+    @Override
+    public int getRanking() {
+        return ranking;
     }
 
     /**

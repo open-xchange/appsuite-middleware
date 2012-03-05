@@ -222,6 +222,7 @@ public final class SessionHandler {
      */
     protected static String addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
         checkMaxSessPerUser(userId, contextId);
+        checkMaxSessPerClient(client, userId, contextId);
         checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final SessionImpl session =
@@ -242,6 +243,23 @@ public final class SessionHandler {
             final int count = sessionData.getNumOfUserSessions(userId, contextId);
             if (count >= maxSessPerUser) {
                 throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
+            }
+        }
+    }
+
+    private static void checkMaxSessPerClient(final String client, final int userId, final int contextId) throws OXException {
+        if (null == client) {
+            // Nothing to check against
+            return;
+        }
+        final int maxSessPerClient = config.getMaxSessionsPerClient();
+        if (maxSessPerClient > 0) {
+            final SessionControl[] userSessions = sessionData.getUserSessions(userId, contextId);
+            int cnt = 0;
+            for (final SessionControl sessionControl : userSessions) {
+                if (client.equals(sessionControl.getSession().getClient()) && ++cnt > maxSessPerClient) {
+                    throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
+                }
             }
         }
     }

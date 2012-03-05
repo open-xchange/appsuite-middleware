@@ -128,7 +128,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
@@ -2053,7 +2053,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final String cs =
                             contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                         final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                        final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         attachmentInputStream =
                             new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
                                 htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));

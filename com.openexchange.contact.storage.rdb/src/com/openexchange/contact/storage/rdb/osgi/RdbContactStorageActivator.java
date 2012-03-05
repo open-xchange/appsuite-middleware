@@ -53,6 +53,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
+import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -74,13 +76,14 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
+            RdbServiceLookup.set(this);            
             super.registerService(ContactStorage.class, new RdbContactStorage());
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
@@ -91,6 +94,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
+        RdbServiceLookup.set(null);            
         super.stopBundle();
     }
 

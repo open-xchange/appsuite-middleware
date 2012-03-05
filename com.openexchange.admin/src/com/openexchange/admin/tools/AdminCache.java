@@ -476,7 +476,7 @@ public class AdminCache {
     }
 
     private String getInitialOXDBSqlDir() {
-        return prop.getSqlProp("INITIAL_OX_SQL_DIR", "/opt/openexchange-internal/system/setup/mysql");
+        return prop.getSqlProp("INITIAL_OX_SQL_DIR", "/opt/open-xchange/etc/mysql");
     }
 
     private void cacheSqlScripts() {
@@ -493,7 +493,7 @@ public class AdminCache {
         ArrayList<String> al = new ArrayList<String>();
 
         for (int a = 0; a < sql_files_order.length; a++) {
-            File tmp = new File(sql_path + "" + sql_files_order[a]);
+            File tmp = new File(sql_path + File.separatorChar + sql_files_order[a]);
 
             try {
                 FileInputStream fis = new FileInputStream(tmp);
@@ -612,7 +612,8 @@ public class AdminCache {
     }
 
     private void readMasterCredentials() throws OXGenericException {
-        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/admindaemon/etc/mpasswd");
+        // TODO Reading the property 
+        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/etc/mpasswd");
         final File tmp = new File(masterfile);
         if (!tmp.exists()) {
             throw new OXGenericException("Fatal! Master auth file does not exists: " + masterfile);

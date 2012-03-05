@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -155,7 +156,7 @@ public class Executor {
     
     public DistributionListEntryObject[] select(final Connection connection, final Table table, final int contextID, final int objectID) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
+        stringBuilder.append("SELECT ").append(Tools.getColumns(Fields.DISTLIST_DATABASE_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
             .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append("=?;"); 
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -176,7 +177,7 @@ public class Executor {
 
     public Map<Integer, List<DistributionListEntryObject>> select(final Connection connection, final Table table, final int contextID, final int[] objectIDs) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT ").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
+        stringBuilder.append("SELECT ").append(Tools.getColumns(Fields.DISTLIST_DATABASE_ARRAY)).append(" FROM ").append(table).append(" WHERE ")
             .append(ContactField.CONTEXTID.getDbName()).append("=? AND ").append(ContactField.OBJECT_ID.getDbName()).append(" IN (")
             .append(Tools.toCSV(objectIDs)).append(");");
         PreparedStatement stmt = null;
@@ -215,12 +216,12 @@ public class Executor {
     
     public int insert(final Connection connection, final Table table, final int contactID, final int contextID, final DistributionListEntryObject member) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Tools.getColumns(Tools.DISTLIST_DATABASE_FIELDS_ARRAY))
-            .append(") VALUES (").append(Tools.getParameters(Tools.DISTLIST_DATABASE_FIELDS_ARRAY.length)).append(");");
+        stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Tools.getColumns(Fields.DISTLIST_DATABASE_ARRAY))
+            .append(") VALUES (").append(Tools.getParameters(Fields.DISTLIST_DATABASE_ARRAY.length)).append(");");
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            Tools.setParameters(stmt, Tools.DISTLIST_DATABASE_FIELDS_ARRAY, member, contactID, contextID);
+            Tools.setParameters(stmt, Fields.DISTLIST_DATABASE_ARRAY, member, contactID, contextID);
             return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);

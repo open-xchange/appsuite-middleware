@@ -71,7 +71,7 @@ import com.openexchange.groupware.notify.LinkableState;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.html.tools.HTMLUtils;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.i18n.tools.StringTemplate;
@@ -115,7 +115,7 @@ public class LabelHelper {
         this.wrapper = wrapper;
         this.dateHelper = dateHelper;
         this.users = services.getService(UserService.class);
-        this.html = new HTMLUtils(services.getService(HTMLService.class));
+        this.html = new HTMLUtils(services.getService(HtmlService.class));
         this.timezone = timezone;
         if (timezone == null) {
         	this.timezone = TimeZone.getDefault(); // Fallback

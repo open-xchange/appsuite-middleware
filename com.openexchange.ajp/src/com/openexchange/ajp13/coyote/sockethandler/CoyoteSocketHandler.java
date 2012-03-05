@@ -50,7 +50,6 @@
 package com.openexchange.ajp13.coyote.sockethandler;
 
 import java.net.Socket;
-import java.util.concurrent.Future;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -245,8 +244,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }
         final CoyoteTask coyoteTask = new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher);
-        final Future<Object> future = pool.submit(coyoteTask, behavior);
-        ajpProcessor.setControl(future);
+        ajpProcessor.setControl(pool.submit(coyoteTask, behavior));
         coyoteTask.open();
     }
 

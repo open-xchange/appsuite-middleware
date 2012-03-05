@@ -127,8 +127,8 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.internal.HTMLServiceImpl;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
@@ -150,6 +150,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -438,7 +439,7 @@ public final class Init {
     }
 
     private static void startAndInjectHTMLService() {
-        if (null == TestServiceRegistry.getInstance().getService(HTMLService.class)) {
+        if (null == TestServiceRegistry.getInstance().getService(HtmlService.class)) {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
             Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
@@ -450,9 +451,9 @@ public final class Init {
             @SuppressWarnings("unchecked")
             final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
-            final HTMLService service = new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap);
-            services.put(HTMLService.class, service);
-            TestServiceRegistry.getInstance().addService(HTMLService.class, service);
+            final HtmlService service = new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap);
+            services.put(HtmlService.class, service);
+            TestServiceRegistry.getInstance().addService(HtmlService.class, service);
         }
     }
 
@@ -548,6 +549,16 @@ public final class Init {
             DefaultContactStorageRegistry registry = new DefaultContactStorageRegistry();
             registry.addStorage(new RdbContactStorage());
             TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
+            com.openexchange.contact.storage.rdb.internal.RdbServiceLookup.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(Class<? extends S> clazz) {
+                    return null;
+                }
+            });                
         }
     }
 

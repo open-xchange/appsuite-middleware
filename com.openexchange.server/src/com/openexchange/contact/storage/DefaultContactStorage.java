@@ -231,11 +231,31 @@ public abstract class DefaultContactStorage implements ContactStorage {
         }
         final List<ContactField> setFields = new ArrayList<ContactField>(); 
         for (final ContactField field : allFields()) {
-            if (contact.contains(field.getNumber())) {
+            if (false == field.isVirtual() && contact.contains(field.getNumber())) {
                 setFields.add(field);
             }
         }        
         return setFields.toArray(new ContactField[setFields.size()]);
+    }
+
+    protected static ContactField[] getUpdatedFields(final Contact original, final Contact update) {
+        if (null == original) {
+            throw new IllegalArgumentException("original");
+        }
+        if (null == update) {
+            throw new IllegalArgumentException("update");
+        }
+        final List<ContactField> updatedFields = new ArrayList<ContactField>(); 
+        for (final ContactField field : allFields()) {
+            if (false == field.isVirtual() && update.contains(field.getNumber())) {
+                final Object originalValue = original.get(field.getNumber());
+                final Object newValue = update.get(field.getNumber());
+                if (null == originalValue && null != newValue || null != originalValue && false == originalValue.equals(newValue)) {
+                    updatedFields.add(field);                    
+                }
+            }
+        }        
+        return updatedFields.toArray(new ContactField[updatedFields.size()]);
     }
 
     /**

@@ -101,6 +101,8 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         
+        analysis.setUid(appointment.getUid());
+        
         refreshed = util.resolveUid(appointment.getUid(), session);
         
         if (isException) {

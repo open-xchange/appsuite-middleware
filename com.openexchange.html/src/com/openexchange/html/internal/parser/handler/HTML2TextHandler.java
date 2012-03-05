@@ -49,8 +49,8 @@
 
 package com.openexchange.html.internal.parser.handler;
 
-import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
-import static com.openexchange.html.internal.HTMLServiceImpl.checkURL;
+import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
+import static com.openexchange.html.internal.HtmlServiceImpl.checkURL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,8 +61,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.internal.parser.HTMLHandler;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.parser.HtmlHandler;
 
 /**
  * {@link HTML2TextHandler} - A handler to generate plain text version from parsed HTML content which is then accessible via
@@ -70,7 +70,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTML2TextHandler implements HTMLHandler {
+public final class HTML2TextHandler implements HtmlHandler {
 
     private static final String TAG_OL = "ol";
 
@@ -134,7 +134,7 @@ public final class HTML2TextHandler implements HTMLHandler {
      * ----------------- Member stuff -----------------
      */
 
-    private final HTMLService htmlService;
+    private final HtmlService htmlService;
 
     private boolean insideBody;
 
@@ -165,7 +165,7 @@ public final class HTML2TextHandler implements HTMLHandler {
      *
      * @param capacity The initial capacity
      */
-    public HTML2TextHandler(final HTMLService htmlService, final int capacity) {
+    public HTML2TextHandler(final HtmlService htmlService, final int capacity) {
         this(htmlService, capacity, false);
     }
 
@@ -177,7 +177,7 @@ public final class HTML2TextHandler implements HTMLHandler {
      *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
      *            <code>Link&nbsp;[www.somewhere.com]</code>
      */
-    public HTML2TextHandler(final HTMLService htmlService, final int capacity, final boolean appendHref) {
+    public HTML2TextHandler(final HtmlService htmlService, final int capacity, final boolean appendHref) {
         super();
         this.htmlService = htmlService;
         textBuilder = new StringBuilder(capacity);

@@ -77,7 +77,7 @@ import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.templating.TemplateService;
@@ -97,7 +97,7 @@ public class ITipActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HTMLService.class, AttachmentBase.class };
+        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HtmlService.class, AttachmentBase.class };
     }
 
 
@@ -109,7 +109,7 @@ public class ITipActivator extends HousekeepingActivator {
         final GroupService groups = getService(GroupService.class);
         final ConfigurationService config = getService(ConfigurationService.class);
         final ITipEmitter emitter = getService(ITipEmitter.class);
-        final HTMLService htmlService = getService(HTMLService.class);
+        final HtmlService htmlService = getService(HtmlService.class);
         final AttachmentBase attachments = getService(AttachmentBase.class);
         final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
         final TimerService timers = getService(TimerService.class);

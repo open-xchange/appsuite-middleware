@@ -51,7 +51,7 @@ package com.openexchange.messaging.rss.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +75,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-            track(HTMLService.class, new HTMLRegistryCustomizer(context));
+            track(HtmlService.class, new HTMLRegistryCustomizer(context));
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
             registerService(MessagingService.class, new RSSMessagingService(), null);

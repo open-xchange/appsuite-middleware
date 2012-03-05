@@ -999,7 +999,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
         if (mail != null) {
-            mail.setAccountId(accountId);
+            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                mail.setAccountId(accountId);
+            }
             /*
              * Post event for possibly switched \Seen flag
              */

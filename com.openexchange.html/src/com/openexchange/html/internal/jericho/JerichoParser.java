@@ -62,7 +62,7 @@ import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.html.internal.parser.HTMLHandler;
+import com.openexchange.html.internal.parser.HtmlHandler;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -87,7 +87,7 @@ public final class JerichoParser {
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
     
     /**
-     * Parses specified real-life HTML document and delegates events to given instance of {@link HTMLHandler}
+     * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
      * 
      * @param html The real-life HTML document
      * @param handler The HTML handler

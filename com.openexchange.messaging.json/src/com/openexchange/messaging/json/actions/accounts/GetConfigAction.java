@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.GET, name = "", description = "", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "")
 public class GetConfigAction extends AbstractMessagingAccountAction {
 

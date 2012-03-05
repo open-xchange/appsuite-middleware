@@ -31,20 +31,23 @@ public class ExceptionUtils {
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
-     *
+     * 
      * @param t The <tt>Throwable</tt> to check
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(MARKER + "Thread death" + MARKER, t);
+            LOG.fatal(surroundWithMarker("Thread death"), t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            LOG.fatal(
-                MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
-                t);
+            final String message = "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.";
+            LOG.fatal(surroundWithMarker(message), t);
             throw (VirtualMachineError) t;
         }
         // All other instances of Throwable will be silently swallowed
+    }
+
+    private static String surroundWithMarker(final String message) {
+        return new StringBuilder(message.length() + 40).append(MARKER).append(message).append(MARKER).toString();
     }
 }

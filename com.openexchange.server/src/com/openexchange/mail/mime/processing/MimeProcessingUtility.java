@@ -59,7 +59,7 @@ import java.util.TimeZone;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -197,7 +197,7 @@ public final class MimeProcessingUtility {
                 return readContent(textPart, charset);
             }
             contentType.setBaseType("text/plain");
-            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             return htmlService.html2text(htmlService.getConformHTML(readContent(textPart, charset), contentType.getCharsetParameter()), false);
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.isMimeType(MimeTypes.MIME_TEXT_PLAIN)) {
@@ -329,7 +329,7 @@ public final class MimeProcessingUtility {
         } else if (rootType.startsWith(CT_TEXT_HTM)) {
             textBuilder.append(htmlFormat(text));
         } else {
-            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             final String plainText = htmlService.html2text(htmlService.getConformHTML(text, contentType.getCharsetParameter()), false);
             textBuilder.append(plainText);
             // textBuilder.append(new Html2TextConverter().convertWithQuotes(text));

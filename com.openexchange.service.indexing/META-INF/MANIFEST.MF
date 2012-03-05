@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Indexing Service Bundle
+Bundle-SymbolicName: com.openexchange.service.indexing
+Bundle-Version: 7.0.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.log,
+ com.openexchange.mq,
+ com.openexchange.mq.queue,
+ com.openexchange.mq.queue.impl,
+ com.openexchange.mq.topic,
+ com.openexchange.mq.topic.impl,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javax.jms,
+ org.apache.commons.logging,
+ org.eclipse.osgi.framework.console,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.service.indexing.osgi.IndexingServiceActivator

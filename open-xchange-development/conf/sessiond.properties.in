@@ -8,6 +8,10 @@ com.openexchange.sessiond.maxSession=5000
 # Maximum number of concurrent sessions per user, a value less than or equal to zero means unlimited
 com.openexchange.sessiond.maxSessionPerUser=100
 
+# Specify the number of sessions allowed per client (Web UI, EAS, WebDAV, ...)
+# A value equal to or less than zero means unlimited
+com.openexchange.sessiond.maxSessionPerClient=0
+
 # Maximum value in milliseconds a session is allowed to be kept without request. After this time the session is put into the long life time
 # container and all temporary session data is removed.
 com.openexchange.sessiond.sessionDefaultLifeTime=3600000

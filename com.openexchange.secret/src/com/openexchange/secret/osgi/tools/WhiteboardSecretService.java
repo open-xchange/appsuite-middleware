@@ -50,7 +50,9 @@
 package com.openexchange.secret.osgi.tools;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
@@ -59,7 +61,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class WhiteboardSecretService implements SecretService {
+public class WhiteboardSecretService implements RankingAwareSecretService {
 
     private final ServiceTracker<SecretService, SecretService> tracker;
 
@@ -72,8 +74,31 @@ public class WhiteboardSecretService implements SecretService {
         tracker = new ServiceTracker<SecretService, SecretService>(context, SecretService.class, null);
     }
 
+    /**
+     * Gets the ranking of the currently applicable {@link SecretService} reference.
+     * 
+     * @return The currently applicable service ranking
+     */
+    @Override
+    public int getRanking() {
+        final ServiceReference<SecretService> reference = tracker.getServiceReference();
+        if (null == reference) {
+            return Integer.MIN_VALUE;
+        }
+        final Object ranking = reference.getProperty(org.osgi.framework.Constants.SERVICE_RANKING);
+        return null == ranking ? Integer.MIN_VALUE : Integer.parseInt(ranking.toString().trim());
+    }
+
     @Override
     public String getSecret(final Session session) {
+        /*-
+         * If multiple services are being tracked, the service with the highest
+         * ranking (as specified in its {@code service.ranking} property) is
+         * returned. If there is a tie in ranking, the service with the lowest
+         * service ID (as specified in its {@code service.id} property); that
+         * is, the service that was registered first is returned. This is the same
+         * algorithm used by {@code BundleContext.getServiceReference}.
+         */
         final SecretService secretService = tracker.getService();
         if (secretService == null) {
             return null;

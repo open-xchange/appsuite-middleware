@@ -52,14 +52,14 @@ package com.openexchange.html.internal.parser.handler;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.openexchange.html.internal.parser.HTMLHandler;
+import com.openexchange.html.internal.parser.HtmlHandler;
 
 /**
  * {@link DumperHTMLHandler} - Used to debug HTML parsing behavior.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DumperHTMLHandler implements HTMLHandler {
+public final class DumperHTMLHandler implements HtmlHandler {
 
     private static final String CRLF = "\r\n";
 

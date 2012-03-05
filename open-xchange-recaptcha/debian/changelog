@@ -1,0 +1,5 @@
+open-xchange-recaptcha (7.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 Feb 2012 17:47:49 +0100

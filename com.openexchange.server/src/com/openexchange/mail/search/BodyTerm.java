@@ -60,7 +60,7 @@ import javax.mail.Part;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HTMLService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -232,7 +232,7 @@ public final class BodyTerm extends SearchTerm<String> {
         }
         try {
             if (contentType.startsWith("text/htm")) {
-                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 return htmlService.html2text(htmlService.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), false);
             }
             return MessageUtility.readMailPart(mailPart, charset);
@@ -262,7 +262,7 @@ public final class BodyTerm extends SearchTerm<String> {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
             }
             if (ct.startsWith("text/htm")) {
-                final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 return htmlService.html2text(htmlService.getConformHTML(MessageUtility.readMimePart(part, charset), charset), false);
             }
             return MessageUtility.readMimePart(part, charset);

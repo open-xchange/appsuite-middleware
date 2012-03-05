@@ -75,7 +75,6 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
-        new com.openexchange.groupware.tasks.osgi.TaskActivator(),
         new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
         new com.openexchange.groupware.links.osgi.LinkActivator(),
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
@@ -90,10 +89,10 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),
         new com.openexchange.quota.json.osgi.QuotaJSONActivator(),
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),
-        new com.openexchange.groupware.calendar.json.osgi.AppointmentJSONActivator(),
         new com.openexchange.mailaccount.json.osgi.MailAccountJSONActivator(),
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
+        new com.openexchange.groupware.tasks.osgi.TaskActivator()
     };
 
     public ServerCompositeActivator() {

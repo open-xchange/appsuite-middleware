@@ -63,12 +63,14 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 
@@ -150,6 +152,8 @@ public class SieveHandler {
     protected final int sieve_host_port;
 
     private Capabilities capa = null;
+    
+    private boolean punycode = false;
 
     private Socket s_sieve = null;
 
@@ -250,6 +254,9 @@ public class SieveHandler {
         final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
 
         final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
+        
+        punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
+
 
         final StringBuilder commandBuilder = new StringBuilder(64);
 
@@ -646,9 +653,12 @@ public class SieveHandler {
         }
     }
 
-    private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException {
-        final String to64 =
-            commandBuilder.append(sieve_user).append('\0').append(sieve_auth).append('\0').append(sieve_auth_passwd).toString();
+    private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+        final String username = getRightEncodedString(sieve_user, "username");
+        final String authname = getRightEncodedString(sieve_auth, "authname");
+        final String to64 = commandBuilder.append(username).append('\0')
+            .append(authname).append('\0')
+            .append(sieve_auth_passwd).toString();
         commandBuilder.setLength(0);
 
         final String user_auth_pass_64 = commandBuilder.append(convertStringToBase64(to64, sieve_auth_enc)).append(CRLF).toString();
@@ -801,6 +811,24 @@ public class SieveHandler {
                 }
             }
         }
+    }
+
+    private String getRightEncodedString(final String username, final String description) throws OXSieveHandlerException {
+        final String retval;
+        if (this.punycode) {
+            try {
+                retval = QuotedInternetAddress.toACE(username);
+            } catch (final AddressException e) {
+                final OXSieveHandlerException oxSieveHandlerException = new OXSieveHandlerException("The " + description + " \""
+                    + username
+                    + "\" could not be transformed to punycode.", this.sieve_host, this.sieve_host_port);
+                log.error(oxSieveHandlerException.getMessage(), e);
+                throw oxSieveHandlerException;
+            }
+        } else {
+            retval = username;
+        }
+        return retval;
     }
 
     /**
