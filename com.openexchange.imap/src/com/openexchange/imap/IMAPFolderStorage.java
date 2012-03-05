@@ -822,6 +822,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (name.length() > MAX_MAILBOX_NAME) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
         }
+        try {
+            final String parentFullname = toCreate.getParentFullname();
+            final String fullName = DEFAULT_FOLDER_ID.equals(parentFullname) ? name : new StringBuilder(parentFullname).append(toCreate.getSeparator()).append(name).toString();
+            if (getIMAPFolder(fullName).exists()) {
+                throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, fullName);
+            }
+        } catch (final MessagingException e) {
+            // Ignore for now
+        }
         boolean created = false;
         IMAPFolder createMe = null;
         try {
@@ -847,21 +856,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 parent = getIMAPFolder(parentFullname);
                 isParentDefault = false;
             }
-            final ListLsubEntry parentEntry = getLISTEntry(parentFullname, parent);
-            if (!doesExist(parentEntry)) {
-                parent = checkForNamespaceFolder(parentFullname);
-                if (null == parent) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
-                }
-            }
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (parent) {
+                if (!parent.exists()) {
+                    parent = checkForNamespaceFolder(parentFullname);
+                    if (null == parent) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
+                    }
+                }
                 /*
                  * Check if parent holds folders
                  */
-                if (!parentEntry.hasInferiors()) {
+                if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
                     throw IMAPException.create(
                         IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
                         imapConfig,
@@ -910,7 +918,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * Check if IMAP server is in MBox format; meaning folder either hold messages or subfolders but not both
                  */
-                final char separator = parentEntry.getSeparator();
+                final char separator = getSeparator();
                 final boolean mboxEnabled =
                     MBoxEnabledCache.isMBoxEnabled(imapConfig, parent, new StringBuilder(parent.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
