@@ -76,7 +76,7 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
  */
 public class SecretActivator extends HousekeepingActivator {
 
-    private volatile WhiteboardSecretService secretService;
+    private volatile WhiteboardSecretService whiteboardSecretService;
 
     public SecretActivator() {
         super();
@@ -106,17 +106,11 @@ public class SecretActivator extends HousekeepingActivator {
             if (pattern.charAt(pattern.length() - 1) == '"') {
                 pattern = pattern.substring(0, pattern.length() - 1);
             }
-            if (pattern.charAt(0) == '<') {
-                pattern = pattern.substring(1);
-            }
-            if (pattern.charAt(pattern.length() - 1) == '>') {
-                pattern = pattern.substring(0, pattern.length() - 1);
-            }
             /*
              * Check for "list"
              */
             final TokenBasedSecretService tokenBasedSecretService;
-            if ("list".equals(pattern)) {
+            if ("<list>".equals(pattern)) {
                 String text = configurationService.getText("secrets");
                 if (null == text) {
                     text = "\"<user-id> + '-' +  <random> + '-' + <context-id>\"";
@@ -148,40 +142,41 @@ public class SecretActivator extends HousekeepingActivator {
                 tokenList = TokenList.newInstance(Collections.singleton(tl));
             }
             // Checks if SecretService is configured to use a password
+            final boolean usesPassword = tokenList.isUsesPassword();
             registerService(SecretUsesPasswordChecker.class, new SecretUsesPasswordChecker() {
                 
                 @Override
                 public boolean usesPassword() {
-                    return tokenList.isUsesPassword();
+                    return usesPassword;
                 }
 
                 @Override
                 public SecretService passwordUsingSecretService() {
-                    return tokenBasedSecretService;
+                    return usesPassword ? tokenBasedSecretService : null;
                 }
             });
 
             final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(tokenBasedSecretService.getRanking()));
             registerService(SecretService.class, tokenBasedSecretService, properties);
         }
         /*
          * Create & open whiteboard service
          */
-        secretService = new WhiteboardSecretService(context);
-        secretService.open();
+        whiteboardSecretService = new WhiteboardSecretService(context);
+        whiteboardSecretService.open();
         /*
          * Register CryptoSecretEncryptionFactoryService
          */
         final CryptoService crypto = getService(CryptoService.class);
-        final CryptoSecretEncryptionFactoryService service = new CryptoSecretEncryptionFactoryService(crypto, secretService, tokenList);
+        final CryptoSecretEncryptionFactoryService service = new CryptoSecretEncryptionFactoryService(crypto, whiteboardSecretService, tokenList);
         registerService(SecretEncryptionFactoryService.class, service);
     }
 
     @Override
     protected void stopBundle() throws Exception {
         TokenBasedSecretService.RANDOM.set("unknown");
-        secretService.close();
+        whiteboardSecretService.close();
         super.stopBundle();
     }
 

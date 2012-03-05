@@ -6,7 +6,9 @@ package com.openexchange.contact.storage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
 import junit.framework.TestCase;
+
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -73,7 +75,7 @@ public class ContactStorageTest extends TestCase {
         if (null != this.rememberedContacts && 0 < rememberedContacts.size()) {
             for (final Contact contact : rememberedContacts) {
                 try {
-                    this.getStorage().delete(getSession(), Integer.toString(contact.getParentFolderID()), 
+                    this.getStorage().delete(getContextID(), Integer.toString(contact.getParentFolderID()), 
                         Integer.toString(contact.getObjectID()), new Date(0));
                 } catch (final Exception e) {
                     LOG.error("error cleaning up contact", e);
@@ -89,11 +91,11 @@ public class ContactStorageTest extends TestCase {
 
     protected ContactStorage getStorage() throws OXException {
         final ContactStorageRegistry registry = ServerServiceRegistry.getInstance().getService(ContactStorageRegistry.class);
-        return registry.getStorage(this.getSession(), null);
+        return registry.getStorage(this.getContextID(), null);
     }
 
     protected Contact findContact(final String uid, final String folderID) throws OXException {
-        for (final Contact c : getStorage().all(getSession(), folderID)) {
+        for (final Contact c : getStorage().all(getContextID(), folderID)) {
             if (uid.equals(c.getUid())) {
                 return c;
             }
@@ -103,6 +105,10 @@ public class ContactStorageTest extends TestCase {
     
     protected Session getSession() {
         return this.session;
+    }
+
+    protected int getContextID() {
+        return this.session.getContextId();
     }
 
 

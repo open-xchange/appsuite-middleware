@@ -72,27 +72,27 @@ public interface MQQueueSender extends MQCloseable {
      * Sends a message containing a <code>java.lang.String</code>.
      * 
      * @param text The <code>java.lang.String</code> to send
-     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
      */
     public void sendTextMessage(String text, int priority) throws OXException;
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Sends a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable object to send
      * @throws OXException If send operation fails
      */
-    public void sendObjectMessage(final Serializable object) throws OXException;
+    public void sendObjectMessage(Serializable object) throws OXException;
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Sends a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable object to send
-     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
      */
-    public void sendObjectMessage(final Serializable object, int priority) throws OXException;
+    public void sendObjectMessage(Serializable object, int priority) throws OXException;
 
     /**
      * Sends a message containing <code>byte</code>s.
@@ -100,15 +100,15 @@ public interface MQQueueSender extends MQCloseable {
      * @param bytes The <code>byte</code> array to send
      * @throws OXException If send operation fails
      */
-    public void sendBytesMessage(final byte[] bytes) throws OXException;
+    public void sendBytesMessage(byte[] bytes) throws OXException;
 
     /**
      * Sends a message containing <code>byte</code>s.
      * 
      * @param bytes The <code>byte</code> array to send
-     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
      */
-    public void sendBytesMessage(final byte[] bytes, int priority) throws OXException;
+    public void sendBytesMessage(byte[] bytes, int priority) throws OXException;
 
 }

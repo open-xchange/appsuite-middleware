@@ -55,7 +55,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.junit.Test;
+
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -79,7 +81,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setSurName("Maier");
         contact.setEmail1("otto.maier@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        getStorage().create(getSession(), folderId, contact);
+        getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -106,7 +108,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setUid(UUID.randomUUID().toString());
         contact.setImage1(ContactTest.image);
         contact.setImageContentType(ContactTest.CONTENT_TYPE);
-        getStorage().create(getSession(), folderId, contact);
+        getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -135,7 +137,7 @@ public class CreateTest extends ContactStorageTest {
             new DistributionListEntryObject("Klaus Otto", "klaus.otto@example.com", 0),            
             new DistributionListEntryObject("Kurt Otto", "kurt.otto@example.com", 0),            
         });
-        getStorage().create(getSession(), folderId, contact);
+        getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -161,7 +163,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setSurName("Müller");
         contact.setEmail1("rene.mueller@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        getStorage().create(getSession(), folderId, contact);
+        getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -189,7 +191,7 @@ public class CreateTest extends ContactStorageTest {
                 contact.setSurName("Test_" + j);
                 contact.setEmail1("kontakt" + i + ".test" + j + "@example.com");
                 contact.setUid(UUID.randomUUID().toString());
-                getStorage().create(getSession(), Integer.toString(i), contact);
+                getStorage().create(getContextID(), Integer.toString(i), contact);
                 contactsInFolders.get(Integer.toString(i)).add(contact);
                 super.rememberForCleanUp(contact);
             }
@@ -200,7 +202,7 @@ public class CreateTest extends ContactStorageTest {
         for (final Map.Entry<String, List<Contact>> entry : contactsInFolders.entrySet()) {
             String folderId = entry.getKey();
             for (final Contact contact : entry.getValue()) {
-                final Contact savedContact = getStorage().get(getSession(), folderId, Integer.toString(contact.getObjectID()));
+                final Contact savedContact = getStorage().get(getContextID(), folderId, Integer.toString(contact.getObjectID()));
                 assertNotNull("contact not found", savedContact);
                 assertEquals("uid wrong", contact.getUid(), savedContact.getUid());
             }   

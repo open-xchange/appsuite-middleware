@@ -1,3 +1,11 @@
+* 2012-03-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21678: Improved delete listener and replaced useless foreign keys with appropriate index entries
+ 
+ * 2012-03-02 - francisco.laguna@open-xchange.com
+  
+  - Fix for bug 21676: Remove old sequence handling so it can be handled in ITipConsistencyCalendar wrapper
+
 * 2012-03-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 21664: Fixed parsing of CSS content

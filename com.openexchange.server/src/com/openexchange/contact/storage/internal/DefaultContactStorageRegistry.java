@@ -51,10 +51,10 @@ package com.openexchange.contact.storage.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link DefaultContactStorageRegistry}
@@ -74,9 +74,9 @@ public final class DefaultContactStorageRegistry implements ContactStorageRegist
     }
 
     @Override
-    public ContactStorage getStorage(final Session session, final String folderId) throws OXException {
+    public ContactStorage getStorage(final int contextID, final String folderId) throws OXException {
         for (final ContactStorage storage : this.knownStorages) {
-            if (storage.supports(session, folderId)) {
+            if (storage.supports(contextID, folderId)) {
                 return storage;
             }
         }
