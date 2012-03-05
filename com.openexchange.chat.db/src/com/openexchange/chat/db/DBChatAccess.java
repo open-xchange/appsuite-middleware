@@ -298,10 +298,11 @@ public final class DBChatAccess implements ChatAccess {
         ResultSet rs = null;
         final Connection con = databaseService.getReadOnly(context);
         try {
-//            stmt = con.prepareStatement("SELECT chatId FROM chat WHERE cid = ?");
-            stmt = con.prepareStatement("SELECT DISTINCT chatChunk.chatId FROM chatChunk LEFT JOIN chatMember ON chatChunk.chunkId = chatMember.chunkId WHERE chatChunk.cid = ? AND chatMember.user = ?");
+            stmt = con.prepareStatement("SELECT DISTINCT chatChunk.chatId FROM chatChunk LEFT JOIN chatMember ON chatChunk.chunkId = chatMember.chunkId WHERE chatChunk.cid = ? AND chatMember.user = ? AND chatChunk.chatId IN (SELECT chat.chatId FROM chat WHERE chat.cid = ? AND chat.user = ?)");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
+            stmt.setInt(3, contextId);
+            stmt.setInt(4, userId);
             rs = stmt.executeQuery();
             final List<String> ids = new LinkedList<String>();
             // TODO: ids.add("default"); // The default chat where all users are participating

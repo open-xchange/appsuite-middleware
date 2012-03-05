@@ -474,6 +474,23 @@ public final class DBChat implements Chat {
             closeSQLStuff(stmt);
         }
         /*
+         * Drop chat chunks
+         */
+        try {
+            stmt = con.prepareStatement("DELETE FROM chatChunk WHERE cid = ? AND chatId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                stmt.setInt(pos, iterator.next());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        /*
          * Drop chat entry for each chat identifier
          */
         try {
