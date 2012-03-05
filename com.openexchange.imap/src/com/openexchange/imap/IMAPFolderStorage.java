@@ -1056,6 +1056,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 try {
                     if (doesExist(createMe, false)) {
                         createMe.delete(true);
+                        created = false;
                     }
                 } catch (final Throwable e2) {
                     LOG.error(
@@ -1074,6 +1075,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     try {
                         if (doesExist(createMe, false)) {
                             createMe.delete(true);
+                            created = false;
                         }
                     } catch (final Throwable e2) {
                         LOG.error(
@@ -1089,6 +1091,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 try {
                     if (doesExist(createMe, false)) {
                         createMe.delete(true);
+                        created = false;
                     }
                 } catch (final Throwable e2) {
                     LOG.error(
@@ -1103,6 +1106,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 try {
                     if (doesExist(createMe, false)) {
                         createMe.delete(true);
+                        created = false;
                     }
                 } catch (final Throwable e2) {
                     LOG.error(
@@ -1113,7 +1117,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            ListLsubCache.clearCache(accountId, session);
+            if (createMe != null && created) {
+                try {
+                    ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session);
+                } catch (final MessagingException e) {
+                    // Updating LIST/LSUB cache failed
+                    ListLsubCache.clearCache(accountId, session);
+                }
+            }
         }
     }
 
