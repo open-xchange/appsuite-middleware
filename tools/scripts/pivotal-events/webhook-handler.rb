@@ -44,6 +44,13 @@ class PivotalConnection
     }
   end
   
+  def add_label(labl, url)
+    story = get_story(url)
+    next unless story.at("labels") == nil || !story.at("labels").inner_html.split(",").include?(labl)  # Condition: Must not yet have the label
+    labels = story.at("labels") == nil ? labl : story.at("labels").inner_html + "," + labl
+    set_labels(labels, url)
+  end
+    
   def get_story(url)
     uri = URI(url)
     req = Net::HTTP::Get.new(uri.request_uri)
@@ -66,7 +73,7 @@ class MailConnection
   end
   
   def send_qa_message(title,link)
-    debug "Sending message about '#{title}'"
+    debug "Sending QA message about '#{title}'"
     recipient = "qa@open-xchange.com"
     message = <<-MESSAGE_END
 From: Pivotal Events<#{@login}>
@@ -78,8 +85,23 @@ MESSAGE_END
     
     smtp = Net::SMTP.new('smtp.open-xchange.com', 25)
     smtp.start('open-xchange.com', @login, @password, :plain) { |smtp| smtp.send_message(message, @login, [recipient])}
-
   end
+  
+  
+    def send_documentation_message(title,link)
+      debug "Sending documentation message about '#{title}'"
+      recipient = "documentation@open-xchange.com"
+      message = <<-MESSAGE_END
+From: Pivotal Events<#{@login}>
+To: Documentation <#{recipient}>
+Subject: [Pivotal Event] Document this: #{CGI::unescapeHTML(title)}
+The following user story has been marked as "accepted". It might be in need of some documentation:
+#{link}
+MESSAGE_END
+
+      smtp = Net::SMTP.new('smtp.open-xchange.com', 25)
+      smtp.start('open-xchange.com', @login, @password, :plain) { |smtp| smtp.send_message(message, @login, [recipient])}
+    end
 end
 
 
@@ -99,10 +121,28 @@ class QualityEventHandler
       mail_con.send_qa_message(description,clickable_url)
 
       url = story.at("url").inner_html.chomp
-      story = piv_con.get_story(url)
-      next unless story.at("labels") == nil || !story.at("labels").inner_html.split(",").include?("qa")  # Condition: Must not yet have the label "qa"
-      labels = story.at("labels") == nil ? "qa" : story.at("labels").inner_html + ",qa"
-      piv_con.set_labels(labels, url) 
+      piv_con.add_label("qa",url)
+    end
+  end
+end
+
+
+class DocumentationEventHandler
+  def is_responsible_for(activity)
+    activity.search("//story/current_state").any?{|elem| elem.inner_html == 'accepted'}
+  end
+
+  def action(activity, piv_con, mail_con)
+    stories = activity.search("//story")
+    stories.each do |story|
+      next unless story.at("current_state") != nil && story.at("current_state").inner_html == 'accepted' # Condition: Must have been changed to "accepted""
+      id = story.at("id").inner_html.chomp
+      description = activity.at("description").inner_html.chomp
+      clickable_url = "https://www.pivotaltracker.com/story/show/#{id}"
+      mail_con.send_documentation_message(description,clickable_url)
+
+      url = story.at("url").inner_html.chomp
+      piv_con.add_label("doc",url)
     end
   end
 end
@@ -116,7 +156,7 @@ set(:port, 80)
 post '/pivotal' do
   piv_con = PivotalConnection.new( PIVOTAL_USERNAME, PIVOTAL_PASSWORD )
   mail_con = MailConnection.new( MAIL_USERNAME, MAIL_PASSWORD )
-  handlers = [ QualityEventHandler.new ]
+  handlers = [ QualityEventHandler.new , DocumentationEventHandler.new ]
 
   doc = Hpricot(request.body)
   debug "Got a post request"
