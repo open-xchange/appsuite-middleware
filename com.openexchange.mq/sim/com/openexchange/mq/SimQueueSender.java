@@ -109,4 +109,16 @@ public class SimQueueSender implements MQQueueSender {
         queue.offer(new QueueElement(bytes, priority));
     }
 
+    @Override
+    public void commit() throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void rollback() throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

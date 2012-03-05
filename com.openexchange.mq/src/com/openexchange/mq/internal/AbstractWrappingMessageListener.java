@@ -47,69 +47,60 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq.internal;
 
-import java.io.Serializable;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQCloseable;
-import com.openexchange.mq.MQTransactional;
+import java.io.ByteArrayOutputStream;
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link MQTopicPublisher}
- *
+ * {@link AbstractWrappingMessageListener}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQTopicPublisher extends MQCloseable, MQTransactional {
+public abstract class AbstractWrappingMessageListener {
 
     /**
-     * Publishes a message containing a <code>java.lang.String</code>.
-     * 
-     * @param text The <code>java.lang.String</code> to publish
-     * @throws OXException If publish operation fails
+     * Initializes a new {@link AbstractWrappingMessageListener}.
      */
-    public void publishTextMessage(String text) throws OXException;
+    protected AbstractWrappingMessageListener() {
+        super();
+    }
 
     /**
-     * Publishes a message containing a {@link Serializable serializable} Java object.
+     * Reads the bytes from specified {@link BytesMessage}.
      * 
-     * @param object The serializable Java object to publish
-     * @throws OXException If publish operation fails
+     * @param bytesMessage The byte message to read from
+     * @return The read bytes
+     * @throws JMSException If reading bytes fails
      */
-    public void publishObjectMessage(Serializable object) throws OXException;
+    protected static byte[] readBytesFrom(final BytesMessage bytesMessage) throws JMSException {
+        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+        final int buflen = 2048;
+        final byte[] buf = new byte[buflen];
+        for (int read; (read = bytesMessage.readBytes(buf, buflen)) > 0;) {
+            out.write(buf, 0, read);
+        }
+        return out.toByteArray();
+    }
 
-    /**
-     * Publishes a message containing <code>byte</code>s.
-     * 
-     * @param bytes The <code>byte</code> array to publish
-     * @throws OXException If publish operation fails
-     */
-    public void publishBytesMessage(byte[] bytes) throws OXException;
-
-    /**
-     * Publishes a message containing a <code>java.lang.String</code>.
-     * 
-     * @param text The <code>java.lang.String</code> to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishTextMessage(String text, int priority) throws OXException;
-
-    /**
-     * Publishes a message containing a {@link Serializable serializable} Java object.
-     * 
-     * @param object The serializable Java object to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishObjectMessage(Serializable object, int priority) throws OXException;
-
-    /**
-     * Publishes a message containing <code>byte</code>s.
-     * 
-     * @param bytes The <code>byte</code> array to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishBytesMessage(byte[] bytes, int priority) throws OXException;
+    protected static void acknowledge(final Message message) {
+        if (null == message) {
+            return;
+        }
+        try {
+            message.acknowledge();
+        } catch (final JMSException e) {
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractWrappingMessageListener.class));
+            logger.error(message);
+        } catch (final RuntimeException e) {
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractWrappingMessageListener.class));
+            logger.error(message);
+        }
+    }
 
 }

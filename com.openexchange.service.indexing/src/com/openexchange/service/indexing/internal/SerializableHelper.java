@@ -47,69 +47,61 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.service.indexing.internal;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQCloseable;
-import com.openexchange.mq.MQTransactional;
+import com.openexchange.java.Streams;
 
 /**
- * {@link MQTopicPublisher}
- *
+ * {@link SerializableHelper}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQTopicPublisher extends MQCloseable, MQTransactional {
+public final class SerializableHelper {
 
     /**
-     * Publishes a message containing a <code>java.lang.String</code>.
-     * 
-     * @param text The <code>java.lang.String</code> to publish
-     * @throws OXException If publish operation fails
+     * Initializes a new {@link SerializableHelper}.
      */
-    public void publishTextMessage(String text) throws OXException;
+    private SerializableHelper() {
+        super();
+    }
 
     /**
-     * Publishes a message containing a {@link Serializable serializable} Java object.
+     * Writes specified {@link Serializable serializable} object to a <code>byte</code> array.
      * 
-     * @param object The serializable Java object to publish
-     * @throws OXException If publish operation fails
+     * @param object The serializable object
+     * @return The resulting <code>byte</code> array
+     * @throws IOException If writing the object fails
      */
-    public void publishObjectMessage(Serializable object) throws OXException;
+    public static byte[] writeObject(final Serializable object) throws IOException {
+        if (null == object) {
+            return null;
+        }
+
+        final ByteArrayOutputStream sink = Streams.newByteArrayOutputStream(2048);
+        new ObjectOutputStream(sink).writeObject(object);
+        return sink.toByteArray();
+    }
 
     /**
-     * Publishes a message containing <code>byte</code>s.
+     * Reads the object from specified <code>byte</code> array.
      * 
-     * @param bytes The <code>byte</code> array to publish
-     * @throws OXException If publish operation fails
+     * @param bytes The object's byte description
+     * @return The read object
+     * @throws IOException If reading the object fails
+     * @throws ClassNotFoundException If such a class is unknown to associated class loader
      */
-    public void publishBytesMessage(byte[] bytes) throws OXException;
+    @SuppressWarnings("unchecked")
+    public static <O> O readObject(final byte[] bytes) throws IOException, ClassNotFoundException {
+        if (null == bytes) {
+            return null;
+        }
 
-    /**
-     * Publishes a message containing a <code>java.lang.String</code>.
-     * 
-     * @param text The <code>java.lang.String</code> to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishTextMessage(String text, int priority) throws OXException;
-
-    /**
-     * Publishes a message containing a {@link Serializable serializable} Java object.
-     * 
-     * @param object The serializable Java object to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishObjectMessage(Serializable object, int priority) throws OXException;
-
-    /**
-     * Publishes a message containing <code>byte</code>s.
-     * 
-     * @param bytes The <code>byte</code> array to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishBytesMessage(byte[] bytes, int priority) throws OXException;
+        return (O) new ObjectInputStream(Streams.newByteArrayInputStream(bytes)).readObject();
+    }
 
 }

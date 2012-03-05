@@ -47,68 +47,96 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.service.indexing.internal;
 
+import java.io.IOException;
+import javax.jms.BytesMessage;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.impl.MQTopicResource;
-import com.openexchange.mq.topic.internal.WrappingMessageListener;
+import com.openexchange.mq.MQExceptionCodes;
+import com.openexchange.mq.queue.impl.MQQueueSenderImpl;
+import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.IndexingService;
 
 /**
- * {@link MQTopicAsyncSubscriber} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link IndexingQueueSender}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQTopicAsyncSubscriber extends MQTopicResource {
+public final class IndexingQueueSender extends MQQueueSenderImpl {
 
-    private TopicSubscriber topicSubscriber;
+    private static final int NON_PERSISTENT = DeliveryMode.NON_PERSISTENT;
 
-    private final MQTopicListener listener;
+    private static final int PERSISTENT = DeliveryMode.PERSISTENT;
 
     /**
-     * Initializes a new {@link MQTopicAsyncSubscriber}.
+     * Initializes a new {@link IndexingQueueSender}.
      * 
-     * @param topicName The name of topic to subscribe from
      * @throws OXException If initialization fails
      */
-    public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName, listener);
-        this.listener = listener;
+    public IndexingQueueSender() throws OXException {
+        super(IndexingService.INDEXING_QUEUE);
     }
 
     @Override
     protected boolean isTransacted() {
-        return false;
+        return true;
     }
 
     @Override
     protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
+        return Session.SESSION_TRANSACTED;
     }
 
-    @Override
-    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
-        topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
-        topicSubscriber.setMessageListener(msgListener);
-        topicConnection.setExceptionListener(msgListener);
-        topicConnection.start();
+    /**
+     * Sends a message containing a {@link IndexingJob job}.
+     * 
+     * @param job The job to send
+     * @throws OXException If send operation fails
+     */
+    public void sendJobMessage(final IndexingJob job) throws OXException {
+        sendJobMessage(job, DEFAULT_PRIORITY);
     }
 
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
+    /**
+     * Sends a message containing a {@link IndexingJob job}.
+     * 
+     * @param job The job to send
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
+     * @throws OXException If send operation fails
+     */
+    public void sendJobMessage(final IndexingJob job, final int priority) throws OXException {
+        if (null == job) {
+            return;
         }
-        super.close();
+        try {
+            final BytesMessage message = queueSession.createBytesMessage();
+            message.writeBytes(SerializableHelper.writeObject(job));
+            queueSender.send(message, job.isDurable() ? PERSISTENT : NON_PERSISTENT, checkPriority(priority), DEFAULT_TIME_TO_LIVE);
+            commit();
+        } catch (final JMSException e) {
+            rollback(this);
+            throw MQExceptionCodes.handleJMSException(e);
+        } catch (final IOException e) {
+            rollback(this);
+            throw MQExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void rollback(final IndexingQueueSender sender) {
+        if (!sender.isTransacted()) {
+            return;
+        }
+        try {
+            sender.rollback();
+        } catch (final Exception e) {
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingQueueSender.class));
+            logger.error(e.getMessage(), e);
+        }
     }
 
 }
