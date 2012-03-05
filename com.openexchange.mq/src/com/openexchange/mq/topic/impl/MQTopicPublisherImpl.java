@@ -86,11 +86,11 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
      * @throws OXException If initialization fails
      */
     public MQTopicPublisherImpl(final String topicName) throws OXException {
-        super(topicName);
+        super(topicName, null);
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic) throws JMSException, OXException {
+    protected synchronized void initResource(final Topic topic, final Object ignore) throws JMSException, OXException {
         topicPublisher = topicSession.createPublisher(topic);
         deliveryMode = MQServiceLookup.getMQService().isLocalOnlyTopic(topicName) ? DeliveryMode.NON_PERSISTENT : DeliveryMode.PERSISTENT;
     }

@@ -77,17 +77,23 @@ public final class MQTopicAsyncSubscriber extends MQTopicResource {
      * @throws OXException If initialization fails
      */
     public MQTopicAsyncSubscriber(final String topicName, final MQTopicListener listener) throws OXException {
-        super(topicName);
+        super(topicName, listener);
         this.listener = listener;
     }
 
     @Override
-    protected synchronized void initResource(final Topic topic) throws JMSException {
+    protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
         topicSubscriber = topicSession.createSubscriber(topic);
-        final WrappingMessageListener msgListener = new WrappingMessageListener(listener);
+        final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
         topicSubscriber.setMessageListener(msgListener);
         topicConnection.setExceptionListener(msgListener);
         topicConnection.start();
+    }
+
+    @Override
+    public void close() {
+        listener.close();
+        super.close();
     }
 
 }

@@ -52,7 +52,7 @@ package com.openexchange.ajp13.najp;
 import java.net.Socket;
 
 /**
- * {@link IAJPv13SocketHandler}
+ * {@link IAJPv13SocketHandler} - Handles a newly established client socket.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

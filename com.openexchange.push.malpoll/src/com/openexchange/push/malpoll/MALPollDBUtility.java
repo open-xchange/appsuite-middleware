@@ -276,6 +276,35 @@ public final class MALPollDBUtility {
         }
     }
 
+    /**
+     * Drops the user data.
+     * <p>
+     * Prefer {@link #dropMailIDs(int, int)} instead.
+     *
+     * @param cid The context ID
+     * @param user The user ID
+     * @throws OXException If a database resource could not be acquired
+     */
+    public static void deleteUserData(final int cid, final int user) throws OXException {
+        final DatabaseService databaseService = getDBService();
+        final Connection con = databaseService.getForUpdateTask(cid);
+        boolean rollback = true;
+        try {
+            con.setAutoCommit(false);
+            deleteUserData(cid, con, user);
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (final Exception e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            databaseService.backForUpdateTask(cid, con);
+        }
+    }
+
     private static void deleteUserData(final int cid, final Connection con, final int user) throws SQLException {
         PreparedStatement stmt = null;
         try {

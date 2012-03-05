@@ -69,7 +69,7 @@ public interface MQTopicPublisher extends MQCloseable {
     public void publishTextMessage(String text) throws OXException;
 
     /**
-     * Publishes a message containing a serializable Java object.
+     * Publishes a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable Java object to publish
      * @throws OXException If publish operation fails
@@ -88,16 +88,16 @@ public interface MQTopicPublisher extends MQCloseable {
      * Publishes a message containing a <code>java.lang.String</code>.
      * 
      * @param text The <code>java.lang.String</code> to publish
-     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If publish operation fails
      */
     public void publishTextMessage(String text, int priority) throws OXException;
 
     /**
-     * Publishes a message containing a serializable Java object.
+     * Publishes a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable Java object to publish
-     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If publish operation fails
      */
     public void publishObjectMessage(Serializable object, int priority) throws OXException;
@@ -106,7 +106,7 @@ public interface MQTopicPublisher extends MQCloseable {
      * Publishes a message containing <code>byte</code>s.
      * 
      * @param bytes The <code>byte</code> array to publish
-     * @param priority The priority; range from 0 (lowest) to 9 (highest)
+     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If publish operation fails
      */
     public void publishBytesMessage(byte[] bytes, int priority) throws OXException;

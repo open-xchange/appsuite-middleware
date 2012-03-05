@@ -93,10 +93,10 @@ public final class MQActivator extends HousekeepingActivator {
             this.serverStartup = serverStartup;
             // Register service(s)
             final MQService service = serverStartup.getService();
-            registerService(MQService.class, service);
             addService(MQService.class, service);
             MQServiceLookup.setMQService(service);
             MQService.SERVICE_REFERENCE.set(service);
+            registerService(MQService.class, service);
 
             // --------- Test service ----------
             // new com.openexchange.mq.example.MQJmsQueueExample(service).test();

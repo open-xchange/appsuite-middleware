@@ -60,6 +60,7 @@ import javax.jms.TextMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.queue.MQQueueSender;
+import com.openexchange.mq.queue.internal.MQQueueResource;
 
 /**
  * {@link MQQueueSenderImpl} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
@@ -77,11 +78,11 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
      * @throws OXException If initialization fails
      */
     public MQQueueSenderImpl(final String queueName) throws OXException {
-        super(queueName);
+        super(queueName, null);
     }
 
     @Override
-    protected synchronized void initResource(final Queue queue) throws JMSException {
+    protected synchronized void initResource(final Queue queue, final Object ignore) throws JMSException {
         queueSender = queueSession.createSender(queue);
     }
 

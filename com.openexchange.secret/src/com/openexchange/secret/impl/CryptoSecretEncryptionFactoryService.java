@@ -50,10 +50,13 @@
 package com.openexchange.secret.impl;
 
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.session.Session;
 
 /**
  * {@link CryptoSecretEncryptionFactoryService} - The factory.
@@ -63,11 +66,32 @@ import com.openexchange.secret.SecretService;
  */
 public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFactoryService {
 
+    private static final class WrappingRankingAwareSecretService implements RankingAwareSecretService {
+
+        private final SecretService secretService;
+
+        protected WrappingRankingAwareSecretService(final SecretService secretService) {
+            super();
+            this.secretService = secretService;
+        }
+
+        @Override
+        public String getSecret(final Session session) {
+            return secretService.getSecret(session);
+        }
+
+        @Override
+        public int getRanking() {
+            // Default ranking
+            return 0;
+        }
+    }
+
     private final CryptoService crypto;
 
     private final TokenList tokenList;
 
-    private final SecretService secretService;
+    private final RankingAwareSecretService secretService;
 
     /**
      * Initializes a new {@link CryptoSecretEncryptionFactoryService}.
@@ -79,7 +103,9 @@ public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFac
     public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final SecretService secretService, final String... patterns) {
         super();
         this.crypto = crypto;
-        this.secretService = secretService;
+        this.secretService =
+            secretService instanceof RankingAwareSecretService ? (RankingAwareSecretService) secretService : new WrappingRankingAwareSecretService(
+                secretService);
         this.tokenList = TokenList.parsePatterns(patterns);
     }
 
@@ -90,7 +116,7 @@ public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFac
      * @param secretService The fall-back secret service
      * @param tokenList The token list
      */
-    public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final SecretService secretService, final TokenList tokenList) {
+    public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final WhiteboardSecretService secretService, final TokenList tokenList) {
         super();
         this.crypto = crypto;
         this.secretService = secretService;

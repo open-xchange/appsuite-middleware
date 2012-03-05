@@ -328,6 +328,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private final boolean forceHttps;
 
     /**
+     * Flag whether to restrict number of long-running request. <code>false</code> by default.
+     */
+    private boolean restrictLongRunning;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -398,6 +403,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor, final boolean forceHttps) {
         super();
+        restrictLongRunning = false;
         this.forceHttps = forceHttps;
         bodyBytes = MessageBytes.newInstance();
         sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
@@ -446,6 +452,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if (TRACE) {
             LOG.trace(Integer.valueOf(foo));
         }
+    }
+
+    /**
+     * Sets the flag whether to restrict long-running requests.
+     *
+     * @param restrictLongRunning <code>true</code> to restrict long-running requests; else <code>false</code>
+     */
+    public AjpProcessor setRestrictLongRunning(final boolean restrictLongRunning) {
+        this.restrictLongRunning = restrictLongRunning;
+        return this;
     }
 
     public void startKeepAlivePing() {
@@ -850,7 +866,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          */
                         request.dumpToBuffer(bytes);
                     }
-                    if (isLongRunning() && !(longRunningAccepted = AjpLongRunningRegistry.getInstance().registerLongRunning(request))) {
+                    if (restrictLongRunning && isLongRunning() && !(longRunningAccepted = AjpLongRunningRegistry.getInstance().registerLongRunning(request))) {
                         /*
                          * Only one per host/port!
                          */
