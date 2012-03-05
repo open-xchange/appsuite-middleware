@@ -114,7 +114,7 @@ public interface MQConstants {
     /**
      * The name of the durable flag parameter.
      * <p>
-     * The durable flag specifies whether the queue will be persisted. This again is optional and defaults to <code>true</code> if omitted.
+     * The durable flag specifies whether the queue will be persisted. This again is optional and defaults to <code>false</code> if omitted.
      * 
      * <pre>
      *  &lt;queue name="selectorQueue"&gt;
