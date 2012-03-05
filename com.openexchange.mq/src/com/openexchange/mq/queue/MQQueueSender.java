@@ -78,7 +78,7 @@ public interface MQQueueSender extends MQCloseable {
     public void sendTextMessage(String text, int priority) throws OXException;
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Sends a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable object to send
      * @throws OXException If send operation fails
@@ -86,7 +86,7 @@ public interface MQQueueSender extends MQCloseable {
     public void sendObjectMessage(Serializable object) throws OXException;
 
     /**
-     * Sends a message containing a serializable Java object.
+     * Sends a message containing a {@link Serializable serializable} Java object.
      * 
      * @param object The serializable object to send
      * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
