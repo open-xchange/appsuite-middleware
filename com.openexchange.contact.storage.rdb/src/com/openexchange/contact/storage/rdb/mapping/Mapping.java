@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,38 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
+package com.openexchange.contact.storage.rdb.mapping;
 
-import com.openexchange.contact.storage.ContactStorage;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link Mapping} - Generic mapping operations providing conversion routines between 
+ * database and java representations for object properties.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
+public interface Mapping<T, O> {
+	
+	boolean isSet(O object);
 
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
+	void set(O object, T value) throws OXException;
+	
+	T get(O object);
+	
+	T get(ResultSet resultSet) throws SQLException;
+	
+	String getColumnLabel();
+	
+	int getSqlType();
+	
+	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
+	
+	void set(ResultSet resultSet, O object) throws SQLException, OXException;
 
+	boolean equals(O object1, O object2);
+	
 }

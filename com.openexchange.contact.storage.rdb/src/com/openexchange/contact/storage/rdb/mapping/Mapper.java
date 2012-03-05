@@ -47,27 +47,33 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
+package com.openexchange.contact.storage.rdb.mapping;
 
-import com.openexchange.contact.storage.ContactStorage;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.EnumSet;
+import java.util.Set;
+
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link Mapper} - 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
-
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
-
+public interface Mapper<O, E extends Enum<E>> extends Factory<O> {
+	
+	Mapping<? extends Object, O> get(E field) throws OXException;
+	
+	void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException;
+	
+	O fromResultSet(final ResultSet resultSet, final E[] fields) throws OXException, SQLException;
+	
+	String getAssignments(final E[] fields) throws OXException;
+	
+	String getColumns(final E[] fields) throws OXException;
+	
+	Set<E> filter(final E[] fields, final EnumSet<E> validFields, final E... mandatoryFields);
+	
 }

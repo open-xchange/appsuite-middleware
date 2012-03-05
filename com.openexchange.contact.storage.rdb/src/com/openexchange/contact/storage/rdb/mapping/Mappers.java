@@ -47,27 +47,49 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
-
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.exception.OXException;
+package com.openexchange.contact.storage.rdb.mapping;
 
 
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link Mappers} - Provides static access to mappings.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
+public final class Mappers {
 
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
+	public static final ContactMapper CONTACT = new ContactMapper();
+	public static final DistListMapper DISTLIST = new DistListMapper();
+
+//	/**
+//	 * Gets a mapper for the supplied contact field.
+//	 * 
+//	 * @param field
+//	 * @throws IllegalArgumentException if there is no mapper for the field
+//	 * @return
+//	 * @throws OXException 
+//	 */
+//	public static final Mapping<? extends Object, Contact> M(final ContactField field) throws OXException {
+//		return get(field, true);
+//	}
+//
+//	public static final Mapping<? extends Object, DistListMember> M(final DistListMemberField field) throws OXException {
+//		return get(field, true);
+//	}
+//	
+//	public static Mapping<? extends Object, Contact> get(final ContactField field, boolean throwIfMissing) throws OXException {
+//		final Mapping<? extends Object, Contact> mapper = CONTACT.get(field);
+//		if (throwIfMissing && null == mapper) {
+//			throw new IllegalArgumentException("No mapping available for '" + field.toString() + "'.");
+//		}
+//		return mapper;
+//	}
+//	
+//	public static Mapping<? extends Object, DistListMember> get(final DistListMemberField field, boolean throwIfMissing) throws OXException {
+//		final Mapping<? extends Object, DistListMember> mapper = DISTLIST.get(field);
+//		if (throwIfMissing && null == mapper) {
+//			throw new IllegalArgumentException("No mapping available for '" + field.toString() + "'.");
+//		}
+//		return mapper;
+//	}
 
 }

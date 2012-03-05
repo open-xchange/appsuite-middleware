@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.rdb.fields;
 
 import java.util.EnumSet;
+
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -99,16 +100,13 @@ public final class Fields {
     /**
      * A set of all contact fields as used by the distribution list database table.
      */
-    public static final EnumSet<ContactField> DISTLIST_DATABASE = EnumSet.of(ContactField.OBJECT_ID, 
-        ContactField.NUMBER_OF_DISTRIBUTIONLIST /* fake intfield02 */, ContactField.NUMBER_OF_LINKS /* fake intfield03 */, 
-        ContactField.NUMBER_OF_IMAGES /* fake intfield04 */, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
-        ContactField.MIDDLE_NAME /* fake field03 */, ContactField.CONTEXTID);
+    public static final EnumSet<DistListMemberField> DISTLIST_DATABASE = EnumSet.allOf(DistListMemberField.class); 
 
     /**
      * An array of all contact fields as used by the distribution list database table.
      */
-    public static final ContactField[] DISTLIST_DATABASE_ARRAY = 
-        DISTLIST_DATABASE.toArray(new ContactField[DISTLIST_DATABASE.size()]);
+    public static final DistListMemberField[] DISTLIST_DATABASE_ARRAY = 
+        DISTLIST_DATABASE.toArray(new DistListMemberField[DISTLIST_DATABASE.size()]);
 
     
     private Fields() {

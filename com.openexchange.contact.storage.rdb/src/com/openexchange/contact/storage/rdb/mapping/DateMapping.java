@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,28 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
+package com.openexchange.contact.storage.rdb.mapping;
 
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.exception.OXException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
 
 
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link DateMapping} - 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
+public abstract class DateMapping<O> extends DefaultMapping<Date, O> {
 
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
-
+	public DateMapping(final String columnName) {
+		super(columnName, Types.DATE);
+	}
+	
+	@Override
+	public Date get(ResultSet resultSet) throws SQLException {
+		return resultSet.getDate(this.getColumnLabel());
+	}
+	
 }

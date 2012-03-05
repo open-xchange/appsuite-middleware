@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,96 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
+package com.openexchange.contact.storage.rdb.internal;
 
-import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 
 
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link DistListMember} - 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
+public class DistListMember extends DistributionListEntryObject {
+	
+	private int parentContactID;
+	private boolean b_parentContactID;
 
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
+	private int contextID;
+	private boolean b_contextID;
+
+	public static DistListMember create(final DistributionListEntryObject dleo, final int contextID, final int parentContactID) throws OXException {
+		final DistListMember member = new DistListMember();
+		member.setParentContactID(parentContactID);
+		member.setContextID(contextID);		
+		if (dleo.containsDisplayname()) {
+			member.setDisplayname(dleo.getDisplayname());
+		}
+		if (dleo.containsEmailaddress()) {
+			member.setEmailaddress(dleo.getEmailaddress());
+		}
+		if (dleo.containsEmailfield()) {
+			member.setEmailfield(dleo.getEmailfield());
+		}
+		if (dleo.containsEntryID()) {
+			member.setEntryID(dleo.getEntryID());
+		}
+		if (dleo.containsFistname()) {
+			member.setFirstname(dleo.getFirstname());
+		}
+		if (dleo.containsFolderld()) {
+			member.setFolderID(dleo.getFolderID());
+		}
+		if (dleo.containsLastname()) {
+			member.setLastname(dleo.getLastname());
+		}
+		
+		return member;
+	}
+	
+	/**
+	 * @return the parentContactID
+	 */
+	public int getParentContactID() {
+		return parentContactID;
+	}
+
+	/**
+	 * @param parentContactID the parentContactID to set
+	 */
+	public void setParentContactID(int parentContactID) {
+		this.b_parentContactID = true;
+		this.parentContactID = parentContactID;
+	}
+
+	/**
+	 * @return the contextID
+	 */
+	public int getContextID() {
+		return contextID;
+	}
+
+	/**
+	 * @param contextID the contextID to set
+	 */
+	public void setContextID(int contextID) {
+		this.b_contextID = true;
+		this.contextID = contextID;
+	}
+
+	/**
+	 * @return the b_contextID
+	 */
+	public boolean containsContextID() {
+		return b_contextID;
+	}
+
+	/**
+	 * @return the b_parentContactID
+	 */
+	public boolean containsParentContactID() {
+		return b_parentContactID;
+	}
 
 }

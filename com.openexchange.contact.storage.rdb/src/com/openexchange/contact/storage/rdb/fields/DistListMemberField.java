@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,50 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
-
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.exception.OXException;
+package com.openexchange.contact.storage.rdb.fields;
 
 
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link DistListMemberField} - 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
-
+public enum DistListMemberField {
     /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
-
+	 * ID of corresponding entry in prg_contacts table
+	 */
+	PARENT_CONTACT_ID,
+	/**
+	 * Object ID of the member's contact if the member is an existing contact
+	 */
+	CONTACT_ID,
+	/**
+	 * Which email field of an existing contact (if any) is used for the mail field. 0 independent contact 1 default email field (email1) 2 second email field (email2) 3 third email field (email3)
+	 */
+	MAIL_FIELD,
+	/**
+	 * Folder ID of the member's contact if the member is an existing contact
+	 */
+	CONTACT_FOLDER_ID,
+	/**
+	 * Display name 
+	 */
+	DISPLAY_NAME,
+	/**
+	 * Last name
+	 */
+	LAST_NAME,
+	/**
+	 * First name
+	 */
+	FIRST_NAME,
+	/**
+	 * Mail address
+	 */
+	MAIL,
+	/**
+	 * Context id
+	 */
+	CONTEXT_ID,
+	;
 }

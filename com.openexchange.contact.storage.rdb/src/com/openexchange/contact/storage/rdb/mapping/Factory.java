@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,20 @@
  *
  */
 
-package com.openexchange.contact.storage.registry;
-
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.exception.OXException;
-
+package com.openexchange.contact.storage.rdb.mapping;
 
 /**
- * {@link ContactStorageRegistry} - Registry for {@link ContactStorage}s
+ * {@link Factory} - Generic factory.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ContactStorageRegistry {
-
-    /**
-     * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
-     * @param context ID the context ID
-     * @param folderId the ID of the folder to get the storage for
-     * @return the storage
-     * @throws OXException
-     */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
-
+public interface Factory<O> {
+	
+	/**
+	 * Creates a new instance of the underlying type.
+	 * 
+	 * @return the new instance
+	 */
+	O newInstance();
+	
 }
