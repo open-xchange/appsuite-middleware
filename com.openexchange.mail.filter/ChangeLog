@@ -1,3 +1,7 @@
+* 2012-03-05 - choeger@open-xchange.com
+
+ - SCR976: new configuration option com.openexchange.mail.filter.useSIEVEResponseCodes
+
 * 2012-02-24 - choeger@open-xchange.com
 
  - SCR963: New backend only api action: notify

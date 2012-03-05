@@ -71,6 +71,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -81,6 +82,7 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.export.Capabilities;
+import com.openexchange.jsieve.export.SIEVEResponse;
 import com.openexchange.jsieve.export.SieveHandler;
 import com.openexchange.jsieve.export.SieveTextFilter;
 import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
@@ -177,6 +179,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private final String scriptname;
 
+    private boolean useSIEVEResponseCodes = false;
+    
     /**
      * Default constructor.
      */
@@ -185,6 +189,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
                 ConfigurationService.class);
         scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
+        useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
         mutex = new Object();
     }
 
@@ -1022,6 +1027,28 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return msg;
     }
 
+    private Category sieveResponse2OXCategory(final SIEVEResponse.Code code) {
+        switch (code) {
+        case ENCRYPT_NEEDED:
+        case QUOTA:
+        case REFERRAL:
+        case SASL:
+        case TRANSITION_NEEDED:
+        case TRYLATER:
+        case ACTIVE:
+        case ALREADYEXISTS:
+        case NONEXISTENT:
+        case TAG:
+            break;
+        case WARNINGS:
+            return Category.CATEGORY_USER_INPUT;
+
+        default:
+            break;
+        }
+        return Category.CATEGORY_ERROR;
+    }
+    
     /**
      * The SIEVE parser is not very expressive when it comes to exceptions.
      * This method analyses an exception message and throws a more detailed
@@ -1037,8 +1064,21 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw OXMailfilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS");
         }
 
-        throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
-            .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+        final OXException mex;
+        if( useSIEVEResponseCodes ) {
+            final SIEVEResponse.Code code = e.getSieveResponseCode();
+            if( null != code ) {
+                mex = new OXException(code.getDetailnumber(), code.getMessage(), e.getSieveHost(), Integer.valueOf(e
+                    .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
+            } else {
+                mex = OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
+                    .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+            }
+        } else {
+            mex = OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
+                .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+        }
+        throw mex;
     }
 
     private static final class Key {
