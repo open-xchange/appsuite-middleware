@@ -121,6 +121,11 @@ public class SendAddress implements PreferencesItemService {
                     throw SettingExceptionCodes.INVALID_VALUE.create(newAlias, setting.getName());
                 }
                 final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
+                try {
+                    storage.removeUserSettingMail(user.getId(), ctx);
+                } catch (final Exception e) {
+                    // Ignore
+                }
                 final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
                     settings.setSendAddr(newAlias);
