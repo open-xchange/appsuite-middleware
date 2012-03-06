@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.internal;
 
+import javax.jms.Session;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.queue.MQQueueAsyncReceiver;
 import com.openexchange.mq.queue.MQQueueListener;
@@ -69,6 +70,16 @@ public final class IndexingQueueAsyncReceiver extends MQQueueAsyncReceiver {
      */
     public IndexingQueueAsyncReceiver(final MQQueueListener listener) throws OXException {
         super(IndexingService.INDEXING_QUEUE, listener);
+    }
+
+    @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
     }
 
 }
