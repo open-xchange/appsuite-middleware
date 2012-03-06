@@ -95,7 +95,7 @@ public final class MDNSActivator extends HousekeepingActivator {
             registerService(MDNSService.class, service, null);
             registerService(CommandProvider.class, new MDNSCommandProvider(service), null);
 
-            serviceInfo = service.registerService("com.openexchange.mdns.lookup", 1808, "Open-Xchange MDNS Lookup Service @" + getHostName());
+            serviceInfo = service.registerService("com.openexchange.mdns.lookup", 1808, "open-xchange lookup service @" + getHostName());
         } catch (final Exception e) {
             log.error("Starting bundle failed: com.openexchange.mdns", e);
             throw e;
