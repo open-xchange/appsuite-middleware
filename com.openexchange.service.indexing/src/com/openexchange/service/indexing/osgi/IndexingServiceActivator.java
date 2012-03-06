@@ -100,7 +100,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             final int maxConcurrentJobs = 8;
             final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
             serviceInit.init();
-            serviceInit.initReceiver();
+            // serviceInit.initReceiver();
             this.serviceInit = serviceInit;
             /*
              * Register service
