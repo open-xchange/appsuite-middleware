@@ -60,6 +60,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.tidy.Report;
@@ -114,6 +116,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Other start-up stuff
              */
+            Config.LoggerProvider = LoggerProvider.DISABLED;
             HTMLFilterHandler.loadWhitelist();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

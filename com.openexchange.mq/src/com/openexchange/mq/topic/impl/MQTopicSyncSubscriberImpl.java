@@ -54,6 +54,7 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
@@ -62,7 +63,6 @@ import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.topic.MQTopicListener;
 import com.openexchange.mq.topic.MQTopicSyncSubscriber;
-import com.openexchange.mq.topic.internal.MQTopicResource;
 
 /**
  * {@link MQTopicSyncSubscriberImpl} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQTopicListener
@@ -74,7 +74,7 @@ import com.openexchange.mq.topic.internal.MQTopicResource;
  */
 public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements MQTopicSyncSubscriber {
 
-    private TopicSubscriber topicSubscriber;
+    protected TopicSubscriber topicSubscriber;
 
     /**
      * Initializes a new {@link MQTopicSyncSubscriberImpl}.
@@ -84,6 +84,16 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
      */
     public MQTopicSyncSubscriberImpl(final String topicName) throws OXException {
         super(topicName, null);
+    }
+
+    @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
     }
 
     @Override

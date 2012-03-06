@@ -95,6 +95,7 @@ public final class JerichoParser {
     public static void parse(final String html, final JerichoHandler handler) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final StreamedSource streamedSource = new StreamedSource(html);
+        streamedSource.setLogger(null);
         int lastSegmentEnd = 0;
         for (final Segment segment : streamedSource) {
             if (segment.getEnd() <= lastSegmentEnd) {

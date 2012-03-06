@@ -47,69 +47,29 @@
  *
  */
 
-package com.openexchange.mq.topic;
+package com.openexchange.mq;
 
-import java.io.Serializable;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQCloseable;
-import com.openexchange.mq.MQTransactional;
 
 /**
- * {@link MQTopicPublisher}
- *
+ * {@link MQTransactional} - Offers methods for transactional message delivery.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQTopicPublisher extends MQCloseable, MQTransactional {
+public interface MQTransactional {
 
     /**
-     * Publishes a message containing a <code>java.lang.String</code>.
+     * Commits all messages done in this transaction and releases any locks currently held.
      * 
-     * @param text The <code>java.lang.String</code> to publish
-     * @throws OXException If publish operation fails
+     * @throws OXException If transaction cannot be committed
      */
-    public void publishTextMessage(String text) throws OXException;
+    void commit() throws OXException;
 
     /**
-     * Publishes a message containing a {@link Serializable serializable} Java object.
+     * Rolls back any messages done in this transaction and releases any locks currently held.
      * 
-     * @param object The serializable Java object to publish
-     * @throws OXException If publish operation fails
+     * @throws OXException If transaction roll-back fails
      */
-    public void publishObjectMessage(Serializable object) throws OXException;
-
-    /**
-     * Publishes a message containing <code>byte</code>s.
-     * 
-     * @param bytes The <code>byte</code> array to publish
-     * @throws OXException If publish operation fails
-     */
-    public void publishBytesMessage(byte[] bytes) throws OXException;
-
-    /**
-     * Publishes a message containing a <code>java.lang.String</code>.
-     * 
-     * @param text The <code>java.lang.String</code> to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishTextMessage(String text, int priority) throws OXException;
-
-    /**
-     * Publishes a message containing a {@link Serializable serializable} Java object.
-     * 
-     * @param object The serializable Java object to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishObjectMessage(Serializable object, int priority) throws OXException;
-
-    /**
-     * Publishes a message containing <code>byte</code>s.
-     * 
-     * @param bytes The <code>byte</code> array to publish
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If publish operation fails
-     */
-    public void publishBytesMessage(byte[] bytes, int priority) throws OXException;
+    void rollback() throws OXException;
 
 }

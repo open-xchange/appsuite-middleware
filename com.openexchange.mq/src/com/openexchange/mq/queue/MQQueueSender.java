@@ -52,13 +52,14 @@ package com.openexchange.mq.queue;
 import java.io.Serializable;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
+import com.openexchange.mq.MQTransactional;
 
 /**
  * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQQueueSender extends MQCloseable {
+public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing a <code>java.lang.String</code>.
