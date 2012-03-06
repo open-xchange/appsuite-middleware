@@ -139,7 +139,7 @@ public final class SessionCache {
     }
 
     /**
-     * Checks if cache contains invalidate marker for given context (and performs local.remove it if present).
+     * Checks if cache contains invalidate marker for given context (and performs local-remove it if present).
      *
      * @param contextId The context identifier
      * @return <code>true</code> if present in cache; otherwise <code>false</code>
