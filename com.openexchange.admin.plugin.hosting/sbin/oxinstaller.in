@@ -52,7 +52,6 @@ OXFUNCTIONS=@oxfunctions@
 SERVERCONF=@absserverconfdir@
 ADMINCONF=@absoxconfdir@
 
-
 test -f $OXFUNCTIONS || {
         echo "missing common shell functions file"
         exit 1
