@@ -12,7 +12,7 @@
 
 # Open-Xchange Initscript
 
-STARTSCRIPT=/opt/open-xchange/sbin/open-xchange-groupware
+STARTSCRIPT=/opt/open-xchange/sbin/open-xchange
 NAME=open-xchange
 DESC="Open-Xchange"
 DEFAULTS=/etc/default/open-xchange

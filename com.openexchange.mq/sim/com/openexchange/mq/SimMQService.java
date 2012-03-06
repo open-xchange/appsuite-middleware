@@ -190,4 +190,40 @@ public class SimMQService implements MQService {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mq.MQService#deleteQueue(java.lang.String)
+     */
+    @Override
+    public void deleteQueue(final String name) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mq.MQService#deleteLocaleQueue(java.lang.String)
+     */
+    @Override
+    public void deleteLocaleQueue(final String name) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mq.MQService#deleteTopic(java.lang.String)
+     */
+    @Override
+    public void deleteTopic(final String name) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mq.MQService#deleteLocaleTopic(java.lang.String)
+     */
+    @Override
+    public void deleteLocaleTopic(final String name) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

@@ -75,7 +75,8 @@ public class MailFilterProperties {
         SIEVE_PASSWORDSRC("com.openexchange.mail.filter.passwordSource", PasswordSource.SESSION.name),
         SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", ""),
         USE_UTF7_FOLDER_ENCODING("com.openexchange.mail.filter.useUTF7FolderEncoding", "false"),
-        PUNYCODE("com.openexchange.mail.filter.punycode", "false");
+        PUNYCODE("com.openexchange.mail.filter.punycode", "false"),
+        USE_SIEVE_RESPONSE_CODES("com.openexchange.mail.filter.useSIEVEResponseCodes","false");
 
         public final String property;
 

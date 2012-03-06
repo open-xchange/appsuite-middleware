@@ -49,12 +49,15 @@
 
 package com.openexchange.service.indexing.internal;
 
+import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.mq.queue.MQQueueListener;
+import com.openexchange.service.indexing.IndexingJob;
 
 /**
- * {@link IndexingServiceQueueListener}
+ * {@link IndexingServiceQueueListener} - The {@link MQQueueListener listener} that delegates incoming messages to
+ * {@link IndexingJobExecutor executor}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -62,16 +65,19 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceQueueListener.class));
 
+    private final IndexingJobExecutor executor;
+
     /**
      * Initializes a new {@link IndexingServiceQueueListener}.
      */
-    public IndexingServiceQueueListener() {
+    public IndexingServiceQueueListener(final IndexingJobExecutor executor) {
         super();
+        this.executor = executor;
     }
 
     @Override
     public void close() {
-        // Nothing to do
+        executor.stop();
     }
 
     @Override
@@ -81,12 +87,18 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
 
     @Override
     public void onObject(final Object object) {
-        System.out.println(object);
+        LOG.warn("Invalid indexing message type: Java object of type " + object.getClass().getName());
     }
 
     @Override
     public void onBytes(final byte[] bytes) {
-        LOG.warn("Invalid indexing message type: binary");
+        try {
+            executor.addJob(SerializableHelper.<IndexingJob> readObject(bytes));
+        } catch (final ClassNotFoundException e) {
+            LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
+        } catch (final IOException e) {
+            LOG.warn("Deserialization failed: " + e.getMessage(), e);
+        } 
     }
 
 }

@@ -49,11 +49,15 @@
 
 package com.openexchange.service.indexing.osgi;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.internal.IndexingServiceInit;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link IndexingServiceActivator} - The activator for indexing service.
@@ -73,7 +77,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MQService.class };
+        return new Class<?>[] { MQService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -81,14 +85,16 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Starting bundle: com.openexchange.service.indexing");
         try {
-            final IndexingServiceInit serviceInit = new IndexingServiceInit(this);
+            final int maxConcurrentJobs = 8;
+            final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
             serviceInit.init();
+            serviceInit.initReceiver();
             this.serviceInit = serviceInit;
 
             /*-
              * ------------------- Test ---------------------
              */
-            serviceInit.getSender().sendTextMessage("Startup test");
+            serviceInit.getSender().sendJobMessage(new DummyIndexingJob());
         } catch (final Exception e) {
             log.error("Error starting bundle: com.openexchange.service.indexing");
             throw e;
@@ -110,6 +116,37 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             log.error("Error stopping bundle: com.openexchange.service.indexing");
             throw e;
         }
+    }
+
+    private static final class DummyIndexingJob implements IndexingJob {
+
+        private static final long serialVersionUID = 1L;
+
+        private final Date stamp;
+
+        /**
+         * Initializes a new {@link DummyIndexingJob}.
+         */
+        public DummyIndexingJob() {
+            super();
+            stamp = new Date(System.currentTimeMillis());
+        }
+
+        @Override
+        public boolean isDurable() {
+            return false;
+        }
+
+        @Override
+        public void performJob() throws OXException {
+            System.out.println("\n\tPerformed dummy job created at " + stamp);
+        }
+
+        @Override
+        public Behavior getBehavior() {
+            return Behavior.CONSUMER_RUNS;
+        }
+        
     }
 
 }

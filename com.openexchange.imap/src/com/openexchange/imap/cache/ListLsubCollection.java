@@ -217,7 +217,9 @@ final class ListLsubCollection {
         deprecated.set(true);
         stamp = 0;
         if (DEBUG) {
-            LOG.debug("Cleared LIST/LSUB cache.");
+            final StringBuilder builder = new StringBuilder("Cleared LIST/LSUB cache.\n");
+            appendStackTrace(new Throwable().getStackTrace(), builder);
+            LOG.debug(builder.toString());
         }
     }
 
@@ -1903,5 +1905,34 @@ final class ListLsubCollection {
         }
 
     } // End of class ListLsubEntryImpl
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            sb.append("<missing stack trace>\n");
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
+    }
 
 }

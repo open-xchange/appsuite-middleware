@@ -1,3 +1,7 @@
+* 2012-03-05 - thorben.betten@open-xchange.com
+
+ - Fixed bug 21680: Improved create routine for faster folder look-up
+
 * 2012-03-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 21678: Improved delete listener and replaced useless foreign keys with appropriate index entries

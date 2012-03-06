@@ -15,6 +15,7 @@ CREATE TABLE chatMember (
  cid INT4 unsigned NOT NULL,
  user INT4 unsigned NOT NULL,
  chatId INT4 unsigned NOT NULL,
+ chunkId INT4 unsigned NOT NULL,
  opMode INT4 unsigned NOT NULL,
  PRIMARY KEY (cid, user, chatId),
  INDEX `user` (cid, user),
@@ -26,6 +27,7 @@ CREATE TABLE chatMessage (
  cid INT4 unsigned NOT NULL,
  user INT4 unsigned NOT NULL,
  chatId INT4 unsigned NOT NULL,
+ chunkId INT4 unsigned NOT NULL,
  messageId BINARY(16) NOT NULL,
  message TEXT NOT NULL,
  createdAt BIGINT(64) DEFAULT NULL,
@@ -53,5 +55,14 @@ CREATE TABLE chatPresence (
  lastModified BINARY(16) NOT NULL,
  PRIMARY KEY (cid, user),
  INDEX `available` (cid, type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE chatChunk (
+ cid INT4 unsigned NOT NULL,
+ chatId INT4 unsigned NOT NULL,
+ chunkId INT4 unsigned NOT NULL,
+ createdAt BIGINT(64) DEFAULT NULL,
+ PRIMARY KEY (cid, chatId, chunkId),
+ INDEX `chat` (cid, chatId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

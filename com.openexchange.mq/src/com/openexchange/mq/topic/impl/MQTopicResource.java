@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mq.topic.internal;
+package com.openexchange.mq.topic.impl;
 
 import static com.openexchange.mq.serviceLookup.MQServiceLookup.getMQService;
 import javax.jms.InvalidDestinationException;
@@ -94,7 +94,7 @@ public abstract class MQTopicResource implements MQCloseable {
             // Setup connection, session & sender
             final TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
             this.topicConnection = topicConnection;
-            final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            final TopicSession topicSession = topicConnection.createTopicSession(isTransacted(), getAcknowledgeMode());
             this.topicSession = topicSession;
             initResource(topic, arg);
             errorOccurred = false;
@@ -108,6 +108,22 @@ public abstract class MQTopicResource implements MQCloseable {
             }
         }
     }
+
+    /**
+     * Gets the acknowledge mode that indicates whether the consumer or the client will acknowledge any messages it receives; ignored if
+     * {@link #isTransacted()} is <code>true</code>. Legal values are {@link Session#AUTO_ACKNOWLEDGE}, {@link Session#CLIENT_ACKNOWLEDGE},
+     * and {@link Session#DUPS_OK_ACKNOWLEDGE}.
+     * 
+     * @return The acknowledge mode
+     */
+    protected abstract int getAcknowledgeMode();
+
+    /**
+     * Checks if this resource is transacted.
+     * 
+     * @return <code>true</code> if transacted; otherwise false
+     */
+    protected abstract boolean isTransacted();
 
     /**
      * Initializes the resource.

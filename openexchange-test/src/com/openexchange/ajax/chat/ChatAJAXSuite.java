@@ -54,6 +54,7 @@ import junit.framework.TestSuite;
 import com.openexchange.ajax.chat.conversation.tests.ChatChunkTest;
 import com.openexchange.ajax.chat.conversation.tests.ChatMessageTest;
 import com.openexchange.ajax.chat.conversation.tests.ChatTest;
+import com.openexchange.ajax.chat.conversation.tests.DeleteChatTest;
 import com.openexchange.ajax.chat.roster.tests.AllTest;
 
 
@@ -73,11 +74,20 @@ public class ChatAJAXSuite extends TestSuite {
     }
 
     public static Test suite() {
+        /*
+         * Conversation tests
+         */
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(ChatTest.class);
         tests.addTestSuite(ChatMessageTest.class);
         tests.addTestSuite(ChatChunkTest.class);
+        tests.addTestSuite(DeleteChatTest.class);
+        
+        /*
+         * Roster tests
+         */
         tests.addTestSuite(AllTest.class);
+        
         return tests;
 
     }

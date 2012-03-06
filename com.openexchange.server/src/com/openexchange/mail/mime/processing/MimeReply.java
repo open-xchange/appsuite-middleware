@@ -600,11 +600,11 @@ public final class MimeReply {
                 final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(
-                            nextLine).append(nextLine).toString());
+                        HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(
+                            nextLine).toString());
                 } else {
                     replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*-

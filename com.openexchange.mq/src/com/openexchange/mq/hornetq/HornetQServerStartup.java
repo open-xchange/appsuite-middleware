@@ -140,7 +140,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
                         configuration = new ConfigurationImpl();
-                        configuration.setPersistenceEnabled(false);
+                        /*configuration.setPersistenceEnabled(false);*/
                         configuration.setSecurityEnabled(false);
                         configuration.setJournalSyncNonTransactional(false);
     

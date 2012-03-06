@@ -328,4 +328,39 @@ public interface MQService extends MQConstants {
      */
     boolean isLocalOnlyTopic(String name) throws OXException;
 
+    /*-
+     * ---------------------- Delete routines ----------------------------
+     */
+
+    /**
+     * Deletes specified queue.
+     * 
+     * @param name The queue name
+     * @throws OXException If deletion fails
+     */
+    public void deleteQueue(String name) throws OXException;
+
+    /**
+     * Deletes specified local queue.
+     * 
+     * @param name The queue name
+     * @throws OXException If deletion fails
+     */
+    public void deleteLocaleQueue(String name) throws OXException;
+
+    /**
+     * Deletes specified topic.
+     * 
+     * @param name The topic name
+     * @throws OXException If deletion fails
+     */
+    public void deleteTopic(String name) throws OXException;
+
+    /**
+     * Deletes specified local topic.
+     * 
+     * @param name The topic name
+     * @throws OXException If deletion fails
+     */
+    public void deleteLocaleTopic(String name) throws OXException;
 }

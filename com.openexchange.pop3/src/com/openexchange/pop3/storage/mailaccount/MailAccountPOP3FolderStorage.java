@@ -276,31 +276,34 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private String checkDefaultFolder(final String realFullname, final char separator) throws OXException {
         /*
-         * Check default folder
+         * Try to create folder
          */
-        final String fn;
-        if (delegatee.exists(realFullname)) {
-            fn = realFullname;
+        final MailFolderDescription description = new MailFolderDescription();
+        {
+            final int pos = realFullname.lastIndexOf(separator);
+            description.setName(pos == -1 ? realFullname : realFullname.substring(pos + 1));
+            description.setParentFullname(pos == -1 ? "" : realFullname.substring(0, pos));
+        }
+        description.setSeparator(separator);
+        description.setExists(false);
+        description.setSubscribed(false);
+        {
+            final MailPermission mp = new DefaultMailPermission();
+            mp.setEntity(session.getUserId());
+            description.addPermission(mp);
+        }
+        String fn;
+        try {
+            fn = delegatee.createFolder(description);
+        } catch (final OXException e) {
+            if (!MailExceptionCode.DUPLICATE_FOLDER.equals(e)) {
+                throw e;
+            }
             /*
              * Ensure folder is unsubscribed in primary account
              */
-            unsubscribe(fn);
-        } else {
-            final MailFolderDescription description = new MailFolderDescription();
-            {
-                final int pos = realFullname.lastIndexOf(separator);
-                description.setName(pos == -1 ? realFullname : realFullname.substring(pos + 1));
-                description.setParentFullname(pos == -1 ? "" : realFullname.substring(0, pos));
-            }
-            description.setSeparator(separator);
-            description.setExists(false);
-            description.setSubscribed(false);
-            {
-                final MailPermission mp = new DefaultMailPermission();
-                mp.setEntity(session.getUserId());
-                description.addPermission(mp);
-            }
-            fn = delegatee.createFolder(description);
+            unsubscribe(realFullname);
+            fn = realFullname;
         }
         /*
          * Return

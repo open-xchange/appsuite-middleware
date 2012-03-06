@@ -51,16 +51,18 @@ package com.openexchange.mq.queue.impl;
 
 import java.io.Serializable;
 import javax.jms.BytesMessage;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueSender;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.queue.MQQueueSender;
-import com.openexchange.mq.queue.internal.MQQueueResource;
+import com.openexchange.mq.serviceLookup.MQServiceLookup;
 
 /**
  * {@link MQQueueSenderImpl} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
@@ -69,7 +71,13 @@ import com.openexchange.mq.queue.internal.MQQueueResource;
  */
 public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender {
 
-    private QueueSender queueSender; // Within synchronized, no volatile needed
+    protected static final int DEFAULT_PRIORITY = Message.DEFAULT_PRIORITY;
+    
+    protected static final long DEFAULT_TIME_TO_LIVE = Message.DEFAULT_TIME_TO_LIVE;
+
+    protected QueueSender queueSender; // Within synchronized, no volatile needed
+
+    private int deliveryMode;
 
     /**
      * Initializes a new {@link MQQueueSenderImpl}.
@@ -82,8 +90,55 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
     }
 
     @Override
-    protected synchronized void initResource(final Queue queue, final Object ignore) throws JMSException {
+    protected synchronized void initResource(final Queue queue, final Object ignore) throws JMSException, OXException {
         queueSender = queueSession.createSender(queue);
+        queueSender.setDisableMessageID(true);
+        queueSender.setDisableMessageTimestamp(true);
+        deliveryMode = MQServiceLookup.getMQService().isLocalOnlyQueue(queueName) ? DeliveryMode.NON_PERSISTENT : DeliveryMode.PERSISTENT;
+    }
+
+    @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
+    }
+
+    @Override
+    public void commit() throws OXException {
+        if (!isTransacted()) {
+            /*
+             * Not transactional
+             */
+            return;
+        }
+        try {
+            queueSession.commit();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void rollback() throws OXException {
+        if (!isTransacted()) {
+            /*
+             * Not transactional
+             */
+            return;
+        }
+        try {
+            queueSession.rollback();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -93,7 +148,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         }
         try {
             final TextMessage message = queueSession.createTextMessage(text);
-            queueSender.send(message);
+            queueSender.send(message, deliveryMode, DEFAULT_PRIORITY, DEFAULT_TIME_TO_LIVE);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -110,7 +165,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         }
         try {
             final ObjectMessage message = queueSession.createObjectMessage(object);
-            queueSender.send(message);
+            queueSender.send(message, deliveryMode, DEFAULT_PRIORITY, DEFAULT_TIME_TO_LIVE);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -124,7 +179,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         try {
             final BytesMessage bytesMessage = queueSession.createBytesMessage();
             bytesMessage.writeBytes(bytes, 0, bytes.length);
-            queueSender.send(bytesMessage);
+            queueSender.send(bytesMessage, deliveryMode, DEFAULT_PRIORITY, DEFAULT_TIME_TO_LIVE);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -137,7 +192,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         }
         try {
             final TextMessage message = queueSession.createTextMessage(text);
-            queueSender.send(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+            queueSender.send(message, deliveryMode, checkPriority(priority), DEFAULT_TIME_TO_LIVE);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -154,7 +209,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         }
         try {
             final ObjectMessage message = queueSession.createObjectMessage(object);
-            queueSender.send(message, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+            queueSender.send(message, deliveryMode, checkPriority(priority), DEFAULT_TIME_TO_LIVE);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
@@ -168,17 +223,23 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
         try {
             final BytesMessage bytesMessage = queueSession.createBytesMessage();
             bytesMessage.writeBytes(bytes, 0, bytes.length);
-            queueSender.send(bytesMessage, Message.DEFAULT_DELIVERY_MODE, checkPriority(priority), Message.DEFAULT_TIME_TO_LIVE);
+            queueSender.send(bytesMessage, deliveryMode, checkPriority(priority), DEFAULT_TIME_TO_LIVE);
         } catch (final JMSException e) {
             throw MQExceptionCodes.handleJMSException(e);
         }
     }
 
-    private static int checkPriority(final int priority) {
+    /**
+     * Checks proper priority range.
+     * 
+     * @param priority The priority to check
+     * @return The checked priority
+     */
+    protected static int checkPriority(final int priority) {
         if (priority >= 0 && priority <= 9) {
             return priority;
         }
-        return Message.DEFAULT_PRIORITY;
+        return DEFAULT_PRIORITY;
     }
 
 }

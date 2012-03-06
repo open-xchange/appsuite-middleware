@@ -48,6 +48,8 @@
  */
 package com.openexchange.jsieve.export.exceptions;
 
+import com.openexchange.jsieve.export.SIEVEResponse;
+
 /**
  * {@link OXSieveHandlerException}
  *
@@ -62,7 +64,10 @@ public class OXSieveHandlerException extends Exception {
 
 	private final int sieveHostPort;
 
-	/**
+	private final SIEVEResponse.Code sieveResponseCode;
+	
+	
+    /**
 	 * Initializes a new {@link OXSieveHandlerException}
 	 *
 	 * @param message
@@ -72,10 +77,11 @@ public class OXSieveHandlerException extends Exception {
 	 * @param sieveHostPort
 	 *            The sieve host port
 	 */
-	public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort) {
+	public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SIEVEResponse.Code responseCode) {
 		super(message);
 		this.sieveHost = sieveHost;
 		this.sieveHostPort = sieveHostPort;
+		this.sieveResponseCode = responseCode;
 	}
 
 	/**
@@ -95,4 +101,12 @@ public class OXSieveHandlerException extends Exception {
 	public int getSieveHostPort() {
 		return sieveHostPort;
 	}
+
+	/**
+	 * @return the sieveResponseCode
+	 */
+	public final SIEVEResponse.Code getSieveResponseCode() {
+	    return sieveResponseCode;
+	}
 }
+

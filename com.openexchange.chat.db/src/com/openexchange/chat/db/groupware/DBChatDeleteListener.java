@@ -106,6 +106,11 @@ public class DBChatDeleteListener implements DeleteListener {
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
+            
+            stmt = writeCon.prepareStatement("DELETE FROM chatChunk WHERE cid = ?");
+            stmt.setInt(pos, contextId);
+            stmt.executeUpdate();
+            DBUtils.closeSQLStuff(stmt);
 
             stmt = writeCon.prepareStatement("DELETE FROM chatPresence WHERE cid = ?");
             stmt.setInt(pos, contextId);
@@ -180,6 +185,15 @@ public class DBChatDeleteListener implements DeleteListener {
                 stmt.executeBatch();
                 DBUtils.closeSQLStuff(stmt);
                 stmt = writeCon.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
+                    stmt.setInt(pos, it.next());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = writeCon.prepareStatement("DELETE FROM chatChunk WHERE cid = ? AND chatId = ?");
                 pos = 1;
                 stmt.setInt(pos++, contextId);
                 for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
