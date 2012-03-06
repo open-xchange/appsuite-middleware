@@ -90,7 +90,7 @@ public final class EchoIndexJob implements IndexingJob {
 
     @Override
     public Behavior getBehavior() {
-        return null;
+        return Behavior.CONSUMER_RUNS;
     }
 
 }
