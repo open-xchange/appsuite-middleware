@@ -12,6 +12,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.management,
  com.openexchange.mq,
  com.openexchange.mq.queue,
  com.openexchange.mq.queue.impl,
@@ -26,3 +27,4 @@ Import-Package: com.openexchange.config,
  org.eclipse.osgi.framework.console,
  org.osgi.framework
 Bundle-Activator: com.openexchange.service.indexing.osgi.IndexingServiceActivator
+Export-Package: com.openexchange.service.indexing

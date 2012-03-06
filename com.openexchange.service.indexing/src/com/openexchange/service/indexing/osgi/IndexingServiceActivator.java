@@ -49,16 +49,22 @@
 
 package com.openexchange.service.indexing.osgi;
 
-import java.util.Date;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementService;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.IndexingServiceMBean;
 import com.openexchange.service.indexing.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.internal.IndexingServiceInit;
+import com.openexchange.service.indexing.internal.IndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.internal.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -87,6 +93,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Starting bundle: com.openexchange.service.indexing");
         try {
+            Services.setServiceLookup(this);
             /*
              * IndexingService initialization
              */
@@ -98,12 +105,43 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             /*
              * Register service
              */
-            registerService(IndexingService.class, new IndexingServiceImpl(serviceInit.getSender()));
+            final IndexingServiceImpl indexingService = new IndexingServiceImpl(serviceInit.getSender());
+            registerService(IndexingService.class, indexingService);
+            addService(IndexingService.class, indexingService);
+            /*
+             * Service tracker(s)
+             */
+            final ObjectName objectName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service MBean");
+            // trackService(ManagementService.class);
+            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+                @Override
+                public void added(final ServiceReference<ManagementService> ref, final ManagementService service) {
+                    try {
+                        service.registerMBean(objectName, new IndexingServiceMBeanImpl());
+                    } catch (final NotCompliantMBeanException e) {
+                        log.error(e.getMessage(), e);
+                    } catch (final OXException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(final ServiceReference<ManagementService> ref, final ManagementService service) {
+                    try {
+                        service.unregisterMBean(objectName);
+                    } catch (final OXException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+
+            });
+            openTrackers();
 
             /*-
              * ------------------- Test ---------------------
              */
-            //serviceInit.getSender().sendJobMessage(new DummyIndexingJob());
+            // serviceInit.getSender().sendJobMessage(new EchoIndexJob("Echo..."));
         } catch (final Exception e) {
             log.error("Error starting bundle: com.openexchange.service.indexing");
             throw e;
@@ -127,42 +165,16 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                 serviceInit.drop();
                 this.serviceInit = null;
             }
+            /*
+             * Perform rest
+             */
             super.stopBundle();
         } catch (final Exception e) {
             log.error("Error stopping bundle: com.openexchange.service.indexing");
             throw e;
+        } finally {
+            Services.setServiceLookup(null);
         }
-    }
-
-    private static final class DummyIndexingJob implements IndexingJob {
-
-        private static final long serialVersionUID = 1L;
-
-        private final Date stamp;
-
-        /**
-         * Initializes a new {@link DummyIndexingJob}.
-         */
-        public DummyIndexingJob() {
-            super();
-            stamp = new Date(System.currentTimeMillis());
-        }
-
-        @Override
-        public boolean isDurable() {
-            return false;
-        }
-
-        @Override
-        public void performJob() throws OXException {
-            System.out.println("\n\tPerformed dummy job created at " + stamp);
-        }
-
-        @Override
-        public Behavior getBehavior() {
-            return Behavior.CONSUMER_RUNS;
-        }
-
     }
 
 }
