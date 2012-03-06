@@ -103,7 +103,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             /*-
              * ------------------- Test ---------------------
              */
-            serviceInit.getSender().sendJobMessage(new DummyIndexingJob());
+            //serviceInit.getSender().sendJobMessage(new DummyIndexingJob());
         } catch (final Exception e) {
             log.error("Error starting bundle: com.openexchange.service.indexing");
             throw e;
