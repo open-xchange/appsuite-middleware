@@ -47,59 +47,22 @@
  *
  */
 
-package com.openexchange.groupware.delete;
-
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.sessiond.SessiondService;
-
+package com.openexchange.sessiond;
 
 /**
- * {@link SessionClearerOnContextDelete} - Clears foreign caches on context delete.
- *
+ * {@link InvalidatedLookupService} - Tests whether the denoted user's sessions have been invalidated.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionClearerOnContextDelete extends ContextDelete {
+public interface InvalidatedLookupService {
 
     /**
-     * Initializes a new {@link SessionClearerOnContextDelete}.
+     * Tests whether the denoted user's sessions have been invalidated. The <i>invalidated status</i> of the user is cleared by this method.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if invalidated; otherwise <code>false</code>
      */
-    public SessionClearerOnContextDelete() {
-        super();
-    }
-
-    @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (!isContextDelete(event)) {
-            return;
-        }
-        final int contextId = event.getContext().getContextId();
-        /*-
-         * TODO
-         * Get cache service
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                final Cache sessionCache = cacheService.getCache("SessionCache");
-                final Integer key = Integer.valueOf(contextId);
-                sessionCache.put(key, InvalidatedMarker.newInstance(key));
-            } catch (final OXException e) {
-                // Ignore
-            }
-        }
-         * 
-         */
-        /*
-         * Get SessionD service
-         */
-        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != service) {
-            /*
-             * Clear context sessions
-             */
-            service.removeContextSessions(contextId);
-        }
-    }
+    boolean invalidated(int userId, int contextId);
 
 }
