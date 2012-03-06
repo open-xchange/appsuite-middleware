@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.internal;
 
 import java.io.IOException;
+import java.io.Serializable;
 import javax.jms.BytesMessage;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
@@ -84,12 +85,32 @@ public final class IndexingQueueSender extends MQQueueSenderImpl {
 
     @Override
     protected boolean isTransacted() {
-        return true;
+        return false;
     }
 
     @Override
     protected int getAcknowledgeMode() {
-        return Session.SESSION_TRANSACTED;
+        return Session.AUTO_ACKNOWLEDGE;
+    }
+
+    @Override
+    public void sendTextMessage(final String text) throws OXException {
+        throw new UnsupportedOperationException("Text messages not supported by queue: " + IndexingService.INDEXING_QUEUE);
+    }
+
+    @Override
+    public void sendTextMessage(final String text, final int priority) throws OXException {
+        throw new UnsupportedOperationException("Text messages not supported by queue: " + IndexingService.INDEXING_QUEUE);
+    }
+
+    @Override
+    public void sendObjectMessage(final Serializable object) throws OXException {
+        sendJobMessage((IndexingJob) object, DEFAULT_PRIORITY);
+    }
+
+    @Override
+    public void sendObjectMessage(final Serializable object, final int priority) throws OXException {
+        sendJobMessage((IndexingJob) object, priority);
     }
 
     /**
