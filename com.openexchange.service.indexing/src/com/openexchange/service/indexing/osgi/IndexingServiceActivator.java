@@ -56,6 +56,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.internal.IndexingServiceInit;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -85,16 +87,23 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Starting bundle: com.openexchange.service.indexing");
         try {
+            /*
+             * IndexingService initialization
+             */
             final int maxConcurrentJobs = 8;
             final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
             serviceInit.init();
             serviceInit.initReceiver();
             this.serviceInit = serviceInit;
+            /*
+             * Register service
+             */
+            registerService(IndexingService.class, new IndexingServiceImpl(serviceInit.getSender()));
 
             /*-
              * ------------------- Test ---------------------
              */
-            serviceInit.getSender().sendJobMessage(new DummyIndexingJob());
+            //serviceInit.getSender().sendJobMessage(new DummyIndexingJob());
         } catch (final Exception e) {
             log.error("Error starting bundle: com.openexchange.service.indexing");
             throw e;
@@ -106,6 +115,13 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Stopping bundle: com.openexchange.service.indexing");
         try {
+            /*
+             * Unregister service
+             */
+            unregisterServices();
+            /*
+             * IndexingService shut-down
+             */
             final IndexingServiceInit serviceInit = this.serviceInit;
             if (null != serviceInit) {
                 serviceInit.drop();
@@ -146,7 +162,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         public Behavior getBehavior() {
             return Behavior.CONSUMER_RUNS;
         }
-        
+
     }
 
 }

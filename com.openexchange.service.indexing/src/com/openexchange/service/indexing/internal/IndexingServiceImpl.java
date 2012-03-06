@@ -49,66 +49,36 @@
 
 package com.openexchange.service.indexing.internal;
 
-import java.io.IOException;
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.mq.queue.MQQueueListener;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.IndexingService;
+
 
 /**
- * {@link IndexingServiceQueueListener} - The {@link MQQueueListener listener} that delegates incoming messages to
- * {@link IndexingJobExecutor executor}.
- * 
+ * {@link IndexingServiceImpl}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexingServiceQueueListener implements MQQueueListener {
+public final class IndexingServiceImpl implements IndexingService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceQueueListener.class));
-
-    private final IndexingJobExecutor executor;
+    private final IndexingQueueSender sender;
 
     /**
-     * Initializes a new {@link IndexingServiceQueueListener}.
+     * Initializes a new {@link IndexingServiceImpl}.
      */
-    public IndexingServiceQueueListener(final IndexingJobExecutor executor) {
+    public IndexingServiceImpl(final IndexingQueueSender sender) {
         super();
-        this.executor = executor;
+        this.sender = sender;
     }
 
     @Override
-    public void close() {
-        executor.stop();
+    public void addJob(final IndexingJob job) throws OXException {
+        sender.sendJobMessage(job);
     }
 
     @Override
-    public void onText(final String text) {
-        LOG.warn("Invalid indexing message type: text");
-    }
-
-    @Override
-    public void onObjectMessage(final ObjectMessage objectMessage) {
-        try {
-            executor.addJob((IndexingJob) objectMessage.getObject());
-        } catch (final JMSException e) {
-            LOG.warn("A JMS error occurred: " + e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.warn("A runtime error occurred: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void onBytes(final byte[] bytes) {
-        try {
-            executor.addJob(SerializableHelper.<IndexingJob> readObject(bytes));
-        } catch (final ClassNotFoundException e) {
-            LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
-        } catch (final IOException e) {
-            LOG.warn("Deserialization failed: " + e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.warn("A runtime error occurred: " + e.getMessage(), e);
-        }
+    public void addJob(final IndexingJob job, final int priority) throws OXException {
+        sender.sendJobMessage(job, priority);
     }
 
 }
