@@ -87,7 +87,7 @@ public class PreviewResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
-        httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
+        //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
             PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
 
@@ -97,6 +97,9 @@ public class PreviewResponseRenderer implements ResponseRenderer {
             }
 
             JSONObject jsonObject = new JSONObject();
+            if (previewDocument.isMoreAvailable() != null) {
+                jsonObject.put("moreAvailable", previewDocument.isMoreAvailable());
+            }
             jsonObject.put("document", jsonArray);
 
             Response response = new Response(request.getSession());

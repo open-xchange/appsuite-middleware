@@ -98,4 +98,9 @@ public final class TikaPreviewDocument implements PreviewDocument {
         return null;
     }
 
+    @Override
+    public Boolean isMoreAvailable() {
+        return null;
+    }
+
 }

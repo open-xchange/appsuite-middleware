@@ -111,8 +111,12 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                 dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
                 dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
                 dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-                previewDocument =
-                    previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
+                
+                int pages = -1;
+                if (requestData.containsParameter("pages")) {
+                    pages = requestData.getIntParameter("pages");
+                }
+                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, pages);
 
             }
             if (requestData.getIntParameter("save") == 1) {

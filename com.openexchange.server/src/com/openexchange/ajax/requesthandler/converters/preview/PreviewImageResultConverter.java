@@ -104,7 +104,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
         dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
 
-        final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
+        final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
 
         requestData.setFormat("file");
 

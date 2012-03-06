@@ -132,7 +132,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             }
         }
         // Return
-        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
+        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail(), previewDocument.isMoreAvailable()), FORMAT);
     }
 
     /**
@@ -147,6 +147,8 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         private final List<String> sanitizedHtml;
 
         private final InputStream thumbnail;
+        
+        private Boolean moreAvailable;
 
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
@@ -154,10 +156,11 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
          * @param metaData
          * @param sanitizedHtml
          */
-        protected SanitizedPreviewDocument(final Map<String, String> metaData, final List<String> sanitizedHtml, final InputStream thumbnail) {
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final List<String> sanitizedHtml, final InputStream thumbnail, Boolean moreAvailable) {
             this.metaData = metaData;
             this.sanitizedHtml = sanitizedHtml;
             this.thumbnail = thumbnail;
+            this.moreAvailable = moreAvailable;
         }
 
         @Override
@@ -178,6 +181,11 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         @Override
         public InputStream getThumbnail() {
             return thumbnail;
+        }
+
+        @Override
+        public Boolean isMoreAvailable() {
+            return moreAvailable;
         }
     } // End of class SanitizedPreviewDocument
 

@@ -50,6 +50,7 @@
 package com.openexchange.preview;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -97,5 +98,13 @@ public interface PreviewDocument {
      * @return The input stream for the image or <code>null</code> if the image is not available.
      */
     InputStream getThumbnail();
+
+
+    /**
+     * Determines if the original document contains more content than this preview document provides.
+     * 
+     * @return true, if more content is available, false if not and null if the document does not know anything about more content.
+     */
+    Boolean isMoreAvailable();
 
 }

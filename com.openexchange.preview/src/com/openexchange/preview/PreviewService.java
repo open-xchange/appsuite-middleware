@@ -76,10 +76,11 @@ public interface PreviewService {
      * @param arg The argument either denotes an URL or a file
      * @param output The output format
      * @param session The session
+     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
      * @return The preview document with its content set according to given output format
      * @throws OXException If preview document cannot be generated
      */
-    PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session) throws OXException;
+    PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session, int pages) throws OXException;
 
     /**
      * Gets the preview document for specified s data and output format.
@@ -87,9 +88,10 @@ public interface PreviewService {
      * @param documentData The data
      * @param output The output format
      * @param session The session
+     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
      * @return The preview document with its content set according to given output format
      * @throws OXException If preview document cannot be generated
      */
-    PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session) throws OXException;
+    PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session, int pages) throws OXException;
 
 }

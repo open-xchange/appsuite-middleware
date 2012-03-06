@@ -153,10 +153,10 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, int pages) throws OXException {
         File file = new File(arg);
         if (file.isFile()) {
-            return generatePreview(file, session);
+            return generatePreview(file, session, pages);
         }
         file = null;
         try {
@@ -169,7 +169,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
                 name = path.substring(slash + 1);
             }
             file = streamToFile(new BufferedInputStream(connection.getInputStream()), name);
-            return generatePreview(file, session);
+            return generatePreview(file, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -180,11 +180,11 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         File file = null;
         try {
             file = streamToFile(documentData.getData(), documentData.getDataProperties().get(DataProperties.PROPERTY_NAME));
-            return generatePreview(file, session);
+            return generatePreview(file, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -204,7 +204,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         return false;
     }
 
-    private PreviewDocument generatePreview(final File file, final Session session) throws OXException {
+    private PreviewDocument generatePreview(final File file, final Session session, int pages) throws OXException {
         final IConversionJob transformer = ConversionJobfactory.getTransformer(file);
         final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);
         final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
@@ -222,15 +222,17 @@ public class ThirdwingPreviewService implements InternalPreviewService {
 
             List<String> content = new ArrayList<String>();
 
-            while (contentIterator.hasNext()) {
+            int pageCount = 1;
+            while (contentIterator.hasNext() && (pages == -1 || pageCount <= pages)) {
                 contentIterator.writeNextContent();
                 content.add(future.get());
+                pageCount++;
             }
 
             final Map<String, String> metaData = new HashMap<String, String>();
             metaData.put("content-type", "text/html");
             metaData.put("resourcename", "document.html");
-            ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage());
+            ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage(), contentIterator.hasNext());
 
             return previewDocument;
         } catch (final FileNotFoundException e) {

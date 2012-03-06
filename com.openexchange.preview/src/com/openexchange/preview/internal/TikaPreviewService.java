@@ -104,7 +104,7 @@ public final class TikaPreviewService implements PreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, int pages) throws OXException {
         try {
             final URL url;
             {
@@ -126,7 +126,7 @@ public final class TikaPreviewService implements PreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         final DataProperties dataProperties = documentData.getDataProperties();
         /*
          * Get content according to output format

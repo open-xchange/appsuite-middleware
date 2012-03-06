@@ -120,7 +120,8 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     @Override
     public void update(final Observable o, final Object obj) {
         final UpdateMessages message = (UpdateMessages) obj;
-        if (message.getKey().equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED)) {
+        String key = message.getKey();
+        if (key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED) || key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED)) {
             try {
                 this.content = streamProvider.getDocumentContent();
             } catch (final OXException e) {
@@ -128,11 +129,11 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
             } finally {
                 done.compareAndSet(false, true);
             }
-        } else if (message.getKey().equals(UpdateMessages.HTML_TRANSFORMATION_FAILED)) {
+        } else if (key.equals(UpdateMessages.HTML_TRANSFORMATION_FAILED)) {
             final Exception e = (Exception) message.getData();
             exception = PreviewExceptionCodes.ERROR.create(e);
             done.compareAndSet(false, true);
-        } else if (message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_STARTED) || message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_FAILED)) {
+        } else if (key.equals(UpdateMessages.PREVIEW_IMAGE_CREATION_STARTED) || message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_FAILED)) {
             Object data = message.getData();
             System.out.println(data.toString());
         }
