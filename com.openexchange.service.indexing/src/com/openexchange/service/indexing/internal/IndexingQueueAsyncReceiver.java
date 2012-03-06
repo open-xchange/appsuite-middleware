@@ -47,68 +47,28 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.service.indexing.internal;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Session;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.impl.MQQueueResource;
-import com.openexchange.mq.queue.internal.WrappingMessageListener;
+import com.openexchange.mq.queue.MQQueueAsyncReceiver;
+import com.openexchange.mq.queue.MQQueueListener;
+import com.openexchange.service.indexing.IndexingService;
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link IndexingQueueAsyncReceiver}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueAsyncReceiver extends MQQueueResource {
-
-    private QueueReceiver queueReceiver;
-
-    private final MQQueueListener listener;
+public final class IndexingQueueAsyncReceiver extends MQQueueAsyncReceiver {
 
     /**
-     * Initializes a new {@link MQQueueAsyncReceiver}.
+     * Initializes a new {@link IndexingQueueAsyncReceiver}.
      * 
-     * @param queueName The name of queue to receive from
+     * @param listener The listener
      * @throws OXException If initialization fails
      */
-    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
-        super(queueName, listener);
-        this.listener = listener;
-    }
-
-    @Override
-    protected boolean isTransacted() {
-        return false;
-    }
-
-    @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
-    }
-
-    @Override
-    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
-        queueReceiver = queueSession.createReceiver(queue);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
-        queueReceiver.setMessageListener(msgListener);
-        queueConnection.setExceptionListener(msgListener);
-        queueConnection.start();
-    }
-
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
-        }
-        super.close();
+    public IndexingQueueAsyncReceiver(final MQQueueListener listener) throws OXException {
+        super(IndexingService.INDEXING_QUEUE, listener);
     }
 
 }
