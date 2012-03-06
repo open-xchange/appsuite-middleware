@@ -46,6 +46,7 @@
     <target name="patchScriptConf">
         <move tofile="${patchConfDir}/ox-scriptconf.sh" file="${patchConfDir}/ox-scriptconf.sh.in" overwrite="true"/>
         <replace file="${patchConfDir}/ox-scriptconf.sh">
+            <replacefilter token="@libDir@" value="${prefix}/${libDir}"/>
             <replacefilter token="@propertiesdir@" value="${confInstallDir}"/>
             <replacefilter token="@loggingproperties@" value="${confInstallDir}/file-logging.properties"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${prefix}"/>
