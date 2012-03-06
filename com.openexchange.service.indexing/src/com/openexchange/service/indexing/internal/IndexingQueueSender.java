@@ -124,6 +124,9 @@ public final class IndexingQueueSender extends MQQueueSenderImpl {
         } catch (final IOException e) {
             rollback(this);
             throw MQExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(this);
+            throw MQExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 

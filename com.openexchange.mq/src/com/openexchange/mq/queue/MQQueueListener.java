@@ -49,6 +49,7 @@
 
 package com.openexchange.mq.queue;
 
+import javax.jms.ObjectMessage;
 import com.openexchange.mq.MQCloseable;
 
 /**
@@ -66,11 +67,11 @@ public interface MQQueueListener extends MQCloseable {
     void onText(String text);
 
     /**
-     * Passes sent Java object to the listener.
+     * Passes sent Java object wrapped by an {@link ObjectMessage} to the listener.
      * 
-     * @param object The object passed to the listener
+     * @param objectMessage The object message passed to the listener
      */
-    void onObject(Object object);
+    void onObjectMessage(ObjectMessage objectMessage);
 
     /**
      * Passes sent bytes to the listener.

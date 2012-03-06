@@ -50,6 +50,8 @@
 package com.openexchange.service.indexing.internal;
 
 import java.io.IOException;
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.mq.queue.MQQueueListener;
@@ -86,8 +88,14 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
     }
 
     @Override
-    public void onObject(final Object object) {
-        LOG.warn("Invalid indexing message type: Java object of type " + object.getClass().getName());
+    public void onObjectMessage(final ObjectMessage objectMessage) {
+        try {
+            executor.addJob((IndexingJob) objectMessage.getObject());
+        } catch (final JMSException e) {
+            LOG.warn("A JMS error occurred: " + e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.warn("A runtime error occurred: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -98,7 +106,9 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
             LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
         } catch (final IOException e) {
             LOG.warn("Deserialization failed: " + e.getMessage(), e);
-        } 
+        } catch (final RuntimeException e) {
+            LOG.warn("A runtime error occurred: " + e.getMessage(), e);
+        }
     }
 
 }
