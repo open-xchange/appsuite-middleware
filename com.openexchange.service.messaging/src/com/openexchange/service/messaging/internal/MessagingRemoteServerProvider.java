@@ -136,7 +136,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
         if (mdnsServiceRef.compareAndSet(null, service)) {
             try {
                 serviceInfo =
-                    service.registerService(Constants.MDNS_SERVICE_ID, MessagingConfig.getInstance().getListenerPort(), new StringBuilder(
+                    service.registerService("_ox-messaging._tcp.local.", Constants.MDNS_SERVICE_ID, MessagingConfig.getInstance().getListenerPort(), new StringBuilder(
                         "open-xchange messaging service @").append(getHostName()).toString());
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);

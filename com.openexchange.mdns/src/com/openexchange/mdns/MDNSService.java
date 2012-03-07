@@ -71,13 +71,14 @@ public interface MDNSService {
 
     /**
      * Registers a new service.
-     *
+     * @param type The fully qualified service type name, such as <code>_http._tcp.local.</code>
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
      * @param port The service port
      * @param info The service information; arbitrary text such as <code>"path=index.html"</code>
+     *
      * @throws OXException If registration fails
      */
-    MDNSServiceInfo registerService(String serviceId, int port, String info) throws OXException;
+    MDNSServiceInfo registerService(String type, String serviceId, int port, String info) throws OXException;
 
     /**
      * Unregisters the service identifier by given service information.

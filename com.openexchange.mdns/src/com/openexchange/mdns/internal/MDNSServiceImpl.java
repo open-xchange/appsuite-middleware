@@ -149,12 +149,12 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     }
 
     @Override
-    public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws OXException {
+    public MDNSServiceInfo registerService(final String type, final String serviceId, final int port, final String info) throws OXException {
         wlock.lock();
         try {
             final UUID id = getIdentifierFor(/*serviceId*/);
             final ServiceInfo sinfo =
-                ServiceInfo.create(Constants.SERVICE_TYPE, new StringBuilder().append(getUnformattedString(id)).append('/').append(
+                ServiceInfo.create(type, new StringBuilder().append(getUnformattedString(id)).append('/').append(
                     serviceId).toString(), port, 0, 0, null == info ? "" : info);
             jmdns.registerService(sinfo);
             if (LOG.isInfoEnabled()) {
