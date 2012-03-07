@@ -58,6 +58,9 @@ import javax.management.MBeanException;
  */
 public interface IndexingServiceMBean {
 
+    /**
+     * The domain of the indexing service's MBean.
+     */
     public static final String DOMAIN = "com.openexchange.service.indexing";
 
     /**
