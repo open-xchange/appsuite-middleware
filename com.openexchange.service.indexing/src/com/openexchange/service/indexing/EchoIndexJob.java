@@ -69,7 +69,7 @@ public final class EchoIndexJob implements IndexingJob {
 
     private final Date stamp;
 
-    private int priority;
+    private volatile int priority;
 
     /**
      * Initializes a new {@link EchoIndexJob}.

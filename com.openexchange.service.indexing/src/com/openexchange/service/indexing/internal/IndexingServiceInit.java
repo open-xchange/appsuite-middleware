@@ -68,11 +68,13 @@ public final class IndexingServiceInit {
 
     private final ServiceLookup services;
 
-    private final IndexingServiceQueueListener listener;
+    private volatile IndexingServiceQueueListener listener;
 
     private IndexingQueueSender sender;
 
     private IndexingQueueAsyncReceiver receiver;
+
+    private final int maxConcurrentJobs;
 
     /**
      * Initializes a new {@link IndexingServiceInit}.
@@ -80,8 +82,7 @@ public final class IndexingServiceInit {
     public IndexingServiceInit(final int maxConcurrentJobs, final ServiceLookup services) {
         super();
         this.services = services;
-        final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, services.getService(ThreadPoolService.class));
-        listener = new IndexingServiceQueueListener(executor.start());
+        this.maxConcurrentJobs = maxConcurrentJobs;
     }
 
     /**
@@ -106,7 +107,7 @@ public final class IndexingServiceInit {
             }
             service.deleteQueue(indexingQueue);
         }
-        */
+         */
 
         final Map<String, Object> params = new HashMap<String, Object>(1);
         params.put(MQService.QUEUE_PARAM_DURABLE, Boolean.TRUE);
@@ -123,16 +124,14 @@ public final class IndexingServiceInit {
      * @throws OXException If initialization fails
      */
     public synchronized void initReceiver() throws OXException {
-        if (null != receiver) {
+        if (null == receiver) {
             /*
-             * Already listening
+             * Create async. queue receiver
              */
-            return;
+            final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
+            final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
+            receiver = new IndexingQueueAsyncReceiver(new IndexingServiceQueueListener(executor));
         }
-        /*
-         * Create async. queue receiver
-         */
-        receiver = new IndexingQueueAsyncReceiver(listener);
     }
 
     /**
