@@ -55,6 +55,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,9 +68,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.reports.Syncstatus;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -604,6 +608,26 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             cacheFolderSlim(folderId);  // Get rid of this
             upgrade(id, folderId);
             return get(id, folderId);
+        }
+
+        /**
+         * Gets an appointment instance that represents the supplied 
+         * appointment without patches applied.
+         * 
+         * @param appointment
+         * @return
+         * @throws WebdavProtocolException
+         */
+        public Appointment getUnpatched(final Appointment appointment) throws WebdavProtocolException {
+        	if (false == this.hasBeenPatched(appointment)) {
+        		return appointment;
+        	}        	
+            final AppointmentSQLInterface appointmentInterface = factory.getAppointmentInterface();
+            try {
+                return appointmentInterface.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
+            } catch (final Exception e) {
+            	throw WebdavProtocolException.generalError(e, new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
         }
 
         private void upgrade(final int id, final int folderId) throws WebdavProtocolException {
