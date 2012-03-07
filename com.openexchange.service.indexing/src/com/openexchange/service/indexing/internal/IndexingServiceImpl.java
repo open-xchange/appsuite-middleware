@@ -53,32 +53,40 @@ import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 
-
 /**
  * {@link IndexingServiceImpl}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexingServiceImpl implements IndexingService {
 
-    private final IndexingQueueSender sender;
+    private final IndexingServiceInit serviceInit;
 
     /**
      * Initializes a new {@link IndexingServiceImpl}.
      */
-    public IndexingServiceImpl(final IndexingQueueSender sender) {
+    public IndexingServiceImpl(final IndexingServiceInit serviceInit) {
         super();
-        this.sender = sender;
+        this.serviceInit = serviceInit;
+    }
+
+    /**
+     * Gets the service initialization.
+     * 
+     * @return The service initialization
+     */
+    public IndexingServiceInit getServiceInit() {
+        return serviceInit;
     }
 
     @Override
     public void addJob(final IndexingJob job) throws OXException {
-        sender.sendJobMessage(job);
+        serviceInit.getSender().sendJobMessage(job);
     }
 
     @Override
     public void addJob(final IndexingJob job, final int priority) throws OXException {
-        sender.sendJobMessage(job, priority);
+        serviceInit.getSender().sendJobMessage(job, priority);
     }
 
 }

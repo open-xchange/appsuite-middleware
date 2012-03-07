@@ -118,15 +118,32 @@ public final class IndexingServiceInit {
     }
 
     /**
-     * Initializes indexing service.
+     * Initializes indexing service receiver.
      * 
      * @throws OXException If initialization fails
      */
     public synchronized void initReceiver() throws OXException {
+        if (null != receiver) {
+            /*
+             * Already listening
+             */
+            return;
+        }
         /*
          * Create async. queue receiver
          */
         receiver = new IndexingQueueAsyncReceiver(listener);
+    }
+
+    /**
+     * Drops indexing service receiver.
+     */
+    public synchronized void dropReceiver() {
+        final MQQueueAsyncReceiver receiver = this.receiver;
+        if (null != receiver) {
+            receiver.close();
+            this.receiver = null;
+        }
     }
 
     /**
