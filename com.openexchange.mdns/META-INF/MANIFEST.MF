@@ -13,6 +13,8 @@ Import-Package: com.openexchange.exception,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework
