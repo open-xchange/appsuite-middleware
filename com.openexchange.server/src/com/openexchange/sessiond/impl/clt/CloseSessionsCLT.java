@@ -99,7 +99,7 @@ public final class CloseSessionsCLT {
     }
 
     /**
-     * Initializes a new {@link CloseSessionsCLT}.
+     * Initializes a new {@link CloseSessionsCLT}.	
      */
     private CloseSessionsCLT() {
         super();
