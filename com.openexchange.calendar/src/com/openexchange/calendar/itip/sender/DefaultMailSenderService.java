@@ -140,7 +140,10 @@ public class DefaultMailSenderService implements MailSenderService {
         message.setFromAddr(getAddress(mail.getSender()));
         message.addToAddr(getAddress(mail.getRecipient()));
         message.setSubject(mail.getSubject());
-
+        message.setUid(app.getUid());
+        if (app.containsRecurrenceDatePosition()) {
+        	message.setRecurrenceDatePosition(app.getRecurrenceDatePosition().getTime());
+        }
         try {
             addBody(mail, message, session);
             message.send();

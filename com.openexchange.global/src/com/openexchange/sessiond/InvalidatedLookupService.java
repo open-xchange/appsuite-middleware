@@ -47,28 +47,22 @@
  *
  */
 
-package com.openexchange.service.indexing;
-
-import com.openexchange.exception.OXException;
+package com.openexchange.sessiond;
 
 /**
- * {@link IndexingService} - The indexing service.
+ * {@link InvalidatedLookupService} - Tests whether the denoted user's sessions have been invalidated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexingService {
+public interface InvalidatedLookupService {
 
     /**
-     * The name of the indexing queue.
-     */
-    public static final String INDEXING_QUEUE = "indexingQueue";
-
-    /**
-     * Adds specified job.
+     * Tests whether the denoted user's sessions have been invalidated. The <i>invalidated status</i> of the user is cleared by this method.
      * 
-     * @param job The job to add
-     * @throws OXException If job cannot be added
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if invalidated; otherwise <code>false</code>
      */
-    public void addJob(IndexingJob job) throws OXException;
+    boolean invalidated(int userId, int contextId);
 
 }

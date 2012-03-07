@@ -884,12 +884,14 @@ public class Login extends AJAXServlet {
             ResponseWriter.write(response, resp.getWriter());
         } finally {
             if (LogProperties.isEnabled()) {
-                final Props properties = LogProperties.getLogProperties();
-                properties.remove("com.openexchange.session.sessionId");
-                properties.remove("com.openexchange.session.userId");
-                properties.remove("com.openexchange.session.contextId");
-                properties.remove("com.openexchange.session.clientId");
-                properties.remove("com.openexchange.session.session");
+                final Props properties = LogProperties.optLogProperties();
+                if (null != properties) {
+                    properties.remove("com.openexchange.session.sessionId");
+                    properties.remove("com.openexchange.session.userId");
+                    properties.remove("com.openexchange.session.contextId");
+                    properties.remove("com.openexchange.session.clientId");
+                    properties.remove("com.openexchange.session.session");
+                }
             }
         }
     }
@@ -962,7 +964,7 @@ public class Login extends AJAXServlet {
         return loginOperation(req, resp, new LoginClosure() {
 
             @Override
-            public LoginResult doLogin(HttpServletRequest req2) throws OXException {
+            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
                 final LoginRequest request = parseAutoLoginRequest(req2);
                 return LoginPerformer.getInstance().doAutoLogin(request);
             }
@@ -973,7 +975,7 @@ public class Login extends AJAXServlet {
         loginOperation(req, resp, new LoginClosure() {
 
             @Override
-            public LoginResult doLogin(HttpServletRequest req2) throws OXException {
+            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
                 final LoginRequest request = parseLogin(req2, LoginFields.NAME_PARAM, false);
                 return LoginPerformer.getInstance().doLogin(request);
             }
@@ -1013,13 +1015,13 @@ public class Login extends AJAXServlet {
                     break;
                 }
             }
-            result.getSession().setParameter("user-agent", req.getHeader("user-agent"));
+            final Session session = result.getSession();
+            session.setParameter("user-agent", req.getHeader("user-agent"));
             // Write response
             final JSONObject json = new JSONObject();
             LoginWriter.write(result, json);
             // Append "config/modules"
-            LogProperties.putLogProperty("com.openexchange.session.session", result.getSession());
-            appendModules(result.getSession(), json, req);
+            appendModules(session, json, req);
             response.setData(json);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
@@ -1056,8 +1058,6 @@ public class Login extends AJAXServlet {
             LOG.error(RESPONSE_ERROR, e);
             sendError(resp);
             return false;
-        } finally {
-            LogProperties.putLogProperty("com.openexchange.session.session", null);
         }
         return false;
     }

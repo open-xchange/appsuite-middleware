@@ -50,9 +50,6 @@
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
-import com.openexchange.caching.InvalidatedMarker;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -78,9 +75,9 @@ public final class SessionClearerOnContextDelete extends ContextDelete {
             return;
         }
         final int contextId = event.getContext().getContextId();
-        /*
+        /*-
+         * TODO
          * Get cache service
-         */
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
@@ -91,6 +88,8 @@ public final class SessionClearerOnContextDelete extends ContextDelete {
                 // Ignore
             }
         }
+         * 
+         */
         /*
          * Get SessionD service
          */

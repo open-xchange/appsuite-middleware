@@ -47,28 +47,65 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.internal;
 
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.mq.MQConstants;
 
 /**
- * {@link IndexingService} - The indexing service.
+ * {@link Services} - The static service lookup for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexingService {
+public final class Services {
 
     /**
-     * The name of the indexing queue.
+     * Initializes a new {@link Services}.
      */
-    public static final String INDEXING_QUEUE = "indexingQueue";
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<com.openexchange.server.ServiceLookup> REF =
+        new AtomicReference<com.openexchange.server.ServiceLookup>();
 
     /**
-     * Adds specified job.
+     * Sets the service lookup.
      * 
-     * @param job The job to add
-     * @throws OXException If job cannot be added
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public void addJob(IndexingJob job) throws OXException;
+    public static void setServiceLookup(final com.openexchange.server.ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"" + MQConstants.BUNDLE_SYMBOLIC_NAME + "\" not staretd?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }
