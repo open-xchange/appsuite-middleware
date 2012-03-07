@@ -58,6 +58,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -77,6 +79,8 @@ public class APIResponseRenderer implements ResponseRenderer {
      * The logger constant.
      */
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(APIResponseRenderer.class));
+
+	private static final String JSONP = "jsonp";
 
     /**
      * Initializes a new {@link APIResponseRenderer}.
@@ -126,6 +130,18 @@ public class APIResponseRenderer implements ResponseRenderer {
                 final Writer w = new UnsynchronizedStringWriter();
                 ResponseWriter.write(response, w);
                 resp.getWriter().print(substituteJS(w.toString(), callback));
+            } else if (req.getParameter("jsonp") != null) {
+                String call = req.getParameter(JSONP);
+
+                final Writer w = new UnsynchronizedStringWriter();
+                ResponseWriter.write(response, w);
+
+                StringBuilder sb = new StringBuilder(call);
+                sb.append("(");
+                sb.append(w.toString());
+                sb.append(");");
+                resp.setContentType("text/javascript");
+                resp.getWriter().write(sb.toString());
             } else {
                 ResponseWriter.write(response, resp.getWriter());
             }

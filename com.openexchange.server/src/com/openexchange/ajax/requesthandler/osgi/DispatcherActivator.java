@@ -75,7 +75,6 @@ import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewRe
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
-import com.openexchange.ajax.requesthandler.customizer.JSONPCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
@@ -149,7 +148,6 @@ public class DispatcherActivator extends HousekeepingActivator {
 
         });
 
-        dispatcher.addCustomizer(new JSONPCustomizer());
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
 
         final DispatcherServlet servlet = new DispatcherServlet();
