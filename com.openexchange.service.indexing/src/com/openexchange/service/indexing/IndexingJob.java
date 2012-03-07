@@ -94,6 +94,24 @@ public interface IndexingJob extends Serializable {
     boolean isDurable();
 
     /**
+     * Gets the priority, ranges from <code>0</code> (lowest) to <code>9</code> (highest).
+     * <p>
+     * Default is <code>4</code>.
+     * 
+     * @return This job's priority
+     */
+    int getPriority();
+
+    /**
+     * Sets the priority, ranges from <code>0</code> (lowest) to <code>9</code> (highest).
+     * <p>
+     * Default is <code>4</code>.
+     * 
+     * @param priority This job's priority
+     */
+    void setPriority(int priority);
+
+    /**
      * Gets this job's {@link Behavior behavior}.
      * 
      * @return The behavior determining how to execute this job

@@ -102,6 +102,16 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public boolean isDurable() {
             return false;
         }
+
+        @Override
+        public int getPriority() {
+            return 9;
+        }
+
+        @Override
+        public void setPriority(final int priority) {
+            // Nothing to do
+        }
     };
 
     private final ThreadPoolService threadPool;
@@ -205,7 +215,7 @@ public final class IndexingJobExecutor implements Callable<Void> {
         if (null == job) {
             return false;
         }
-        return queue.offer(job);
+        return queue.offer(new IndexingJobWrapper(job));
     }
 
     /*-
@@ -228,12 +238,71 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
         @Override
         public Void call() throws Exception {
+            // TODO: before/after execute here
             try {
                 job.performJob();
             } catch (final RuntimeException e) {
                 logger.warn("Indexing job failed with unchecked error.", e);
             }
             return null;
+        }
+
+    }
+
+    private static final class IndexingJobWrapper implements IndexingJob, Comparable<IndexingJob> {
+
+        @Override
+        public int getPriority() {
+            return job.getPriority();
+        }
+
+        @Override
+        public void setPriority(final int priority) {
+            job.setPriority(priority);
+        }
+
+        private final IndexingJob job;
+
+        public IndexingJobWrapper(final IndexingJob job) {
+            super();
+            this.job = job;
+        }
+
+        @Override
+        public void performJob() throws OXException {
+            job.performJob();
+        }
+
+        @Override
+        public boolean isDurable() {
+            return job.isDurable();
+        }
+
+        @Override
+        public Behavior getBehavior() {
+            return job.getBehavior();
+        }
+
+        @Override
+        public int hashCode() {
+            return job.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return job.equals(obj);
+        }
+
+        @Override
+        public String toString() {
+            return job.toString();
+        }
+
+        @Override
+        public int compareTo(final IndexingJob o) {
+            final int thisVal = job.getPriority();
+            final int anotherVal = o.getPriority();
+            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
 
     }

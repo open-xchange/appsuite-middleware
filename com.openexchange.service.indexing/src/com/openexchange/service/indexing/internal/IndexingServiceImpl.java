@@ -84,9 +84,4 @@ public final class IndexingServiceImpl implements IndexingService {
         serviceInit.getSender().sendJobMessage(job);
     }
 
-    @Override
-    public void addJob(final IndexingJob job, final int priority) throws OXException {
-        serviceInit.getSender().sendJobMessage(job, priority);
-    }
-
 }

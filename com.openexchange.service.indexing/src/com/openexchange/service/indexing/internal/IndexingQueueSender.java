@@ -105,12 +105,14 @@ public final class IndexingQueueSender extends MQQueueSenderImpl {
 
     @Override
     public void sendObjectMessage(final Serializable object) throws OXException {
-        sendJobMessage((IndexingJob) object, DEFAULT_PRIORITY);
+        sendJobMessage((IndexingJob) object);
     }
 
     @Override
     public void sendObjectMessage(final Serializable object, final int priority) throws OXException {
-        sendJobMessage((IndexingJob) object, priority);
+        final IndexingJob job = (IndexingJob) object;
+        job.setPriority(priority);
+        sendJobMessage(job);
     }
 
     /**
@@ -120,24 +122,13 @@ public final class IndexingQueueSender extends MQQueueSenderImpl {
      * @throws OXException If send operation fails
      */
     public void sendJobMessage(final IndexingJob job) throws OXException {
-        sendJobMessage(job, DEFAULT_PRIORITY);
-    }
-
-    /**
-     * Sends a message containing a {@link IndexingJob job}.
-     * 
-     * @param job The job to send
-     * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
-     * @throws OXException If send operation fails
-     */
-    public void sendJobMessage(final IndexingJob job, final int priority) throws OXException {
         if (null == job) {
             return;
         }
         try {
             final BytesMessage message = queueSession.createBytesMessage();
             message.writeBytes(SerializableHelper.writeObject(job));
-            queueSender.send(message, job.isDurable() ? PERSISTENT : NON_PERSISTENT, checkPriority(priority), DEFAULT_TIME_TO_LIVE);
+            queueSender.send(message, job.isDurable() ? PERSISTENT : NON_PERSISTENT, checkPriority(job.getPriority()), DEFAULT_TIME_TO_LIVE);
             commit();
         } catch (final JMSException e) {
             rollback(this);
