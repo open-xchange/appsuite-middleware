@@ -136,6 +136,8 @@ public class MailObject {
 
 	private String uid;
 
+	private long recurrenceDatePosition;
+
     /**
      * Initializes a new {@link MailObject}
      *
@@ -348,6 +350,8 @@ public class MailObject {
 
     private final static String HEADER_X_OX_UID = "X-Open-Xchange-UID";
 
+    private final static String HEADER_X_OX_RECURRENCE_DATE = "X-Open-Xchange-RDATE";
+
     public final void send() throws OXException {
         try {
             validateMailObject();
@@ -505,6 +509,10 @@ public class MailObject {
             	msg.setHeader(HEADER_X_OX_UID, uid);
             }
             
+            if (internalRecipient && recurrenceDatePosition != 0) {
+            	msg.setHeader(HEADER_X_OX_RECURRENCE_DATE, String.valueOf(recurrenceDatePosition));
+            }
+
             msg.saveChanges();
             /*
              * Finally transport mail
@@ -611,6 +619,14 @@ public class MailObject {
 		return uid;
 	}
 
+    public void setRecurrenceDatePosition(long time) {
+    	this.recurrenceDatePosition = time;
+	}
+    
+    public long getRecurrenceDatePosition() {
+		return recurrenceDatePosition;
+	}
+
     private static final String[] addAddr(final String addr, String[] arr) {
         if (arr == null) {
             return new String[] { addr };
@@ -621,5 +637,6 @@ public class MailObject {
         arr[arr.length - 1] = addr;
         return arr;
     }
+
 
 }
