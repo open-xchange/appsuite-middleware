@@ -131,7 +131,7 @@ public class SimContactStorage extends DefaultContactStorage {
     }
   
     @Override
-    public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields) throws OXException {
+    public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields, SortOptions sortOptions) throws OXException {
         return this.searchService.filter(this.contacts.values(), term, ContactAttributeFetcher.getInstance());
     }
 

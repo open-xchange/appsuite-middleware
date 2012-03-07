@@ -47,23 +47,98 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.contact.storage;
+
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.search.Order;
 
 /**
- * {@link Mappers} - Provides static access to mappings.
+ * {@link SortOptions} - Specifies sort options for the results of storage operations. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class Mappers {
-
-	/**
-	 * The mappings for contacts.
-	 */
-	public static final ContactMapper CONTACT = new ContactMapper();
+public final class SortOptions {
 	
-	/**
-	 * The mappings for distribution list members.
-	 */
-	public static final DistListMapper DISTLIST = new DistListMapper();
+	public static final SortOptions EMPTY = new SortOptions();
+	
+	private Order order; 
+	
+	private String collation;
+	
+	private ContactField[] orderBy;
+	
+	
+	public SortOptions(final ContactField[] orderBy, final Order order, final String collation) {
+		super();
+		this.orderBy = orderBy;
+		this.order = order;
+		this.collation = collation;
+	}
+	
+	public SortOptions(final ContactField orderBy, final Order order, final String collation) {
+		this(new ContactField[] { orderBy }, order, collation);
+	}
+	
+	public SortOptions(final ContactField[] orderBy, final Order order) {
+		this(orderBy, order, null);
+	}
+	
+	public SortOptions(final ContactField orderBy, final Order order) {
+		this(orderBy, order, null);
+	}
+	
+	public SortOptions(final ContactField[] orderBy) {
+		this(orderBy, Order.NO_ORDER);
+	}	
 
+	public SortOptions(final ContactField orderBy) {
+		this(orderBy, Order.NO_ORDER);
+	}	
+	
+	public SortOptions() {
+		this((ContactField)null);
+	}
+
+	/**
+	 * @return the collation
+	 */
+	public String getCollation() {
+		return collation;
+	}
+
+	/**
+	 * @param collation the collation to set
+	 */
+	public void setCollation(String collation) {
+		this.collation = collation;
+	}
+
+	/**
+	 * @return the orderBy
+	 */
+	public ContactField[] getOrderBy() {
+		return orderBy;
+	}
+
+	/**
+	 * @param orderBy the orderBy to set
+	 */
+	public void setOrderBy(ContactField[] orderBy) {
+		this.orderBy = orderBy;
+	}
+
+	/**
+	 * @return the order
+	 */
+	public Order getOrder() {
+		return order;
+	}
+
+	/**
+	 * @param order the order to set
+	 */
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+	
 }

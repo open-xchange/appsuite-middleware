@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.contact.storage.DefaultContactStorage;
+import com.openexchange.contact.storage.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
@@ -278,7 +279,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                         }
                     } else {
                         // create new image
-                        this.executor.insert(connection, Table.CONTACTS, contact, Fields.IMAGE_DATABASE_ARRAY);                        
+                        this.executor.insert(connection, Table.IMAGES, contact, Fields.IMAGE_DATABASE_ARRAY);                        
                     }                    
                 }
             }
@@ -298,7 +299,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 executor.delete(connection, Table.DISTLIST, contextID, objectID);
                 if (0 < contact.getNumberOfDistributionLists() && null != contact.getDistributionList()) {
                     // insert distribution list entries
-                    executor.insert(connection, Table.DISTLIST, getMembers(contact.getDistributionList(), objectID, contextID), Fields.DISTLIST_DATABASE_ARRAY);
+                    executor.insert(connection, Table.DISTLIST, getMembers(contact.getDistributionList(), contextID, objectID), Fields.DISTLIST_DATABASE_ARRAY);
                 }
             }
             /*
@@ -311,17 +312,6 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.autocommit(connection);
             databaseService.backWritable(contextID, connection);
         }
-    }
-    
-    private static DistListMember[] getMembers(final DistributionListEntryObject[] distList, final int contextID, final int parentContactID) throws OXException {
-    	if (null != distList) {
-    		final DistListMember[] members = new DistListMember[distList.length];
-    		for (int i = 0; i < members.length; i++) {
-				members[i] = DistListMember.create(distList[i], contextID, parentContactID);
-			}
-        	return members;
-    	}
-    	return null;
     }
     
     @Override
@@ -337,7 +327,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             Collection<Contact> contacts = null;
             final ContactField[] contactDataFields = Mappers.CONTACT.filter(fields, Fields.CONTACT_DATABASE, ContactField.OBJECT_ID).toArray(new ContactField[0]);
             if (null != contactDataFields && 0 < contactDataFields.length) {
-                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, minLastModified, contactDataFields);
+                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, minLastModified, contactDataFields, null);
             }
             /*
              * merge image data if needed
@@ -356,13 +346,45 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields) throws OXException {
-        //TODO move ContactSearchtermSqlConverter to this bundle
-        return null;
-    }
+    public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection connection = databaseService.getReadOnly(contextID);
+        try {
+            /*
+             * check fields
+             */
+            final QueryFields queryFields = new QueryFields(fields);
+            if (false == queryFields.hasContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */        
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, term, queryFields.getContactDataFields(), sortOptions);
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.hasImageData()) {
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.hasDistListData()) {
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
+                }
+            }
+            return contacts;
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create();
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }  
     
     @Override
-    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
+    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         final int parentFolderID = parse(folderId);
         final DatabaseService databaseService = getDatabaseService();
         final Connection connection = databaseService.getReadOnly(contextID);
@@ -377,7 +399,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */        
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, parentFolderID, queryFields.getContactDataFields());
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, parentFolderID, queryFields.getContactDataFields(), sortOptions);
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed
@@ -401,7 +423,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection connection = databaseService.getReadOnly(contextID);
         try {
@@ -415,7 +437,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */        
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, parse(ids), queryFields.getContactDataFields());
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, parse(ids), queryFields.getContactDataFields(), sortOptions);
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed
@@ -455,7 +477,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     private List<Contact> mergeImageData(final Connection connection, final Table table, final int contextID, final List<Contact> contacts, final ContactField[] fields) throws SQLException, OXException {
         final int[] objectIDs = getObjectIDsWithImages(contacts);
         if (null != objectIDs && 0 < objectIDs.length) {
-            final List<Contact> imagaDataList = executor.select(connection, table, contextID, objectIDs, fields);
+            final List<Contact> imagaDataList = executor.select(connection, table, contextID, objectIDs, fields, null);
             if (null != imagaDataList && 0 < imagaDataList.size()) {
                 return mergeByID(contacts, imagaDataList);
             }
@@ -507,6 +529,17 @@ public class RdbContactStorage extends DefaultContactStorage {
         } catch (final NumberFormatException e) {
             throw new OXException(e);
         }
+    }
+
+    private static DistListMember[] getMembers(final DistributionListEntryObject[] distList, final int contextID, final int parentContactID) throws OXException {
+    	if (null != distList) {
+    		final DistListMember[] members = new DistListMember[distList.length];
+    		for (int i = 0; i < members.length; i++) {
+				members[i] = DistListMember.create(distList[i], contextID, parentContactID);
+			}
+        	return members;
+    	}
+    	return null;
     }
     
 }
