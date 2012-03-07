@@ -56,6 +56,7 @@ import org.junit.Test;
 
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 
 /**
  * {@link UpdateTest}
@@ -149,4 +150,136 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("image content type wrong", savedContact.getImageContentType(), updatedContact.getImageContentType());
     }
     
+    public void testUpdateDistList() throws Exception {
+        /*
+         * create contact        
+         */
+        final String folderId = "500003";
+        final Contact contact = new Contact();
+        contact.setSurName("Distributionlist 52");
+        contact.setUid(UUID.randomUUID().toString());
+        contact.setDistributionList(new DistributionListEntryObject[] {
+            new DistributionListEntryObject("Horst Hund", "horst.hund@example.com", 0),            
+            new DistributionListEntryObject("Werner Hund", "werner.hund@example.com", 0),            
+            new DistributionListEntryObject("Dieter Hund", "dieter.hund@example.com", 0),            
+            new DistributionListEntryObject("Klaus Hund", "klaus.hund@example.com", 0),            
+            new DistributionListEntryObject("Kurt Hund", "kurt.hund@example.com", 0),            
+        });
+        getStorage().create(getContextID(), folderId, contact);
+        super.rememberForCleanUp(contact);
+        /*
+         * verify contact
+         */
+        Contact savedContact = super.findContact(contact.getUid(), folderId);
+        assertNotNull("contact not found", savedContact);
+        assertTrue("not marked as distribution list", savedContact.getMarkAsDistribtuionlist());
+        assertNotNull("distribution list not found", savedContact.getDistributionList());
+        assertEquals("number of distribution list members wrong", 5, savedContact.getNumberOfDistributionLists());
+        assertEquals("number of distribution list members wrong", 5, savedContact.getDistributionList().length);
+        assertTrue("distribution list wrong", Arrays.equals(contact.getDistributionList(), savedContact.getDistributionList()));
+        /*
+         * update contact        
+         */
+        savedContact.setDistributionList(new DistributionListEntryObject[] {
+                new DistributionListEntryObject("Horst Klotz", "horst.klotz@example.com", 0),            
+                new DistributionListEntryObject("Werner Klotz", "werner.klotz@example.com", 0),            
+                new DistributionListEntryObject("Klaus Klotz", "klaus.klotz@example.com", 0),            
+                new DistributionListEntryObject("Kurt Klotz", "kurt.klotz@example.com", 0),            
+            });
+        getStorage().update(getContextID(), folderId, savedContact, savedContact.getLastModified());
+        super.rememberForCleanUp(contact);
+        /*
+         * verify updated contact
+         */
+        Contact updatedContact = super.findContact(savedContact.getUid(), folderId);
+        assertNotNull("contact not found", updatedContact);
+        assertTrue("not marked as distribution list", updatedContact.getMarkAsDistribtuionlist());
+        assertNotNull("distribution list not found", updatedContact.getDistributionList());
+        assertEquals("number of distribution list members wrong", 4, updatedContact.getNumberOfDistributionLists());
+        assertEquals("number of distribution list members wrong", 4, updatedContact.getDistributionList().length);
+        assertTrue("distribution list wrong", Arrays.equals(savedContact.getDistributionList(), updatedContact.getDistributionList()));
+    }
+    
+    public void testAddImage() throws Exception {
+        /*
+         * create contact        
+         */
+        final String folderId = "500007";
+        final Contact contact = new Contact();
+        contact.setDisplayName("Bernd Bein");
+        contact.setGivenName("Bernd");
+        contact.setSurName("Bein");
+        contact.setEmail1("bernd.bein@example.com");
+        contact.setUid(UUID.randomUUID().toString());
+        getStorage().create(getContextID(), folderId, contact);
+        super.rememberForCleanUp(contact);
+        /*
+         * verify contact
+         */
+        final Contact savedContact = super.findContact(contact.getUid(), folderId);
+        assertNotNull("contact not found", savedContact);
+        assertEquals("display name wrong", contact.getDisplayName(), savedContact.getDisplayName());
+        assertEquals("surname wrong", contact.getSurName(), savedContact.getSurName());
+        assertEquals("givenname wrong", contact.getGivenName(), savedContact.getGivenName());
+        assertEquals("email1 wrong", contact.getEmail1(), savedContact.getEmail1());
+        /*
+         * update contact        
+         */
+        savedContact.setImage1(ContactTest.image);
+        savedContact.setImageContentType(ContactTest.CONTENT_TYPE);
+        getStorage().update(getContextID(), folderId, savedContact, savedContact.getLastModified());
+        super.rememberForCleanUp(contact);
+        /*
+         * verify updated contact
+         */
+        Contact updatedContact = super.findContact(contact.getUid(), folderId);
+        assertNotNull("contact not found", updatedContact);
+        assertNotNull("no image found", updatedContact.getImage1());
+        assertEquals("number of images wrong", 1, updatedContact.getNumberOfImages());
+        assertTrue("image wrong", Arrays.equals(savedContact.getImage1(), updatedContact.getImage1()));
+        assertEquals("image content type wrong", savedContact.getImageContentType(), updatedContact.getImageContentType());
+    }
+    
+    public void testRemoveImage() throws Exception {
+        /*
+         * create contact        
+         */
+        final String folderId = "500004";
+        final Contact contact = new Contact();
+        contact.setDisplayName("Dirk Dampf");
+        contact.setGivenName("Dirk");
+        contact.setSurName("Dampf");
+        contact.setEmail1("dirk.dampf@example.com");
+        contact.setUid(UUID.randomUUID().toString());
+        contact.setImage1(ContactTest.image);
+        contact.setImageContentType(ContactTest.CONTENT_TYPE);
+        getStorage().create(getContextID(), folderId, contact);
+        super.rememberForCleanUp(contact);
+        /*
+         * verify contact
+         */
+        Contact savedContact = super.findContact(contact.getUid(), folderId);
+        assertNotNull("contact not found", savedContact);
+        assertNotNull("no image found", savedContact.getImage1());
+        assertEquals("number of images wrong", 1, savedContact.getNumberOfImages());
+        assertTrue("image wrong", Arrays.equals(contact.getImage1(), savedContact.getImage1()));
+        assertEquals("image content type wrong", contact.getImageContentType(), savedContact.getImageContentType());
+        /*
+         * update contact
+         */
+        savedContact.setImage1(null);
+        savedContact.setImageContentType(null);
+        savedContact.setNumberOfImages(0);
+        getStorage().update(getContextID(), folderId, savedContact, savedContact.getLastModified());
+        super.rememberForCleanUp(contact);
+        /*
+         * verify updated contact
+         */
+        Contact updatedContact = super.findContact(contact.getUid(), folderId);
+        assertNotNull("contact not found", updatedContact);
+        assertNull("image still found", updatedContact.getImage1());
+        assertEquals("number of images wrong", 0, updatedContact.getNumberOfImages());
+        assertNull("image content type wrong", updatedContact.getImageContentType());
+    }
+        
 }

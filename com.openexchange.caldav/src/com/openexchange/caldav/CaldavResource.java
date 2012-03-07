@@ -378,9 +378,11 @@ public class CaldavResource extends AbstractResource {
                 appointmentSQLInterface.insertAppointmentObject(toSave);
             } else {
                 final Appointment oldAppointment = factory.getState().get(appointment.getObjectID(), appointment.getParentFolderID());
-                patchResources(oldAppointment, toSave);
-                patchParticipantListRemovingAliases(toSave);
-                patchParticipantListRemovingDoubleUsers(toSave);
+            	if (false == Patches.Incoming.tryRestoreParticipants(factory.getState().getUnpatched(oldAppointment), toSave)) {
+                    patchResources(oldAppointment, toSave);
+                    patchParticipantListRemovingAliases(toSave);
+                    patchParticipantListRemovingDoubleUsers(toSave);
+            	}
                 appointmentSQLInterface.updateAppointmentObject(toSave, parent.getId(), toSave.getLastModified());
             }
 
@@ -398,8 +400,11 @@ public class CaldavResource extends AbstractResource {
                 final CalendarDataObject cdo = (CalendarDataObject) exception;
                 factory.getCalendarUtilities().removeRecurringType(cdo);
                 cdo.setIgnoreConflicts(true);
-                patchParticipantListRemovingAliases(toSave);
-                patchParticipantListRemovingDoubleUsers(toSave);
+                if (create || false == Patches.Incoming.tryRestoreParticipants(null != matchingException ? matchingException :
+                	factory.getState().getUnpatched(appointment), exception)) {
+                    patchParticipantListRemovingAliases(toSave);
+                    patchParticipantListRemovingDoubleUsers(toSave);
+                }
                 appointmentSQLInterface.updateAppointmentObject(cdo, exception.getParentFolderID(), appointment.getLastModified());
             }
 

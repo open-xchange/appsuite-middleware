@@ -49,26 +49,39 @@
 
 package com.openexchange.service.indexing;
 
-import com.openexchange.exception.OXException;
+import javax.management.MBeanException;
 
 /**
- * {@link IndexingService} - The indexing service.
+ * {@link IndexingServiceMBean} - The MBean for indexing service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexingService {
+public interface IndexingServiceMBean {
+
+    public static final String DOMAIN = "com.openexchange.service.indexing";
 
     /**
-     * The name of the indexing queue.
-     */
-    public static final String INDEXING_QUEUE = "indexingQueue";
-
-    /**
-     * Adds specified job.
+     * Sends a simple echo.
+     * <p>
+     * Message is logged as ERROR, don't be surprised!
      * 
-     * @param job The job to add
-     * @throws OXException If job cannot be added
+     * @param message The echo message
+     * @throws MBeanException If a MBean error occurs
      */
-    public void addJob(IndexingJob job) throws OXException;
+    public void echoMessage(String message) throws MBeanException;
+
+    /**
+     * (Re-)Starts the receiver on this node.
+     * 
+     * @throws MBeanException If starting receiver fails
+     */
+    public void starReceiver() throws MBeanException;
+
+    /**
+     * Stops the receiver on this node.
+     * 
+     * @throws MBeanException If receiver cannot be stopped
+     */
+    public void stopReceiver() throws MBeanException;
 
 }

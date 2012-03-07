@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.customizer;
+package com.openexchange.service.indexing;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
-import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSONPCustomizer}
+ * {@link EchoIndexJob} - A simple job for echo'ing a given message.
  * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSONPCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
+public final class EchoIndexJob implements IndexingJob {
 
-    private static final String JSONP = "jsonp";
+    private static final long serialVersionUID = 8422334197440807865L;
 
-    @Override
-    public AJAXActionCustomizer createCustomizer(AJAXRequestData request, ServerSession session) {
-        return this;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EchoIndexJob.class));
+
+    private final String message;
+
+    private final Date stamp;
+
+    private volatile int priority;
+
+    /**
+     * Initializes a new {@link EchoIndexJob}.
+     */
+    public EchoIndexJob(final String message) {
+        super();
+        this.message = null == message ? "Hello world!" : message;
+        stamp = new Date();
+        priority = 4;
     }
 
     @Override
-    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
-        return request;
+    public void performJob() throws OXException {
+        LOG.error("\n\n\tEchoIndexJob (created at " + stamp.toString() + "): \"" + message + "\"\n\n");
     }
 
     @Override
-    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
-        if (request.containsParameter(JSONP) && result.getResultObject() instanceof Response) {
-            Response response = (Response) result.getResultObject();
-            try {
-                JSONObject jsonValue = response.getJSON();
-                if (jsonValue == null) {
-                    return result;
-                }
-                String call = request.getParameter(JSONP);
-                StringBuilder sb = new StringBuilder(call);
-                sb.append("(");
-                sb.append(jsonValue.toString());
-                sb.append(");");
-                result.setResultObject(sb.toString());
-            } catch (JSONException e) {
-                e.printStackTrace(); //Do nothing
-            }
-        }
+    public void setPriority(final int priority) {
+        this.priority = priority;
+    }
 
-        return result;
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
+    public boolean isDurable() {
+        return true;
+    }
+
+    @Override
+    public Behavior getBehavior() {
+        return Behavior.CONSUMER_RUNS;
     }
 
 }

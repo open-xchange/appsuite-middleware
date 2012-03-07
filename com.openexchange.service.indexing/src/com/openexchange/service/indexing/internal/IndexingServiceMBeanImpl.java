@@ -47,78 +47,70 @@
  *
  */
 
-package com.openexchange.mdns.internal;
+package com.openexchange.service.indexing.internal;
 
-import java.util.Arrays;
-import java.util.List;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mdns.MDNSService;
-import com.openexchange.mdns.MDNSServiceEntry;
+import com.openexchange.service.indexing.EchoIndexJob;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.IndexingServiceMBean;
 
 /**
- * {@link MDNSCommandProvider} - The {@link CommandProvider command provider} to output MDNS status.
- *
+ * {@link IndexingServiceMBeanImpl}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MDNSCommandProvider implements CommandProvider {
+public final class IndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean {
 
-    private final MDNSService mdnsService;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceMBeanImpl.class));
 
     /**
-     * Initializes a new {@link MDNSCommandProvider}.
-     *
-     * @param registry
+     * Initializes a new {@link IndexingServiceMBeanImpl}.
+     * 
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    public MDNSCommandProvider(final MDNSService mdnsService) {
-        super();
-        this.mdnsService = mdnsService;
-    }
-
-    public Object _mdnsServices(final CommandInterpreter intp) {
-        /*
-         * Check service identifier
-         */
-        String serviceId = intp.nextArgument();
-        if (null == serviceId) {
-            serviceId = "openexchange.service.messaging";
-        }
-        final StringBuilder sb = new StringBuilder(256);
-        final List<MDNSServiceEntry> services;
-        try {
-            services = mdnsService.listByService(serviceId);
-        } catch (final OXException e) {
-            intp.print(sb.append("Error: ").append(e.getMessage()).toString());
-            return null;
-        }
-        sb.setLength(0);
-        intp.print(sb.append("---Tracked services of \"").append(serviceId).append(
-            "\" ---\n").toString());
-        if (services.isEmpty()) {
-            intp.print(" <no tracked services>");
-        } else {
-            final String delim = "\n\t";
-            for (final MDNSServiceEntry mdnsServiceEntry : services) {
-                sb.setLength(0);
-                sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
-                sb.append(delim).append("Address: ").append(Arrays.toString(mdnsServiceEntry.getAddresses()));
-                sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
-                sb.append('\n');
-                intp.print(sb.toString());
-            }
-        }
-        /*
-         * Return
-         */
-        return null;
+    public IndexingServiceMBeanImpl() throws NotCompliantMBeanException {
+        super(IndexingServiceMBean.class);
     }
 
     @Override
-    public String getHelp() {
-        final StringBuilder builder = new StringBuilder(256).append("---Output tracked hosts of specified service---\n\t");
-        builder.append("mdnsServices <service-id> - Output tracked hosts. Specify the service identifier; by default \"openexchange.service.messaging\".\n");
-        return builder.toString();
+    public void echoMessage(final String message) throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        try {
+            indexingService.addJob(new EchoIndexJob(message));
+        } catch (final OXException e) {
+            LOG.error(e.getLogMessage(), e);
+            new MBeanException(new IllegalStateException(e.getLogMessage()));
+        }
+    }
+
+    public void starReceiver() throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        try {
+            ((IndexingServiceImpl) indexingService).getServiceInit().initReceiver();
+        } catch (final OXException e) {
+            LOG.error(e.getLogMessage(), e);
+            new MBeanException(new IllegalStateException(e.getLogMessage()));
+        }
+    }
+
+    public void stopReceiver() throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        ((IndexingServiceImpl) indexingService).getServiceInit().dropReceiver();
     }
 
 }

@@ -94,13 +94,28 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return this.all(contextID, folderId, allFields());
     }
     
+    @Override
+    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
+		return this.all(contextID, folderId, fields, SortOptions.EMPTY);
+    }
+
+	@Override
+	public Collection<Contact> all(int contextID, String folderId, SortOptions sortOptions) throws OXException {
+		return this.all(contextID, folderId, allFields(), sortOptions);
+	}
+
     /**
      * Default implementation that uses <code>ContactStorage.search</code> internally. 
      * Override if applicable for concrete storage implementation.
      */
+	@Override
+	public Collection<Contact> all(int contextID, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return this.search(contextID, getSearchTermFor(folderId), fields, sortOptions);
+	}
+
     @Override
-    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
-        return this.search(contextID, getSearchTermFor(folderId), fields);
+    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since) throws OXException {
+        return this.deleted(contextID, folderId, since, allFields());
     }
 
     @Override
@@ -108,18 +123,22 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return this.list(contextID, folderId, ids, allFields());
     }
 
-    @Override
-    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since) throws OXException {
-        return this.deleted(contextID, folderId, since, allFields());
-    }
+	@Override
+	public Collection<Contact> list(int contextID, String folderId, String[] ids, SortOptions sortOptions) throws OXException {
+    	return this.list(contextID, folderId, ids, allFields(), sortOptions);    	
+	}
 
+    @Override
+    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+    	return this.list(contextID, folderId, ids, fields, SortOptions.EMPTY);    	
+    }
+    
     /**
      * Default implementation that uses <code>ContactStorage.search</code> internally. 
      * Override if applicable for concrete storage implementation.
      */
-    @Override
-    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) 
-        throws OXException {
+	@Override
+	public Collection<Contact> list(int contextID, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
         final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
         andTerm.addSearchTerm(getSearchTermFor(folderId));
         final CompositeSearchTerm idsTerm = new CompositeSearchTerm(CompositeOperation.OR);
@@ -129,13 +148,24 @@ public abstract class DefaultContactStorage implements ContactStorage {
             idTerm.addOperand(new ConstantOperand<String>(id));
         }
         andTerm.addSearchTerm(idsTerm);
-        return this.search(contextID, andTerm, fields);
-    }
+        return this.search(contextID, andTerm, fields, sortOptions);
+	}
     
     @Override
     public <O> Collection<Contact> search(int contextID, SearchTerm<O> term) throws OXException {
         return this.search(contextID, term, allFields());
     }
+    
+	@Override
+	public <O> Collection<Contact> search(int contextID, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
+        return this.search(contextID, term, allFields(), sortOptions);
+	}
+
+	@Override
+	public <O> Collection<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException {
+        return this.search(contextID, term, fields, SortOptions.EMPTY);
+	}
+
 
     /**
      * Creates a clone from an existing contact and merges the attributes from another contact into that clone.
@@ -269,5 +299,5 @@ public abstract class DefaultContactStorage implements ContactStorage {
         folderIdTerm.addOperand(new ConstantOperand<String>(folderId));
         return folderIdTerm;
     }
-    
+
 }
