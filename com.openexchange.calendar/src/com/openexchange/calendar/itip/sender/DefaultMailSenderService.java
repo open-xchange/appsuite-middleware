@@ -140,7 +140,8 @@ public class DefaultMailSenderService implements MailSenderService {
         message.setFromAddr(getAddress(mail.getSender()));
         message.addToAddr(getAddress(mail.getRecipient()));
         message.setSubject(mail.getSubject());
-
+        message.setUid(app.getUid());
+        
         try {
             addBody(mail, message, session);
             message.send();
