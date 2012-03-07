@@ -1,3 +1,8 @@
+# TO DO
+# -----
+# Documentation: Only inform Harry & Antje on frontend changes, only inform myself on backend changes
+# QA: Add project name to e-mail
+#
 require 'rubygems'
 require 'hpricot'
 require 'base64'
@@ -12,8 +17,9 @@ require 'sinatra'
 #
 PIVOTAL_USERNAME = Base64.decode64("dG9iaWFzLnByaW56QG9wZW4teGNoYW5nZS5jb20=")
 PIVOTAL_PASSWORD = Base64.decode64("dHlnZ2Vy")
-MAIL_USERNAME = Base64.decode64("dG9iaWFzLnByaW56QG9wZW4teGNoYW5nZS5jb20=")
-MAIL_PASSWORD = Base64.decode64("dHlnZ2Vy")
+
+MAIL_USERNAME = Base64.decode64("bm9ib2R5")
+MAIL_PASSWORD = Base64.decode64("bmV0bGluZTEzMzcj")
 
 def debug(str)
 #  puts str
@@ -46,7 +52,7 @@ class PivotalConnection
   
   def add_label(labl, url)
     story = get_story(url)
-    next unless story.at("labels") == nil || !story.at("labels").inner_html.split(",").include?(labl)  # Condition: Must not yet have the label
+    return unless story.at("labels") == nil || !story.at("labels").inner_html.split(",").include?(labl)  # Condition: Must not yet have the label
     labels = story.at("labels") == nil ? labl : story.at("labels").inner_html + "," + labl
     set_labels(labels, url)
   end
