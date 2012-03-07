@@ -1,3 +1,7 @@
+* 2012-03-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21697: Reliable access to cached external account folder
+
 * 2012-03-05 - thorben.betten@open-xchange.com
 
  - Fixed bug 21680: Improved create routine for faster folder look-up
