@@ -92,7 +92,7 @@ public final class IndexingServiceMBeanImpl extends StandardMBean implements Ind
         }
     }
 
-    public void starReceiver() throws MBeanException {
+    public void startReceiving() throws MBeanException {
         final IndexingService indexingService = Services.optService(IndexingService.class);
         if (null == indexingService) {
             throw new MBeanException(new IllegalStateException("Missing indexing service."));
@@ -105,7 +105,7 @@ public final class IndexingServiceMBeanImpl extends StandardMBean implements Ind
         }
     }
 
-    public void stopReceiver() throws MBeanException {
+    public void stopReceiving() throws MBeanException {
         final IndexingService indexingService = Services.optService(IndexingService.class);
         if (null == indexingService) {
             throw new MBeanException(new IllegalStateException("Missing indexing service."));

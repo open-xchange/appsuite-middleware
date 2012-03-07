@@ -75,13 +75,13 @@ public interface IndexingServiceMBean {
      * 
      * @throws MBeanException If starting receiver fails
      */
-    public void starReceiver() throws MBeanException;
+    public void startReceiving() throws MBeanException;
 
     /**
      * Stops the receiver on this node.
      * 
      * @throws MBeanException If receiver cannot be stopped
      */
-    public void stopReceiver() throws MBeanException;
+    public void stopReceiving() throws MBeanException;
 
 }
