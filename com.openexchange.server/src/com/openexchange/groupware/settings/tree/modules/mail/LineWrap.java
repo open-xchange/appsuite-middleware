@@ -110,11 +110,6 @@ public class LineWrap implements PreferencesItemService {
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
-                try {
-                    storage.removeUserSettingMail(user.getId(), ctx);
-                } catch (final Exception e) {
-                    // Ignore
-                }
                 final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
                     try {
