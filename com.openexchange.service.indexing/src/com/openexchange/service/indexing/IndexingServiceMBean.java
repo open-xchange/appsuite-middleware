@@ -63,7 +63,7 @@ public interface IndexingServiceMBean {
     /**
      * Sends a simple echo.
      * <p>
-     * Message is logged as ERROR, don't be surprised!
+     * Message is logged as <code>ERROR</code>, don't be surprised!
      * 
      * @param message The echo message
      * @throws MBeanException If a MBean error occurs
