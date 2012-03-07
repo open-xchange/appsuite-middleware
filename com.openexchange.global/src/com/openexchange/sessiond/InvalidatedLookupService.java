@@ -47,68 +47,22 @@
  *
  */
 
-package com.openexchange.mq.queue;
-
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Session;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.impl.MQQueueResource;
-import com.openexchange.mq.queue.internal.WrappingMessageListener;
+package com.openexchange.sessiond;
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link InvalidatedLookupService} - Tests whether the denoted user's sessions have been invalidated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueAsyncReceiver extends MQQueueResource {
-
-    private QueueReceiver queueReceiver;
-
-    private final MQQueueListener listener;
+public interface InvalidatedLookupService {
 
     /**
-     * Initializes a new {@link MQQueueAsyncReceiver}.
+     * Tests whether the denoted user's sessions have been invalidated. The <i>invalidated status</i> of the user is cleared by this method.
      * 
-     * @param queueName The name of queue to receive from
-     * @throws OXException If initialization fails
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if invalidated; otherwise <code>false</code>
      */
-    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
-        super(queueName, listener);
-        this.listener = listener;
-    }
-
-    @Override
-    protected boolean isTransacted() {
-        return false;
-    }
-
-    @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
-    }
-
-    @Override
-    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
-        queueReceiver = queueSession.createReceiver(queue);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
-        queueReceiver.setMessageListener(msgListener);
-        queueConnection.setExceptionListener(msgListener);
-        queueConnection.start();
-    }
-
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
-        }
-        super.close();
-    }
+    boolean invalidated(int userId, int contextId);
 
 }

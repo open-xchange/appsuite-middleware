@@ -47,68 +47,38 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.service.indexing.internal;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Session;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.impl.MQQueueResource;
-import com.openexchange.mq.queue.internal.WrappingMessageListener;
+import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.IndexingService;
+
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
- * 
+ * {@link IndexingServiceImpl}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueAsyncReceiver extends MQQueueResource {
+public final class IndexingServiceImpl implements IndexingService {
 
-    private QueueReceiver queueReceiver;
-
-    private final MQQueueListener listener;
+    private final IndexingQueueSender sender;
 
     /**
-     * Initializes a new {@link MQQueueAsyncReceiver}.
-     * 
-     * @param queueName The name of queue to receive from
-     * @throws OXException If initialization fails
+     * Initializes a new {@link IndexingServiceImpl}.
      */
-    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
-        super(queueName, listener);
-        this.listener = listener;
+    public IndexingServiceImpl(final IndexingQueueSender sender) {
+        super();
+        this.sender = sender;
     }
 
     @Override
-    protected boolean isTransacted() {
-        return false;
+    public void addJob(final IndexingJob job) throws OXException {
+        sender.sendJobMessage(job);
     }
 
     @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
-    }
-
-    @Override
-    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
-        queueReceiver = queueSession.createReceiver(queue);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
-        queueReceiver.setMessageListener(msgListener);
-        queueConnection.setExceptionListener(msgListener);
-        queueConnection.start();
-    }
-
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
-        }
-        super.close();
+    public void addJob(final IndexingJob job, final int priority) throws OXException {
+        sender.sendJobMessage(job, priority);
     }
 
 }

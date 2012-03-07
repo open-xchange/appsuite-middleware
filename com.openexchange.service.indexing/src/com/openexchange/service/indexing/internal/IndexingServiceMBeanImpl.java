@@ -47,68 +47,49 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.service.indexing.internal;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Session;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.impl.MQQueueResource;
-import com.openexchange.mq.queue.internal.WrappingMessageListener;
+import com.openexchange.service.indexing.EchoIndexJob;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.IndexingServiceMBean;
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link IndexingServiceMBeanImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueAsyncReceiver extends MQQueueResource {
+public final class IndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean {
 
-    private QueueReceiver queueReceiver;
-
-    private final MQQueueListener listener;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceMBeanImpl.class));
 
     /**
-     * Initializes a new {@link MQQueueAsyncReceiver}.
+     * Initializes a new {@link IndexingServiceMBeanImpl}.
      * 
-     * @param queueName The name of queue to receive from
-     * @throws OXException If initialization fails
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
-        super(queueName, listener);
-        this.listener = listener;
+    public IndexingServiceMBeanImpl() throws NotCompliantMBeanException {
+        super(IndexingServiceMBean.class);
     }
 
     @Override
-    protected boolean isTransacted() {
-        return false;
-    }
-
-    @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
-    }
-
-    @Override
-    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
-        queueReceiver = queueSession.createReceiver(queue);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
-        queueReceiver.setMessageListener(msgListener);
-        queueConnection.setExceptionListener(msgListener);
-        queueConnection.start();
-    }
-
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
+    public void echoMessage(final String message) throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
         }
-        super.close();
+        try {
+            indexingService.addJob(new EchoIndexJob(message));
+        } catch (final OXException e) {
+            LOG.error(e.getLogMessage(), e);
+            new MBeanException(new IllegalStateException(e.getLogMessage()));
+        }
     }
 
 }

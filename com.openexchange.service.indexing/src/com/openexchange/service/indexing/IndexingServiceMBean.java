@@ -47,68 +47,28 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.service.indexing;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Session;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.impl.MQQueueResource;
-import com.openexchange.mq.queue.internal.WrappingMessageListener;
+import javax.management.MBeanException;
+
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
- * 
+ * {@link IndexingServiceMBean} - The MBean for indexing service.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueAsyncReceiver extends MQQueueResource {
+public interface IndexingServiceMBean {
 
-    private QueueReceiver queueReceiver;
-
-    private final MQQueueListener listener;
+    public static final String DOMAIN = "com.openexchange.service.indexing";
 
     /**
-     * Initializes a new {@link MQQueueAsyncReceiver}.
+     * Sends a simple echo.
+     * <p>
+     * Message is logged as ERROR, don't be surprised!
      * 
-     * @param queueName The name of queue to receive from
-     * @throws OXException If initialization fails
+     * @param message The echo message
+     * @throws MBeanException If a MBean error occurs
      */
-    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
-        super(queueName, listener);
-        this.listener = listener;
-    }
-
-    @Override
-    protected boolean isTransacted() {
-        return false;
-    }
-
-    @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
-    }
-
-    @Override
-    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
-        queueReceiver = queueSession.createReceiver(queue);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
-        queueReceiver.setMessageListener(msgListener);
-        queueConnection.setExceptionListener(msgListener);
-        queueConnection.start();
-    }
-
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
-        }
-        super.close();
-    }
-
+    public void echoMessage(String message) throws MBeanException;
+    
 }

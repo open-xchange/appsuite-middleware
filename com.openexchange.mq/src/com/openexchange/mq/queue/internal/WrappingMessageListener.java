@@ -90,7 +90,7 @@ public final class WrappingMessageListener extends AbstractWrappingMessageListen
                 listener.onText(((TextMessage) message).getText());
                 acknowledge(message);
             } else if (message instanceof ObjectMessage) {
-                listener.onObject(((ObjectMessage) message).getObject());
+                listener.onObjectMessage((ObjectMessage) message);
                 acknowledge(message);
             } else if (message instanceof BytesMessage) {
                 listener.onBytes(readBytesFrom((BytesMessage) message));

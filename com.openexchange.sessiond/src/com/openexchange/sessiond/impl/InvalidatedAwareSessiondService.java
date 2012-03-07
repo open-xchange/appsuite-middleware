@@ -83,14 +83,14 @@ public final class InvalidatedAwareSessiondService implements SessiondService {
 
     private boolean checkInvalidatedAndRemoveIfPresent(final int contextId) {
         try {
-            if (!SessionCache.getInstance().containsInvalidateMarker(contextId)) {
-                return false;
+            if (SessionCache.getInstance().containsInvalidateMarker(contextId)) {
+                // Drops sessions belonging to context
+                SessionHandler.removeContextSessions(contextId, true);
+                // Return null
+                LOG.info("Context is marked as invalid: " + contextId + ". Removed all context-related sessions.");
+                return true;
             }
-            // Drops sessions belonging to context
-            SessionHandler.removeContextSessions(contextId, true);
-            // Return null
-            LOG.info("Context is marked as invalid: " + contextId + ". Removed all context-related sessions.");
-            return true;
+            return false;
         } catch (final Exception e) {
             // Ignore
             return false;

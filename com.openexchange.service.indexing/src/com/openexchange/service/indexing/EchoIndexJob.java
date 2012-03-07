@@ -47,68 +47,50 @@
  *
  */
 
-package com.openexchange.mq.queue;
+package com.openexchange.service.indexing;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Session;
+import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.impl.MQQueueResource;
-import com.openexchange.mq.queue.internal.WrappingMessageListener;
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
- * listener} to given topic.
- * <p>
- * Invoke {@link #close()} method when done.
+ * {@link EchoIndexJob} - A simple job for echo'ing a given message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MQQueueAsyncReceiver extends MQQueueResource {
+public final class EchoIndexJob implements IndexingJob {
 
-    private QueueReceiver queueReceiver;
+    private static final long serialVersionUID = 8422334197440807865L;
 
-    private final MQQueueListener listener;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EchoIndexJob.class));
+
+    private final String message;
+
+    private final Date stamp;
 
     /**
-     * Initializes a new {@link MQQueueAsyncReceiver}.
-     * 
-     * @param queueName The name of queue to receive from
-     * @throws OXException If initialization fails
+     * Initializes a new {@link EchoIndexJob}.
      */
-    public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
-        super(queueName, listener);
-        this.listener = listener;
+    public EchoIndexJob(final String message) {
+        super();
+        this.message = null == message ? "Hello world!" : message;
+        stamp = new Date();
     }
 
     @Override
-    protected boolean isTransacted() {
-        return false;
+    public void performJob() throws OXException {
+        LOG.error("\n\n\tEchoIndexJob (created at " + stamp.toString() + "): \"" + message + "\"\n\n");
     }
 
     @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
+    public boolean isDurable() {
+        return true;
     }
 
     @Override
-    protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
-        queueReceiver = queueSession.createReceiver(queue);
-        final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
-        queueReceiver.setMessageListener(msgListener);
-        queueConnection.setExceptionListener(msgListener);
-        queueConnection.start();
-    }
-
-    @Override
-    public void close() {
-        try {
-            listener.close();
-        } catch (final Exception e) {
-            // Ignore
-        }
-        super.close();
+    public Behavior getBehavior() {
+        return Behavior.CONSUMER_RUNS;
     }
 
 }

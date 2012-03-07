@@ -72,7 +72,7 @@ public final class IndexingServiceInit {
 
     private IndexingQueueSender sender;
 
-    private MQQueueAsyncReceiver receiver;
+    private IndexingQueueAsyncReceiver receiver;
 
     /**
      * Initializes a new {@link IndexingServiceInit}.
@@ -126,7 +126,7 @@ public final class IndexingServiceInit {
         /*
          * Create async. queue receiver
          */
-        receiver = new MQQueueAsyncReceiver(IndexingService.INDEXING_QUEUE, listener);
+        receiver = new IndexingQueueAsyncReceiver(listener);
     }
 
     /**

@@ -53,6 +53,8 @@ import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServ
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -70,6 +72,8 @@ import com.openexchange.server.ServiceExceptionCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionCache {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionCache.class));
 
     static final String LATERAL_REGION_NAME = "SessionLTCP";
 
@@ -139,7 +143,7 @@ public final class SessionCache {
     }
 
     /**
-     * Checks if cache contains invalidate marker for given context.
+     * Checks if cache contains invalidate marker for given context (and performs local-remove it if present).
      *
      * @param contextId The context identifier
      * @return <code>true</code> if present in cache; otherwise <code>false</code>
@@ -161,6 +165,9 @@ public final class SessionCache {
                     element = cache.get(key);
                     if (null != element) {
                         cache.localRemove(key);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Detected & (locally) removed invalidate marker for context: " + contextId);
+                        }
                     }
                 } finally {
                     readLock.lock();
