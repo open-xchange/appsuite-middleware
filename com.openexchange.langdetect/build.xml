@@ -5,11 +5,11 @@
         This build file overrides the installConf target to patch a configuration file path before installing them.
     </description>
 
+    <import file="build-project.xml"/>
+
 	<!-- Constants -->
     <property name="modelsDir" value="languageModels"/>
     <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
-
-    <import file="build-project.xml"/>
 
     <target name="installConf" depends="patchConfig">
         <copy todir="${destDir}/${confInstallDir}">

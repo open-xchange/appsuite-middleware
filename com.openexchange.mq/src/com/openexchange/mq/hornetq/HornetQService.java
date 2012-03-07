@@ -297,6 +297,26 @@ public final class HornetQService implements MQService {
         }
     }
 
+    @Override
+    public void deleteQueue(final String name) throws OXException {
+        try {
+            final JMSServerManager serverManager = jmsServer.getServerManager();
+            serverManager.destroyQueue(name); // No prefix
+        } catch (final Exception e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteLocaleQueue(final String name) throws OXException {
+        try {
+            final JMSServerManager serverManager = jmsServer.getServerManager();
+            serverManager.destroyQueue(name + SERVER); // No prefix
+        } catch (final Exception e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     /*-
      * -------------------------------------------------------------------------------------------------
      * ----------------------------------- Lookup methods for Topics -----------------------------------
@@ -398,6 +418,26 @@ public final class HornetQService implements MQService {
         try {
             return null != ((Queue) jmsServer.lookup(PREFIX_TOPIC + name + SERVER));
         } catch (final ClassCastException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteTopic(final String name) throws OXException {
+        try {
+            final JMSServerManager serverManager = jmsServer.getServerManager();
+            serverManager.destroyTopic(PREFIX_QUEUE + name);
+        } catch (final Exception e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteLocaleTopic(final String name) throws OXException {
+        try {
+            final JMSServerManager serverManager = jmsServer.getServerManager();
+            serverManager.destroyTopic(PREFIX_QUEUE + name + SERVER);
+        } catch (final Exception e) {
             throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

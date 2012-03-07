@@ -52,13 +52,14 @@ package com.openexchange.mq.topic;
 import java.io.Serializable;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQCloseable;
+import com.openexchange.mq.MQTransactional;
 
 /**
  * {@link MQTopicPublisher}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MQTopicPublisher extends MQCloseable {
+public interface MQTopicPublisher extends MQCloseable, MQTransactional {
 
     /**
      * Publishes a message containing a <code>java.lang.String</code>.

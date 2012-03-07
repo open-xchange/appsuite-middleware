@@ -134,8 +134,13 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         @Override
         public S addingService(final ServiceReference<S> serviceReference) {
             final S service = context.getService(serviceReference);
-            listener.added(serviceReference, service);
-            return service;
+            try {
+                listener.added(serviceReference, service);
+                return service;
+            } catch (final Exception e) {
+                context.ungetService(serviceReference);
+                return null;
+            }
         }
 
         @Override
@@ -145,8 +150,11 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
         @Override
         public void removedService(final ServiceReference<S> serviceReference, final S service) {
-            listener.removed(serviceReference, service);
-            context.ungetService(serviceReference);
+            try {
+                listener.removed(serviceReference, service);
+            } finally {
+                context.ungetService(serviceReference);
+            }
         }
     }
 

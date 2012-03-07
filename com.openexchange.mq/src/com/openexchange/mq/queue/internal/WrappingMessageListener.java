@@ -49,7 +49,6 @@
 
 package com.openexchange.mq.queue.internal;
 
-import java.io.ByteArrayOutputStream;
 import javax.jms.BytesMessage;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
@@ -59,7 +58,7 @@ import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.mq.internal.AbstractWrappingMessageListener;
 import com.openexchange.mq.queue.MQQueueListener;
 import com.openexchange.mq.topic.MQTopicListener;
 
@@ -68,7 +67,7 @@ import com.openexchange.mq.topic.MQTopicListener;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WrappingMessageListener implements MessageListener, ExceptionListener {
+public final class WrappingMessageListener extends AbstractWrappingMessageListener implements MessageListener, ExceptionListener {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WrappingMessageListener.class));
 
@@ -89,10 +88,13 @@ public final class WrappingMessageListener implements MessageListener, Exception
         try {
             if (message instanceof TextMessage) {
                 listener.onText(((TextMessage) message).getText());
+                acknowledge(message);
             } else if (message instanceof ObjectMessage) {
-                listener.onObject(((ObjectMessage) message).getObject());
+                listener.onObjectMessage((ObjectMessage) message);
+                acknowledge(message);
             } else if (message instanceof BytesMessage) {
                 listener.onBytes(readBytesFrom((BytesMessage) message));
+                acknowledge(message);
             } else {
                 throw new IllegalArgumentException("Unhandled message: " + message.getClass().getName());
             }
@@ -101,16 +103,6 @@ public final class WrappingMessageListener implements MessageListener, Exception
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    private static byte[] readBytesFrom(final BytesMessage bytesMessage) throws JMSException {
-        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
-        final int buflen = 2048;
-        final byte[] buf = new byte[buflen];
-        for (int read; (read = bytesMessage.readBytes(buf, buflen)) > 0;) {
-            out.write(buf, 0, read);
-        }
-        return out.toByteArray();
     }
 
     @Override

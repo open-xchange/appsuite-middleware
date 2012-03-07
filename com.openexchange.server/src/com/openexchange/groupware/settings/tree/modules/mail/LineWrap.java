@@ -88,45 +88,44 @@ public class LineWrap implements PreferencesItemService {
     @Override
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
+
             @Override
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws OXException {
-                final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(user.getId(), ctx);
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
-                    setting.setSingleValue(Integer.valueOf(settings
-                        .getAutoLinebreak()));
+                    setting.setSingleValue(Integer.valueOf(settings.getAutoLinebreak()));
                 }
             }
+
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }
+
             @Override
             public boolean isWritable() {
                 return true;
             }
+
             @Override
-            public void writeValue(final Session session, final Context ctx, final User user,
-                final Setting setting) throws OXException {
-                final UserSettingMailStorage storage = UserSettingMailStorage
-                    .getInstance();
-                final UserSettingMail settings = storage.getUserSettingMail(
-                        user.getId(), ctx);
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
+                final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
+                try {
+                    storage.removeUserSettingMail(user.getId(), ctx);
+                } catch (final Exception e) {
+                    // Ignore
+                }
+                final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
                     try {
-                        settings.setAutoLinebreak(Integer.parseInt(setting
-                            .getSingleValue().toString()));
-                        storage.saveUserSettingMail(settings, user.getId(),
-                                ctx);
+                        settings.setAutoLinebreak(Integer.parseInt(setting.getSingleValue().toString()));
+                        storage.saveUserSettingMail(settings, user.getId(), ctx);
                     } catch (final NumberFormatException e) {
                         throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
-                    } catch (final OXException e) {
-                        throw new OXException(e);
                     }
                 }
             }
+
             @Override
             public int getId() {
                 return -1;

@@ -50,10 +50,11 @@
 package com.openexchange.mq.topic;
 
 import javax.jms.JMSException;
+import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.topic.internal.MQTopicResource;
+import com.openexchange.mq.topic.impl.MQTopicResource;
 import com.openexchange.mq.topic.internal.WrappingMessageListener;
 
 /**
@@ -82,6 +83,16 @@ public final class MQTopicAsyncSubscriber extends MQTopicResource {
     }
 
     @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
+    }
+
+    @Override
     protected synchronized void initResource(final Topic topic, final Object listener) throws JMSException {
         topicSubscriber = topicSession.createSubscriber(topic);
         final WrappingMessageListener msgListener = new WrappingMessageListener((MQTopicListener) listener);
@@ -92,7 +103,11 @@ public final class MQTopicAsyncSubscriber extends MQTopicResource {
 
     @Override
     public void close() {
-        listener.close();
+        try {
+            listener.close();
+        } catch (final Exception e) {
+            // Ignore
+        }
         super.close();
     }
 

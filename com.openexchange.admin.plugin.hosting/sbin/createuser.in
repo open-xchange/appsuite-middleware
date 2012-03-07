@@ -48,7 +48,6 @@
 #
 #
 
-
 OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 
@@ -63,8 +62,7 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-
-test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
+test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
 
 BNAME=$(basename $0)
 CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|changeaccessglobal\|getaccesscombinationnameforuser\|list\|change\)\(.*\)/\1 \2/') )
@@ -94,7 +92,9 @@ case "${CMDARR[0]}" in
 esac
 
 JAVAMAIN="com.openexchange.admin.console.${MODULE}.${ACTION}"
-ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
+
+ADMINCP=$(for jar in $LIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
+
 $JAVA_BIN $JAVA_OXCMD_OPTS -classpath ${ADMINCP} $JAVAMAIN "$@"

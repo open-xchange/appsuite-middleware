@@ -128,7 +128,7 @@ public final class FolderMapManagement {
         final Key key = keyFor(session);
         FolderMap folderMap = map.get(key);
         if (null == folderMap) {
-            final FolderMap newFolderMap = new FolderMap(1024, 300, TimeUnit.SECONDS);
+            final FolderMap newFolderMap = new FolderMap(1024, 300, TimeUnit.SECONDS, session.getUserId(), session.getContextId());
             folderMap = map.putIfAbsent(key, newFolderMap);
             if (null == folderMap) {
                 folderMap = newFolderMap;

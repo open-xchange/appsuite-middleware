@@ -141,6 +141,15 @@ public final class ThreadPools {
         }
     }
 
+    /**
+     * Appends current thread's stack trace to given {@link StringBuilder} instance.
+     * 
+     * @param sb The string builder to write to
+     */
+    public static void appendCurrentStackTrace(final StringBuilder sb) {
+        appendStackTrace(new Throwable().getStackTrace(), sb);
+    }
+
     public interface ExpectedExceptionFactory<E extends Exception> {
 
         /**

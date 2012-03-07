@@ -56,12 +56,12 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueReceiver;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.queue.MQQueueReceiver;
-import com.openexchange.mq.queue.internal.MQQueueResource;
 
 /**
  * {@link MQQueueReceiverImpl} - A queue receiver intended to be re-used. Invoke {@link #close()} method when done.
@@ -70,7 +70,7 @@ import com.openexchange.mq.queue.internal.MQQueueResource;
  */
 public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueReceiver {
 
-    private QueueReceiver queueReceiver; // Within synchronized, no volatile needed
+    protected QueueReceiver queueReceiver; // Within synchronized, no volatile needed
 
     /**
      * Initializes a new {@link MQQueueReceiverImpl}.
@@ -85,6 +85,16 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
     @Override
     protected synchronized void initResource(final Queue queue, final Object ignore) throws JMSException {
         queueReceiver = queueSession.createReceiver(queue);
+    }
+
+    @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
     }
 
     /*-

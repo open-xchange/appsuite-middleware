@@ -52,8 +52,9 @@ package com.openexchange.mq.queue;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueReceiver;
+import javax.jms.Session;
 import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.internal.MQQueueResource;
+import com.openexchange.mq.queue.impl.MQQueueResource;
 import com.openexchange.mq.queue.internal.WrappingMessageListener;
 
 /**
@@ -64,7 +65,7 @@ import com.openexchange.mq.queue.internal.WrappingMessageListener;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MQQueueAsyncReceiver extends MQQueueResource {
+public class MQQueueAsyncReceiver extends MQQueueResource {
 
     private QueueReceiver queueReceiver;
 
@@ -82,6 +83,16 @@ public final class MQQueueAsyncReceiver extends MQQueueResource {
     }
 
     @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
+    }
+
+    @Override
     protected synchronized void initResource(final Queue queue, final Object listener) throws JMSException {
         queueReceiver = queueSession.createReceiver(queue);
         final WrappingMessageListener msgListener = new WrappingMessageListener((MQQueueListener) listener);
@@ -92,7 +103,11 @@ public final class MQQueueAsyncReceiver extends MQQueueResource {
 
     @Override
     public void close() {
-        listener.close();
+        try {
+            listener.close();
+        } catch (final Exception e) {
+            // Ignore
+        }
         super.close();
     }
 

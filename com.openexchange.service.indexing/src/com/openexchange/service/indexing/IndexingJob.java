@@ -53,14 +53,28 @@ import java.io.Serializable;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IndexingJob} - Represents an indexing job described only using POJO (plain old Java objects) for the sake of reliability and
+ * {@link IndexingJob} - Represents an arbitrary job described only using POJO (plain old Java objects) for the sake of reliability and
  * consistency throughout clustered nodes.
+ * <p>
+ * Specify how a job is supposed to be performed by {@link #getBehavior()} method.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexingJob extends Serializable {
 
-    // Account access
+    /**
+     * The job's behavior: Either {@link #CONSUMER_RUNS consumer-runs} (low-cost) or {@link #DELEGATE delegate} (high-cost) job.
+     */
+    public static enum Behavior {
+        /**
+         * Consumer runs associated job (default). Appropriate for small jobs which are performed in a timely manner.
+         */
+        CONSUMER_RUNS,
+        /**
+         * Consumer delegates job's execution to another thread. Appropriate for high-cost jobs.
+         */
+        DELEGATE, ;
+    }
 
     /**
      * Performs this job's task.
@@ -68,5 +82,22 @@ public interface IndexingJob extends Serializable {
      * @throws OXException If performing job fails for any reason
      */
     void performJob() throws OXException;
+
+    /**
+     * Indicates whether this job is durable.
+     * <p>
+     * Durable jobs will be persisted in permanent storage and will survive server failure or restart. Non durable jobs will not survive
+     * server failure or restart.
+     * 
+     * @return <code>true</code> if durable; otherwise <code>false</code>
+     */
+    boolean isDurable();
+
+    /**
+     * Gets this job's {@link Behavior behavior}.
+     * 
+     * @return The behavior determining how to execute this job
+     */
+    Behavior getBehavior();
 
 }

@@ -50,7 +50,8 @@
 package com.openexchange.contact.storage.rdb.fields;
 
 import java.util.EnumSet;
-import com.openexchange.contact.storage.rdb.internal.Tools;
+
+import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -65,7 +66,7 @@ public class QueryFields {
     
     private ContactField[] contactDataFields;
     private ContactField[] imageDataFields;
-    private ContactField[] distListDataFields;
+    private DistListMemberField[] distListDataFields;
     private boolean hasImageData;
     private boolean hasContactData;
     private boolean hasDistListData;
@@ -86,28 +87,28 @@ public class QueryFields {
         /*
          * determine image data fields
          */
-        final ContactField[] imageDataFields = Tools.filter(fields, Fields.IMAGE_DATABASE_ADDITIONAL, ContactField.OBJECT_ID);
+        imageDataFields = Mappers.CONTACT.filter(fields, Fields.IMAGE_DATABASE_ADDITIONAL, ContactField.OBJECT_ID).toArray(new ContactField[0]);
         hasImageData = 1 < imageDataFields.length;
         /*
          * determine distlist data fields
          */
-        hasDistListData = 0 < Tools.filter(fields, EnumSet.of(ContactField.DISTRIBUTIONLIST)).length;
-        distListDataFields = hasDistListData ? Fields.DISTLIST_DATABASE_ARRAY : new ContactField[0];
+        hasDistListData = 0 < Mappers.CONTACT.filter(fields, EnumSet.of(ContactField.DISTRIBUTIONLIST)).size();
+        distListDataFields = hasDistListData ? Fields.DISTLIST_DATABASE_ARRAY : new DistListMemberField[0];
         /*
          * build required contact data fields
          */
         if (hasDistListData) {
             if (hasImageData) {
-                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES, 
-                    ContactField.NUMBER_OF_DISTRIBUTIONLIST);
+                contactDataFields = Mappers.CONTACT.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES, 
+                    ContactField.NUMBER_OF_DISTRIBUTIONLIST).toArray(new ContactField[0]);
             } else {
-                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_DISTRIBUTIONLIST);
+                contactDataFields = Mappers.CONTACT.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_DISTRIBUTIONLIST).toArray(new ContactField[0]);
             }
         } else {
             if (hasImageData) {
-                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES);
+                contactDataFields = Mappers.CONTACT.filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES).toArray(new ContactField[0]);
             } else {
-                contactDataFields = Tools.filter(fields, Fields.CONTACT_DATABASE);
+                contactDataFields = Mappers.CONTACT.filter(fields, Fields.CONTACT_DATABASE).toArray(new ContactField[0]);
             }
         }
         hasContactData = 0 < contactDataFields.length;
@@ -121,7 +122,7 @@ public class QueryFields {
         return this.imageDataFields;
     }
     
-    public ContactField[] getDistListDataFields() {
+    public DistListMemberField[] getDistListDataFields() {
         return this.distListDataFields;
     }    
     

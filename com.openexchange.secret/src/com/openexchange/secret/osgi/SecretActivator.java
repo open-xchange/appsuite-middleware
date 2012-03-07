@@ -106,17 +106,11 @@ public class SecretActivator extends HousekeepingActivator {
             if (pattern.charAt(pattern.length() - 1) == '"') {
                 pattern = pattern.substring(0, pattern.length() - 1);
             }
-            if (pattern.charAt(0) == '<') {
-                pattern = pattern.substring(1);
-            }
-            if (pattern.charAt(pattern.length() - 1) == '>') {
-                pattern = pattern.substring(0, pattern.length() - 1);
-            }
             /*
              * Check for "list"
              */
             final TokenBasedSecretService tokenBasedSecretService;
-            if ("list".equals(pattern)) {
+            if ("<list>".equals(pattern)) {
                 String text = configurationService.getText("secrets");
                 if (null == text) {
                     text = "\"<user-id> + '-' +  <random> + '-' + <context-id>\"";

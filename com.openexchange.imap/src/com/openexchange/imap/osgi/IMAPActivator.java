@@ -53,6 +53,8 @@ import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegis
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -146,6 +148,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
                 secretService.open();
             }
+            Config.LoggerProvider = LoggerProvider.DISABLED;
             IMAPStoreCache.initInstance();
             /*
              * Register IMAP mail provider

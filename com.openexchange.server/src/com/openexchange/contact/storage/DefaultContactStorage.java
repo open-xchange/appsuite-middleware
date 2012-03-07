@@ -53,20 +53,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link DefaultContactStorage} - Abstract {@link ContactStorage} implementation.
@@ -88,13 +85,13 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
     
     @Override
-    public Contact get(final Session session, final String folderId, final String id) throws OXException {
-        return this.get(session, folderId, id, allFields());
+    public Contact get(final int contextID, final String folderId, final String id) throws OXException {
+        return this.get(contextID, folderId, id, allFields());
     }
 
     @Override
-    public Collection<Contact> all(final Session session, final String folderId) throws OXException {
-        return this.all(session, folderId, allFields());
+    public Collection<Contact> all(final int contextID, final String folderId) throws OXException {
+        return this.all(contextID, folderId, allFields());
     }
     
     /**
@@ -102,18 +99,18 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * Override if applicable for concrete storage implementation.
      */
     @Override
-    public Collection<Contact> all(final Session session, final String folderId, final ContactField[] fields) throws OXException {
-        return this.search(session, getSearchTermFor(folderId), fields);
+    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
+        return this.search(contextID, getSearchTermFor(folderId), fields);
     }
 
     @Override
-    public Collection<Contact> list(final Session session, final String folderId, final String[] ids) throws OXException {
-        return this.list(session, folderId, ids, allFields());
+    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids) throws OXException {
+        return this.list(contextID, folderId, ids, allFields());
     }
 
     @Override
-    public Collection<Contact> deleted(final Session session, final String folderId, final Date since) throws OXException {
-        return this.deleted(session, folderId, since, allFields());
+    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since) throws OXException {
+        return this.deleted(contextID, folderId, since, allFields());
     }
 
     /**
@@ -121,7 +118,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * Override if applicable for concrete storage implementation.
      */
     @Override
-    public Collection<Contact> list(final Session session, final String folderId, final String[] ids, final ContactField[] fields) 
+    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) 
         throws OXException {
         final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
         andTerm.addSearchTerm(getSearchTermFor(folderId));
@@ -132,40 +129,12 @@ public abstract class DefaultContactStorage implements ContactStorage {
             idTerm.addOperand(new ConstantOperand<String>(id));
         }
         andTerm.addSearchTerm(idsTerm);
-        return this.search(session, andTerm, fields);
+        return this.search(contextID, andTerm, fields);
     }
     
     @Override
-    public <O> Collection<Contact> search(Session session, SearchTerm<O> term) throws OXException {
-        return this.search(session, term, allFields());
-    }
-    
-    /**
-     * Gets the adapted server session.
-     * 
-     * @param session the session
-     * @return the server session
-     * @throws OXException
-     */
-    protected static ServerSession getServerSession(final Session session) throws OXException {
-        if (null == session) {
-            throw new IllegalArgumentException("session");
-        }
-        return ServerSessionAdapter.valueOf(session);        
-    }
-    
-    /**
-     * Gets the context the session belongs to.
-     *  
-     * @param session the session
-     * @return the context
-     * @throws OXException
-     */
-    protected static Context getContext(final Session session) throws OXException {
-        if (null == session) {
-            throw new IllegalArgumentException("session");
-        }
-        return getServerSession(session).getContext();
+    public <O> Collection<Contact> search(int contextID, SearchTerm<O> term) throws OXException {
+        return this.search(contextID, term, allFields());
     }
 
     /**

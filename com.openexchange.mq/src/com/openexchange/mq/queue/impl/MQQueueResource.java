@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mq.queue.internal;
+package com.openexchange.mq.queue.impl;
 
 import static com.openexchange.mq.serviceLookup.MQServiceLookup.getMQService;
 import javax.jms.InvalidDestinationException;
@@ -94,7 +94,7 @@ public abstract class MQQueueResource implements MQCloseable {
             // Setup connection, session & sender
             final QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
             this.queueConnection = queueConnection;
-            final QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+            final QueueSession queueSession = queueConnection.createQueueSession(isTransacted(), getAcknowledgeMode());
             this.queueSession = queueSession;
             initResource(queue, arg);
             errorOccurred = false;
@@ -110,11 +110,27 @@ public abstract class MQQueueResource implements MQCloseable {
     }
 
     /**
+     * Gets the acknowledge mode that indicates whether the consumer or the client will acknowledge any messages it receives; ignored if
+     * {@link #isTransacted()} is <code>true</code>. Legal values are {@link Session#AUTO_ACKNOWLEDGE}, {@link Session#CLIENT_ACKNOWLEDGE},
+     * and {@link Session#DUPS_OK_ACKNOWLEDGE}.
+     * 
+     * @return The acknowledge mode
+     */
+    protected abstract int getAcknowledgeMode();
+
+    /**
+     * Checks if this resource is transacted.
+     * 
+     * @return <code>true</code> if transacted; otherwise false
+     */
+    protected abstract boolean isTransacted();
+
+    /**
      * Initializes the resource.
      * 
      * @throws JMSException If initialization fails
      */
-    protected abstract void initResource(Queue queue, Object arg) throws JMSException;
+    protected abstract void initResource(Queue queue, Object arg) throws JMSException, OXException;
 
     /**
      * Gets the name of the queue associated with this receiver.

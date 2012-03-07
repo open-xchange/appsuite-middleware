@@ -55,6 +55,7 @@ import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicPublisher;
@@ -62,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.serviceLookup.MQServiceLookup;
 import com.openexchange.mq.topic.MQTopicPublisher;
-import com.openexchange.mq.topic.internal.MQTopicResource;
 
 /**
  * {@link MQTopicPublisherImpl} - A topic publisher intended to be re-used. Invoke {@link #close()} method when done.
@@ -71,13 +71,13 @@ import com.openexchange.mq.topic.internal.MQTopicResource;
  */
 public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPublisher {
 
-    private static final int DEFAULT_PRIORITY = Message.DEFAULT_PRIORITY;
-    
-    private static final long DEFAULT_TIME_TO_LIVE = Message.DEFAULT_TIME_TO_LIVE;
+    protected static final int DEFAULT_PRIORITY = Message.DEFAULT_PRIORITY;
+
+    protected static final long DEFAULT_TIME_TO_LIVE = Message.DEFAULT_TIME_TO_LIVE;
 
     private int deliveryMode;
 
-    private TopicPublisher topicPublisher;
+    protected TopicPublisher topicPublisher;
 
     /**
      * Initializes a new {@link MQTopicPublisherImpl}.
@@ -90,9 +90,55 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
     }
 
     @Override
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
+    }
+
+    @Override
     protected synchronized void initResource(final Topic topic, final Object ignore) throws JMSException, OXException {
         topicPublisher = topicSession.createPublisher(topic);
+        topicPublisher.setDisableMessageID(true);
+        topicPublisher.setDisableMessageTimestamp(true);
         deliveryMode = MQServiceLookup.getMQService().isLocalOnlyTopic(topicName) ? DeliveryMode.NON_PERSISTENT : DeliveryMode.PERSISTENT;
+    }
+
+    @Override
+    public void commit() throws OXException {
+        if (!isTransacted()) {
+            /*
+             * Not transactional
+             */
+            return;
+        }
+        try {
+            topicSession.commit();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void rollback() throws OXException {
+        if (!isTransacted()) {
+            /*
+             * Not transactional
+             */
+            return;
+        }
+        try {
+            topicSession.rollback();
+        } catch (final JMSException e) {
+            throw MQExceptionCodes.handleJMSException(e);
+        } catch (final RuntimeException e) {
+            throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -183,7 +229,13 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
         }
     }
 
-    private static int checkPriority(final int priority) {
+    /**
+     * Checks proper priority range.
+     * 
+     * @param priority The priority to check
+     * @return The checked priority
+     */
+    protected static int checkPriority(final int priority) {
         if (priority >= 0 && priority <= 9) {
             return priority;
         }

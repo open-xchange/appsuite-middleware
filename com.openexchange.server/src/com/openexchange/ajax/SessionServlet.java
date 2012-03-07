@@ -286,12 +286,14 @@ public abstract class SessionServlet extends AJAXServlet {
         } finally {
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
-                final Props properties = LogProperties.getLogProperties();
-                properties.remove("com.openexchange.session.sessionId");
-                properties.remove("com.openexchange.session.userId");
-                properties.remove("com.openexchange.session.contextId");
-                properties.remove("com.openexchange.session.clientId");
-                properties.remove("com.openexchange.session.session");
+                final Props properties = LogProperties.optLogProperties();
+                if (null != properties) {
+                    properties.remove("com.openexchange.session.sessionId");
+                    properties.remove("com.openexchange.session.userId");
+                    properties.remove("com.openexchange.session.contextId");
+                    properties.remove("com.openexchange.session.clientId");
+                    properties.remove("com.openexchange.session.session");
+                }
             }
             if (null != counter) {
                 counter.getAndDecrement();

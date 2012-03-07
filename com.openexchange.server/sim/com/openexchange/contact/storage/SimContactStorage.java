@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactAttributeFetcher;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -65,7 +66,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.internal.SearchServiceImpl;
-import com.openexchange.session.Session;
 
 /**
  * {@link SimContactStorage} - In-memory {@link ContactStorage} implementation.
@@ -86,18 +86,18 @@ public class SimContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public boolean supports(Session session, String folderId) throws OXException {
+    public boolean supports(int contextID, String folderId) throws OXException {
         return true;
     }
 
     @Override
-    public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
+    public Contact get(int contextID, String folderId, String id, ContactField[] fields) throws OXException {
         final Contact contact = contacts.get(id);
         return null != contact && this.matches(contact, folderId) ? this.filter(contact, fields) : null;
     }
 
     @Override
-    public Collection<Contact> all(final Session session, final String folderId, final ContactField[] fields) throws OXException {
+    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
         final Collection<Contact> contacts = new ArrayList<Contact>();
         for (final Contact contact : this.contacts.values()) {
             if (this.matches(contact, folderId)) {
@@ -108,7 +108,7 @@ public class SimContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public Collection<Contact> list(final Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
         final Collection<Contact> contacts = new ArrayList<Contact>();
         for (final String id : ids) {
             final Contact contact = this.contacts.get(id);
@@ -120,7 +120,7 @@ public class SimContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public Collection<Contact> deleted(final Session session, final String folderId, final Date since, final ContactField[] fields) throws OXException {
+    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since, final ContactField[] fields) throws OXException {
         final Collection<Contact> contacts = new ArrayList<Contact>();
         for (final Contact contact : this.deletedContacts) {
             if (contact.getLastModified().after(since) && this.matches(contact, folderId)) {
@@ -131,18 +131,18 @@ public class SimContactStorage extends DefaultContactStorage {
     }
   
     @Override
-    public <O> Collection<Contact> search(final Session session, final SearchTerm<O> term, final ContactField[] fields) throws OXException {
+    public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields) throws OXException {
         return this.searchService.filter(this.contacts.values(), term, ContactAttributeFetcher.getInstance());
     }
 
     @Override
-    public synchronized void create(final Session session, final String folderId, final Contact contact) throws OXException {
+    public synchronized void create(final int contextID, final String folderId, final Contact contact) throws OXException {
         final Date now = new Date();
         final String id = this.nextId();
         contact.setObjectID(Integer.parseInt(id));
-        contact.setCreatedBy(session.getUserId());
-        contact.setModifiedBy(session.getUserId());
-        contact.setContextId(session.getContextId());
+//        contact.setCreatedBy(session.getUserId());
+//        contact.setModifiedBy(session.getUserId());
+        contact.setContextId(contextID);
         contact.setParentFolderID(Integer.parseInt(folderId));            
         contact.setLastModified(now);
         contact.setCreationDate(now);
@@ -150,7 +150,7 @@ public class SimContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public synchronized void update(final Session session, final String folderId, final Contact contact, final Date lastRead) throws OXException {
+    public synchronized void update(final int contextID, final String folderId, final Contact contact, final Date lastRead) throws OXException {
         final String id = Integer.toString(contact.getObjectID());
         final Contact existingContact = this.contacts.get(id);
         if (null == existingContact) {
@@ -158,15 +158,15 @@ public class SimContactStorage extends DefaultContactStorage {
         } else if (existingContact.getLastModified().after(lastRead)) {
             throw new IllegalArgumentException("object changed in the meantime");
         }
-        contact.setModifiedBy(session.getUserId());
-        contact.setContextId(session.getContextId());
+//        contact.setModifiedBy(session.getUserId());
+        contact.setContextId(contextID);
         contact.setParentFolderID(Integer.parseInt(folderId));
         contact.setLastModified(new Date());
         this.contacts.put(id, merge(existingContact, contact));
     }
 
     @Override
-    public synchronized void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
+    public synchronized void delete(int contextID, String folderId, String id, Date lastRead) throws OXException {
         final Contact existingContact = this.contacts.get(id);
         if (null == existingContact || false == this.matches(existingContact, folderId)) {
             throw new IllegalArgumentException("contact " + id + " not found in folder " + folderId);
@@ -175,8 +175,8 @@ public class SimContactStorage extends DefaultContactStorage {
         } else {
             final Contact deleted = this.contacts.remove(id);
             final Date now = new Date();
-            deleted.setModifiedBy(session.getUserId());
-            deleted.setContextId(session.getContextId());
+//            deleted.setModifiedBy(session.getUserId());
+            deleted.setContextId(contextID);
             deleted.setParentFolderID(Integer.parseInt(folderId));            
             deleted.setLastModified(now);
             this.deletedContacts.add(deleted);

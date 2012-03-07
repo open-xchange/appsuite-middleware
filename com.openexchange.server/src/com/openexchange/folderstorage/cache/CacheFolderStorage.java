@@ -1164,7 +1164,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * Gets the folder reference from cache.
      * 
      * @param treeId The tree identifier
-     * @param folderId The fodler identifier
+     * @param folderId The folder identifier
      * @param storageParameters The storage parameters
      * @return The folder or <code>null</code> on cache miss
      */

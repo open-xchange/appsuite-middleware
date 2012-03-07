@@ -49,22 +49,27 @@
 
 package com.openexchange.mdns.osgi;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import com.openexchange.mdns.MDNSService;
+import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
 import com.openexchange.mdns.internal.MDNSServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link MDNSActivator} - The mDNS activator.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSActivator extends HousekeepingActivator {
 
     private MDNSServiceImpl service;
+
+    private MDNSServiceInfo serviceInfo;
 
     /**
      * Initializes a new {@link MDNSActivator}.
@@ -75,8 +80,7 @@ public final class MDNSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
     @Override
@@ -90,9 +94,19 @@ public final class MDNSActivator extends HousekeepingActivator {
             service = new MDNSServiceImpl();
             registerService(MDNSService.class, service, null);
             registerService(CommandProvider.class, new MDNSCommandProvider(service), null);
+
+            serviceInfo = service.registerService("com.openexchange.mdns.lookup", 1808, "open-xchange lookup service @" + getHostName());
         } catch (final Exception e) {
             log.error("Starting bundle failed: com.openexchange.mdns", e);
             throw e;
+        }
+    }
+
+    private String getHostName() {
+        try {
+            return InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {
+            return "<unknown>";
         }
     }
 
@@ -103,6 +117,10 @@ public final class MDNSActivator extends HousekeepingActivator {
         try {
             unregisterServices();
             if (service != null) {
+                if (null != serviceInfo) {
+                    service.unregisterService(serviceInfo);
+                    serviceInfo = null;
+                }
                 service.close();
                 service = null;
             }
