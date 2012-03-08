@@ -78,6 +78,7 @@
         <replace dir="${patchSbinDir}" includes="createcontext createuser initconfigdb oxinstaller oxsysreport showruntimestats">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
+            <replacefilter token="@confDir@" value="${confInstallDir}"/>
         </replace>
     </target>
 

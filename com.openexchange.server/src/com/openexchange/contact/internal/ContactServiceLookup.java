@@ -47,88 +47,58 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.contact.internal;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.search.Order;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SortOptions} - Specifies sort options for the results of storage operations. 
+ * {@link ContactServiceLookup} - Provides access to services.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SortOptions {
-	
-	public static final SortOptions EMPTY = new SortOptions();
-	
-	private SortOrder order[];
-	
-	private String collation;
-	
-	public static final SortOrder Order(final ContactField by, final Order order) {
-		return new SortOrder(by, order);
-	}
-	
-	public SortOptions(final String collation, final SortOrder... order) {
-		super();
-		this.collation = collation;
-		this.order = order;
-	}
+public class ContactServiceLookup {
 
-	public SortOptions(final SortOrder... order) {
-		this(null, order);
-	}
+    /**
+     * Initializes a new {@link DBChatServiceLookup}.
+     */
+    private ContactServiceLookup() {
+        super();
+    }
 
-	public SortOptions(final String collation) {
-		this(collation, (SortOrder[])null);
-	}
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-	public SortOptions() {
-		this((SortOrder[])null);
-	}
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
-	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
-		this(collation, Order(orderBy, order));
-	}
-	
-	public SortOptions(final ContactField orderBy, final Order order) {
-		this(Order(orderBy, order));
-	}
-	
-	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	/**
-	 * @return the collation
-	 */
-	public String getCollation() {
-		return collation;
-	}
+    public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
+        return ContactServiceLookup.getService(c, false);
+    }
+    
+    public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        final ServiceLookup serviceLookup = ref.get();
+        final S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
 
-	/**
-	 * @param collation the collation to set
-	 */
-	public void setCollation(String collation) {
-		this.collation = collation;
-	}
-
-	/**
-	 * @return the order
-	 */
-	public SortOrder[] getOrder() {
-		return order;
-	}
-
-	/**
-	 * @param order the orderBy to set
-	 */
-	public void setOrderBy(SortOrder[] order) {
-		this.order = order;
-	}
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(final ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
 }

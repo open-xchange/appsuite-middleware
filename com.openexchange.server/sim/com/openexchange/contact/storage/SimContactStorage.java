@@ -130,6 +130,17 @@ public class SimContactStorage extends DefaultContactStorage {
         return contacts;
     }
   
+	@Override
+	public Collection<Contact> modified(int contextID, String folderId, Date since, ContactField[] fields) throws OXException {
+        final Collection<Contact> contacts = new ArrayList<Contact>();
+        for (final Contact contact : this.contacts.values()) {
+            if (contact.getLastModified().after(since) && this.matches(contact, folderId)) {
+                contacts.add(this.filter(contact, fields));
+            }
+        }        
+        return contacts;
+	}
+
     @Override
     public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields, SortOptions sortOptions) throws OXException {
         return this.searchService.filter(this.contacts.values(), term, ContactAttributeFetcher.getInstance());

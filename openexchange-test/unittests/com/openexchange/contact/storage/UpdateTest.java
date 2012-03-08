@@ -100,7 +100,7 @@ public class UpdateTest extends ContactStorageTest {
         /*
          * verify updated contact
          */
-        final Contact updatedContact = super.findContact(savedContact.getUid(), folderId);
+        final Contact updatedContact = super.findContact(savedContact.getUid(), folderId, savedContact.getLastModified());
         assertNotNull("contact not found", updatedContact);
         assertEquals("display name wrong", updatedContact.getDisplayName(), savedContact.getDisplayName());
         assertEquals("surname wrong", updatedContact.getSurName(), savedContact.getSurName());
@@ -142,7 +142,7 @@ public class UpdateTest extends ContactStorageTest {
         /*
          * verify updated contact
          */
-        final Contact updatedContact = super.findContact(savedContact.getUid(), folderId);
+        final Contact updatedContact = super.findContact(savedContact.getUid(), folderId, savedContact.getLastModified());
         assertNotNull("contact not found", updatedContact);
         assertNotNull("no image found", updatedContact.getImage1());
         assertEquals("number of images wrong", 1, updatedContact.getNumberOfImages());
@@ -191,7 +191,7 @@ public class UpdateTest extends ContactStorageTest {
         /*
          * verify updated contact
          */
-        Contact updatedContact = super.findContact(savedContact.getUid(), folderId);
+        Contact updatedContact = super.findContact(savedContact.getUid(), folderId, savedContact.getLastModified());
         assertNotNull("contact not found", updatedContact);
         assertTrue("not marked as distribution list", updatedContact.getMarkAsDistribtuionlist());
         assertNotNull("distribution list not found", updatedContact.getDistributionList());
@@ -232,7 +232,7 @@ public class UpdateTest extends ContactStorageTest {
         /*
          * verify updated contact
          */
-        Contact updatedContact = super.findContact(contact.getUid(), folderId);
+        Contact updatedContact = super.findContact(contact.getUid(), folderId, savedContact.getLastModified());
         assertNotNull("contact not found", updatedContact);
         assertNotNull("no image found", updatedContact.getImage1());
         assertEquals("number of images wrong", 1, updatedContact.getNumberOfImages());
@@ -275,7 +275,7 @@ public class UpdateTest extends ContactStorageTest {
         /*
          * verify updated contact
          */
-        Contact updatedContact = super.findContact(contact.getUid(), folderId);
+        Contact updatedContact = super.findContact(contact.getUid(), folderId, savedContact.getLastModified());
         assertNotNull("contact not found", updatedContact);
         assertNull("image still found", updatedContact.getImage1());
         assertEquals("number of images wrong", 0, updatedContact.getNumberOfImages());

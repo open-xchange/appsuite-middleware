@@ -98,15 +98,14 @@ import com.openexchange.java.Charsets;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
+/**
+ * Executes the {@link AJAXRequest}s, processes the response as defined through {@link AbstractAJAXParser} and returns an
+ * {@link AbstractAJAXResponse}.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class Executor extends Assert {
-    /**
-     * To use character encoding.
-     */
-    private static final String ENCODING = "UTF-8";
 
-    /**
-     * Prevent instantiation
-     */
     private Executor() {
         super();
     }
@@ -169,7 +168,9 @@ public class Executor extends Assert {
             break;
         case PUT:
         	final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
-        	httpPut.setEntity( new InputStreamEntity( createBody( request.getBody()), -1));
+            InputStreamEntity entity = new InputStreamEntity(createBody(request.getBody()), -1);
+            entity.setContentType("text/javascript; charset=UTF-8");
+            httpPut.setEntity(entity);
         	httpRequest = httpPut;
             break;
         default:
