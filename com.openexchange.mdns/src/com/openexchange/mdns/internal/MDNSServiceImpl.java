@@ -62,6 +62,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
 import javax.jmdns.impl.JmDNSImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSExceptionCodes;
@@ -88,6 +89,8 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
     private final JmDNS jmdns;
 
+    private final ServiceListener serviceListener;
+
     private final Lock rlock;
 
     private final Lock wlock;
@@ -113,7 +116,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             /*
              * Add service listener for "_openexchange._tcp.local."
              */
-            jmdns.addServiceListener(serviceType, new MDNSListener(map, this));
+            jmdns.addServiceListener(serviceType, (serviceListener = new MDNSListener(map, this)));
             final ReadWriteLock rw = new ReentrantReadWriteLock();
             rlock = rw.readLock();
             wlock = rw.writeLock();
@@ -134,6 +137,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         try {
             map.clear();
             registeredServicesSet.clear();
+            jmdns.removeServiceListener(Constants.SERVICE_TYPE, serviceListener);
             jmdns.unregisterAllServices();
             jmdns.close();
         } catch (final IOException e) {
@@ -163,7 +167,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         try {
             final UUID id = getIdentifierFor(/* serviceId */);
             final String name = new StringBuilder().append(getUnformattedString(id)).append('/').append(serviceId).toString();
-            final ServiceInfo sinfo = ServiceInfo.create(Constants.SERVICE_TYPE, name, port, 0, 0, null == info ? "" : info);
+            final ServiceInfo sinfo = ServiceInfo.create(Constants.SERVICE_TYPE, name, port, null == info ? "" : info);
             jmdns.registerService(sinfo);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(64).append("Registered new service: ").append(sinfo).toString());
