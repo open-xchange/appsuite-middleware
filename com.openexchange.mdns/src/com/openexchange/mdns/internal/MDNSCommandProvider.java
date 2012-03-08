@@ -103,7 +103,7 @@ public final class MDNSCommandProvider implements CommandProvider {
                 return null;
             }
             sb.setLength(0);
-            intp.print(sb.append("---Tracked services of \"").append(serviceId).append("\" ---\n").toString());
+            intp.print(sb.append("\n---Tracked services of \"").append(serviceId).append("\" ---\n").toString());
             if (services.isEmpty()) {
                 intp.print("\n\t<no tracked services>");
             } else {
@@ -113,7 +113,7 @@ public final class MDNSCommandProvider implements CommandProvider {
                     sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
                     sb.append(delim).append("Address: ").append(Arrays.toString(mdnsServiceEntry.getAddresses()));
                     sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
-                    sb.append(delim).append('\n');
+                    sb.append('\n');
                     intp.print(sb.toString());
                 }
             }
