@@ -49,38 +49,58 @@
 
 package com.openexchange.service.indexing;
 
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link EchoIndexJob} - A simple job for echo'ing a given message.
+ * {@link StandardIndexingJob} - The standard <code style="color: red;">abstract</code> {@link IndexingJob} to extend from.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EchoIndexJob extends StandardIndexingJob {
+public abstract class StandardIndexingJob implements IndexingJob {
 
-    private static final long serialVersionUID = 8422334197440807865L;
+    private static final long serialVersionUID = -2170181015109576781L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EchoIndexJob.class));
-
-    private final String message;
-
-    private final Date stamp;
+    protected volatile int priority;
 
     /**
-     * Initializes a new {@link EchoIndexJob}.
+     * Initializes a new {@link StandardIndexingJob}.
      */
-    public EchoIndexJob(final String message) {
+    protected StandardIndexingJob() {
         super();
-        this.message = null == message ? "Hello world!" : message;
-        stamp = new Date();
+        priority = 4; // Default priority
     }
 
     @Override
-    public void performJob() throws OXException {
-        LOG.error("\n\n\tEchoIndexJob (created at " + stamp.toString() + "): \"" + message + "\"\n\n");
+    public Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    public boolean isDurable() {
+        return true;
+    }
+
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
+    public void setPriority(final int priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public Behavior getBehavior() {
+        return Behavior.CONSUMER_RUNS;
+    }
+
+    @Override
+    public void beforeExecute() {
+        // Nothing to do
+    }
+
+    @Override
+    public void afterExecute(final Throwable t) {
+        // Nothing to do
     }
 
 }
