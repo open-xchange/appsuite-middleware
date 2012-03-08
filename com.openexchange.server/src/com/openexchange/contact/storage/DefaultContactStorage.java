@@ -119,6 +119,11 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
 
     @Override
+    public Collection<Contact> modified(final int contextID, final String folderId, final Date since) throws OXException {
+        return this.modified(contextID, folderId, since, allFields());
+    }
+
+    @Override
     public Collection<Contact> list(final int contextID, final String folderId, final String[] ids) throws OXException {
         return this.list(contextID, folderId, ids, allFields());
     }

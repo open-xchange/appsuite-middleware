@@ -53,82 +53,33 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.search.Order;
 
 /**
- * {@link SortOptions} - Specifies sort options for the results of storage operations. 
+ * {@link SortOrder} - The sort order 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SortOptions {
+public final class SortOrder {
 	
-	public static final SortOptions EMPTY = new SortOptions();
+	private final ContactField by;
+	private final Order order;
 	
-	private SortOrder order[];
-	
-	private String collation;
-	
-	public static final SortOrder Order(final ContactField by, final Order order) {
-		return new SortOrder(by, order);
-	}
-	
-	public SortOptions(final String collation, final SortOrder... order) {
-		super();
-		this.collation = collation;
+	public SortOrder(final ContactField by, final Order order) {
+		this.by = by;
 		this.order = order;
-	}
-
-	public SortOptions(final SortOrder... order) {
-		this(null, order);
-	}
-
-	public SortOptions(final String collation) {
-		this(collation, (SortOrder[])null);
-	}
-
-	public SortOptions() {
-		this((SortOrder[])null);
-	}
-
-	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
-		this(collation, Order(orderBy, order));
-	}
-	
-	public SortOptions(final ContactField orderBy, final Order order) {
-		this(Order(orderBy, order));
-	}
-	
-	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	/**
-	 * @return the collation
-	 */
-	public String getCollation() {
-		return collation;
-	}
-
-	/**
-	 * @param collation the collation to set
-	 */
-	public void setCollation(String collation) {
-		this.collation = collation;
 	}
 
 	/**
 	 * @return the order
 	 */
-	public SortOrder[] getOrder() {
+	public Order getOrder() {
 		return order;
 	}
 
 	/**
-	 * @param order the orderBy to set
+	 * @return the by
 	 */
-	public void setOrderBy(SortOrder[] order) {
-		this.order = order;
+	public ContactField getBy() {
+		return by;
 	}
-
+	
+	
 }

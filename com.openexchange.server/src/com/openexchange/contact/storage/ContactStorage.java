@@ -213,6 +213,29 @@ public interface ContactStorage {
     Collection<Contact> deleted(int contextID, String folderId, Date since, ContactField[] fields) throws OXException;
 
     /**
+     * Gets a list of modified contacts in a folder with all fields.
+     * 
+     * @param contextID the context ID
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @return the contacts
+     * @throws OXException
+     */
+    Collection<Contact> modified(int contextID, String folderId, Date since) throws OXException;
+
+    /**
+     * Gets a list of modified contacts in a folder with specified fields.
+     * 
+     * @param contextID the context ID
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts
+     * @throws OXException
+     */
+    Collection<Contact> modified(int contextID, String folderId, Date since, ContactField[] fields) throws OXException;
+
+    /**
      * Searches for contacts.
      * 
      * @param contextID the context ID

@@ -103,6 +103,15 @@ public class ContactStorageTest extends TestCase {
         return null;
     }
     
+    protected Contact findContact(final String uid, final String folderID, final Date since) throws OXException {
+        for (final Contact c : getStorage().modified(getContextID(), folderID, since)) {
+            if (uid.equals(c.getUid())) {
+                return c;
+            }
+        }
+        return null;
+    }
+    
     protected Session getSession() {
         return this.session;
     }
