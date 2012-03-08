@@ -51,24 +51,40 @@ package com.openexchange.service.indexing;
 
 import javax.management.MBeanException;
 
-
 /**
  * {@link IndexingServiceMBean} - The MBean for indexing service.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexingServiceMBean {
 
+    /**
+     * The domain of the indexing service's MBean.
+     */
     public static final String DOMAIN = "com.openexchange.service.indexing";
 
     /**
      * Sends a simple echo.
      * <p>
-     * Message is logged as ERROR, don't be surprised!
+     * Message is logged as <code>ERROR</code>, don't be surprised!
      * 
      * @param message The echo message
      * @throws MBeanException If a MBean error occurs
      */
     public void echoMessage(String message) throws MBeanException;
-    
+
+    /**
+     * (Re-)Starts the receiver on this node.
+     * 
+     * @throws MBeanException If starting receiver fails
+     */
+    public void startReceiving() throws MBeanException;
+
+    /**
+     * Stops the receiver on this node.
+     * 
+     * @throws MBeanException If receiver cannot be stopped
+     */
+    public void stopReceiving() throws MBeanException;
+
 }

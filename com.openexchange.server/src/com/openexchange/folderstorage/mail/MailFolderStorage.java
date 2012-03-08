@@ -726,7 +726,6 @@ public final class MailFolderStorage implements FolderStorage {
                     retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
                 } else {
                     retval = new RemoveAfterAccessExtRootFolder(mailAccount, mailAccess.getMailConfig(), session);
-                    LogProperties.getLogProperties().put("com.openexchange.session.session", session);
                 }
                 /*
                  * Load on demand (or in FolderMap)
@@ -751,7 +750,6 @@ public final class MailFolderStorage implements FolderStorage {
                     retval = mailFolderImpl;
                 } else {
                     retval = new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
-                    LogProperties.getLogProperties().put("com.openexchange.session.session", session);
                 }
             }
             hasSubfolders = mailFolder.hasSubfolders();

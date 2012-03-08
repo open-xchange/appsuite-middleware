@@ -64,8 +64,8 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderType;
-import com.openexchange.log.LogProperties;
-import com.openexchange.session.Session;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
@@ -85,6 +85,10 @@ public final class FolderMap {
 
     private final int maxLifeMillis;
 
+    private final int userId;
+
+    private final int contextId;
+
     /**
      * Initializes a new {@link FolderMap}.
      * 
@@ -92,11 +96,13 @@ public final class FolderMap {
      * @param maxLifeUnits the max life units
      * @param unit the unit
      */
-    public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
+    public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit, final int userId, final int contextId) {
         super();
         final Lock lock = new ReentrantLock();
         map = new LockBasedConcurrentMap<Key, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<Key, Wrapper>(maxCapacity));
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
+        this.contextId = contextId;
+        this.userId = userId;
     }
 
     /**
@@ -105,8 +111,8 @@ public final class FolderMap {
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life millis
      */
-    public FolderMap(final int maxCapacity, final int maxLifeMillis) {
-        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS);
+    public FolderMap(final int maxCapacity, final int maxLifeMillis, final int userId, final int contextId) {
+        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS, userId, contextId);
     }
 
     /**
@@ -221,7 +227,11 @@ public final class FolderMap {
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
         try {
-            final ServerSession session = ServerSessionAdapter.valueOf(LogProperties.getLogProperties().<Session> get("com.openexchange.session.session"));
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null == sessiondService) {
+                return;
+            }
+            final ServerSession session = ServerSessionAdapter.valueOf(sessiondService.getAnyActiveSessionForUser(userId, contextId));
             if (null == session) {
                 return;
             }
@@ -233,7 +243,11 @@ public final class FolderMap {
 
     private void loadSubolders(final Folder folder, final String treeId) {
         try {
-            final ServerSession session = ServerSessionAdapter.valueOf(LogProperties.getLogProperties().<Session> get("com.openexchange.session.session"));
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null == sessiondService) {
+                return;
+            }
+            final ServerSession session = ServerSessionAdapter.valueOf(sessiondService.getAnyActiveSessionForUser(userId, contextId));
             if (null == session) {
                 return;
             }

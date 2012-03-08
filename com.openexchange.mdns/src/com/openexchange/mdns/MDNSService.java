@@ -56,7 +56,6 @@ import com.openexchange.exception.OXException;
  * {@link MDNSService} - The <a href="http://en.wikipedia.org/wiki/MDNS">mDNS</a> service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.22
  */
 public interface MDNSService {
 
@@ -71,7 +70,6 @@ public interface MDNSService {
 
     /**
      * Registers a new service.
-     *
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
      * @param port The service port
      * @param info The service information; arbitrary text such as <code>"path=index.html"</code>

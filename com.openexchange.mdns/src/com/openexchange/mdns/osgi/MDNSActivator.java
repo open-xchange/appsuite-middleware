@@ -51,14 +51,21 @@ package com.openexchange.mdns.osgi;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
 import com.openexchange.mdns.internal.MDNSServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link MDNSActivator} - The mDNS activator.
@@ -67,15 +74,16 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class MDNSActivator extends HousekeepingActivator {
 
-    private MDNSServiceImpl service;
+    private volatile MDNSServiceImpl mdnsService;
 
-    private MDNSServiceInfo serviceInfo;
+    protected final AtomicReference<MDNSServiceInfo> serviceInfoReference;
 
     /**
      * Initializes a new {@link MDNSActivator}.
      */
     public MDNSActivator() {
         super();
+        serviceInfoReference = new AtomicReference<MDNSServiceInfo>();
     }
 
     @Override
@@ -91,18 +99,44 @@ public final class MDNSActivator extends HousekeepingActivator {
             /*
              * Create mDNS service
              */
-            service = new MDNSServiceImpl();
-            registerService(MDNSService.class, service, null);
-            registerService(CommandProvider.class, new MDNSCommandProvider(service), null);
+            final MDNSServiceImpl mdnsService = new MDNSServiceImpl();
+            this.mdnsService = mdnsService;
+            registerService(MDNSService.class, mdnsService, null);
+            registerService(CommandProvider.class, new MDNSCommandProvider(mdnsService), null);
 
-            serviceInfo = service.registerService("com.openexchange.mdns.lookup", 1808, "open-xchange lookup service @" + getHostName());
+            track(ThreadPoolService.class, new SimpleRegistryListener<ThreadPoolService>() {
+
+                @Override
+                public void added(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
+                    final Task<Void> task = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            final String serviceId = "openexchange.service.lookup";
+                            final int port = 6666;
+                            final String info = new StringBuilder("open-xchange lookup service @").append(getHostName()).toString();
+                            serviceInfoReference.set(mdnsService.registerService(serviceId, port, info));
+                            log.info("MDNS Lookup Service successfully registered.");
+                            return null;
+                        }
+                    };
+                    service.submit(task, CallerRunsBehavior.<Void> getInstance());
+                    addService(ThreadPoolService.class, service);
+                }
+
+                @Override
+                public void removed(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
+                    removeService(ThreadPoolService.class);
+                }
+            });
+            openTrackers();
         } catch (final Exception e) {
             log.error("Starting bundle failed: com.openexchange.mdns", e);
             throw e;
         }
     }
 
-    private String getHostName() {
+    protected String getHostName() {
         try {
             return InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
@@ -116,14 +150,17 @@ public final class MDNSActivator extends HousekeepingActivator {
         log.info("Stopping bundle: com.openexchange.mdns");
         try {
             unregisterServices();
-            if (service != null) {
+            final MDNSServiceImpl mdnsService = this.mdnsService;
+            if (mdnsService != null) {
+                final MDNSServiceInfo serviceInfo = serviceInfoReference.get();
                 if (null != serviceInfo) {
-                    service.unregisterService(serviceInfo);
-                    serviceInfo = null;
+                    mdnsService.unregisterService(serviceInfo);
+                    serviceInfoReference.set(null);
                 }
-                service.close();
-                service = null;
+                mdnsService.close();
+                this.mdnsService = null;
             }
+            super.stopBundle();
         } catch (final Exception e) {
             log.error("Stopping bundle failed: com.openexchange.mdns", e);
             throw e;

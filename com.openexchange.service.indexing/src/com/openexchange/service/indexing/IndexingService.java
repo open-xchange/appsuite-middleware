@@ -71,13 +71,4 @@ public interface IndexingService {
      */
     public void addJob(IndexingJob job) throws OXException;
 
-    /**
-     * Adds specified job.
-     * 
-     * @param job The job to add
-     * @param priority The job's priority; range from 0 (lowest) to 9 (highest)
-     * @throws OXException If job cannot be added
-     */
-    public void addJob(IndexingJob job, int priority) throws OXException;
-
 }

@@ -92,4 +92,25 @@ public final class IndexingServiceMBeanImpl extends StandardMBean implements Ind
         }
     }
 
+    public void startReceiving() throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        try {
+            ((IndexingServiceImpl) indexingService).getServiceInit().initReceiver();
+        } catch (final OXException e) {
+            LOG.error(e.getLogMessage(), e);
+            new MBeanException(new IllegalStateException(e.getLogMessage()));
+        }
+    }
+
+    public void stopReceiving() throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        ((IndexingServiceImpl) indexingService).getServiceInit().dropReceiver();
+    }
+
 }

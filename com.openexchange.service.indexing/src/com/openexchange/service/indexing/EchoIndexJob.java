@@ -69,6 +69,8 @@ public final class EchoIndexJob implements IndexingJob {
 
     private final Date stamp;
 
+    private volatile int priority;
+
     /**
      * Initializes a new {@link EchoIndexJob}.
      */
@@ -76,11 +78,22 @@ public final class EchoIndexJob implements IndexingJob {
         super();
         this.message = null == message ? "Hello world!" : message;
         stamp = new Date();
+        priority = 4;
     }
 
     @Override
     public void performJob() throws OXException {
         LOG.error("\n\n\tEchoIndexJob (created at " + stamp.toString() + "): \"" + message + "\"\n\n");
+    }
+
+    @Override
+    public void setPriority(final int priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public int getPriority() {
+        return priority;
     }
 
     @Override

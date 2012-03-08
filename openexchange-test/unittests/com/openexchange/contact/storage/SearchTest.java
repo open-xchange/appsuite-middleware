@@ -47,23 +47,63 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.contact.storage;
+
+import java.util.Collection;
+import java.util.UUID;
+
+import org.junit.Test;
+
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.internal.operands.ColumnOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
- * {@link Mappers} - Provides static access to mappings.
+ * {@link SearchTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class Mappers {
-
-	/**
-	 * The mappings for contacts.
-	 */
-	public static final ContactMapper CONTACT = new ContactMapper();
-	
-	/**
-	 * The mappings for distribution list members.
-	 */
-	public static final DistListMapper DISTLIST = new DistListMapper();
-
+public class SearchTest extends ContactStorageTest {
+    
+    @Test
+    public void testSearchByUID() throws Exception {
+        /*
+         * create contact        
+         */
+        final String folderId = "500011";
+        final Contact contact = new Contact();
+        contact.setDisplayName("Horst Horstensen");
+        contact.setGivenName("Horst");
+        contact.setSurName("Horstensen");
+        contact.setEmail1("horst.horstensen@example.com");
+        contact.setUid(UUID.randomUUID().toString());
+        getStorage().create(getContextID(), folderId, contact);
+        super.rememberForCleanUp(contact);
+        /*
+         * search contact
+         */
+		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		term.addOperand(new ColumnOperand("uid"));
+		term.addOperand(new ConstantOperand<String>(contact.getUid()));
+		final Collection<Contact> result = getStorage().search(getContextID(), term);
+		/*
+		 * verify search result
+		 */
+		assertNotNull("got no search result", result);
+		assertTrue("got no search result", 0 < result.size());
+		Contact foundContact = null;
+		for (final Contact c : result) {
+			if (contact.getUid().equals(c.getUid())) {
+				foundContact = c;
+				break;
+			}
+		}
+        assertNotNull("contact not in search results", foundContact);
+        assertEquals("display name wrong", contact.getDisplayName(), foundContact.getDisplayName());
+        assertEquals("surname wrong", contact.getSurName(), foundContact.getSurName());
+        assertEquals("givenname wrong", contact.getGivenName(), foundContact.getGivenName());
+        assertEquals("email1 wrong", contact.getEmail1(), foundContact.getEmail1());
+    }
+        
 }
