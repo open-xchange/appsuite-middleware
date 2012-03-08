@@ -113,9 +113,9 @@ public final class MDNSActivator extends HousekeepingActivator {
                         @Override
                         public Void call() throws Exception {
                             final String serviceId = "openexchange.service.lookup";
-                            final int port = 1808;
+                            final int port = 6666;
                             final String info = new StringBuilder("open-xchange lookup service @").append(getHostName()).toString();
-                            serviceInfoReference.set(mdnsService.registerService("_ox-lookup._tcp.local.", serviceId, port, info));
+                            serviceInfoReference.set(mdnsService.registerService(serviceId, port, info));
                             log.info("MDNS Lookup Service successfully registered.");
                             return null;
                         }

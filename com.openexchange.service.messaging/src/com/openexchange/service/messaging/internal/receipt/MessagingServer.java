@@ -139,11 +139,7 @@ public final class MessagingServer implements Runnable {
                 final DecimalFormat DF = new DecimalFormat("0000");
                 final CountDownLatch startGate = new CountDownLatch(1);
                 final StringBuilder sb = new StringBuilder(32);
-                threadArr[0] = new Thread(new GateRunnable(startGate, this, LOG));
-                threadArr[0].setName(sb.append("MessagingServer-").append(DF.format((1))).toString());
-                threadArr[0].setPriority(Thread.MAX_PRIORITY);
-                threadArr[0].start();
-                for (int i = 1; i < threadArr.length; i++) {
+                for (int i = 0; i < threadArr.length; i++) {
                     threadArr[i] = new Thread(new GateRunnable(startGate, this, LOG));
                     sb.setLength(0);
                     threadArr[i].setName(sb.append("MessaginServer-").append(DF.format((i + 1))).toString());
