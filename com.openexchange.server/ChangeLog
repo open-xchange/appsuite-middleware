@@ -1,3 +1,7 @@
+* 2012-03-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21714: Added MARK_AS_DISTRIBUTIONLIST to JSON columns
+
 * 2012-03-08 - marcus.klein@open-xchange.com
 
  - Fix for bug 21619: Using SELECT FOR UPDATE now to read committed changes to not get into an endless loop.

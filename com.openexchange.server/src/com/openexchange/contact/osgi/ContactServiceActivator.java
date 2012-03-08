@@ -47,88 +47,55 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.contact.osgi;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.search.Order;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.internal.ContactServiceImpl;
+import com.openexchange.contact.internal.ContactServiceLookup;
+import com.openexchange.contact.storage.registry.ContactStorageRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link SortOptions} - Specifies sort options for the results of storage operations. 
+ * {@link ContactServiceActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SortOptions {
-	
-	public static final SortOptions EMPTY = new SortOptions();
-	
-	private SortOrder order[];
-	
-	private String collation;
-	
-	public static final SortOrder Order(final ContactField by, final Order order) {
-		return new SortOrder(by, order);
-	}
-	
-	public SortOptions(final String collation, final SortOrder... order) {
-		super();
-		this.collation = collation;
-		this.order = order;
-	}
+public class ContactServiceActivator extends HousekeepingActivator {
+    
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
 
-	public SortOptions(final SortOrder... order) {
-		this(null, order);
-	}
+    /**
+     * Initializes a new {@link ContactServiceActivator}.
+     */
+    public ContactServiceActivator() {
+        super();
+    }
 
-	public SortOptions(final String collation) {
-		this(collation, (SortOrder[])null);
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ContactStorageRegistry.class };
+    }
+    
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle: com.openexchange.contact.service");
+            ContactServiceLookup.set(this);            
+            super.registerService(ContactService.class, new ContactServiceImpl());
+        } catch (final Exception e) {
+            LOG.error("error starting \"com.openexchange.contact.service\"", e);
+            throw e;            
+        }
+    }
 
-	public SortOptions() {
-		this((SortOrder[])null);
-	}
-
-	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
-		this(collation, Order(orderBy, order));
-	}
-	
-	public SortOptions(final ContactField orderBy, final Order order) {
-		this(Order(orderBy, order));
-	}
-	
-	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	/**
-	 * @return the collation
-	 */
-	public String getCollation() {
-		return collation;
-	}
-
-	/**
-	 * @param collation the collation to set
-	 */
-	public void setCollation(String collation) {
-		this.collation = collation;
-	}
-
-	/**
-	 * @return the order
-	 */
-	public SortOrder[] getOrder() {
-		return order;
-	}
-
-	/**
-	 * @param order the orderBy to set
-	 */
-	public void setOrderBy(SortOrder[] order) {
-		this.order = order;
-	}
-
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.contact.service");
+        ContactServiceLookup.set(null);            
+        super.stopBundle();
+    }
+    
 }
