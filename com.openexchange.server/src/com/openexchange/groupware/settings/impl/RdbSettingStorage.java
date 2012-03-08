@@ -79,20 +79,17 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * SQL statement for loading one specific user setting.
      */
-    private static final String SELECT_VALUE = "SELECT value FROM user_setting "
-        + "WHERE cid=? AND user_id=? AND path_id=?";
+    private static final String SELECT_VALUE = "SELECT value FROM user_setting WHERE cid=? AND user_id=? AND path_id=?";
 
     /**
      * SQL statement for inserting one specific user setting.
      */
-    private static final String INSERT_SETTING =
-        "INSERT INTO user_setting (value,cid,user_id,path_id) VALUES (?,?,?,?)";
+    private static final String INSERT_SETTING = "INSERT INTO user_setting (value,cid,user_id,path_id) VALUES (?,?,?,?)";
 
     /**
      * SQL statement for compare-and-set updating one specific user setting.
      */
-    private static final String UPDATE_SETTING_CAS = "UPDATE user_setting "
-        + "SET value=? WHERE cid=? AND user_id=? AND path_id=? AND value=?";
+    private static final String UPDATE_SETTING_CAS = "UPDATE user_setting SET value=? WHERE cid=? AND user_id=? AND path_id=? AND value=?";
 
     /**
      * Reference to the context.
@@ -233,16 +230,12 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private void saveInternalCAS(final Connection con, final Setting setting, final int retryCount) throws OXException {
         try {
-            /*
-             * Start
-             */
+            // Start
             String val = null;
             int retry = 0;
             boolean tryInsert = true;
-            while (val == null && retry++ < retryCount) {
-                /*
-                 * Try to perform a compare-and-set UPDATE
-                 */
+            while (val == null) {
+                // Try to perform a compare-and-set UPDATE
                 String cur;
                 do {
                     cur = performSelect(setting, con);
@@ -255,15 +248,14 @@ public class RdbSettingStorage extends SettingStorage {
                         }
                         cur = performSelect(setting, con);
                     }
-                } while (!compareAndSet(setting, cur, con) && retry++ < retryCount);
+                    if (retry++ > retryCount) {
+                        throw SettingExceptionCodes.MAX_RETRY.create();
+                    }
+                } while (!compareAndSet(setting, cur, con));
                 val = setting.getSingleValue().toString();
-                /*
-                 * Retry...
-                 */
+                // Retry...
             }
-            /*
-             * Return value
-             */
+            // Return value
             return;
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
@@ -311,7 +303,7 @@ public class RdbSettingStorage extends SettingStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_VALUE);
+            stmt = con.prepareStatement(SELECT_VALUE + " FOR UPDATE");
             int pos = 1;
             stmt.setInt(pos++, ctxId);
             stmt.setInt(pos++, userId);
