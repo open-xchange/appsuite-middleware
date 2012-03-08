@@ -140,7 +140,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             jmdns.removeServiceListener(Constants.SERVICE_TYPE, serviceListener);
             jmdns.unregisterAllServices();
             jmdns.close();
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             LOG.error("Closing JmDNS instance failed.", e);
         } finally {
             wlock.unlock();
