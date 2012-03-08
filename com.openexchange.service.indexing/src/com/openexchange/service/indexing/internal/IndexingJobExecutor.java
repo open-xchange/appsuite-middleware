@@ -112,6 +112,16 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public void setPriority(final int priority) {
             // Nothing to do
         }
+
+        @Override
+        public void beforeExecute() {
+            // Nothing to do
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            // Nothing to do
+        }
     };
 
     private final ThreadPoolService threadPool;
@@ -152,13 +162,9 @@ public final class IndexingJobExecutor implements Callable<Void> {
                 final boolean quit = jobs.remove(POISON);
                 for (final IndexingJob indexingJob : jobs) {
                     if (Behavior.DELEGATE.equals(indexingJob.getBehavior())) {
-                        threadPool.submit(new IndexingJobTask(indexingJob, LOG), callerRunsBehavior);
+                        threadPool.submit(new IndexingJobTask(indexingJob), callerRunsBehavior);
                     } else {
-                        try {
-                            indexingJob.performJob();
-                        } catch (final RuntimeException e) {
-                            LOG.info("Indexing job failed with unchecked error.", e);
-                        }
+                        performJob(indexingJob);
                     }
                 }
                 if (quit) {
@@ -218,6 +224,29 @@ public final class IndexingJobExecutor implements Callable<Void> {
         return queue.offer(new IndexingJobWrapper(job));
     }
 
+    /**
+     * Performs given job with respect to beforeExecute() and afterExecute() call-backs.
+     * 
+     * @param job The job to perform
+     * @throws OXException If job execution fails orderly
+     * @throws RuntimeException If job execution fails unexpectedly
+     */
+    protected static void performJob(final IndexingJob job) throws OXException {
+        boolean ran = false;
+        job.beforeExecute();
+        try {
+            job.performJob();
+            ran = true;
+            job.afterExecute(null);
+        } catch (final RuntimeException e) {
+            if (!ran) {
+                job.afterExecute(e);
+            }
+            LOG.warn("Indexing job failed with unchecked error.", e);
+            throw e;
+        }
+    }
+
     /*-
      * -----------------------------------------------------------------------
      * --------------------------- Helper classes ----------------------------
@@ -226,30 +255,31 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
     private static final class IndexingJobTask extends AbstractTask<Void> {
 
-        private final Log logger;
-
         private final IndexingJob job;
 
-        public IndexingJobTask(final IndexingJob job, final Log logger) {
+        public IndexingJobTask(final IndexingJob job) {
             super();
             this.job = job;
-            this.logger = logger;
         }
 
         @Override
         public Void call() throws Exception {
-            // TODO: before/after execute here
-            try {
-                job.performJob();
-            } catch (final RuntimeException e) {
-                logger.warn("Indexing job failed with unchecked error.", e);
-            }
+            performJob(job);
             return null;
         }
 
     }
 
     private static final class IndexingJobWrapper implements IndexingJob, Comparable<IndexingJob> {
+
+        private static final long serialVersionUID = -3358800982328898854L;
+
+        private final IndexingJob job;
+
+        public IndexingJobWrapper(final IndexingJob job) {
+            super();
+            this.job = job;
+        }
 
         @Override
         public int getPriority() {
@@ -261,11 +291,14 @@ public final class IndexingJobExecutor implements Callable<Void> {
             job.setPriority(priority);
         }
 
-        private final IndexingJob job;
+        @Override
+        public void beforeExecute() {
+            job.beforeExecute();
+        }
 
-        public IndexingJobWrapper(final IndexingJob job) {
-            super();
-            this.job = job;
+        @Override
+        public void afterExecute(final Throwable t) {
+            job.afterExecute(t);
         }
 
         @Override

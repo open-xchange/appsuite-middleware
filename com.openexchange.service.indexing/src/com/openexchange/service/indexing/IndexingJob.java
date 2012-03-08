@@ -118,4 +118,22 @@ public interface IndexingJob extends Serializable {
      */
     Behavior getBehavior();
 
+    /**
+     * Invoked prior to executing this task in the given thread. This method is invoked by pooled thread <tt>t</tt> that will execute this
+     * task, and may be used to re-initialize {@link ThreadLocal}s, or to perform logging.
+     * <p>
+     * Implementations may leave this method empty if nothing should be performed.
+     */
+    void beforeExecute();
+
+    /**
+     * Invoked upon completion of execution of this task. This method is invoked by the thread that executed the task. If non-null, the
+     * {@link Throwable} is the uncaught exception that caused execution to terminate abruptly.
+     * <p>
+     * Implementations may leave this method empty if nothing should be performed.
+     *
+     * @param t The exception that caused termination, or <code>null</code> if execution completed normally
+     */
+    void afterExecute(Throwable t);
+
 }
