@@ -60,7 +60,7 @@ import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSCommandProvider} - The {@link CommandProvider command provider} to output MDNS status.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSCommandProvider implements CommandProvider {
@@ -69,7 +69,7 @@ public final class MDNSCommandProvider implements CommandProvider {
 
     /**
      * Initializes a new {@link MDNSCommandProvider}.
-     *
+     * 
      * @param registry
      */
     public MDNSCommandProvider(final MDNSService mdnsService) {
@@ -103,10 +103,9 @@ public final class MDNSCommandProvider implements CommandProvider {
                 return null;
             }
             sb.setLength(0);
-            intp.print(sb.append("---Tracked services of \"").append(serviceId).append(
-                "\" ---\n").toString());
+            intp.print(sb.append("---Tracked services of \"").append(serviceId).append("\" ---\n").toString());
             if (services.isEmpty()) {
-                intp.print(" <no tracked services>");
+                intp.print("\n\t<no tracked services>");
             } else {
                 final String delim = "\n\t";
                 for (final MDNSServiceEntry mdnsServiceEntry : services) {
@@ -114,7 +113,7 @@ public final class MDNSCommandProvider implements CommandProvider {
                     sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
                     sb.append(delim).append("Address: ").append(Arrays.toString(mdnsServiceEntry.getAddresses()));
                     sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
-                    sb.append('\n');
+                    sb.append(delim).append('\n');
                     intp.print(sb.toString());
                 }
             }
