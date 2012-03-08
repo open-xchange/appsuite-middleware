@@ -69,6 +69,11 @@ public abstract class StandardIndexingJob implements IndexingJob {
     }
 
     @Override
+    public Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
     public boolean isDurable() {
         return true;
     }

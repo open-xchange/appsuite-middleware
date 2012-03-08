@@ -74,7 +74,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class IndexingJobExecutor implements Callable<Void> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingJobExecutor.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingJobExecutor.class));
 
     /**
      * The max. queue capacity.
@@ -122,6 +122,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public void afterExecute(final Throwable t) {
             // Nothing to do
         }
+
+        @Override
+        public Class<?>[] getNeededServices() {
+            return EMPTY_CLASSES;
+        }
     };
 
     private final ThreadPoolService threadPool;
@@ -132,6 +137,8 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
     private volatile Future<Void> future;
 
+    protected final CompositeServiceLookup serviceLookup;
+
     /**
      * Initializes a new {@link IndexingJobExecutor}.
      */
@@ -140,31 +147,53 @@ public final class IndexingJobExecutor implements Callable<Void> {
         this.maxConcurrentJobs = maxConcurrentJobs;
         this.threadPool = threadPool;
         this.queue = new BoundedPriorityBlockingQueue<IndexingJob>(CAPACITY);
+        this.serviceLookup = Services.getServiceLookup();
     }
 
     @Override
-    public Void call() throws Exception {
+    public Void call() {
         final RefusedExecutionBehavior<Void> callerRunsBehavior = CallerRunsBehavior.<Void> getInstance();
         final List<IndexingJob> jobs = new ArrayList<IndexingJob>(maxConcurrentJobs);
         while (true) {
             try {
                 if (queue.isEmpty()) {
-                    /*
-                     * Blocking wait for at least one job to arrive.
-                     */
-                    final IndexingJob job = queue.take();
-                    if (POISON == job) {
+                    try {
+                        /*
+                         * Blocking wait for at least one job to arrive.
+                         */
+                        final IndexingJob job = queue.take();
+                        if (POISON == job) {
+                            return null;
+                        }
+                        jobs.add(job);
+                    } catch (final InterruptedException e) {
+                        // Keep interrupted flag
+                        Thread.currentThread().interrupt();
                         return null;
                     }
-                    jobs.add(job);
                 }
                 queue.drainTo(jobs, maxConcurrentJobs);
                 final boolean quit = jobs.remove(POISON);
                 for (final IndexingJob indexingJob : jobs) {
-                    if (Behavior.DELEGATE.equals(indexingJob.getBehavior())) {
+                    if (Behavior.DELEGATE.equals(indexingJob.getBehavior()) || serviceLookup.servesAll(indexingJob.getNeededServices())) {
+                        /*
+                         * Delegate to thread pool; awaiting currently absent services
+                         */
                         threadPool.submit(new IndexingJobTask(indexingJob), callerRunsBehavior);
                     } else {
-                        performJob(indexingJob);
+                        try {
+                            performJob(indexingJob);
+                        } catch (final OXException e) {
+                            LOG.error(e.getLogMessage(), e);
+                        } catch (final InterruptedException e) {
+                            // Job interrupted
+                            /*-
+                             * TODO:
+                             * Thread.currentThread().interrupt();
+                             * return null;
+                             */
+                            Thread.interrupted(); // clear interrupt status
+                        }
                     }
                 }
                 if (quit) {
@@ -229,9 +258,10 @@ public final class IndexingJobExecutor implements Callable<Void> {
      * 
      * @param job The job to perform
      * @throws OXException If job execution fails orderly
+     * @throws InterruptedException If job has been interrupted
      * @throws RuntimeException If job execution fails unexpectedly
      */
-    protected static void performJob(final IndexingJob job) throws OXException {
+    protected static void performJob(final IndexingJob job) throws OXException, InterruptedException {
         boolean ran = false;
         job.beforeExecute();
         try {
@@ -270,7 +300,7 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
     }
 
-    private static final class IndexingJobWrapper implements IndexingJob, Comparable<IndexingJob> {
+    private final class IndexingJobWrapper implements IndexingJob, Comparable<IndexingJob> {
 
         private static final long serialVersionUID = -3358800982328898854L;
 
@@ -293,6 +323,18 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
         @Override
         public void beforeExecute() {
+            /*
+             * Ensure needed service(s) are available
+             */
+            final Class<?>[] classes = job.getNeededServices();
+            if (null != classes && 0 < classes.length) {
+                for (final Class<?> clazz : classes) {
+                    serviceLookup.await(clazz);
+                }
+            }
+            /*
+             * Perform job's beforeExecute()
+             */
             job.beforeExecute();
         }
 
@@ -302,7 +344,7 @@ public final class IndexingJobExecutor implements Callable<Void> {
         }
 
         @Override
-        public void performJob() throws OXException {
+        public void performJob() throws OXException, InterruptedException {
             job.performJob();
         }
 
@@ -336,6 +378,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
             final int thisVal = job.getPriority();
             final int anotherVal = o.getPriority();
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+        }
+
+        @Override
+        public Class<?>[] getNeededServices() {
+            return job.getNeededServices();
         }
 
     }

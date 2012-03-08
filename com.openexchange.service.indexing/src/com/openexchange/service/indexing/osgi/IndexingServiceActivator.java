@@ -61,6 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.internal.CompositeServiceLookup;
 import com.openexchange.service.indexing.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.internal.IndexingServiceInit;
 import com.openexchange.service.indexing.internal.IndexingServiceMBeanImpl;
@@ -93,7 +94,9 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Starting bundle: com.openexchange.service.indexing");
         try {
-            Services.setServiceLookup(this);
+            final CompositeServiceLookup compositeServiceLookup = new CompositeServiceLookup(context);
+            compositeServiceLookup.addAll(getNeededServices(), this);
+            Services.setServiceLookup(compositeServiceLookup);
             /*
              * IndexingService initialization
              */
@@ -157,6 +160,11 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
              * Unregister service
              */
             unregisterServices();
+            final CompositeServiceLookup lookup = Services.getServiceLookup();
+            if (null != lookup) {
+                lookup.close();
+                Services.setServiceLookup(null);
+            }
             /*
              * IndexingService shut-down
              */
