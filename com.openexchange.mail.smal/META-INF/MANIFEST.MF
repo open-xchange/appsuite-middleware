@@ -143,4 +143,5 @@ Bundle-ClassPath: .,
  lib/jcl-over-slf4j-1.6.1.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/wstx-asl-3.2.7.jar
-Export-Package: com.openexchange.mail.smal.adapter
+Export-Package: com.openexchange.mail.smal,
+ com.openexchange.mail.smal.adapter
