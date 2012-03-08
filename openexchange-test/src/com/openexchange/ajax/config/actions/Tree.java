@@ -433,6 +433,8 @@ public enum Tree {
     TasksNotifyNewAcceptedDeclinedAsCreator("/modules/tasks/notifyAcceptedDeclinedAsCreator"),
     TasksNotifyNewAcceptedDeclinedAsParticipant("/modules/tasks/notifyAcceptedDeclinedAsParticipant"),
 
+    TaskUIConfiguration("/modules/tasks/gui"),
+
     /** */
     InfostoreEnabled("/modules/infostore/module"),
 
