@@ -58,7 +58,6 @@ import com.openexchange.exception.OXExceptionFactory;
  * {@link MDNSExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.22
  */
 public enum MDNSExceptionCodes implements OXExceptionCode {
 

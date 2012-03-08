@@ -62,6 +62,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
+import javax.jmdns.impl.JmDNSImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSExceptionCodes;
 import com.openexchange.mdns.MDNSService;
@@ -70,12 +71,13 @@ import com.openexchange.mdns.MDNSServiceInfo;
 
 /**
  * {@link MDNSServiceImpl} - The mDNS service implementation backed by <a href="http://sourceforge.net/projects/jmdns/">JmDNS</a>.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSServiceImpl.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSServiceImpl.class));
 
     /**
      * Maps service identifiers to available services
@@ -92,17 +94,26 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
     /**
      * Initializes a new {@link MDNSServiceImpl}.
-     *
+     * 
      * @throws OXException If initialization fails
      */
     public MDNSServiceImpl() throws OXException {
         super();
         try {
             jmdns = JmDNS.create();
-            jmdns.registerServiceType(Constants.SERVICE_TYPE);
+            /*
+             * Register the "_openexchange._tcp.local." service type
+             */
+            final String serviceType = Constants.SERVICE_TYPE;
+            if (!((JmDNSImpl) jmdns).getServiceTypes().containsKey(serviceType)) {
+                jmdns.registerServiceType(serviceType);
+            }
             map = new ConcurrentHashMap<String, ConcurrentMap<UUID, MDNSServiceEntry>>();
             registeredServicesSet = new ConcurrentHashMap<Key, ServiceInfo>();
-            jmdns.addServiceListener(Constants.SERVICE_TYPE, new MDNSListener(map, this));
+            /*
+             * Add service listener for "_openexchange._tcp.local."
+             */
+            jmdns.addServiceListener(serviceType, new MDNSListener(map, this));
             final ReadWriteLock rw = new ReentrantReadWriteLock();
             rlock = rw.readLock();
             wlock = rw.writeLock();
@@ -111,7 +122,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
-    private UUID getIdentifierFor(/*final String serviceId*/) {
+    private UUID getIdentifierFor(/* final String serviceId */) {
         return UUID.randomUUID();
     }
 
@@ -124,11 +135,9 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             map.clear();
             registeredServicesSet.clear();
             jmdns.unregisterAllServices();
-            try {
-                jmdns.close();
-            } catch (final IOException e) {
-                LOG.error("Closing JmDNS instance failed.", e);
-            }
+            jmdns.close();
+        } catch (final IOException e) {
+            LOG.error("Closing JmDNS instance failed.", e);
         } finally {
             wlock.unlock();
         }
@@ -149,13 +158,12 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     }
 
     @Override
-    public MDNSServiceInfo registerService(final String type, final String serviceId, final int port, final String info) throws OXException {
+    public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws OXException {
         wlock.lock();
         try {
-            final UUID id = getIdentifierFor(/*serviceId*/);
-            final ServiceInfo sinfo =
-                ServiceInfo.create(type, new StringBuilder().append(getUnformattedString(id)).append('/').append(
-                    serviceId).toString(), port, 0, 0, null == info ? "" : info);
+            final UUID id = getIdentifierFor(/* serviceId */);
+            final String name = new StringBuilder().append(getUnformattedString(id)).append('/').append(serviceId).toString();
+            final ServiceInfo sinfo = ServiceInfo.create(Constants.SERVICE_TYPE, name, port, 0, 0, null == info ? "" : info);
             jmdns.registerService(sinfo);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(64).append("Registered new service: ").append(sinfo).toString());
@@ -209,6 +217,10 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     public boolean contains(final UUID id, final String serviceId) {
         return registeredServicesSet.containsKey(new Key(id, serviceId));
     }
+
+    /*-
+     * -------------------------- Key class ------------------------------
+     */
 
     private static final class Key {
 
