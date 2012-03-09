@@ -658,6 +658,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     public MailAccount getMailAccount(final int id, final int user, final int cid, final Connection con) throws OXException {
+        if (null == con) {
+            return getMailAccount(id, user, cid);
+        }
         final AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
         fillMailAccount(retval, id, user, cid, con);
         fillTransportAccount(retval, id, user, cid, con);
