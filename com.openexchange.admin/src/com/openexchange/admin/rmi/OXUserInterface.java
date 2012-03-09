@@ -213,7 +213,19 @@ public interface OXUserInterface extends Remote {
      */
     public UserModuleAccess getContextAdminUserModuleAccess(Context ctx, Credentials auth)  throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
-    
+    /**
+     * Returns the Context admin {@link User} object
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
+
     /**
      * Manipulate user data within the given context.
      * 
@@ -460,6 +472,9 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieve all users for a given context.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
      * 
      * @param ctx
      *            Context object.
@@ -480,6 +495,9 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieve all users for a given context.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
      * 
      * @param ctx
      *            Context object.
@@ -516,5 +534,18 @@ public interface OXUserInterface extends Remote {
      */
     public User[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
-    
+    /**
+     * Check whether the given user exists. Either users id or name must be set.
+     * 
+     * @param ctx
+     * @param user
+     * @return
+     * @throws RemoteException
+     * @throws InvalidDataException 
+     * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     * @throws DatabaseUpdateException 
+     * @throws NoSuchContextException 
+     */
+    public boolean exists(final Context ctx, final User user, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException;
 }

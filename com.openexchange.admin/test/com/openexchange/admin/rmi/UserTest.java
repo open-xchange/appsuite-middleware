@@ -116,8 +116,9 @@ public class UserTest extends AbstractTest {
         final Class clazz = ret.getClass();
         for(final Method m : clazz.getMethods() ) {
             final String name = m.getName();
-            if( !name.equals("getClass") && !name.equals("getPermissionBits") && (name.startsWith("is") || name.startsWith("get")) ) {
-                System.out.println(name);
+            if( !name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") 
+                && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get")) ) {
+                //System.out.println("*******" + name);
                 boolean res = (Boolean)m.invoke(ret, null);
                 if( name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
                     assertTrue(name + " must return true", res);
@@ -372,7 +373,15 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         access.setPublicFolderEditable(true);
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx, usr, access, cred);
+        User createduser;
+        try {
+            createduser = oxu.create(ctx, usr, access, cred);
+            fail("Creating a user with permission to edit public folder permissions should be denied.");
+        } catch (final StorageException e) {
+            // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
+            access.setPublicFolderEditable(false);
+            createduser = oxu.create(ctx, usr, access, cred);
+        }
 
         // now load user from server and check if data is correct, else fail
         UserModuleAccess moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
@@ -1795,4 +1804,38 @@ public class UserTest extends AbstractTest {
         // Remove value
         return retval;
     }
+    
+    @Test
+    public void testExists() throws Exception {
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+
+        final User exists = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        User notexists = new User();
+        notexists.setName("Rumpelstilz");
+        final User createduser = oxu.create(ctx,exists,cred);
+
+        boolean existingexists = false;
+        try {
+            existingexists = oxu.exists(ctx, exists, cred);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // delete user
+        oxu.delete(ctx, createduser, cred);
+
+        try {
+            assertFalse("nonexisting user must not exist",oxu.exists(ctx, notexists, cred));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        assertTrue("created user does not exist",existingexists);
+    }
+
 }

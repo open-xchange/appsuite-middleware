@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import javax.mail.internet.IDNA;
+import java.util.Set;
 
 /**
  * Class representing a context.
@@ -164,7 +164,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public final void setName(final String name) {
-        this.name = IDNA.toUnicode(name);
+        this.name = name;
         this.nameset = true;
     }
 
@@ -175,15 +175,12 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * login with <username>@ mydomain.org OR   <username>@<context_id>
      *  
      */    
-    public final void setLoginMappings(final HashSet<String> mappings) {
+    public final void setLoginMappings(final Set<String> mappings) {
         if (null == mappings) {
             login_mappings = null;
             return;
         }
-        login_mappings = new HashSet<String>(mappings.size());
-        for (final String mapping : mappings) {
-            login_mappings.add(IDNA.toIDN(mapping));
-        }
+        login_mappings = new HashSet<String>(mappings);
     }
     
     /*
@@ -193,7 +190,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         if (this.login_mappings == null) {
             this.login_mappings = new HashSet<String>();
         }
-        this.login_mappings.add(IDNA.toIDN(mapping));
+        this.login_mappings.add(mapping);
     }
 
     public final void addLoginMappings(final Collection<String> mappings) {
@@ -204,7 +201,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
             this.login_mappings = new HashSet<String>();
         }
         for (final String mapping : mappings) {
-            login_mappings.add(IDNA.toIDN(mapping));
+            login_mappings.add(mapping);
         }
     }
     
@@ -218,7 +215,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         if (null == this.login_mappings) {
             return false;
         }
-        return this.login_mappings.remove(IDNA.toIDN(mapping));
+        return this.login_mappings.remove(mapping);
     }
 
     public final boolean removeLoginMappings(final Collection<String> mappings) {
@@ -230,7 +227,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         }
         boolean b = false;
         for (final String mapping : mappings) {
-            b |= login_mappings.remove(IDNA.toIDN(mapping));
+            b |= login_mappings.remove(mapping);
         }
         return b;
     }
@@ -528,14 +525,6 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
             userAttributes.put(namespace, ns);
         }
         return ns;
-    }
-    
-    public SOAPUserAttributes getUserAttributesForSOAP() {
-        return new SOAPUserAttributes(userAttributes);
-    }
-    
-    public void setUserAttributesForSOAP(final SOAPUserAttributes userAttributes) {
-        this.userAttributes = userAttributes.toMap();
     }
     
     /**

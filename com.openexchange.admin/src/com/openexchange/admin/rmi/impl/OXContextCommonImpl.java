@@ -92,7 +92,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
                 }
             }
-        } catch (EnforceableDataObjectException e) {
+        } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }        
 
@@ -108,7 +108,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             if (!admin_user.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());               
             }
-        } catch (EnforceableDataObjectException e) {
+        } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
         
@@ -117,7 +117,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
     protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth) throws StorageException, InvalidDataException;
 
-    protected Context createcommon(final Context ctx, final User admin_user, final Database db, UserModuleAccess access, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
+    protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
@@ -138,7 +138,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             if( isAnyPluginLoaded() ) {
                 try {
                     ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
-                } catch(StorageException e) {
+                } catch(final StorageException e) {
                     log.error(e.getMessage(),e);
                     throw e;
                 }
@@ -194,7 +194,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                                 log.debug("Calling " + method + " for plugin: " + bundlename);
                             }
                             try {
-                                Class[] classes = new Class[args.length];
+                                final Class[] classes = new Class[args.length];
                                 for(int i=0; i<args.length; i++) {
                                     if( args[i] == null ) {
                                         final String errtxt = "Error calling method " + method + "() for plugin: " + bundlename + ": argument " + (i+1) + " is null"; 
@@ -209,19 +209,19 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                                 if( args[0] instanceof Context && ret instanceof Context ) {
                                     args[0] = ret;
                                 }
-                            } catch (SecurityException e) {
+                            } catch (final SecurityException e) {
                                 log.error("Error while calling method " + method + " of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
-                            } catch (NoSuchMethodException e) {
+                            } catch (final NoSuchMethodException e) {
                                 log.error("Error while calling method " + method + " of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
-                            } catch (IllegalArgumentException e) {
+                            } catch (final IllegalArgumentException e) {
                                 log.error("Error while calling method " + method + " of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
-                            } catch (IllegalAccessException e) {
+                            } catch (final IllegalAccessException e) {
                                 log.error("Error while calling method " + method + " of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
-                            } catch (InvocationTargetException e) {
+                            } catch (final InvocationTargetException e) {
                                 log.error("Error while calling method " + method + " of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
                             }

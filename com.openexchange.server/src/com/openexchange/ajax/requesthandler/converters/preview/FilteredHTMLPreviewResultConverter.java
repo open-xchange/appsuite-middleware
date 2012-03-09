@@ -50,6 +50,8 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -108,28 +110,29 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             return;
         }
         final Map<String, String> metaData = previewDocument.getMetaData();
-        final String sanitizedHtml;
+        final List<String> sanitizedHtml = new ArrayList<String>();
         {
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            String content = previewDocument.getContent();
-            content = htmlService.dropScriptTagsInHeader(content);
-            final String charset = metaData.get("charset");
-            content = htmlService.getConformHTML(content, charset == null ? "ISO-8859-1" : charset, false);
-            content = htmlService.checkBaseTag(content, false);
-            /*
-             * Filter according to white-list
-             */
-            content = htmlService.filterWhitelist(content);
-            final boolean[] modified = new boolean[1];
-            content = htmlService.filterExternalImages(content, modified);
-            /*
-             * Replace CSS classes
-             */
-            content = HTMLProcessing.saneCss(content, htmlService);
-            sanitizedHtml = content;
+            for (String content : previewDocument.getContent()) {
+                content = htmlService.dropScriptTagsInHeader(content);
+                final String charset = metaData.get("charset");
+                content = htmlService.getConformHTML(content, charset == null ? "ISO-8859-1" : charset, false);
+                content = htmlService.checkBaseTag(content, false);
+                /*
+                 * Filter according to white-list
+                 */
+                content = htmlService.filterWhitelist(content);
+                final boolean[] modified = new boolean[1];
+                content = htmlService.filterExternalImages(content, modified);
+                /*
+                 * Replace CSS classes
+                 */
+                content = HTMLProcessing.saneCss(content, htmlService);
+                sanitizedHtml.add(content);
+            }
         }
         // Return
-        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
+        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail(), previewDocument.isMoreAvailable()), FORMAT);
     }
 
     /**
@@ -141,9 +144,11 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
 
         private final Map<String, String> metaData;
 
-        private final String sanitizedHtml;
+        private final List<String> sanitizedHtml;
 
         private final InputStream thumbnail;
+        
+        private Boolean moreAvailable;
 
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
@@ -151,10 +156,11 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
          * @param metaData
          * @param sanitizedHtml
          */
-        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml, final InputStream thumbnail) {
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final List<String> sanitizedHtml, final InputStream thumbnail, Boolean moreAvailable) {
             this.metaData = metaData;
             this.sanitizedHtml = sanitizedHtml;
             this.thumbnail = thumbnail;
+            this.moreAvailable = moreAvailable;
         }
 
         @Override
@@ -168,13 +174,18 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         }
 
         @Override
-        public String getContent() {
+        public List<String> getContent() {
             return sanitizedHtml;
         }
 
         @Override
         public InputStream getThumbnail() {
             return thumbnail;
+        }
+
+        @Override
+        public Boolean isMoreAvailable() {
+            return moreAvailable;
         }
     } // End of class SanitizedPreviewDocument
 

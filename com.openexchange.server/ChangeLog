@@ -1,3 +1,9 @@
+* 2012-03-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21557: Added missing confirmation status information.
+ - Fix for bug 21684: Workaround for bad directory reading in 3rd party library.
+ - Fix for bug 21597: Deleting a recurring exception without access to the master appointment.
+
 * 2012-03-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21714: Added MARK_AS_DISTRIBUTIONLIST to JSON columns

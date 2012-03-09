@@ -130,12 +130,8 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         basicauth = new BasicAuthenticator();
     }
 
-    public void addMember(final Context ctx, final Group grp,
-            final User[] members, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException, NoSuchUserException,
-            NoSuchGroupException {
+    public void addMember(final Context ctx, final Group grp, final User[] members, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp, members);
         } catch (final InvalidDataException e3) {
@@ -198,7 +194,8 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // END OF JCS
     }
 
-    public void change(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
+    public void change(final Context ctx, final Group grp, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -333,9 +330,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public Group create(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException, StorageException,
+            Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -496,10 +494,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public void delete(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException,
+            Credentials auth) throws RemoteException,
             InvalidCredentialsException, NoSuchContextException,
             StorageException, InvalidDataException, DatabaseUpdateException,
             NoSuchGroupException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -511,9 +510,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public void delete(final Context ctx, final Group[] grp,
-            final Credentials auth) throws RemoteException, StorageException,
+            Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck((Object[]) grp);
         } catch (final InvalidDataException e3) {
@@ -640,9 +640,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public Group getData(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException, StorageException,
+            Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -702,9 +703,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public Group[] getData(final Context ctx, final Group[] groups,
-            final Credentials auth) throws RemoteException, StorageException,
+            Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck((Object[]) groups);
         } catch (final InvalidDataException e3) {
@@ -788,10 +790,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return retval.toArray(new Group[retval.size()]);
     }
 
-    public Group getDefaultGroup(final Context ctx, final Credentials auth)
+    public Group getDefaultGroup(final Context ctx, Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException {
+        auth = auth == null ? new Credentials("","") : auth;
         basicauth.doAuthentication(auth, ctx);
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + auth);
@@ -808,9 +811,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public User[] getMembers(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException, StorageException,
+            Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -843,9 +847,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public Group[] list(final Context ctx, final String pattern,
-            final Credentials auth) throws RemoteException, StorageException,
+            Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(pattern);
         } catch (final InvalidDataException e3) {
@@ -877,10 +882,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public Group[] listGroupsForUser(final Context ctx, final User usr,
-            final Credentials auth) throws RemoteException,
+            Credentials auth) throws RemoteException,
             InvalidCredentialsException, NoSuchContextException,
             StorageException, InvalidDataException, DatabaseUpdateException,
             NoSuchUserException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(usr);
         } catch (final InvalidDataException e3) {
@@ -910,11 +916,12 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     public void removeMember(final Context ctx, final Group grp,
-            final User[] members, final Credentials auth)
+            final User[] members, Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException,
             NoSuchGroupException, NoSuchUserException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(grp, members);
         } catch (final InvalidDataException e3) {

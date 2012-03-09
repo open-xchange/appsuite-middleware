@@ -4421,20 +4421,29 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0)
                 || (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
-            final CalendarDataObject mdao;
+            CalendarDataObject mdao = edao;
             /*
              * Check if a change exception has been deleted
              */
             final int empty;
+            boolean takeCareOfMaster = true;
             final boolean isChangeException = (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() != edao.getObjectID());
             if (isChangeException) {
                 /*
                  * A change exception; load real appointment
                  */
-                mdao = CalendarMySQL.factory.createAppointmentSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
+                try {
+                    mdao = CalendarMySQL.factory.createAppointmentSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
+                } catch (OXException e) {
+                    if (e.getCode() == OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber()) {
+                        LOG.debug("Unable to access Exception-Master (User-ID:" + uid + "/Folder-ID:" + inFolder + "/Exception-ID:" + cdao.getObjectID() + "/Master-ID" + edao.getRecurrenceID() + ")", e);
+                        takeCareOfMaster = false;
+                    } else {
+                        throw e;
+                    }
+                }
                 empty = 0;
             } else {
-                mdao = edao;
                 empty = 1;
             }
 
@@ -4442,9 +4451,7 @@ public class CalendarMySQL implements CalendarSqlImp {
              * Delete of a single appointment: delete exception
              */
             final RecurringResultsInterface rresults = collection.calculateRecurring(mdao, 0, 0, 0);
-            if (rresults.size() == empty
-                    && (mdao.getChangeException() == null || (isChangeException ? mdao.getChangeException().length == 1
-                            : mdao.getChangeException().length == 0))) {
+            if (takeCareOfMaster && rresults.size() == empty && (mdao.getChangeException() == null || (isChangeException ? mdao.getChangeException().length == 1 : mdao.getChangeException().length == 0))) {
                 /*
                  * Commit current transaction
                  */

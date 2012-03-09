@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.lang.reflect.Field;
-import javax.mail.internet.IDNA;
 
 /**
  * This class represents a database.
@@ -163,7 +162,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.login = login;
         this.password = password;
         this.driver = driver;
-        this.url = IDNA.toUnicode(url);
+        this.url = url;
         this.id = Integer.valueOf(id);
         this.name = displayname;
     }
@@ -193,7 +192,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     }
 
     public void setUrl(final String val) {
-        this.url = IDNA.toUnicode(val);
+        this.url = val;
         this.urlset = true;
     }
 

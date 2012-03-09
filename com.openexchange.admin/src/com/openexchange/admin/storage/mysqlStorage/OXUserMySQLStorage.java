@@ -75,6 +75,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceException;
@@ -1007,7 +1008,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final ArrayList<MethodAndNames> methodlist = getGetters(theMethods);
 
-                final StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,");
+                final StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,uid,");
                 final StringBuilder placeHolders = new StringBuilder();
                 final List<Method> methodlist2 = new ArrayList<Method>();
                 for (final MethodAndNames methodandname : methodlist) {
@@ -1048,7 +1049,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 placeHolders.deleteCharAt(placeHolders.length() - 1);
                 contactInsert.deleteCharAt(contactInsert.length() - 1);
-                contactInsert.append(") VALUES (?,?,?,?,?,?,?,?,?,");
+                contactInsert.append(") VALUES (?,?,?,?,?,?,?,?,?,?,");
                 contactInsert.append(placeHolders);
                 contactInsert.append(")");
                 stmt = con.prepareStatement(contactInsert.toString());
@@ -1062,6 +1063,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setLong(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 stmt.setInt(pos++, contactId);
                 stmt.setString(pos++, usrdata.getDisplay_name());
+                stmt.setString(pos++, UUID.randomUUID().toString());
 
                 for (final Method method : methodlist2) {
                     final Class<?> returntype = method.getReturnType();

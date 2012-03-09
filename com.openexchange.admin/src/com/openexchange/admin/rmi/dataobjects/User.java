@@ -60,9 +60,9 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.internet.IDNA;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
@@ -548,11 +548,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private boolean folderTreeSet = false;
 
     private Map<String, String> guiPreferences;
-
-    /**
-     * Dummy attribute which is only used for SOAP so that the conversion is possible
-     */
-    private SOAPStringMap guiPreferencesForSoap;
 
     private boolean guiPreferencesset = false;
 
@@ -1664,7 +1659,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (null == primaryEmail) {
             this.primaryEmailset = true;
         }
-        this.primaryEmail = IDNA.toIDN(primaryEmail);
+        this.primaryEmail = primaryEmail;
     }
 
     /**
@@ -2055,7 +2050,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (null == email2) {
             this.email2set = true;
         }
-        this.email2 = IDNA.toIDN(email2);
+        this.email2 = email2;
     }
 
     /**
@@ -2076,7 +2071,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (null == email3) {
             this.email3set = true;
         }
-        this.email3 = IDNA.toIDN(email3);
+        this.email3 = email3;
     }
 
     /**
@@ -2172,7 +2167,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public int getImapPort() {
         if (this.imapServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(IDNA.toASCII(this.imapServer));
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
             if (matcher.matches() && null != matcher.group(4)) {
                 try {
                     return Integer.parseInt(matcher.group(4));
@@ -2193,9 +2188,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getImapServer() {
         if (this.imapServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(IDNA.toASCII(this.imapServer));
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
             if (matcher.matches() && null != matcher.group(2)) {
-                return IDNA.toUnicode(matcher.group(2));
+                return matcher.group(2);
             }
         }
         return null;
@@ -2220,7 +2215,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getImapSchema() {
         if (this.imapServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(IDNA.toASCII(this.imapServer));
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
             if (matcher.matches() && null != matcher.group(1)) {
                 return matcher.group(1);
             }
@@ -2242,7 +2237,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (null == imapServer) {
             this.imapServerset = true;
         }
-        this.imapServer = IDNA.toUnicode(imapServer);
+        this.imapServer = imapServer;
     }
 
     /**
@@ -2275,9 +2270,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getSmtpServer() {
         if (this.smtpServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(IDNA.toASCII(this.smtpServer));
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
             if (matcher.matches() && null != matcher.group(2)) {
-                return IDNA.toUnicode(matcher.group(2));
+                return matcher.group(2);
             }
         }
         return null;
@@ -2292,7 +2287,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getSmtpSchema() {
         if (this.smtpServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(IDNA.toASCII(this.smtpServer));
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
             if (matcher.matches() && null != matcher.group(1)) {
                 return matcher.group(1);
             }
@@ -2324,7 +2319,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (null == smtpServer) {
             this.smtpServerset = true;
         }
-        this.smtpServer = IDNA.toUnicode(smtpServer);
+        this.smtpServer = smtpServer;
     }
 
     /**
@@ -2336,7 +2331,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public int getSmtpPort() {
         if (this.smtpServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(IDNA.toASCII(this.smtpServer));
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
             if (matcher.matches() && null != matcher.group(4)) {
                 try {
                     return Integer.parseInt(matcher.group(4));
@@ -3875,16 +3870,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param aliases A {@link HashSet} containing the E-Mail aliases
      */
-    final public void setAliases(final HashSet<String> aliases) {
+    final public void setAliases(final Set<String> aliases) {
         if (null == aliases) {
             this.aliasesset = true;
             this.aliases = null;
             return;
         }
-        final HashSet<String> thisAliases = this.aliases = new HashSet<String>(aliases.size());
-        for (final String alias : aliases) {
-            thisAliases.add(IDNA.toIDN(alias));
-        }
+        this.aliases = new HashSet<String>(aliases);
     }
 
     /**
@@ -3896,7 +3888,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (this.aliases == null) {
             this.aliases = new HashSet<String>();
         }
-        this.aliases.add(IDNA.toIDN(alias));
+        this.aliases.add(alias);
     }
 
     /**
@@ -3906,7 +3898,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @return true if removing was successful; false otherwise
      */
     public final boolean removeAlias(final String alias) {
-        return null != aliases && aliases.remove(IDNA.toIDN(alias));
+        return null != aliases && aliases.remove(alias);
     }
 
     /**
@@ -3923,7 +3915,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if(aliases != null) {
             final HashSet<String> thisAliases = this.aliases = new HashSet<String>(aliases.size());
             for (final String alias : aliases) {
-                thisAliases.add(IDNA.toIDN(alias));
+                thisAliases.add(alias);
             }
         }
     }
@@ -4053,7 +4045,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (null == email1) {
             this.email1set = true;
         }
-        this.email1 = IDNA.toIDN(email1);
+        this.email1 = email1;
     }
 
     /**
@@ -4517,7 +4509,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     public final void setDefaultSenderAddress(final String defaultSenderAddress) {
         this.defaultSenderAddressset = true;
-        this.defaultSenderAddress = IDNA.toIDN(defaultSenderAddress);
+        this.defaultSenderAddress = defaultSenderAddress;
     }
 
     /**
@@ -4581,14 +4573,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return ns;
     }
 
-    public SOAPUserAttributes getUserAttributesForSOAP() {
-        return new SOAPUserAttributes(userAttributes);
-    }
-
-    public void setUserAttributesForSOAP(final SOAPUserAttributes userAttributes) {
-        this.userAttributes = userAttributes.toMap();
-    }
-
     /**
      * Used to check if the user attributes have been modified
      */
@@ -4609,10 +4593,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     public final Map<String, String> getGuiPreferences() {
         return guiPreferences;
-    }
-
-    public final SOAPStringMap getGuiPreferencesForSoap() {
-        return SOAPStringMap.convertFromMap(guiPreferences);
     }
 
     /**
@@ -4648,16 +4628,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         this.guiPreferences = guiPreferences;
     }
-
-   /**
-    * @param guiPreferences the guiPreferences to set
-    */
-   public final void setGuiPreferencesForSoap(final SOAPStringMap guiPreferences) {
-       if( guiPreferences != null ) {
-           this.guiPreferencesset = true;
-       }
-       this.guiPreferences = SOAPStringMap.convertToMap(guiPreferences);
-   }
 
     /**
      * At the moment {@link #setName}, {@link #setDisplay_name}, {@link #setPassword(String)},

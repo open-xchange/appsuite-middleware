@@ -360,16 +360,6 @@ public abstract class OXToolStorageInterface {
     public abstract int getContextIDByContextname(final String ctxname) throws StorageException;
 
     public abstract int getDatabaseIDByDatabasename(final String dbname) throws StorageException;
-    
-    /**
-     * load Database with the given ID
-     * only sets id and readid, returns null if not found
-     * 
-     * @param id
-     * @return
-     * @throws StorageException
-     */
-    public abstract Database loadDatabaseById(final Integer id) throws StorageException;
 
     public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
 

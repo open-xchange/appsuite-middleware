@@ -107,7 +107,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, int pages) throws OXException {
         InputStream is = null;
         try {
             final File file = new File(arg);
@@ -123,7 +123,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
              * Serve with best-fit or delegate preview service
              */
             final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
-            return previewService.getPreviewFor(arg, output, session);
+            return previewService.getPreviewFor(arg, output, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -132,10 +132,10 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
         final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
-        return previewService.getPreviewFor(documentData, output, session);
+        return previewService.getPreviewFor(documentData, output, session, pages);
     }
 
     @Override

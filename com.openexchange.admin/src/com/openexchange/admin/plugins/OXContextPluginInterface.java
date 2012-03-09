@@ -237,4 +237,19 @@ public interface OXContextPluginInterface {
      * @throws PluginException
      */
     public Boolean checkMandatoryMembersContextCreate(final Context ctx) throws PluginException;
+    
+    /**
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws PluginException
+     */
+    public void exists(Context ctx, Credentials auth) throws PluginException;
+    
+    /**
+     * @param ctx
+     * @param auth
+     * @throws PluginException
+     */
+    public void getAdminId(Context ctx, Credentials auth) throws PluginException;
 }
