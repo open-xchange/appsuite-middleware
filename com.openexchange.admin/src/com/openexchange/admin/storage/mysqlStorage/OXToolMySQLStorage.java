@@ -2347,4 +2347,45 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
+
+    @Override
+    public Database loadDatabaseById(Integer id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        final Database ret;
+
+        try {
+            con = ClientAdminThread.cache.getConnectionForConfigDB();
+            
+            prep_check = con.prepareStatement("SELECT read_db_pool_id FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
+            prep_check.setInt(1, id);
+            
+            rs = prep_check.executeQuery();
+            if( rs.next() ) {
+                ret = new Database();
+                ret.setRead_id(rs.getInt(1));
+                ret.setId(id);
+            } else {
+                ret = null;
+            }
+            
+            return ret;
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+
+            try {
+               cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                log.error("Error pushing connection to pool!", e);
+            }
+        }
+    }
 }
