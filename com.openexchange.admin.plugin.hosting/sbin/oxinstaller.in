@@ -59,9 +59,34 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
+noLongerInUse() {
+	    echo option $1 is deprected and not longer in use
+}
+
+handleIPv6() {
+        if [[ "$1" =~ .*:.* ]]; then
+                echo "[$1]"
+        else
+                echo $1
+        fi
+}
+
 OXHOST=$(hostname -f)
 if [ -z "$OXHOST" ]; then
     die "unable to determine hostname using 'hostname -f', giving up."
+fi
+
+if hostname --help 2>&1 | grep all-ip-addresses > /dev/null; then
+    # on at least Debian Squeeze like systems, -i results in crap
+    HCMD="hostname --all-ip-addresses"
+    haddrs=( $($HCMD) )
+    OXIP=${haddrs[0]}
+else
+    HCMD="hostname -i"
+    OXIP=$($HCMD)
+fi
+if [ -z "$OXIP" ]; then
+    die "unable to determine host ip using $HCMD, giving up."
 fi
 
 # some defaults
@@ -104,13 +129,13 @@ GWCACHEPORT=57462
 GWCACHEPORT_LONG=admin-cache-port
 GWSCACHEPORT=58849
 GWSCACHEPORT_LONG=gwsession-cache-port
-SESSIONCONTAINERTIMEOUT=4200000
+SESSIONCONTAINERTIMEOUT="Deprecated"
 SESSIONCONTAINERTIMEOUT_LONG=SesssionContTimeout
-NUMBEROFSESSIONCONTAINERS=8
+NUMBEROFSESSIONCONTAINERS="Deprecated"
 NUMBEROFSESSIONCONTAINERS_LONG=NRSessionContainers
 MAXSESSION=0
 MAXSESSION_LONG=maxSession
-ISDOUBLELOGINPERMITTED=true
+ISDOUBLELOGINPERMITTED="Deprecated"
 ISDOUBLELOGINPERMITTED_LONG=DoubleLoginPerm
 ISDOUBLELOGINPERMITTED_VALUES="true false"
 SESSIONDEFAULTLIFETIME=3600000
@@ -145,7 +170,7 @@ URL="http://$OXHOST/"
 URL_LONG=extras-link
 OXOBJECT_LINK_HOSTNAME="$OXHOST"
 OXOBJECT_LINK_HOSTNAME_LONG=object-link-hostname
-OXCLUSTERIP=$(hostname -i)
+OXCLUSTERIP="$OXIP"
 OXCLUSTERIP_LONG=ip-of-oxcluster
 PUSHMCPORT=9982
 PUSHMCPORT_LONG=push-udp-disc-port
@@ -364,11 +389,11 @@ while true; do
 	    shift 2
 	    ;;
 	--$SESSIONCONTAINERTIMEOUT_LONG)
-	    SESSIONCONTAINERTIMEOUT=$2
+	    noLongerInUse $SESSIONCONTAINERTIMEOUT_LONG
 	    shift 2
 	    ;;
 	--$NUMBEROFSESSIONCONTAINERS_LONG)
-	    NUMBEROFSESSIONCONTAINERS=$2
+	    noLongerInUse $NUMBEROFSESSIONCONTAINERS_LONG
 	    shift 2
 	    ;;
 	--$MAXSESSION_LONG)
@@ -376,7 +401,7 @@ while true; do
 	    shift 2
 	    ;;
 	--$ISDOUBLELOGINPERMITTED_LONG)
-	    ISDOUBLELOGINPERMITTED=$2
+	    noLongerInUse $ISDOUBLELOGINPERMITTED_LONG
 	    shift 2
 	    ;;
 	--$SESSIONDEFAULTLIFETIME_LONG)
@@ -480,12 +505,12 @@ setup_groupware()
 
 
 
-    SQLHOST=$CONFIGDB_READ
+    SQLHOST=$(handleIPv6 $CONFIGDB_READ)
     SQLPORT=$CONFIGDB_READ_PORT
     EVAL_SQL_URL=$(eval echo $SQL_URL)
     v_setprop readUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
 
-    SQLHOST=$CONFIGDB_WRITE
+    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
     SQLPORT=$CONFIGDB_WRITE_PORT
     EVAL_SQL_URL=$(eval echo $SQL_URL)
     v_setprop writeUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
@@ -511,10 +536,7 @@ setup_groupware()
 
     v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
 
-    v_setprop com.openexchange.sessiond.sessionContainerTimeout "$SESSIONCONTAINERTIMEOUT" ${SERVERCONF}/sessiond.properties
-    v_setprop com.openexchange.sessiond.numberOfSessionContainers "$NUMBEROFSESSIONCONTAINERS" ${SERVERCONF}/sessiond.properties
     v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${SERVERCONF}/sessiond.properties
-    v_setprop com.openexchange.sessiond.isDoubleLoginPermitted "$ISDOUBLELOGINPERMITTED" ${SERVERCONF}/sessiond.properties
     v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${SERVERCONF}/sessiond.properties
 
     v_cache_hosting ${SERVERCONF}/cache.ccf LTCP $UDPDISCOVERYPORT
@@ -553,12 +575,12 @@ setup_admin()
     CLTOPTS="-Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true"
     v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${ADMINCONF}/ox-admin-scriptconf.sh
 
-    SQLHOST=$CONFIGDB_WRITE
+    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
     SQLPORT=$CONFIGDB_WRITE_PORT
     EVAL_SQL_URL=$(eval echo $SQL_URL)
     v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
 
-    SQLHOST=$CONFIGDB_WRITE
+    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
     SQLPORT=$CONFIGDB_WRITE_PORT
     EVAL_SQL_URL=$(eval echo $SQL_URL)
     v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties

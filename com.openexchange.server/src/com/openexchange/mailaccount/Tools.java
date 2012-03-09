@@ -52,6 +52,7 @@ package com.openexchange.mailaccount;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -143,6 +144,27 @@ public final class Tools {
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
+     * @return The mail account with full names present
+     * @throws OXException If check for full names fails
+     */
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session) throws OXException {
+        final int contextId = session.getContextId();
+        final Connection rcon = Database.get(contextId, false);
+        try {
+            return checkFullNames(account, storageService, session, rcon);
+        } finally {
+            Database.back(contextId, false, rcon);
+        }
+        
+    }
+
+    /**
+     * Checks for presence of default folder full names and creates them if absent.
+     *
+     * @param account The corresponding account
+     * @param storageService The storage service (needed for update)
+     * @param session The session providing needed user information
+     * @param con The connection or <code>null</code>
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */

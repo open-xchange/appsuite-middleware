@@ -279,8 +279,10 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Search for contexts<br>
-     * Returns all contexts matching the provided search_pattern. Note: When there are any plugins loaded into the admin daemon providing
-     * extensions, e.g. reseller, you have to call {@link #getData(Context, Credentials)} for a context afterwards.
+     * Returns all contexts matching the provided search_pattern.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
      * 
      * @param auth Credentials for authenticating against server.
      * @param search_pattern Search pattern e.g "*mycontext*".
@@ -297,7 +299,6 @@ public interface OXContextInterface extends Remote {
      * Use this for search a context or list all contexts.
      * 
      * @param auth Credentials for authenticating against server.
-     * @param search_pattern Search pattern e.g "*mycontext*".
      * @return Contexts.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
@@ -482,7 +483,6 @@ public interface OXContextInterface extends Remote {
      */
     public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchFilestoreException;
 
-
     /**
      * Determines the user ID of the admin user for a given context
      * @param ctx The context for which the userId of the admin should be determined.
@@ -491,14 +491,24 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException Thrown when the login fails
      * @throws StorageException Thrown when an error in a subsystem occurred.
+     * @throws NoSuchContextException 
      */
-    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException ;
+    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException ;
+
+    /**
+     * Determines whether a context already exists.
+     * @param ctx The context we're interested in
+     * @param auth Credentials for authenticating against the server.
+     * @return Whether the given context exists or not
+     */
+    public boolean exists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
     
     /**
      * Determines whether a context already exists.
      * @param ctx The context we're interested in
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
+     * @deprecated
      */
     public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
 }

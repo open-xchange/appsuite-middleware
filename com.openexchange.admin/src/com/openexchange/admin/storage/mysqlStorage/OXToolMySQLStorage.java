@@ -76,9 +76,13 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -2155,8 +2159,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void checkCreateUserData(Context ctx, User usr) throws InvalidDataException, EnforceableDataObjectException, StorageException {
-        checkAndSetLanguage(usr);
+    public void checkCreateUserData(final Context ctx, final User usr) throws InvalidDataException, EnforceableDataObjectException, StorageException {
+        checkAndSetLanguage(ctx, usr);
         GenericChecks.checkCreateValidPasswordMech(usr);
         if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed.");
@@ -2210,9 +2214,45 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void checkAndSetLanguage(User user) throws InvalidDataException {
+    private void checkAndSetLanguage(final Context ctx, final User user) throws InvalidDataException {
         String lang = user.getLanguage();
         if (lang == null) {
+            final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (viewFactory != null) {
+                try {
+                    int ctxId = ctx.getId();
+                    if (user.isContextadmin() && user.getId() == null) {
+                        ctxId = -1;
+                    }
+                    final ConfigView view = viewFactory.getView(-1, ctxId);
+                    final String userAttribute = ctx.getUserAttribute("config", "com.openexchange.admin.user.defaultLanguage");
+                    if (userAttribute != null) {
+                        final ComposedConfigProperty<String> property = view.property("com.openexchange.admin.user.defaultLanguage", String.class).precedence(
+                            "server, contextSets");
+                        if (property.isDefined()) {
+                            lang = property.get();
+                        } else {
+                            lang = userAttribute;
+                        }
+                    } else {
+                        final ComposedConfigProperty<String> property = view.property("com.openexchange.admin.user.defaultLanguage", String.class);
+                        if (property.isDefined()) {
+                            lang = property.get();
+                        }
+                    }
+                    
+                    if (lang != null) {
+                        if (lang.indexOf('_') == -1) {
+                            throw new InvalidDataException("language must contain an underscore, e.g. en_US");
+                        }
+                        user.setLanguage(lang);
+                        return;
+                    }
+                } catch (final OXException e) {
+                    throw new InvalidDataException(e.getMessage());
+                }
+                
+            }
             user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
         } else {
             if (lang.indexOf('_') == -1) {

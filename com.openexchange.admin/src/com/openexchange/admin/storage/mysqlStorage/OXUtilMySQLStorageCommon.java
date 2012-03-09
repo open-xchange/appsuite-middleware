@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.mail.internet.IDNA;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -96,7 +95,7 @@ public class OXUtilMySQLStorageCommon {
             sql_pass = db.getPassword();
         }
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(IDNA.toASCII(db.getUrl()), db.getLogin(), sql_pass, db.getDriver());
+            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
@@ -286,7 +285,7 @@ public class OXUtilMySQLStorageCommon {
     public void deleteDatabase(final Database db) throws StorageException {
         final Connection con;
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(IDNA.toASCII(db.getUrl()), db.getLogin(), db.getPassword(), db.getDriver());
+            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);

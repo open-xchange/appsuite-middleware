@@ -1,6 +1,18 @@
+* 2012-02-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21643: Fixed possible NoSuchElementException in Unified Mail
+
+* 2012-02-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21626: Resolving dependencies for IDN support
+
 * 2012-02-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 21508: Checking for duplicate display name on user change
+
+* 2012-02-06 - choeger@open-xchange.com
+
+ - Fix for bug 14517: RMI javadoc broken
 
 * 2012-01-17 - thorben.betten@open-xchange.com
 
@@ -16,7 +28,12 @@
 
 * 2012-01-02 - marcus.klein@open-xchange.com
 
+ - Fix for bug 21096: Installed bundle containing templating service description into administration daemon process.
  - Fix for bug 19809: Ignoring null values in group member list.
+
+* 2011-12-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21083: Populating uid field during contact insertion for users 
 
 * 2011-12-14 - thorben.betten@open-xchange.com
 
@@ -42,6 +59,10 @@
 * 2011-10-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 20673: listcontext CLT now also outputs information about context attributes.
+
+* 2011-09-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20335: Retry with one-by-one table creation if batch creation failed
 
 * 2011-09-09 - marcus.klein@open-xchange.com
 

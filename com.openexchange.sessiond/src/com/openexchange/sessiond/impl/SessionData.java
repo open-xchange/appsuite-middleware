@@ -146,9 +146,9 @@ final class SessionData {
         rlongTermLock.lock();
         try {
             final long lifeTime = SessionHandler.config.getLongLifeTime();
-            for (final SessionContainer container : sessionList) {
+            for (final SessionMap map : longTermList) {
                 final long stamp = System.currentTimeMillis() - lifeTime;
-                for (final SessionControl sessionControl : container.getSessionControls()) {
+                for (final SessionControl sessionControl : map.values()) {
                     long lastAccessed = sessionControl.getLastAccessed();
                     if (lastAccessed < stamp) {
                         // Upgrade lock
@@ -157,7 +157,7 @@ final class SessionData {
                         try {
                             lastAccessed = sessionControl.getLastAccessed();
                             if (lastAccessed < stamp) {
-                                container.removeSessionById(sessionControl.getSession().getSessionID());
+                                map.removeBySessionId(sessionControl.getSession().getSessionID());
                             }
                         } finally {
                             // Down-grade lock

@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import net.thirdwing.common.ConversionJobfactory;
+import net.thirdwing.common.IContentIterator;
 import net.thirdwing.common.IConversionJob;
 import net.thirdwing.exception.XHTMLConversionException;
 import net.thirdwing.io.IOUnit;
@@ -152,10 +153,10 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, int pages) throws OXException {
         File file = new File(arg);
         if (file.isFile()) {
-            return generatePreview(file, session);
+            return generatePreview(file, session, pages);
         }
         file = null;
         try {
@@ -168,7 +169,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
                 name = path.substring(slash + 1);
             }
             file = streamToFile(new BufferedInputStream(connection.getInputStream()), name);
-            return generatePreview(file, session);
+            return generatePreview(file, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -179,11 +180,11 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         File file = null;
         try {
             file = streamToFile(documentData.getData(), documentData.getDataProperties().get(DataProperties.PROPERTY_NAME));
-            return generatePreview(file, session);
+            return generatePreview(file, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -203,7 +204,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         return false;
     }
 
-    private PreviewDocument generatePreview(final File file, final Session session) throws OXException {
+    private PreviewDocument generatePreview(final File file, final Session session, int pages) throws OXException {
         final IConversionJob transformer = ConversionJobfactory.getTransformer(file);
         final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);
         final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
@@ -212,37 +213,42 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         final Future<String> future = poolService.submit(observationTask);
         IOUnit unit;
         FileInputStream fis = null;
+        IContentIterator contentIterator = null;
         try {
             unit = new IOUnit((fis = new FileInputStream(file)));
             unit.setStreamProvider(streamProvider);
             transformer.addObserver(observationTask);
-            transformer.transformDocument(unit, 80);
+            contentIterator = transformer.transformDocument(unit, 80, true);
 
-            final String content = future.get();
-            if (content == null) {
-                throw observationTask.getException();
+            List<String> content = new ArrayList<String>();
+
+            int pageCount = 1;
+            while (contentIterator.hasNext() && (pages == -1 || pageCount <= pages)) {
+                contentIterator.writeNextContent();
+                content.add(future.get());
+                pageCount++;
             }
 
             final Map<String, String> metaData = new HashMap<String, String>();
             metaData.put("content-type", "text/html");
             metaData.put("resourcename", "document.html");
-            final ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage());
+            ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage(), contentIterator.hasNext());
 
             return previewDocument;
         } catch (final FileNotFoundException e) {
-         // TODO: throw proper exception
+            // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
         } catch (final XHTMLConversionException e) {
-         // TODO: throw proper exception
+            // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
+        } catch (InterruptedException e) {
             throw PreviewExceptionCodes.ERROR.create();
-        } catch (final ExecutionException e) {
-         // TODO: throw proper exception
+        } catch (ExecutionException e) {
             throw PreviewExceptionCodes.ERROR.create();
         } finally {
+            if (contentIterator != null) {
+                contentIterator.releaseData();
+            }
             Streams.close(fis);
         }
     }
@@ -262,7 +268,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             final File file = fileManagement.newTempFile("open-xchange", extension);
             fos = new FileOutputStream(file);
             final byte[] buf = new byte[2048];
-            for (int len; (len=is.read(buf, 0, 2048)) > 0;) {
+            for (int len; (len = is.read(buf, 0, 2048)) > 0;) {
                 fos.write(buf, 0, len);
             }
             fos.flush();

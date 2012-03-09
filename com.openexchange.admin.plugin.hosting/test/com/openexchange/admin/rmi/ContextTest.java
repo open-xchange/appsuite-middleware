@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi;
 
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.net.MalformedURLException;
@@ -464,6 +465,20 @@ public class ContextTest extends AbstractTest {
             pos = pos + 3;
         }
         return ret;
+    }
+
+    @Test
+    public void testExistsContext() throws Exception {
+        OXContextInterface ctxstub = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        
+        final Credentials cred = DummyMasterCredentials();
+        Context ctxexists = getTestContextObject(cred);
+        addContext(ctxexists, getRMIHostUrl(), cred);
+        Context ctxnotexists = new Context();
+        ctxnotexists.setName("notexists.com");
+        
+        assertFalse("context must not exist", ctxstub.exists(ctxnotexists, cred));
+        assertTrue("context must exist", ctxstub.exists(ctxexists, cred));
     }
 
 }

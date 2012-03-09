@@ -49,28 +49,31 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
-import java.io.IOException;
+import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.exception.OXException;
 import com.openexchange.preview.PreviewDocument;
 
 /**
  * {@link PreviewResponseRenderer} - The response renderer for {@link PreviewDocument}s.
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PreviewResponseRenderer implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PreviewResponseRenderer.class));
-
-    private static final boolean WARN = LOG.isWarnEnabled();
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
@@ -84,16 +87,35 @@ public class PreviewResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
-        httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
+        //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
-            final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
-            if (previewDocument.hasContent()) {
-                httpResp.getWriter().write(previewDocument.getContent());
-            } else if (WARN) {
-                LOG.warn("Content of PreviewDocument was null.");
+            PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
+
+            JSONArray jsonArray = new JSONArray();
+            for (String previewPage : previewDocument.getContent()) {
+                jsonArray.put(previewPage);
             }
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+
+            JSONObject jsonObject = new JSONObject();
+            if (previewDocument.isMoreAvailable() != null) {
+                jsonObject.put("moreAvailable", previewDocument.isMoreAvailable());
+            }
+            jsonObject.put("document", jsonArray);
+
+            Response response = new Response(request.getSession());
+            response.setTimestamp(result.getTimestamp());
+            response.setData(jsonObject);
+
+            Collection<OXException> warnings = result.getWarnings();
+            if (warnings != null && !warnings.isEmpty()) {
+                for (OXException warning : warnings) {
+                    response.addWarning(warning);
+                }
+            }
+
+            APIResponseRenderer.writeResponse(response, request.getAction(), httpReq, httpResp);
+        } catch (JSONException e) {
+            LOG.error("JSON Error", e);
         }
     }
 

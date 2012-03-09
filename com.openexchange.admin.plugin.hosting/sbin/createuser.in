@@ -78,6 +78,9 @@ case "${CMDARR[0]}" in
     "change")
     ACTION="Change"
     ;;
+    "exists")
+    ACTION="Exists"
+    ;;
     "getaccesscombinationnameforuser")
     ACTION="GetAccessCombinationName"
 	MODULE=user

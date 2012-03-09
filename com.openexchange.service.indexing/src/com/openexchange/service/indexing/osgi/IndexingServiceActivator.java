@@ -54,7 +54,9 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,7 +88,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MQService.class, ThreadPoolService.class };
+        return new Class<?>[] { MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class };
     }
 
     @Override
@@ -146,7 +148,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
              */
             // serviceInit.getSender().sendJobMessage(new EchoIndexJob("Echo..."));
         } catch (final Exception e) {
-            log.error("Error starting bundle: com.openexchange.service.indexing");
+            log.error("Error starting bundle: com.openexchange.service.indexing", e);
             throw e;
         }
     }
@@ -178,7 +180,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
              */
             super.stopBundle();
         } catch (final Exception e) {
-            log.error("Error stopping bundle: com.openexchange.service.indexing");
+            log.error("Error stopping bundle: com.openexchange.service.indexing", e);
             throw e;
         } finally {
             Services.setServiceLookup(null);

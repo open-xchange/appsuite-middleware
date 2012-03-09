@@ -54,7 +54,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.tika.io.TikaInputStream;
@@ -102,7 +104,7 @@ public final class TikaPreviewService implements PreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, int pages) throws OXException {
         try {
             final URL url;
             {
@@ -124,7 +126,7 @@ public final class TikaPreviewService implements PreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         final DataProperties dataProperties = documentData.getDataProperties();
         /*
          * Get content according to output format
@@ -149,6 +151,7 @@ public final class TikaPreviewService implements PreviewService {
         /*
          * Return preview document
          */
-        return new TikaPreviewDocument(content, map);
+        List<String> c = new ArrayList<String>();
+        return new TikaPreviewDocument(c, map);
     }
 }

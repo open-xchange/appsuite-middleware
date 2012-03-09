@@ -133,6 +133,7 @@ public class ConfirmationsDiffer extends Differ<CalendarObject> {
         if (original.getMessage() != update.getMessage() && (original.getMessage() == null && update.getMessage() != null || !original.getMessage().equals(update.getMessage()))) {
             changed = true;
             change.setMessage(original.getMessage(), update.getMessage());
+            change.setStatus(original.getConfirm(), update.getConfirm()); // Also set status on change.
         }
 
         return changed ? change : null;

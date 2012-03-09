@@ -139,7 +139,10 @@ public class TemplateServiceImpl implements TemplateService {
         Template retval = null;
         try {
             final TemplateLoader templateLoader = new FileTemplateLoader(path);
-            final Configuration config = new Configuration();
+            String userDir = System.getProperty("user.dir");
+            System.setProperty("user.dir", templatePath);
+            Configuration config = new Configuration();
+            System.setProperty("user.dir", userDir);
             config.setTemplateLoader(templateLoader);
             if (exceptionHandler != null) {
                 config.setTemplateExceptionHandler(exceptionHandler);

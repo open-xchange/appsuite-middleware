@@ -64,34 +64,34 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondConfigImpl.class));
     private static final boolean DEBUG = LOG.isDebugEnabled();
-    private static final long SHORT_CONTAINER_LIFE_TIME = 6l * 60l * 1000l;
-    private static final long LONG_CONTAINER_LIFE_TIME = 60l * 60l * 1000l;
+    private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L;
+    private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L;
 
     private int maxSession = 5000;
     private int maxSessionsPerUser = 100;
     private int maxSessionsPerClient = 0;
-    private long sessionShortLifeTime = 60l * 60l * 1000l;
-    private long randomTokenTimeout = 60l * 1000l;
-    private long longLifeTime = 7l * 24l * 60l * 60l * 1000l;
+    private long sessionShortLifeTime = 60L * 60L * 1000L;
+    private long randomTokenTimeout = 60L * 1000L;
+    private long longLifeTime = 7L * 24L * 60L * 60L * 1000L;
     private boolean autoLogin = false;
 
     public SessiondConfigImpl(final ConfigurationService conf) {
-        maxSession = parseProperty(conf, "com.openexchange.sessiond.maxSession", maxSession);
+        maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession=" + maxSession);
         }
 
-        maxSessionsPerUser = parseProperty(conf, "com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
+        maxSessionsPerUser = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser=" + maxSessionsPerUser);
         }
 
-        maxSessionsPerClient = parseProperty(conf, "com.openexchange.sessiond.maxSessionPerClient", maxSessionsPerClient);
+        maxSessionsPerClient = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerClient", maxSessionsPerClient);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient=" + maxSessionsPerClient);
         }
 
-        sessionShortLifeTime = parseProperty(conf, "com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
+        sessionShortLifeTime = conf.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionShortLifeTime);
         }
@@ -116,7 +116,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     @Override
     public long getNumberOfSessionContainers() {
-        return sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME;
+        return checkContainerCount(sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     @Override
     public long getNumberOfLongTermSessionContainers() {
-        return (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
+        return checkContainerCount((longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME);
     }
 
     @Override
@@ -159,20 +159,15 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return autoLogin;
     }
 
-    public static int parseProperty(final ConfigurationService prop, final String name, final int value) {
-        final String tmp = prop.getProperty(name, "");
-        if (tmp.trim().length() > 0) {
-            try {
-                return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException ex) {
-                LOG.warn("property no parsable: " + name + ':' + value);
-            }
-        }
-        return value;
-    }
-
     @Override
     public long getLongTermSessionContainerTimeout() {
         return LONG_CONTAINER_LIFE_TIME;
     }
+
+    private static final long MIN_CONTAINER_COUNT = 5L;
+
+    private static long checkContainerCount(final long count) {
+        return (count >= MIN_CONTAINER_COUNT) ? count : MIN_CONTAINER_COUNT;
+    }
+
 }
