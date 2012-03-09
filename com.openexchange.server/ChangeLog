@@ -2,6 +2,7 @@
 
  - Fix for bug 21729: Assign proper error message constant to error code
  - Fix for bug 21734: Ensure a positive number of session containers is returned
+ - Fix for bug 21719: Dealing with missing URL in account settings
 
 * 2012-03-08 - martin.herfurth@open-xchange.com
 
