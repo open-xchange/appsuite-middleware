@@ -124,7 +124,7 @@ public final class MailJobInfo {
     @Override
     public String toString() {
         final StringBuilder builder2 = new StringBuilder(32);
-        builder2.append("MailJobInfo {contextId=").append(contextId).append(", userId=").append(userId).append(", accountId=").append(
+        builder2.append("{contextId=").append(contextId).append(", userId=").append(userId).append(", accountId=").append(
             accountId).append(", ");
         if (login != null) {
             builder2.append("login=").append(login).append(", ");
