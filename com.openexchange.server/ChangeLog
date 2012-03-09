@@ -1,3 +1,7 @@
+* 2012-03-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21729: Assign proper error message constant to error code
+
 * 2012-03-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21557: Added missing confirmation status information.
