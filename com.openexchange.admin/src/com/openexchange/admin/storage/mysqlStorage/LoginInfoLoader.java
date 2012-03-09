@@ -79,19 +79,19 @@ public class LoginInfoLoader implements Filter<Context, Context> {
 
     private final AdminCache cache;
 
-    public LoginInfoLoader(AdminCache cache) {
+    public LoginInfoLoader(final AdminCache cache) {
         super();
         this.cache = cache;
     }
 
-    public Context[] filter(Collection<Context> input) throws PipesAndFiltersException {
-        Map<Integer, Context> contexts = new HashMap<Integer, Context>(input.size());
-        for (Context context : input) {
+    public Context[] filter(final Collection<Context> input) throws PipesAndFiltersException {
+        final Map<Integer, Context> contexts = new HashMap<Integer, Context>(input.size());
+        for (final Context context : input) {
             contexts.put(context.getId(), context);
         }
         try {
             loadLoginInfo(contexts);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PipesAndFiltersException(e);
         }
         return contexts.values().toArray(new Context[contexts.size()]);
@@ -99,11 +99,11 @@ public class LoginInfoLoader implements Filter<Context, Context> {
 
     private static final String SQL = "SELECT cid,login_info FROM login2context WHERE cid IN (";
 
-    private void loadLoginInfo(Map<Integer, Context> contexts) throws StorageException {
+    private void loadLoginInfo(final Map<Integer, Context> contexts) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;
@@ -111,27 +111,27 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         try {
             stmt = con.prepareStatement(getIN(SQL, contexts.size()));
             int pos = 1;
-            for (Integer cid : contexts.keySet()) {
+            for (final Integer cid : contexts.keySet()) {
                 stmt.setInt(pos++, cid.intValue());
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
-                int cid = rs.getInt(1);
-                String loginMapping = rs.getString(2);
+                final int cid = rs.getInt(1);
+                final String loginMapping = rs.getString(2);
                 // Do not return the context identifier as a mapping. This can cause errors if changing login mappings afterwards! See
                 // bug 11094 for details!
-                Context context = contexts.get(I(cid));
+                final Context context = contexts.get(I(cid));
                 if (!context.getIdAsString().equals(loginMapping)) {
                     context.addLoginMapping(loginMapping);
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
             try {
                 cache.pushConnectionForConfigDB(con);
-            } catch (PoolException e) {
+            } catch (final PoolException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

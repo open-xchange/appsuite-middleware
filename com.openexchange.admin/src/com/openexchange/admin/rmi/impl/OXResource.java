@@ -113,7 +113,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         basicauth = new BasicAuthenticator();
     }
 
-    public void change(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+    public void change(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(res);
         } catch (final InvalidDataException e3) {
@@ -212,7 +213,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
     }
     
-    public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
+    public Resource create(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
+       auth = auth == null ? new Credentials("","") : auth;
        try {
            doNullCheck(res);
            doNullCheck(res.getName());
@@ -315,7 +317,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        return res;
     }
     
-    public void delete(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+    public void delete(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(res);
         } catch (final InvalidDataException e3) {
@@ -388,7 +391,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         oxRes.delete(ctx, res);
     }
     
-    public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+    public Resource getData(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(res);
         } catch (final InvalidDataException e3) {
@@ -442,7 +446,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         return retres;
     }
     
-    public Resource[] getData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
+    public Resource[] getData(final Context ctx, final Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck((Object[])resources);
         } catch (final InvalidDataException e3) {
@@ -516,7 +521,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         return retval.toArray(new Resource[retval.size()]);
     }
     
-    public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    public Resource[] list(final Context ctx, final String pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(pattern);
         } catch (final InvalidDataException e3) {

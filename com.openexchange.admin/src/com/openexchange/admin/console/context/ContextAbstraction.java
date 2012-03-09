@@ -108,7 +108,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             return required;
         }
 
-        public void setRequired(boolean required) {
+        public void setRequired(final boolean required) {
             this.required = required;
         }
 
@@ -203,7 +203,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
     
-    protected void extensionConstantProcessing(HashMap<String, CSVConstants> constantsMap) {
+    protected void extensionConstantProcessing(final HashMap<String, CSVConstants> constantsMap) {
         // We don't check for subclasses being null here because if someone has forgotten
         // to set the options he will directly fix it and thus there no need for the
         // future to check everytime
