@@ -77,11 +77,24 @@ public interface IndexingJob extends Serializable {
     }
 
     /**
+     * The empty class array.
+     */
+    public static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
+
+    /**
+     * Gets the classes of the services which need to be available to start this activator.
+     * 
+     * @return The array of {@link Class} instances of needed services
+     */
+    Class<?>[] getNeededServices();
+
+    /**
      * Performs this job's task.
      * 
      * @throws OXException If performing job fails for any reason
+     * @throws InterruptedException If job has been interrupted
      */
-    void performJob() throws OXException;
+    void performJob() throws OXException, InterruptedException;
 
     /**
      * Indicates whether this job is durable.
@@ -117,5 +130,23 @@ public interface IndexingJob extends Serializable {
      * @return The behavior determining how to execute this job
      */
     Behavior getBehavior();
+
+    /**
+     * Invoked prior to executing this task in the given thread. This method is invoked by pooled thread <tt>t</tt> that will execute this
+     * task, and may be used to re-initialize {@link ThreadLocal}s, or to perform logging.
+     * <p>
+     * Implementations may leave this method empty if nothing should be performed.
+     */
+    void beforeExecute();
+
+    /**
+     * Invoked upon completion of execution of this task. This method is invoked by the thread that executed the task. If non-null, the
+     * {@link Throwable} is the uncaught exception that caused execution to terminate abruptly.
+     * <p>
+     * Implementations may leave this method empty if nothing should be performed.
+     * 
+     * @param t The exception that caused termination, or <code>null</code> if execution completed normally
+     */
+    void afterExecute(Throwable t);
 
 }

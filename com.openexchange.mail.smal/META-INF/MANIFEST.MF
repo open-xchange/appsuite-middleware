@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Super-MAL Bundle
 Bundle-SymbolicName: com.openexchange.mail.smal
-Bundle-Version: 6.21.0.0
+Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.mail.smal.osgi.SMALActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -143,4 +143,5 @@ Bundle-ClassPath: .,
  lib/jcl-over-slf4j-1.6.1.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/wstx-asl-3.2.7.jar
-Export-Package: com.openexchange.mail.smal.adapter
+Export-Package: com.openexchange.mail.smal,
+ com.openexchange.mail.smal.adapter

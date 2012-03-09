@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,60 @@
  *
  */
 
-package com.openexchange.osgi.osgi;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.console.ServiceStateLookup;
-import com.openexchange.osgi.console.osgi.ConsoleActivator;
+package com.openexchange.service.indexing;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
+ * {@link StandardIndexingJob} - The standard <code style="color: red;">abstract</code> {@link IndexingJob} to extend from.
  * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OsgiActivator extends HousekeepingActivator {
+public abstract class StandardIndexingJob implements IndexingJob {
 
-    private ConsoleActivator consoleActivator;
+    private static final long serialVersionUID = -2170181015109576781L;
+
+    protected volatile int priority;
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Initializes a new {@link StandardIndexingJob}.
      */
-    public OsgiActivator() {
+    protected StandardIndexingJob() {
         super();
+        priority = 4; // Default priority
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
+    public Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-        logger.info("starting bundle: com.openexchange.osgi");
-        try {
-            registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-            consoleActivator = new ConsoleActivator();
-            consoleActivator.start(context);
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: start: ", e);
-            throw e;
-        }
+    public boolean isDurable() {
+        return true;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-        logger.info("stopping bundle: com.openexchange.osgi");
-        try {
-            if (null != consoleActivator) {
-                consoleActivator.stop(context);
-                consoleActivator = null;
-            }
-            cleanUp();
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: stop: ", e);
-            throw e;
-        }
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
+    public void setPriority(final int priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public Behavior getBehavior() {
+        return Behavior.CONSUMER_RUNS;
+    }
+
+    @Override
+    public void beforeExecute() {
+        // Nothing to do
+    }
+
+    @Override
+    public void afterExecute(final Throwable t) {
+        // Nothing to do
     }
 
 }

@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EchoIndexJob implements IndexingJob {
+public final class EchoIndexJob extends StandardIndexingJob {
 
     private static final long serialVersionUID = 8422334197440807865L;
 
@@ -69,8 +69,6 @@ public final class EchoIndexJob implements IndexingJob {
 
     private final Date stamp;
 
-    private volatile int priority;
-
     /**
      * Initializes a new {@link EchoIndexJob}.
      */
@@ -78,32 +76,11 @@ public final class EchoIndexJob implements IndexingJob {
         super();
         this.message = null == message ? "Hello world!" : message;
         stamp = new Date();
-        priority = 4;
     }
 
     @Override
     public void performJob() throws OXException {
         LOG.error("\n\n\tEchoIndexJob (created at " + stamp.toString() + "): \"" + message + "\"\n\n");
-    }
-
-    @Override
-    public void setPriority(final int priority) {
-        this.priority = priority;
-    }
-
-    @Override
-    public int getPriority() {
-        return priority;
-    }
-
-    @Override
-    public boolean isDurable() {
-        return true;
-    }
-
-    @Override
-    public Behavior getBehavior() {
-        return Behavior.CONSUMER_RUNS;
     }
 
 }

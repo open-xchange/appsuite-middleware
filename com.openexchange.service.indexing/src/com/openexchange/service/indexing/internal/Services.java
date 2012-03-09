@@ -66,16 +66,24 @@ public final class Services {
         super();
     }
 
-    private static final AtomicReference<com.openexchange.server.ServiceLookup> REF =
-        new AtomicReference<com.openexchange.server.ServiceLookup>();
+    private static final AtomicReference<CompositeServiceLookup> REF = new AtomicReference<CompositeServiceLookup>();
 
     /**
      * Sets the service lookup.
      * 
      * @param serviceLookup The service lookup or <code>null</code>
      */
-    public static void setServiceLookup(final com.openexchange.server.ServiceLookup serviceLookup) {
+    public static void setServiceLookup(final CompositeServiceLookup serviceLookup) {
         REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static CompositeServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
