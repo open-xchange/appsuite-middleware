@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.customizer;
+package com.openexchange.mq;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
-import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSONPCustomizer}
+ * {@link MQTransactional} - Offers methods for transactional message delivery.
  * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSONPCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
+public interface MQTransactional {
 
-    private static final String JSONP = "jsonp";
+    /**
+     * Commits all messages done in this transaction and releases any locks currently held.
+     * 
+     * @throws OXException If transaction cannot be committed
+     */
+    void commit() throws OXException;
 
-    @Override
-    public AJAXActionCustomizer createCustomizer(AJAXRequestData request, ServerSession session) {
-        return this;
-    }
-
-    @Override
-    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
-        return request;
-    }
-
-    @Override
-    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
-        if (request.containsParameter(JSONP) && result.getResultObject() instanceof Response) {
-            Response response = (Response) result.getResultObject();
-            try {
-                JSONObject jsonValue = response.getJSON();
-                if (jsonValue == null) {
-                    return result;
-                }
-                String call = request.getParameter(JSONP);
-                StringBuilder sb = new StringBuilder(call);
-                sb.append("(");
-                sb.append(jsonValue.toString());
-                sb.append(");");
-                result.setResultObject(sb.toString());
-            } catch (JSONException e) {
-                e.printStackTrace(); //Do nothing
-            }
-        }
-
-        return result;
-    }
+    /**
+     * Rolls back any messages done in this transaction and releases any locks currently held.
+     * 
+     * @throws OXException If transaction roll-back fails
+     */
+    void rollback() throws OXException;
 
 }

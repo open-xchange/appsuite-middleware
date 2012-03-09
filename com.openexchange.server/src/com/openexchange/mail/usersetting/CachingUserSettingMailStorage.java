@@ -158,7 +158,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             Connection tmpCon = null;
             try {
                 tmpCon = DBPool.pickup(ctx);
-                stmt = tmpCon.prepareStatement(SQL_LOAD);
+                stmt = tmpCon.prepareStatement("SELECT 1 FROM user_setting_mail WHERE cid = ? AND user = ?");
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, user);
                 rs = stmt.executeQuery();

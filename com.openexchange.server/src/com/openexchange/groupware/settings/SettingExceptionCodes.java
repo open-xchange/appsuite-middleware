@@ -81,7 +81,9 @@ public enum SettingExceptionCodes implements OXExceptionCode {
     /** Subsystem error. */
     SUBSYSTEM("Error during use of a subsystem", Category.CATEGORY_SERVICE_DOWN, 13),
     /** Not allowed operation. */
-    NOT_ALLOWED("Not allowed operation.", Category.CATEGORY_ERROR, 14);
+    NOT_ALLOWED("Not allowed operation.", Category.CATEGORY_ERROR, 14),
+    /** Reached maximum retries writing setting %s. */
+    MAX_RETRY("Reached maximum retries writing setting %s.", Category.CATEGORY_TRY_AGAIN, 15);
 
     private final String message;
 

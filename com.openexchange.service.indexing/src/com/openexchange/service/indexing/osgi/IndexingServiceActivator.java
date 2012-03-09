@@ -49,11 +49,26 @@
 
 package com.openexchange.service.indexing.osgi;
 
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.internal.CompositeServiceLookup;
+import com.openexchange.service.indexing.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.internal.IndexingServiceInit;
+import com.openexchange.service.indexing.internal.IndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.internal.Services;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link IndexingServiceActivator} - The activator for indexing service.
@@ -73,7 +88,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MQService.class };
+        return new Class<?>[] { MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class };
     }
 
     @Override
@@ -81,16 +96,59 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Starting bundle: com.openexchange.service.indexing");
         try {
-            final IndexingServiceInit serviceInit = new IndexingServiceInit(this);
+            final CompositeServiceLookup compositeServiceLookup = new CompositeServiceLookup(context);
+            compositeServiceLookup.addAll(getNeededServices(), this);
+            Services.setServiceLookup(compositeServiceLookup);
+            /*
+             * IndexingService initialization
+             */
+            final int maxConcurrentJobs = 8;
+            final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
             serviceInit.init();
+            serviceInit.initReceiver();
             this.serviceInit = serviceInit;
+            /*
+             * Register service
+             */
+            final IndexingServiceImpl indexingService = new IndexingServiceImpl(serviceInit);
+            registerService(IndexingService.class, indexingService);
+            addService(IndexingService.class, indexingService);
+            /*
+             * Service tracker(s)
+             */
+            final ObjectName objectName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service MBean");
+            // trackService(ManagementService.class);
+            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+                @Override
+                public void added(final ServiceReference<ManagementService> ref, final ManagementService service) {
+                    try {
+                        service.registerMBean(objectName, new IndexingServiceMBeanImpl());
+                    } catch (final NotCompliantMBeanException e) {
+                        log.error(e.getMessage(), e);
+                    } catch (final OXException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(final ServiceReference<ManagementService> ref, final ManagementService service) {
+                    try {
+                        service.unregisterMBean(objectName);
+                    } catch (final OXException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+
+            });
+            openTrackers();
 
             /*-
              * ------------------- Test ---------------------
              */
-            serviceInit.getSender().sendTextMessage("Startup test");
+            // serviceInit.getSender().sendJobMessage(new EchoIndexJob("Echo..."));
         } catch (final Exception e) {
-            log.error("Error starting bundle: com.openexchange.service.indexing");
+            log.error("Error starting bundle: com.openexchange.service.indexing", e);
             throw e;
         }
     }
@@ -100,15 +158,32 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Stopping bundle: com.openexchange.service.indexing");
         try {
+            /*
+             * Unregister service
+             */
+            unregisterServices();
+            final CompositeServiceLookup lookup = Services.getServiceLookup();
+            if (null != lookup) {
+                lookup.close();
+                Services.setServiceLookup(null);
+            }
+            /*
+             * IndexingService shut-down
+             */
             final IndexingServiceInit serviceInit = this.serviceInit;
             if (null != serviceInit) {
                 serviceInit.drop();
                 this.serviceInit = null;
             }
+            /*
+             * Perform rest
+             */
             super.stopBundle();
         } catch (final Exception e) {
-            log.error("Error stopping bundle: com.openexchange.service.indexing");
+            log.error("Error stopping bundle: com.openexchange.service.indexing", e);
             throw e;
+        } finally {
+            Services.setServiceLookup(null);
         }
     }
 

@@ -51,6 +51,7 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,6 +59,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
@@ -388,7 +390,7 @@ public class Contact extends CommonObject implements Serializable {
     public static final int[] JSON_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC,
         USE_COUNT, FILE_AS, NUMBER_OF_IMAGES, INTERNAL_USERID, CATEGORIES, FOLDER_ID, IMAGE1_URL, LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
-        NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT, DEFAULT_ADDRESS
+        NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT, DEFAULT_ADDRESS, MARK_AS_DISTRIBUTIONLIST
     });
 
     protected String display_name;

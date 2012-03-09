@@ -6,6 +6,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-ldap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authorization-standard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-imap"/>

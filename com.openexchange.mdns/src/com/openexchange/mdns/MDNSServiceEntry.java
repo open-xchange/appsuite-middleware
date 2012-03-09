@@ -56,7 +56,6 @@ import java.util.UUID;
  * {@link MDNSServiceEntry} - A resolved mDNS service entry.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.22
  */
 public interface MDNSServiceEntry {
 

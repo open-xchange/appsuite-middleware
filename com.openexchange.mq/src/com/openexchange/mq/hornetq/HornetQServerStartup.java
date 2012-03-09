@@ -53,6 +53,7 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
@@ -112,6 +113,8 @@ public final class HornetQServerStartup implements MQServerStartup {
         return hornetQService;
     }
 
+    private static final Pattern PATTERN_CONFIGPATH = Pattern.compile(Pattern.quote("@oxgroupwaresysconfdir@"));
+
     @Override
     public synchronized void start() throws OXException {
         try {
@@ -135,12 +138,14 @@ public final class HornetQServerStartup implements MQServerStartup {
                     /*
                      * Parse into configuration
                      */
+                    final String configPath = service.getProperty("CONFIGPATH", "/tmp/hornetq");
                     final Configuration configuration;
                     {
+                        hornetqConfigXml = PATTERN_CONFIGPATH.matcher(hornetqConfigXml).replaceAll(configPath);
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
                         configuration = new ConfigurationImpl();
-                        configuration.setPersistenceEnabled(false);
+                        /*configuration.setPersistenceEnabled(false);*/
                         configuration.setSecurityEnabled(false);
                         configuration.setJournalSyncNonTransactional(false);
     
@@ -154,7 +159,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                      */
                     final JMSConfiguration jmsConfiguration;
                     {
-                        final String hornetqJmsXml = service.getText("hornetq-jms.xml");
+                        String hornetqJmsXml = service.getText("hornetq-jms.xml");
                         if (null == hornetqJmsXml) {
                             jmsConfiguration = new JMSConfigurationImpl();
                             /*
@@ -181,10 +186,19 @@ public final class HornetQServerStartup implements MQServerStartup {
                             jmsConfiguration.getTopicConfigurations().add(
                                 new TopicConfigurationImpl(MQConstants.NAME_TOPIC, MQConstants.PREFIX_TOPIC + MQConstants.NAME_TOPIC));
                         } else {
+                            hornetqJmsXml = PATTERN_CONFIGPATH.matcher(hornetqJmsXml).replaceAll(configPath);
                             final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqJmsXml));
     
                             final JMSServerConfigParser jmsServerConfigParser = new JMSServerConfigParserImpl();
                             jmsConfiguration = jmsServerConfigParser.parseConfiguration(e);
+                            if (!configuration.isClustered()) {
+                                /*
+                                 * Clustering disabled per HornetQ configuration "hornetq-configuration.xml"
+                                 */
+                                for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfiguration.getConnectionFactoryConfigurations()) {
+                                    connectionFactoryConfiguration.setHA(false);
+                                }
+                            }
 
                             /*-
                              * 
@@ -194,6 +208,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                             }
                              * 
                              */
+                            hornetqJmsXml = null; // Help GC
                         }
                     }
                     /*

@@ -70,7 +70,7 @@ import com.openexchange.mdns.MDNSServiceInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessagingRemoteServerProvider extends ServiceTracker {
+public final class MessagingRemoteServerProvider extends ServiceTracker<MDNSService, MDNSService> {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingRemoteServerProvider.class));
@@ -131,8 +131,8 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final MDNSService service = (MDNSService) context.getService(reference);
+    public MDNSService addingService(final ServiceReference<MDNSService> reference) {
+        final MDNSService service = context.getService(reference);
         if (mdnsServiceRef.compareAndSet(null, service)) {
             try {
                 serviceInfo =
@@ -155,9 +155,9 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
         if (null != service) {
-            final MDNSService mdnsService = (MDNSService) service;
+            final MDNSService mdnsService = service;
             if (mdnsServiceRef.compareAndSet(mdnsService, null)) {
                 try {
                     mdnsService.unregisterService(serviceInfo);
@@ -171,7 +171,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
         // Nope
     }
 

@@ -48,10 +48,8 @@
 #
 #
 
-
 OXFUNCTIONS=@oxfunctions@
-ADMINCONF=@absoxconfdir@
-
+ADMINCONF=@confDir@
 
 test -f $OXFUNCTIONS || {
         echo "missing common shell functions file"

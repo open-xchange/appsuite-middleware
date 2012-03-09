@@ -1,0 +1,5 @@
+open-xchange-authentication-imap (7.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Mar 2012 10:59:17 +0100

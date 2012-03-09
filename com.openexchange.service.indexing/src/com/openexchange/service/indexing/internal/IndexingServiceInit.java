@@ -55,9 +55,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQService;
 import com.openexchange.mq.queue.MQQueueAsyncReceiver;
 import com.openexchange.mq.queue.MQQueueSender;
-import com.openexchange.mq.queue.impl.MQQueueSenderImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link IndexingServiceInit}
@@ -68,19 +68,21 @@ public final class IndexingServiceInit {
 
     private final ServiceLookup services;
 
-    private final IndexingServiceQueueListener listener;
+    private volatile IndexingServiceQueueListener listener;
 
-    private MQQueueSender sender;
+    private IndexingQueueSender sender;
 
-    private MQQueueAsyncReceiver receiver;
+    private IndexingQueueAsyncReceiver receiver;
+
+    private final int maxConcurrentJobs;
 
     /**
      * Initializes a new {@link IndexingServiceInit}.
      */
-    public IndexingServiceInit(final ServiceLookup services) {
+    public IndexingServiceInit(final int maxConcurrentJobs, final ServiceLookup services) {
         super();
         this.services = services;
-        listener = new IndexingServiceQueueListener();
+        this.maxConcurrentJobs = maxConcurrentJobs;
     }
 
     /**
@@ -94,17 +96,53 @@ public final class IndexingServiceInit {
          */
         final String indexingQueue = IndexingService.INDEXING_QUEUE;
         final MQService service = services.getService(MQService.class);
+
+        /*-
+         * TODO: Delete if needed
+        {
+            try {
+                service.lookupQueue(indexingQueue, true, new HashMap<String, Object>(1));
+            } catch (final Exception e) {
+                // Ignore
+            }
+            service.deleteQueue(indexingQueue);
+        }
+         */
+
         final Map<String, Object> params = new HashMap<String, Object>(1);
         params.put(MQService.QUEUE_PARAM_DURABLE, Boolean.TRUE);
         service.lookupQueue(indexingQueue, true, params);
         /*
          * Create queue sender
          */
-        sender = new MQQueueSenderImpl(indexingQueue);
-        /*
-         * Create async. queue receiver
-         */
-        receiver = new MQQueueAsyncReceiver(indexingQueue, listener);
+        sender = new IndexingQueueSender();
+    }
+
+    /**
+     * Initializes indexing service receiver.
+     * 
+     * @throws OXException If initialization fails
+     */
+    public synchronized void initReceiver() throws OXException {
+        if (null == receiver) {
+            /*
+             * Create async. queue receiver
+             */
+            final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
+            final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
+            receiver = new IndexingQueueAsyncReceiver(new IndexingServiceQueueListener(executor));
+        }
+    }
+
+    /**
+     * Drops indexing service receiver.
+     */
+    public synchronized void dropReceiver() {
+        final MQQueueAsyncReceiver receiver = this.receiver;
+        if (null != receiver) {
+            receiver.close();
+            this.receiver = null;
+        }
     }
 
     /**
@@ -137,7 +175,7 @@ public final class IndexingServiceInit {
      * 
      * @return The sender or <code>null</code> if already closed
      */
-    public MQQueueSender getSender() {
+    public IndexingQueueSender getSender() {
         return sender;
     }
 

@@ -66,6 +66,26 @@ public class DistListMember extends DistributionListEntryObject {
 	private int contextID;
 	private boolean b_contextID;
 
+	/**
+	 * Creates an array of distribution list members using the supplied data.
+	 * 
+	 * @param distList an array of distribution list entry objects 
+	 * @param contextID the context ID
+	 * @param parentContactID the ID of the corresponding contact
+	 * @return the distribution list members
+	 * @throws OXException
+	 */
+	public static DistListMember[] create(final DistributionListEntryObject[] distList, final int contextID, final int parentContactID) throws OXException {
+    	if (null != distList) {
+    		final DistListMember[] members = new DistListMember[distList.length];
+    		for (int i = 0; i < members.length; i++) {
+				members[i] = DistListMember.create(distList[i], contextID, parentContactID);
+			}
+        	return members;
+    	}
+    	return null;
+	}
+	
 	public static DistListMember create(final DistributionListEntryObject dleo, final int contextID, final int parentContactID) throws OXException {
 		final DistListMember member = new DistListMember();
 		member.setParentContactID(parentContactID);

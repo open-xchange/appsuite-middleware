@@ -764,8 +764,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     lastStart = System.currentTimeMillis();
                 }
 
+                // Prepare thread
                 Thread.interrupted(); // clear interrupt status on entry
                 ((CustomThread) Thread.currentThread()).clearInterruptorStack();
+                LogProperties.removeLogProperties(); // Drop possible log properties
+
                 boolean ran = false;
                 beforeExecute(thread, task);
                 try {
@@ -784,9 +787,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             } finally {
                 runLock.unlock();
-
-                // Drop possible log properties
-                LogProperties.removeLogProperties();
             }
         }
 

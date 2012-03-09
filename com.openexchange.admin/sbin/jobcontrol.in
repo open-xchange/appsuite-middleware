@@ -63,12 +63,12 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-
-test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
+test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
 
 JAVAMAIN="com.openexchange.admin.console.taskmanagement.JobControl"
 
-ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
+ADMINCP=$(for jar in $LIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
+
 $JAVA_BIN $JAVA_XTRAOPTS -classpath ${ADMINCP} $JAVAMAIN $*

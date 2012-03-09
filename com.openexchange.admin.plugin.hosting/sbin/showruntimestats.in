@@ -48,7 +48,6 @@
 #
 #
 
-
 OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 
@@ -64,9 +63,11 @@ test -f $OXCONFIG && . $OXCONFIG
 ox_set_JAVA_BIN
 
 
-test -z "$SERVERNAME"       && SERVERNAME=$HOSTNAME
-test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
+test -z "$SERVERNAME" && SERVERNAME=$HOSTNAME
+test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
 
+ADMINCP=$(for jar in $LIBPATH/*.jar; do
+    echo -n "${jar}:"
+    done)
 
-$JAVA_BIN $JAVA_OXCMD_OPTS -classpath $LIBPATH/ox_admin_rmiclient.jar:$LIBPATH/ox_admin_hosting_rmiclient.jar:$LIBPATH/ox_admin_cli.jar \
-	com.openexchange.admin.console.StatisticTools "$@"
+$JAVA_BIN $JAVA_OXCMD_OPTS -classpath ${ADMINCP} com.openexchange.admin.console.StatisticTools "$@"

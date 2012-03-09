@@ -4,6 +4,27 @@
  - Fix for bug 21684: Workaround for bad directory reading in 3rd party library.
  - Fix for bug 21597: Deleting a recurring exception without access to the master appointment.
 
+* 2012-03-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21714: Added MARK_AS_DISTRIBUTIONLIST to JSON columns
+
+* 2012-03-08 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21619: Using SELECT FOR UPDATE now to read committed changes to not get into an endless loop.
+
+* 2012-03-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21499: Store user timezone in appointments imported from CalDAV interface
+ - Fix for bug 21342: Try and restore unchanged groups when updating appointments   
+
+* 2012-03-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21697: Reliable access to cached external account folder
+
+* 2012-03-05 - thorben.betten@open-xchange.com
+
+ - Fixed bug 21680: Improved create routine for faster folder look-up
+
 * 2012-03-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 21678: Improved delete listener and replaced useless foreign keys with appropriate index entries

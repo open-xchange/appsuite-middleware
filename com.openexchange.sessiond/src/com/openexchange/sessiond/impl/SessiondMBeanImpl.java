@@ -51,11 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.InvalidatedMarker;
-import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessiondMBean;
-import com.openexchange.sessiond.cache.SessionCache;
 
 /**
  * {@link SessiondMBeanImpl}
@@ -81,9 +77,9 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
 
     @Override
     public void clearContextSessions(final int contextId) {
-        /*
+        /*-
+         * TODO:
          * Put invalidated-marker into session cache
-         */
         try {
             final Cache sessionCache = SessionCache.getInstance().getCache();
             final Integer key = Integer.valueOf(contextId);
@@ -91,6 +87,7 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
         } catch (final OXException e) {
             // Ignore
         }
+        */
         /*
          * Clear context-associated sessions
          */

@@ -1,79 +1,129 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.ajax.redirect;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * {@link RedirectServlet}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public class RedirectServlet extends HttpServlet {
-	
-	
-	@Override
-	protected void service(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		
-		String location = req.getParameter("location");
-		
-		if (location == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
-		
-		if (!isRelative(location)) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
-		
-		
-		if ( isServerRelative(location)) {
-			resp.sendRedirect(location);
-			return;
-		}
-		
-		
-		String referer = purgeHost(req.getHeader("referer"));
-		
-		if (referer == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
 
-		location = assumeRelative(referer, location);
-		
-		resp.sendRedirect(location);
-		
-		
-	}
-	
-	private static final Pattern PROTOCOL_PATTERN = Pattern.compile("^(\\w*:)?//");
-	
-	private boolean isRelative(String location) {
-		Matcher matcher = PROTOCOL_PATTERN.matcher(location);
-		return !matcher.find();
-	}
+    private static final long serialVersionUID = 6111473866164506367L;
 
-	private String purgeHost(String location) {
-		if (location == null) {
-			return null;
-		}
-		return location.replaceAll("^(\\w*:)?//\\w*/","");
-	}
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 
-	private boolean isServerRelative(String location) {
-		return location.startsWith("/");
-	}
+        String location = req.getParameter("location");
 
-	private String assumeRelative(String referer, String location) {
-		if (referer.endsWith("/")) {
-			return "/"+referer + location;
-		}
-		int index = referer.lastIndexOf('/');
+        if (location == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-		return "/"+referer.substring(0, index) + "/" + location;
-	}
-	
+        if (!isRelative(location)) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        if (isServerRelative(location)) {
+            resp.sendRedirect(location);
+            return;
+        }
+
+        final String referer = purgeHost(req.getHeader("referer"));
+
+        if (referer == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        location = assumeRelative(referer, location);
+
+        resp.sendRedirect(location);
+
+    }
+
+    private static final Pattern PROTOCOL_PATTERN = Pattern.compile("^(\\w*:)?//");
+
+    private boolean isRelative(final String location) {
+        final Matcher matcher = PROTOCOL_PATTERN.matcher(location);
+        return !matcher.find();
+    }
+
+    private String purgeHost(final String location) {
+        if (location == null) {
+            return null;
+        }
+        return location.replaceAll("^(\\w*:)?//\\w*/", "");
+    }
+
+    private boolean isServerRelative(final String location) {
+        return location.startsWith("/");
+    }
+
+    private String assumeRelative(final String referer, final String location) {
+        if (referer.endsWith("/")) {
+            return "/" + referer + location;
+        }
+        final int index = referer.lastIndexOf('/');
+
+        return "/" + referer.substring(0, index) + "/" + location;
+    }
+
 }

@@ -104,7 +104,7 @@ public final class MQActivator extends HousekeepingActivator {
             // new com.openexchange.mq.example.MQJmsTopicExample(service).test();
             // new com.openexchange.mq.example.MQJmsPriorizedQueueExample(service).test();
         } catch (final Exception e) {
-            log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+            log.error("Error starting bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME, e);
             throw e;
         }
     }
@@ -125,7 +125,7 @@ public final class MQActivator extends HousekeepingActivator {
             MQService.SERVICE_REFERENCE.set(null);
             super.stopBundle();
         } catch (final Exception e) {
-            log.error("Error stopping bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME);
+            log.error("Error stopping bundle: " + MQConstants.BUNDLE_SYMBOLIC_NAME, e);
             throw e;
         }
     }
