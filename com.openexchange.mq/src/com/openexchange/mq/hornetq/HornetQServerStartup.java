@@ -191,6 +191,14 @@ public final class HornetQServerStartup implements MQServerStartup {
     
                             final JMSServerConfigParser jmsServerConfigParser = new JMSServerConfigParserImpl();
                             jmsConfiguration = jmsServerConfigParser.parseConfiguration(e);
+                            if (!configuration.isClustered()) {
+                                /*
+                                 * Clustering disabled per HornetQ configuration "hornetq-configuration.xml"
+                                 */
+                                for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfiguration.getConnectionFactoryConfigurations()) {
+                                    connectionFactoryConfiguration.setHA(false);
+                                }
+                            }
 
                             /*-
                              * 
