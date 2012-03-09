@@ -51,34 +51,38 @@ package com.openexchange.preview.thirdwing;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
 
 /**
  * {@link ThirdwingPreviewDocument}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ThirdwingPreviewDocument implements PreviewDocument {
 
     private final Map<String, String> metaData;
 
-    private final String content;
+    private final List<String> content;
 
     private final InputStream thumbnail;
 
+    private Boolean moreAvailable;
+
     /**
      * Initializes a new {@link ThirdwingPreviewDocument}.
-     *
+     * 
      * @param metaData The meta data
      * @param content The textual content
      */
-    public ThirdwingPreviewDocument(final Map<String, String> metaData, final String content, InputStream thumbnail) {
+    public ThirdwingPreviewDocument(final Map<String, String> metaData, final List<String> content, InputStream thumbnail, Boolean moreAvailable) {
         super();
         this.metaData = new HashMap<String, String>();
         this.metaData.putAll(metaData);
         this.content = content;
         this.thumbnail = thumbnail;
+        this.moreAvailable = moreAvailable;
     }
 
     @Override
@@ -92,7 +96,7 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
     }
 
     @Override
-    public String getContent() {
+    public List<String> getContent() {
         return content;
     }
 
@@ -101,9 +105,13 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
         return thumbnail;
     }
 
+    public Boolean isMoreAvailable() {
+        return moreAvailable;
+    }
+
     @Override
     public String toString() {
-        return content == null ? super.toString() : content;
+        return content == null ? super.toString() : content.toString();
     }
 
 }

@@ -52,7 +52,9 @@ package com.openexchange.osgi.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.console.ServiceStateLookup;
 import com.openexchange.osgi.console.osgi.ConsoleActivator;
 
 /**
@@ -81,6 +83,7 @@ public class OsgiActivator extends HousekeepingActivator {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
         logger.info("starting bundle: com.openexchange.osgi");
         try {
+            registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
             track(ManagementService.class, new ManagementRegisterer(context));
             openTrackers();
             consoleActivator = new ConsoleActivator();
