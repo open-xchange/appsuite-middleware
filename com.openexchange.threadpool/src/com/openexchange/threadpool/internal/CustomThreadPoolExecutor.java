@@ -77,6 +77,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -295,6 +296,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * The task for consuming from delayed work queue.
      */
     private final DelayedQueueConsumer delayedQueueConsumer;
+
+    /**
+     * The number of threads that are actively executing tasks
+     */
+    private final AtomicInteger activeCount = new AtomicInteger();
 
     /**
      * Timeout in nanoseconds for idle threads waiting for work. Threads use this timeout only when there are more than corePoolSize
@@ -1400,10 +1406,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((CustomThread) Thread.currentThread()).restoreName();
         }
+        activeCount.decrementAndGet();
     }
 
     @Override
     protected void beforeExecute(final Thread thread, final Runnable r) {
+        activeCount.incrementAndGet();
         if (r instanceof CustomFutureTask<?>) {
             final Task<?> task = ((CustomFutureTask<?>) r).getTask();
             task.setThreadName((ThreadRenamer) thread);
@@ -2024,19 +2032,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     @Override
     public int getActiveCount() {
-        final ReentrantLock mainLock = this.mainLock;
-        mainLock.lock();
-        try {
-            int n = 0;
-            for (final Worker w : workerSet) {
-                if (w.isActive()) {
-                    ++n;
-                }
-            }
-            return n;
-        } finally {
-            mainLock.unlock();
-        }
+        return activeCount.get();
     }
 
     /**
