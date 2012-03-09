@@ -49,78 +49,97 @@
 
 package com.openexchange.service.indexing;
 
+import com.openexchange.exception.OXException;
+
 /**
- * {@link StandardIndexingJob} - The standard <code style="color: red;">abstract</code> {@link IndexingJob} to extend from.
+ * {@link Jobs} - Utility class for {@link IndexingJob}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class StandardIndexingJob implements IndexingJob {
-
-    private static final long serialVersionUID = -2170181015109576781L;
+public final class Jobs {
 
     /**
-     * The job's priority; initially <code>4</code>.
+     * Initializes a new {@link Jobs}.
      */
-    protected volatile int priority;
-
-    /**
-     * The job's behavior; initially {@link Behavior#CONSUMER_RUNS}.
-     * 
-     * @see #setBehavior(com.openexchange.service.indexing.IndexingJob.Behavior)
-     */
-    protected volatile Behavior behavior;
-
-    /**
-     * Initializes a new {@link StandardIndexingJob}.
-     */
-    protected StandardIndexingJob() {
+    private Jobs() {
         super();
-        priority = 4; // Default priority
-        behavior = Behavior.CONSUMER_RUNS;
-    }
-
-    @Override
-    public Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    public boolean isDurable() {
-        return true;
-    }
-
-    @Override
-    public int getPriority() {
-        return priority;
-    }
-
-    @Override
-    public void setPriority(final int priority) {
-        this.priority = priority;
-    }
-
-    @Override
-    public Behavior getBehavior() {
-        return behavior;
     }
 
     /**
-     * Sets the behavior
+     * Generates a new {@link IndexingJob job} for specified task.
      * 
-     * @param behavior The behavior to set
+     * @param task The task to perform as a job
+     * @return A new {@link IndexingJob job} for specified task
      */
-    public void setBehavior(final Behavior behavior) {
-        this.behavior = behavior;
+    public static IndexingJob jobFor(final Runnable task) {
+        return jobFor(task, 4);
     }
 
-    @Override
-    public void beforeExecute() {
-        // Nothing to do
+    /**
+     * Generates a new {@link IndexingJob job} for specified task with given priority.
+     * 
+     * @param task The task to perform as a job
+     * @param priority The priority
+     * @return A new {@link Job job} for specified task
+     */
+    public static IndexingJob jobFor(final Runnable task, final int priority) {
+        return new RunnableJob(task, priority);
     }
 
-    @Override
-    public void afterExecute(final Throwable t) {
-        // Nothing to do
+    private static final class RunnableJob implements IndexingJob {
+
+        private static final long serialVersionUID = -3089273727289929417L;
+
+        private final Runnable task;
+
+        private int priority;
+
+        protected RunnableJob(final Runnable task, final int priority) {
+            super();
+            this.task = task;
+            this.priority = priority;
+        }
+
+        @Override
+        public int getPriority() {
+            return priority;
+        }
+
+        @Override
+        public Class<?>[] getNeededServices() {
+            return EMPTY_CLASSES;
+        }
+
+        @Override
+        public void performJob() throws OXException, InterruptedException {
+            task.run();
+        }
+
+        @Override
+        public boolean isDurable() {
+            return false;
+        }
+
+        @Override
+        public void setPriority(final int priority) {
+            this.priority = priority;
+        }
+
+        @Override
+        public Behavior getBehavior() {
+            return Behavior.CONSUMER_RUNS;
+        }
+
+        @Override
+        public void beforeExecute() {
+            // Nope
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            // Nope
+        }
+
     }
 
 }

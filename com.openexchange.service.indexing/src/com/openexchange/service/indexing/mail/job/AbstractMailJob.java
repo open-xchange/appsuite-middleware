@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.mail;
+package com.openexchange.service.indexing.mail.job;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,32 +61,51 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.service.indexing.StandardIndexingJob;
+import com.openexchange.service.indexing.internal.Services;
+import com.openexchange.service.indexing.mail.Constants;
+import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link AbstractMailSyncJob}
+ * {@link AbstractMailJob}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMailSyncJob extends StandardIndexingJob {
+public abstract class AbstractMailJob extends StandardIndexingJob {
 
     private static final long serialVersionUID = 1726202716841172518L;
 
-    protected final int contextId;
-
-    protected final int userId;
-
-    protected final int accountId;
-
+    /**
+     * The job's information.
+     */
     protected final MailJobInfo info;
 
     /**
-     * Initializes a new {@link AbstractMailSyncJob}.
+     * Convenience member for <code>info.contextId</code>
      */
-    protected AbstractMailSyncJob(final MailJobInfo info) {
+    protected final int contextId;
+
+    /**
+     * Convenience member for <code>info.userId</code>
+     */
+    protected final int userId;
+
+    /**
+     * Convenience member for <code>info.accountId</code>
+     */
+    protected final int accountId;
+
+    /**
+     * Initializes a new {@link AbstractMailJob}.
+     */
+    protected AbstractMailJob(final MailJobInfo info) {
         super();
         this.info = info;
         this.accountId = info.accountId;
@@ -96,7 +115,16 @@ public abstract class AbstractMailSyncJob extends StandardIndexingJob {
 
     @Override
     public Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, MailService.class };
+        return new Class<?>[] { DatabaseService.class, MailService.class, IndexService.class };
+    }
+
+    /**
+     * Gets the tracked index adapter.
+     * 
+     * @return The adapter
+     */
+    protected IndexAdapter getAdapter() {
+        return Services.getService(IndexService.class).getAdapter();
     }
 
     /**
@@ -106,10 +134,20 @@ public abstract class AbstractMailSyncJob extends StandardIndexingJob {
      * @throws OXException If initialization of {@link MailAccess} instance fails
      */
     protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccessFor() throws OXException {
+        /*
+         * Fake session & signaling not to lookup cache
+         */
         final Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
         session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session);
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SMALMailAccess.getUnwrappedInstance(session, accountId);
+        /*
+         * Safety close & not cacheable
+         */
         mailAccess.close(true);
+        mailAccess.setCacheable(false);
+        /*
+         * Parameterize configuration
+         */
         final MailConfig mailConfig = mailAccess.getMailConfig();
         mailConfig.setLogin(info.login);
         mailConfig.setPassword(info.password);

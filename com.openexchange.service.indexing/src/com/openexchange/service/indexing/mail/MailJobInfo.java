@@ -119,6 +119,24 @@ public final class MailJobInfo {
         this.secure = builder.secure;
     }
 
+    
+
+    @Override
+    public String toString() {
+        final StringBuilder builder2 = new StringBuilder(32);
+        builder2.append("MailJobInfo {contextId=").append(contextId).append(", userId=").append(userId).append(", accountId=").append(
+            accountId).append(", ");
+        if (login != null) {
+            builder2.append("login=").append(login).append(", ");
+        }
+        if (server != null) {
+            builder2.append("server=").append(server).append(", ");
+        }
+        builder2.append("port=").append(port).append(", secure=").append(secure).append('}');
+        return builder2.toString();
+    }
+
+
     /**
      * Initializes a new {@link Builder}.
      * <p>

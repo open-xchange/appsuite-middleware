@@ -141,7 +141,8 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         /*
          * Check MailAccessCache
          */
-        {
+        final Object sLookup = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+        if (null == sLookup || Boolean.parseBoolean(sLookup.toString())) {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
                 SMALMailAccessCache.getInstance().removeMailAccess(session, accountId);
             if (mailAccess != null) {
