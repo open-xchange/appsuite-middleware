@@ -164,7 +164,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return LONG_CONTAINER_LIFE_TIME;
     }
 
-    private static final long MIN_CONTAINER_COUNT = 2L;
+    private static final long MIN_CONTAINER_COUNT = 5L;
 
     private static long checkContainerCount(final long count) {
         return (count >= MIN_CONTAINER_COUNT) ? count : MIN_CONTAINER_COUNT;
