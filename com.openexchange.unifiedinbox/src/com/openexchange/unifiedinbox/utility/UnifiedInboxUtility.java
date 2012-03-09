@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
@@ -126,27 +125,30 @@ public final class UnifiedInboxUtility {
     }
 
     /**
-     * Generates a nested folder's fullname.
+     * Generates a nested folder's full name.
      *
      * @param uiAccountId The Unified Mail's account ID
-     * @param uiFullname The Unified Mail's fullname
+     * @param uiFullname The Unified Mail's full name
      * @param nestedAccountId The nested account's ID
-     * @param nestedFullname The nested folder's fullname
-     * @return The generated nested folder's fullname.
+     * @param nestedFullname The nested folder's full name or <code>null</code>
+     * @return The generated nested folder's full name.
      */
     public static String generateNestedFullname(final int uiAccountId, final String uiFullname, final int nestedAccountId, final String nestedFullname) {
+        if (null == nestedFullname) {
+            return new StringBuilder(16).append(prepareFullname(uiAccountId, uiFullname)).toString();
+        }
         return new StringBuilder(32).append(prepareFullname(uiAccountId, uiFullname)).append(SEPERATOR).append(
             prepareFullname(nestedAccountId, nestedFullname)).toString();
     }
 
     /**
-     * Parses nested fullname.
+     * Parses nested full name.
      * <p>
      * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
      *
-     * @param nestedFullname The nested fullname to parse
-     * @return The parsed nested fullname argument
-     * @throws OXException If specified nested fullname is invalid
+     * @param nestedFullname The nested full name to parse
+     * @return The parsed nested full name argument
+     * @throws OXException If specified nested full name is invalid
      */
     public static FullnameArgument parseNestedFullname(final String nestedFullname) throws OXException {
         // INBOX/default0/INBOX

@@ -304,9 +304,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         /*
          * Occupy free slot
          */
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
-        if (mailAccess != null) {
-            return mailAccess;
+        final Object sLookup = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+        if (null == sLookup || Boolean.parseBoolean(sLookup.toString())) {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
+            if (mailAccess != null) {
+                return mailAccess;
+            }
         }
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);

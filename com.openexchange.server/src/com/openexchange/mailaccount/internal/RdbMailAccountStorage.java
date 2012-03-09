@@ -1888,9 +1888,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 final int id = (int) result.getLong(1);
                 if (null == excepts || !excepts.contains(id)) {
                     final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
-                    current.parseMailServerURL(result.getString(2));
-                    if (checkMailServer(server, addr, current) && current.getMailPort() == port && login.equals(result.getString(3))) {
-                        throw MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
+                    final String url = result.getString(2);
+                    if (null != url) {
+                        current.parseMailServerURL(url);
+                        if (checkMailServer(server, addr, current) && current.getMailPort() == port && login.equals(result.getString(3))) {
+                            throw MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
+                        }
                     }
                 }
             } while (result.next());

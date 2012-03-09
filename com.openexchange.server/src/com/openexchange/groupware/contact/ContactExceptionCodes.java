@@ -109,7 +109,7 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     /** Unable to move this contact because it is marked as private: Context %1$d Object %2$d */
     NO_PRIVATE_MOVE(NO_PRIVATE_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 165),
     /** Your display name is mandatory. Please enter it. */
-    DISPLAY_NAME_MANDATORY(DISPLAY_NAME_IN_USE_MSG, Category.CATEGORY_USER_INPUT, 166),
+    DISPLAY_NAME_MANDATORY(ContactExceptionMessages.DISPLAY_NAME_MANDATORY, Category.CATEGORY_USER_INPUT, 166),
     /** The name you entered is already assigned to another user. Please choose another display name. Context %1$d Object %2$d */
     DISPLAY_NAME_IN_USE(DISPLAY_NAME_IN_USE_MSG, Category.CATEGORY_TRY_AGAIN, 167),
     /** Bad character in field %2$s. Error: %1$s */

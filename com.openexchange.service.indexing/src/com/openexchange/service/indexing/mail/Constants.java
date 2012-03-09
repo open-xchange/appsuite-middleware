@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,40 @@
  *
  */
 
-package com.openexchange.preview.jodconverter.internal;
-
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.preview.PreviewDocument;
+package com.openexchange.service.indexing.mail;
 
 /**
- * {@link JODCPreviewDocument}
+ * {@link Constants} - Constants for job queue.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JODCPreviewDocument implements PreviewDocument {
+public final class Constants {
 
-    private String content;
-
-    private final Map<String, String> metaData;
-
-    public JODCPreviewDocument() {
-        super();
-        metaData = new HashMap<String, String>();
-    }
-
-    @Override
-    public boolean hasContent() {
-        return null != content;
-    }
-
-    @Override
-    public Map<String, String> getMetaData() {
-        return metaData;
-    }
-
-    @Override
-    public List<String> getContent() {
-        return null;
-    }
-
-    public void setContent(final String content) {
-        this.content = content;
-    }
-
-    public void setMetaData(final Map<String, String> metaData) {
-        this.metaData.clear();
-        this.metaData.putAll(metaData);
-    }
-
-    @Override
-    public InputStream getThumbnail() {
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.preview.PreviewDocument#isMoreAvailable()
+    /**
+     * Initializes a new {@link Constants}.
      */
-    @Override
-    public Boolean isMoreAvailable() {
-        // TODO Auto-generated method stub
-        return null;
+    private Constants() {
+        super();
     }
+
+    /**
+     * Hour milliseconds.
+     */
+    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+
+    /**
+     * Default (5 minutes) milliseconds.
+     */
+    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+
+    /**
+     * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
+     */
+    public static final int CHUNK_SIZE = 0;
+
+    /**
+     * The number of chunks allowed being added to index in a single job's run.
+     */
+    public static final int MAX_CHUNKS_PER_RUN = 10;
 
 }
