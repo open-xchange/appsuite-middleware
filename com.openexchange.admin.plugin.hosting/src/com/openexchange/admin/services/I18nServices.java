@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.i18n.I18nService;
 
 /**
@@ -65,6 +64,7 @@ import com.openexchange.i18n.I18nService;
 public class I18nServices {
 
     private static final Log LOG = LogFactory.getLog(I18nServices.class);
+    private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final I18nServices SINGLETON = new I18nServices();
 
     private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
@@ -73,13 +73,13 @@ public class I18nServices {
         super();
     }
 
-    public void addService(I18nService i18n) {
+    public void addService(final I18nService i18n) {
         if (null != services.put(i18n.getLocale(), i18n)) {
             LOG.warn("Another i18n translation service found for " + i18n.getLocale());
         }
     }
 
-    public void removeService(I18nService i18n) {
+    public void removeService(final I18nService i18n) {
         if (null == services.remove(i18n.getLocale())) {
             LOG.warn("Unknown i18n translation service shut down for " + i18n.getLocale());
         }
@@ -89,16 +89,17 @@ public class I18nServices {
         return SINGLETON;
     }
 
-    public String translate(Locale locale, String toTranslate) {
-        I18nService service = services.get(locale);
+    public String translate(final Locale locale, final String toTranslate) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService service = services.get(loc);
         if (null == service) {
-            if (!"en".equalsIgnoreCase(locale.getLanguage())) {
-                LOG.warn("No i18n service for locale " + locale + ".");
+            if (!"en".equalsIgnoreCase(loc.getLanguage())) {
+                LOG.warn("No i18n service for locale " + loc + ".");
             }
             return toTranslate;
         }
         if (!service.hasKey(toTranslate)) {
-            LOG.warn("I18n service for locale " + locale + " has no translation for \"" + toTranslate + "\".");
+            LOG.warn("I18n service for locale " + loc + " has no translation for \"" + toTranslate + "\".");
             return toTranslate;
         }
         return service.getLocalized(toTranslate);

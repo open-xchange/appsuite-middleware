@@ -148,6 +148,9 @@ case "${BNAME}" in
     "getadminid")
     ACTION="context.GetAdminId"
     ;;
+    "existscontext")
+    ACTION="context.Exists"
+    ;;
 esac
 
 JAVAMAIN="com.openexchange.admin.console.${ACTION}"

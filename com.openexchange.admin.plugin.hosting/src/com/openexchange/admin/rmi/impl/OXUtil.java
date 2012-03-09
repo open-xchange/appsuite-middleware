@@ -89,7 +89,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         basicauth = new BasicAuthenticator();
     }
 
-    public Filestore registerFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Filestore registerFilestore(final Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(fstore);
         } catch (final InvalidDataException e1) {            
@@ -139,7 +140,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     }
 
-    public void changeFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void changeFilestore(final Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(fstore);
         } catch (final InvalidDataException e1) {            
@@ -161,7 +163,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.changeFilestore(fstore);
     }
 
-    public Filestore[] listFilestore(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Filestore[] listFilestore(final String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e1) {            
@@ -183,7 +186,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listFilestore("*", auth);
     }
     
-    public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void unregisterFilestore(final Filestore store, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(store);
             doNullCheck(store.getId());
@@ -207,7 +211,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     
-    public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(reason);
         } catch (final InvalidDataException e1) {            
@@ -228,7 +233,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return  new MaintenanceReason(oxutil.createMaintenanceReason(reason));
     }
 
-    public MaintenanceReason[] listMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
+    public MaintenanceReason[] listMaintenanceReasons(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
+        auth = auth == null ? new Credentials("","") : auth;
         basicauth.doAuthentication(auth);
 
         return oxutil.getAllMaintenanceReasons();
@@ -252,7 +258,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listMaintenanceReason("*", auth);
     }
     
-    public void createDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void createDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -280,7 +287,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.createDatabase(db);
     }
 
-    public void deleteDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void deleteDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -303,7 +311,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
     }
 
-    public Database registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Database registerDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -366,7 +375,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
    
-    public Server registerServer(final Server srv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Server registerServer(final Server srv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(srv);
             doNullCheck(srv.getName());
@@ -414,7 +424,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.unregisterDatabase(i(database.getId()), tool.isMasterDatabase(i(database.getId())));
     }
 
-    public void unregisterServer(final Server server, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void unregisterServer(final Server server, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(server);
         } catch (final InvalidDataException e1) {            
@@ -438,7 +449,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     
-    public Database[] listDatabase(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Database[] listDatabase(final String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e1) {            
@@ -460,7 +472,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listDatabase("*", auth);
     }
     
-    public Server[] listServer(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Server[] listServer(final String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e1) {            
@@ -482,7 +495,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listServer("*", auth);
     }
     
-    public void changeDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void changeDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -513,7 +527,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.changeDatabase(db);
     }
 
-    public void deleteMaintenanceReason(final MaintenanceReason[] reasons, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void deleteMaintenanceReason(final MaintenanceReason[] reasons, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck((Object[])reasons);
         } catch (final InvalidDataException e1) {            

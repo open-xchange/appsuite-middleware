@@ -50,17 +50,24 @@
 
 OXFUNCTIONS=@oxfunctions@
 TAR=$(type -P tar)
+BZIP2=$(type -P bzip2)
 
 test -f $OXFUNCTIONS || {
         echo "missing common shell functions file"
         exit 1
 }
 
-test -x $TAR || {
+# check for "tar" executable
+[ -x "$TAR" ] || {
 	echo "missing needed command tar"
 	exit 1
 }
 
+# check for "bzip2" executable
+[ -x "$BZIP2" ] || {
+   echo "missing needed command bzip2"
+   exit 1
+   }
 . $OXFUNCTIONS
 
 export PATH="$PATH:/opt/open-xchange/sbin"
@@ -76,6 +83,7 @@ LOGARC_LONG=log-archive
 KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
 KEEP_TMP_VALUES="true false"
+EXCLUDES="--exclude groupware/osgi --exclude admindaemon/osgi"
 
 FILES_DIRS="
 /opt/open-xchange/etc
@@ -226,7 +234,7 @@ else
 fi
 
 collect_files() {
-   $TAR cvfj /$TMP/$LOGDIR/ox_files_and_logs.tar.bz2 ${FILES_DIRS} > /dev/null 2>&1
+   $TAR cvfj /$TMP/$LOGDIR/ox_files_and_logs.tar.bz2 ${EXCLUDES} ${FILES_DIRS} > /dev/null 2>&1
 }
 
 

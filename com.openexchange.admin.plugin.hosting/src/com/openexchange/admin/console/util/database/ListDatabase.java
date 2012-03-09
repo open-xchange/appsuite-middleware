@@ -52,7 +52,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.ArrayList;
-import javax.mail.internet.IDNA;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -206,7 +205,7 @@ public class ListDatabase extends DatabaseAbstraction {
             if (csv) {
                 rea_data.add(db.getUrl());
             } else {
-                rea_data.add(IDNA.toUnicode(new URI(IDNA.toASCII(db.getUrl())).getHost()));
+                rea_data.add(new URI(db.getUrl().substring("jdbc:".length())).getHost());
             }
         } else {
             rea_data.add(null);

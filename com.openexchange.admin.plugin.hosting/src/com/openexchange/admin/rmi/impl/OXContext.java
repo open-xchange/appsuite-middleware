@@ -127,7 +127,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void change(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
@@ -193,9 +194,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return createcommon(ctx, admin_user, null, null, auth);
     }
 
-    public Context create(final Context ctx, final User admin_user,final String access_combination_name, final Credentials auth)
+    public Context create(final Context ctx, final User admin_user,final String access_combination_name, Credentials auth)
         throws RemoteException, StorageException,InvalidCredentialsException, InvalidDataException,    ContextExistsException {
 
+        auth = auth == null ? new Credentials("","") : auth;
         // Resolve access rights by name
         try {
             doNullCheck(admin_user, access_combination_name);
@@ -222,8 +224,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return createcommon(ctx, admin_user, null, access, auth);
     }
 
-    public Context create(final Context ctx, final User admin_user,final UserModuleAccess access, final Credentials auth)
+    public Context create(final Context ctx, final User admin_user,final UserModuleAccess access, Credentials auth)
         throws RemoteException,StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
+        auth = auth == null ? new Credentials("","") : auth;
 
         try {
             doNullCheck(admin_user, access);
@@ -236,7 +239,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     }
 
-    public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
+    public void delete(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(ctx);
         } catch (final InvalidDataException e) {
@@ -307,7 +311,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disable(ctx, reason, auth);
     }
 
-    private void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
+    private void disable(final Context ctx, final MaintenanceReason reason, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(ctx, reason);
             doNullCheck(reason.getId());
@@ -363,7 +368,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disableAll(reason, auth);
     }
 
-    private void disableAll(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
+    private void disableAll(final MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(reason);
             doNullCheck(reason.getId());
@@ -410,7 +416,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // END OF CACHE
     }
 
-    public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void enable(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
@@ -445,8 +452,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
+    public void enableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
         new BasicAuthenticator(context).doAuthentication(auth);
+        auth = auth == null ? new Credentials("","") : auth;
 
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
@@ -477,7 +485,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // END OF CACHE
     }
 
-    public Context[] getData(final Context[] ctxs, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public Context[] getData(final Context[] ctxs, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             try {
                 doNullCheck((Object[])ctxs);
@@ -539,7 +548,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return getData(new Context[]{ctx}, auth)[0];
     }
 
-    public Context[] list(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Context[] list(final String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e) {
@@ -606,7 +616,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return list("*", auth);
     }
 
-    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+    public Context[] listByDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(db);
         } catch (final InvalidDataException e) {
@@ -623,14 +634,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchDatabaseException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.searchContextByDatabase(db);
+
+            final List<Context> retval = new ArrayList<Context>();
+            final Context[] ret = oxcox.searchContextByDatabase(db);
+            final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
+            if (null != callGetDataPlugins) {
+                retval.addAll(callGetDataPlugins);
+            } else {
+                retval.addAll(Arrays.asList(ret));
+            }
+            return retval.toArray(new Context[retval.size()]);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
     }
 
-    public Context[] listByFilestore(final Filestore filestore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
+    public Context[] listByFilestore(final Filestore filestore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(filestore);
             doNullCheck(filestore.getId());
@@ -647,7 +668,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchFilestoreException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.searchContextByFilestore(filestore);
+            final List<Context> retval = new ArrayList<Context>();
+            final Context[] ret = oxcox.searchContextByFilestore(filestore);
+            final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
+            if (null != callGetDataPlugins) {
+                retval.addAll(callGetDataPlugins);
+            } else {
+                retval.addAll(Arrays.asList(ret));
+            }
+            return retval.toArray(new Context[retval.size()]);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -662,7 +691,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return moveContextDatabase(ctx, db, reason, auth);
     }
 
-    private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
+    private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
+        auth = auth == null ? new Credentials("","") : auth;
         try{
             doNullCheck(ctx,db,reason);
             doNullCheck(reason.getId());
@@ -727,7 +757,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
     }
 
-    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, OXContextException {
+    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, Credentials auth) throws InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, OXContextException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(ctx, dst_filestore, reason);
             doNullCheck(dst_filestore.getId(), reason.getId());
@@ -878,8 +909,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return src;
     }
 
-    public void changeModuleAccess(final Context ctx, final UserModuleAccess access,final Credentials auth)
+    public void changeModuleAccess(final Context ctx, final UserModuleAccess access,Credentials auth)
         throws RemoteException,InvalidCredentialsException, NoSuchContextException,    StorageException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
 
         try {
             doNullCheck(access);
@@ -922,9 +954,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     }
 
-    public void changeModuleAccess(final Context ctx, final String access_combination_name,final Credentials auth)
+    public void changeModuleAccess(final Context ctx, final String access_combination_name,Credentials auth)
         throws RemoteException,InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
 
+        auth = auth == null ? new Credentials("","") : auth;
 
         try {
             doNullCheck(access_combination_name);
@@ -980,9 +1013,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     /**
      * {@inheritDoc}
      */
-    public void downgrade(final Context ctx, final Credentials auth) throws
+    public void downgrade(final Context ctx, Credentials auth) throws
         RemoteException, InvalidCredentialsException,NoSuchContextException,
         StorageException, DatabaseUpdateException,InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
         try {
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
@@ -1017,8 +1051,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    public String getAccessCombinationName(final Context ctx, final Credentials auth)
+    public String getAccessCombinationName(final Context ctx, Credentials auth)
         throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
 
         // Resolve admin user and get the module access from db and query cache for access combination name
         try {
@@ -1051,8 +1086,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth)
+    public UserModuleAccess getModuleAccess(final Context ctx, Credentials auth)
         throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
+        auth = auth == null ? new Credentials("","") : auth;
 
         try {
             doNullCheck(ctx);
@@ -1137,19 +1173,50 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
     
-    public int getAdminId(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException {
+    public int getAdminId(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException {
+        auth = auth == null ? new Credentials("","") : auth;
+        
         new BasicAuthenticator(context).doAuthentication(auth);
-        final OXToolStorageInterface oxtool = OXToolMySQLStorage.getInstance();
-        return oxtool.getAdminForContext(ctx);
+
+        try {
+            callPluginMethod("getAdminId", ctx, auth);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException();
+        }
+
+        return tool.getAdminForContext(ctx);
     }
 
-    public boolean checkExists(final Context ctx, final Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
+    public boolean exists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
+        auth = auth == null ? new Credentials("","") : auth;
         new BasicAuthenticator(context).doAuthentication(auth);
         
         if(ctx == null) {
             throw new InvalidDataException("Given context is invalid");
         }
 
+        try {
+            callPluginMethod("exists", ctx, auth);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+
+        if( null != ctx.getId() ) {
         return tool.existsContext(ctx);
+        } else if( null != ctx.getName() ) {
+            return tool.existsContextName(ctx.getName());
+        } else {
+            throw new InvalidDataException("neither id or name is set in supplied context object");
+        }
+    }
+    
+    public boolean checkExists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
+        return exists(ctx, auth);
     }
 }

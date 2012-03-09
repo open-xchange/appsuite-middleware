@@ -2,6 +2,10 @@
 
  - Fix for bug 21708: Properly replacing configuration directory in initconfigdb script.
 
+* 2012-03-08 - choeger@open-xchange.com
+
+ - Fix for bug 21438: [L3] listdatabase does not show the hostname anymore
+
 * 2012-02-28 - choeger@open-xchange.com
 
  - SCR968: Define destination database/filestore on context creation
@@ -9,6 +13,11 @@
 * 2012-02-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 21167: Creating sorted list of databases (new algorithm) and check each database for availability before creating a context.
+
+* 2012-02-06 - choeger@open-xchange.com
+
+ - Fix for bug 21459: enhance rmi/soap documentation: list and searchpattern
+ - Fix for bug 14517: RMI javadoc broken
 
 * 2012-01-24 - thorben.betten@open-xchange.com
 
@@ -22,15 +31,47 @@
 
  - Fix for bug 19379: More proper handling of context login mappings when changing them.
 
+* 2011-11-14 - thomas.schweiger@open-xchange.com
+
+ - Added an exclude pattern for the tar creation to avoid "taring" the whole
+   temporary osgi framework including all bundles.
+
+* 2011-11-10 - tobias.prinz@open-xchange.com
+
+ - Fix for bug 20640: Clearing some pools to make sure old values are not cached.
+
 * 2011-11-10 - marcus.klein@open-xchange.com
 
  - Fix for bug 20369: Removing publicFolderEditable permissions for non context administrator users.
  - Fix for bug 20635: Fixed with new solution for bug 20369.
 
+* 2011-11-09 - thomas.schweiger@open-xchange.com
+
+ - Bugfix #18817 - oxsysreport doesn't contain logfiles if system has no bzip2 installed:
+   Fixed issue by extending check for "bzip2" binary.
+   
 * 2011-10-20 - marcus.klein@open-xchange.com
 
  - Bugfix #20571: Properly rolling back transaction if the method for changing login mappings throws an exception. Removing all login
    mappings is possible again.
+
+* 2011-10-20 - holger.achtziger@open-xchange.com
+
+ - Bugfix #20493: - oxinstaller writes wrong ipv6 format to configdb.properties 
+
+* 2011-10-20 - holger.achtziger@open-xchange.com
+
+ - Bugfix #20481: - [L3] oxinstaller still sets removed options
+    sessionContainerTimeout numberOfSessionContainers isDoubleLoginPermitted
+
+* 2011-08-18 - choeger@open-xchange.com
+
+ - Bugfix #20033 - oxinstaller must not touch push.properties now anymore
+
+* 2011-08-16 - choeger@open-xchange.com
+
+ - Bugfix #20099 - "listContextByDatabase" and "listContextByFilestore" throws NPE when
+   using through SOAP reseller interface
 
 * 2011-06-20 - marcus.klein@open-xchange.com
 

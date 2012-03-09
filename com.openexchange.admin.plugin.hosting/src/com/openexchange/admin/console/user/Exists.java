@@ -47,75 +47,36 @@
  *
  */
 
-package com.openexchange.admin.console.context;
+package com.openexchange.admin.console.user;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
+public class Exists extends ExistsCore {
 
-/**
- * {@link GetAdminId}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class GetAdminId extends ContextAbstraction {
-
-    public GetAdminId(String[] args) {
-        final AdminParser parser = new AdminParser("getadminid");
-
-        commonfunctions(parser, args);
+    public static void main(final String[] args) {
+        new Exists(args);
     }
 
-    protected void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptionsWithoutContextID(parser);
-        setContextOption(parser, NeededQuadState.eitheror);
-        setContextNameOption(parser, NeededQuadState.eitheror);
-    }
-    
-    protected final void commonfunctions(final AdminParser parser, final String[] args) {
-        setOptions(parser);
+    public Exists(final String[] args2) {
 
-        String successtext = null;
-        try {
-            Context ctx = null;
-            Credentials auth = null;
-            try {
-                parser.ownparse(args);
-                
-                ctx = contextparsing(parser);
-                
-                auth = credentialsparsing(parser);
-                
-                parseAndSetContextName(parser, ctx);
-                
-                successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-                
-            } catch (final RuntimeException e) {
-                printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-                sysexit(1);
-            }
-            maincall(ctx, auth);
-        } catch (final Exception e) {
-            printErrors(successtext, null, e, parser);
-        }
+        final AdminParser parser = new AdminParser("existsuser");
+
+        commonfunctions(parser, args2);
     }
 
-    private void maincall(Context ctx, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidCredentialsException, StorageException, NoSuchContextException {
-        final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
-        System.out.println(oxres.getAdminId(ctx, auth));        
+    @Override
+    protected boolean maincall(AdminParser parser, OXUserInterface oxusr, Context ctx, User usr, Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException {
+        return oxusr.exists(ctx, usr, auth);
     }
-    
-    public static void main(String[] args) {
-        new GetAdminId(args);
-    }
+
 }
