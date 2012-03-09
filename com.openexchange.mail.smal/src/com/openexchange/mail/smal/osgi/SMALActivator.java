@@ -135,11 +135,18 @@ public class SMALActivator extends HousekeepingActivator {
             final String className = cs.getProperty("com.openexchange.mail.smal.adapter", SolrAdapter.class.getName());
             final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
             indexService = new IndexServiceImpl(clazz.newInstance());
+            /*-
+             * 
+             * TODO: Enable
+             * 
+             * 
             registerService(IndexService.class, indexService);
             if (!addService(IndexService.class, indexService)) {
                 com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALActivator.class)).error(
                     "IndexService could not be added.");
             }
+             * 
+             */
         }
         /*
          * Register event handlers
