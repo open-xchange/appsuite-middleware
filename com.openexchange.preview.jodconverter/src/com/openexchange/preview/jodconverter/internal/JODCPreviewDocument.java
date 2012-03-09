@@ -51,6 +51,7 @@ package com.openexchange.preview.jodconverter.internal;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
 
@@ -81,8 +82,8 @@ public class JODCPreviewDocument implements PreviewDocument {
     }
 
     @Override
-    public String getContent() {
-        return content;
+    public List<String> getContent() {
+        return null;
     }
 
     public void setContent(final String content) {
@@ -96,6 +97,15 @@ public class JODCPreviewDocument implements PreviewDocument {
 
     @Override
     public InputStream getThumbnail() {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.preview.PreviewDocument#isMoreAvailable()
+     */
+    @Override
+    public Boolean isMoreAvailable() {
+        // TODO Auto-generated method stub
         return null;
     }
 

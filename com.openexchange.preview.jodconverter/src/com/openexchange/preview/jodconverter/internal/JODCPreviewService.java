@@ -104,7 +104,6 @@ public class JODCPreviewService implements InternalPreviewService {
         return null;
     }
 
-    @Override
     public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
         if (!isConvertableToOutput(output)) {
             return null;
@@ -126,7 +125,6 @@ public class JODCPreviewService implements InternalPreviewService {
         }
     }
 
-    @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
         if (!isConvertableToOutput(output)) {
             return null;
@@ -221,6 +219,24 @@ public class JODCPreviewService implements InternalPreviewService {
     @Override
     public boolean canDetectContentType() {
         return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.preview.PreviewService#getPreviewFor(java.lang.String, com.openexchange.preview.PreviewOutput, com.openexchange.session.Session, int)
+     */
+    @Override
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, final int pages) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.preview.PreviewService#getPreviewFor(com.openexchange.conversion.Data, com.openexchange.preview.PreviewOutput, com.openexchange.session.Session, int)
+     */
+    @Override
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, final int pages) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
