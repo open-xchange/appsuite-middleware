@@ -70,6 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -173,7 +174,15 @@ public final class CreatePerformer extends AbstractPerformer {
              * Check for duplicates for OLOX-covered folders
              */
             if (!CONTENT_TYPE_INFOSTORE.equals(cts)) {
-                checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
+                final Session session = storageParameters.getSession();
+                if (null == session) {
+                    checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
+                } else {
+                    final CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
+                    if (null != result && null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
+                        return result.optFolderId;
+                    }
+                }
             }
             /*
              * Create folder dependent on folder is virtual or not

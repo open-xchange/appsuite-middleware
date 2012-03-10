@@ -177,18 +177,36 @@ public abstract class AbstractPerformer {
 
     /**
      * Checks for duplicate folder through a LIST request.
-     *
+     * 
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier
-     * @throws FolderException If name look-up fails
+     * @param openedStorages The list containing already opened folder storages
+     * @throws OXException If name look-up fails
      */
     protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        final CheckForDuplicateResult result = getCheckForDuplicateResult(name, treeId, parentId, openedStorages);
+        if (null != result) {
+            throw result.error;
+        }
+    }
+
+    /**
+     * Checks for duplicate folder through a LIST request.
+     * 
+     * @param name The name to check for
+     * @param treeId The tree identifier
+     * @param parentId The parent identifier
+     * @param openedStorages The list containing already opened folder storages
+     * @return The check result or <code>null</code> if no duplicate/conflict found
+     * @throws OXException If name look-up fails
+     */
+    protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         if (!check4Duplicates || null == name) {
-            return;
+            return null;
         }
         /*
-         * Check for duplicate
+         * Check for duplicate (if not real tree)
          */
         final Locale locale = storageParameters.getUser().getLocale();
         final String lcName = name.toLowerCase(locale);
@@ -198,7 +216,8 @@ public abstract class AbstractPerformer {
                 if (localizedName.toLowerCase(locale).equals(lcName)) {
                     final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
                     checkOpenedStorage(realStorage, openedStorages);
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
+                    final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
+                    return new CheckForDuplicateResult(userizedFolder.getID(), e);
                 }
             }
         }
@@ -209,9 +228,11 @@ public abstract class AbstractPerformer {
         final Set<String> i18nNames = namesService.getI18nNamesFor();
         for (final String reservedName : i18nNames) {
             if (reservedName.toLowerCase(locale).equals(lcName)) {
-                throw FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+                final OXException e = FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+                return new CheckForDuplicateResult(null, e);
             }
         }
+        return null;
     }
 
     private void checkOpenedStorage(final FolderStorage storage, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
@@ -436,5 +457,21 @@ public abstract class AbstractPerformer {
     public FolderStorageDiscoverer getFolderStorageDiscoverer() {
         return folderStorageDiscoverer;
     }
+
+    /**
+     * A check-for-duplicate result.
+     */
+    protected static final class CheckForDuplicateResult {
+        
+        protected final OXException error;
+        protected final String optFolderId;
+
+        protected CheckForDuplicateResult(final String optFolderId, final OXException error) {
+            super();
+            this.optFolderId = optFolderId;
+            this.error = error;
+        }
+
+    } // End of class CheckForDuplicateResult
 
 }
