@@ -58,7 +58,7 @@ import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link ScalingQueue} - dsds.
+ * {@link ScalingQueue} - Enhances {@link LinkedBlockingQueue}.
  * <p>
  * Addresses the need to create an unbounded thread pool with minimum and maximum threads.<br>
  * What most people do is the following:
