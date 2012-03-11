@@ -128,11 +128,11 @@ public class MailConverterTest extends AbstractMailTest {
 			"\n" +
 			"Received: from netline.de (comfire.netline.de [192.168.32.1])\n" +
 			"	by ox.netline-is.de (Postfix) with ESMTP id A3A242FB5D4\n" +
-			"	for <thorben@netline-is.de>; Thu, 28 Jun 2007 23:21:39 +0200 (CEST)\n" +
+			"	for <thorben@open-xchange.com>; Thu, 28 Jun 2007 23:21:39 +0200 (CEST)\n" +
 			"Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n" +
 			"	by netline.de with esmtp (Exim)\n" +
 			"	id 1I412Y-0008VX-00\n" +
-			"	for thorben@netline-is.de; Thu, 28 Jun 2007 22:56:34 +0200\n" +
+			"	for thorben@open-xchange.com; Thu, 28 Jun 2007 22:56:34 +0200\n" +
 			"Received: from mail.netline-is.de ([10.20.30.2] helo=netline.de)\n" +
 			"	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n" +
 			"	id 1I41Po-0005FL-00\n" +

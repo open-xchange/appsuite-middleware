@@ -52,7 +52,7 @@ package com.openexchange.tools.file;
 /**
  * Replacing of tags in TemplateParser takes place through the methods of this interface.
  *
- * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
+ * @author <a href="mailto:m.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface TagFiller {
 

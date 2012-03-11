@@ -115,7 +115,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link Contacts}
  *
- * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public final class Contacts {
 

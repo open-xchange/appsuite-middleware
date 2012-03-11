@@ -52,7 +52,7 @@ package com.openexchange.tools.encoding;
 /**
  * Conversion methods for strings with hexadezimal coded bytes.
  *
- * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
+ * @author <a href="mailto:m.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Hex {
 

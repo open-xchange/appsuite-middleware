@@ -62,7 +62,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * ContactSql
- * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public interface ContactSql {
 

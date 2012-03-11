@@ -89,7 +89,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * <p>
  * This implementation is <b>not</b> designed for multi-threaded access and therefore is not thread-safe.
  *
- * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactMySql implements ContactSql {
