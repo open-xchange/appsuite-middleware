@@ -98,7 +98,7 @@ public final class UnifiedInboxFolderConverter {
         tmp.setRootFolder(true);
         tmp.setExists(true);
         tmp.setSeparator('/');
-        // Only the default folder contains subfolders, to be more precise it only contains the INBOX folder.
+        // Only the default folder contains subfolders
         tmp.setSubfolders(true);
         tmp.setSubscribedSubfolders(true);
         tmp.setFullname(MailFolder.DEFAULT_FOLDER_ID);
