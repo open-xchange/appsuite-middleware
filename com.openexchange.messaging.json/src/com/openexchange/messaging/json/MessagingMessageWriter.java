@@ -58,13 +58,13 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.Log;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
@@ -348,12 +348,12 @@ public class MessagingMessageWriter {
     public MessagingMessageWriter() {
         super();
         // Header writers
-        headerWriters = new ConcurrentLinkedQueue<MessagingHeaderWriter>();
+        headerWriters = new Java7ConcurrentLinkedQueue<MessagingHeaderWriter>();
         headerWriters.add(new ContentTypeWriter());
         headerWriters.add(new ContentDispositionWriter());
         headerWriters.add(new AddressHeaderWriter());
         // Content writers
-        contentWriters = new ConcurrentLinkedQueue<MessagingContentWriter>();
+        contentWriters = new Java7ConcurrentLinkedQueue<MessagingContentWriter>();
         contentWriters.add(new StringContentRenderer());
         contentWriters.add(new BinaryContentRenderer());
         contentWriters.add(new ReferenceContentRenderer());

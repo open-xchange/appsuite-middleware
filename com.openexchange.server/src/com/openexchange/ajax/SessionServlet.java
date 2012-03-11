@@ -58,7 +58,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -87,6 +86,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
@@ -122,7 +122,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private static final Queue<IPRange> RANGES = new ConcurrentLinkedQueue<IPRange>();
+    private static final Queue<IPRange> RANGES = new Java7ConcurrentLinkedQueue<IPRange>();
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 

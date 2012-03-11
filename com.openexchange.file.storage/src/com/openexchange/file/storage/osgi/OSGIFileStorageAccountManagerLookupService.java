@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -67,6 +66,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 
 /**
  * {@link OSGIFileStorageAccountManagerLookupService}
@@ -89,7 +89,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     /**
      * The tracker instance.
      */
-    private ServiceTracker tracker;
+    private ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
 
     final OSGIEventAdminLookup eventAdminLookup;
 
@@ -98,7 +98,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      */
     public OSGIFileStorageAccountManagerLookupService(final OSGIEventAdminLookup eventAdminLookup) {
         super();
-        providers = new ConcurrentLinkedQueue<FileStorageAccountManagerProvider>();
+        providers = new Java7ConcurrentLinkedQueue<FileStorageAccountManagerProvider>();
         this.eventAdminLookup = eventAdminLookup;
     }
 
@@ -109,7 +109,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      */
     public void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, FileStorageAccountManagerProvider.class.getName(), new Customizer(context));
+            tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new Customizer(context));
             tracker.open();
         }
     }
@@ -168,7 +168,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         return candidate.getAccountManagerFor(service);
     }
 
-    private final class Customizer implements ServiceTrackerCustomizer {
+    private final class Customizer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
         private final BundleContext context;
 
@@ -178,10 +178,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
-            if ((service instanceof FileStorageAccountManagerProvider)) {
-                final FileStorageAccountManagerProvider addMe = (FileStorageAccountManagerProvider) service;
+        public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
+            final FileStorageAccountManagerProvider service = context.getService(reference);
+            {
+                final FileStorageAccountManagerProvider addMe = service;
                 synchronized (providers) {
                     if (!providers.contains(addMe)) {
                         providers.add(addMe);
@@ -214,19 +214,17 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
             if (null != service) {
                 try {
-                    if (service instanceof FileStorageAccountManagerProvider) {
-                        final FileStorageAccountManagerProvider removeMe = (FileStorageAccountManagerProvider) service;
-                        synchronized (providers) {
-                            providers.remove(removeMe);
-                        }
+                    final FileStorageAccountManagerProvider removeMe = service;
+                    synchronized (providers) {
+                        providers.remove(removeMe);
                     }
                 } finally {
                     context.ungetService(reference);
