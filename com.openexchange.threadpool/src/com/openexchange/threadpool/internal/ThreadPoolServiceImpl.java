@@ -117,14 +117,8 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
     public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
-        final RejectedExecutionType ret = RejectedExecutionType.getRejectedExecutionType(refusedExecutionBehavior);
-        if (null == ret) {
-            throw new IllegalArgumentException("Unknown refused execution behavior: " + refusedExecutionBehavior);
-        }
         final ThreadPoolServiceImpl newInst =
-            new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize);
-        final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), newInst);
-        newInst.threadPoolExecutor.setRejectedExecutionHandler(reh);
+            new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, refusedExecutionBehavior);
         newInst.threadPoolExecutor.setBlocking(blocking);
         return newInst;
     }
@@ -146,20 +140,42 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize) {
+    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final String refusedExecutionBehavior) {
         final QueueType queueType = QueueType.getQueueType(workQueue);
         if (null == queueType) {
             throw new IllegalArgumentException("Unknown queue type: " + workQueue);
         }
+        final RejectedExecutionType ret = RejectedExecutionType.getRejectedExecutionType(refusedExecutionBehavior);
+        if (null == ret) {
+            throw new IllegalArgumentException("Unknown refused execution behavior: " + refusedExecutionBehavior);
+        }
         this.corePoolSize = getCorePoolSize(corePoolSize);
-        threadPoolExecutor =
-            new CustomThreadPoolExecutor(
-                queueType.isFixedSize() ? maximumPoolSize : this.corePoolSize,
-                maximumPoolSize,
-                keepAliveTime,
-                TimeUnit.MILLISECONDS,
-                queueType.newWorkQueue(workQueueSize),
-                new CustomThreadFactory("OXWorker-"));
+        if (QueueType.LINKED.equals(queueType) && corePoolSize < maximumPoolSize) {
+            final ScalingQueue scalingQueue = workQueueSize > 0 ? new ScalingQueue(workQueueSize) : new ScalingQueue();
+            threadPoolExecutor =
+                new CustomThreadPoolExecutor(
+                    this.corePoolSize,
+                    maximumPoolSize,
+                    keepAliveTime,
+                    TimeUnit.MILLISECONDS,
+                    scalingQueue,
+                    new CustomThreadFactory("OXWorker-"));
+            scalingQueue.setThreadPoolExecutor(threadPoolExecutor);
+            scalingQueue.setThreadPool(this);
+            final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), this);
+            threadPoolExecutor.setRejectedExecutionHandler(scalingQueue.createRejectedExecutionHandler(reh));
+        } else {
+            threadPoolExecutor =
+                new CustomThreadPoolExecutor(
+                    queueType.isFixedSize() ? maximumPoolSize : this.corePoolSize,
+                    maximumPoolSize,
+                    keepAliveTime,
+                    TimeUnit.MILLISECONDS,
+                    queueType.newWorkQueue(workQueueSize),
+                    new CustomThreadFactory("OXWorker-"));
+            final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), this);
+            threadPoolExecutor.setRejectedExecutionHandler(reh);
+        }
     }
 
     private static int getCorePoolSize(final int desiredCorePoolSize) {
