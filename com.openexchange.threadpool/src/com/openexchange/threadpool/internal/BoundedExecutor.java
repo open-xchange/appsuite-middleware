@@ -49,71 +49,62 @@
 
 package com.openexchange.threadpool.internal;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 
 /**
- * {@link QueueProvider} - Provider for appropriate queue instance dependent on JRE version.
- * <p>
- * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
- *
+ * {@link BoundedExecutor} - Accomplishes the saturation policy to make execute block when the work queue is full.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class QueueProvider {
+public final class BoundedExecutor {
 
-    private static QueueProvider INSTANCE = new QueueProvider();
+    private final Executor executor;
+
+    private final Semaphore semaphore;
 
     /**
-     * Gets the {@link QueueProvider} instance.
-     *
-     * @return The {@link QueueProvider} instance
+     * Initializes a new {@link BoundedExecutor}.
+     * 
+     * @param exec The executor to delegate execution to
+     * @param bound The capacity boundary; actually the pool size plus the number of queued tasks you want to allow
      */
-    public static QueueProvider getInstance() {
-        return INSTANCE;
+    public BoundedExecutor(final Executor exec, final int bound) {
+        super();
+        this.executor = exec;
+        this.semaphore = new Semaphore(bound);
     }
 
     /**
-     * Gets a newly created synchronous queue.
-     *
-     * @param <V> The queue's type
-     * @return A newly created synchronous queue
+     * Submits specified task to executor; waits if no queue space or worker thread is immediately available.
+     * 
+     * @param command The command to submit
+     * @throws InterruptedException If interrupted while waiting for queue space or thread to become available
+     * @throws RejectedExecutionException If given command cannot be accepted for execution.
      */
-    public <V> BlockingQueue<V> newSynchronousQueue() {
-        return new SynchronousQueue<V>();
+    public void submitTask(final Runnable command) throws InterruptedException {
+        if (null == command) {
+            return;
+        }
+        final Semaphore semaphore = this.semaphore;
+        semaphore.acquire();
+        try {
+            executor.execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        command.run();
+                    } finally {
+                        semaphore.release();
+                    }
+                }
+            });
+        } catch (final RejectedExecutionException e) {
+            semaphore.release();
+            throw e;
+        }
     }
 
-    /**
-     * Gets a newly created synchronous queue.
-     *
-     * @param <V> The queue's type
-     * @param clazz The queue's type class
-     * @return A newly created synchronous queue
-     */
-    public <V extends Object> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
-        return new SynchronousQueue<V>();
-    }
-
-    /**
-     * Gets a newly created linked queue.
-     *
-     * @param <V> The queue's type
-     * @param fixedCapacity The fixed capacity
-     * @return A newly created linked queue
-     */
-    public final <V> BlockingQueue<V> newLinkedQueue(final int fixedCapacity) {
-        return fixedCapacity > 0 ? new LinkedBlockingQueue<V>(fixedCapacity) : new LinkedBlockingQueue<V>();
-    }
-
-    /**
-     * Gets a newly created linked queue.
-     *
-     * @param <V> The queue's type
-     * @param clazz The queue's type class
-     * @param fixedCapacity The fixed capacity
-     * @return A newly created linked queue
-     */
-    public final <V extends Object> BlockingQueue<V> newLinkedQueue(final Class<? extends V> clazz, final int fixedCapacity) {
-        return fixedCapacity > 0 ? new LinkedBlockingQueue<V>(fixedCapacity) : new LinkedBlockingQueue<V>();
-    }
 }

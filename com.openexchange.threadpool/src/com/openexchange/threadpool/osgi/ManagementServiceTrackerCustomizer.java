@@ -65,7 +65,7 @@ import com.openexchange.threadpool.internal.ThreadPoolInformation;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
     private final BundleContext context;
 
@@ -86,32 +86,28 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        if (!ManagementService.class.isInstance(service)) {
-            context.ungetService(reference);
-            return null;
-        }
+    public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+        final ManagementService service = context.getService(reference);
         /*
          * Register MBean for thread pool
          */
-        registerCacheMBean((ManagementService) service);
+        registerCacheMBean(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        if (null != service && ManagementService.class.isInstance(service)) {
+    public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
+        if (null != service) {
             try {
                 /*
                  * Unregister MBean for thread pool
                  */
-                unregisterCacheMBean((ManagementService) service);
+                unregisterCacheMBean(service);
             } finally {
                 context.ungetService(reference);
             }

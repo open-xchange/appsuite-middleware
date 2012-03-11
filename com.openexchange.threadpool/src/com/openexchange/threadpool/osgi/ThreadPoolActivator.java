@@ -65,7 +65,6 @@ import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.timer.TimerService;
@@ -97,23 +96,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.threadpool");
-            }
-            /*
-             * Proper synchronous queue
-             */
-            String property = System.getProperty("java.specification.version");
-            if (null == property) {
-                property = System.getProperty("java.runtime.version");
-                if (null == property) {
-                    // JRE not detectable, use fallback
-                    QueueProvider.initInstance(false);
-                } else {
-                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
-                    QueueProvider.initInstance(!property.startsWith("1.5"));
-                }
-            } else {
-                // "java.specification.version=1.5" OR "java.specification.version=1.6"
-                QueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
             configureLogProperties();
             /*
@@ -215,10 +197,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                     threadPool = null;
                 }
             }
-            /*
-             * Drop queue provider
-             */
-            QueueProvider.releaseInstance();
         } catch (final Exception e) {
             LOG.error("Failed shut-down of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
