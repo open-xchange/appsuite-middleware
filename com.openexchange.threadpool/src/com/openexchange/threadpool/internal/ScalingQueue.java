@@ -236,7 +236,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
     @Override
     public boolean offer(final Runnable o) {
         final int allWorkingThreads = executor.getActiveCount() + super.size();
-        return allWorkingThreads < executor.getPoolSize() && super.offer(o);
+        return ((allWorkingThreads < executor.getPoolSize()) && super.offer(o));
     }
 
 }
