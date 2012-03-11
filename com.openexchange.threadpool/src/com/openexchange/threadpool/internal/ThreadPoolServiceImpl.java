@@ -117,10 +117,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
     public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
-        final ThreadPoolServiceImpl newInst =
-            new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, refusedExecutionBehavior);
-        newInst.threadPoolExecutor.setBlocking(blocking);
-        return newInst;
+        return new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, blocking, refusedExecutionBehavior);
     }
 
     private final CustomThreadPoolExecutor threadPoolExecutor;
@@ -140,7 +137,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final String refusedExecutionBehavior) {
+    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
         final QueueType queueType = QueueType.getQueueType(workQueue);
         if (null == queueType) {
             throw new IllegalArgumentException("Unknown queue type: " + workQueue);
@@ -164,6 +161,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             scalingQueue.setThreadPool(this);
             final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), this);
             threadPoolExecutor.setRejectedExecutionHandler(scalingQueue.createRejectedExecutionHandler(reh));
+            threadPoolExecutor.setBlocking(false);
         } else {
             threadPoolExecutor =
                 new CustomThreadPoolExecutor(
@@ -175,6 +173,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     new CustomThreadFactory("OXWorker-"));
             final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), this);
             threadPoolExecutor.setRejectedExecutionHandler(reh);
+            threadPoolExecutor.setBlocking(blocking);
         }
     }
 
