@@ -163,9 +163,9 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             return true;
         }
         boolean retval = true;
-        final char[] chars = s.toCharArray();
-        for (int i = 0; i < chars.length && retval; i++) {
-            retval = Character.isWhitespace(chars[i]);
+        final int length = s.length();
+        for (int i = 0; i < length && retval; i++) {
+            retval = Character.isWhitespace(s.charAt(i));
         }
         return retval;
     }
