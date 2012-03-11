@@ -107,6 +107,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
@@ -577,7 +578,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final Boolean spam_filter_enabled = usrdata.getGui_spam_filter_enabled();
             if (null != spam_filter_enabled) {
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-                if (spam_filter_enabled) {
+                if (spam_filter_enabled.booleanValue()) {
                     tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 } else {
                     tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
@@ -596,64 +597,134 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.executeUpdate();
                 folder_update.close();
             }
-            final String mailfolderdrafts = usrdata.getMail_folder_drafts_name();
-            if (null != mailfolderdrafts) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_drafts = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfolderdrafts);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
+            {
+                final String mailfolderdrafts = usrdata.getMail_folder_drafts_name();
+                if (null != mailfolderdrafts) {
+                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_drafts = ? WHERE cid = ? AND user = ?");
+                    folder_update.setString(1, mailfolderdrafts);
+                    folder_update.setInt(2, contextId);
+                    folder_update.setInt(3, userId);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+
+                    folder_update =
+                        con.prepareStatement("UPDATE user_mail_account SET drafts = ?, drafts_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, mailfolderdrafts);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
             }
-            final String mailfoldersent = usrdata.getMail_folder_sent_name();
-            if (null != mailfoldersent) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_sent = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfoldersent);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
+            {
+                final String mailfoldersent = usrdata.getMail_folder_sent_name();
+                if (null != mailfoldersent) {
+                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_sent = ? WHERE cid = ? AND user = ?");
+                    folder_update.setString(1, mailfoldersent);
+                    folder_update.setInt(2, contextId);
+                    folder_update.setInt(3, userId);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+
+                    folder_update =
+                        con.prepareStatement("UPDATE user_mail_account SET sent = ?, sent_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, mailfoldersent);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
             }
-            final String mailfolderspam = usrdata.getMail_folder_spam_name();
-            if (null != mailfolderspam) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_spam = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfolderspam);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
+            {
+                final String mailfolderspam = usrdata.getMail_folder_spam_name();
+                if (null != mailfolderspam) {
+                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_spam = ? WHERE cid = ? AND user = ?");
+                    folder_update.setString(1, mailfolderspam);
+                    folder_update.setInt(2, contextId);
+                    folder_update.setInt(3, userId);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+
+                    folder_update =
+                        con.prepareStatement("UPDATE user_mail_account SET spam = ?, spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, mailfolderspam);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
             }
-            final String mailfoldertrash = usrdata.getMail_folder_trash_name();
-            if (null != mailfoldertrash) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_trash = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfoldertrash);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
+            {
+                final String mailfoldertrash = usrdata.getMail_folder_trash_name();
+                if (null != mailfoldertrash) {
+                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_trash = ? WHERE cid = ? AND user = ?");
+                    folder_update.setString(1, mailfoldertrash);
+                    folder_update.setInt(2, contextId);
+                    folder_update.setInt(3, userId);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+
+                    folder_update =
+                        con.prepareStatement("UPDATE user_mail_account SET trash = ?, trash_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, mailfoldertrash);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
             }
-            final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
-            if (null != mailfolderconfirmedspam) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfolderconfirmedspam);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
+            {
+                final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
+                if (null != mailfolderconfirmedspam) {
+                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
+                    folder_update.setString(1, mailfolderconfirmedspam);
+                    folder_update.setInt(2, contextId);
+                    folder_update.setInt(3, userId);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+    
+                    folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_spam = ?, confirmed_spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, mailfolderconfirmedspam);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
             }
-            final String mailfolderconfirmedham = usrdata.getMail_folder_confirmed_ham_name();
-            if (null != mailfolderconfirmedham) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfolderconfirmedham);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
+            {
+                final String mailfolderconfirmedham = usrdata.getMail_folder_confirmed_ham_name();
+                if (null != mailfolderconfirmedham) {
+                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
+                    folder_update.setString(1, mailfolderconfirmedham);
+                    folder_update.setInt(2, contextId);
+                    folder_update.setInt(3, userId);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+
+                    folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_ham = ?, confirmed_ham_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, mailfolderconfirmedham);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
             }
             final Integer uploadFileSizeLimit = usrdata.getUploadFileSizeLimit();
             if (null != uploadFileSizeLimit) {
                 folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = ? WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, uploadFileSizeLimit);
+                folder_update.setInt(1, uploadFileSizeLimit.intValue());
                 folder_update.setInt(2, contextId);
                 folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
@@ -668,7 +739,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final Integer uploadFileSizeLimitPerFile = usrdata.getUploadFileSizeLimitPerFile();
             if (null != uploadFileSizeLimitPerFile) {
                 folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = ? WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, uploadFileSizeLimitPerFile);
+                folder_update.setInt(1, uploadFileSizeLimitPerFile.intValue());
                 folder_update.setInt(2, contextId);
                 folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
@@ -887,7 +958,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         try {
             ps = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
-            ps.setInt(1, ctx.getId());
+            ps.setInt(1, ctx.getId().intValue());
             final ResultSet rs = ps.executeQuery();
             int admin_id = 0;
             boolean mustMapAdmin = false;
@@ -912,7 +983,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (usrdata.getPassword_expired() == null) {
                     usrdata.setPassword_expired(false);
                 }
-                stmt.setInt(5, getintfrombool(usrdata.getPassword_expired()));
+                stmt.setInt(5, getintfrombool(usrdata.getPassword_expired().booleanValue()));
 
                 stmt.setString(6, usrdata.getPrimaryEmail());
 
