@@ -6,7 +6,7 @@
  * 
  * http://creativecommons.org/licenses/by-nc-sa/2.5/
  * 
- * Copyright (C) 2004-2010 Open-Xchange, Inc.
+ * Copyright (C) 2004-2012 Open-Xchange, Inc.
  * Mail: info@open-xchange.com 
  * 
  * @author Viktor Pracht <viktor.pracht@open-xchange.com>
