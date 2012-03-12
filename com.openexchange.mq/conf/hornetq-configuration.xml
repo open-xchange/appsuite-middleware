@@ -64,7 +64,7 @@
          -->
          
          <!-- Socket based -->
-         <param key="host" value="localhost"/>
+         <param key="host" value="0.0.0.0"/>
          <param key="port" value="5445"/>
          <!-- <param key="use-nio" value="true"/> -->
       </acceptor>

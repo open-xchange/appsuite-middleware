@@ -50,6 +50,8 @@
 package com.openexchange.mq.hornetq;
 
 import java.io.Reader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +68,7 @@ import org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory;
 import org.hornetq.core.remoting.impl.invm.InVMConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
+import org.hornetq.core.remoting.impl.netty.TransportConstants;
 import org.hornetq.jms.server.JMSServerConfigParser;
 import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
 import org.hornetq.jms.server.config.JMSConfiguration;
@@ -152,6 +155,20 @@ public final class HornetQServerStartup implements MQServerStartup {
                         final FileConfigurationParser parser = new FileConfigurationParser();
                         parser.setValidateAIO(true);
                         parser.parseMainConfig(e, configuration);
+
+                        {
+                            final Map<String, TransportConfiguration> connectorConfigurations = configuration.getConnectorConfigurations();
+                            for (final TransportConfiguration transportConfiguration : connectorConfigurations.values()) {
+                                final Map<String, Object> params = transportConfiguration.getParams();
+                                final String key = TransportConstants.HOST_PROP_NAME;
+                                final String hostName = (String) params.get(key);
+                                if (null == hostName || "localhost".equals(hostName) || "127.0.0.1".equals(hostName)) {
+                                    final String ipString = toIpString();
+                                    params.put(key, ipString);
+                                }
+                            }
+                        }
+
                         hornetqConfigXml = null; // Help GC
                     }
                     /*
@@ -359,6 +376,25 @@ public final class HornetQServerStartup implements MQServerStartup {
         final DocumentBuilder parser = factory.newDocumentBuilder();
         final Document doc = parser.parse(new InputSource(new UnsynchronizedStringReader(xml)));
         return doc.getDocumentElement();
+    }
+
+    private static String toIpString() {
+        try {
+            final InetAddress addr = InetAddress.getLocalHost();
+            final byte[] ipAddr = addr.getAddress();
+
+            // Convert to dot representation
+            final StringBuilder ipAddrStr = new StringBuilder(16);
+            for (int i = 0; i < ipAddr.length; i++) {
+                if (i > 0) {
+                    ipAddrStr.append('.');
+                }
+                ipAddrStr.append(ipAddr[i] & 0xFF);
+            }
+            return ipAddrStr.toString();
+        } catch (final UnknownHostException e) {
+            return TransportConstants.DEFAULT_HOST;
+        }
     }
 
 }
