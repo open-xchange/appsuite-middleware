@@ -83,7 +83,7 @@ public interface ContactStorage {
      * @return the contact
      * @throws OXException
      */
-    Contact get(int contextID, String folderId, String id) throws OXException;
+//    Contact get(int contextID, String folderId, String id) throws OXException;
     
     /**
      * Gets a contact with specified fields.
@@ -105,7 +105,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(int contextID, String folderId) throws OXException;
+//    Collection<Contact> all(int contextID, String folderId) throws OXException;
 
     /**
      * Gets all contacts with all fields in a folder.
@@ -116,7 +116,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(int contextID, String folderId, SortOptions sortOptions) throws OXException;
+//    Collection<Contact> all(int contextID, String folderId, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets all contacts with specified fields in a folder.
@@ -150,7 +150,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(int contextID, String folderId, String[] ids) throws OXException;
+//    Collection<Contact> list(int contextID, String folderId, String[] ids) throws OXException;
 
     /**
      * Gets a list of contacts with all fields.
@@ -162,7 +162,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(int contextID, String folderId, String[] ids, SortOptions sortOptions) throws OXException;
+//    Collection<Contact> list(int contextID, String folderId, String[] ids, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of contacts with specified fields.
@@ -198,7 +198,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> deleted(int contextID, String folderId, Date since) throws OXException;
+//    Collection<Contact> deleted(int contextID, String folderId, Date since) throws OXException;
 
     /**
      * Gets a list of deleted contacts in a folder with specified fields.
@@ -221,7 +221,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> modified(int contextID, String folderId, Date since) throws OXException;
+//    Collection<Contact> modified(int contextID, String folderId, Date since) throws OXException;
 
     /**
      * Gets a list of modified contacts in a folder with specified fields.
@@ -239,45 +239,49 @@ public interface ContactStorage {
      * Searches for contacts.
      * 
      * @param contextID the context ID
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, SearchTerm<O> term) throws OXException;
+//    <O> Collection<Contact> search(int contextID, String folderId, SearchTerm<O> term) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param contextID the context ID
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
+//    <O> Collection<Contact> search(int contextID, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param contextID the context ID
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException;
+    <O> Collection<Contact> search(int contextID, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param contextID the context ID
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    <O> Collection<Contact> search(int contextID, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.

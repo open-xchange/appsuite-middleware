@@ -54,6 +54,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ColumnOperand;
@@ -86,7 +87,7 @@ public class SearchTest extends ContactStorageTest {
 		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		term.addOperand(new ColumnOperand("uid"));
 		term.addOperand(new ConstantOperand<String>(contact.getUid()));
-		final Collection<Contact> result = getStorage().search(getContextID(), term);
+		final Collection<Contact> result = getStorage().search(getContextID(), folderId, term, ContactField.values());
 		/*
 		 * verify search result
 		 */

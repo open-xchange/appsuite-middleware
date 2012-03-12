@@ -47,57 +47,36 @@
  *
  */
 
-package com.openexchange.contact.osgi;
+package com.openexchange.contact.internal.mapping;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.mail.internet.AddressException;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.internal.ContactServiceImpl;
-import com.openexchange.contact.internal.ContactServiceLookup;
-import com.openexchange.contact.storage.registry.ContactStorageRegistry;
-import com.openexchange.context.ContextService;
-import com.openexchange.folder.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+
 
 /**
- * {@link ContactServiceActivator}
+ * {@link EMailMapping} - Default mapping for email properties in Contacts.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactServiceActivator extends HousekeepingActivator {
-    
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
+public abstract class EMailMapping extends StringMapping {
 
-    /**
-     * Initializes a new {@link ContactServiceActivator}.
-     */
-    public ContactServiceActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.service");
-            ContactServiceLookup.set(this);            
-            super.registerService(ContactService.class, new ContactServiceImpl());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.service\"", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.service");
-        ContactServiceLookup.set(null);            
-        super.stopBundle();
-    }
-    
+	@Override
+	public void validate(final Contact contact) throws OXException {
+		super.validate(contact);
+		if (this.isSet(contact)) {
+			final String value = this.get(contact);
+			if (null != value) {
+				try {
+					new QuotedInternetAddress(value).validate();
+				} catch (final AddressException e) {
+					throw ContactExceptionCodes.INVALID_EMAIL.create(e, value);
+				}
+			}
+		}
+	}
+	
 }

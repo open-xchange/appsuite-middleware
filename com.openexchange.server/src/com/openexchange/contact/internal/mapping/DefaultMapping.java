@@ -47,57 +47,33 @@
  *
  */
 
-package com.openexchange.contact.osgi;
+package com.openexchange.contact.internal.mapping;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.internal.ContactServiceImpl;
-import com.openexchange.contact.internal.ContactServiceLookup;
-import com.openexchange.contact.storage.registry.ContactStorageRegistry;
-import com.openexchange.context.ContextService;
-import com.openexchange.folder.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link ContactServiceActivator}
+ * {@link DefaultMapping} - Default mapping properties in contacts using 
+ * a generic comparison for the <code>copy</code>-and <code>equals</code>-
+ * operations and providing an emtpy validation routine. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactServiceActivator extends HousekeepingActivator {
-    
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
+public abstract class DefaultMapping<T> implements Mapping<T> {
 
-    /**
-     * Initializes a new {@link ContactServiceActivator}.
-     */
-    public ContactServiceActivator() {
-        super();
-    }
+	@Override
+	public void validate(Contact contact) throws OXException {
+	}
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.service");
-            ContactServiceLookup.set(this);            
-            super.registerService(ContactService.class, new ContactServiceImpl());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.service\"", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.service");
-        ContactServiceLookup.set(null);            
-        super.stopBundle();
-    }
-    
+	@Override
+	public boolean equals(Contact contact1, Contact contact2) {
+		final T value1 = this.get(contact1);
+		final T value2 = this.get(contact2);
+        return null == value1 ? null == value2 : value1.equals(value2);
+	}
+	
+	@Override
+	public void copy(Contact from, Contact to) throws OXException {
+		this.set(to, this.get(from));
+	}
 }
