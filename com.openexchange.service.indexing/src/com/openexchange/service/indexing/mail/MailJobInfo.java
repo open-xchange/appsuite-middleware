@@ -49,11 +49,9 @@
 
 package com.openexchange.service.indexing.mail;
 
-
-
 /**
  * {@link MailJobInfo} - Provides necessary information for performing a mail job.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailJobInfo {
@@ -119,23 +117,20 @@ public final class MailJobInfo {
         this.secure = builder.secure;
     }
 
-    
-
     @Override
     public String toString() {
-        final StringBuilder builder2 = new StringBuilder(32);
-        builder2.append("{contextId=").append(contextId).append(", userId=").append(userId).append(", accountId=").append(
-            accountId).append(", ");
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append("{contextId=").append(contextId).append(", userId=").append(userId);
+        sb.append(", accountId=").append(accountId).append(", ");
         if (login != null) {
-            builder2.append("login=").append(login).append(", ");
+            sb.append("login=").append(login).append(", ");
         }
         if (server != null) {
-            builder2.append("server=").append(server).append(", ");
+            sb.append("server=").append(server).append(", ");
         }
-        builder2.append("port=").append(port).append(", secure=").append(secure).append('}');
-        return builder2.toString();
+        sb.append("port=").append(port).append(", secure=").append(secure).append('}');
+        return sb.toString();
     }
-
 
     /**
      * Initializes a new {@link Builder}.
@@ -154,14 +149,23 @@ public final class MailJobInfo {
      * Builds a {@link MailJobInfo} instance.
      */
     public static final class Builder {
+
         protected final int contextId;
+
         protected final int userId;
+
         protected int accountId;
+
         protected String primaryPassword;
+
         protected String login;
+
         protected String password;
+
         protected String server;
+
         protected int port;
+
         protected boolean secure;
 
         /**
