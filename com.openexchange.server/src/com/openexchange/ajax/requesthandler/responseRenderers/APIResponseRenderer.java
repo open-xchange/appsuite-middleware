@@ -55,6 +55,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -121,7 +124,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      */
     public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            if (isRespondWithHTML(req) || req.getParameter("callback") != null) {
+            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || isRespondWithHTML(req) || req.getParameter("callback") != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter("callback");
                 if (callback == null) {
