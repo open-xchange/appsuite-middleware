@@ -56,6 +56,8 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
 import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
+import com.openexchange.context.ContextService;
+import com.openexchange.folder.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -76,7 +78,7 @@ public class ContactServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class };
+        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
     }
     
     @Override

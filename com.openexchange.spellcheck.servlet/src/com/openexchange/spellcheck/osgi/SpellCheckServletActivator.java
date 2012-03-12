@@ -51,24 +51,21 @@ package com.openexchange.spellcheck.osgi;
 
 import static com.openexchange.spellcheck.services.SpellCheckServletServiceRegistry.getServiceRegistry;
 import org.osgi.service.http.HttpService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.servlet.SpellCheckServlet;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link SpellCheckServletActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SpellCheckServletActivator extends HousekeepingActivator {
+public final class SpellCheckServletActivator extends AbstractSessionServletActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class));
 
     private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
-
-    private SessionServletRegistration servletRegistration;
 
     /**
      * Initializes a new {@link SpellCheckServletActivator}
@@ -78,7 +75,7 @@ public final class SpellCheckServletActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
+    protected Class<?>[] getAdditionalNeededServices() {
         return new Class<?>[] { SpellCheckService.class, HttpService.class };
     }
 
@@ -119,7 +116,7 @@ public final class SpellCheckServletActivator extends HousekeepingActivator {
             /*
              * Register spell check servlet to newly available HTTP service
              */
-            servletRegistration = new SessionServletRegistration(context, new SpellCheckServlet(), SC_SRVLT_ALIAS);
+            registerSessionServlet(SC_SRVLT_ALIAS, new SpellCheckServlet());
 
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -134,12 +131,6 @@ public final class SpellCheckServletActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            /*
-             * Unregister spell check servlet
-             */
-            if(servletRegistration != null) {
-                servletRegistration.close();
-            }
             /*
              * Clear service registry
              */

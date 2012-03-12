@@ -49,21 +49,15 @@
 
 package com.openexchange.contact.storage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
+import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.internal.operands.ColumnOperand;
-import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link DefaultContactStorage} - Abstract {@link ContactStorage} implementation.
@@ -73,11 +67,6 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 public abstract class DefaultContactStorage implements ContactStorage {
     
     /**
-     * An overwriting {@link ContactMerger}.
-     */
-    private static final ContactMerger MERGER = new ContactMerger(true);
-    
-    /**
      * Initializes a new {@link DefaultContactStorage}.
      */
     public DefaultContactStorage() {
@@ -85,192 +74,20 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
     
     @Override
-    public Contact get(final int contextID, final String folderId, final String id) throws OXException {
-        return this.get(contextID, folderId, id, allFields());
-    }
-
-    @Override
-    public Collection<Contact> all(final int contextID, final String folderId) throws OXException {
-        return this.all(contextID, folderId, allFields());
-    }
-    
-    @Override
-    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
+    public SearchIterator<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
 		return this.all(contextID, folderId, fields, SortOptions.EMPTY);
     }
 
-	@Override
-	public Collection<Contact> all(int contextID, String folderId, SortOptions sortOptions) throws OXException {
-		return this.all(contextID, folderId, allFields(), sortOptions);
-	}
-
-    /**
-     * Default implementation that uses <code>ContactStorage.search</code> internally. 
-     * Override if applicable for concrete storage implementation.
-     */
-	@Override
-	public Collection<Contact> all(int contextID, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        return this.search(contextID, getSearchTermFor(folderId), fields, sortOptions);
-	}
-
     @Override
-    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since) throws OXException {
-        return this.deleted(contextID, folderId, since, allFields());
-    }
-
-    @Override
-    public Collection<Contact> modified(final int contextID, final String folderId, final Date since) throws OXException {
-        return this.modified(contextID, folderId, since, allFields());
-    }
-
-    @Override
-    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids) throws OXException {
-        return this.list(contextID, folderId, ids, allFields());
-    }
-
-	@Override
-	public Collection<Contact> list(int contextID, String folderId, String[] ids, SortOptions sortOptions) throws OXException {
-    	return this.list(contextID, folderId, ids, allFields(), sortOptions);    	
-	}
-
-    @Override
-    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+    public SearchIterator<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
     	return this.list(contextID, folderId, ids, fields, SortOptions.EMPTY);    	
     }
     
-    /**
-     * Default implementation that uses <code>ContactStorage.search</code> internally. 
-     * Override if applicable for concrete storage implementation.
-     */
 	@Override
-	public Collection<Contact> list(int contextID, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        andTerm.addSearchTerm(getSearchTermFor(folderId));
-        final CompositeSearchTerm idsTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (final String id : ids) {
-            final SingleSearchTerm idTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-            idTerm.addOperand(new ColumnOperand(ContactField.OBJECT_ID.getAjaxName()));
-            idTerm.addOperand(new ConstantOperand<String>(id));
-        }
-        andTerm.addSearchTerm(idsTerm);
-        return this.search(contextID, andTerm, fields, sortOptions);
-	}
-    
-    @Override
-    public <O> Collection<Contact> search(int contextID, SearchTerm<O> term) throws OXException {
-        return this.search(contextID, term, allFields());
-    }
-    
-	@Override
-	public <O> Collection<Contact> search(int contextID, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
-        return this.search(contextID, term, allFields(), sortOptions);
+	public <O> SearchIterator<Contact> search(int contextID, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException {
+        return this.search(contextID, folderId, term, fields, SortOptions.EMPTY);
 	}
 
-	@Override
-	public <O> Collection<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException {
-        return this.search(contextID, term, fields, SortOptions.EMPTY);
-	}
-
-
-    /**
-     * Creates a clone from an existing contact and merges the attributes from another contact into that clone.
-     * 
-     * @param into the original contact that is used as base for the clone
-     * @param from the contact containing the changes to be merged into the clone
-     * @return the merged contact
-     */
-    protected static Contact merge(final Contact into, final Contact from) {
-        if (null == into) {
-            throw new IllegalArgumentException("into");
-        } else if (null == from) {
-            throw new IllegalArgumentException("from");
-        }        
-        return MERGER.merge(into, from);
-    }
-    
-    /**
-     * 
-     * @param into
-     * @param from
-     * @return
-     */
-    protected static List<Contact> merge(final List<Contact> into, final List<Contact> from) {
-        if (null == into) {
-            throw new IllegalArgumentException("into");
-        } else if (null == from) {
-            throw new IllegalArgumentException("from");
-        }
-        return MERGER.merge(into, from);
-    }
-
-    protected static List<Contact> mergeByID(final List<Contact> into, final List<Contact> from) {
-        if (null == into) {
-            throw new IllegalArgumentException("into");
-        } else if (null == from) {
-            throw new IllegalArgumentException("from");
-        }        
-        for (final Contact fromData : from) {
-            final int objectID = fromData.getObjectID();
-            for (int i = 0; i < into.size(); i++) {
-                final Contact intoData = into.get(i);
-                if (objectID == intoData.getObjectID()) {
-                    into.set(i, merge(intoData, fromData));
-                    break;
-                }
-            }
-        }
-        return into;
-    }
-    
-    /**
-     * Gets the contact fields that are actually set in the supplied contact, thus the <code>Contact.contains(int field)</code> method 
-     * actually return <code>true</code> for.
-     *  
-     * @param contact the contact
-     * @return the assigned contact fields
-     */
-    protected static ContactField[] getAssignedFields(final Contact contact) {
-        if (null == contact) {
-            throw new IllegalArgumentException("contact");
-        }
-        final List<ContactField> setFields = new ArrayList<ContactField>(); 
-        for (final ContactField field : allFields()) {
-            if (false == field.isVirtual() && contact.contains(field.getNumber())) {
-                setFields.add(field);
-            }
-        }        
-        return setFields.toArray(new ContactField[setFields.size()]);
-    }
-
-    protected static ContactField[] getUpdatedFields(final Contact original, final Contact update) {
-        if (null == original) {
-            throw new IllegalArgumentException("original");
-        }
-        if (null == update) {
-            throw new IllegalArgumentException("update");
-        }
-        final List<ContactField> updatedFields = new ArrayList<ContactField>(); 
-        for (final ContactField field : allFields()) {
-            if (false == field.isVirtual() && update.contains(field.getNumber())) {
-                final Object originalValue = original.get(field.getNumber());
-                final Object newValue = update.get(field.getNumber());
-                if (null == originalValue && null != newValue || null != originalValue && false == originalValue.equals(newValue)) {
-                    updatedFields.add(field);                    
-                }
-            }
-        }        
-        return updatedFields.toArray(new ContactField[updatedFields.size()]);
-    }
-
-    /**
-     * Gets an array containing the column numbers of all contact fields.
-     * 
-     * @return the columns
-     */
-    protected static int[] allColumns() {
-        return asColumns(allFields());
-    }
-    
     /**
      * Gets all contact fields.
      * 
@@ -280,29 +97,8 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return ContactField.values();
     }
     
-    /**
-     * Gets an array containing the column numbers of the supplied contact fields.
-     * 
-     * @param fields the fields
-     * @return the columns, or <code>null</code> if no fields were supplied
-     */
-    protected static int[] asColumns(final ContactField[] fields) {
-        if (null != fields) {
-            final int[] columns = new int[fields.length];
-            for (int i = 0; i < fields.length; i++) {
-                columns[i] = fields[i].getNumber();
-            }            
-            return columns;
-        } else {
-            return null;
-        }
+    protected static SearchIterator<Contact> getSearchIterator(final Collection<Contact> contacts) {
+    	return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
     
-    private static SingleSearchTerm getSearchTermFor(final String folderId) {
-        final SingleSearchTerm folderIdTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-        folderIdTerm.addOperand(new ColumnOperand(ContactField.FOLDER_ID.getAjaxName()));
-        folderIdTerm.addOperand(new ConstantOperand<String>(folderId));
-        return folderIdTerm;
-    }
-
 }

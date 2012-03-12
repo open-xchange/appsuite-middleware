@@ -63,8 +63,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.contact.storage.SortOptions;
-import com.openexchange.contact.storage.SortOrder;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
@@ -163,6 +163,9 @@ public class Executor {
         }
         if (null != sortOptions && SortOptions.EMPTY != sortOptions) {
         	stringBuilder.append(' ').append(getOrderClause(sortOptions));
+        	if (0 < sortOptions.getLimit()) {
+            	stringBuilder.append(' ').append(getLimitClause(sortOptions));
+        	}
         }
         stringBuilder.append(';');
         /*
@@ -349,7 +352,7 @@ public class Executor {
         return this.insertFrom(connection, from, to, contextID, objectID, Long.MIN_VALUE);
     }
             
-    public int update(final Connection connection, final Table table, final long minLastModified, final Contact contact, 
+    public int update(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified, final Contact contact, 
     		final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
@@ -360,8 +363,8 @@ public class Executor {
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             Mappers.CONTACT.setParameters(stmt, contact, fields);
-            stmt.setInt(1 + fields.length, contact.getContextId());
-            stmt.setInt(2 + fields.length, contact.getObjectID());
+            stmt.setInt(1 + fields.length, contextID);
+            stmt.setInt(2 + fields.length, objectID);
             stmt.setLong(3 + fields.length, minLastModified);
             return logExecuteUpdate(stmt);
         } finally {
@@ -423,6 +426,20 @@ public class Executor {
     			for (int i = 1; i < order.length; i++) {
     				stringBuilder.append(' ').append(getOrderClause(order[i], collator));
     			}
+    		}
+    	}
+    	return stringBuilder.toString();
+    }
+    
+    private static String getLimitClause(final SortOptions sortOptions) throws OXException {
+    	final StringBuilder stringBuilder = new StringBuilder();
+    	if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+    		if (0 < sortOptions.getLimit()) {
+    			stringBuilder.append("LIMIT ");
+    			if (0 < sortOptions.getRangeStart()) {
+    				stringBuilder.append(sortOptions.getRangeStart()).append(',');
+    			}
+    			stringBuilder.append(sortOptions.getLimit());
     		}
     	}
     	return stringBuilder.toString();

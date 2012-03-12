@@ -50,7 +50,7 @@
 package com.openexchange.halo.mail.osgi;
 
 import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.mail.OxEmailDataSource;
+import com.openexchange.halo.mail.EmailContactHalo;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -64,7 +64,7 @@ public class MailHaloActivator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		registerService(HaloContactDataSource.class, new OxEmailDataSource(this));
+		registerService(HaloContactDataSource.class, new EmailContactHalo(this));
 	}
 
 }

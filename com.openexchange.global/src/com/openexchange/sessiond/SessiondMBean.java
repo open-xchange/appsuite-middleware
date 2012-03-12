@@ -74,4 +74,7 @@ public interface SessiondMBean {
      */
     public void clearContextSessions(int contextId);
 
+    int[] getNumberOfShortTermSessions();
+
+    int[] getNumberOfLongTermSessions();
 }

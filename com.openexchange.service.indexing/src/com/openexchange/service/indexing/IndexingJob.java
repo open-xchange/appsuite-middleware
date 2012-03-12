@@ -53,8 +53,8 @@ import java.io.Serializable;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IndexingJob} - Represents an arbitrary job described only using POJO (plain old Java objects) for the sake of reliability and
- * consistency throughout clustered nodes.
+ * {@link IndexingJob} - Represents an arbitrary, {@link java.io.Serializable serializable} job described only using POJO (plain old Java
+ * objects) for the sake of reliability and consistency throughout clustered nodes.
  * <p>
  * Specify how a job is supposed to be performed by {@link #getBehavior()} method.
  * 
@@ -65,7 +65,7 @@ public interface IndexingJob extends Serializable {
     /**
      * The job's behavior: Either {@link #CONSUMER_RUNS consumer-runs} (low-cost) or {@link #DELEGATE delegate} (high-cost) job.
      */
-    public static enum Behavior {
+    public static enum Behavior implements Serializable {
         /**
          * Consumer runs associated job (default). Appropriate for small jobs which are performed in a timely manner.
          */
@@ -75,6 +75,37 @@ public interface IndexingJob extends Serializable {
          */
         DELEGATE, ;
     }
+
+    /**
+     * A job's origin.
+     */
+    public static enum Origin implements Serializable {
+        /**
+         * Active user interaction
+         */
+        ACTIVE,
+        /**
+         * Initiated by passive operation.
+         */
+        PASSIVE
+    }
+
+    /**
+     * The default priority is <code>4</code>.
+     * 
+     * @see javax.jms.Message#DEFAULT_PRIORITY
+     */
+    public static final int DEFAULT_PRIORITY = 4;
+
+    /**
+     * The default behavior is {@link Behavior#CONSUMER_RUNS consumer-runs}.
+     */
+    public static final Behavior DEFAULT_BEHAVIOR = Behavior.CONSUMER_RUNS;
+
+    /**
+     * The default origin is {@link Origin#ACTIVE active}.
+     */
+    public static final Origin DEFAULT_ORIGIN = Origin.ACTIVE;
 
     /**
      * The empty class array.
@@ -123,6 +154,20 @@ public interface IndexingJob extends Serializable {
      * @param priority This job's priority
      */
     void setPriority(int priority);
+
+    /**
+     * Gets this job's time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT).
+     * 
+     * @return The time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     */
+    long getTimeStamp();
+
+    /**
+     * Gets this job's origin
+     * 
+     * @return The origin
+     */
+    Origin getOrigin();
 
     /**
      * Gets this job's {@link Behavior behavior}.

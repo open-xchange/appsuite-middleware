@@ -49,11 +49,9 @@
 
 package com.openexchange.subscribe.json.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.json.SubscriptionMultipleFactory;
@@ -61,20 +59,17 @@ import com.openexchange.subscribe.json.SubscriptionServlet;
 import com.openexchange.subscribe.json.SubscriptionSourceMultipleFactory;
 import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
 import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscoveryService;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class ServletActivator extends HousekeepingActivator {
+public class ServletActivator extends AbstractSessionServletActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServletActivator.class));
 
     private static final String SUBSCRIPTION_ALIAS = "ajax/subscriptions";
 
     private static final String SUBSCRIPTION_SOURCES_ALIAS = "ajax/subscriptionSources";
-
-    private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
 
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
 
@@ -83,7 +78,7 @@ public class ServletActivator extends HousekeepingActivator {
     private WhiteboardSecretService secretService;
 
     @Override
-    protected Class<?>[] getNeededServices() {
+    protected Class<?>[] getAdditionalNeededServices() {
         return NEEDED_SERVICES;
     }
 
@@ -95,21 +90,11 @@ public class ServletActivator extends HousekeepingActivator {
     private void registerServlets() {
         try {
             //servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
-            servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionServlet(), SUBSCRIPTION_ALIAS));
-            for (final SessionServletRegistration reg : servletRegistrations) {
-                reg.open();
-            }
+            registerSessionServlet(SUBSCRIPTION_ALIAS, new SubscriptionServlet());
             LOG.info("Registered Servlets for Subscriptions");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    private void deregisterServlets() {
-        for (final SessionServletRegistration reg : servletRegistrations) {
-            reg.close();
-        }
-        LOG.info("Deregistered Servlets for Subscriptions");
     }
 
     @Override
@@ -145,7 +130,6 @@ public class ServletActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        deregisterServlets();
         discoverer.close();
         destroyMultipleHandler();
     }

@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.proxy.servlet.Constants;
@@ -68,14 +68,13 @@ import com.openexchange.proxy.servlet.services.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link ProxyServletActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ProxyServletActivator extends HousekeepingActivator {
+public class ProxyServletActivator extends AbstractSessionServletActivator {
 
     private List<ServiceTracker<?,?>> trackers;
 
@@ -88,8 +87,10 @@ public class ProxyServletActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy.servlet");
             }
+            
+            registerSessionServlet(Constants.PATH, new ProxyServlet());
+            
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
-            trackers.add(new SessionServletRegistration(context, new ProxyServlet(), Constants.PATH));
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
             trackers.add(new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, ServiceRegistry.getInstance(), SessiondService.class)));
             for (final ServiceTracker<?,?> serviceTracker : trackers) {
@@ -139,8 +140,7 @@ public class ProxyServletActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
+    protected Class<?>[] getAdditionalNeededServices() {
         return null;
     }
 

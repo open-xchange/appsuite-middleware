@@ -51,11 +51,21 @@ package com.openexchange.contact.storage.rdb.internal;
 
 import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.contact.TruncatedContactAttribute;
+import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Charsets;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Tools} - Provides constants and utility methods to create SQL statements.
@@ -64,6 +74,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public final class Tools {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
+	
     /**
      * Constructs an array containing the object IDs of the supplied {@link Contact}s.
      *  
@@ -108,10 +120,53 @@ public final class Tools {
         }
         return parametersBuilder.toString();
     }
-      
-    public static OXException truncation(final Connection connection, final DataTruncation e, final Contact contact, final Table table) {
-        //TODO
-        return ContactExceptionCodes.DATA_TRUNCATION.create();
+
+    private static int getMaximumSize(final Connection connection, final Table table, final String columnLabel) {
+    	try {
+			return DBUtils.getColumnSize(connection, table.toString(), columnLabel);
+        } catch (final SQLException x) {
+            LOG.error(x.getMessage(), x);
+            return 0;
+        }
+    }
+    
+    public static OXException truncation(final Connection connection, final DataTruncation e, final Contact contact, final Table table)
+    		throws OXException {
+        final String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
+        final StringBuilder stringBuilder = new StringBuilder();
+        /*
+         * create truncated attributes
+         */
+        final OXException.Truncated[] truncatedAttributes = new OXException.Truncated[truncatedColumns.length];
+        for (int i = 0; i < truncatedColumns.length; i++) {
+        	final String columnLabel = truncatedColumns[i];
+        	final int maximumSize =  getMaximumSize(connection, table, columnLabel);
+        	final ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
+    		final DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
+    		final Object object = mapping.get(contact);
+			final int actualSize = null != object && String.class.isInstance(object) ? 
+					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
+			stringBuilder.append(mapping.getReadableName());       		        		
+			truncatedAttributes[i] = new TruncatedContactAttribute(field, maximumSize, actualSize);
+        	if (i != truncatedColumns.length - 1) {
+        		stringBuilder.append(", ");
+        	}
+		}
+        /*
+         * create truncation exception
+         */
+        final OXException truncationException;
+        if (truncatedAttributes.length > 0) {
+            final OXException.Truncated truncated = truncatedAttributes[0];
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(truncated.getMaxSize()),
+                Integer.valueOf(truncated.getLength()));
+        } else {
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
+        }
+        for (final OXException.Truncated truncated : truncatedAttributes) {
+            truncationException.addProblematic(truncated);
+        }
+        return truncationException;
     }
     
     private Tools() {

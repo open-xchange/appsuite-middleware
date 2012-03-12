@@ -56,10 +56,10 @@ package com.openexchange.service.indexing;
  */
 public abstract class StandardIndexingJob implements IndexingJob {
 
-    private static final long serialVersionUID = -2170181015109576781L;
+    private static final long serialVersionUID = -603520334844563670L;
 
     /**
-     * The job's priority; initially <code>4</code>.
+     * The job's priority; initially <code>4</code> (default).
      */
     protected volatile int priority;
 
@@ -71,17 +71,39 @@ public abstract class StandardIndexingJob implements IndexingJob {
     protected volatile Behavior behavior;
 
     /**
+     * The job' origin.
+     */
+    protected volatile Origin origin;
+
+    /**
+     * The time stamp.
+     */
+    protected final long timeStamp;
+
+    /**
      * Initializes a new {@link StandardIndexingJob}.
      */
     protected StandardIndexingJob() {
         super();
-        priority = 4; // Default priority
-        behavior = Behavior.CONSUMER_RUNS;
+        timeStamp = System.currentTimeMillis();
+        priority = DEFAULT_PRIORITY;
+        behavior = DEFAULT_BEHAVIOR;
+        origin = DEFAULT_ORIGIN;
     }
 
     @Override
     public Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
+    }
+
+    @Override
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
     }
 
     @Override
@@ -102,6 +124,16 @@ public abstract class StandardIndexingJob implements IndexingJob {
     @Override
     public Behavior getBehavior() {
         return behavior;
+    }
+
+    
+    /**
+     * Sets the origin
+     *
+     * @param origin The origin to set
+     */
+    public void setOrigin(final Origin origin) {
+        this.origin = origin;
     }
 
     /**

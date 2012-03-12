@@ -245,10 +245,12 @@ public final class VirtualFolderStorage implements FolderStorage {
                     folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, contentType, PrivateType.getInstance(), params);
                     if (!tree.containsFolder(folderID)) {
                         final Folder folder = realStorage.getFolder(realTreeId, folderID, params);
-                        folder.setTreeID(treeId);
-                        folder.setParentID(ROOT_ID);
-                        folder.setSubscribed(true);
-                        createDefaultFolder(folder, params);
+                        if (null != folder.getName()) {
+                            folder.setTreeID(treeId);
+                            folder.setParentID(ROOT_ID);
+                            folder.setSubscribed(true);
+                            createDefaultFolder(folder, params);
+                        }
                     }
                 }
                 /*

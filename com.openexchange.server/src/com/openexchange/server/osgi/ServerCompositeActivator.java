@@ -50,6 +50,7 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
+
 import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
@@ -91,8 +92,10 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),
         new com.openexchange.mailaccount.json.osgi.MailAccountJSONActivator(),
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
+        new com.openexchange.contact.osgi.ContactServiceActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
-        new com.openexchange.groupware.tasks.osgi.TaskActivator()
+        new com.openexchange.groupware.tasks.osgi.TaskActivator(),
+        new FolderUpdaterRegistryDependencyActivator()
     };
 
     public ServerCompositeActivator() {

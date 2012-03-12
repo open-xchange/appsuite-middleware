@@ -68,7 +68,6 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -100,17 +99,14 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
     private WhiteboardGenericConfigurationStorageService genconfStorage;
 
-    private Whiteboard whiteboard;
-
     @Override
     public void startBundle() throws Exception {
-        whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
         contextService = new WhiteboardContextService(context);
-        final UserService users = whiteboard.getService(UserService.class);
-        final UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
-        final InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);
-        final FolderService folders = whiteboard.getService(FolderService.class);
+        final UserService users = getService(UserService.class);
+        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        final InfostoreFacade infostore = getService(InfostoreFacade.class);
+        final FolderService folders = getService(FolderService.class);
 
         final Dictionary<String, Object> discoveryDict = new Hashtable<String, Object>();
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
@@ -134,14 +130,14 @@ public class DiscoveryActivator extends HousekeepingActivator {
         registerService(SubscriptionExecutionService.class, executor);
         registerService(FolderUpdaterRegistry.class, executor);
 
-        final DBProvider provider = whiteboard.getService(DBProvider.class);
+        final DBProvider provider = getService(DBProvider.class);
         genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
         final SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, discoveryCollector);
 
         AbstractSubscribeService.STORAGE = storage;
 
-        AbstractSubscribeService.ENCRYPTION_FACTORY = whiteboard.getService(SecretEncryptionFactoryService.class);
-        AbstractSubscribeService.CRYPTO_SERVICE = whiteboard.getService(CryptoService.class);
+        AbstractSubscribeService.ENCRYPTION_FACTORY = getService(SecretEncryptionFactoryService.class);
+        AbstractSubscribeService.CRYPTO_SERVICE = getService(CryptoService.class);
         AbstractSubscribeService.FOLDERS = folders;
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
@@ -157,8 +153,6 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        whiteboard.close();
-        whiteboard = null;
         genconfStorage.close();
         genconfStorage = null;
         collector.close();
@@ -170,8 +164,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[] { UserService.class, UserConfigurationService.class, InfostoreFacade.class, FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class };
     }
 
 }

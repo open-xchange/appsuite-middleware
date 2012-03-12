@@ -52,7 +52,7 @@ package com.openexchange.indexedSearch.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.indexedSearch.json.IndexActionFactory;
 import com.openexchange.indexedSearch.json.ResultConverters;
-import com.openexchange.mail.smal.adapter.IndexService;
+import com.openexchange.mail.smal.adaper.IndexService;
 
 /**
  * {@link IndexJSONActivator}

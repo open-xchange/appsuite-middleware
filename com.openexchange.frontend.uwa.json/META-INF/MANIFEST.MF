@@ -6,6 +6,7 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-XChange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.osgi,
  com.openexchange.ajax.requesthandler,
  com.openexchange.config.cascade,
  com.openexchange.documentation,

@@ -6,9 +6,9 @@ Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.api2,
- com.openexchange.authentication,
+Import-Package: com.openexchange.authentication,
  com.openexchange.config.cascade,
+ com.openexchange.contact,
  com.openexchange.exception,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.database.contentType,
@@ -22,6 +22,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.search,
  com.openexchange.groupware.settings,
+ com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
  com.openexchange.log,

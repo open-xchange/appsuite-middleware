@@ -97,7 +97,6 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.osgiservice.WhiteboardDBProvider;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dataretention.DataRetentionService;
@@ -132,7 +131,6 @@ import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServ
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -171,7 +169,6 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.WhiteboardFactoryService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -250,7 +247,7 @@ public final class ServerActivator extends HousekeepingActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class,
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class,
             ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
         };
 
@@ -586,7 +583,6 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Register DBProvider
         registerService(DBProvider.class, new DBPoolProvider());
-        registerService(WhiteboardFactoryService.class, new WhiteboardDBProvider.Factory());
 
         // Register Infostore
         registerService(InfostoreFacade.class, Infostore.FACADE);

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.itip.osgi;
 
+import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.itip.ITipActionFactory;
 import com.openexchange.ajax.itip.servlet.ITipJSONServlet;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
@@ -59,29 +60,31 @@ import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.service.ServletRegistration;
-
 
 /**
  * {@link ITipJSONActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipJSONActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ITipAnalyzerService.class, ITipParser.class, ConversionService.class, ITipDingeMacherFactoryService.class, ITipMailGeneratorFactory.class};
+        return new Class[] {
+            ITipAnalyzerService.class, ITipParser.class, ConversionService.class, ITipDingeMacherFactoryService.class,
+            ITipMailGeneratorFactory.class, HttpService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         ITipActionFactory.INSTANCE = new ITipActionFactory(this);
-        
-        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(ITipActionFactory.INSTANCE, "calendar/itip"));
-        
-        rememberTracker(new ServletRegistration(context, new ITipJSONServlet(), "ajax/calendar/itip"));
-        
+
+        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(
+            ITipActionFactory.INSTANCE,
+            "calendar/itip"));
+
+        getService(HttpService.class).registerServlet("ajax/calendar/itip", new ITipJSONServlet(), null, null);
+
         openTrackers();
     }
 

@@ -1,3 +1,21 @@
+* 2012-03-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21732: Added automatic handling for data truncation errors
+
+* 2012-03-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21776: Using already established threads awaiting tasks in thread pool
+ - Fix for bug 21784: Checking folder name prior to creating pre-defined virtual folder
+ - Fix for bug 21786: Proper jar in "lib" directory
+
+* 2012-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21762: Introduced config tree entry "modules/unifiedMail/module"" to signal presence of Unified Mail feature
+
+* 2012-03-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21709: Packaging for Debian does not write a warning anymore when checking for the open-xchange system user.
+
 * 2012-03-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 21286: Introduced sanitizing if a duplicate is detected on folder creation invoked by "USM-JSON" client

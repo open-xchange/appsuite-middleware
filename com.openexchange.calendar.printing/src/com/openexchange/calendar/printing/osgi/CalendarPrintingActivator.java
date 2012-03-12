@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing.osgi;
 
 import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.group.GroupService;
@@ -57,40 +58,26 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryCustomizer;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
 
 /**
  * {@link CalendarPrintingActivator} - The activator for calendar printing.
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CalendarPrintingActivator extends HousekeepingActivator {
+public class CalendarPrintingActivator extends AbstractSessionServletActivator {
 
     /**
      * The servlet path.
      */
     public static final String ALIAS = "/ajax/printCalendar";
 
-    private SessionServletRegistration registration;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
-    }
-
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         register();
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregister();
     }
 
     @Override
@@ -103,19 +90,12 @@ public class CalendarPrintingActivator extends HousekeepingActivator {
         registerService(PreferencesItemService.class, new CalendarPrintingEnabled());
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
-        cleanUp();
-    }
-
     private void register() {
         final TemplateService templates = getService(TemplateService.class);
         final AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
         final CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
 
         if (templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
             return;
         }
 
@@ -123,14 +103,11 @@ public class CalendarPrintingActivator extends HousekeepingActivator {
         CPServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
         CPServlet.setCalendarTools(collectionService);
 
-        registration = new SessionServletRegistration(context, new CPServlet(), ALIAS);
-        registration.open();
+        registerSessionServlet(ALIAS, new CPServlet());
     }
 
-    private void unregister() {
-        if (registration != null) {
-            registration.close();
-            registration = null;
-        }
+    @Override
+    protected Class<?>[] getAdditionalNeededServices() {
+        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
     }
 }

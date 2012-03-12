@@ -62,6 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.PushHandler;
 import com.openexchange.push.udp.PushInit;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -82,7 +83,7 @@ public class PushUDPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, ContextService.class, FolderService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, ContextService.class, FolderService.class, ThreadPoolService.class };
     }
 
     @Override

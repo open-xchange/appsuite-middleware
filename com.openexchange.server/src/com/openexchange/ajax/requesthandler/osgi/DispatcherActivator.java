@@ -49,15 +49,12 @@
 
 package com.openexchange.ajax.requesthandler.osgi;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
@@ -79,10 +76,8 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 
 /**
@@ -90,12 +85,9 @@ import com.openexchange.tools.service.SessionServletRegistration;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DispatcherActivator extends HousekeepingActivator {
+public class DispatcherActivator extends AbstractSessionServletActivator {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    private final Set<String> servlets = new HashSet<String>();
 
     @Override
     protected void startBundle() throws Exception {
@@ -176,7 +168,28 @@ public class DispatcherActivator extends HousekeepingActivator {
         });
 
 
-        track(AJAXActionServiceFactory.class, new Registerer(context, dispatcher, servlet));
+        track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
+
+            @Override
+            public void added(ServiceReference<AJAXActionServiceFactory> ref, AJAXActionServiceFactory service) {
+                String module = (String) ref.getProperty("module");
+                dispatcher.register(module, service);
+                if (!servlets.contains(module)) {
+                    servlets.add(module);
+                    registerSessionServlet("/ajax/" + module, servlet);
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<AJAXActionServiceFactory> ref, AJAXActionServiceFactory service) {
+                String module = (String) ref.getProperty("module");
+                if (servlets.contains(module)) {
+                    unregisterServlet("/ajax/" + module);
+                    servlets.remove(module);
+                }
+            }
+            
+        });
 
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
@@ -206,57 +219,6 @@ public class DispatcherActivator extends HousekeepingActivator {
         Multiple.setDispatcher(null);
     }
 
-    private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
-
-        private final BundleContext rcontext;
-        private final DefaultDispatcher dispatcher;
-        private final DispatcherServlet servlet;
-
-        private final Set<String> registrationGuardian = new HashSet<String>();
-
-        private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
-        private final Map<String, ServiceRegistration<AJAXActionServiceFactory>> serviceRegistrations = new HashMap<String, ServiceRegistration<AJAXActionServiceFactory>>();
-
-        public Registerer(final BundleContext context, final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
-            super();
-            this.rcontext = context;
-            this.dispatcher = dispatcher;
-            this.servlet = servlet;
-        }
-
-        @Override
-        public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
-            final String module = (String) ref.getProperty("module");
-            dispatcher.register(module, thing);
-
-            if (registrationGuardian.contains(module)) {
-            	return;
-            }
-            registrationGuardian.add(module);
-
-            final SessionServletRegistration registration = new SessionServletRegistration(rcontext, servlet, "/ajax/"+module);
-            registrations.put(module, registration);
-            rememberTracker(registration);
-        }
-
-        @Override
-        public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
-            final String module = (String) ref.getProperty("module");
-            dispatcher.remove(module, thing);
-
-            final SessionServletRegistration tracker = registrations.remove(module);
-            if (null != tracker) {
-                tracker.remove();
-                forgetTracker(tracker);
-            }
-            final ServiceRegistration<AJAXActionServiceFactory> serviceRegistration = serviceRegistrations.remove(module);
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-            }
-        }
-
-    }
-
     @Override
     public void forgetTracker(final ServiceTracker<?, ?> tracker) {
         super.forgetTracker(tracker);
@@ -265,6 +227,11 @@ public class DispatcherActivator extends HousekeepingActivator {
     @Override
     public void rememberTracker(final ServiceTracker<?, ?> tracker) {
         super.rememberTracker(tracker);
+    }
+
+    @Override
+    protected Class<?>[] getAdditionalNeededServices() {
+        return EMPTY_CLASSES;
     }
 
 }

@@ -57,8 +57,12 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.carddav.mapping.CardDAVMapper;
+import com.openexchange.carddav.mapping.CardDAVMapping;
+import com.openexchange.contact.TruncatedContactAttribute;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -81,27 +85,27 @@ public class ContactResource extends CarddavResource {
 	/**
 	 * All contact fields that may be set in vCards
 	 */
-    private static final int[] CARDDAV_FIELDS = {
-    	Contact.DISPLAY_NAME, // FN
-    	Contact.SUR_NAME, Contact.GIVEN_NAME, // N
-    	Contact.COMPANY, // ORG
-    	Contact.EMAIL1, // EMAIL;type=WORK
-    	Contact.EMAIL2, // EMAIL;type=HOME
-    	Contact.CELLULAR_TELEPHONE1, // TEL;type=VOICE;type=CELL
-    	Contact.CELLULAR_TELEPHONE2, // TEL;type=VOICE;type=IPHONE
-    	Contact.TELEPHONE_HOME1, // TEL;type=VOICE;type=HOME
-    	Contact.TELEPHONE_BUSINESS1, // TEL;type=VOICE;type=WORK
-    	Contact.TELEPHONE_BUSINESS2, // TEL;type=VOICE;type=MAIN //TODO:Contact.TELEPHONE_COMPANY?
-    	Contact.FAX_HOME, // TEL;type=HOME;type=FAX
-    	Contact.FAX_BUSINESS, // TEL;type=WORK;type=FAX
-    	Contact.FAX_OTHER, // TEL;type=OTHER;type=FAX
-    	Contact.TELEPHONE_PAGER, // TEL;type=PAGER
-    	Contact.NOTE, // NOTE
-    	Contact.URL, // URL
-    	Contact.STREET_HOME, Contact.POSTAL_CODE_HOME, Contact.CITY_HOME, Contact.COUNTRY_HOME, // ADR;TYPE=home
-    	Contact.STREET_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, // ADR;TYPE=work
-    	Contact.PROFESSION, // TITLE
-    };
+//    private static final int[] CARDDAV_FIELDS = {
+//    	Contact.DISPLAY_NAME, // FN
+//    	Contact.SUR_NAME, Contact.GIVEN_NAME, // N
+//    	Contact.COMPANY, // ORG
+//    	Contact.EMAIL1, // EMAIL;type=WORK
+//    	Contact.EMAIL2, // EMAIL;type=HOME
+//    	Contact.CELLULAR_TELEPHONE1, // TEL;type=VOICE;type=CELL
+//    	Contact.CELLULAR_TELEPHONE2, // TEL;type=VOICE;type=IPHONE
+//    	Contact.TELEPHONE_HOME1, // TEL;type=VOICE;type=HOME
+//    	Contact.TELEPHONE_BUSINESS1, // TEL;type=VOICE;type=WORK
+//    	Contact.TELEPHONE_BUSINESS2, // TEL;type=VOICE;type=MAIN //TODO:Contact.TELEPHONE_COMPANY?
+//    	Contact.FAX_HOME, // TEL;type=HOME;type=FAX
+//    	Contact.FAX_BUSINESS, // TEL;type=WORK;type=FAX
+//    	Contact.FAX_OTHER, // TEL;type=OTHER;type=FAX
+//    	Contact.TELEPHONE_PAGER, // TEL;type=PAGER
+//    	Contact.NOTE, // NOTE
+//    	Contact.URL, // URL
+//    	Contact.STREET_HOME, Contact.POSTAL_CODE_HOME, Contact.CITY_HOME, Contact.COUNTRY_HOME, // ADR;TYPE=home
+//    	Contact.STREET_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, // ADR;TYPE=work
+//    	Contact.PROFESSION, // TITLE
+//    };
 
     private static final OXContainerConverter converter = new OXContainerConverter((TimeZone) null, (String) null);
     
@@ -160,7 +164,7 @@ public class ContactResource extends CarddavResource {
         	/*
         	 * Insert contact
         	 */
-            this.factory.getContactInterface().insertContactObject(this.contact);
+        	this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
             LOG.debug(this.getUrl() + ": created.");
         } catch (final OXException e) {
         	if (Tools.isImageProblem(e)) {
@@ -170,6 +174,16 @@ public class ContactResource extends CarddavResource {
             	LOG.warn(this.getUrl() + ": " + e.getMessage() + " - creating contact without image.");
             	this.contact.removeImage1();
             	this.create();
+        	} else if (Tools.isDataTruncation(e)) {
+        		/*
+        		 * handle by trimming truncated fields
+        		 */
+            	if (this.trimTruncatedAttributes(e)) {
+            		LOG.warn(this.getUrl() + ": " + e.getMessage() + " - creating contact with trimmed fields.");
+            		this.create();
+            	} else {
+            		throw super.internalError(e);
+            	}
         	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
         		/*
         		 * handle by overriding sync-token
@@ -183,33 +197,6 @@ public class ContactResource extends CarddavResource {
         		throw super.internalError(e);
         	}
         }   
-//        } catch (final OXConflictException e) {
-//        	if (Category.PERMISSION.equals(e.getCategory())) {
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//    			this.factory.overrideNextSyncToken();
-//    			return; // don't throw an exception here!
-//        	}
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXPermissionException e) {
-//        	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//			this.factory.overrideNextSyncToken();
-//			return; // don't throw an exception here!
-//        } catch (final OXException e) {
-//            if (ContactExceptionCodes.IMAGE_SCALE_PROBLEM.getDetailNumber() == e.getDetailNumber() ||
-//            	ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.getDetailNumber() == e.getDetailNumber()) {
-//            	/*
-//            	 * Could not scale and store image, remove image and try again
-//            	 */
-//            	LOG.warn(this.getUrl() + ": " + e.getMessage() + "; creating contact without image.");
-//                this.contact.removeImage1();
-//                this.create();
-//                return;
-//            } else {
-//            	throw super.internalError(e);
-//            }
-//		} catch (final OXException e) {
-//        	throw internalError(e);
-//		}
 	}
 
 	@Override
@@ -226,7 +213,8 @@ public class ContactResource extends CarddavResource {
     		/*
     		 * Delete contact
     		 */
-            factory.getContactInterface().deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
+        	this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
+        			Integer.toString(contact.getObjectID()),  contact.getLastModified());
             LOG.debug(this.getUrl() + ": deleted.");
             this.contact = null;
         } catch (final OXException e) {
@@ -243,22 +231,6 @@ public class ContactResource extends CarddavResource {
         		throw super.internalError(e);
         	}
         }   
-//        } catch (final OXConflictException e) {
-//        	if (Category.PERMISSION.equals(e.getCategory())) {
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//    			this.factory.overrideNextSyncToken();
-//    			return; // don't throw an exception here!
-//        	}
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXPermissionException e) {
-//        	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//			this.factory.overrideNextSyncToken();
-//			return; // don't throw an exception here!
-//        } catch (final OXObjectNotFoundException e) {
-//        	throw protocolException(e, HttpServletResponse.SC_NOT_FOUND);
-//		} catch (final AbstractOXException e) {
-//			throw internalError(e);
-//		}    	
 	}
 
 	@Override
@@ -270,8 +242,8 @@ public class ContactResource extends CarddavResource {
         	/*
         	 * Update contact 
         	 */
-            this.factory.getContactInterface().updateContactObject(this.contact, this.contact.getParentFolderID(), 
-            		this.contact.getLastModified());
+        	this.factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
+        			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
             LOG.debug(this.getUrl() + ": saved.");
         } catch (final OXException e) {
         	if (Tools.isImageProblem(e)) {
@@ -281,6 +253,16 @@ public class ContactResource extends CarddavResource {
             	LOG.warn(this.getUrl() + ": " + e.getMessage() + " - saving contact without image.");
             	this.contact.removeImage1();
             	this.save();
+        	} else if (Tools.isDataTruncation(e)) {
+        		/*
+        		 * handle by trimming truncated fields
+        		 */
+            	if (this.trimTruncatedAttributes(e)) {
+            		LOG.warn(this.getUrl() + ": " + e.getMessage() + " - saving contact with trimmed fields.");
+            		this.save();
+            	} else {
+            		throw super.internalError(e);
+            	}
         	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
         		/*
         		 * handle by overriding sync-token
@@ -294,35 +276,6 @@ public class ContactResource extends CarddavResource {
         		throw super.internalError(e);
         	}
         }
-//        } catch (final OXConcurrentModificationException e) {
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXPermissionException e) {
-//        	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//			this.factory.overrideNextSyncToken();
-//			return; // don't throw an exception here!
-//        } catch (final OXConflictException e) {
-//        	if (Category.PERMISSION.equals(e.getCategory())) {
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//    			this.factory.overrideNextSyncToken();
-//    			return; // don't throw an exception here!
-//        	}
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXException e) {
-//            if (ContactExceptionCodes.IMAGE_SCALE_PROBLEM.getDetailNumber() == e.getDetailNumber() ||
-//            	ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.getDetailNumber() == e.getDetailNumber()) {
-//            	/*
-//            	 * Could not scale and store image, remove image and try again
-//            	 */
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; saving contact without image.");
-//                this.contact.setImage1(null);
-//                this.save();
-//                return;
-//            } else {
-//            	throw super.internalError(e);
-//            }
-//        } catch (final OXException e) {
-//        	throw super.internalError(e);
-//        }	
     }
 	
 	@Override
@@ -367,21 +320,34 @@ public class ContactResource extends CarddavResource {
 		        /*
 		         * Check for property changes
 		         */
-		        for (final int field : ContactResource.CARDDAV_FIELDS) {
-					if (this.contact.contains(field)) {
-						if (false == newContact.contains(field)) {
+				for (final CardDAVMapping<? extends Object> mapping : CardDAVMapper.getInstance().getMappings().values()) {
+					if (mapping.isSet(this.contact)) {
+						if (false == mapping.isSet(newContact)) {
 							// set this one explicitly so that the property gets removed during update
-							newContact.set(field, newContact.get(field));
-						} else {
-							final Object oldValue = this.contact.get(field);
-							final Object newValue = newContact.get(field);
-							if (null == oldValue && null == newValue || null != oldValue && oldValue.equals(newValue)) {
-								// this is no change, so ignore in update
-								newContact.remove(field);								
-							}
+							mapping.copy(newContact, newContact);
+						}
+					} else {
+						if (mapping.equals(contact, newContact)) {
+							// this is no change, so ignore in update
+							mapping.remove(newContact);
 						}
 					}
 				}
+//		        for (final int field : ContactResource.CARDDAV_FIELDS) {
+//					if (this.contact.contains(field)) {
+//						if (false == newContact.contains(field)) {
+//							// set this one explicitly so that the property gets removed during update
+//							newContact.set(field, newContact.get(field));
+//						} else {
+//							final Object oldValue = this.contact.get(field);
+//							final Object newValue = newContact.get(field);
+//							if (null == oldValue && null == newValue || null != oldValue && oldValue.equals(newValue)) {
+//								// this is no change, so ignore in update
+//								newContact.remove(field);								
+//							}
+//						}
+//					}
+//				}
 		        /*
 		         * Never update the UID
 		         */
@@ -429,5 +395,32 @@ public class ContactResource extends CarddavResource {
 	@Override
 	protected String getUID() {
     	return this.exists() ? this.contact.getUid() : null;
+	}
+	
+	private boolean trimTruncatedAttributes(final OXException e) {
+		boolean hasTrimmed = false;
+		if (null != this.contact && null != e && null != e.getProblematics()) {
+			for (final ProblematicAttribute problematicAttribute : e.getProblematics()) {
+				if (TruncatedContactAttribute.class.isInstance(problematicAttribute)) {
+					hasTrimmed |= this.trimTruncatedAttribute((TruncatedContactAttribute)problematicAttribute);
+				}
+			}
+		}
+		return hasTrimmed;
+	}
+	
+	private boolean trimTruncatedAttribute(final TruncatedContactAttribute truncatedAttribute) {
+		if (null != this.contact && null != truncatedAttribute.getField() && 0 < truncatedAttribute.getMaxSize()) {
+			try {
+				final CardDAVMapping<? extends Object> mapping = CardDAVMapper.getInstance().get(truncatedAttribute.getField());
+				if (null != mapping) {
+					return mapping.truncate(contact, truncatedAttribute.getMaxSize());
+				}
+			} catch (final OXException x) {
+				// no success
+				LOG.warn("error trying to handle truncated attribute", x);
+			}
+		}
+		return false;
 	}
 }

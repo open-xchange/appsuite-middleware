@@ -59,6 +59,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.openexchange.ajax.ContactTest;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 
@@ -76,6 +77,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500002";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Otto Maier");
         contact.setGivenName("Otto");
         contact.setSurName("Maier");
@@ -101,6 +103,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500004";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Dirk Dampf");
         contact.setGivenName("Dirk");
         contact.setSurName("Dampf");
@@ -128,6 +131,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500003";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setSurName("Distributionlist 77");
         contact.setUid(UUID.randomUUID().toString());
         contact.setDistributionList(new DistributionListEntryObject[] {
@@ -158,6 +162,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500001";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("René Müller");
         contact.setGivenName("René");
         contact.setSurName("Müller");
@@ -186,6 +191,7 @@ public class CreateTest extends ContactStorageTest {
             contactsInFolders.put(Integer.toString(i), new ArrayList<Contact>());
             for (int j = 1; j <= 33; j++) {
                 final Contact contact = new Contact();
+                contact.setCreatedBy(getUserID());
                 contact.setDisplayName("Kontakt_" + i + " Test_" + j);
                 contact.setGivenName("Kontakt_" + i);
                 contact.setSurName("Test_" + j);
@@ -202,7 +208,7 @@ public class CreateTest extends ContactStorageTest {
         for (final Map.Entry<String, List<Contact>> entry : contactsInFolders.entrySet()) {
             String folderId = entry.getKey();
             for (final Contact contact : entry.getValue()) {
-                final Contact savedContact = getStorage().get(getContextID(), folderId, Integer.toString(contact.getObjectID()));
+                final Contact savedContact = getStorage().get(getContextID(), folderId, Integer.toString(contact.getObjectID()), ContactField.values());
                 assertNotNull("contact not found", savedContact);
                 assertEquals("uid wrong", contact.getUid(), savedContact.getUid());
             }   
