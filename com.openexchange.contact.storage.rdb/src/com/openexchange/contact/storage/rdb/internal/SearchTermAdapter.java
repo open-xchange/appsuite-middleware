@@ -177,12 +177,17 @@ public class SearchTermAdapter {
 	
     private void append(final Operand<?> operand) throws OXException {
 		if (Operand.Type.COLUMN.equals(operand.getType())) {
+			ContactField field = null;
 			final Object value = operand.getValue();
 			if (null == value) {
 				throw new IllegalArgumentException("column operand without value: " + operand);
-			}
-			//TODO: don't use getByAjaxName in storage layer
-			final String columnLabel = Mappers.CONTACT.get(ContactField.getByAjaxName(value.toString())).getColumnLabel();
+			} else if (ContactField.class.isInstance(value)) {
+				field = (ContactField)value;
+			} else {
+				//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
+				field = ContactField.getByAjaxName(value.toString());
+			}			
+			final String columnLabel = Mappers.CONTACT.get(field).getColumnLabel();
 			if (null != this.charset) {
 				stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(this.charset).append(')');
 			} else {

@@ -47,57 +47,72 @@
  *
  */
 
-package com.openexchange.contact.osgi;
+package com.openexchange.contact.internal.mapping;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.internal.ContactServiceImpl;
-import com.openexchange.contact.internal.ContactServiceLookup;
-import com.openexchange.contact.storage.registry.ContactStorageRegistry;
-import com.openexchange.context.ContextService;
-import com.openexchange.folder.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link ContactServiceActivator}
+ * {@link Mapping} - Generic mapping operations for contact properties.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactServiceActivator extends HousekeepingActivator {
-    
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
+public interface Mapping<T> {
+	
+	/**
+	 * Gets a value indicating whether the mapped property is set in the 
+	 * supplied contact or not. This is usually done by passing the result
+	 * of the contact instance's <code>containsXXX</code>-method.
+	 * 
+	 * @param contact the contact
+	 * @return <code>true</code>, if the property is set, <code>false</code>,
+	 * otherwise.
+	 */
+	boolean isSet(Contact contact);
 
-    /**
-     * Initializes a new {@link ContactServiceActivator}.
-     */
-    public ContactServiceActivator() {
-        super();
-    }
+	/**
+	 * Sets the mapped property in the contact to the given value.
+	 * 
+	 * @param contact the contact to set the property for
+	 * @param value the value to set
+	 * @throws OXException
+	 */
+	void set(Contact contact, T value) throws OXException;
+	
+	/**
+	 * Gets the mapped property's value from a contact.
+	 * 
+	 * @param contact the contact to get the property value from
+	 * @return the value
+	 */
+	T get(Contact contact);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.service");
-            ContactServiceLookup.set(this);            
-            super.registerService(ContactService.class, new ContactServiceImpl());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.service\"", e);
-            throw e;            
-        }
-    }
+	/**
+	 * Validates the property in a contact, throwing exceptions if validation
+	 * fails.
+	 * 
+	 * @param contact the contact to validate the property for
+	 * @throws OXException 
+	 */
+	void validate(Contact contact) throws OXException;
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.service");
-        ContactServiceLookup.set(null);            
-        super.stopBundle();
-    }
-    
+	/**
+	 * Gets a value indicating whether a property's value is equal in two 
+	 * contacts or not.
+	 * 
+	 * @param contact1 the first contact for comparison
+	 * @param contact2 the second contact for comparison
+	 * @return
+	 */
+	boolean equals(Contact contact1, Contact contact2);
+	
+	/**
+	 * Copies the value of a property in one contact to another one.
+	 * 
+	 * @param from the contact to read the property value from
+	 * @param to the contact to set the property
+	 * @throws OXException
+	 */
+	void copy(Contact from, Contact to) throws OXException;
+	
 }
