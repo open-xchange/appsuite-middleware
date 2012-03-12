@@ -391,6 +391,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 int fromIndex = 0;
                 while (fromIndex < size) {
                     if (thread.isInterrupted()) {
+                        Thread.interrupted();
                         throw new InterruptedException("Text filler thread interrupted");
                     }
                     int toIndex = fromIndex + configuredBlockSize;
@@ -407,6 +408,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             final Thread thread = Thread.currentThread();
             for (final TextFiller textFiller : fillersChunk) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Text filler thread interrupted");
                 }
                 try {
@@ -467,6 +469,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     solrQuery = new SolrQuery(q.toString());
                 }
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Text filler thread interrupted");
                 }
                 solrQuery.setRows(Integer.valueOf(size));
@@ -483,6 +486,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     }
                 }
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Text filler thread interrupted");
                 }
                 for (final TextFiller filler : map.values()) {
@@ -494,6 +498,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     }
                 }
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Text filler thread interrupted");
                 }
             }
@@ -529,6 +534,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 int off = 0;
                 while (off < docSize) {
                     if (thread.isInterrupted()) {
+                        Thread.interrupted();
                         throw new InterruptedException("Text filler thread interrupted");
                     }
                     int toIndex = off + 10;
@@ -617,6 +623,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             final Thread thread = Thread.currentThread();
             for (int i = 0; i < fs; i++) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Text filler thread interrupted");
                 }
                 final TextFiller filler = fillers.get(i);

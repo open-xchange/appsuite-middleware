@@ -579,6 +579,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             while (off < numFound) {
                 if (thread.isInterrupted()) {
                     // Clears the thread's interrupted flag
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -711,6 +712,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             while (off < numFound) {
                 if (thread.isInterrupted()) {
                     // Clears the thread's interrupted flag
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -805,6 +807,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             while (off < numFound) {
                 if (thread.isInterrupted()) {
                     // Clears the thread's interrupted flag
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -897,6 +900,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             int off = 0;
             while (off < size) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while getting Solr documents.");
                 }
                 int endIndex = off + GET_ROWS;
@@ -968,6 +972,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final Thread thread = Thread.currentThread();
             while (off < numFound) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -1029,6 +1034,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              */
             while (off < size) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while deleting Solr documents.");
                 }
                 int endIndex = off + DELETE_ROWS;
@@ -1161,6 +1167,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             int off = 0;
             while (off < size) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while changing Solr documents.");
                 }
                 int endIndex = off + CHANGE_ROWS;
@@ -1250,6 +1257,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final Thread thread = Thread.currentThread();
             while (off < numFound) {
                 if (thread.isInterrupted()) {
+                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -1280,6 +1288,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final int itSize = documents.size();
                 for (int i = 0; i < itSize; i++) {
                     if (thread.isInterrupted()) {
+                        Thread.interrupted();
                         throw new InterruptedException("Thread interrupted while changing Solr documents.");
                     }
                     noTimeoutSolrServer.add(it.next());
@@ -1352,6 +1361,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 int off = 0;
                 while (off < size) {
                     if (thread.isInterrupted()) {
+                        Thread.interrupted();
                         throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                     }
                     int endIndex = off + chunkSize;
@@ -1372,6 +1382,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                         final int itSize = subList.size();
                         for (int i = 0; i < itSize; i++) {
                             if (thread.isInterrupted()) {
+                                Thread.interrupted();
                                 throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                             }
                             noTimeoutSolrServer.add(it.next());
@@ -1389,6 +1400,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 fillers.clear();
                 for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, null); it.hasNext();) {
                     if (thread.isInterrupted()) {
+                        Thread.interrupted();
                         throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                     }
                     final SolrInputDocument inputDocument = it.next();

@@ -100,6 +100,7 @@ public final class BoundedJobCompletionService extends AbstractJobCompletionServ
         int count;
         do {
             if (thread.isInterrupted()) {
+                Thread.interrupted();
                 throw new InterruptedException("Thread interrupted while awaiting a completed job.");
             }
             count = runningCount.get();
