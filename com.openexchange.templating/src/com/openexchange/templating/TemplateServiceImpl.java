@@ -160,7 +160,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public OXTemplate loadTemplate(String templateName,
     		String defaultTemplateName, Session session) throws OXException {
-    	return loadTemplate(defaultTemplateName, defaultTemplateName, session, true);
+    	return loadTemplate(templateName, defaultTemplateName, session, true);
     }
     
     @Override

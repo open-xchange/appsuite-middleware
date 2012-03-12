@@ -81,7 +81,7 @@ public class JavaImageScalingService implements ImageScalingService {
             throw new IOException("Couldn't scale image");
         }
 
-
+        
 
         return new ByteArrayInputStream(baos.toByteArray());
     }
