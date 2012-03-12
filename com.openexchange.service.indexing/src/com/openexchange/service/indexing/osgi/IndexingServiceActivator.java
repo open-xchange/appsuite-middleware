@@ -54,6 +54,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.service.MailService;
@@ -88,7 +89,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class };
+        return new Class<?>[] { ConfigurationService.class, MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class };
     }
 
     @Override
@@ -105,7 +106,16 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             final int maxConcurrentJobs = 8;
             final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
             serviceInit.init();
-            serviceInit.initReceiver();
+            /*
+             * Start receiving jobs?
+             */
+            {
+                final ConfigurationService service = getService(ConfigurationService.class);
+                final boolean startReceiver = service.getBoolProperty("com.openexchange.service.indexing.startReceiver", true);
+                if (startReceiver) {
+                    serviceInit.initReceiver();
+                }
+            }
             this.serviceInit = serviceInit;
             /*
              * Register service

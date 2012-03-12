@@ -57,7 +57,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -191,14 +190,20 @@ public final class FolderJob extends AbstractMailJob {
         return this;
     }
 
+    /**
+     * ID, FLAGS, and COLOR_LABEL
+     */
     private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
 
     @Override
     public void performJob() throws OXException, InterruptedException {
         final boolean debug = LOG.isDebugEnabled();
         try {
-            final long now = System.currentTimeMillis();
+            /*
+             * Check against table entry if allowed to be run
+             */
             try {
+                final long now = System.currentTimeMillis();
                 if ((span > 0 ? !shouldSync(fullName, now, span) : false) || !wasAbleToSetSyncFlag(fullName, now)) {
                     if (debug) {
                         LOG.debug("Folder job should not yet be performed or wasn't able to acquire 'sync' flag: " + info);
@@ -314,46 +319,15 @@ public final class FolderJob extends AbstractMailJob {
                 List<MailMessage> changedMails;
                 {
                     final Set<String> changedIds = new HashSet<String>(indexMap.keySet());
-                    changedMails = new ArrayList<MailMessage>(changedIds.size());
                     changedIds.removeAll(deletedIds);
-                    for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
-                        final String mailId = iterator.next();
+                    changedMails = new ArrayList<MailMessage>(changedIds.size());
+                    for (final String mailId : changedIds) {
                         final MailMessage storageMail = storageMap.get(mailId);
-                        if (null == storageMail) {
-                            iterator.remove();
-                        } else {
-                            final MailMessage indexMail = indexMap.get(mailId);
-                            boolean different = false;
-                            if (storageMail.getFlags() != indexMail.getFlags()) { // Different flags
-                                storageMail.setAccountId(accountId);
-                                storageMail.setFolder(fullName);
-                                storageMail.setMailId(mailId);
-                                changedMails.add(storageMail);
-                                different = true;
-                            }
-                            if (storageMail.getColorLabel() != indexMail.getColorLabel()) { // Different color label
-                                storageMail.setAccountId(accountId);
-                                storageMail.setFolder(fullName);
-                                storageMail.setMailId(mailId);
-                                changedMails.add(storageMail);
-                                different = true;
-                            }
-                            final String[] stoUserFlags = storageMail.getUserFlags();
-                            final Set<String> storageUserFlags =
-                                null == stoUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(stoUserFlags));
-                            final String[] idxUserFlags = indexMail.getUserFlags();
-                            final Set<String> indexUserFlags =
-                                null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
-                            if (!storageUserFlags.equals(indexUserFlags)) { // Different user flags
-                                storageMail.setAccountId(accountId);
-                                storageMail.setFolder(fullName);
-                                storageMail.setMailId(mailId);
-                                changedMails.add(storageMail);
-                                different = true;
-                            }
-                            if (different) {
-                                iterator.remove();
-                            }
+                        if (isDifferent(storageMail, indexMap.get(mailId))) {
+                            storageMail.setAccountId(accountId);
+                            storageMail.setFolder(fullName);
+                            storageMail.setMailId(mailId);
+                            changedMails.add(storageMail);
                         }
                     }
                 }
@@ -384,7 +358,7 @@ public final class FolderJob extends AbstractMailJob {
                     final List<String> ids = new ArrayList<String>(newIds);
                     newIds = null;
                     try {
-                        chunkedAddWithoutJobs(ids, indexAdapter, session);
+                        chunkedAdd(ids, indexAdapter, session);
                     } finally {
                         if (DEBUG) {
                             LOG.debug("Folder job \"" + info + "\" triggers to add messages' content.");
@@ -413,7 +387,7 @@ public final class FolderJob extends AbstractMailJob {
         }
     }
 
-    private void chunkedAddWithoutJobs(final List<String> ids, final IndexAdapter indexAdapter, final Session session) throws OXException {
+    private void chunkedAdd(final List<String> ids, final IndexAdapter indexAdapter, final Session session) throws OXException {
         final long st = DEBUG ? System.currentTimeMillis() : 0l;
         final int configuredBlockSize = Constants.CHUNK_SIZE;
         if (configuredBlockSize <= 0) {
@@ -509,4 +483,45 @@ public final class FolderJob extends AbstractMailJob {
         }
     }
 
+    /**
+     * Checks if specified {@link MailMessage} instances are different by system flags, color flag, or user flags.
+     * 
+     * @param storageMail The mail fetched from storage
+     * @param indexMail The mail fetched from index
+     * @return <code>true</code> if provided mails are considered different; otherwise <code>false</code>
+     */
+    private static boolean isDifferent(final MailMessage storageMail, final MailMessage indexMail) {
+        if (null == storageMail || null == indexMail) {
+            return false;
+        }
+        /*
+         * Check system flags
+         */
+        if (storageMail.getFlags() != indexMail.getFlags()) {
+            return true;
+        }
+        /*
+         * Check color label
+         */
+        if (storageMail.getColorLabel() != indexMail.getColorLabel()) {
+            return true;
+        }
+        /*
+         * Check user flags
+         */
+        final Set<String> storageUserFlags;
+        {
+            final String[] stoUserFlags = storageMail.getUserFlags();
+            storageUserFlags =
+                null == stoUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(stoUserFlags));
+        }
+        final Set<String> indexUserFlags;
+        {
+            final String[] idxUserFlags = indexMail.getUserFlags();
+            indexUserFlags =
+                null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
+        }
+        return (!storageUserFlags.equals(indexUserFlags));
+    }
+    
 }

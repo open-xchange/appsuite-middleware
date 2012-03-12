@@ -180,7 +180,11 @@ public class TemplateServiceImpl implements TemplateService {
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
-            final Configuration config = new Configuration();
+            String userDir = System.getProperty("user.dir");
+            String templatePath = config.getProperty(PATH_PROPERTY);
+            System.setProperty("user.dir", templatePath);
+            Configuration config = new Configuration();
+            System.setProperty("user.dir", userDir);
             if (exceptionHandler != null) {
                 config.setTemplateExceptionHandler(exceptionHandler);
             }
