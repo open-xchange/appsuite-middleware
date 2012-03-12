@@ -59,6 +59,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.openexchange.ajax.ContactTest;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 
@@ -202,7 +203,7 @@ public class CreateTest extends ContactStorageTest {
         for (final Map.Entry<String, List<Contact>> entry : contactsInFolders.entrySet()) {
             String folderId = entry.getKey();
             for (final Contact contact : entry.getValue()) {
-                final Contact savedContact = getStorage().get(getContextID(), folderId, Integer.toString(contact.getObjectID()));
+                final Contact savedContact = getStorage().get(getContextID(), folderId, Integer.toString(contact.getObjectID()), ContactField.values());
                 assertNotNull("contact not found", savedContact);
                 assertEquals("uid wrong", contact.getUid(), savedContact.getUid());
             }   

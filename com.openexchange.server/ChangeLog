@@ -1,3 +1,7 @@
+* 2012-03-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21709: Packaging for Debian does not write a warning anymore when checking for the open-xchange system user.
+
 * 2012-03-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 21286: Introduced sanitizing if a duplicate is detected on folder creation invoked by "USM-JSON" client

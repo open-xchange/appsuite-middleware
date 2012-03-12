@@ -47,57 +47,32 @@
  *
  */
 
-package com.openexchange.contact.osgi;
+package com.openexchange.contact.storage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.internal.ContactServiceImpl;
-import com.openexchange.contact.internal.ContactServiceLookup;
-import com.openexchange.contact.storage.registry.ContactStorageRegistry;
-import com.openexchange.context.ContextService;
-import com.openexchange.folder.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.search.Operand;
 
 /**
- * {@link ContactServiceActivator}
+ * {@link ContactColumnOperand} - 'Column' type search term operand for contact fields. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactServiceActivator extends HousekeepingActivator {
-    
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
+public class ContactColumnOperand implements Operand<ContactField>{
 
-    /**
-     * Initializes a new {@link ContactServiceActivator}.
-     */
-    public ContactServiceActivator() {
-        super();
-    }
+	private final ContactField value;
+	
+	public ContactColumnOperand(final ContactField value) {
+		super();
+		this.value = value;
+	}
+	
+	@Override
+	public com.openexchange.search.Operand.Type getType() {
+		return Type.COLUMN;
+	}
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.service");
-            ContactServiceLookup.set(this);            
-            super.registerService(ContactService.class, new ContactServiceImpl());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.service\"", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.service");
-        ContactServiceLookup.set(null);            
-        super.stopBundle();
-    }
-    
+	@Override
+	public ContactField getValue() {
+		return this.value;
+	}
 }
