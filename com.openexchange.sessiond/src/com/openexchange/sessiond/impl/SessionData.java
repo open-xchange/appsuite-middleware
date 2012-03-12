@@ -141,79 +141,6 @@ final class SessionData {
         }
     }
 
-    void checkEmAll() {
-        // Long-term list
-        rlongTermLock.lock();
-        try {
-            final long lifeTime = SessionHandler.config.getLongLifeTime();
-            for (final SessionMap map : longTermList) {
-                final long stamp = System.currentTimeMillis() - lifeTime;
-                for (final SessionControl sessionControl : map.values()) {
-                    long lastAccessed = sessionControl.getLastAccessed();
-                    if (lastAccessed < stamp) {
-                        // Upgrade lock
-                        rlongTermLock.unlock();
-                        wlongTermLock.lock();
-                        try {
-                            lastAccessed = sessionControl.getLastAccessed();
-                            if (lastAccessed < stamp) {
-                                map.removeBySessionId(sessionControl.getSession().getSessionID());
-                            }
-                        } finally {
-                            // Down-grade lock
-                            rlongTermLock.lock();
-                            wlongTermLock.unlock();
-                        }
-                    }
-                }
-            }
-        } finally {
-            rlongTermLock.unlock();
-        }
-        // Short-term list
-        rlock.lock();
-        try {
-            final long lifeTime = SessionHandler.config.getLifeTime();
-            for (final SessionContainer container : sessionList) {
-                final long stamp = System.currentTimeMillis() - lifeTime;
-                for (final SessionControl sessionControl : container.getSessionControls()) {
-                    long lastAccessed = sessionControl.getLastAccessed();
-                    if (lastAccessed < stamp) {
-                        // Upgrade lock
-                        rlock.unlock();
-                        wlock.lock();
-                        try {
-                            // Re-check
-                            lastAccessed = sessionControl.getLastAccessed();
-                            if (lastAccessed < stamp) {
-                                // Remove from short-term list
-                                final SessionImpl session = sessionControl.getSession();
-                                container.removeSessionById(session.getSessionID());
-                                if (autoLogin) {
-                                    // Add to long-term list
-                                    wlongTermLock.lock();
-                                    try {
-                                        final SessionMap first = longTermList.getFirst();
-                                        first.putBySessionId(session.getSessionID(), sessionControl);
-                                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
-                                    } finally {
-                                        wlongTermLock.unlock();
-                                    }
-                                }
-                            }
-                        } finally {
-                            // Down-grade lock
-                            rlock.lock();
-                            wlock.unlock();
-                        }
-                    }
-                }
-            }
-        } finally {
-            rlock.unlock();
-        }
-    }
-
     /**
      * Rotates the session containers. A new slot is added to head of each queue, while the last one is removed.
      *
@@ -562,6 +489,38 @@ final class SessionData {
             rlongTermLock.unlock();
         }
         return count;
+    }
+
+    int[] getShortTermSessionsPerContainer() {
+        // read-only access to short term sessions.
+        final int[] retval;
+        rlock.lock();
+        try {
+            retval = new int[sessionList.size()];
+            int i = 0;
+            for (final SessionContainer container : sessionList) {
+                retval[i++] = container.size();
+            }
+        } finally {
+            rlock.unlock();
+        }
+        return retval;
+    }
+
+    int[] getLongTermSessionsPerContainer() {
+        // read-only access to long term sessions.
+        final int[] retval;
+        rlongTermLock.lock();
+        try {
+            retval = new int[longTermList.size()];
+            int i = 0;
+            for (final SessionMap longTermMap : longTermList) {
+                retval[i++] = longTermMap.size();
+            }
+        } finally {
+            rlongTermLock.unlock();
+        }
+        return retval;
     }
 
     SessionControl getSessionByAlternativeId(final String altId) {

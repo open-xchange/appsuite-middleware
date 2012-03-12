@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -95,7 +96,7 @@ public class ContactStorageTest extends TestCase {
     }
 
     protected Contact findContact(final String uid, final String folderID) throws OXException {
-        for (final Contact c : getStorage().all(getContextID(), folderID)) {
+        for (final Contact c : getStorage().all(getContextID(), folderID, ContactField.values())) {
             if (uid.equals(c.getUid())) {
                 return c;
             }
@@ -104,7 +105,7 @@ public class ContactStorageTest extends TestCase {
     }
     
     protected Contact findContact(final String uid, final String folderID, final Date since) throws OXException {
-        for (final Contact c : getStorage().modified(getContextID(), folderID, since)) {
+        for (final Contact c : getStorage().modified(getContextID(), folderID, since, ContactField.values())) {
             if (uid.equals(c.getUid())) {
                 return c;
             }

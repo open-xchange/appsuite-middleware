@@ -51,19 +51,13 @@ package com.openexchange.contact.storage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.internal.operands.ColumnOperand;
-import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
  * {@link DefaultContactStorage} - Abstract {@link ContactStorage} implementation.
@@ -85,90 +79,18 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
     
     @Override
-    public Contact get(final int contextID, final String folderId, final String id) throws OXException {
-        return this.get(contextID, folderId, id, allFields());
-    }
-
-    @Override
-    public Collection<Contact> all(final int contextID, final String folderId) throws OXException {
-        return this.all(contextID, folderId, allFields());
-    }
-    
-    @Override
     public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
 		return this.all(contextID, folderId, fields, SortOptions.EMPTY);
     }
-
-	@Override
-	public Collection<Contact> all(int contextID, String folderId, SortOptions sortOptions) throws OXException {
-		return this.all(contextID, folderId, allFields(), sortOptions);
-	}
-
-    /**
-     * Default implementation that uses <code>ContactStorage.search</code> internally. 
-     * Override if applicable for concrete storage implementation.
-     */
-	@Override
-	public Collection<Contact> all(int contextID, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        return this.search(contextID, getSearchTermFor(folderId), fields, sortOptions);
-	}
-
-    @Override
-    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since) throws OXException {
-        return this.deleted(contextID, folderId, since, allFields());
-    }
-
-    @Override
-    public Collection<Contact> modified(final int contextID, final String folderId, final Date since) throws OXException {
-        return this.modified(contextID, folderId, since, allFields());
-    }
-
-    @Override
-    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids) throws OXException {
-        return this.list(contextID, folderId, ids, allFields());
-    }
-
-	@Override
-	public Collection<Contact> list(int contextID, String folderId, String[] ids, SortOptions sortOptions) throws OXException {
-    	return this.list(contextID, folderId, ids, allFields(), sortOptions);    	
-	}
 
     @Override
     public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
     	return this.list(contextID, folderId, ids, fields, SortOptions.EMPTY);    	
     }
     
-    /**
-     * Default implementation that uses <code>ContactStorage.search</code> internally. 
-     * Override if applicable for concrete storage implementation.
-     */
 	@Override
-	public Collection<Contact> list(int contextID, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        andTerm.addSearchTerm(getSearchTermFor(folderId));
-        final CompositeSearchTerm idsTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (final String id : ids) {
-            final SingleSearchTerm idTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-            idTerm.addOperand(new ColumnOperand(ContactField.OBJECT_ID.getAjaxName()));
-            idTerm.addOperand(new ConstantOperand<String>(id));
-        }
-        andTerm.addSearchTerm(idsTerm);
-        return this.search(contextID, andTerm, fields, sortOptions);
-	}
-    
-    @Override
-    public <O> Collection<Contact> search(int contextID, SearchTerm<O> term) throws OXException {
-        return this.search(contextID, term, allFields());
-    }
-    
-	@Override
-	public <O> Collection<Contact> search(int contextID, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
-        return this.search(contextID, term, allFields(), sortOptions);
-	}
-
-	@Override
-	public <O> Collection<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException {
-        return this.search(contextID, term, fields, SortOptions.EMPTY);
+	public <O> Collection<Contact> search(int contextID, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException {
+        return this.search(contextID, folderId, term, fields, SortOptions.EMPTY);
 	}
 
 
@@ -263,15 +185,6 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
 
     /**
-     * Gets an array containing the column numbers of all contact fields.
-     * 
-     * @return the columns
-     */
-    protected static int[] allColumns() {
-        return asColumns(allFields());
-    }
-    
-    /**
      * Gets all contact fields.
      * 
      * @return the fields
@@ -280,29 +193,4 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return ContactField.values();
     }
     
-    /**
-     * Gets an array containing the column numbers of the supplied contact fields.
-     * 
-     * @param fields the fields
-     * @return the columns, or <code>null</code> if no fields were supplied
-     */
-    protected static int[] asColumns(final ContactField[] fields) {
-        if (null != fields) {
-            final int[] columns = new int[fields.length];
-            for (int i = 0; i < fields.length; i++) {
-                columns[i] = fields[i].getNumber();
-            }            
-            return columns;
-        } else {
-            return null;
-        }
-    }
-    
-    private static SingleSearchTerm getSearchTermFor(final String folderId) {
-        final SingleSearchTerm folderIdTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-        folderIdTerm.addOperand(new ColumnOperand(ContactField.FOLDER_ID.getAjaxName()));
-        folderIdTerm.addOperand(new ConstantOperand<String>(folderId));
-        return folderIdTerm;
-    }
-
 }
