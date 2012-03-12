@@ -166,7 +166,6 @@ import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
@@ -376,20 +375,6 @@ public final class Init {
 
     private static void startAndInjectThreadPoolBundle() {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
-            String property = System.getProperty("java.specification.version");
-            if (null == property) {
-                property = System.getProperty("java.runtime.version");
-                if (null == property) {
-                    // JRE not detectable, use fallback
-                    QueueProvider.initInstance(false);
-                } else {
-                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
-                    QueueProvider.initInstance(!property.startsWith("1.5"));
-                }
-            } else {
-                // "java.specification.version=1.5" OR "java.specification.version=1.6"
-                QueueProvider.initInstance("1.5".compareTo(property) < 0);
-            }
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
             final ThreadPoolServiceImpl threadPool =
@@ -546,16 +531,16 @@ public final class Init {
 
     private static void startAndInjectContactStorageServices() {
         if (null == TestServiceRegistry.getInstance().getService(ContactStorageRegistry.class)) {
-            DefaultContactStorageRegistry registry = new DefaultContactStorageRegistry();
+            final DefaultContactStorageRegistry registry = new DefaultContactStorageRegistry();
             registry.addStorage(new RdbContactStorage());
             TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
             com.openexchange.contact.storage.rdb.internal.RdbServiceLookup.set(new ServiceLookup() {
                 @Override
-                public <S> S getService(Class<? extends S> clazz) {
+                public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
                 @Override
-                public <S> S getOptionalService(Class<? extends S> clazz) {
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
             });                
