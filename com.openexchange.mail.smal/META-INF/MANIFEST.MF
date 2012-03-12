@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Super-MAL Bundle
-Bundle-SymbolicName: com.openexchange.mail.smal
+Bundle-Name: Open-Xchange Super-MAL Implementation Bundle
+Bundle-SymbolicName: com.openexchange.mail.smal.impl
 Bundle-Version: 7.0.0.0
-Bundle-Activator: com.openexchange.mail.smal.osgi.SMALActivator
+Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SMALActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,
@@ -39,6 +39,8 @@ Import-Package: com.openexchange.api2,
  com.openexchange.mail.mime.utils,
  com.openexchange.mail.permission,
  com.openexchange.mail.search,
+ com.openexchange.mail.smal,
+ com.openexchange.mail.smal.adaper,
  com.openexchange.mail.text,
  com.openexchange.mail.usersetting,
  com.openexchange.mail.utils,
@@ -50,6 +52,8 @@ Import-Package: com.openexchange.api2,
  com.openexchange.secret.osgi.tools,
  com.openexchange.server,
  com.openexchange.server.impl,
+ com.openexchange.service.indexing.impl.mail,
+ com.openexchange.service.indexing.impl.mail.job,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.spamhandler,
@@ -143,5 +147,3 @@ Bundle-ClassPath: .,
  lib/jcl-over-slf4j-1.6.1.jar,
  lib/slf4j-api-1.6.1.jar,
  lib/wstx-asl-3.2.7.jar
-Export-Package: com.openexchange.mail.smal,
- com.openexchange.mail.smal.adapter
