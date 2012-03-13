@@ -53,6 +53,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.openexchange.exception.OXException;
@@ -66,14 +68,17 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O> {
 	
 	Mapping<? extends Object, O> get(E field) throws OXException;
 	
-	void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException;
+	void setParameters(PreparedStatement stmt, O object, E[] fields) throws SQLException, OXException;
 	
-	O fromResultSet(final ResultSet resultSet, final E[] fields) throws OXException, SQLException;
+	O fromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException;
 	
-	String getAssignments(final E[] fields) throws OXException;
+	String getAssignments(E[] fields) throws OXException;
 	
-	String getColumns(final E[] fields) throws OXException;
+	String getColumns(E[] fields) throws OXException;
 	
-	Set<E> filter(final E[] fields, final EnumSet<E> validFields, final E... mandatoryFields);
+	Set<E> filter(E[] fields, EnumSet<E> validFields, E... mandatoryFields);
 	
+	List<Entry<E, Mapping<? extends Object, O>>> getByColumnLabel(String[] columnLabels);
+	
+	E getMappedField(String columnLabel);
 }

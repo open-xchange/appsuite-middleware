@@ -73,6 +73,8 @@ public interface Mapping<T, O> {
 	
 	String getColumnLabel();
 	
+	String getReadableName();
+	
 	int getSqlType();
 	
 	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;

@@ -61,8 +61,8 @@ import java.sql.Types;
  */
 public abstract class BigIntMapping<O> extends DefaultMapping<Long, O> {
 
-	public BigIntMapping(String columnName) {
-		super(columnName, Types.BIGINT);
+	public BigIntMapping(final String columnName, final String readableName) {
+		super(columnName, readableName, Types.BIGINT);
 	}
 	
 	@Override

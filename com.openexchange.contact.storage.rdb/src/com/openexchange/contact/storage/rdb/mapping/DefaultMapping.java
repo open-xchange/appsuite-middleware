@@ -66,11 +66,14 @@ import com.openexchange.exception.OXException;
 public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
 	
 	private final String columnName;
+	private final String readableName;
 	private final int sqlType;
 	
-	public DefaultMapping(final String columnName, final int sqlType) {
+	public DefaultMapping(final String columnName, final String readableName, final int sqlType) {
+		super();
 		this.sqlType = sqlType;
 		this.columnName = columnName;
+		this.readableName = readableName;
 	}
 
 	@Override
@@ -101,6 +104,11 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
 	@Override
 	public String getColumnLabel() {
 		return this.columnName;
+	}
+
+	@Override
+	public String getReadableName() {
+		return this.readableName;
 	}
 
 	@Override

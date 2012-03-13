@@ -61,8 +61,8 @@ import java.sql.Types;
  */
 public abstract class IntegerMapping<O> extends DefaultMapping<Integer, O> {
 
-	public IntegerMapping(String columnName) {
-		super(columnName, Types.INTEGER);
+	public IntegerMapping(String columnName, final String readableName) {
+		super(columnName, readableName, Types.INTEGER);
 	}
 	
 	@Override

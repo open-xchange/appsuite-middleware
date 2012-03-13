@@ -52,9 +52,12 @@ package com.openexchange.contact.storage.rdb.mapping;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.openexchange.exception.OXException;
@@ -110,6 +113,33 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 			throw OXException.general("No mapping for field " + field + ".");
 		}
 		return mapping;
+	}	
+	
+	public E getMappedField(final String columnLabel) {
+		if (null == columnLabel) {
+			throw new IllegalArgumentException("columnLabel");
+		}
+		for (final Entry<E, Mapping<? extends Object, O>> entry : this.mappings.entrySet()) {
+			if (columnLabel.equals(entry.getValue().getColumnLabel())) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}	
+	
+	public List<Entry<E, Mapping<? extends Object, O>>> getByColumnLabel(final String[] columnLabels) {
+		if (null == columnLabels) {
+			throw new IllegalArgumentException("columnLabels");
+		}
+		final List<Entry<E, Mapping<? extends Object, O>>> mappings = new ArrayList<Entry<E,Mapping<? extends Object,O>>>();
+		for (final Entry<E, Mapping<? extends Object, O>> entry : this.mappings.entrySet()) {
+			for (final String columnLabel : columnLabels) {
+				if (null != columnLabel && columnLabel.equals(entry.getValue().getColumnLabel())) {
+					mappings.add(entry);
+				}
+			}			
+		}
+		return mappings;
 	}	
 	
 	@Override

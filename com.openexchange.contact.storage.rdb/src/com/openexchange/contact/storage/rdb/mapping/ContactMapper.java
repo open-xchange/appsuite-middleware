@@ -78,8 +78,8 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 	protected EnumMap<ContactField, Mapping<? extends Object, Contact>> createMappings() {
 		final EnumMap<ContactField, Mapping<? extends Object, Contact>> mappings = new 
 				EnumMap<ContactField, Mapping<? extends Object, Contact>>(ContactField.class);
-		
-        mappings.put(ContactField.DISPLAY_NAME, new VarCharMapping<Contact>("field01") {
+
+        mappings.put(ContactField.DISPLAY_NAME, new VarCharMapping<Contact>("field01", "Display name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -97,7 +97,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SUR_NAME, new VarCharMapping<Contact>("field02") {
+        mappings.put(ContactField.SUR_NAME, new VarCharMapping<Contact>("field02", "Sur name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -115,7 +115,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.GIVEN_NAME, new VarCharMapping<Contact>("field03") {
+        mappings.put(ContactField.GIVEN_NAME, new VarCharMapping<Contact>("field03", "Given name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -133,7 +133,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MIDDLE_NAME, new VarCharMapping<Contact>("field04") {
+        mappings.put(ContactField.MIDDLE_NAME, new VarCharMapping<Contact>("field04", "Middle name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -151,7 +151,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SUFFIX, new VarCharMapping<Contact>("field05") {
+        mappings.put(ContactField.SUFFIX, new VarCharMapping<Contact>("field05", "Suffix") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -169,7 +169,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TITLE, new VarCharMapping<Contact>("field06") {
+        mappings.put(ContactField.TITLE, new VarCharMapping<Contact>("field06", "Title") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -187,7 +187,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STREET_HOME, new VarCharMapping<Contact>("field07") {
+        mappings.put(ContactField.STREET_HOME, new VarCharMapping<Contact>("field07", "Street home") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -205,7 +205,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSTAL_CODE_HOME, new VarCharMapping<Contact>("field08") {
+        mappings.put(ContactField.POSTAL_CODE_HOME, new VarCharMapping<Contact>("field08", "Postal code home") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -223,7 +223,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CITY_HOME, new VarCharMapping<Contact>("field09") {
+        mappings.put(ContactField.CITY_HOME, new VarCharMapping<Contact>("field09", "City home") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -241,7 +241,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STATE_HOME, new VarCharMapping<Contact>("field10") {
+        mappings.put(ContactField.STATE_HOME, new VarCharMapping<Contact>("field10", "State home") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -259,7 +259,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COUNTRY_HOME, new VarCharMapping<Contact>("field11") {
+        mappings.put(ContactField.COUNTRY_HOME, new VarCharMapping<Contact>("field11", "Country home") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -277,7 +277,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MARITAL_STATUS, new VarCharMapping<Contact>("field12") {
+        mappings.put(ContactField.MARITAL_STATUS, new VarCharMapping<Contact>("field12", "Martial status") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -295,7 +295,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_CHILDREN, new VarCharMapping<Contact>("field13") {
+        mappings.put(ContactField.NUMBER_OF_CHILDREN, new VarCharMapping<Contact>("field13", "Number of children") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -313,7 +313,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.PROFESSION, new VarCharMapping<Contact>("field14") {
+        mappings.put(ContactField.PROFESSION, new VarCharMapping<Contact>("field14", "Profession") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -331,7 +331,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NICKNAME, new VarCharMapping<Contact>("field15") {
+        mappings.put(ContactField.NICKNAME, new VarCharMapping<Contact>("field15", "Nickname") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -349,7 +349,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SPOUSE_NAME, new VarCharMapping<Contact>("field16") {
+        mappings.put(ContactField.SPOUSE_NAME, new VarCharMapping<Contact>("field16", "Spouse name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -367,7 +367,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NOTE, new VarCharMapping<Contact>("field17") {
+        mappings.put(ContactField.NOTE, new VarCharMapping<Contact>("field17", "Note") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -385,7 +385,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COMPANY, new VarCharMapping<Contact>("field18") {
+        mappings.put(ContactField.COMPANY, new VarCharMapping<Contact>("field18", "Company") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -403,7 +403,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.DEPARTMENT, new VarCharMapping<Contact>("field19") {
+        mappings.put(ContactField.DEPARTMENT, new VarCharMapping<Contact>("field19", "Department") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -421,7 +421,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSITION, new VarCharMapping<Contact>("field20") {
+        mappings.put(ContactField.POSITION, new VarCharMapping<Contact>("field20", "Position") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -439,7 +439,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMPLOYEE_TYPE, new VarCharMapping<Contact>("field21") {
+        mappings.put(ContactField.EMPLOYEE_TYPE, new VarCharMapping<Contact>("field21", "Employee type") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -457,7 +457,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.ROOM_NUMBER, new VarCharMapping<Contact>("field22") {
+        mappings.put(ContactField.ROOM_NUMBER, new VarCharMapping<Contact>("field22", "Room number") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -475,7 +475,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STREET_BUSINESS, new VarCharMapping<Contact>("field23") {
+        mappings.put(ContactField.STREET_BUSINESS, new VarCharMapping<Contact>("field23", "Street business") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -493,7 +493,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSTAL_CODE_BUSINESS, new VarCharMapping<Contact>("field24") {
+        mappings.put(ContactField.POSTAL_CODE_BUSINESS, new VarCharMapping<Contact>("field24", "Postal code business") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -511,7 +511,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CITY_BUSINESS, new VarCharMapping<Contact>("field25") {
+        mappings.put(ContactField.CITY_BUSINESS, new VarCharMapping<Contact>("field25", "City business") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -529,7 +529,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STATE_BUSINESS, new VarCharMapping<Contact>("field26") {
+        mappings.put(ContactField.STATE_BUSINESS, new VarCharMapping<Contact>("field26", "State business") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -547,7 +547,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COUNTRY_BUSINESS, new VarCharMapping<Contact>("field27") {
+        mappings.put(ContactField.COUNTRY_BUSINESS, new VarCharMapping<Contact>("field27", "Country business") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -565,7 +565,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new VarCharMapping<Contact>("field28") {
+        mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new VarCharMapping<Contact>("field28", "Number of employee") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -583,7 +583,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SALES_VOLUME, new VarCharMapping<Contact>("field29") {
+        mappings.put(ContactField.SALES_VOLUME, new VarCharMapping<Contact>("field29", "Sales volume") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -601,7 +601,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TAX_ID, new VarCharMapping<Contact>("field30") {
+        mappings.put(ContactField.TAX_ID, new VarCharMapping<Contact>("field30", "Tax id") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -619,7 +619,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COMMERCIAL_REGISTER, new VarCharMapping<Contact>("field31") {
+        mappings.put(ContactField.COMMERCIAL_REGISTER, new VarCharMapping<Contact>("field31", "Commercial register") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -637,7 +637,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BRANCHES, new VarCharMapping<Contact>("field32") {
+        mappings.put(ContactField.BRANCHES, new VarCharMapping<Contact>("field32", "Branches") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -655,7 +655,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BUSINESS_CATEGORY, new VarCharMapping<Contact>("field33") {
+        mappings.put(ContactField.BUSINESS_CATEGORY, new VarCharMapping<Contact>("field33", "Business category") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -673,7 +673,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INFO, new VarCharMapping<Contact>("field34") {
+        mappings.put(ContactField.INFO, new VarCharMapping<Contact>("field34", "Info") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -691,7 +691,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MANAGER_NAME, new VarCharMapping<Contact>("field35") {
+        mappings.put(ContactField.MANAGER_NAME, new VarCharMapping<Contact>("field35", "Manager's name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -709,7 +709,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.ASSISTANT_NAME, new VarCharMapping<Contact>("field36") {
+        mappings.put(ContactField.ASSISTANT_NAME, new VarCharMapping<Contact>("field36", "Assistant's name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -727,7 +727,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STREET_OTHER, new VarCharMapping<Contact>("field37") {
+        mappings.put(ContactField.STREET_OTHER, new VarCharMapping<Contact>("field37", "Street other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -745,7 +745,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSTAL_CODE_OTHER, new VarCharMapping<Contact>("field38") {
+        mappings.put(ContactField.POSTAL_CODE_OTHER, new VarCharMapping<Contact>("field38", "Postal code other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -763,7 +763,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CITY_OTHER, new VarCharMapping<Contact>("field39") {
+        mappings.put(ContactField.CITY_OTHER, new VarCharMapping<Contact>("field39", "City other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -781,7 +781,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STATE_OTHER, new VarCharMapping<Contact>("field40") {
+        mappings.put(ContactField.STATE_OTHER, new VarCharMapping<Contact>("field40", "State other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -799,7 +799,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COUNTRY_OTHER, new VarCharMapping<Contact>("field41") {
+        mappings.put(ContactField.COUNTRY_OTHER, new VarCharMapping<Contact>("field41", "Country other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -817,7 +817,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_ASSISTANT, new VarCharMapping<Contact>("field42") {
+        mappings.put(ContactField.TELEPHONE_ASSISTANT, new VarCharMapping<Contact>("field42", "Telephone assistant") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -835,7 +835,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_BUSINESS1, new VarCharMapping<Contact>("field43") {
+        mappings.put(ContactField.TELEPHONE_BUSINESS1, new VarCharMapping<Contact>("field43", "Telephone business 1") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -853,7 +853,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_BUSINESS2, new VarCharMapping<Contact>("field44") {
+        mappings.put(ContactField.TELEPHONE_BUSINESS2, new VarCharMapping<Contact>("field44", "Telephone business 2") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -871,7 +871,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FAX_BUSINESS, new VarCharMapping<Contact>("field45") {
+        mappings.put(ContactField.FAX_BUSINESS, new VarCharMapping<Contact>("field45", "FAX business") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -889,7 +889,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_CALLBACK, new VarCharMapping<Contact>("field46") {
+        mappings.put(ContactField.TELEPHONE_CALLBACK, new VarCharMapping<Contact>("field46", "Telephone callback") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -907,7 +907,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_CAR, new VarCharMapping<Contact>("field47") {
+        mappings.put(ContactField.TELEPHONE_CAR, new VarCharMapping<Contact>("field47", "Telephone car") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -925,7 +925,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_COMPANY, new VarCharMapping<Contact>("field48") {
+        mappings.put(ContactField.TELEPHONE_COMPANY, new VarCharMapping<Contact>("field48", "Telephone company") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -943,7 +943,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_HOME1, new VarCharMapping<Contact>("field49") {
+        mappings.put(ContactField.TELEPHONE_HOME1, new VarCharMapping<Contact>("field49", "Telephone home 1") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -961,7 +961,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_HOME2, new VarCharMapping<Contact>("field50") {
+        mappings.put(ContactField.TELEPHONE_HOME2, new VarCharMapping<Contact>("field50", "Telephone home 2") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -979,7 +979,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FAX_HOME, new VarCharMapping<Contact>("field51") {
+        mappings.put(ContactField.FAX_HOME, new VarCharMapping<Contact>("field51", "FAX home") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -997,7 +997,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_ISDN, new VarCharMapping<Contact>("field52") {
+        mappings.put(ContactField.TELEPHONE_ISDN, new VarCharMapping<Contact>("field52", "Telephone ISDN") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1015,7 +1015,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CELLULAR_TELEPHONE1, new VarCharMapping<Contact>("field53") {
+        mappings.put(ContactField.CELLULAR_TELEPHONE1, new VarCharMapping<Contact>("field53", "Cellular telephone 1") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1033,7 +1033,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CELLULAR_TELEPHONE2, new VarCharMapping<Contact>("field54") {
+        mappings.put(ContactField.CELLULAR_TELEPHONE2, new VarCharMapping<Contact>("field54", "Cellular telephone 2") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1051,7 +1051,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_OTHER, new VarCharMapping<Contact>("field55") {
+        mappings.put(ContactField.TELEPHONE_OTHER, new VarCharMapping<Contact>("field55", "Telephone other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1069,7 +1069,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FAX_OTHER, new VarCharMapping<Contact>("field56") {
+        mappings.put(ContactField.FAX_OTHER, new VarCharMapping<Contact>("field56", "FAX other") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1087,7 +1087,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_PAGER, new VarCharMapping<Contact>("field57") {
+        mappings.put(ContactField.TELEPHONE_PAGER, new VarCharMapping<Contact>("field57", "Telephone pager") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1105,7 +1105,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_PRIMARY, new VarCharMapping<Contact>("field58") {
+        mappings.put(ContactField.TELEPHONE_PRIMARY, new VarCharMapping<Contact>("field58", "Telephone primary") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1123,7 +1123,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_RADIO, new VarCharMapping<Contact>("field59") {
+        mappings.put(ContactField.TELEPHONE_RADIO, new VarCharMapping<Contact>("field59", "Telephone radio") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1141,7 +1141,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_TELEX, new VarCharMapping<Contact>("field60") {
+        mappings.put(ContactField.TELEPHONE_TELEX, new VarCharMapping<Contact>("field60", "Telephone telex") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1159,7 +1159,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_TTYTDD, new VarCharMapping<Contact>("field61") {
+        mappings.put(ContactField.TELEPHONE_TTYTDD, new VarCharMapping<Contact>("field61", "Telephone TTY/TDD") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1177,7 +1177,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INSTANT_MESSENGER1, new VarCharMapping<Contact>("field62") {
+        mappings.put(ContactField.INSTANT_MESSENGER1, new VarCharMapping<Contact>("field62", "Instantmessenger 1") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1195,7 +1195,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INSTANT_MESSENGER2, new VarCharMapping<Contact>("field63") {
+        mappings.put(ContactField.INSTANT_MESSENGER2, new VarCharMapping<Contact>("field63", "Instantmessenger 2") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1213,7 +1213,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_IP, new VarCharMapping<Contact>("field64") {
+        mappings.put(ContactField.TELEPHONE_IP, new VarCharMapping<Contact>("field64", "Telephone IP") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1231,7 +1231,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMAIL1, new VarCharMapping<Contact>("field65") {
+        mappings.put(ContactField.EMAIL1, new VarCharMapping<Contact>("field65", "Email 1") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1249,7 +1249,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMAIL2, new VarCharMapping<Contact>("field66") {
+        mappings.put(ContactField.EMAIL2, new VarCharMapping<Contact>("field66", "Email 2") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1267,7 +1267,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMAIL3, new VarCharMapping<Contact>("field67") {
+        mappings.put(ContactField.EMAIL3, new VarCharMapping<Contact>("field67", "Email 3") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1285,7 +1285,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.URL, new VarCharMapping<Contact>("field68") {
+        mappings.put(ContactField.URL, new VarCharMapping<Contact>("field68", "URL") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1303,7 +1303,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CATEGORIES, new VarCharMapping<Contact>("field69") {
+        mappings.put(ContactField.CATEGORIES, new VarCharMapping<Contact>("field69", "Categories") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1321,7 +1321,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD01, new VarCharMapping<Contact>("field70") {
+        mappings.put(ContactField.USERFIELD01, new VarCharMapping<Contact>("field70", "Dynamic Field 1") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1339,7 +1339,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD02, new VarCharMapping<Contact>("field71") {
+        mappings.put(ContactField.USERFIELD02, new VarCharMapping<Contact>("field71", "Dynamic Field 2") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1357,7 +1357,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD03, new VarCharMapping<Contact>("field72") {
+        mappings.put(ContactField.USERFIELD03, new VarCharMapping<Contact>("field72", "Dynamic Field 3") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1375,7 +1375,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD04, new VarCharMapping<Contact>("field73") {
+        mappings.put(ContactField.USERFIELD04, new VarCharMapping<Contact>("field73", "Dynamic Field 4") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1393,7 +1393,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD05, new VarCharMapping<Contact>("field74") {
+        mappings.put(ContactField.USERFIELD05, new VarCharMapping<Contact>("field74", "Dynamic Field 5") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1411,7 +1411,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD06, new VarCharMapping<Contact>("field75") {
+        mappings.put(ContactField.USERFIELD06, new VarCharMapping<Contact>("field75", "Dynamic Field 6") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1429,7 +1429,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD07, new VarCharMapping<Contact>("field76") {
+        mappings.put(ContactField.USERFIELD07, new VarCharMapping<Contact>("field76", "Dynamic Field 7") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1447,7 +1447,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD08, new VarCharMapping<Contact>("field77") {
+        mappings.put(ContactField.USERFIELD08, new VarCharMapping<Contact>("field77", "Dynamic Field 8") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1465,7 +1465,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD09, new VarCharMapping<Contact>("field78") {
+        mappings.put(ContactField.USERFIELD09, new VarCharMapping<Contact>("field78", "Dynamic Field 9") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1483,7 +1483,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD10, new VarCharMapping<Contact>("field79") {
+        mappings.put(ContactField.USERFIELD10, new VarCharMapping<Contact>("field79", "Dynamic Field 10") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1501,7 +1501,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD11, new VarCharMapping<Contact>("field80") {
+        mappings.put(ContactField.USERFIELD11, new VarCharMapping<Contact>("field80", "Dynamic Field 11") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1519,7 +1519,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD12, new VarCharMapping<Contact>("field81") {
+        mappings.put(ContactField.USERFIELD12, new VarCharMapping<Contact>("field81", "Dynamic Field 12") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1537,7 +1537,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD13, new VarCharMapping<Contact>("field82") {
+        mappings.put(ContactField.USERFIELD13, new VarCharMapping<Contact>("field82", "Dynamic Field 13") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1555,7 +1555,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD14, new VarCharMapping<Contact>("field83") {
+        mappings.put(ContactField.USERFIELD14, new VarCharMapping<Contact>("field83", "Dynamic Field 14") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1573,7 +1573,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD15, new VarCharMapping<Contact>("field84") {
+        mappings.put(ContactField.USERFIELD15, new VarCharMapping<Contact>("field84", "Dynamic Field 15") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1591,7 +1591,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD16, new VarCharMapping<Contact>("field85") {
+        mappings.put(ContactField.USERFIELD16, new VarCharMapping<Contact>("field85", "Dynamic Field 16") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1609,7 +1609,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD17, new VarCharMapping<Contact>("field86") {
+        mappings.put(ContactField.USERFIELD17, new VarCharMapping<Contact>("field86", "Dynamic Field 17") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1627,7 +1627,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD18, new VarCharMapping<Contact>("field87") {
+        mappings.put(ContactField.USERFIELD18, new VarCharMapping<Contact>("field87", "Dynamic Field 18") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1645,7 +1645,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD19, new VarCharMapping<Contact>("field88") {
+        mappings.put(ContactField.USERFIELD19, new VarCharMapping<Contact>("field88", "Dynamic Field 19") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1663,7 +1663,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD20, new VarCharMapping<Contact>("field89") {
+        mappings.put(ContactField.USERFIELD20, new VarCharMapping<Contact>("field89", "Dynamic Field 20") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1681,7 +1681,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>("intfield01") {
+        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>("intfield01", "Object id") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1699,7 +1699,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new IntegerMapping<Contact>("intfield02") {
+        mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new IntegerMapping<Contact>("intfield02", "Number of distributionlists") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1717,7 +1717,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>("intfield03") {
+        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>("intfield03", "Number of links") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1735,7 +1735,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>("fid") {
+        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>("fid", "Folder id") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1753,7 +1753,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CONTEXTID, new IntegerMapping<Contact>("cid") {
+		mappings.put(ContactField.CONTEXTID, new IntegerMapping<Contact>("cid", "Context ID") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1771,7 +1771,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.PRIVATE_FLAG, new IntegerMapping<Contact>("pflag") {
+        mappings.put(ContactField.PRIVATE_FLAG, new IntegerMapping<Contact>("pflag", "Private Flag") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1789,7 +1789,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>("created_from") {
+        mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>("created_from", "Created by") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1807,7 +1807,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>("changed_from") {
+        mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>("changed_from", "Modified by") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1825,7 +1825,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CREATION_DATE, new BigIntMapping<Contact>("creating_date") {
+        mappings.put(ContactField.CREATION_DATE, new BigIntMapping<Contact>("creating_date", "Creation date") {
 
             @Override
             public void set(Contact contact, Long value) { 
@@ -1843,7 +1843,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED, new BigIntMapping<Contact>("changing_date") {
+        mappings.put(ContactField.LAST_MODIFIED, new BigIntMapping<Contact>("changing_date", "Changing date") {
 
             @Override
             public void set(Contact contact, Long value) { 
@@ -1861,7 +1861,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BIRTHDAY, new DateMapping<Contact>("timestampfield01") {
+        mappings.put(ContactField.BIRTHDAY, new DateMapping<Contact>("timestampfield01", "Birthday") {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -1879,7 +1879,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.ANNIVERSARY, new DateMapping<Contact>("timestampfield02") {
+        mappings.put(ContactField.ANNIVERSARY, new DateMapping<Contact>("timestampfield02", "Anniversary") {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -1896,8 +1896,8 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getAnniversary();
             }
         });
-        
-        mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>("image1", Types.VARBINARY) {
+
+        mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>("image1", "Image 1", Types.VARBINARY) {
 
 			@Override
 			public void set(Contact contact, byte[] value) {
@@ -1920,7 +1920,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 			}
 		});
 
-        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new VarCharMapping<Contact>("mime_type") {
+        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new VarCharMapping<Contact>("mime_type", "Image 1 Content Type") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -1937,8 +1937,8 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getImageContentType();
             }
         });
-        
-        mappings.put(ContactField.IMAGE_LAST_MODIFIED, new BigIntMapping<Contact>("changing_date") {
+
+        mappings.put(ContactField.IMAGE_LAST_MODIFIED, new BigIntMapping<Contact>("changing_date", "Image 1 Changing date") {
 
             @Override
             public void set(Contact contact, Long value) { 
@@ -1956,7 +1956,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INTERNAL_USERID, new IntegerMapping<Contact>("userid") {
+        mappings.put(ContactField.INTERNAL_USERID, new IntegerMapping<Contact>("userid", "User ID") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1974,7 +1974,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COLOR_LABEL, new IntegerMapping<Contact>("intfield05") {
+        mappings.put(ContactField.COLOR_LABEL, new IntegerMapping<Contact>("intfield05", "Color Label") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1992,7 +1992,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FILE_AS, new VarCharMapping<Contact>("field90") {
+        mappings.put(ContactField.FILE_AS, new VarCharMapping<Contact>("field90", "File As") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2010,7 +2010,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>("intfield06") {
+        mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>("intfield06", "Default address") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2028,7 +2028,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new IntegerMapping<Contact>("intfield07") {
+        mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new IntegerMapping<Contact>("intfield07", "Mark as Distribution List") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2046,7 +2046,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>("intfield08") {
+        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>("intfield08", "Number of attachments") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2064,7 +2064,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_FIRST_NAME, new VarCharMapping<Contact>("yomiFirstName") {
+        mappings.put(ContactField.YOMI_FIRST_NAME, new VarCharMapping<Contact>("yomiFirstName", "Yomi First Name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2082,7 +2082,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_LAST_NAME, new VarCharMapping<Contact>("yomiLastName") {
+        mappings.put(ContactField.YOMI_LAST_NAME, new VarCharMapping<Contact>("yomiLastName", "Yomi Last Name") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2100,7 +2100,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_COMPANY, new VarCharMapping<Contact>("yomiCompany") {
+        mappings.put(ContactField.YOMI_COMPANY, new VarCharMapping<Contact>("yomiCompany", "Yomi Company") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2118,7 +2118,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_IMAGES, new IntegerMapping<Contact>("intfield04") {
+        mappings.put(ContactField.NUMBER_OF_IMAGES, new IntegerMapping<Contact>("intfield04", "Number of images") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2137,7 +2137,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USE_COUNT, new IntegerMapping<Contact>("useCount") {
+        mappings.put(ContactField.USE_COUNT, new IntegerMapping<Contact>("useCount", "Use Count") {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2155,7 +2155,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.HOME_ADDRESS, new VarCharMapping<Contact>("homeAddress") {
+        mappings.put(ContactField.HOME_ADDRESS, new VarCharMapping<Contact>("homeAddress", "Home Address") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2173,7 +2173,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BUSINESS_ADDRESS, new VarCharMapping<Contact>("businessAddress") {
+        mappings.put(ContactField.BUSINESS_ADDRESS, new VarCharMapping<Contact>("businessAddress", "Business Address") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2191,7 +2191,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.OTHER_ADDRESS, new VarCharMapping<Contact>("otherAddress") {
+        mappings.put(ContactField.OTHER_ADDRESS, new VarCharMapping<Contact>("otherAddress", "Other Address") {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2201,6 +2201,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             @Override
             public boolean isSet(Contact contact) {
                 return contact.containsAddressOther();
+
             }
 
             @Override
@@ -2209,7 +2210,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.UID, new VarCharMapping<Contact>("uid") {
+        mappings.put(ContactField.UID, new VarCharMapping<Contact>("uid", "UID") {
 
             @Override
             public void set(Contact contact, String value) { 

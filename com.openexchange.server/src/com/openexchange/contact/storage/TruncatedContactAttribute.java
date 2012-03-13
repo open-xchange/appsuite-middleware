@@ -47,28 +47,50 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.contact.storage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Date;
-
+import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link DateMapping} - 
+ * {@link TruncatedContactAttribute} - {@link Truncated} implementation using 
+ * contact fields to identify the truncated attribute. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DateMapping<O> extends DefaultMapping<Date, O> {
+public class TruncatedContactAttribute implements Truncated {
+	
+	private final ContactField field;
+	private final int maxSize;
+	private final int length;
+	
+	public TruncatedContactAttribute(final ContactField field, final int maxSize, final int length) {
+		this.field = field;
+		this.maxSize = maxSize;
+		this.length = length;		 
+	}
+	
+	public ContactField getField() {
+		return this.field;
+	}
 
-	public DateMapping(final String columnName, final String readableName) {
-		super(columnName, readableName, Types.DATE);
-	}
-	
+	/**
+	 * {@link Deprecated} - use <code>getField()</code> directly and determine 
+	 * field ID in ajax layer internally afterwards.
+	 */
+	@Deprecated 
 	@Override
-	public Date get(ResultSet resultSet) throws SQLException {
-		return resultSet.getDate(this.getColumnLabel());
+	public int getId() {
+		return this.getField().getNumber();
 	}
-	
+
+	@Override
+	public int getMaxSize() {
+		return this.maxSize;
+	}
+
+	@Override
+	public int getLength() {
+		return this.length;
+	}
 }

@@ -61,8 +61,8 @@ import java.sql.Types;
  */
 public abstract class VarCharMapping<O> extends DefaultMapping<String, O> {
 	
-	public VarCharMapping(String columnName) {
-		super(columnName, Types.VARCHAR);
+	public VarCharMapping(final String columnName, final String readableName) {
+		super(columnName, readableName, Types.VARCHAR);
 	}
 
 	@Override

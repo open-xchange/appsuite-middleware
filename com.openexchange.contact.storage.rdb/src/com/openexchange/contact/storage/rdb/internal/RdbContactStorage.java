@@ -326,6 +326,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             connection.commit();
         	committed = true;
+        } catch (final DataTruncation e) {
+            DBUtils.rollback(connection);
+            throw Tools.truncation(connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
         } finally {
