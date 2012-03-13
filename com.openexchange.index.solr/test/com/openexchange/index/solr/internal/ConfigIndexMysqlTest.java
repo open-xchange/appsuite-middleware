@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.util.List;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.solr.IndexExceptionCodes;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.SolrCoreStore;
 import com.openexchange.index.solr.internal.ConfigIndexMysql;
 import com.openexchange.index.solr.internal.SolrCore;
@@ -138,7 +138,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         try {
             indexMysql.getCoreStore(con, store.getId());
         } catch (final OXException e) {
-            assertTrue("Wrong exception.", e.similarTo(IndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND));
+            assertTrue("Wrong exception.", e.similarTo(SolrIndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND));
             return;
         }
         

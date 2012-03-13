@@ -55,11 +55,12 @@ import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.solr.ConfigIndexService;
-import com.openexchange.index.solr.IndexExceptionCodes;
 import com.openexchange.index.solr.IndexServer;
 import com.openexchange.index.solr.IndexUrl;
 import com.openexchange.index.solr.SolrCoreStore;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
 
 
 /**
@@ -151,7 +152,7 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             instanceUri = new URI(instanceUriStr);            
             final File instanceDir = new File(instanceUri);            
             if (instanceDir.exists()) {
-                throw IndexExceptionCodes.INSTANCE_DIR_EXISTS.create(instanceDir.toString());
+                throw SolrIndexExceptionCodes.INSTANCE_DIR_EXISTS.create(instanceDir.toString());
             }
             
             if (instanceDir.mkdir()) {                
@@ -166,7 +167,6 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             } else {
                 uri = dataUriStr;
             }
-            
             throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, uri);
         }  
     }

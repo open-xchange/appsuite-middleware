@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -72,31 +72,20 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      */
     IO_ERROR(IndexExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_CONNECTIVITY, 2),
     /**
-     * Could not find search index for user %1$s and module %2$s in context %3$s.
+     * Could not find a suitable index for user %1$s and module %2$s in context %3$s.
      */
     INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
     /**
-     * Could not find solr core entry for user %1$s and module %2$s in context %3$s. 
-     */
-    CORE_ENTRY_NOT_FOUND(IndexExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4),
-    /**
-     * Could not find solr core store for given attributes. %1$s.
-     */
-    CORE_STORE_ENTRY_NOT_FOUND(IndexExceptionMessages.CORE_STORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
-    /**
-     * All core stores seem to be full.
-     */
-    NO_FREE_CORE_STORE(IndexExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 6),
-    /**
-     * This cores instance directory (%1$s) already exists. It cannot be created. 
-     */
-    INSTANCE_DIR_EXISTS(IndexExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 7),
-    /**
      * Could not parse URI: %1$s.
      */
-    URI_PARSE_ERROR(IndexExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 8),
+    URI_PARSE_ERROR(IndexExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 4),
     
     ;
+
+    /**
+     * The error code prefix.
+     */
+    public static final String PREFIX = "INDEX";
 
     private final String message;
 
@@ -157,7 +146,7 @@ public enum IndexExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SEA";
+        return PREFIX;
     }
 
     @Override

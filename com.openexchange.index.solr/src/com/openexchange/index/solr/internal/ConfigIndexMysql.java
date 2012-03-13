@@ -59,7 +59,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.index.solr.IndexExceptionCodes;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.IndexServer;
 import com.openexchange.index.solr.SolrCoreStore;
 import com.openexchange.server.ServiceExceptionCodes;
@@ -145,7 +145,7 @@ public class ConfigIndexMysql {
                 storeId = rs.getInt(1);
                 server = rs.getString(2);
             } else {
-                throw IndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+                throw SolrIndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -258,7 +258,7 @@ public class ConfigIndexMysql {
                     return true;
                 }
             } else {
-                throw IndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+                throw SolrIndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
             }
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -333,7 +333,7 @@ public class ConfigIndexMysql {
                 
                 return store;
             } else {
-                throw IndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("StoreId: " + storeId);
+                throw SolrIndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("StoreId: " + storeId);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -372,7 +372,7 @@ public class ConfigIndexMysql {
                 
                 return store;
             } else {
-                throw IndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("Context: " + cid + ", User: " + uid + ", Module: " + module);
+                throw SolrIndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("Context: " + cid + ", User: " + uid + ", Module: " + module);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -497,7 +497,7 @@ public class ConfigIndexMysql {
             }
             
             if (storeId == -1) {
-                throw IndexExceptionCodes.NO_FREE_CORE_STORE.create();
+                throw SolrIndexExceptionCodes.NO_FREE_CORE_STORE.create();
             }
             
             return storeId;

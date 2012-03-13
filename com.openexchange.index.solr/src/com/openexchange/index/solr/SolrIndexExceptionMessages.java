@@ -53,27 +53,18 @@ import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link IndexExceptionMessages}
+ * {@link SolrIndexExceptionMessages}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexExceptionMessages implements LocalizableStrings {
+public final class SolrIndexExceptionMessages implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link IndexExceptionMessages}.
+     * Initializes a new {@link SolrIndexExceptionMessages}.
      */
-    public IndexExceptionMessages() {
+    public SolrIndexExceptionMessages() {
         super();
     }
-
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Could not find search index for user %1$s and module %2$s in context %3$s.
-    public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
 
     // Could not find solr core entry for user %1$s and module %2$s in context %3$s.
     public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
@@ -86,8 +77,5 @@ public final class IndexExceptionMessages implements LocalizableStrings {
     
     // This cores instance directory (%1$s) already exists. It cannot be created.
     public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
-
-    // Could not parse URI: %1$s.
-    public static final String URI_PARSE_ERROR_MSG = "Could not parse URI: %1$s.";
     
 }
