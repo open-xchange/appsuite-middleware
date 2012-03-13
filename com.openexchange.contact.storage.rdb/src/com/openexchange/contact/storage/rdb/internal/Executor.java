@@ -349,7 +349,7 @@ public class Executor {
         return this.insertFrom(connection, from, to, contextID, objectID, Long.MIN_VALUE);
     }
             
-    public int update(final Connection connection, final Table table, final long minLastModified, final Contact contact, 
+    public int update(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified, final Contact contact, 
     		final ContactField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
@@ -360,8 +360,8 @@ public class Executor {
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             Mappers.CONTACT.setParameters(stmt, contact, fields);
-            stmt.setInt(1 + fields.length, contact.getContextId());
-            stmt.setInt(2 + fields.length, contact.getObjectID());
+            stmt.setInt(1 + fields.length, contextID);
+            stmt.setInt(2 + fields.length, objectID);
             stmt.setLong(3 + fields.length, minLastModified);
             return logExecuteUpdate(stmt);
         } finally {

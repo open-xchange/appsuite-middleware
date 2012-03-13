@@ -161,8 +161,7 @@ public class SimContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public synchronized void update(final int contextID, final String folderId, final Contact contact, final Date lastRead) throws OXException {
-        final String id = Integer.toString(contact.getObjectID());
+    public synchronized void update(final int contextID, final String folderId, final String id, final Contact contact, final Date lastRead) throws OXException {
         final Contact existingContact = this.contacts.get(id);
         if (null == existingContact) {
             throw new IllegalArgumentException("contact " + id + " not found");
@@ -177,7 +176,7 @@ public class SimContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public synchronized void delete(int contextID, String folderId, String id, Date lastRead) throws OXException {
+    public synchronized void delete(int contextID, int userID, String folderId, String id, Date lastRead) throws OXException {
         final Contact existingContact = this.contacts.get(id);
         if (null == existingContact || false == this.matches(existingContact, folderId)) {
             throw new IllegalArgumentException("contact " + id + " not found in folder " + folderId);
@@ -186,7 +185,7 @@ public class SimContactStorage extends DefaultContactStorage {
         } else {
             final Contact deleted = this.contacts.remove(id);
             final Date now = new Date();
-//            deleted.setModifiedBy(session.getUserId());
+            deleted.setModifiedBy(userID);
             deleted.setContextId(contextID);
             deleted.setParentFolderID(Integer.parseInt(folderId));            
             deleted.setLastModified(now);

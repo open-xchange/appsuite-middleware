@@ -203,7 +203,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     }    
         
     @Override
-    public void delete(final int contextID, final String folderId, final String id, final Date lastRead) throws OXException {
+    public void delete(final int contextID, final int userID, final String folderId, final String id, final Date lastRead) throws OXException {
     	boolean committed = false;
         final int objectID = parse(id);
         final long minLastModified = lastRead.getTime();
@@ -237,12 +237,10 @@ public class RdbContactStorage extends DefaultContactStorage {
              * update meta data
              */
             final Contact contact = new Contact();
-            contact.setContextId(contextID);
-            contact.setObjectID(objectID);
             contact.setLastModified(new Date());
-            contact.setParentFolderID(parse(folderId));
-            executor.update(connection, Table.CONTACTS, minLastModified, contact, new ContactField[] 
-                { ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
+            contact.setModifiedBy(userID);
+            executor.update(connection, Table.CONTACTS, contextID, objectID, minLastModified, contact, new ContactField[] { 
+            		ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
             /*
              * commit
              */
@@ -264,9 +262,10 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public void update(final int contextID, final String folderId, final Contact contact, final Date lastRead) throws OXException {
+    public void update(final int contextID, final String folderId, final String id, final Contact contact, final Date lastRead) 
+    		throws OXException {
     	boolean committed = false;
-        final int objectID = contact.getObjectID();
+        final int objectID = parse(id);
         final long minLastModified = lastRead.getTime();
         final DatabaseService databaseService = getDatabaseService();
         final Connection connection = databaseService.getWritable(contextID);
@@ -291,8 +290,9 @@ public class RdbContactStorage extends DefaultContactStorage {
                     if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { 
                     		ContactField.OBJECT_ID })) {
                         // update previous image
-                        if (0 == executor.update(connection, Table.IMAGES, now.getTime(), contact, queryFields.getImageDataFields())) {
-                            throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
+                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, now.getTime(), contact, 
+                        		queryFields.getImageDataFields())) {
+                        	throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
                         }
                     } else {
                         // create new image
@@ -303,7 +303,8 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * update contact data
              */
-            if (0 == executor.update(connection, Table.CONTACTS, minLastModified, contact, queryFields.getContactDataFields())) {
+            if (0 == executor.update(connection, Table.CONTACTS, contextID, objectID, minLastModified, contact, 
+            		queryFields.getContactDataFields())) {
                 //TODO: check imagelastmodified also?
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
             }
@@ -316,7 +317,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 executor.delete(connection, Table.DISTLIST, contextID, objectID);
                 if (0 < contact.getNumberOfDistributionLists() && null != contact.getDistributionList()) {
                     // insert distribution list entries
-                	final DistListMember[] members = DistListMember.create(contact.getDistributionList(), contextID, contact.getObjectID());
+                	final DistListMember[] members = DistListMember.create(contact.getDistributionList(), contextID, objectID);
                     executor.insert(connection, Table.DISTLIST, members, Fields.DISTLIST_DATABASE_ARRAY);
                 }
             }

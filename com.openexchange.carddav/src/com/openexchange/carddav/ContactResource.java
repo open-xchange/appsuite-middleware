@@ -160,7 +160,7 @@ public class ContactResource extends CarddavResource {
         	/*
         	 * Insert contact
         	 */
-            this.factory.getContactInterface().insertContactObject(this.contact);
+        	this.factory.getContactService().create(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
             LOG.debug(this.getUrl() + ": created.");
         } catch (final OXException e) {
         	if (Tools.isImageProblem(e)) {
@@ -183,33 +183,6 @@ public class ContactResource extends CarddavResource {
         		throw super.internalError(e);
         	}
         }   
-//        } catch (final OXConflictException e) {
-//        	if (Category.PERMISSION.equals(e.getCategory())) {
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//    			this.factory.overrideNextSyncToken();
-//    			return; // don't throw an exception here!
-//        	}
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXPermissionException e) {
-//        	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//			this.factory.overrideNextSyncToken();
-//			return; // don't throw an exception here!
-//        } catch (final OXException e) {
-//            if (ContactExceptionCodes.IMAGE_SCALE_PROBLEM.getDetailNumber() == e.getDetailNumber() ||
-//            	ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.getDetailNumber() == e.getDetailNumber()) {
-//            	/*
-//            	 * Could not scale and store image, remove image and try again
-//            	 */
-//            	LOG.warn(this.getUrl() + ": " + e.getMessage() + "; creating contact without image.");
-//                this.contact.removeImage1();
-//                this.create();
-//                return;
-//            } else {
-//            	throw super.internalError(e);
-//            }
-//		} catch (final OXException e) {
-//        	throw internalError(e);
-//		}
 	}
 
 	@Override
@@ -226,7 +199,8 @@ public class ContactResource extends CarddavResource {
     		/*
     		 * Delete contact
     		 */
-            factory.getContactInterface().deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
+        	this.factory.getContactService().delete(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
+        			Integer.toString(contact.getObjectID()),  contact.getLastModified());
             LOG.debug(this.getUrl() + ": deleted.");
             this.contact = null;
         } catch (final OXException e) {
@@ -243,22 +217,6 @@ public class ContactResource extends CarddavResource {
         		throw super.internalError(e);
         	}
         }   
-//        } catch (final OXConflictException e) {
-//        	if (Category.PERMISSION.equals(e.getCategory())) {
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//    			this.factory.overrideNextSyncToken();
-//    			return; // don't throw an exception here!
-//        	}
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXPermissionException e) {
-//        	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//			this.factory.overrideNextSyncToken();
-//			return; // don't throw an exception here!
-//        } catch (final OXObjectNotFoundException e) {
-//        	throw protocolException(e, HttpServletResponse.SC_NOT_FOUND);
-//		} catch (final AbstractOXException e) {
-//			throw internalError(e);
-//		}    	
 	}
 
 	@Override
@@ -270,8 +228,8 @@ public class ContactResource extends CarddavResource {
         	/*
         	 * Update contact 
         	 */
-            this.factory.getContactInterface().updateContactObject(this.contact, this.contact.getParentFolderID(), 
-            		this.contact.getLastModified());
+        	this.factory.getContactService().update(factory.getSession(), Integer.toString(contact.getParentFolderID()),
+        			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
             LOG.debug(this.getUrl() + ": saved.");
         } catch (final OXException e) {
         	if (Tools.isImageProblem(e)) {
@@ -294,35 +252,6 @@ public class ContactResource extends CarddavResource {
         		throw super.internalError(e);
         	}
         }
-//        } catch (final OXConcurrentModificationException e) {
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXPermissionException e) {
-//        	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//			this.factory.overrideNextSyncToken();
-//			return; // don't throw an exception here!
-//        } catch (final OXConflictException e) {
-//        	if (Category.PERMISSION.equals(e.getCategory())) {
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; overriding next sync token for client recovery.");
-//    			this.factory.overrideNextSyncToken();
-//    			return; // don't throw an exception here!
-//        	}
-//        	throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-//        } catch (final OXException e) {
-//            if (ContactExceptionCodes.IMAGE_SCALE_PROBLEM.getDetailNumber() == e.getDetailNumber() ||
-//            	ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.getDetailNumber() == e.getDetailNumber()) {
-//            	/*
-//            	 * Could not scale and store image, remove image and try again
-//            	 */
-//            	LOG.debug(this.getUrl() + ": " + e.getMessage() + "; saving contact without image.");
-//                this.contact.setImage1(null);
-//                this.save();
-//                return;
-//            } else {
-//            	throw super.internalError(e);
-//            }
-//        } catch (final OXException e) {
-//        	throw super.internalError(e);
-//        }	
     }
 	
 	@Override

@@ -221,17 +221,19 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public void update(Session session, String folderId, Contact contact, Date lastRead) throws OXException {
+	public void update(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
+			throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
+		checkArgNotNull(id, "idd");
 		checkArgNotNull(lastRead, "lastRead");
 		checkArgNotNull(contact, "contact");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
-			this.updateAndMoveContact(contextID, userID, folderId, Integer.toString(contact.getParentFolderID()), contact, lastRead);			
+			this.updateAndMoveContact(contextID, userID, folderId, id, Integer.toString(contact.getParentFolderID()), contact, lastRead);			
 		} else {
-			this.updateContact(contextID, userID, folderId, contact, lastRead);
+			this.updateContact(contextID, userID, folderId, id, contact, lastRead);
 		}
 	}
 
@@ -353,13 +355,13 @@ public class ContactServiceImpl implements ContactService {
 	}
 	
 	protected void updateAndMoveContact(final int contextID, final int userID, final String sourceFolderId, final String targetFolderId, 
-			final Contact contact, final Date lastRead) throws OXException {
+			final String objectID, final Contact contact, final Date lastRead) throws OXException {
 		/*
 		 * check supplied contact
 		 */
 		Mapper.validateAll(contact);
-		if (0 > contact.getObjectID()) {
-			throw ContactExceptionCodes.NEGATIVE_OBJECT_ID.create();			
+		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		}
 		/*
 		 * check source folder
@@ -389,7 +391,6 @@ public class ContactServiceImpl implements ContactService {
 		 * check currently stored contact
 		 */
 		final ContactStorage sourceStorage = Tools.getStorage(contextID, sourceFolderId);
-		final String objectID = Integer.toString(contact.getObjectID());
 		final Contact storedContact = sourceStorage.get(contextID, sourceFolderId, objectID, ContactField.values());
 		if (null == storedContact) {
 			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
@@ -444,7 +445,7 @@ public class ContactServiceImpl implements ContactService {
 			/*
 			 * same storage, send update as delta
 			 */
-			sourceStorage.update(contextID, sourceFolderId, delta, lastRead);			
+			sourceStorage.update(contextID, sourceFolderId, objectID, delta, lastRead);			
 		} else {
 			/*
 			 * different storage, perform delete & create of complete contact information
@@ -452,26 +453,26 @@ public class ContactServiceImpl implements ContactService {
 			final Contact movedContact = Mapper.mergeDifferences(storedContact, delta); 
 			targetStorage.create(contextID, targetFolderId, movedContact);
 			try {
-				sourceStorage.delete(contextID, sourceFolderId, objectID, lastRead);
+				sourceStorage.delete(contextID, userID, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
 				LOG.warn("error deleting contact from source folder, rolling back move operation", e);
 				// simple rollback for now
-				targetStorage.delete(contextID, targetFolderId, Integer.toString(movedContact.getObjectID()), 
+				targetStorage.delete(contextID, userID, targetFolderId, Integer.toString(movedContact.getObjectID()), 
 						movedContact.getLastModified());
 				throw e;
 			}
 		}
 	}	
 	
-	protected void updateContact(final int contextID, final int userID, final String folderID, final Contact contact, final Date lastRead) 
-			throws OXException {
+	protected void updateContact(final int contextID, final int userID, final String folderID, final String objectID, 
+			final Contact contact, final Date lastRead) throws OXException {
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check supplied contact
 		 */
 		Mapper.validateAll(contact);
-		if (0 > contact.getObjectID()) {
-			throw ContactExceptionCodes.NEGATIVE_OBJECT_ID.create();			
+		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		}
 		/*
 		 * check folder
@@ -494,7 +495,6 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check currently stored contact
 		 */
-		final String objectID = Integer.toString(contact.getObjectID());
 		final Contact storedContact = storage.get(contextID, folderID, objectID, ContactField.values());
 		if (null == storedContact) {
 			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
@@ -545,7 +545,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * pass through to storage
 		 */
-		storage.update(contextID, folderID, delta, lastRead);
+		storage.update(contextID, folderID, objectID, delta, lastRead);
 	}
 	
 	protected void deleteContact(final int contextID, final int userID, final String folderID, final String objectID, final Date lastRead) 
@@ -569,7 +569,7 @@ public class ContactServiceImpl implements ContactService {
 		 * check currently stored contact
 		 */
 		final Contact storedContact = storage.get(contextID, folderID, objectID, new ContactField[] { ContactField.CREATED_BY, 
-				ContactField.CREATION_DATE });
+				ContactField.LAST_MODIFIED });
 		if (null == storedContact) {
 			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
 		} else if (false == permission.canDeleteAllObjects() && storedContact.getCreatedBy() != userID) {
@@ -580,7 +580,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * delete contact from storage
 		 */
-		storage.delete(contextID, folderID, objectID, lastRead);
+		storage.delete(contextID, userID, folderID, objectID, lastRead);
 	}
 	
 	/**
