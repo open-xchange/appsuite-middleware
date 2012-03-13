@@ -77,6 +77,20 @@ public interface IndexingJob extends Serializable {
     }
 
     /**
+     * A job's origin.
+     */
+    public static enum Origin implements Serializable {
+        /**
+         * Active user interaction
+         */
+        ACTIVE,
+        /**
+         * Initiated by passive operation.
+         */
+        PASSIVE
+    }
+
+    /**
      * The default priority is <code>4</code>.
      * 
      * @see javax.jms.Message#DEFAULT_PRIORITY
@@ -87,6 +101,11 @@ public interface IndexingJob extends Serializable {
      * The default behavior is {@link Behavior#CONSUMER_RUNS consumer-runs}.
      */
     public static final Behavior DEFAULT_BEHAVIOR = Behavior.CONSUMER_RUNS;
+
+    /**
+     * The default origin is {@link Origin#ACTIVE active}.
+     */
+    public static final Origin DEFAULT_ORIGIN = Origin.ACTIVE;
 
     /**
      * The empty class array.
@@ -135,6 +154,20 @@ public interface IndexingJob extends Serializable {
      * @param priority This job's priority
      */
     void setPriority(int priority);
+
+    /**
+     * Gets this job's time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT).
+     * 
+     * @return The time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     */
+    long getTimeStamp();
+
+    /**
+     * Gets this job's origin
+     * 
+     * @return The origin
+     */
+    Origin getOrigin();
 
     /**
      * Gets this job's {@link Behavior behavior}.
