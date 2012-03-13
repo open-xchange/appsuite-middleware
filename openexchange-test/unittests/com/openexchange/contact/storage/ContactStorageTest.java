@@ -6,9 +6,7 @@ package com.openexchange.contact.storage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-
 import junit.framework.TestCase;
-
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -76,7 +74,7 @@ public class ContactStorageTest extends TestCase {
         if (null != this.rememberedContacts && 0 < rememberedContacts.size()) {
             for (final Contact contact : rememberedContacts) {
                 try {
-                    this.getStorage().delete(getContextID(), Integer.toString(contact.getParentFolderID()), 
+                    this.getStorage().delete(getContextID(), getUserID(), Integer.toString(contact.getParentFolderID()), 
                         Integer.toString(contact.getObjectID()), new Date(0));
                 } catch (final Exception e) {
                     LOG.error("error cleaning up contact", e);
@@ -121,5 +119,7 @@ public class ContactStorageTest extends TestCase {
         return this.session.getContextId();
     }
 
-
+    protected int getUserID() {
+        return this.session.getUserId();
+    }
 }
