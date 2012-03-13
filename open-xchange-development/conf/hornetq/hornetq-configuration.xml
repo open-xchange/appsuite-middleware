@@ -38,7 +38,7 @@
          -->
          
          <!-- Socket based -->
-         <param key="host" value="localhost"/>
+         <param key="host" value="localhost"/> <!-- If set to loop-back device ("localhost" or "127.0.0.1") this parameter will be replaced with host's IP address  -->
          <param key="port" value="5445"/>
          <!-- <param key="use-nio" value="true"/> -->
       </connector>

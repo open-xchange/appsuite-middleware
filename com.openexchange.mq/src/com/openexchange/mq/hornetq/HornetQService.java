@@ -79,6 +79,19 @@ public final class HornetQService implements MQService {
 
     private static final String SERVER = "-" + UUIDs.getUnformattedString(UUID.randomUUID());
 
+    /**
+     * Gets the unique server identifier prefixed with <code>'-'</code> character.
+     *
+     * @return The server identifier prefixed with <code>'-'</code> character
+     */
+    public static String getServer() {
+        return SERVER;
+    }
+
+    /*-
+     * --------------------- Members -----------------------
+     */
+
     private final HornetQEmbeddedJMS jmsServer;
 
     private final ConnectionFactory defaultConnectionFactory;

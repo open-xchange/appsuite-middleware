@@ -100,6 +100,11 @@ import com.openexchange.mq.serviceLookup.MQServiceLookup;
  */
 public final class HornetQServerStartup implements MQServerStartup {
 
+    /**
+     * The class name of the Netty factory.
+     */
+    private static final String NETTY_FACTORY_CLASS_NAME = "org.hornetq.core.remoting.impl.netty.NettyConnectorFactory".intern();
+
     private HornetQEmbeddedJMS jmsServer; // Set in synchronized context
 
     private HornetQService hornetQService;
@@ -117,6 +122,8 @@ public final class HornetQServerStartup implements MQServerStartup {
     }
 
     private static final Pattern PATTERN_CONFIGPATH = Pattern.compile(Pattern.quote("@oxgroupwaresysconfdir@"));
+
+    private static final Pattern PATTERN_SERVER_ID = Pattern.compile("-?"+Pattern.quote("@serverid@"));
 
     @Override
     public synchronized void start() throws OXException {
@@ -145,6 +152,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                     final Configuration configuration;
                     {
                         hornetqConfigXml = PATTERN_CONFIGPATH.matcher(hornetqConfigXml).replaceAll(configPath);
+                        hornetqConfigXml = PATTERN_SERVER_ID.matcher(hornetqConfigXml).replaceAll(HornetQService.getServer());
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
                         configuration = new ConfigurationImpl();
@@ -157,14 +165,22 @@ public final class HornetQServerStartup implements MQServerStartup {
                         parser.parseMainConfig(e, configuration);
 
                         {
+                            /*
+                             * Check connector configurations
+                             */
                             final Map<String, TransportConfiguration> connectorConfigurations = configuration.getConnectorConfigurations();
                             for (final TransportConfiguration transportConfiguration : connectorConfigurations.values()) {
-                                final Map<String, Object> params = transportConfiguration.getParams();
-                                final String key = TransportConstants.HOST_PROP_NAME;
-                                final String hostName = (String) params.get(key);
-                                if (null == hostName || "localhost".equals(hostName) || "127.0.0.1".equals(hostName)) {
-                                    final String ipString = toIpString();
-                                    params.put(key, ipString);
+                                if (NETTY_FACTORY_CLASS_NAME.equals(transportConfiguration.getFactoryClassName())) {
+                                    /*
+                                     * Check if loop-back device is configured for Netty connector
+                                     */
+                                    final Map<String, Object> params = transportConfiguration.getParams();
+                                    final String key = TransportConstants.HOST_PROP_NAME;
+                                    final String hostName = (String) params.get(key);
+                                    if (null == hostName || "localhost".equals(hostName) || "127.0.0.1".equals(hostName)) {
+                                        final String ipString = toIpString();
+                                        params.put(key, ipString);
+                                    }
                                 }
                             }
                         }
