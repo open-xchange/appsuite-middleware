@@ -75,9 +75,9 @@ import com.openexchange.service.indexing.mail.MailJobInfo;
  */
 public final class MailAccountJob extends AbstractMailJob {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccountJob.class));
+    private static final long serialVersionUID = -382130217643032914L;
 
-    private static final long serialVersionUID = -6340938661683281026L;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccountJob.class));
 
     private static final String SIMPLE_NAME = MailAccountJob.class.getSimpleName();
 

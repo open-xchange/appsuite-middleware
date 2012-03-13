@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public final class RemoveByIDsJob extends AbstractMailJob {
 
-    private static final long serialVersionUID = -1211521171077091128L;
+    private static final long serialVersionUID = 6978164673531858003L;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveByIDsJob.class));
 

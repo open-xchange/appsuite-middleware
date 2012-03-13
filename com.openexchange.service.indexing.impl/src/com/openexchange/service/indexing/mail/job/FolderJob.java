@@ -88,36 +88,11 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderJob extends AbstractMailJob {
 
+    private static final long serialVersionUID = 2093998857641164982L;
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    private static final long serialVersionUID = -4811521171077091128L;
-
-    private final class Add2IndexRunnable implements Runnable {
-
-        private final IndexAdapter indexAdapter;
-
-        private final List<String> ids;
-
-        private final Session session;
-
-        protected Add2IndexRunnable(final List<String> ids, final IndexAdapter indexAdapter, final Session session) {
-            super();
-            this.indexAdapter = indexAdapter;
-            this.ids = ids;
-            this.session = session;
-        }
-
-        @Override
-        public void run() {
-            try {
-                add2Index(ids, fullName, indexAdapter, session);
-            } catch (final OXException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 
     private static final String SIMPLE_NAME = FolderJob.class.getSimpleName();
 

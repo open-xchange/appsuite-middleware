@@ -49,12 +49,16 @@
 
 package com.openexchange.service.indexing.mail;
 
+import java.io.Serializable;
+
 /**
  * {@link MailJobInfo} - Provides necessary information for performing a mail job.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailJobInfo {
+public final class MailJobInfo implements Serializable {
+
+    private static final long serialVersionUID = -541314174402111431L;
 
     /**
      * The context identifier

@@ -73,13 +73,13 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link AbstractMailJob}
+ * {@link AbstractMailJob} - The abstract mail job.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailJob extends StandardIndexingJob {
 
-    private static final long serialVersionUID = 1726202716841172518L;
+    private static final long serialVersionUID = 8617301658519763880L;
 
     /**
      * The job's information.

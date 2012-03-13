@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.mail;
 
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
@@ -58,7 +59,9 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FakeSession implements Session {
+public final class FakeSession implements Session, Serializable {
+
+    private static final long serialVersionUID = -6627564586034661789L;
 
     private final String password;
 

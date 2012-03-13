@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  */
 public final class RemoveFolderJob extends AbstractMailJob {
 
-    private static final long serialVersionUID = -1211521171077091128L;
+    private static final long serialVersionUID = -7677441731409939202L;
 
     private static final String SIMPLE_NAME = RemoveFolderJob.class.getSimpleName();
 

@@ -55,6 +55,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -71,10 +73,9 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ElapsedFolderJob extends AbstractMailJob {
 
-    private static final long serialVersionUID = -3561304349504231252L;
+    private static final long serialVersionUID = 7241539353635873191L;
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElapsedFolderJob.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ElapsedFolderJob.class));
 
     private static final String SIMPLE_NAME = ElapsedFolderJob.class.getSimpleName();
 

@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public final class AddByIDsJob extends AbstractMailJob {
 
-    private static final long serialVersionUID = -5611521171077091128L;
+    private static final long serialVersionUID = 3310275939748782858L;
 
     private static final String SIMPLE_NAME = AddByIDsJob.class.getSimpleName();
 

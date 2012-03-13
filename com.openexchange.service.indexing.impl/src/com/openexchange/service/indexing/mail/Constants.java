@@ -54,14 +54,7 @@ package com.openexchange.service.indexing.mail;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
-
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
-        super();
-    }
+public interface Constants {
 
     /**
      * Hour milliseconds.
