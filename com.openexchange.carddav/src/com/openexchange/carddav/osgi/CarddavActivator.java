@@ -2,10 +2,12 @@ package com.openexchange.carddav.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.carddav.mixins.AddressbookHomeSet;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.ContactService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
@@ -17,8 +19,9 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 public class CarddavActivator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(CarddavActivator.class);
-    
-    private static final Class<?>[] NEEDED = new Class[]{FolderService.class, ConfigViewFactory.class, UserService.class};
+    private static final Class<?>[] NEEDED = new Class[] { 
+    	FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
+
     private OSGiPropertyMixin mixin;
 
     @Override

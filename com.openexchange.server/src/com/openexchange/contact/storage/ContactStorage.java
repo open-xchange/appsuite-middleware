@@ -302,17 +302,18 @@ public interface ContactStorage {
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void update(int contextID, String folderId, Contact contact, Date lastRead) throws OXException;
+    void update(int contextID, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
      * Deletes a contact.
      * 
      * @param contextID the context ID
+     * @param userID the ID of the user performing the operation (to allow storing the id in 'modified by')
      * @param folderId the ID of the parent folder
      * @param id the object ID
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void delete(int contextID, String folderId, String id, Date lastRead) throws OXException;
+    void delete(int contextID, int userID, String folderId, String id, Date lastRead) throws OXException;
     
 }
