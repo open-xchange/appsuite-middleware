@@ -4,6 +4,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacade;
+import com.openexchange.session.Session;
 
 public class SolrIndexFacade implements IndexFacade {
 	
@@ -23,6 +24,13 @@ public class SolrIndexFacade implements IndexFacade {
 	@Override
 	public void releaseIndexAccess(IndexAccess indexAccess) throws OXException {
 		// TODO: implement me
+	}
+
+	@Override
+	public IndexAccess aquireIndexAccess(int module, Session session)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

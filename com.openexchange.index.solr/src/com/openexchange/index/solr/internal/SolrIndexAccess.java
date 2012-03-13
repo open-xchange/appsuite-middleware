@@ -145,4 +145,10 @@ public class SolrIndexAccess implements IndexAccess {
          */
     }
 
+	@Override
+	public void release() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
