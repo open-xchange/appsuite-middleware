@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.mail.IndexRange;
@@ -75,7 +76,6 @@ import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
@@ -102,13 +102,17 @@ public class OxEmailDataSource implements HaloContactDataSource {
 		int limit = req.getIntParameter(AJAXServlet.PARAMETER_LIMIT);
 		limit = limit < 0 ? 10 : limit;
 		
+		List<String> addresses = getEMailAddresses(query.getContact());
+		if(isUserThemselves(session.getUser(), addresses)){
+			return new AJAXRequestResult(new LinkedList<MailMessage>(), "mail");
+		}
+		
 		MailField[] requestedFields = MailField.getFields(params);
 		
 		MailService mailService = services.getService(MailService.class);
 		MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
 		MailAccount[] userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
-		List<String> addresses = getEMailAddresses(query.getContact());
 
 		List<MailMessage> messages = new LinkedList<MailMessage>();
 		for (MailAccount mailAccount : userMailAccounts) {
@@ -153,7 +157,19 @@ public class OxEmailDataSource implements HaloContactDataSource {
 		return new AJAXRequestResult(messages, "mail");
 	}
 
-	private SearchTerm<?> generateSenderSearch(List<String> addresses) {
+	protected boolean isUserThemselves(User user, List<String> addresses) {
+		List<String> ownAddresses = new LinkedList<String>();
+		ownAddresses.addAll( Arrays.asList(user.getAliases()));
+		ownAddresses.add(user.getMail());
+		for(String requested: addresses){
+			if(!ownAddresses.contains(requested)){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	protected SearchTerm<?> generateSenderSearch(List<String> addresses) {
 		List<FromTerm> queries = new LinkedList<FromTerm>();
 		for (String addr : addresses) {
 			queries.add(new FromTerm(addr));
@@ -165,7 +181,7 @@ public class OxEmailDataSource implements HaloContactDataSource {
 		return queries.get(0);
 	}
 
-	private SearchTerm<?> generateRecipientSearch(List<String> addresses) {
+	protected SearchTerm<?> generateRecipientSearch(List<String> addresses) {
 		List<ORTerm> queries = new LinkedList<ORTerm>();
 		for (String addr : addresses) {
 			queries.add(new ORTerm(new CcTerm(addr), new ToTerm(addr)));
@@ -177,7 +193,7 @@ public class OxEmailDataSource implements HaloContactDataSource {
 		return queries.get(0);
 	}
 
-	private List<String> getEMailAddresses(Contact contact) {
+	protected List<String> getEMailAddresses(Contact contact) {
 		List<String> addresses = new LinkedList<String>();
 		if (contact.containsEmail1()) {
 			addresses.add(contact.getEmail1());
