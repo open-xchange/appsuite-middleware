@@ -53,27 +53,75 @@ import java.util.Collection;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IndexAccess}
+ * {@link IndexAccess} - Provides access to an index.
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexAccess {
 
+    /**
+     * Adds specified document's headers to associated index.
+     * 
+     * @param document The document to add
+     * @throws OXException If add operation fails
+     */
     void addEnvelopeData(IndexDocument document) throws OXException;
 
+    /**
+     * Adds specified documents' headers to associated index.
+     * 
+     * @param documents The documents to add
+     * @throws OXException If add operation fails
+     */
     void addEnvelopeData(Collection<IndexDocument> documents) throws OXException;
 
+    /**
+     * Adds specified document's content to associated index.
+     * 
+     * @param document The document to add
+     * @throws OXException If add operation fails
+     */
     void addContent(IndexDocument document) throws OXException;
 
+    /**
+     * Adds specified documents' contents to associated index.
+     * 
+     * @param documents The documents to add
+     * @throws OXException If add operation fails
+     */
     void addContent(Collection<IndexDocument> documents) throws OXException;
 
+    /**
+     * Adds specified document's attachments to associated index.
+     * 
+     * @param document The document to add
+     * @throws OXException If add operation fails
+     */
     void addAttachments(IndexDocument document) throws OXException;
 
+    /**
+     * Adds specified documents' attachments to associated index.
+     * 
+     * @param documents The documents to add
+     * @throws OXException If add operation fails
+     */
     void addAttachments(Collection<IndexDocument> documents) throws OXException;
 
+    /**
+     * Deletes a document by identifier.
+     * 
+     * @param id The document identifier
+     * @throws OXException If delete operation fails
+     */
     void deleteById(String id) throws OXException;
 
+    /**
+     * Deletes documents by query.
+     * 
+     * @param query The query string
+     * @throws OXException 
+     */
     void deleteByQuery(String query) throws OXException;
 
     IndexResult query(QueryParameters parameters) throws OXException;
