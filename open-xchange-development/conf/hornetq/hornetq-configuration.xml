@@ -2,6 +2,14 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="urn:hornetq /schema/hornetq-configuration.xsd">
 
+   <!--
+   		Placeholders
+   		- @oxgroupwaresysconfdir@	:= Path to Open-Xchange server's configuration
+   		- @serverid@				:= The unique identifier of the HornetQ's Open-Xchange server
+   		- @myip@					:= The resolved IP address of the Open-Xchange server's host;
+   		                               uses java.net.InetAddress.getLocalHost().getAddress();
+   -->
+
    <!-- Clustered flag -->
    <clustered>false</clustered>
 
@@ -38,7 +46,7 @@
          -->
          
          <!-- Socket based -->
-         <param key="host" value="localhost"/> <!-- If set to loop-back device ("localhost" or "127.0.0.1") this parameter will be replaced with host's IP address  -->
+         <param key="host" value="localhost"/> <!-- If set to loop-back device ("localhost" or "127.0.0.1") cluster setup seems not to work  -->
          <param key="port" value="5445"/>
          <!-- <param key="use-nio" value="true"/> -->
       </connector>
