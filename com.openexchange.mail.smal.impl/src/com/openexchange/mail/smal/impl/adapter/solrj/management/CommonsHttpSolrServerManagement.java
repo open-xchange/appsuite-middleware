@@ -71,7 +71,7 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexUrl;
+import com.openexchange.index.solr.IndexUrl;
 import com.openexchange.mail.smal.impl.SMALExceptionCodes;
 import com.openexchange.mail.smal.impl.SMALServiceLookup;
 import com.openexchange.mail.smal.impl.json.TrustAllAdapter;

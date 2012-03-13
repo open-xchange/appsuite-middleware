@@ -82,7 +82,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.solr.ConfigIndexService;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.impl.SMALExceptionCodes;

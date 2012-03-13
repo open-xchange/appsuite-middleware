@@ -59,7 +59,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.solr.ConfigIndexService;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALAccessService;
