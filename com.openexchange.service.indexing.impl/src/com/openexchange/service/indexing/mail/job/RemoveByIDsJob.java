@@ -47,72 +47,82 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.mail.job;
 
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.service.indexing.EchoIndexJob;
-import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.mail.smal.adaper.IndexAdapter;
+import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.session.Session;
 
 /**
- * {@link IndexingServiceMBeanImpl}
- * 
+ * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean {
+public final class RemoveByIDsJob extends AbstractMailJob {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceMBeanImpl.class));
+    private static final long serialVersionUID = -1211521171077091128L;
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveByIDsJob.class));
+
+    private static final String SIMPLE_NAME = RemoveByIDsJob.class.getSimpleName();
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private final String fullName;
+
+    private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link IndexingServiceMBeanImpl}.
-     * 
-     * @param mbeanInterface
-     * @throws NotCompliantMBeanException
+     * Initializes a new {@link RemoveByIDsJob}.
+     *
+     * @param fullName The folder full name
+     * @param info The job information
      */
-    public IndexingServiceMBeanImpl() throws NotCompliantMBeanException {
-        super(IndexingServiceMBean.class);
+    public RemoveByIDsJob(final String fullName, final MailJobInfo info) {
+        super(info);
+        this.fullName = fullName;
+    }
+
+    /**
+     * Sets the mails identifiers
+     *
+     * @param mailIds The identifiers to set
+     * @return This folder job
+     */
+    public RemoveByIDsJob setMailIds(final List<String> mailIds) {
+        this.mailIds = mailIds;
+        return this;
     }
 
     @Override
-    public void echoMessage(final String message) throws MBeanException {
-        final IndexingService indexingService = Services.optService(IndexingService.class);
-        if (null == indexingService) {
-            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+    public void performJob() throws OXException, InterruptedException {
+        final List<String> mailIds = this.mailIds;
+        if (null == mailIds) {
+            return;
         }
         try {
-            indexingService.addJob(new EchoIndexJob(message));
-        } catch (final OXException e) {
-            LOG.error(e.getLogMessage(), e);
-            new MBeanException(new IllegalStateException(e.getLogMessage()));
+            /*
+             * Check flags of contained mails
+             */
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
+            try {
+                final IndexAdapter indexAdapter = getAdapter();
+                final Session session = new FakeSession(info.primaryPassword, userId, contextId);
+                indexAdapter.deleteMessages(mailIds, fullName, accountId, session);
+            } finally {
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("RemoverJob \"" + info + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                }
+            }
+        } catch (final RuntimeException e) {
+            LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
         }
-    }
-
-    @Override
-    public void startReceiving() throws MBeanException {
-        final IndexingService indexingService = Services.optService(IndexingService.class);
-        if (null == indexingService) {
-            throw new MBeanException(new IllegalStateException("Missing indexing service."));
-        }
-        try {
-            ((IndexingServiceImpl) indexingService).getServiceInit().initReceiver();
-        } catch (final OXException e) {
-            LOG.error(e.getLogMessage(), e);
-            new MBeanException(new IllegalStateException(e.getLogMessage()));
-        }
-    }
-
-    @Override
-    public void stopReceiving() throws MBeanException {
-        final IndexingService indexingService = Services.optService(IndexingService.class);
-        if (null == indexingService) {
-            throw new MBeanException(new IllegalStateException("Missing indexing service."));
-        }
-        ((IndexingServiceImpl) indexingService).getServiceInit().dropReceiver();
     }
 
 }

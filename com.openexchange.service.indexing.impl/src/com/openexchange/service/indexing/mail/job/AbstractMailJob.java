@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail.job;
+package com.openexchange.service.indexing.mail.job;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,10 +65,10 @@ import com.openexchange.mail.smal.SMALAccessService;
 import com.openexchange.mail.smal.adaper.IndexAdapter;
 import com.openexchange.mail.smal.adaper.IndexService;
 import com.openexchange.service.indexing.StandardIndexingJob;
-import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.mail.Constants;
-import com.openexchange.service.indexing.impl.mail.FakeSession;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.service.indexing.mail.Constants;
+import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 

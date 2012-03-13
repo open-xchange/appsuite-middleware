@@ -59,7 +59,7 @@ public abstract class StandardIndexingJob implements IndexingJob {
     private static final long serialVersionUID = -2170181015109576781L;
 
     /**
-     * The job's priority; initially <code>4</code>.
+     * The job's priority; initially <code>4</code> (default).
      */
     protected volatile int priority;
 
@@ -75,8 +75,8 @@ public abstract class StandardIndexingJob implements IndexingJob {
      */
     protected StandardIndexingJob() {
         super();
-        priority = 4; // Default priority
-        behavior = Behavior.CONSUMER_RUNS;
+        priority = DEFAULT_PRIORITY;
+        behavior = DEFAULT_BEHAVIOR;
     }
 
     @Override

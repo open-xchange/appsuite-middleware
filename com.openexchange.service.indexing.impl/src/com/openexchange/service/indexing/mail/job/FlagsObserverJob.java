@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail.job;
+package com.openexchange.service.indexing.mail.job;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,8 +63,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.service.indexing.impl.mail.FakeSession;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.session.Session;
 
 /**

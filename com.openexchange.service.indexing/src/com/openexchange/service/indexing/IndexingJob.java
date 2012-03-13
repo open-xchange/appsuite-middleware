@@ -77,6 +77,18 @@ public interface IndexingJob extends Serializable {
     }
 
     /**
+     * The default priority is <code>4</code>.
+     * 
+     * @see javax.jms.Message#DEFAULT_PRIORITY
+     */
+    public static final int DEFAULT_PRIORITY = 4;
+
+    /**
+     * The default behavior is {@link Behavior#CONSUMER_RUNS consumer-runs}.
+     */
+    public static final Behavior DEFAULT_BEHAVIOR = Behavior.CONSUMER_RUNS;
+
+    /**
      * The empty class array.
      */
     public static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];

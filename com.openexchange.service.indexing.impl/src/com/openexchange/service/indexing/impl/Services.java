@@ -47,39 +47,73 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl;
 
-import javax.jms.Session;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.queue.MQQueueAsyncReceiver;
-import com.openexchange.mq.queue.MQQueueListener;
-import com.openexchange.service.indexing.IndexingService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.mq.MQConstants;
 
 /**
- * {@link IndexingQueueAsyncReceiver}
+ * {@link Services} - The static service lookup for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexingQueueAsyncReceiver extends MQQueueAsyncReceiver {
+public final class Services {
 
     /**
-     * Initializes a new {@link IndexingQueueAsyncReceiver}.
-     * 
-     * @param listener The listener
-     * @throws OXException If initialization fails
+     * Initializes a new {@link Services}.
      */
-    public IndexingQueueAsyncReceiver(final MQQueueListener listener) throws OXException {
-        super(IndexingService.INDEXING_QUEUE, listener);
+    private Services() {
+        super();
     }
 
-    @Override
-    protected boolean isTransacted() {
-        return false;
+    private static final AtomicReference<CompositeServiceLookup> REF = new AtomicReference<CompositeServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final CompositeServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    protected int getAcknowledgeMode() {
-        return Session.AUTO_ACKNOWLEDGE;
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static CompositeServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"" + MQConstants.BUNDLE_SYMBOLIC_NAME + "\" not staretd?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

@@ -47,40 +47,66 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail;
+package com.openexchange.service.indexing.mail.job;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.smal.adaper.IndexAdapter;
+import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.session.Session;
 
 /**
- * {@link Constants} - Constants for job queue.
- *
+ * {@link RemoveFolderJob}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public final class RemoveFolderJob extends AbstractMailJob {
+
+    private static final long serialVersionUID = -1211521171077091128L;
+
+    private static final String SIMPLE_NAME = RemoveFolderJob.class.getSimpleName();
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveFolderJob.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private final String fullName;
 
     /**
-     * Initializes a new {@link Constants}.
+     * Initializes a new {@link RemoveFolderJob} with default span.
+     * <p>
+     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     * 
+     * @param fullName The folder full name
+     * @param info The job information
      */
-    private Constants() {
-        super();
+    public RemoveFolderJob(final String fullName, final MailJobInfo info) {
+        super(info);
+        this.fullName = fullName;
     }
 
-    /**
-     * Hour milliseconds.
-     */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
-
-    /**
-     * Default (5 minutes) milliseconds.
-     */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
-
-    /**
-     * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
-     */
-    public static final int CHUNK_SIZE = 0;
-
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
+    @Override
+    public void performJob() throws OXException, InterruptedException {
+        try {
+            /*
+             * Check flags of contained mails
+             */
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
+            try {
+                final IndexAdapter indexAdapter = getAdapter();
+                final Session session = new FakeSession(info.primaryPassword, userId, contextId);
+                indexAdapter.deleteFolder(fullName, accountId, session);
+            } finally {
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug(SIMPLE_NAME + " \"" + info + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                }
+            }
+        } catch (final RuntimeException e) {
+            LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
+        }
+    }
 
 }

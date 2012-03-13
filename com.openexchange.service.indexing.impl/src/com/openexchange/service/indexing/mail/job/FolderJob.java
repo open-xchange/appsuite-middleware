@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail.job;
+package com.openexchange.service.indexing.mail.job;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -75,9 +75,9 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.mail.Constants;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.service.indexing.mail.Constants;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -142,7 +142,7 @@ public final class FolderJob extends AbstractMailJob {
     public FolderJob(final String fullName, final MailJobInfo info) {
         super(info);
         this.fullName = fullName;
-        span = com.openexchange.service.indexing.impl.mail.Constants.DEFAULT_MILLIS;
+        span = com.openexchange.service.indexing.mail.Constants.DEFAULT_MILLIS;
     }
 
     /**

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl;
 
 import java.util.HashMap;
 import java.util.Map;

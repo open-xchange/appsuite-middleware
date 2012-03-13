@@ -67,11 +67,11 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.IndexingServiceMBean;
-import com.openexchange.service.indexing.impl.internal.CompositeServiceLookup;
-import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
-import com.openexchange.service.indexing.impl.internal.IndexingServiceInit;
-import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
-import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.CompositeServiceLookup;
+import com.openexchange.service.indexing.impl.IndexingServiceImpl;
+import com.openexchange.service.indexing.impl.IndexingServiceInit;
+import com.openexchange.service.indexing.impl.IndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**

@@ -47,101 +47,72 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.impl;
 
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.service.indexing.EchoIndexJob;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.IndexingServiceMBean;
 
 /**
- * {@link Jobs} - Utility class for {@link IndexingJob}s.
+ * {@link IndexingServiceMBeanImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Jobs {
+public final class IndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean {
 
-    private static final int DEFAULT_PRIORITY = IndexingJob.DEFAULT_PRIORITY;
-
-    /**
-     * Initializes a new {@link Jobs}.
-     */
-    private Jobs() {
-        super();
-    }
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceMBeanImpl.class));
 
     /**
-     * Generates a new {@link IndexingJob job} for specified task.
+     * Initializes a new {@link IndexingServiceMBeanImpl}.
      * 
-     * @param task The task to perform as a job
-     * @return A new {@link IndexingJob job} for specified task
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    public static IndexingJob jobFor(final Runnable task) {
-        return jobFor(task, DEFAULT_PRIORITY);
+    public IndexingServiceMBeanImpl() throws NotCompliantMBeanException {
+        super(IndexingServiceMBean.class);
     }
 
-    /**
-     * Generates a new {@link IndexingJob job} for specified task with given priority.
-     * 
-     * @param task The task to perform as a job
-     * @param priority The priority
-     * @return A new {@link Job job} for specified task
-     */
-    public static IndexingJob jobFor(final Runnable task, final int priority) {
-        return new RunnableJob(task, priority);
+    @Override
+    public void echoMessage(final String message) throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        try {
+            indexingService.addJob(new EchoIndexJob(message));
+        } catch (final OXException e) {
+            LOG.error(e.getLogMessage(), e);
+            new MBeanException(new IllegalStateException(e.getLogMessage()));
+        }
     }
 
-    private static final class RunnableJob implements IndexingJob {
-
-        private static final long serialVersionUID = -3089273727289929417L;
-
-        private final Runnable task;
-
-        private int priority;
-
-        protected RunnableJob(final Runnable task, final int priority) {
-            super();
-            this.task = task;
-            this.priority = priority;
+    @Override
+    public void startReceiving() throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
         }
-
-        @Override
-        public int getPriority() {
-            return priority;
+        try {
+            ((IndexingServiceImpl) indexingService).getServiceInit().initReceiver();
+        } catch (final OXException e) {
+            LOG.error(e.getLogMessage(), e);
+            new MBeanException(new IllegalStateException(e.getLogMessage()));
         }
+    }
 
-        @Override
-        public Class<?>[] getNeededServices() {
-            return EMPTY_CLASSES;
+    @Override
+    public void stopReceiving() throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
         }
-
-        @Override
-        public void performJob() throws OXException, InterruptedException {
-            task.run();
-        }
-
-        @Override
-        public boolean isDurable() {
-            return false;
-        }
-
-        @Override
-        public void setPriority(final int priority) {
-            this.priority = priority;
-        }
-
-        @Override
-        public Behavior getBehavior() {
-            return Behavior.CONSUMER_RUNS;
-        }
-
-        @Override
-        public void beforeExecute() {
-            // Nope
-        }
-
-        @Override
-        public void afterExecute(final Throwable t) {
-            // Nope
-        }
-
+        ((IndexingServiceImpl) indexingService).getServiceInit().dropReceiver();
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail.job;
+package com.openexchange.service.indexing.mail.job;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,9 +64,9 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.mail.Constants;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.service.indexing.mail.Constants;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 
 /**
  * {@link MailAccountJob}

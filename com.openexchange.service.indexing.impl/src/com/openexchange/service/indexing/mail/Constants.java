@@ -47,73 +47,40 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
-
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.mq.MQConstants;
+package com.openexchange.service.indexing.mail;
 
 /**
- * {@link Services} - The static service lookup for Message Queue bundle.
- * 
+ * {@link Constants} - Constants for job queue.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Services {
+public final class Constants {
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link Constants}.
      */
-    private Services() {
+    private Constants() {
         super();
     }
 
-    private static final AtomicReference<CompositeServiceLookup> REF = new AtomicReference<CompositeServiceLookup>();
+    /**
+     * Hour milliseconds.
+     */
+    public static final int HOUR_MILLIS = 60 * 60 * 1000;
 
     /**
-     * Sets the service lookup.
-     * 
-     * @param serviceLookup The service lookup or <code>null</code>
+     * Default (5 minutes) milliseconds.
      */
-    public static void setServiceLookup(final CompositeServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
+    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
 
     /**
-     * Gets the service lookup.
-     * 
-     * @return The service lookup or <code>null</code>
+     * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
      */
-    public static CompositeServiceLookup getServiceLookup() {
-        return REF.get();
-    }
+    public static final int CHUNK_SIZE = 0;
 
     /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * The number of chunks allowed being added to index in a single job's run.
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException(
-                "Missing ServiceLookup instance. Bundle \"" + MQConstants.BUNDLE_SYMBOLIC_NAME + "\" not staretd?");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
+    public static final int MAX_CHUNKS_PER_RUN = 10;
 
 }

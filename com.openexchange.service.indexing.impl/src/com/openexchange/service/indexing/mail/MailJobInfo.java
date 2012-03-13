@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail;
+package com.openexchange.service.indexing.mail;
 
 /**
  * {@link MailJobInfo} - Provides necessary information for performing a mail job.

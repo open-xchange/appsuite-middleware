@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl;
 
+import javax.jms.Session;
 import com.openexchange.exception.OXException;
-import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.mq.queue.MQQueueAsyncReceiver;
+import com.openexchange.mq.queue.MQQueueListener;
 import com.openexchange.service.indexing.IndexingService;
 
 /**
- * {@link IndexingServiceImpl}
+ * {@link IndexingQueueAsyncReceiver}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexingServiceImpl implements IndexingService {
-
-    private final IndexingServiceInit serviceInit;
+public final class IndexingQueueAsyncReceiver extends MQQueueAsyncReceiver {
 
     /**
-     * Initializes a new {@link IndexingServiceImpl}.
-     */
-    public IndexingServiceImpl(final IndexingServiceInit serviceInit) {
-        super();
-        this.serviceInit = serviceInit;
-    }
-
-    /**
-     * Gets the service initialization.
+     * Initializes a new {@link IndexingQueueAsyncReceiver}.
      * 
-     * @return The service initialization
+     * @param listener The listener
+     * @throws OXException If initialization fails
      */
-    public IndexingServiceInit getServiceInit() {
-        return serviceInit;
+    public IndexingQueueAsyncReceiver(final MQQueueListener listener) throws OXException {
+        super(IndexingService.INDEXING_QUEUE, listener);
     }
 
     @Override
-    public void addJob(final IndexingJob job) throws OXException {
-        serviceInit.getSender().sendJobMessage(job);
+    protected boolean isTransacted() {
+        return false;
+    }
+
+    @Override
+    protected int getAcknowledgeMode() {
+        return Session.AUTO_ACKNOWLEDGE;
     }
 
 }

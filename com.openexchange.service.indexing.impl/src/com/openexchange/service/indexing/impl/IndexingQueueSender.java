@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl;
 
 import java.io.IOException;
 import java.io.Serializable;

@@ -44,6 +44,6 @@ Import-Package: com.openexchange.config,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.util.tracker
-Export-Package: com.openexchange.service.indexing.impl.mail,
- com.openexchange.service.indexing.impl.mail.job
+Export-Package: com.openexchange.service.indexing.mail,
+ com.openexchange.service.indexing.mail.job
 Bundle-Activator: com.openexchange.service.indexing.impl.osgi.IndexingServiceActivator

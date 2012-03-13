@@ -47,68 +47,140 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.mail;
 
-import java.io.IOException;
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.mq.queue.MQQueueListener;
-import com.openexchange.service.indexing.IndexingJob;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.session.Session;
 
 /**
- * {@link IndexingServiceQueueListener} - The {@link MQQueueListener listener} that delegates incoming messages to
- * {@link IndexingJobExecutor executor}.
+ * {@link FakeSession} - A fake session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexingServiceQueueListener implements MQQueueListener {
+public final class FakeSession implements Session {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceQueueListener.class));
+    private final String password;
 
-    private final IndexingJobExecutor executor;
+    private final int userId;
+
+    private final int contextId;
+
+    private final ConcurrentMap<String, Object> parameters;
 
     /**
-     * Initializes a new {@link IndexingServiceQueueListener}.
+     * Initializes a new {@link FakeSession}.
      */
-    public IndexingServiceQueueListener(final IndexingJobExecutor executor) {
+    public FakeSession(final String password, final int userId, final int contextId) {
         super();
-        this.executor = executor;
+        this.password = password;
+        this.userId = userId;
+        this.contextId = contextId;
+        parameters = new ConcurrentHashMap<String, Object>(8);
     }
 
     @Override
-    public void close() {
-        executor.stop();
+    public int getContextId() {
+        return contextId;
     }
 
     @Override
-    public void onText(final String text) {
-        LOG.warn("Invalid indexing message type: text");
+    public String getLocalIp() {
+        return null;
     }
 
     @Override
-    public void onObjectMessage(final ObjectMessage objectMessage) {
-        try {
-            executor.addJob((IndexingJob) objectMessage.getObject());
-        } catch (final JMSException e) {
-            LOG.warn("A JMS error occurred: " + e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.warn("A runtime error occurred: " + e.getMessage(), e);
+    public void setLocalIp(final String ip) {
+        // Nothing to do
+    }
+
+    @Override
+    public String getLoginName() {
+        return null;
+    }
+
+    @Override
+    public boolean containsParameter(final String name) {
+        return parameters.containsKey(name);
+    }
+
+    @Override
+    public Object getParameter(final String name) {
+        return parameters.get(name);
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getRandomToken() {
+        return null;
+    }
+
+    @Override
+    public String getSecret() {
+        return null;
+    }
+
+    @Override
+    public String getSessionID() {
+        return null;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public String getUserlogin() {
+        return null;
+    }
+
+    @Override
+    public String getLogin() {
+        return null;
+    }
+
+    @Override
+    public void setParameter(final String name, final Object value) {
+        if (null == value) {
+            parameters.remove(name);
+        } else {
+            parameters.put(name, value);
         }
     }
 
     @Override
-    public void onBytes(final byte[] bytes) {
-        try {
-            executor.addJob(SerializableHelper.<IndexingJob> readObject(bytes));
-        } catch (final ClassNotFoundException e) {
-            LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
-        } catch (final IOException e) {
-            LOG.warn("Deserialization failed: " + e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.warn("A runtime error occurred: " + e.getMessage(), e);
-        }
+    public void removeRandomToken() {
+        // Nope
+    }
+
+    @Override
+    public String getAuthId() {
+        return null;
+    }
+
+    @Override
+    public String getHash() {
+        return null;
+    }
+
+    @Override
+    public void setHash(final String hash) {
+        // Nope
+    }
+
+    @Override
+    public String getClient() {
+        return null;
+    }
+
+    @Override
+    public void setClient(final String client) {
+        // Nothing to do
     }
 
 }

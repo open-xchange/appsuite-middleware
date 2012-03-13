@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl;
 
 import java.util.ArrayList;
 import java.util.List;

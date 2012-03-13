@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail.job;
+package com.openexchange.service.indexing.mail.job;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +60,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.session.Session;
 
 /**
