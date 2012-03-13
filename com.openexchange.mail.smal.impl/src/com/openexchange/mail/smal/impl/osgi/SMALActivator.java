@@ -104,7 +104,7 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class };
     }
 
     @Override
@@ -115,7 +115,7 @@ public class SMALActivator extends HousekeepingActivator {
         trackService(SessiondService.class);
         trackService(DatabaseService.class);
         trackService(ConfigIndexService.class);
-        trackService(LanguageDetectionService.class);
+        // trackService(LanguageDetectionService.class);
         trackService(UserService.class);
         trackService(ContextService.class);
         openTrackers();
