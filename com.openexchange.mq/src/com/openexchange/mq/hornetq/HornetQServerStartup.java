@@ -380,16 +380,14 @@ public final class HornetQServerStartup implements MQServerStartup {
 
     private static String toIpString() {
         try {
-            final InetAddress addr = InetAddress.getLocalHost();
-            final byte[] ipAddr = addr.getAddress();
-
-            // Convert to dot representation
+            final byte[] ipAddr = InetAddress.getLocalHost().getAddress();
+            /*
+             * Convert to dot representation
+             */
             final StringBuilder ipAddrStr = new StringBuilder(16);
-            for (int i = 0; i < ipAddr.length; i++) {
-                if (i > 0) {
-                    ipAddrStr.append('.');
-                }
-                ipAddrStr.append(ipAddr[i] & 0xFF);
+            ipAddrStr.append(ipAddr[0] & 0xFF);
+            for (int i = 1; i < ipAddr.length; i++) {
+                ipAddrStr.append('.').append(ipAddr[i] & 0xFF);
             }
             return ipAddrStr.toString();
         } catch (final UnknownHostException e) {
