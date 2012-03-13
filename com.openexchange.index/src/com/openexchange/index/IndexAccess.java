@@ -54,30 +54,37 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link IndexAccess}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexAccess {
-	
-	void addEnvelopeData(IndexDocument document) throws OXException;
-	
-	void addEnvelopeData(Collection<IndexDocument> documents) throws OXException;
-	
-	void addContent(IndexDocument document) throws OXException;
-	
-	void addContent(Collection<IndexDocument> documents) throws OXException;
-	
-	void addAttachments(IndexDocument document) throws OXException;
-	
-	void addAttachments(Collection<IndexDocument> documents) throws OXException;
-	
-	void deleteById(String id) throws OXException;
-	
-	void deleteByQuery(String query) throws OXException;
-		
-	IndexResult query(QueryParameters parameters) throws OXException;
-	
-	TriggerType getTriggerType();
+
+    void addEnvelopeData(IndexDocument document) throws OXException;
+
+    void addEnvelopeData(Collection<IndexDocument> documents) throws OXException;
+
+    void addContent(IndexDocument document) throws OXException;
+
+    void addContent(Collection<IndexDocument> documents) throws OXException;
+
+    void addAttachments(IndexDocument document) throws OXException;
+
+    void addAttachments(Collection<IndexDocument> documents) throws OXException;
+
+    void deleteById(String id) throws OXException;
+
+    void deleteByQuery(String query) throws OXException;
+
+    IndexResult query(QueryParameters parameters) throws OXException;
+
+    TriggerType getTriggerType();
+
+    /**
+     * Releases this access and frees all possibly obtained resources.
+     * <p>
+     * Invoked on {@link IndexFacade#releaseIndexAccess(IndexAccess)}.
+     */
+    void release();
 
 }
