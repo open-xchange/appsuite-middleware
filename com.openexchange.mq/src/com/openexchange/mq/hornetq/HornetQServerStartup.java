@@ -155,9 +155,10 @@ public final class HornetQServerStartup implements MQServerStartup {
                     {
                         hornetqConfigXml = PATTERN_CONFIGPATH.matcher(hornetqConfigXml).replaceAll(configPath);
                         hornetqConfigXml = PATTERN_SERVER_ID.matcher(hornetqConfigXml).replaceAll(HornetQService.getServer());
-                        
+
                         final String ip = toIpString();
                         hornetqConfigXml = PATTERN_MY_IP.matcher(hornetqConfigXml).replaceAll(ip);
+
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
                         configuration = new ConfigurationImpl();
