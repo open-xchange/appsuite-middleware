@@ -50,6 +50,7 @@
 package com.openexchange.index;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link IndexFacade} - Provides appropriate {@link IndexAccess} instances.
@@ -61,14 +62,27 @@ public interface IndexFacade {
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
+     * <p>
+     * Convenience method for:<br>
+     * {@link #aquireIndexAccess(int, int, int) aquireIndexAccess(module, session.getUserId(), session.getContextId()}.
      * 
-     * @param contextId The context identifier
-     * @param userId The user identifier
      * @param module The module
+     * @param session The session providing the user for whom to acquire the index access
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess aquireIndexAccess(int contextId, int userId, int module) throws OXException;
+    IndexAccess aquireIndexAccess(int module, Session session) throws OXException;
+
+    /**
+     * Acquires an appropriate {@link IndexAccess} instance.
+     * 
+     * @param module The module
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The acquired index access.
+     * @throws OXException If acquiring an index access fails for any reason
+     */
+    IndexAccess aquireIndexAccess(int module, int userId, int contextId) throws OXException;
 
     /**
      * Releases specified {@link IndexAccess} instance.
