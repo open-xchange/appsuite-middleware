@@ -23,5 +23,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
- com.openexchange.log
+ com.openexchange.log,
+ com.openexchange.index
 Export-Package: com.openexchange.index.solr
