@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONTokener;
 import org.json.JSONValue;
@@ -69,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -153,7 +153,7 @@ public final class ResultConverters {
             final String inputFormat = rc.getInputFormat();
             Queue<ResultConverter> queue = converters.get(inputFormat);
             if (null == queue) {
-                final Queue<ResultConverter> nq = new ConcurrentLinkedQueue<ResultConverter>();
+                final Queue<ResultConverter> nq = new Java7ConcurrentLinkedQueue<ResultConverter>();
                 queue = converters.putIfAbsent(inputFormat, nq);
                 if (null == queue) {
                     queue = nq;

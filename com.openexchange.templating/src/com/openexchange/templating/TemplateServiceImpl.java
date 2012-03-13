@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -180,7 +180,11 @@ public class TemplateServiceImpl implements TemplateService {
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
-            final Configuration config = new Configuration();
+            String userDir = System.getProperty("user.dir");
+            String templatePath = config.getProperty(PATH_PROPERTY);
+            System.setProperty("user.dir", templatePath);
+            Configuration config = new Configuration();
+            System.setProperty("user.dir", userDir);
             if (exceptionHandler != null) {
                 config.setTemplateExceptionHandler(exceptionHandler);
             }

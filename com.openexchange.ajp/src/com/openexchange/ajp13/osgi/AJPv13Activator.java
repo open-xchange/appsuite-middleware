@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.servlet.http.HttpSessionWrapper;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.config.ConfigurationService;
@@ -231,23 +230,6 @@ public final class AJPv13Activator extends HousekeepingActivator {
 
         @Override
         public void start() throws OXException {
-            /*
-             * Proper synchronous queue
-             */
-            String property = System.getProperty("java.specification.version");
-            if (null == property) {
-                property = System.getProperty("java.runtime.version");
-                if (null == property) {
-                    // JRE not detectable, use fallback
-                    AJPv13SynchronousQueueProvider.initInstance(false);
-                } else {
-                    // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
-                    AJPv13SynchronousQueueProvider.initInstance(!property.startsWith("1.5"));
-                }
-            } else {
-                // "java.specification.version=1.5" OR "java.specification.version=1.6"
-                AJPv13SynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
-            }
             AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
             AJPv13Server.startAJPServer();
@@ -258,7 +240,6 @@ public final class AJPv13Activator extends HousekeepingActivator {
             com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
-            AJPv13SynchronousQueueProvider.releaseInstance();
         }
     }
 

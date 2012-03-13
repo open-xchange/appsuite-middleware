@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -98,7 +98,7 @@ public final class UnifiedInboxFolderConverter {
         tmp.setRootFolder(true);
         tmp.setExists(true);
         tmp.setSeparator('/');
-        // Only the default folder contains subfolders, to be more precise it only contains the INBOX folder.
+        // Only the default folder contains subfolders
         tmp.setSubfolders(true);
         tmp.setSubscribedSubfolders(true);
         tmp.setFullname(MailFolder.DEFAULT_FOLDER_ID);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
@@ -62,6 +61,7 @@ import com.openexchange.folderstorage.FolderStorageComparator;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
@@ -95,7 +95,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     private FolderStorageRegistry() {
         super();
         registry = new ConcurrentHashMap<String, Queue<FolderStorage>>();
-        genStorages = new ConcurrentLinkedQueue<FolderStorage>();
+        genStorages = new Java7ConcurrentLinkedQueue<FolderStorage>();
     }
 
     /**
@@ -134,11 +134,11 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
              * 1. genStorages.clear();
              * 2. genStorages.addAll(tmp);
              */
-            genStorages = new ConcurrentLinkedQueue<FolderStorage>(tmp);
+            genStorages = new Java7ConcurrentLinkedQueue<FolderStorage>(tmp);
         } else {
             Queue<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
-                final Queue<FolderStorage> tmp = new ConcurrentLinkedQueue<FolderStorage>();
+                final Queue<FolderStorage> tmp = new Java7ConcurrentLinkedQueue<FolderStorage>();
                 storages = registry.putIfAbsent(treeId, tmp);
                 if (null == storages) {
                     storages = tmp;

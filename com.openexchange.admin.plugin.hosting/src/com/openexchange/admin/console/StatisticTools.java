@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
@@ -121,6 +122,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption showoperation = null;
 
     private CLIOption dooperation = null;
+    private CLIOption sessionStats = null;
     
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
@@ -128,7 +130,7 @@ public class StatisticTools extends AbstractJMXTools {
     }
 
     @Override
-    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) throws InterruptedException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException {
+    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) throws JMException, InterruptedException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException {
         boolean admin = false;
         if (null != parser.getOptionValue(this.admindaemonstats)) {
             admin = true;
@@ -168,10 +170,18 @@ public class StatisticTools extends AbstractJMXTools {
             count++;
 
         }
+        if (null != parser.getOptionValue(this.sessionStats)) {
+            if (0 == count) {
+                final MBeanServerConnection initConnection = initConnection(admin, env);
+                System.out.print(getStats(initConnection, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+                count++;
+            }
+        }
         if (null != parser.getOptionValue(this.allstats)) {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
                 showOXData(initConnection, admin);
+                System.out.print(getStats(initConnection, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
                 showThreadPoolData(initConnection);
                 System.out.print(getStats(initConnection, "com.sun.management.UnixOperatingSystem"));
                 System.out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
@@ -204,7 +214,7 @@ public class StatisticTools extends AbstractJMXTools {
         if (0 == count) {
             System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ")
                     .append(OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ")
-                    .append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(")"));
+                    .append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(", sessionstats)"));
             parser.printUsage();
         } else if (count > 1) {
             System.err.println("More than one of the stat options given. Using the first one only");
@@ -222,6 +232,7 @@ public class StatisticTools extends AbstractJMXTools {
         this.admindaemonstats = setShortLongOpt(parser, OPT_ADMINDAEMON_STATS_SHORT, OPT_ADMINDAEMON_STATS_LONG, "shows stats for the admin instead of the groupware", false, NeededQuadState.notneeded);
         this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededQuadState.notneeded);
         this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>", false);
+        this.sessionStats = setShortLongOpt(parser, 'i', "sessionstats", "shows the statistics of the session container", false, NeededQuadState.notneeded);
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {

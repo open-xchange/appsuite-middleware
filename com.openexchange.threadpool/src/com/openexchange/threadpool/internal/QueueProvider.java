@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,59 +60,9 @@ import java.util.concurrent.SynchronousQueue;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class QueueProvider {
+public final class QueueProvider {
 
-    /**
-     * Initializes a new {@link QueueProvider}.
-     */
-    protected QueueProvider() {
-        super();
-    }
-
-    private static QueueProvider instance;
-
-    /**
-     * Initializes appropriate instance of synchronous queue provider.
-     *
-     * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
-     *            {@link Java6SynchronousQueue}
-     */
-    public static void initInstance(final boolean useBuiltInQueue) {
-        if (useBuiltInQueue) {
-            instance = new QueueProvider() {
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue() {
-                    return new SynchronousQueue<V>();
-                }
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
-                    return new SynchronousQueue<V>();
-                }
-            };
-        } else {
-            instance = new QueueProvider() {
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue() {
-                    return new Java6SynchronousQueue<V>();
-                }
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
-                    return new Java6SynchronousQueue<V>();
-                }
-            };
-        }
-    }
-
-    /**
-     * Releases instance of synchronous queue provider.
-     */
-    public static void releaseInstance() {
-        instance = null;
-    }
+    private static QueueProvider INSTANCE = new QueueProvider();
 
     /**
      * Gets the {@link QueueProvider} instance.
@@ -120,7 +70,7 @@ public abstract class QueueProvider {
      * @return The {@link QueueProvider} instance
      */
     public static QueueProvider getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
@@ -129,7 +79,9 @@ public abstract class QueueProvider {
      * @param <V> The queue's type
      * @return A newly created synchronous queue
      */
-    public abstract <V> BlockingQueue<V> newSynchronousQueue();
+    public <V> BlockingQueue<V> newSynchronousQueue() {
+        return new SynchronousQueue<V>();
+    }
 
     /**
      * Gets a newly created synchronous queue.
@@ -138,7 +90,9 @@ public abstract class QueueProvider {
      * @param clazz The queue's type class
      * @return A newly created synchronous queue
      */
-    public abstract <V extends Object> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz);
+    public <V extends Object> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
+        return new SynchronousQueue<V>();
+    }
 
     /**
      * Gets a newly created linked queue.

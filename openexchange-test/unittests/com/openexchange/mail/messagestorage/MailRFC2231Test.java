@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,7 +70,7 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public final class MailRFC2231Test extends AbstractMailTest {
 
-	private static final String RFC2231_1 = "From: Marcus Klein <m.klein@netline-is.de>\n"
+	private static final String RFC2231_1 = "From: Marcus Klein <m.klein@open-xchange.com>\n"
 			+ "Organization: Netline Internet Service GmbH\n"
 			+ "X-KMail-Fcc: sent-mail\n"
 			+ "To: marcus@1337\n"

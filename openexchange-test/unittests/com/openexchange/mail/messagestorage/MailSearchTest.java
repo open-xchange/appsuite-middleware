@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -213,10 +213,10 @@ public final class MailSearchTest extends AbstractMailTest {
 			+ "	id B46993DCB9E; Tue,  8 Apr 2008 10:33:23 +0200 (CEST)\n"
 			+ "Received: from netline.de (comfire.netline.de [192.168.32.1])\n"
 			+ "	by ox.netline-is.de (Postfix) with ESMTP id 70E1A3DCB9A\n"
-			+ "	for <thorben@netline-is.de>; Tue,  8 Apr 2008 10:33:22 +0200 (CEST)\n"
+			+ "	for <thorben@open-xchange.com>; Tue,  8 Apr 2008 10:33:22 +0200 (CEST)\n"
 			+ "Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n"
 			+ "	by netline.de with esmtp (Exim)\n" + "	id 1Jj95z-0003bM-00\n"
-			+ "	for thorben@netline-is.de; Tue, 08 Apr 2008 10:22:23 +0200\n"
+			+ "	for thorben@open-xchange.com; Tue, 08 Apr 2008 10:22:23 +0200\n"
 			+ "Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com)\n"
 			+ "	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n" + "	id 1Jj9Fo-000709-00\n"
 			+ "	for <thorben@open-xchange.org>; Tue, 08 Apr 2008 10:32:32 +0200\n"

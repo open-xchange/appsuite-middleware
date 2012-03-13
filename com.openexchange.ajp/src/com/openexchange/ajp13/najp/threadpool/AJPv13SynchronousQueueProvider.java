@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,7 +59,7 @@ import java.util.concurrent.SynchronousQueue;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJPv13SynchronousQueueProvider {
+public class AJPv13SynchronousQueueProvider {
 
     /**
      * Initializes a new {@link AJPv13SynchronousQueueProvider}.
@@ -68,50 +68,7 @@ public abstract class AJPv13SynchronousQueueProvider {
         super();
     }
 
-    private static AJPv13SynchronousQueueProvider instance;
-
-    /**
-     * Initializes appropriate instance of synchronous queue provider.
-     *
-     * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
-     *            {@link Java6SynchronousQueue}
-     */
-    public static void initInstance(final boolean useBuiltInQueue) {
-        if (useBuiltInQueue) {
-            instance = new AJPv13SynchronousQueueProvider() {
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue() {
-                    return new SynchronousQueue<V>();
-                }
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
-                    return new SynchronousQueue<V>();
-                }
-            };
-        } else {
-            instance = new AJPv13SynchronousQueueProvider() {
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue() {
-                    return new Java6SynchronousQueue<V>();
-                }
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
-                    return new Java6SynchronousQueue<V>();
-                }
-            };
-        }
-    }
-
-    /**
-     * Releases instance of synchronous queue provider.
-     */
-    public static void releaseInstance() {
-        instance = null;
-    }
+    private static final AJPv13SynchronousQueueProvider INSTANCE = new AJPv13SynchronousQueueProvider();
 
     /**
      * Gets the {@link AJPv13SynchronousQueueProvider} instance.
@@ -119,23 +76,27 @@ public abstract class AJPv13SynchronousQueueProvider {
      * @return The {@link AJPv13SynchronousQueueProvider} instance
      */
     public static AJPv13SynchronousQueueProvider getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
      * Gets a newly created synchronous queue.
-     *
+     * 
      * @param <V> The queue's type
      * @return A newly created synchronous queue
      */
-    public abstract <V> BlockingQueue<V> newSynchronousQueue();
+    public <V> BlockingQueue<V> newSynchronousQueue() {
+        return new SynchronousQueue<V>();
+    }
 
     /**
      * Gets a newly created synchronous queue.
-     *
+     * 
      * @param <V> The queue's type
      * @param clazz The queue's type class
      * @return A newly created synchronous queue
      */
-    public abstract <V extends Object> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz);
+    public <V extends Object> BlockingQueue<V> newSynchronousQueue(final Class<? extends V> clazz) {
+        return new SynchronousQueue<V>();
+    }
 }

@@ -22,7 +22,7 @@
  *
  *
  *     Copyright (C) 1998 - 2005 Netline Internet Service GmbH
- *     mail:	                 info@netline-is.de
+ *     mail:	                 info@open-xchange.com
  *
  *
  *     This program is free software; you can redistribute it and/or modify it
@@ -52,7 +52,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 /**
  * {@link ResourceGroupParser} - The WebDAV/XML resource group parser.
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
 public class ResourceGroupParser extends DataParser {

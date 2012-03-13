@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -149,11 +149,11 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
 			"\n" +
 			"Received: from netline.de (comfire.netline.de [192.168.32.1])\n" +
 			"	by ox.netline-is.de (Postfix) with ESMTP id 39A903DD151\n" +
-			"	for <thorben@netline-is.de>; Wed,  9 Apr 2008 15:25:21 +0200 (CEST)\n" +
+			"	for <thorben@open-xchange.com>; Wed,  9 Apr 2008 15:25:21 +0200 (CEST)\n" +
 			"Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n" +
 			"	by netline.de with esmtp (Exim)\n" +
 			"	id 1Jja7v-0003JD-00\n" +
-			"	for thorben@netline-is.de; Wed, 09 Apr 2008 15:14:11 +0200\n" +
+			"	for thorben@open-xchange.com; Wed, 09 Apr 2008 15:14:11 +0200\n" +
 			"Received: from mail.netline-is.de ([10.20.30.2] helo=netline.de)\n" +
 			"	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n" +
 			"	id 1JjaHv-0005pN-00\n" +

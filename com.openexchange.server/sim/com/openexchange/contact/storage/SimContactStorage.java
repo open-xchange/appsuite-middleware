@@ -142,8 +142,8 @@ public class SimContactStorage extends DefaultContactStorage {
 	}
 
     @Override
-    public <O> Collection<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields, SortOptions sortOptions) throws OXException {
-        return this.searchService.filter(this.contacts.values(), term, ContactAttributeFetcher.getInstance());
+    public <O> Collection<Contact> search(final int contextID, final String folderId, final SearchTerm<O> term, final ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return this.searchService.filter(this.all(contextID, folderId, fields), term, ContactAttributeFetcher.getInstance());
     }
 
     @Override
@@ -216,5 +216,18 @@ public class SimContactStorage extends DefaultContactStorage {
     private boolean matches(final Contact contact, final String folderId) {
         return folderId.equals(Integer.toString(contact.getParentFolderID()));
     }
+
+	@Override
+	public Collection<Contact> all(int contextID, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<Contact> list(int contextID, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

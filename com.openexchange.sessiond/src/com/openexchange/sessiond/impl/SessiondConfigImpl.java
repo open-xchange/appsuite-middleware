@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -92,18 +92,29 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         }
 
         sessionShortLifeTime = conf.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
+        String tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
+        longLifeTime = ConfigTools.parseTimespan(tmp);
+        if (sessionShortLifeTime < SHORT_CONTAINER_LIFE_TIME) {
+            sessionShortLifeTime = SHORT_CONTAINER_LIFE_TIME;
+        }
+        if (longLifeTime < LONG_CONTAINER_LIFE_TIME) {
+            longLifeTime = LONG_CONTAINER_LIFE_TIME;
+        }
+        if (longLifeTime < sessionShortLifeTime) {
+            longLifeTime = sessionShortLifeTime;
+        }
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionShortLifeTime);
         }
+        if (DEBUG) {
+            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime=" + longLifeTime);
+        }
 
-        String tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "1M");
+        tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "1M");
         randomTokenTimeout = ConfigTools.parseTimespan(tmp);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
         }
-
-        tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
-        longLifeTime = ConfigTools.parseTimespan(tmp);
 
         tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
         autoLogin = Boolean.parseBoolean(tmp);
@@ -116,7 +127,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     @Override
     public long getNumberOfSessionContainers() {
-        return checkContainerCount(sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME);
+        return sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME;
     }
 
     @Override
@@ -151,7 +162,8 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     @Override
     public long getNumberOfLongTermSessionContainers() {
-        return checkContainerCount((longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME);
+        long retval = (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
+        return (retval < 1) ? 1 : retval;
     }
 
     @Override
@@ -163,11 +175,4 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public long getLongTermSessionContainerTimeout() {
         return LONG_CONTAINER_LIFE_TIME;
     }
-
-    private static final long MIN_CONTAINER_COUNT = 5L;
-
-    private static long checkContainerCount(final long count) {
-        return (count >= MIN_CONTAINER_COUNT) ? count : MIN_CONTAINER_COUNT;
-    }
-
 }

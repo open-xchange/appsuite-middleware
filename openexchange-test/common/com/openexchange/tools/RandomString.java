@@ -18,7 +18,7 @@
  * by the copyright holder(s) or original author(s).
  *
  * Copyright (C) 1998 - 2005 Netline Internet Service GmbH
- * mail:                    info@netline-is.de
+ * mail:                    info@open-xchange.com
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -102,11 +102,11 @@ public final class MailReplyTest extends AbstractMailTest {
 			"	id 49AB33DB402; Wed,  2 Apr 2008 07:42:19 +0200 (CEST)\n" +
 			"Received: from netline.de (comfire.netline.de [192.168.32.1])\n" +
 			"	by ox.netline-is.de (Postfix) with ESMTP id 744013DB3F7\n" +
-			"	for <thorben@netline-is.de>; Wed,  2 Apr 2008 07:42:17 +0200 (CEST)\n" +
+			"	for <thorben@open-xchange.com>; Wed,  2 Apr 2008 07:42:17 +0200 (CEST)\n" +
 			"Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n" +
 			"	by netline.de with esmtp (Exim)\n" +
 			"	id 1JgvaA-00032q-00\n" +
-			"	for thorben@netline-is.de; Wed, 02 Apr 2008 07:32:22 +0200\n" +
+			"	for thorben@open-xchange.com; Wed, 02 Apr 2008 07:32:22 +0200\n" +
 			"Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com)\n" +
 			"	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n" +
 			"	id 1Jgvix-0004np-00\n" +
@@ -201,11 +201,11 @@ public final class MailReplyTest extends AbstractMailTest {
 			"	id 1D3EB39A15A; Mon, 31 Mar 2008 22:39:11 +0200 (CEST)\n" +
 			"Received: from netline.de (comfire.netline.de [192.168.32.1])\n" +
 			"	by ox.netline-is.de (Postfix) with ESMTP id 0272639A155\n" +
-			"	for <thorben@netline-is.de>; Mon, 31 Mar 2008 22:39:00 +0200 (CEST)\n" +
+			"	for <thorben@open-xchange.com>; Mon, 31 Mar 2008 22:39:00 +0200 (CEST)\n" +
 			"Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n" +
 			"	by netline.de with esmtp (Exim)\n" +
 			"	id 1JgQd5-0005ya-00\n" +
-			"	for thorben@netline-is.de; Mon, 31 Mar 2008 22:29:19 +0200\n" +
+			"	for thorben@open-xchange.com; Mon, 31 Mar 2008 22:29:19 +0200\n" +
 			"Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com)\n" +
 			"	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n" +
 			"	id 1JgQlf-00070z-00\n" +

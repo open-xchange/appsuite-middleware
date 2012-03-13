@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,8 +76,8 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 			+ "Received: from ox.netline-is.de ([unix socket]) by ox (Cyrus v2.2.3) with LMTP; Wed, 15 Aug 2007 14:03:12 +0200\r\n"
 			+ "X-Sieve: CMU Sieve 2.2\r\n"
 			+ "Received: by ox.netline-is.de (Postfix, from userid 65534) id 5073F318173; Wed, 15 Aug 2007 14:03:12 +0200 (CEST)\r\n"
-			+ "Received: from netline.de (comfire.netline.de [192.168.32.1]) by ox.netline-is.de (Postfix) with ESMTP id 494D531816D for <thorben@netline-is.de>; Wed, 15 Aug 2007 14:03:11 +0200 (CEST)\r\n"
-			+ "Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail) by netline.de with esmtp (Exim) id 1ILHV0-00063Y-00 for thorben@netline-is.de; Wed, 15 Aug 2007 13:57:18 +0200\r\n"
+			+ "Received: from netline.de (comfire.netline.de [192.168.32.1]) by ox.netline-is.de (Postfix) with ESMTP id 494D531816D for <thorben@open-xchange.com>; Wed, 15 Aug 2007 14:03:11 +0200 (CEST)\r\n"
+			+ "Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail) by netline.de with esmtp (Exim) id 1ILHV0-00063Y-00 for thorben@open-xchange.com; Wed, 15 Aug 2007 13:57:18 +0200\r\n"
 			+ "Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com) by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian)) id 1ILHZi-0004x6-00 for <thorben@open-xchange.org>; Wed, 15 Aug 2007 14:02:10 +0200\r\n"
 			+ "Received: by ox.open-xchange.com (Postfix, from userid 76) id 469A532CDE6; Wed, 15 Aug 2007 14:02:05 +0200 (CEST)\r\n"
 			+ "Received: from ox.open-xchange.com ([unix socket]) by ox.open-xchange.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA; Wed, 15 Aug 2007 14:02:05 +0200\r\n"

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,14 +58,25 @@ public abstract class StandardIndexingJob implements IndexingJob {
 
     private static final long serialVersionUID = -2170181015109576781L;
 
+    /**
+     * The job's priority; initially <code>4</code> (default).
+     */
     protected volatile int priority;
+
+    /**
+     * The job's behavior; initially {@link Behavior#CONSUMER_RUNS}.
+     * 
+     * @see #setBehavior(com.openexchange.service.indexing.IndexingJob.Behavior)
+     */
+    protected volatile Behavior behavior;
 
     /**
      * Initializes a new {@link StandardIndexingJob}.
      */
     protected StandardIndexingJob() {
         super();
-        priority = 4; // Default priority
+        priority = DEFAULT_PRIORITY;
+        behavior = DEFAULT_BEHAVIOR;
     }
 
     @Override
@@ -90,7 +101,16 @@ public abstract class StandardIndexingJob implements IndexingJob {
 
     @Override
     public Behavior getBehavior() {
-        return Behavior.CONSUMER_RUNS;
+        return behavior;
+    }
+
+    /**
+     * Sets the behavior
+     * 
+     * @param behavior The behavior to set
+     */
+    public void setBehavior(final Behavior behavior) {
+        this.behavior = behavior;
     }
 
     @Override

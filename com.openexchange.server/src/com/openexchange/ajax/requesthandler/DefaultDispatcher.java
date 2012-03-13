@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,9 +56,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -82,7 +82,7 @@ public class DefaultDispatcher implements Dispatcher {
     public DefaultDispatcher() {
         super();
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
-        customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+        customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
     }
 
     @Override

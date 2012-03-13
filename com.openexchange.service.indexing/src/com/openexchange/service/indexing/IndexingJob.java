@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,8 +53,8 @@ import java.io.Serializable;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IndexingJob} - Represents an arbitrary job described only using POJO (plain old Java objects) for the sake of reliability and
- * consistency throughout clustered nodes.
+ * {@link IndexingJob} - Represents an arbitrary, {@link java.io.Serializable serializable} job described only using POJO (plain old Java
+ * objects) for the sake of reliability and consistency throughout clustered nodes.
  * <p>
  * Specify how a job is supposed to be performed by {@link #getBehavior()} method.
  * 
@@ -65,7 +65,7 @@ public interface IndexingJob extends Serializable {
     /**
      * The job's behavior: Either {@link #CONSUMER_RUNS consumer-runs} (low-cost) or {@link #DELEGATE delegate} (high-cost) job.
      */
-    public static enum Behavior {
+    public static enum Behavior implements Serializable {
         /**
          * Consumer runs associated job (default). Appropriate for small jobs which are performed in a timely manner.
          */
@@ -75,6 +75,18 @@ public interface IndexingJob extends Serializable {
          */
         DELEGATE, ;
     }
+
+    /**
+     * The default priority is <code>4</code>.
+     * 
+     * @see javax.jms.Message#DEFAULT_PRIORITY
+     */
+    public static final int DEFAULT_PRIORITY = 4;
+
+    /**
+     * The default behavior is {@link Behavior#CONSUMER_RUNS consumer-runs}.
+     */
+    public static final Behavior DEFAULT_BEHAVIOR = Behavior.CONSUMER_RUNS;
 
     /**
      * The empty class array.

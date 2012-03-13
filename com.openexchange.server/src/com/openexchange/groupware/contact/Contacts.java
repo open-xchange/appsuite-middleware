@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -115,7 +115,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link Contacts}
  *
- * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public final class Contacts {
 
@@ -2518,7 +2518,8 @@ public final class Contacts {
         ResultSet rs = null;
 
         try {
-            final Context ct = ContextStorage.getStorageContext(so.getContextId());
+            final int contextId = so.getContextId();
+            final Context ct = ContextStorage.getStorageContext(contextId);
             final ContactSql cs = new ContactMySql(ct, uid);
 
             stmt = readcon.createStatement();
@@ -2529,7 +2530,7 @@ public final class Contacts {
             /*
              * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the creator.
              */
-            rs = stmt.executeQuery(cs.iFgetRightsSelectString(uid, so.getContextId()));
+            rs = stmt.executeQuery(cs.iFgetRightsSelectString(uid, contextId));
 
             int fid = 0;
             int oid = 0;
@@ -2559,7 +2560,7 @@ public final class Contacts {
                         contactFolder = FolderObject.loadFolderObjectFromDB(fid, ct, readcon);
                     }
                     if (contactFolder.getModule() != FolderObject.CONTACT) {
-                        throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(so.getContextId()), I(uid));
+                        throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(contextId), I(uid));
                     }
                     if (contactFolder.getType() == FolderObject.PRIVATE) {
                         delete = true;
@@ -2567,7 +2568,14 @@ public final class Contacts {
 
                 } catch (final Exception oe) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder." + "This contact will be modified and can be found in the administrator address book." + "Context " + so.getContextId() + " Folder " + fid + " User" + uid + " Contact" + oid);
+                        final StringBuilder sb = new StringBuilder(128);
+                        sb.append("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder.");
+                        sb.append("This contact will be modified and can be found in the administrator address book.");
+                        sb.append(" Context=").append(contextId);
+                        sb.append(" Folder=").append(fid);
+                        sb.append(" User=").append(uid);
+                        sb.append(" Contact=").append(oid);
+                        LOG.warn(sb.toString());
                     }
                     folder_error = true;
                     delete = true;
@@ -2585,7 +2593,7 @@ public final class Contacts {
                         cs.iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
                         oxee.printStackTrace();
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + so.getContextId() + " Folder " + fid + " User" + uid + " Contact" + oid);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid);
 
                         folder_error = false;
                     }
@@ -2594,7 +2602,7 @@ public final class Contacts {
                 }
 
                 if (!folder_error) {
-                    cs.iFtrashAllUserContacts(delete, del, so.getContextId(), oid, uid, rs, so);
+                    cs.iFtrashAllUserContacts(delete, del, contextId, oid, uid, rs, so);
                     final Contact co = new Contact();
                     try {
                         co.setCreatedBy(created_from);
@@ -2609,9 +2617,9 @@ public final class Contacts {
                 }
             }
             if (uid == ct.getMailadmin()) {
-                cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del, so.getContextId(), uid);
+                cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del, contextId, uid);
             } else {
-                cs.iFtrashAllUserContactsDeletedEntries(del, so.getContextId(), uid, ct);
+                cs.iFtrashAllUserContactsDeletedEntries(del, contextId, uid, ct);
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);

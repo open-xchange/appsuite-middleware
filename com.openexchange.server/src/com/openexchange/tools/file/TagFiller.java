@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,7 @@ package com.openexchange.tools.file;
 /**
  * Replacing of tags in TemplateParser takes place through the methods of this interface.
  *
- * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
+ * @author <a href="mailto:m.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface TagFiller {
 

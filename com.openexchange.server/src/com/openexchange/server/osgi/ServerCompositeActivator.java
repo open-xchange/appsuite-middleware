@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
+
 import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
@@ -91,6 +92,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),
         new com.openexchange.mailaccount.json.osgi.MailAccountJSONActivator(),
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
+        new com.openexchange.contact.osgi.ContactServiceActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
         new com.openexchange.groupware.tasks.osgi.TaskActivator()
     };

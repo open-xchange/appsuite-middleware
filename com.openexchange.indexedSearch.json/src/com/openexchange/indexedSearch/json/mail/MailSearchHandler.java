@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,8 +73,8 @@ import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.service.MailAttributeFetcher;
-import com.openexchange.mail.smal.adapter.IndexAdapter;
-import com.openexchange.mail.smal.adapter.IndexService;
+import com.openexchange.mail.smal.adaper.IndexAdapter;
+import com.openexchange.mail.smal.adaper.IndexService;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;

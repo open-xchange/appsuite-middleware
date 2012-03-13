@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -154,11 +154,11 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			+ "	id E44443DBC7F; Fri,  4 Apr 2008 11:37:56 +0200 (CEST)\n"
 			+ "Received: from netline.de (comfire.netline.de [192.168.32.1])\n"
 			+ "	by ox.netline-is.de (Postfix) with ESMTP id 250743DBC7D\n"
-			+ "	for <thorben@netline-is.de>; Fri,  4 Apr 2008 11:37:56 +0200 (CEST)\n"
+			+ "	for <thorben@open-xchange.com>; Fri,  4 Apr 2008 11:37:56 +0200 (CEST)\n"
 			+ "Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n"
 			+ "	by netline.de with esmtp (Exim)\n"
 			+ "	id 1JhiCw-000368-00\n"
-			+ "	for thorben@netline-is.de; Fri, 04 Apr 2008 11:27:38 +0200\n"
+			+ "	for thorben@open-xchange.com; Fri, 04 Apr 2008 11:27:38 +0200\n"
 			+ "Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com)\n"
 			+ "	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n"
 			+ "	id 1JhiM6-0006Dp-00\n"
@@ -202,7 +202,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			+ "> Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe\n"
 			+ "> _______________________________________________\n";
 
-	private static final String RFC2231 = "From: Marcus Klein <m.klein@netline-is.de>\n"
+	private static final String RFC2231 = "From: Marcus Klein <m.klein@open-xchange.com>\n"
 			+ "Organization: Netline Internet Service GmbH\n"
 			+ "X-KMail-Fcc: sent-mail\n"
 			+ "To: marcus@1337\n"

@@ -1,3 +1,7 @@
+* 2012-03-09 - choeger@open-xchange.com
+
+ - report client can now display accesscombinations of specified bitmask
+
 * 2012-02-27 - choeger@open-xchange.com
 
  - report client can now optionally save json string in local file

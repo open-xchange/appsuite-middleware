@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSpecificContainerRetrievalService.CleanUp;
@@ -103,7 +103,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         final String sessionID = session.getSessionID();
         Queue<String> tokenList = tokensPerSession.get(sessionID);
         if(tokenList == null) {
-            final Queue<String> tmp = new ConcurrentLinkedQueue<String>();
+            final Queue<String> tmp = new Java7ConcurrentLinkedQueue<String>();
             tokenList = tokensPerSession.putIfAbsent(sessionID, tmp);
             if(tokenList == null) {
                 tokenList = tmp;

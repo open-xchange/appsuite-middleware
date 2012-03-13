@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.mq.hornetq;
 
 import java.io.Reader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +68,7 @@ import org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory;
 import org.hornetq.core.remoting.impl.invm.InVMConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
+import org.hornetq.core.remoting.impl.netty.TransportConstants;
 import org.hornetq.jms.server.JMSServerConfigParser;
 import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
 import org.hornetq.jms.server.config.JMSConfiguration;
@@ -115,6 +118,10 @@ public final class HornetQServerStartup implements MQServerStartup {
 
     private static final Pattern PATTERN_CONFIGPATH = Pattern.compile(Pattern.quote("@oxgroupwaresysconfdir@"));
 
+    private static final Pattern PATTERN_SERVER_ID = Pattern.compile("-?"+Pattern.quote("@serverid@"));
+
+    private static final Pattern PATTERN_MY_IP = Pattern.compile(Pattern.quote("@myip@"));
+
     @Override
     public synchronized void start() throws OXException {
         try {
@@ -142,6 +149,11 @@ public final class HornetQServerStartup implements MQServerStartup {
                     final Configuration configuration;
                     {
                         hornetqConfigXml = PATTERN_CONFIGPATH.matcher(hornetqConfigXml).replaceAll(configPath);
+                        hornetqConfigXml = PATTERN_SERVER_ID.matcher(hornetqConfigXml).replaceAll(HornetQService.getServer());
+
+                        final String ip = toIpString();
+                        hornetqConfigXml = PATTERN_MY_IP.matcher(hornetqConfigXml).replaceAll(ip);
+
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
                         configuration = new ConfigurationImpl();
@@ -152,6 +164,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                         final FileConfigurationParser parser = new FileConfigurationParser();
                         parser.setValidateAIO(true);
                         parser.parseMainConfig(e, configuration);
+
                         hornetqConfigXml = null; // Help GC
                     }
                     /*
@@ -359,6 +372,23 @@ public final class HornetQServerStartup implements MQServerStartup {
         final DocumentBuilder parser = factory.newDocumentBuilder();
         final Document doc = parser.parse(new InputSource(new UnsynchronizedStringReader(xml)));
         return doc.getDocumentElement();
+    }
+
+    private static String toIpString() {
+        try {
+            final byte[] ipAddr = InetAddress.getLocalHost().getAddress();
+            /*
+             * Convert to dot representation
+             */
+            final StringBuilder ipAddrStr = new StringBuilder(16);
+            ipAddrStr.append(ipAddr[0] & 0xFF);
+            for (int i = 1; i < ipAddr.length; i++) {
+                ipAddrStr.append('.').append(ipAddr[i] & 0xFF);
+            }
+            return ipAddrStr.toString();
+        } catch (final UnknownHostException e) {
+            return TransportConstants.DEFAULT_HOST;
+        }
     }
 
 }

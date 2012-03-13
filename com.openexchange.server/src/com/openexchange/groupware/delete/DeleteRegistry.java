@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfigurationDeleteListener;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
@@ -147,7 +147,7 @@ public final class DeleteRegistry {
             classes.put(deleteListener.getClass(), PRESENT);
         }
         this.staticListeners = new CopyOnWriteArrayList<DeleteListener>(tmpListeners);
-        listeners = new ConcurrentLinkedQueue<DeleteListener>();
+        listeners = new Java7ConcurrentLinkedQueue<DeleteListener>();
     }
 
     /**
