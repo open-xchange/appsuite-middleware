@@ -50,24 +50,11 @@
 package com.openexchange.index;
 
 /**
- * {@link TriggerType} - The trigger type for an established {@link IndexFacade}.
+ * {@link Index}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum TriggerType {
-	
-	/**
-	 * Initiated by a scheduled job to perform a deferred task.
-	 */
-	JOB,
-	/**
-	 * Initiated by user interaction
-	 */
-	USER_INTERACTION,
-	/**
-	 * Initiated by passive interaction.
-	 */
-	PASSIVE_INTERACTION;
+public interface Index {
 
 }
