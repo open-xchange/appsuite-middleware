@@ -94,12 +94,15 @@ public final class Jobs {
 
         private final Runnable task;
 
+        private final long timeStamp;
+
         private int priority;
 
         protected RunnableJob(final Runnable task, final int priority) {
             super();
             this.task = task;
             this.priority = priority;
+            timeStamp = System.currentTimeMillis();
         }
 
         @Override
@@ -140,6 +143,16 @@ public final class Jobs {
         @Override
         public void afterExecute(final Throwable t) {
             // Nope
+        }
+
+        @Override
+        public long getTimeStamp() {
+            return timeStamp;
+        }
+
+        @Override
+        public Origin getOrigin() {
+            return Origin.ACTIVE;
         }
 
     }

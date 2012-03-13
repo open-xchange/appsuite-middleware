@@ -127,6 +127,16 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public Class<?>[] getNeededServices() {
             return EMPTY_CLASSES;
         }
+
+        @Override
+        public long getTimeStamp() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public Origin getOrigin() {
+            return Origin.ACTIVE;
+        }
     };
 
     private final ThreadPoolService threadPool;
@@ -383,6 +393,16 @@ public final class IndexingJobExecutor implements Callable<Void> {
         @Override
         public Class<?>[] getNeededServices() {
             return job.getNeededServices();
+        }
+
+        @Override
+        public long getTimeStamp() {
+            return job.getTimeStamp();
+        }
+
+        @Override
+        public Origin getOrigin() {
+            return job.getOrigin();
         }
 
     }
