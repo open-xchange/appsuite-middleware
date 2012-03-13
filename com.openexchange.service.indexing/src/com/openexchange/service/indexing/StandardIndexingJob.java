@@ -126,6 +126,16 @@ public abstract class StandardIndexingJob implements IndexingJob {
         return behavior;
     }
 
+    
+    /**
+     * Sets the origin
+     *
+     * @param origin The origin to set
+     */
+    public void setOrigin(final Origin origin) {
+        this.origin = origin;
+    }
+
     /**
      * Sets the behavior
      * 
