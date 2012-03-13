@@ -120,12 +120,24 @@ public interface IndexAccess {
      * Deletes documents by query.
      * 
      * @param query The query string
-     * @throws OXException 
+     * @throws OXException
      */
     void deleteByQuery(String query) throws OXException;
 
+    /**
+     * Queries indexed documents by specified query parameters.
+     * 
+     * @param parameters The query parameters
+     * @return The query result
+     * @throws OXException If query fails
+     */
     IndexResult query(QueryParameters parameters) throws OXException;
 
+    /**
+     * Gets the trigger type for this access.
+     * 
+     * @return he trigger type.
+     */
     TriggerType getTriggerType();
 
     /**
