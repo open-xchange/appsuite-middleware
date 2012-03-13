@@ -125,6 +125,8 @@ public final class HornetQServerStartup implements MQServerStartup {
 
     private static final Pattern PATTERN_SERVER_ID = Pattern.compile("-?"+Pattern.quote("@serverid@"));
 
+    private static final Pattern PATTERN_MY_IP = Pattern.compile(Pattern.quote("@myip@"));
+
     @Override
     public synchronized void start() throws OXException {
         try {
@@ -153,6 +155,9 @@ public final class HornetQServerStartup implements MQServerStartup {
                     {
                         hornetqConfigXml = PATTERN_CONFIGPATH.matcher(hornetqConfigXml).replaceAll(configPath);
                         hornetqConfigXml = PATTERN_SERVER_ID.matcher(hornetqConfigXml).replaceAll(HornetQService.getServer());
+                        
+                        final String ip = toIpString();
+                        hornetqConfigXml = PATTERN_MY_IP.matcher(hornetqConfigXml).replaceAll(ip);
                         final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqConfigXml));
 
                         configuration = new ConfigurationImpl();
@@ -178,7 +183,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                                     final String key = TransportConstants.HOST_PROP_NAME;
                                     final String hostName = (String) params.get(key);
                                     if (null == hostName || "localhost".equals(hostName) || "127.0.0.1".equals(hostName)) {
-                                        final String ipString = toIpString();
+                                        final String ipString = ip;
                                         params.put(key, ipString);
                                     }
                                 }
