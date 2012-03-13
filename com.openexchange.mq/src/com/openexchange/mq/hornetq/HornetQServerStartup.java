@@ -183,7 +183,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                                     final Map<String, Object> params = transportConfiguration.getParams();
                                     final String key = TransportConstants.HOST_PROP_NAME;
                                     final String hostName = (String) params.get(key);
-                                    if (null == hostName || "localhost".equals(hostName) || "127.0.0.1".equals(hostName)) {
+                                    if (null == hostName || "localhost".equalsIgnoreCase(hostName) || "127.0.0.1".equals(hostName)) {
                                         final String ipString = ip;
                                         params.put(key, ipString);
                                     }
