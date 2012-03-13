@@ -104,7 +104,7 @@ public interface ConfigIndexService {
     /**
      * Modifies an existing core.
      * 
-     * @param store The store to modifiy. Must contain id!
+     * @param store The store to modify. Must contain id!
      * @throws OXException
      */
     void modifyCoreStore(SolrCoreStore store) throws OXException;
