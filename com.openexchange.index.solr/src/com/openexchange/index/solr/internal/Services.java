@@ -49,60 +49,70 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexFacade;
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SolrIndexFacade} - The Solr {@link IndexFacade} implementation.
+ * {@link Services} - The static service lookup for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SolrIndexFacade implements IndexFacade {
-
-    private final ConcurrentHashMap<SolrIndexIdentifier, SolrIndexAccess> accessMap;
+public final class Services {
 
     /**
-     * Initializes a new {@link SolrIndexFacade}.
-     * 
-     * @param config The configuration service
+     * Initializes a new {@link Services}.
      */
-    public SolrIndexFacade() {
+    private Services() {
         super();
-        accessMap = new ConcurrentHashMap<SolrIndexIdentifier, SolrIndexAccess>();
     }
 
-    @Override
-    public IndexAccess acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
-        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
-        SolrIndexAccess cachedIndexAccess = accessMap.get(identifier);
-        if (null == cachedIndexAccess) {
-            final SolrIndexAccess newAccess = new SolrIndexAccess(identifier);
-            cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
-            if (null == cachedIndexAccess) {
-                cachedIndexAccess = newAccess;
-            }
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.index.solr\" not staretd?");
         }
-        cachedIndexAccess.incrementRetainCount();
-        return cachedIndexAccess;
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    public void releaseIndexAccess(final IndexAccess indexAccess) throws OXException {
-        final SolrIndexAccess cachedIndexAccess = accessMap.get(((SolrIndexAccess) indexAccess).getIdentifier());
-        if (null != cachedIndexAccess) {
-            final int retainCount = cachedIndexAccess.decrementRetainCount();
-            if (retainCount == 0) {
-                cachedIndexAccess.release();
-            }
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
-    }
-
-    @Override
-    public IndexAccess acquireIndexAccess(final int module, final Session session) throws OXException {
-        return acquireIndexAccess(session.getContextId(), session.getUserId(), module);
     }
 
 }

@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -84,13 +83,13 @@ public class SolrIndexAccess implements IndexAccess {
     private final AtomicInteger retainCount;
 	
 	
-	public SolrIndexAccess(final SolrIndexIdentifier identifier, final ConfigurationService config) {
+	public SolrIndexAccess(final SolrIndexIdentifier identifier) {
         super();
         this.identifier = identifier;
         this.contextId = identifier.getContextId();
         this.userId = identifier.getUserId();
         this.module = identifier.getModule();
-        solrManager = new SolrCoreManager(contextId, userId, module, config);
+        solrManager = new SolrCoreManager(contextId, userId, module);
         retainCount = new AtomicInteger(0);
 	}
 
