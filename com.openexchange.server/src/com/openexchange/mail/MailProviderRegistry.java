@@ -181,7 +181,16 @@ public final class MailProviderRegistry {
         return getRealMailProvider(protocolName);
     }
 
-    private static MailProvider getRealMailProvider(final String protocolName) {
+    /**
+     * Gets the real mail provider for specified protocol name.
+     * 
+     * @param protocolName The protocol name
+     * @return The mail provider or <code>null</code>
+     */
+    public static MailProvider getRealMailProvider(final String protocolName) {
+        if (null == protocolName) {
+            return null;
+        }
         /*
          * Look-up
          */
