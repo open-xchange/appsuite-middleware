@@ -51,24 +51,36 @@ package com.openexchange.index.solr.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.index.solr.ConfigIndexService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.CreateTableUpdateTask;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.index.IndexFacade;
+import com.openexchange.index.solr.SolrCoreConfigService;
+import com.openexchange.index.solr.groupware.IndexCreateServerTableTask;
+import com.openexchange.index.solr.groupware.IndexCreateTableService;
+import com.openexchange.index.solr.groupware.IndexDeleteListener;
+import com.openexchange.index.solr.groupware.IndexUpdateTaskProviderService;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.index.solr.internal.StaticConfigIndexService;
+import com.openexchange.index.solr.internal.SolrCoreConfigServiceImpl;
+import com.openexchange.index.solr.internal.SolrIndexFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
- * {@link IndexActivator} - The activator of the index bundle.
+ * {@link SolrIndexActivator} - The activator of the index bundle.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IndexActivator extends HousekeepingActivator {
+public class SolrIndexActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
 
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class };
@@ -76,26 +88,24 @@ public class IndexActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting Bundle com.openexchange.index.osgi.");
+        LOG.info("Starting Bundle com.openexchange.index.solr");
         Services.setServiceLookup(this);
-        final DatabaseService dbService = getService(DatabaseService.class);
-        final ConfigIndexService service = new StaticConfigIndexService();    // TODO: Choose right implementation for production     
+        
+        registerService(IndexFacade.class, new SolrIndexFacade());
+        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
+        registerService(SolrCoreConfigService.class, indexService);     
         
         /*
          * Register UpdateTasks and DeleteListener. Uncomment for production.
-         */
-//        final CreateTableService createTableService = new IndexCreateTableService();
-//        registerService(CreateTableService.class, createTableService);        
-//        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(
-//            new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService),
-//            new IndexCreateServerTableTask(dbService)
-//        ));
-//        registerService(DeleteListener.class, new IndexDeleteListener(service));        
-        
-        
-        /*
-         * Register ConfigIndexService
-         */
-        registerService(ConfigIndexService.class, service);
+         *
+        final DatabaseService dbService = getService(DatabaseService.class);
+        final CreateTableService createTableService = new IndexCreateTableService();
+        registerService(CreateTableService.class, createTableService);        
+        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(
+            new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService),
+            new IndexCreateServerTableTask(dbService)
+        ));
+        registerService(DeleteListener.class, new IndexDeleteListener(indexService));
+        */        
     }
 }

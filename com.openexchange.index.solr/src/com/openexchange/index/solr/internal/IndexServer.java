@@ -47,44 +47,112 @@
  *
  */
 
-package com.openexchange.index.solr.internal.tasks;
+package com.openexchange.index.solr.internal;
 
-import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link IndexCreateTableService}
+ * {@link IndexServerImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexCreateTableService extends AbstractCreateTableImpl {
-    
-    private static final String CT_CORES =
-        "CREATE TABLE solrCores (" +
-            "cid int(10) unsigned NOT NULL," +
-            "uid int(10) unsigned NOT NULL," +
-            "module int(10) unsigned NOT NULL," +
-            "store int(10) unsigned NOT NULL," +
-            "active tinyint(1) unsigned NOT NULL," +
-            "server varchar(32) DEFAULT NULL,  " +
-            "PRIMARY KEY  (cid,uid,module)," +
-            "KEY server (server)," +
-            "KEY store (store)" +
-         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    
+public class IndexServer {
 
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
+    private String url;
+
+    private int soTimeout;
+
+    private int connectionTimeout;
+
+    private int maxConnectionsPerHost;
+
+
+    public IndexServer() {
+      super();
+      soTimeout = 1000;
+      connectionTimeout = 100;
+      maxConnectionsPerHost = 100;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public int getSoTimeout() {
+        return soTimeout;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public int getMaxConnectionsPerHost() {
+        return maxConnectionsPerHost;
+    }
+
+    /**
+     * Sets the url
+     *
+     * @param url The url to set
+     */
+    public void setUrl(final String url) {
+        this.url = url;
+    }
+
+    /**
+     * Sets the soTimeout
+     *
+     * @param soTimeout The soTimeout to set
+     */
+    public void setSoTimeout(final int soTimeout) {
+        this.soTimeout = soTimeout;
+    }
+
+    /**
+     * Sets the connectionTimeout
+     *
+     * @param connectionTimeout The connectionTimeout to set
+     */
+    public void setConnectionTimeout(final int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    /**
+     * Sets the maxConnectionsPerHost
+     *
+     * @param maxConnectionsPerHost The maxConnectionsPerHost to set
+     */
+    public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
+        this.maxConnectionsPerHost = maxConnectionsPerHost;
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return new String[] { "solrCores" };
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        return result;
     }
 
     @Override
-    protected String[] getCreateStatements() {        
-        return new String[] { CT_CORES };
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final IndexServer other = (IndexServer) obj;
+        if (url == null) {
+            if (other.url != null) {
+                return false;
+            }
+        } else if (!url.equals(other.url)) {
+            return false;
+        }
+        return true;
     }
 }

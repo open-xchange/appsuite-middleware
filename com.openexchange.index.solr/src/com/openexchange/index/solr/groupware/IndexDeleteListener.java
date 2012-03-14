@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.index.solr.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,7 +58,8 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.index.solr.ConfigIndexService;
+import com.openexchange.index.solr.SolrCoreConfigService;
+import com.openexchange.index.solr.internal.Services;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -69,18 +70,15 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexDeleteListener implements DeleteListener {
-
-    private final ConfigIndexService indexService;
-    
-    private final UserService userService;
     
     private final int[] coreTypes;
     
+    private final SolrCoreConfigService indexService;
+    
 
-    public IndexDeleteListener(final ConfigIndexService indexService, final UserService userService) {
+    public IndexDeleteListener(final SolrCoreConfigService indexService) {
         super();
         this.indexService = indexService;
-        this.userService = userService;
      // TODO: extend!
         coreTypes = new int[] { Types.EMAIL };
     }
@@ -95,6 +93,7 @@ public class IndexDeleteListener implements DeleteListener {
             deleteUserEntriesFromDB(writeCon, cid, uid);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
             final int cid = event.getContext().getContextId();
+            final UserService userService = Services.getService(UserService.class);
             final User[] users = userService.getUser(event.getContext());
             
             for (final User user : users) {
@@ -136,5 +135,4 @@ public class IndexDeleteListener implements DeleteListener {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-
 }

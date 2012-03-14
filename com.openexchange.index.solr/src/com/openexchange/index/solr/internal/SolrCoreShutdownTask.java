@@ -75,10 +75,10 @@ public class SolrCoreShutdownTask implements Runnable {
 
     @Override
     public void run() {
-        final List<AbstractSolrIndexAccess> accessList = indexAccessManager.getActivePrimaryAccesses();
+        final List<AbstractSolrIndexAccess<?>> accessList = indexAccessManager.getActivePrimaryAccesses();
         final List<SolrIndexIdentifier> indentifers = new ArrayList<SolrIndexIdentifier>();
-        final long barrier = System.currentTimeMillis() - (TIMEOUT * 3600);
-        for (final AbstractSolrIndexAccess access : accessList) {
+        final long barrier = System.currentTimeMillis() - (TIMEOUT * 60000);
+        for (final AbstractSolrIndexAccess<?> access : accessList) {
             if (access.getLastAccess() <= barrier) {
                 indentifers.add(access.getIdentifier());
                 access.release();                

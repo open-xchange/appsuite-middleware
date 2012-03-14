@@ -47,46 +47,73 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.index.solr.groupware;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@link StaticSolrCore}
+ * {@link IndexCreateServerTableTask}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class StaticSolrCore extends SolrCore {
-
-    /**
-     * Initializes a new {@link StaticSolrCore}.
-     * @param cid
-     * @param uid
-     * @param module
-     */
-    public StaticSolrCore() {
-        super(new SolrIndexIdentifier(0, 0, 0));
-    }
+public class IndexCreateServerTableTask extends UpdateTaskAdapter {
     
+    private static final String CT_CORE_STORES = 
+        "CREATE TABLE solrCoreStores (" +
+            "id int(10) unsigned NOT NULL," +
+            "uri varchar(32) NOT NULL," +
+            "maxCores int(10) unsigned NOT NULL," +
+            "PRIMARY KEY (id)" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
+    
+    private final DatabaseService dbService;
+    
+
+    public IndexCreateServerTableTask(final DatabaseService dbService) {
+        super();
+        this.dbService = dbService;
+    }
+
     @Override
-    public SolrIndexIdentifier getIdentifier() {
-        return new MockIdentifier(0, 0, 0);
+    public void perform(final PerformParameters params) throws OXException {
+        updateConfigDB(dbService);
     }
     
-    private static final class MockIdentifier extends SolrIndexIdentifier {
-
-        /**
-         * Initializes a new {@link MockIdentifier}.
-         * @param contextId
-         * @param userId
-         * @param module
-         */
-        public MockIdentifier(int contextId, int userId, int module) {
-            super(contextId, userId, module);
+    private void updateConfigDB(final DatabaseService dbService) throws OXException {
+        final Connection writeCon = dbService.getWritable();
+        try {
+            PreparedStatement stmt = null;
+            /*
+             * Create table solrServers in configDb
+             */
+            try {
+                if (DBUtils.tableExists(writeCon, "solrServers")) {
+                    return;
+                }
+                stmt = writeCon.prepareStatement(CT_CORE_STORES);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        } finally {
+            dbService.backWritable(writeCon);
         }
-        
-        @Override
-        public String toString() {
-            return "solr/main";
-        }        
     }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
+    }
+
 }

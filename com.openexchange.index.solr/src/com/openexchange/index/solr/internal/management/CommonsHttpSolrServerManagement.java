@@ -72,7 +72,7 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.IndexUrl;
+import com.openexchange.index.solr.internal.IndexUrl;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;

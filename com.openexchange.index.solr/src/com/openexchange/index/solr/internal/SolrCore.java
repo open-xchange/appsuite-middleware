@@ -49,8 +49,6 @@
 
 package com.openexchange.index.solr.internal;
 
-import com.openexchange.index.solr.IndexServer;
-import com.openexchange.index.solr.SolrCoreStore;
 
 /**
  * {@link SolrCore}

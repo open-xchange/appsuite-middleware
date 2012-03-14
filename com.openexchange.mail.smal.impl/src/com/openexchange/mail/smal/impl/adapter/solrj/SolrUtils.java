@@ -55,7 +55,6 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.log.Log;
 
 /**
@@ -149,7 +148,7 @@ public final class SolrUtils {
 
     private static CommonsHttpSolrServer noTimeoutServer(final CommonsHttpSolrServer solrServer) throws OXException {
         final HttpClientParams params = solrServer.getHttpClient().getParams();
-        return ((CommonsHttpSolrServerManagement) params.getParameter("solr.server-management")).getNoTimeoutSolrServerFor(solrServer);
+        return null; // ((CommonsHttpSolrServerManagement) params.getParameter("solr.server-management")).getNoTimeoutSolrServerFor(solrServer);
     }
 
     private static final String MARKER = " ---=== /!\\ ===--- ";

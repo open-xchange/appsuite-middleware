@@ -81,9 +81,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
-import com.openexchange.index.solr.ConfigIndexService;
-import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.impl.SMALExceptionCodes;
@@ -135,17 +132,17 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private final int maxNumConcurrentFillerTasks;
 
-    private final CommonsHttpSolrServerManagement serverManagement;
+    //private final CommonsHttpSolrServerManagement serverManagement;
 
     private final Gate gate;
 
     /**
      * Initializes a new {@link SolrTextFillerQueue}.
      */
-    public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverManagement) {
+    public SolrTextFillerQueue(/*final CommonsHttpSolrServerManagement serverManagement*/) {
         super();
         placeHolder = new StampedFuture(null);
-        this.serverManagement = serverManagement;
+        //this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
         concurrentFutures = new AtomicReferenceArray<StampedFuture>(maxNumConcurrentFillerTasks);
         keepgoing = new AtomicBoolean(true);
@@ -444,11 +441,11 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         CommonsHttpSolrServer solrServer = null;
         boolean rollback = false;
         try {
-            solrServer =
-                serverManagement.getSolrServer(SMALServiceLookup.getServiceStatic(ConfigIndexService.class).getReadOnlyURL(
-                    contextId,
-                    userId,
-                    Types.EMAIL));
+            solrServer = null;
+//                serverManagement.getSolrServer(SMALServiceLookup.getServiceStatic(SolrCoreConfigService.class).getReadOnlyURL(
+//                    contextId,
+//                    userId,
+//                    Types.EMAIL));
             /*
              * Query existing documents
              */
@@ -549,7 +546,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
                             throw e;
                         }
-                        final CommonsHttpSolrServer noTimeoutSolrServer = serverManagement.getNoTimeoutSolrServerFor(solrServer);
+                        final CommonsHttpSolrServer noTimeoutSolrServer = null; //serverManagement.getNoTimeoutSolrServerFor(solrServer);
                         for (final SolrInputDocument doc : docs) {
                             noTimeoutSolrServer.add(doc);
                             rollback = true;

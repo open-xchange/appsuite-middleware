@@ -56,9 +56,7 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.solr.IndexServer;
-import com.openexchange.index.solr.IndexUrl;
-import com.openexchange.index.solr.SolrCoreStore;
+import com.openexchange.index.solr.internal.IndexUrl;
 import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 
 /**
@@ -215,7 +213,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     private IndexUrl fetchIndexUrl() throws OXException {
         final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
         fillIndexServer(core.getServer());
-        final IndexUrlImpl indexUrl = new IndexUrlImpl(core);
+        final IndexUrl indexUrl = new IndexUrl(core);
 
         return indexUrl;
     }
