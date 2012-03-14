@@ -71,7 +71,7 @@ public interface IndexFacade {
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess acquireIndexAccess(int module, Session session) throws OXException;
+    IndexAccess<?> acquireIndexAccess(int module, Session session) throws OXException;
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
@@ -82,7 +82,7 @@ public interface IndexFacade {
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess acquireIndexAccess(int module, int userId, int contextId) throws OXException;
+    IndexAccess<?> acquireIndexAccess(int module, int userId, int contextId) throws OXException;
 
     /**
      * Releases specified {@link IndexAccess} instance.
@@ -90,6 +90,6 @@ public interface IndexFacade {
      * @param indexAccess The index access to release
      * @throws OXException If releasing specified index access fails
      */
-    void releaseIndexAccess(IndexAccess indexAccess) throws OXException;
+    void releaseIndexAccess(IndexAccess<?> indexAccess) throws OXException;
 
 }

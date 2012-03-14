@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexAccess {
+public interface IndexAccess<V> {
 
     /**
      * Adds specified document's headers to associated index.
@@ -66,7 +66,7 @@ public interface IndexAccess {
      * @param document The document to add
      * @throws OXException If add operation fails
      */
-    void addEnvelopeData(IndexDocument document) throws OXException;
+    void addEnvelopeData(IndexDocument<V> document) throws OXException;
 
     /**
      * Adds specified documents' headers to associated index.
@@ -74,7 +74,7 @@ public interface IndexAccess {
      * @param documents The documents to add
      * @throws OXException If add operation fails
      */
-    void addEnvelopeData(Collection<IndexDocument> documents) throws OXException;
+    void addEnvelopeData(Collection<IndexDocument<V>> documents) throws OXException;
 
     /**
      * Adds specified document's content to associated index.
@@ -82,7 +82,7 @@ public interface IndexAccess {
      * @param document The document to add
      * @throws OXException If add operation fails
      */
-    void addContent(IndexDocument document) throws OXException;
+    void addContent(IndexDocument<V> document) throws OXException;
 
     /**
      * Adds specified documents' contents to associated index.
@@ -90,7 +90,7 @@ public interface IndexAccess {
      * @param documents The documents to add
      * @throws OXException If add operation fails
      */
-    void addContent(Collection<IndexDocument> documents) throws OXException;
+    void addContent(Collection<IndexDocument<V>> documents) throws OXException;
 
     /**
      * Adds specified document's attachments to associated index.
@@ -98,7 +98,7 @@ public interface IndexAccess {
      * @param document The document to add
      * @throws OXException If add operation fails
      */
-    void addAttachments(IndexDocument document) throws OXException;
+    void addAttachments(IndexDocument<V> document) throws OXException;
 
     /**
      * Adds specified documents' attachments to associated index.
@@ -106,7 +106,7 @@ public interface IndexAccess {
      * @param documents The documents to add
      * @throws OXException If add operation fails
      */
-    void addAttachments(Collection<IndexDocument> documents) throws OXException;
+    void addAttachments(Collection<IndexDocument<V>> documents) throws OXException;
 
     /**
      * Deletes a document by identifier.

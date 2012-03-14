@@ -52,12 +52,14 @@ package com.openexchange.index.solr.internal;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.solr.IndexServer;
 import com.openexchange.index.solr.IndexUrl;
 import com.openexchange.index.solr.SolrCoreStore;
+import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 
 
 /**
@@ -65,7 +67,7 @@ import com.openexchange.index.solr.SolrCoreStore;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractSolrIndexAccess implements IndexAccess {
+public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSolrIndexAccess.class));
     
@@ -85,9 +87,16 @@ public abstract class AbstractSolrIndexAccess implements IndexAccess {
     
     private IndexUrl cachedIndexUrl;
     
-    private long lastAccess;   
+    private long lastAccess;
+
+    protected volatile CommonsHttpSolrServerManagement solrServerManagement;
     
     
+    /**
+     * Initializes a new {@link AbstractSolrIndexAccess}.
+     * 
+     * @param identifier The Solr index identifier
+     */
     public AbstractSolrIndexAccess(final SolrIndexIdentifier identifier) {
         super();
         this.identifier = identifier;
@@ -104,13 +113,33 @@ public abstract class AbstractSolrIndexAccess implements IndexAccess {
     @Override
     public void release() {
         try {
+            {
+                final CommonsHttpSolrServerManagement solrServerManagement = this.solrServerManagement;
+                if (null != solrServerManagement) {
+                    solrServerManagement.shutDown();
+                    this.solrServerManagement = null;
+                }
+            }
             releaseIndexUrl();
         } catch (final OXException e) {
             LOG.warn(e.getLogMessage(), e);
         }        
     }
+
+    protected CommonsHttpSolrServer solrServerFor() throws OXException {
+        CommonsHttpSolrServerManagement solrServerManagement = this.solrServerManagement;
+        if (null == solrServerManagement) {
+            synchronized (this) {
+                solrServerManagement = this.solrServerManagement;
+                if (null == solrServerManagement) {
+                    this.solrServerManagement = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
+                }
+            }
+        }
+        return solrServerManagement.getSolrServer(getIndexUrl());
+    }
     
-    protected IndexUrl getIndexUrl() throws OXException {
+    private IndexUrl getIndexUrl() throws OXException {
         lastAccess = System.currentTimeMillis();
         if (isPrimary && cachedIndexUrl != null) {
             return cachedIndexUrl;

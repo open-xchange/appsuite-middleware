@@ -63,24 +63,27 @@ public class SolrIndexFacade implements IndexFacade {
 	
 	private final SolrIndexAccessManager solrIndexAccessManager;
 
+    /**
+     * Initializes a new {@link SolrIndexFacade}.
+     */
     public SolrIndexFacade() {
 		super();
 		solrIndexAccessManager = new SolrIndexAccessManager();	
     }
 	
     @Override
-    public IndexAccess acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
+    public IndexAccess<?> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
         final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
         return solrIndexAccessManager.acquireIndexAccess(identifier);
     }
 
     @Override
-    public IndexAccess acquireIndexAccess(final int module, final Session session) throws OXException {
+    public IndexAccess<?> acquireIndexAccess(final int module, final Session session) throws OXException {
         return acquireIndexAccess(module, session.getUserId(), session.getContextId());
     }
 
 	@Override
-	public void releaseIndexAccess(final IndexAccess indexAccess) throws OXException {
+	public void releaseIndexAccess(final IndexAccess<?> indexAccess) throws OXException {
 	    solrIndexAccessManager.releaseIndexAccess(indexAccess);
 	}
 }

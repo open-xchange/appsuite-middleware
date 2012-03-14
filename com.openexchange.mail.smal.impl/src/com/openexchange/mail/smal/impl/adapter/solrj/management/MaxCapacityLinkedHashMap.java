@@ -52,6 +52,7 @@ package com.openexchange.mail.smal.impl.adapter.solrj.management;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.index.solr.internal.management.MaxCapacityLinkedHashMap;
 
 /**
  * {@link MaxCapacityLinkedHashMap}

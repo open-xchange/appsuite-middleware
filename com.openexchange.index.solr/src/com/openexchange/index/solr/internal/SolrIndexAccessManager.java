@@ -57,24 +57,26 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.timer.TimerService;
 
-
 /**
  * {@link SolrIndexAccessManager}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexAccessManager {
-    
+
     private final ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess> accessMap;
-    
-    
+
     public SolrIndexAccessManager() {
         super();
         accessMap = new ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess>();
         final TimerService timerService = Services.getService(TimerService.class);
-        timerService.scheduleAtFixedRate(new SolrCoreShutdownTask(this), SolrCoreShutdownTask.TIMEOUT, SolrCoreShutdownTask.TIMEOUT, TimeUnit.MINUTES);
+        timerService.scheduleAtFixedRate(
+            new SolrCoreShutdownTask(this),
+            SolrCoreShutdownTask.TIMEOUT,
+            SolrCoreShutdownTask.TIMEOUT,
+            TimeUnit.MINUTES);
     }
-    
+
     public IndexAccess acquireIndexAccess(final SolrIndexIdentifier identifier) throws OXException {
         AbstractSolrIndexAccess cachedIndexAccess = accessMap.get(identifier);
         if (null == cachedIndexAccess) {
@@ -84,21 +86,21 @@ public class SolrIndexAccessManager {
                 cachedIndexAccess = newAccess;
             }
         }
-        
+
         cachedIndexAccess.incrementRetainCount();
         return cachedIndexAccess;
     }
 
-    public void releaseIndexAccess(final IndexAccess indexAccess) throws OXException {
+    public void releaseIndexAccess(final IndexAccess indexAccess) {
         final AbstractSolrIndexAccess cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess) indexAccess).getIdentifier());
         if (null != cachedIndexAccess) {
             final int retainCount = cachedIndexAccess.decrementRetainCount();
             if (retainCount == 0) {
                 cachedIndexAccess.release();
             }
-        }   
+        }
     }
-    
+
     public List<AbstractSolrIndexAccess> getActivePrimaryAccesses() {
         final List<AbstractSolrIndexAccess> accessList = new ArrayList<AbstractSolrIndexAccess>();
         for (final AbstractSolrIndexAccess access : accessMap.values()) {
@@ -106,17 +108,17 @@ public class SolrIndexAccessManager {
                 accessList.add(access);
             }
         }
-        
+
         return accessList;
     }
-    
+
     public void removeFromCache(final List<SolrIndexIdentifier> identifiers) {
         for (final SolrIndexIdentifier identifier : identifiers) {
             accessMap.remove(identifier);
-        }       
+        }
     }
-    
-    private AbstractSolrIndexAccess createIndexAccessByType(final SolrIndexIdentifier identifier) {
+
+    private AbstractSolrIndexAccess createIndexAccessByType(final SolrIndexIdentifier identifier) throws OXException {
         return null;
     }
 }

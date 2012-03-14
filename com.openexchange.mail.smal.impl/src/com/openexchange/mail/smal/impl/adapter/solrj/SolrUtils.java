@@ -55,8 +55,8 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.log.Log;
-import com.openexchange.mail.smal.impl.adapter.solrj.management.CommonsHttpSolrServerManagement;
 
 /**
  * {@link SolrUtils} - Utility methods for Solr.

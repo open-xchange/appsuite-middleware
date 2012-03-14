@@ -57,7 +57,7 @@ import java.util.List;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexResult {
+public interface IndexResult<V> {
 	
 	/**
 	 * Gets the total number of results.
@@ -71,6 +71,6 @@ public interface IndexResult {
 	 * 
 	 * @return The requested results.
 	 */
-	List<IndexDocument> getResults();
+	List<IndexDocument<V>> getResults();
 
 }
