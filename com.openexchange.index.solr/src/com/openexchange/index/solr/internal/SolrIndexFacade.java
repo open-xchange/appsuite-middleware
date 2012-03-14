@@ -57,7 +57,7 @@ import com.openexchange.index.IndexFacade;
 import com.openexchange.session.Session;
 
 /**
- * {@link SolrIndexFacade} - The Solr {@link IndexFacade}.
+ * {@link SolrIndexFacade} - The Solr {@link IndexFacade} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
