@@ -81,24 +81,25 @@ public class SolrIndexFacade implements IndexFacade {
     @Override
     public IndexAccess acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
         final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
-        if (!accessMap.containsKey(identifier)) {
-            accessMap.putIfAbsent(identifier, new SolrIndexAccess(identifier, config));
+        SolrIndexAccess cachedIndexAccess = accessMap.get(identifier);
+        if (null == cachedIndexAccess) {
+            final SolrIndexAccess newAccess = new SolrIndexAccess(identifier, config);
+            cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
+            if (null == cachedIndexAccess) {
+                cachedIndexAccess = newAccess;
+            }
         }
-
-        final SolrIndexAccess keptIndexAccess = accessMap.get(identifier);
-        keptIndexAccess.incrementRetainCount();
-        return keptIndexAccess;
+        cachedIndexAccess.incrementRetainCount();
+        return cachedIndexAccess;
     }
 
     @Override
     public void releaseIndexAccess(final IndexAccess indexAccess) throws OXException {
-        final SolrIndexAccess solrIndexAccess = (SolrIndexAccess) indexAccess;
-        final SolrIndexIdentifier identifier = solrIndexAccess.getIdentifier();
-        if (accessMap.containsKey(identifier)) {
-            final SolrIndexAccess keptIndexAccess = accessMap.get(identifier);
-            final int retainCount = keptIndexAccess.decrementRetainCount();
+        final SolrIndexAccess cachedIndexAccess = accessMap.get(((SolrIndexAccess) indexAccess).getIdentifier());
+        if (null != cachedIndexAccess) {
+            final int retainCount = cachedIndexAccess.decrementRetainCount();
             if (retainCount == 0) {
-                keptIndexAccess.release();
+                cachedIndexAccess.release();
             }
         }
     }
