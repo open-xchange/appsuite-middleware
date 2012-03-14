@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,33 +49,47 @@
 
 package com.openexchange.index;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
 /**
- * {@link IndexDocument} - Represents an indexed document.
+ * {@link IndexConstants} - Provides useful constants.
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
+public final class IndexConstants {
 
     /**
-     * The document's type.
+     * Initializes a new {@link IndexConstants}.
      */
-    public static enum Type {
-        MAIL, CONTACT, APPOINTMENT, TASK, INFOSTORE_DOCUMENT;
+    private IndexConstants() {
+        super();
     }
 
     /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
+     * Currently known languages.
      */
-    public V getObject();
+    public static final Set<Locale> KNOWN_LOCALES;
 
-    /**
-     * Gets the document's type.
-     * 
-     * @return The type
-     */
-    Type getType();
+    static {
+        final Set<Locale> set = new HashSet<Locale>(10);
+        set.add(new Locale("en"));
+        set.add(new Locale("de"));
+        // set.add(new Locale("fr"));
+        // set.add(new Locale("nl"));
+        // set.add(new Locale("sv"));
+        // set.add(new Locale("es"));
+        // set.add(new Locale("ja"));
+        // set.add(new Locale("pl"));
+        // set.add(new Locale("it"));
+        // set.add(new Locale("zh"));
+        // set.add(new Locale("hu"));
+        // set.add(new Locale("sk"));
+        // set.add(new Locale("cs"));
+        // set.add(new Locale("lv"));
+        KNOWN_LOCALES = Collections.unmodifiableSet(set);
+    }
 
 }

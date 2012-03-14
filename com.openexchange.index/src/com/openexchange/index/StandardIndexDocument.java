@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,32 +50,33 @@
 package com.openexchange.index;
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
+ * {@link StandardIndexDocument}
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
+public class StandardIndexDocument<V> implements IndexDocument<V> {
+
+    private final V object;
+
+    private final Type type;
 
     /**
-     * The document's type.
+     * Initializes a new {@link StandardIndexDocument}.
      */
-    public static enum Type {
-        MAIL, CONTACT, APPOINTMENT, TASK, INFOSTORE_DOCUMENT;
+    public StandardIndexDocument(final V object, final Type type) {
+        super();
+        this.object = object;
+        this.type = type;
     }
 
-    /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
-     */
-    public V getObject();
+    @Override
+    public V getObject() {
+        return object;
+    }
 
-    /**
-     * Gets the document's type.
-     * 
-     * @return The type
-     */
-    Type getType();
+    @Override
+    public com.openexchange.index.IndexDocument.Type getType() {
+        return type;
+    }
 
 }

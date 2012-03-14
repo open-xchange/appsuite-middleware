@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,41 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl.index;
+
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
+import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
+ * {@link MailMessageIndexDocumentHelper}
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
+public final class MailMessageIndexDocumentHelper implements SolrConstants {
 
     /**
-     * The document's type.
+     * Initializes a new {@link MailMessageIndexDocumentHelper}.
      */
-    public static enum Type {
-        MAIL, CONTACT, APPOINTMENT, TASK, INFOSTORE_DOCUMENT;
+    private MailMessageIndexDocumentHelper() {
+        super();
     }
 
     /**
-     * Gets the object associated with this index document.
+     * Gets the index document for given mail.
      * 
-     * @return The associated object
+     * @param mail The mail
+     * @param accountId The account identifier
+     * @return The index document
      */
-    public V getObject();
+    public static IndexDocument<MailMessage> documentFor(final MailMessage mail, final int accountId) {
+        if (null == mail) {
+            return null;
+        }
+        mail.setAccountId(accountId);
+        return new StandardIndexDocument<MailMessage>(mail, Type.MAIL);
 
-    /**
-     * Gets the document's type.
-     * 
-     * @return The type
-     */
-    Type getType();
+    }
 
 }

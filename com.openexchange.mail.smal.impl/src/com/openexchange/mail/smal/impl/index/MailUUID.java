@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,119 +47,39 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl.index;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import com.openexchange.mail.MailPath;
 
 /**
- * {@link MapBasedIndexDocument} - The index document backed by a {@link Map}.
- * 
+ * {@link MailUUID} - Represents a mail's UUID in index storage.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MapBasedIndexDocument<M extends Map<String, Object>> implements IndexDocument {
+public class MailUUID {
 
-    private static final long serialVersionUID = -4897655903500710196L;
-
-    private final M map;
-
-    private final Type type;
+    private final String mailUUID;
 
     /**
-     * Initializes a new {@link MapBasedIndexDocument}.
+     * Initializes a new {@link MailUUID}.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
+     * @param fullName The folder full name
+     * @param mailId The mail identifier
      */
-    public MapBasedIndexDocument(final M map, final Type type) {
+    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
         super();
-        this.map = map;
-        this.type = type;
+        final StringBuilder tmp = new StringBuilder(64);
+        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
+        mailUUID = tmp.toString();
     }
 
-    @Override
-    public Type getType() {
-        return type;
-    }
-
-    @Override
-    public int size() {
-        return map.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public boolean containsKey(final Object key) {
-        return map.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(final Object value) {
-        return map.containsValue(value);
-    }
-
-    @Override
-    public Object get(final Object key) {
-        return map.get(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> V get(final String name) {
-        return (V) map.get(name);
-    }
-
-    @Override
-    public Object put(final String key, final Object value) {
-        return map.put(key, value);
-    }
-
-    @Override
-    public Object remove(final Object key) {
-        return map.remove(key);
-    }
-
-    @Override
-    public void putAll(final Map<? extends String, ? extends Object> m) {
-        map.putAll(m);
-    }
-
-    @Override
-    public void clear() {
-        map.clear();
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return map.keySet();
-    }
-
-    @Override
-    public Collection<Object> values() {
-        return map.values();
-    }
-
-    @Override
-    public Set<java.util.Map.Entry<String, Object>> entrySet() {
-        return map.entrySet();
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        return map.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return map.hashCode();
-    }
-
-    @Override
-    public Iterator<java.util.Map.Entry<String, Object>> iterator() {
-        return map.entrySet().iterator();
+    public String getUUID() {
+        return mailUUID;
     }
 
 }
