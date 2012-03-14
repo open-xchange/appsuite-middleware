@@ -64,11 +64,29 @@ public class StaticSolrCore extends SolrCore {
      * @param module
      */
     public StaticSolrCore() {
-        super(0, 0, 0);
+        super(new SolrIndexIdentifier(0, 0, 0));
     }
     
     @Override
-    public String getCoreName() {
-        return "solr/main";
+    public SolrIndexIdentifier getIdentifier() {
+        return new MockIdentifier(0, 0, 0);
+    }
+    
+    private static final class MockIdentifier extends SolrIndexIdentifier {
+
+        /**
+         * Initializes a new {@link MockIdentifier}.
+         * @param contextId
+         * @param userId
+         * @param module
+         */
+        public MockIdentifier(int contextId, int userId, int module) {
+            super(contextId, userId, module);
+        }
+        
+        @Override
+        public String toString() {
+            return "solr/main";
+        }        
     }
 }

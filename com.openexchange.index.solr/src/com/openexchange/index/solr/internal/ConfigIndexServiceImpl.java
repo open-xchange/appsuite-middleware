@@ -72,10 +72,13 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     
     private final ConfigurationService config;
     
+    private boolean isPrimary;
+    
 
     public ConfigIndexServiceImpl(final ConfigurationService config) {
         super();
         this.config = config;
+        this.isPrimary = false;
     }
 
     @Override
@@ -86,7 +89,9 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             final SolrCoreStore coreStore = indexMysql.getCoreStore(cid, uid, module);
             final SolrCore core = startUpSolrCore(cid, uid, module, coreStore);
             final String server = config.getProperty("com.openexchange.index.solrHost");            
-            if (!indexMysql.activateCoreEntry(cid, uid, module, server)) {
+            if (indexMysql.activateCoreEntry(cid, uid, module, server)) {
+                isPrimary = true;
+            } else {
                 /*
                  * Somebody else tried to start up a core for this index and was faster.
                  */
@@ -130,11 +135,13 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     
     @Override
     public void stopCore(final int cid, final int uid, final int module) throws OXException {
-        final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
-        if (indexMysql.hasActiveCore(cid, uid, module)) {
-            final SolrCore core = indexMysql.getSolrCore(cid, uid, module);
-            indexMysql.deactivateCoreEntry(cid, uid, module);
-            shutDownSolrCore(core);
+        if (isPrimary) {
+            final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
+            if (indexMysql.hasActiveCore(cid, uid, module)) {
+                final SolrCore core = indexMysql.getSolrCore(cid, uid, module);
+                indexMysql.deactivateCoreEntry(cid, uid, module);
+                shutDownSolrCore(core);
+            }
         }
     }
     
@@ -143,9 +150,9 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
         final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
         final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
         final String baseUri = store.getUri();
-        final String coreName = SolrCoreStore.getCoreName(cid, uid, module);
-        final String instanceUriStr = baseUri + File.pathSeparator + coreName;
-        final String dataUriStr = baseUri + File.pathSeparator + coreName + File.pathSeparator + "data";
+        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(cid, uid, module);
+        final String instanceUriStr = baseUri + File.pathSeparator + identifier.toString();
+        final String dataUriStr = baseUri + File.pathSeparator + identifier.toString() + File.pathSeparator + "data";
         URI instanceUri = null;
         URI dataUri = null;
         try {
@@ -177,8 +184,8 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
         final ConfigIndexMysql indexMysql = ConfigIndexMysql.getInstance();
         final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
         final String baseUri = store.getUri();
-        final String coreName = SolrCoreStore.getCoreName(cid, uid, module);
-        final String uriStr = baseUri + File.pathSeparator + coreName;        
+        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(cid, uid, module);
+        final String uriStr = baseUri + File.pathSeparator + identifier.toString();        
         try {
             final URI uri = new URI(uriStr);
             final File instanceDir = new File(uri);
@@ -216,7 +223,7 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
         indexServer.setUrl(solrHost);
         fillIndexServer(indexServer);
         
-        final SolrCore core = new SolrCore(cid, uid, module);
+        final SolrCore core = new SolrCore(new SolrIndexIdentifier(cid, uid, module));
         core.setStore(coreStore);
         core.setServer(indexServer);
         /*

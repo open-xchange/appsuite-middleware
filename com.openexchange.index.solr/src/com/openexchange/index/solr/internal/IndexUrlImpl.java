@@ -74,7 +74,7 @@ public final class IndexUrlImpl implements IndexUrl {
     public IndexUrlImpl(final SolrCore core) {
         super();
         server = core.getServer();
-        fullUrl = server.getUrl() + DELIM + core.getCoreName();
+        fullUrl = server.getUrl() + DELIM + core.getIdentifier().toString();
     }
 
     @Override
