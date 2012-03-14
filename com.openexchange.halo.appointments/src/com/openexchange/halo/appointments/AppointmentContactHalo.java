@@ -49,6 +49,8 @@
 
 package com.openexchange.halo.appointments;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,6 +62,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
@@ -101,7 +104,20 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 		} else if (query.getUser() != null) {
 		    appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
 		} else {
-		    appointments = appointmentService.getAppointmentsWithExternalParticipantBetween(query.getContact().getEmail1(), columns, start, end, orderBy, order);
+			Contact searchContact = query.getContact();
+			List<String> addresses = getEMailAddresses(searchContact);
+			appointments = new LinkedList<Appointment>();
+			for(String address: addresses){
+				appointments.addAll( appointmentService.getAppointmentsWithExternalParticipantBetween(address, columns, start, end, orderBy, order) );
+			}
+			if(addresses.size() > 1){
+				Collections.sort(appointments, new Comparator<Appointment>() {
+					@Override
+					public int compare(Appointment app, Appointment other) {
+						return app.getStartDate().compareTo(other.getStartDate());
+					}
+				});
+			}
 		}
 
 //		//TODO: Construct a list of appointments with the given user and the session user in the near future
@@ -126,6 +142,20 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 	@Override
 	public boolean isAvailable(ServerSession session) {
 		return session.getUserConfiguration().hasCalendar();
+	}
+
+	protected List<String> getEMailAddresses(Contact contact) {
+		List<String> addresses = new LinkedList<String>();
+		if (contact.containsEmail1()) {
+			addresses.add(contact.getEmail1());
+		}
+		if (contact.containsEmail2()) {
+			addresses.add(contact.getEmail2());
+		}
+		if (contact.containsEmail3()) {
+			addresses.add(contact.getEmail3());
+		}
+		return addresses;
 	}
 
 }
