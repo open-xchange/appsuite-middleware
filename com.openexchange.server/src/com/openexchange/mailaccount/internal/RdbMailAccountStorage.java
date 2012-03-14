@@ -85,6 +85,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -92,6 +93,7 @@ import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mail.utils.ProviderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -130,7 +132,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final String SELECT_TRANSPORT_ACCOUNT =
         "SELECT name, url, login, password, send_addr, default_flag, personal, replyTo FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
-    private static final String SELECT_MAIL_ACCOUNTS = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id";
+    private static final String SELECT_MAIL_ACCOUNTS = "SELECT id, url FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id";
 
     private static final String SELECT_BY_LOGIN = "SELECT id, user FROM user_mail_account WHERE cid = ? AND login = ?";
 
@@ -722,30 +724,29 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     int[] getUserMailAccountIDs(final int user, final int cid, final Connection con) throws OXException {
-        final int[] ids;
-        {
-            PreparedStatement stmt = null;
-            ResultSet result = null;
-            final SmartIntArray sia = new SmartIntArray(8);
-            try {
-                stmt = con.prepareStatement(SELECT_MAIL_ACCOUNTS);
-                stmt.setLong(1, cid);
-                stmt.setLong(2, user);
-                result = stmt.executeQuery();
-                if (!result.next()) {
-                    return new int[0];
-                }
-                do {
-                    sia.append(result.getInt(1));
-                } while (result.next());
-            } catch (final SQLException e) {
-                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                closeSQLStuff(result, stmt);
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT_MAIL_ACCOUNTS);
+            stmt.setLong(1, cid);
+            stmt.setLong(2, user);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return new int[0];
             }
-            ids = sia.toArray();
+            final TIntList ids = new TIntArrayList(8);
+            do {
+                final String url = result.getString(2);
+                if (null != MailProviderRegistry.getRealMailProvider(ProviderUtility.extractProtocol(url, null))) {
+                    ids.add(result.getInt(1));
+                }
+            } while (result.next());
+            return ids.toArray();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
         }
-        return ids;
     }
 
     @Override
