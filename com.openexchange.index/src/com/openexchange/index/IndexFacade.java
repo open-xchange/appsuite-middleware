@@ -64,14 +64,14 @@ public interface IndexFacade {
      * Acquires an appropriate {@link IndexAccess} instance.
      * <p>
      * Convenience method for:<br>
-     * {@link #aquireIndexAccess(int, int, int) aquireIndexAccess(module, session.getUserId(), session.getContextId()}.
+     * {@link #acquireIndexAccess(int, int, int) aquireIndexAccess(module, session.getUserId(), session.getContextId()}.
      * 
      * @param module The module
      * @param session The session providing the user for whom to acquire the index access
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess aquireIndexAccess(int module, Session session) throws OXException;
+    IndexAccess acquireIndexAccess(int module, Session session) throws OXException;
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
@@ -82,7 +82,7 @@ public interface IndexFacade {
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess aquireIndexAccess(int module, int userId, int contextId) throws OXException;
+    IndexAccess acquireIndexAccess(int module, int userId, int contextId) throws OXException;
 
     /**
      * Releases specified {@link IndexAccess} instance.

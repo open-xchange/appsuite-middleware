@@ -65,8 +65,6 @@ public class SolrCoreManager {
     
     private final SolrIndexMysql indexMysql;
     
-    private final ConfigurationService config;
-    
     private final int contextId;
     
     private final int userId;
@@ -85,7 +83,6 @@ public class SolrCoreManager {
         this.contextId = contextId;
         this.userId = userId;
         this.module = module;
-        this.config = IndexServiceLookup.getInstance().getService(ConfigurationService.class);
         isPrimary = false;
         cachedIndexUrl = null;
         indexMysql = SolrIndexMysql.getInstance();
@@ -102,6 +99,7 @@ public class SolrCoreManager {
         if (!hasActiveCore) {
             final SolrCoreStore coreStore = indexMysql.getCoreStore(contextId, userId, module);
             final SolrCore core = startUpSolrCore(coreStore);
+            final ConfigurationService config = Services.getService(ConfigurationService.class);
             final String server = config.getProperty("com.openexchange.index.solrHost");            
             if (indexMysql.activateCoreEntry(contextId, userId, module, server)) {
                 isPrimary = true;
@@ -151,12 +149,14 @@ public class SolrCoreManager {
     }
     
     private void fillIndexServer(final IndexServer server) {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         server.setConnectionTimeout(config.getIntProperty("com.openexchange.index.connectionTimeout", 100));
         server.setSoTimeout(config.getIntProperty("com.openexchange.index.socketTimeout", 1000));
         server.setMaxConnectionsPerHost(config.getIntProperty("com.openexchange.index.maxConnections", 100));
     }
     
     private SolrCore startUpSolrCore(final SolrCoreStore coreStore) throws OXException {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String solrHost = config.getProperty("com.openexchange.index.solrHost");  
         final IndexServer indexServer = new IndexServer();
         indexServer.setUrl(solrHost);

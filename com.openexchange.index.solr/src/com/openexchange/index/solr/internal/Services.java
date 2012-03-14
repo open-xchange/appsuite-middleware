@@ -52,49 +52,67 @@ package com.openexchange.index.solr.internal;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
- * {@link IndexServiceLookup}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link Services} - The static service lookup for Solr index implementation bundle.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IndexServiceLookup implements ServiceLookup {
+public final class Services {
 
-    private static final IndexServiceLookup INSTANCE = new IndexServiceLookup();
-
-    private final AtomicReference<ServiceLookup> serviceLookupRef;
-
-
-    private IndexServiceLookup() {
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
         super();
-        serviceLookupRef = new AtomicReference<ServiceLookup>();
     }
 
-    public static IndexServiceLookup getInstance() {
-        return INSTANCE;
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = serviceLookupRef.get();
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
-            return null;
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.index.solr\" not staretd?");
         }
-
         return serviceLookup.getService(clazz);
     }
-    
-    @Override
-    public <S> S getOptionalService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = serviceLookupRef.get();
-        if (null == serviceLookup) {
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
             return null;
         }
-
-        return serviceLookup.getOptionalService(clazz);
     }
 
-    public void setServiceLookup(final ServiceLookup serviceLookup) {
-        serviceLookupRef.set(serviceLookup);
-    }
 }

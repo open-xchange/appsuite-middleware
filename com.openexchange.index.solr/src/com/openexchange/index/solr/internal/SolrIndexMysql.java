@@ -466,7 +466,7 @@ public class SolrIndexMysql {
     }
 
     private DatabaseService getDbService() throws OXException {
-        final DatabaseService dbService = IndexServiceLookup.getInstance().getService(DatabaseService.class);
+        final DatabaseService dbService = Services.getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
