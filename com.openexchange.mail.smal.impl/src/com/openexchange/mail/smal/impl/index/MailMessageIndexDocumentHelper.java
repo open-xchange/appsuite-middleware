@@ -59,7 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailMessageIndexDocumentHelper implements SolrConstants {
+public final class MailMessageIndexDocumentHelper {
 
     /**
      * Initializes a new {@link MailMessageIndexDocumentHelper}.
