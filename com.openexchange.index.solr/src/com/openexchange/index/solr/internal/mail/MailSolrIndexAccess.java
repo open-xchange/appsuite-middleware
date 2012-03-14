@@ -59,20 +59,23 @@ import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.SolrIndexIdentifier;
 import com.openexchange.mail.dataobjects.MailMessage;
 
-
 /**
  * {@link MailSolrIndexAccess}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
+    private final TriggerType triggerType;
+
     /**
      * Initializes a new {@link MailSolrIndexAccess}.
-     * @param identifier
+     * 
+     * @param identifier The Solr server identifier
      */
-    public MailSolrIndexAccess(final SolrIndexIdentifier identifier) {
+    public MailSolrIndexAccess(final SolrIndexIdentifier identifier, final TriggerType triggerType) {
         super(identifier);
+        this.triggerType = triggerType;
     }
 
     @Override
@@ -81,7 +84,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#addEnvelopeData(java.util.Collection)
      */
     @Override
@@ -90,7 +94,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#addContent(com.openexchange.index.IndexDocument)
      */
     @Override
@@ -99,7 +104,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#addContent(java.util.Collection)
      */
     @Override
@@ -108,16 +114,18 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#addAttachments(com.openexchange.index.IndexDocument)
      */
     @Override
-    public void addAttachments(final IndexDocument document) throws OXException {
+    public void addAttachments(final IndexDocument<MailMessage> document) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#addAttachments(java.util.Collection)
      */
     @Override
@@ -126,7 +134,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#deleteById(java.lang.String)
      */
     @Override
@@ -135,7 +144,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#deleteByQuery(java.lang.String)
      */
     @Override
@@ -144,7 +154,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.index.IndexAccess#query(com.openexchange.index.QueryParameters)
      */
     @Override
@@ -153,13 +164,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.index.IndexAccess#getTriggerType()
-     */
     @Override
     public TriggerType getTriggerType() {
-        // TODO Auto-generated method stub
-        return null;
+        return triggerType;
     }
 
 }

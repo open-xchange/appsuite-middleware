@@ -47,71 +47,39 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.adapter.solrj.management;
+package com.openexchange.index.solr.internal.mail;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.index.solr.internal.management.MaxCapacityLinkedHashMap;
+import com.openexchange.mail.MailPath;
 
 /**
- * {@link MaxCapacityLinkedHashMap}
+ * {@link MailUUID} - Represents a mail's UUID in index storage.
  *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> implements ConcurrentMap<K, V> {
+public class MailUUID {
 
-    private static final long serialVersionUID = 8965907246210389424L;
-
-    private static final int INITIAL_CAPACITY = 16;
-
-    private static final float LOAD_FACTOR = 0.75f;
-
-    private final int maximumCapacity;
+    private final String mailUUID;
 
     /**
-     * Initializes a new {@link MaxCapacityLinkedHashMap}.
+     * Initializes a new {@link MailUUID}.
      *
-     * @param maximumCapacity The maximum capacity
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
+     * @param fullName The folder full name
+     * @param mailId The mail identifier
      */
-    MaxCapacityLinkedHashMap(final int maximumCapacity) {
-        super(INITIAL_CAPACITY, LOAD_FACTOR, true);
-        this.maximumCapacity = maximumCapacity;
+    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
+        super();
+        final StringBuilder tmp = new StringBuilder(64);
+        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
+        mailUUID = tmp.toString();
     }
 
-    @Override
-    protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-        return size() > maximumCapacity;
-    }
-
-    @Override
-    public V putIfAbsent(final K key, final V value) {
-        final V currentValue = get(key);
-        return (currentValue == null) ? put(key, value) : currentValue;
-    }
-
-    @Override
-    public boolean remove(final Object key, final Object value) {
-        if (value.equals(get(key))) {
-            remove(key);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public V replace(final K key, final V value) {
-        return containsKey(key) ? put(key, value) : null;
-    }
-
-    @Override
-    public boolean replace(final K key, final V oldValue, final V newValue) {
-        final V currentValue = get(key);
-        if (oldValue.equals(currentValue)) {
-            put(key, newValue);
-            return true;
-        }
-        return false;
+    public String getUUID() {
+        return mailUUID;
     }
 
 }

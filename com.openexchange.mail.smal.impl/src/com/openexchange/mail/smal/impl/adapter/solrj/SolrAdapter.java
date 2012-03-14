@@ -88,9 +88,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.index.solr.ConfigIndexService;
 import com.openexchange.index.solr.IndexUrl;
 import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.IndexRange;
@@ -485,35 +483,21 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     }
 
     private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
-        final ConfigIndexService configIndexService = SMALServiceLookup.getServiceStatic(ConfigIndexService.class);
-        if (readWrite) {
-            return configIndexService.getWriteURL(session.getContextId(), session.getUserId(), Types.EMAIL);
-        }
-        return configIndexService.getReadOnlyURL(session.getContextId(), session.getUserId(), Types.EMAIL);
+        return null;
     }
 
     private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
-        if (readWrite) {
-            return solrServerManagement.newSolrServer(indexUrlFor(session, true));
-        }
-        return solrServerManagement.getSolrServer(indexUrlFor(session, false));
+        return null;
     }
 
     @Override
     public void start() throws OXException {
-        final CommonsHttpSolrServerManagement cache = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
-        final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
-        q.start();
-        q.proceed();
+        // Nope
     }
 
     @Override
     public void stop() throws OXException {
-        final CommonsHttpSolrServerManagement solrServerCache = this.solrServerManagement;
-        if (null != solrServerCache) {
-            solrServerCache.shutDown();
-            this.solrServerManagement = null;
-        }
+        // Nope
     }
 
     @Override
