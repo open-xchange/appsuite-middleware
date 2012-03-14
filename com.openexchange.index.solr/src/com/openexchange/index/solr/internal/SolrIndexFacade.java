@@ -1,30 +1,32 @@
 package com.openexchange.index.solr.internal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.config.ConfigurationService;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacade;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 
 public class SolrIndexFacade implements IndexFacade {
-	
-	private final ConfigurationService config;
 	
 	private final ConcurrentHashMap<SolrIndexIdentifier, SolrIndexAccess> accessMap;
 	
 	
-	public SolrIndexFacade(final ConfigurationService config) {
+	public SolrIndexFacade() {
 		super();
-		this.config = config;
 		accessMap = new ConcurrentHashMap<SolrIndexIdentifier, SolrIndexAccess>();
+		final TimerService timerService = IndexServiceLookup.getInstance().getService(TimerService.class);
+		timerService.scheduleAtFixedRate(new SolrCoreShutdownTask(this), SolrCoreShutdownTask.TIMEOUT, SolrCoreShutdownTask.TIMEOUT, TimeUnit.MINUTES);
 	}
 
 	@Override
 	public IndexAccess aquireIndexAccess(final int contextId, final int userId, final int module) throws OXException {
 	    final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
 		if (!accessMap.containsKey(identifier)) {
-		    accessMap.putIfAbsent(identifier, new SolrIndexAccess(identifier, config));
+		    accessMap.putIfAbsent(identifier, new SolrIndexAccess(identifier));
 		}
 		
 		final SolrIndexAccess keptIndexAccess = accessMap.get(identifier);
@@ -48,6 +50,23 @@ public class SolrIndexFacade implements IndexFacade {
 	@Override
 	public IndexAccess aquireIndexAccess(final int module, final Session session) throws OXException {
 		return aquireIndexAccess(session.getContextId(), session.getUserId(), module);
+	}
+	
+	public List<SolrIndexAccess> getActivePrimaryAccesses() {
+	    final List<SolrIndexAccess> accessList = new ArrayList<SolrIndexAccess>();
+	    for (final SolrIndexAccess access : accessMap.values()) {
+	        if (access.isPrimary()) {
+	            accessList.add(access);
+	        }
+	    }
+	    
+	    return accessList;
+	}
+	
+	public void removeFromCache(final List<SolrIndexIdentifier> identifiers) {
+	    for (final SolrIndexIdentifier identifier : identifiers) {
+	        accessMap.remove(identifier);
+	    }	    
 	}
 
 }

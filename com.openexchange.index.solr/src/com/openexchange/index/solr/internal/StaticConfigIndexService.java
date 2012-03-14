@@ -82,16 +82,6 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public IndexUrl getReadOnlyURL(final int contextId, final int userId, final int module) throws OXException {
-        return indexUrl;
-    }
-
-    @Override
-    public IndexUrl getWriteURL(final int contextId, final int userId, final int module) throws OXException {
-        return indexUrl;
-    }
-
-    @Override
     public List<SolrCoreStore> getAllStores() throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -111,12 +101,6 @@ public final class StaticConfigIndexService implements ConfigIndexService {
 
     @Override
     public void unregisterCoreStore(final int storeId) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void stopCore(final int contextId, final int userId, final int module) throws OXException {
         // TODO Auto-generated method stub
         
     }

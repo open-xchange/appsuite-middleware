@@ -67,20 +67,20 @@ import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@link ConfigIndexMysql}
+ * {@link SolrIndexMysql}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConfigIndexMysql {
+public class SolrIndexMysql {
 
-    private static final ConfigIndexMysql INSTANCE = new ConfigIndexMysql();
+    private static final SolrIndexMysql INSTANCE = new SolrIndexMysql();
 
 
-    private ConfigIndexMysql() {
+    private SolrIndexMysql() {
         super();
     }
 
-    public static ConfigIndexMysql getInstance() {
+    public static SolrIndexMysql getInstance() {
         return INSTANCE;
     }
     

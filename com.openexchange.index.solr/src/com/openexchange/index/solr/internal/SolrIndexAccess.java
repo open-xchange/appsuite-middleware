@@ -2,7 +2,7 @@ package com.openexchange.index.solr.internal;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.config.ConfigurationService;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -10,6 +10,7 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.TriggerType;
 import com.openexchange.index.solr.IndexUrl;
+import com.openexchange.log.Log;
 
 public class SolrIndexAccess implements IndexAccess {
 	
@@ -24,15 +25,17 @@ public class SolrIndexAccess implements IndexAccess {
     private final SolrCoreManager solrManager;
     
     private final AtomicInteger retainCount;
+    
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(SolrIndexAccess.class));
 	
 	
-	public SolrIndexAccess(final SolrIndexIdentifier identifier, final ConfigurationService config) {
+	public SolrIndexAccess(final SolrIndexIdentifier identifier) {
         super();
         this.identifier = identifier;
         this.contextId = identifier.getContextId();
         this.userId = identifier.getUserId();
         this.module = identifier.getModule();
-        solrManager = new SolrCoreManager(contextId, userId, module, config);
+        solrManager = new SolrCoreManager(contextId, userId, module);
         retainCount = new AtomicInteger(0);
 	}
 
@@ -104,8 +107,7 @@ public class SolrIndexAccess implements IndexAccess {
         try {
             solrManager.releaseIndexUrl();
         } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Error while releasing index url.", e);
         }        
     }
     
@@ -121,8 +123,16 @@ public class SolrIndexAccess implements IndexAccess {
         return retainCount.decrementAndGet();
     }
     
+    public boolean isPrimary() {
+        return solrManager.isPrimary();
+    }
+    
     private IndexUrl getIndexUrl() throws OXException {
         return solrManager.getIndexUrl();
+    }
+
+    public long getLastAccess() {
+        return solrManager.getLastAccess();
     }
 
 }

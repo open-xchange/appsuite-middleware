@@ -63,7 +63,7 @@ import com.openexchange.index.solr.SolrCoreStore;
  */
 public class SolrCoreManager {
     
-    private final ConfigIndexMysql indexMysql;
+    private final SolrIndexMysql indexMysql;
     
     private final ConfigurationService config;
     
@@ -80,15 +80,15 @@ public class SolrCoreManager {
     private long lastAccess;
     
     
-    public SolrCoreManager(final int contextId, final int userId, final int module, final ConfigurationService config) {
+    public SolrCoreManager(final int contextId, final int userId, final int module) {
         super();
         this.contextId = contextId;
         this.userId = userId;
         this.module = module;
-        this.config = config;
+        this.config = IndexServiceLookup.getInstance().getService(ConfigurationService.class);
         isPrimary = false;
         cachedIndexUrl = null;
-        indexMysql = ConfigIndexMysql.getInstance();
+        indexMysql = SolrIndexMysql.getInstance();
         lastAccess = System.currentTimeMillis();
     }
     
@@ -132,6 +132,10 @@ public class SolrCoreManager {
                 cachedIndexUrl = null;
             }            
         }
+    }
+    
+    public boolean isPrimary() {
+        return isPrimary;
     }
     
     public long getLastAccess() {

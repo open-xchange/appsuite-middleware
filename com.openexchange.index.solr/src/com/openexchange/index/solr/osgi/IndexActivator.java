@@ -56,6 +56,7 @@ import com.openexchange.index.solr.ConfigIndexService;
 import com.openexchange.index.solr.internal.IndexServiceLookup;
 import com.openexchange.index.solr.internal.StaticConfigIndexService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -70,7 +71,7 @@ public class IndexActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class };
+        return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class };
     }
 
     @Override

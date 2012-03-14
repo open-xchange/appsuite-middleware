@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,44 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal;
 
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.exception.OXException;
+
 
 /**
- * {@link ConfigIndexService} - The configuration interface for index module.
+ * {@link SolrCoreShutdownTask}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ConfigIndexService { 
-    /**
-     * Gets a list of all available core stores.
-     * 
-     * @return The store list.
-     * @throws OXException
-     */
-    List<SolrCoreStore> getAllStores() throws OXException;
+public class SolrCoreShutdownTask implements Runnable {
     
     /**
-     * Registers a new solr core store.
-     * 
-     * @param store The store.
-     * @return The stores id.
-     * @throws OXException
+     * Timeout in minutes.
      */
-    int registerCoreStore(SolrCoreStore store) throws OXException;
+    public static final long TIMEOUT = 60;
     
-    /**
-     * Modifies an existing core.
-     * 
-     * @param store The store to modify. Must contain id!
-     * @throws OXException
-     */
-    void modifyCoreStore(SolrCoreStore store) throws OXException;
+    private final SolrIndexFacade indexFacade;
     
-    /**
-     * Unregisters a core store.
-     * 
-     * @param storeId The id of the store to unregister.
-     * @throws OXException
-     */
-    void unregisterCoreStore(int storeId) throws OXException;
     
-    /**
-     * Creates a new solr core. The core will be inactive after creation.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void createCore(int contextId, int userId, int module) throws OXException;
-    
-    /**
-     * Deletes a core. If the core is running, it will be stopped first.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void deleteCore(int contextId, int userId, int module) throws OXException;
-    
+    public SolrCoreShutdownTask(final SolrIndexFacade indexFacade) {
+        super();
+        this.indexFacade = indexFacade;
+    }
+
+    @Override
+    public void run() {
+        final List<SolrIndexAccess> accessList = indexFacade.getActivePrimaryAccesses();
+        final List<SolrIndexIdentifier> indentifers = new ArrayList<SolrIndexIdentifier>();
+        final long barrier = System.currentTimeMillis() - (TIMEOUT * 3600);
+        for (final SolrIndexAccess access : accessList) {
+            if (access.getLastAccess() <= barrier) {
+                indentifers.add(access.getIdentifier());
+                access.release();                
+            }
+        }
+        
+        indexFacade.removeFromCache(indentifers);
+    }
 }
