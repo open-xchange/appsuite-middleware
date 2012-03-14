@@ -55,7 +55,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.SolrCoreStore;
-import com.openexchange.index.solr.internal.ConfigIndexMysql;
+import com.openexchange.index.solr.internal.SolrIndexMysql;
 import com.openexchange.index.solr.internal.SolrCore;
 import com.openexchange.tools.sql.SQLTestCase;
 
@@ -71,7 +71,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
 
     private DBProvider dbProvider;
     
-    private ConfigIndexMysql indexMysql;
+    private SolrIndexMysql indexMysql;
     
     private final int cid = 1;
     
@@ -86,7 +86,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
     public void setUp() throws Exception {
         super.setUp();
         dbProvider = getDBProvider();        
-        indexMysql = ConfigIndexMysql.getInstance();
+        indexMysql = SolrIndexMysql.getInstance();
         con = dbProvider.getWriteConnection(null);
         con.createStatement().executeUpdate("DELETE FROM solrCores");
         con.createStatement().executeUpdate("DELETE FROM solrCoreStores");

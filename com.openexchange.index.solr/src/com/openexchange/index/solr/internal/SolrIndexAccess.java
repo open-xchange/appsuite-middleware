@@ -81,7 +81,7 @@ public class SolrIndexAccess implements IndexAccess {
     private final SolrCoreManager solrManager;
     
     private final AtomicInteger retainCount;
-	
+    
 	
 	public SolrIndexAccess(final SolrIndexIdentifier identifier) {
         super();
@@ -177,8 +177,16 @@ public class SolrIndexAccess implements IndexAccess {
         return retainCount.decrementAndGet();
     }
     
+    public boolean isPrimary() {
+        return solrManager.isPrimary();
+    }
+    
     private IndexUrl getIndexUrl() throws OXException {
         return solrManager.getIndexUrl();
+    }
+
+    public long getLastAccess() {
+        return solrManager.getLastAccess();
     }
 
 }

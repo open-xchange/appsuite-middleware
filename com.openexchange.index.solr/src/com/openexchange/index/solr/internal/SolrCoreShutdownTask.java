@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,52 +49,42 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
- * {@link IndexServiceLookup}
+ * {@link SolrCoreShutdownTask}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexServiceLookup implements ServiceLookup {
-
-    private static final IndexServiceLookup INSTANCE = new IndexServiceLookup();
-
-    private final AtomicReference<ServiceLookup> serviceLookupRef;
-
-
-    private IndexServiceLookup() {
-        super();
-        serviceLookupRef = new AtomicReference<ServiceLookup>();
-    }
-
-    public static IndexServiceLookup getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = serviceLookupRef.get();
-        if (null == serviceLookup) {
-            return null;
-        }
-
-        return serviceLookup.getService(clazz);
-    }
+public class SolrCoreShutdownTask implements Runnable {
     
-    @Override
-    public <S> S getOptionalService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = serviceLookupRef.get();
-        if (null == serviceLookup) {
-            return null;
-        }
-
-        return serviceLookup.getOptionalService(clazz);
+    /**
+     * Timeout in minutes.
+     */
+    public static final long TIMEOUT = 60;
+    
+    private final SolrIndexFacade indexFacade;
+    
+    
+    public SolrCoreShutdownTask(final SolrIndexFacade indexFacade) {
+        super();
+        this.indexFacade = indexFacade;
     }
 
-    public void setServiceLookup(final ServiceLookup serviceLookup) {
-        serviceLookupRef.set(serviceLookup);
+    @Override
+    public void run() {
+        final List<SolrIndexAccess> accessList = indexFacade.getActivePrimaryAccesses();
+        final List<SolrIndexIdentifier> indentifers = new ArrayList<SolrIndexIdentifier>();
+        final long barrier = System.currentTimeMillis() - (TIMEOUT * 3600);
+        for (final SolrIndexAccess access : accessList) {
+            if (access.getLastAccess() <= barrier) {
+                indentifers.add(access.getIdentifier());
+                access.release();                
+            }
+        }
+        
+        indexFacade.removeFromCache(indentifers);
     }
 }

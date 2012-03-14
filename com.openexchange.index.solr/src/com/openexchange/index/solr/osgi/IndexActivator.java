@@ -53,9 +53,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.solr.ConfigIndexService;
-import com.openexchange.index.solr.internal.IndexServiceLookup;
+import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.StaticConfigIndexService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -70,13 +71,13 @@ public class IndexActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class };
+        return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting Bundle com.openexchange.index.osgi.");
-        IndexServiceLookup.getInstance().setServiceLookup(this);
+        Services.setServiceLookup(this);
         final DatabaseService dbService = getService(DatabaseService.class);
         final ConfigIndexService service = new StaticConfigIndexService();    // TODO: Choose right implementation for production     
         

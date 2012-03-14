@@ -67,20 +67,20 @@ import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@link ConfigIndexMysql}
+ * {@link SolrIndexMysql}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConfigIndexMysql {
+public class SolrIndexMysql {
 
-    private static final ConfigIndexMysql INSTANCE = new ConfigIndexMysql();
+    private static final SolrIndexMysql INSTANCE = new SolrIndexMysql();
 
 
-    private ConfigIndexMysql() {
+    private SolrIndexMysql() {
         super();
     }
 
-    public static ConfigIndexMysql getInstance() {
+    public static SolrIndexMysql getInstance() {
         return INSTANCE;
     }
     
@@ -466,7 +466,7 @@ public class ConfigIndexMysql {
     }
 
     private DatabaseService getDbService() throws OXException {
-        final DatabaseService dbService = IndexServiceLookup.getInstance().getService(DatabaseService.class);
+        final DatabaseService dbService = Services.getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }

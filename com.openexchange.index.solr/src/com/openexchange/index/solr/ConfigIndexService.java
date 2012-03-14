@@ -51,7 +51,6 @@ package com.openexchange.index.solr;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 
 /**
  * {@link ConfigIndexService} - The configuration interface for index module.
@@ -59,31 +58,7 @@ import com.openexchange.groupware.Types;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ConfigIndexService {
-    /**
-     * Gets the appropriate read-only URL to index host for specified arguments.
-     * If there is no core running for this user/module-combination it will be started automatically.
-     *
-     * @param contextId The context identifier.
-     * @param userId The user identifier. Use <code>0</code> here to receive the contexts index for public folders.
-     * @param module The module; see {@link Types}.
-     * @return The appropriate read-only URL to index host.
-     * @throws OXException If index URL cannot be returned.
-     */
-    IndexUrl getReadOnlyURL(int contextId, int userId, int module) throws OXException;
-
-    /**
-     * Gets the appropriate read-write URL to index host for specified arguments.
-     * If there is no core running for this user/module-combination it will be started automatically.
-     *
-     * @param contextId The context identifier.
-     * @param userId The user identifier. Use <code>0</code> here to receive the contexts index for public folders.
-     * @param module The module; see {@link Types}.
-     * @return The appropriate read-write URL to index host.
-     * @throws OXException If index URL cannot be returned.
-     */
-    IndexUrl getWriteURL(int contextId, int userId, int module) throws OXException;
-    
+public interface ConfigIndexService { 
     /**
      * Gets a list of all available core stores.
      * 
@@ -116,15 +91,6 @@ public interface ConfigIndexService {
      * @throws OXException
      */
     void unregisterCoreStore(int storeId) throws OXException;
-    
-    /**
-     * Stops a running solr core.
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void stopCore(int contextId, int userId, int module) throws OXException;
     
     /**
      * Creates a new solr core. The core will be inactive after creation.
