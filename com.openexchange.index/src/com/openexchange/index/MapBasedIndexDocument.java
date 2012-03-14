@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,37 +49,117 @@
 
 package com.openexchange.index;
 
-import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
+ * {@link MapBasedIndexDocument} - The index document backed by a {@link Map}.
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument extends Map<String, Object>, Iterable<Map.Entry<String, Object>>, Serializable {
+public class MapBasedIndexDocument<M extends Map<String, Object>> implements IndexDocument {
+
+    private static final long serialVersionUID = -4897655903500710196L;
+
+    private final M map;
+
+    private final Type type;
 
     /**
-     * The document's type.
+     * Initializes a new {@link MapBasedIndexDocument}.
      */
-    public static enum Type {
-        MAIL, CONTACT, APPOINTMENT, TASK, INFOSTORE_DOCUMENT;
+    public MapBasedIndexDocument(final M map, final Type type) {
+        super();
+        this.map = map;
+        this.type = type;
     }
 
-    /**
-     * Gets the value associated with specified name.
-     * 
-     * @param name The name
-     * @return The associated value or <code>null</code> if there is no such mapping
-     */
-    public <V> V get(final String name);
+    @Override
+    public Type getType() {
+        return type;
+    }
 
-    /**
-     * Gets the document's type.
-     * 
-     * @return The type
-     */
-    Type getType();
+    @Override
+    public int size() {
+        return map.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(final Object key) {
+        return map.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(final Object value) {
+        return map.containsValue(value);
+    }
+
+    @Override
+    public Object get(final Object key) {
+        return map.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> V get(final String name) {
+        return (V) map.get(name);
+    }
+
+    @Override
+    public Object put(final String key, final Object value) {
+        return map.put(key, value);
+    }
+
+    @Override
+    public Object remove(final Object key) {
+        return map.remove(key);
+    }
+
+    @Override
+    public void putAll(final Map<? extends String, ? extends Object> m) {
+        map.putAll(m);
+    }
+
+    @Override
+    public void clear() {
+        map.clear();
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return map.keySet();
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return map.values();
+    }
+
+    @Override
+    public Set<java.util.Map.Entry<String, Object>> entrySet() {
+        return map.entrySet();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        return map.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+
+    @Override
+    public Iterator<java.util.Map.Entry<String, Object>> iterator() {
+        return map.entrySet().iterator();
+    }
 
 }
