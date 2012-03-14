@@ -55,13 +55,16 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.unifiedinbox.Enabled;
 import com.openexchange.unifiedinbox.UnifiedInboxProvider;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxSynchronousQueueProvider;
 import com.openexchange.user.UserService;
@@ -86,7 +89,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class,
-            ThreadPoolService.class };
+            ThreadPoolService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -133,6 +136,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
             registerService(MailProvider.class, UnifiedInboxProvider.getInstance(), dictionary);
+            registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
             /*
              * Detect what SynchronousQueue to use
              */

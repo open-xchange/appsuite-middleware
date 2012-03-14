@@ -50,6 +50,7 @@
 package com.openexchange.halo.appointments;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
@@ -95,7 +96,9 @@ public class AppointmentContactHalo implements HaloContactDataSource {
         Order order = OrderFields.parse(parameterOrder);
 
 		List<Appointment> appointments = null;
-		if (query.getUser() != null) {
+		if (query.getUser() != null && query.getUser().getId() == session.getUser().getId()) {
+			appointments = new LinkedList<Appointment>(); 
+		} else if (query.getUser() != null) {
 		    appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
 		} else {
 		    appointments = appointmentService.getAppointmentsWithExternalParticipantBetween(query.getContact().getEmail1(), columns, start, end, orderBy, order);
