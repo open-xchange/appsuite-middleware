@@ -81,11 +81,11 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public class OxEmailDataSource implements HaloContactDataSource {
+public class EmailContactHalo implements HaloContactDataSource {
 
 	private ServiceLookup services;
 	
-	public OxEmailDataSource(ServiceLookup services) {
+	public EmailContactHalo(ServiceLookup services) {
 		this.services = services;
 	}
 
