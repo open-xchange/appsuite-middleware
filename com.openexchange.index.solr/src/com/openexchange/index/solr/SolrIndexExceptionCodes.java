@@ -79,6 +79,10 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
      * This cores instance directory (%1$s) already exists. It cannot be created. 
      */
     INSTANCE_DIR_EXISTS(SolrIndexExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
+    /**
+     * An index fault occurred: %1$s
+     */
+    INDEX_FAULT(SolrIndexExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005)
     
     ;
 

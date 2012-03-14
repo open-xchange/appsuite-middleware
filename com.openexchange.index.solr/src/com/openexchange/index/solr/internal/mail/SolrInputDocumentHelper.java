@@ -69,10 +69,21 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
  */
 public final class SolrInputDocumentHelper implements SolrMailConstants {
 
+    private static final SolrInputDocumentHelper INSTANCE = new SolrInputDocumentHelper();
+
+    /**
+     * Gets the instance
+     * 
+     * @return The instance
+     */
+    public static SolrInputDocumentHelper getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Initializes a new {@link SolrInputDocumentHelper}.
      */
-    public SolrInputDocumentHelper() {
+    private SolrInputDocumentHelper() {
         super();
     }
 

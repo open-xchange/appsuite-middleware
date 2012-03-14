@@ -49,12 +49,20 @@
 
 package com.openexchange.index.solr.internal.mail;
 
+import static com.openexchange.index.solr.internal.SolrUtils.commitSane;
+import static com.openexchange.index.solr.internal.SolrUtils.rollback;
+import java.io.IOException;
 import java.util.Collection;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.TriggerType;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.SolrIndexIdentifier;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -68,20 +76,42 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     private final TriggerType triggerType;
 
+    private final SolrInputDocumentHelper helper;
+
     /**
      * Initializes a new {@link MailSolrIndexAccess}.
      * 
      * @param identifier The Solr server identifier
+     * @param triggerType The trigger type
      */
     public MailSolrIndexAccess(final SolrIndexIdentifier identifier, final TriggerType triggerType) {
         super(identifier);
         this.triggerType = triggerType;
+        helper = SolrInputDocumentHelper.getInstance();
     }
 
     @Override
     public void addEnvelopeData(final IndexDocument<MailMessage> document) throws OXException {
-        // TODO Auto-generated method stub
-
+        CommonsHttpSolrServer solrServer = null;
+        try {
+            solrServer = solrServerFor();
+            final SolrInputDocument inputDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
+            // TODO: Continue....
+            
+            /*
+             * Commit sane
+             */
+            commitSane(solrServer);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(solrServer);
+            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /*

@@ -77,5 +77,8 @@ public final class SolrIndexExceptionMessages implements LocalizableStrings {
     
     // This cores instance directory (%1$s) already exists. It cannot be created.
     public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
+
+    // An index fault occurred: %1$s
+    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
     
 }
