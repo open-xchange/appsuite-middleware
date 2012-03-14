@@ -47,81 +47,70 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.index.solr;
 
-import com.openexchange.index.solr.IndexServer;
-import com.openexchange.index.solr.IndexUrl;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.solr.internal.SolrCoreStore;
 
 /**
- * {@link IndexUrlImpl}
+ * {@link SolrCoreConfigService} - The configuration interface for index module.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexUrlImpl implements IndexUrl {
-
-    private static final String DELIM = "/";
-
-    private final String fullUrl;
-
-    private final IndexServer server;
-
+public interface SolrCoreConfigService { 
     /**
-     * Initializes a new {@link IndexUrlImpl}.
-     *
-     * @param fullUrl
+     * Gets a list of all available core stores.
+     * 
+     * @return The store list.
+     * @throws OXException
      */
-    public IndexUrlImpl(final SolrCore core) {
-        super();
-        server = core.getServer();
-        fullUrl = server.getUrl() + DELIM + core.getIdentifier().toString();
-    }
-
-    @Override
-    public String getUrl() {
-        return fullUrl;
-    }
-
-    @Override
-    public int getSoTimeout() {
-        return server.getSoTimeout();
-    }
-
-    @Override
-    public int getConnectionTimeout() {
-        return server.getConnectionTimeout();
-    }
-
-    @Override
-    public int getMaxConnectionsPerHost() {
-        return server.getMaxConnectionsPerHost();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fullUrl == null) ? 0 : fullUrl.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof IndexUrlImpl)) {
-            return false;
-        }
-        final IndexUrlImpl other = (IndexUrlImpl) obj;
-        if (fullUrl == null) {
-            if (other.fullUrl != null) {
-                return false;
-            }
-        } else if (!fullUrl.equals(other.fullUrl)) {
-            return false;
-        }
-        return true;
-    }
-
+    List<SolrCoreStore> getAllStores() throws OXException;
+    
+    /**
+     * Registers a new solr core store.
+     * 
+     * @param store The store.
+     * @return The stores id.
+     * @throws OXException
+     */
+    int registerCoreStore(SolrCoreStore store) throws OXException;
+    
+    /**
+     * Modifies an existing core.
+     * 
+     * @param store The store to modify. Must contain id!
+     * @throws OXException
+     */
+    void modifyCoreStore(SolrCoreStore store) throws OXException;
+    
+    /**
+     * Unregisters a core store.
+     * 
+     * @param storeId The id of the store to unregister.
+     * @throws OXException
+     */
+    void unregisterCoreStore(int storeId) throws OXException;
+    
+    /**
+     * Creates a new solr core. The core will be inactive after creation.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void createCore(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Deletes a core. If the core is running, it will be stopped first.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void deleteCore(int contextId, int userId, int module) throws OXException;
+    
 }

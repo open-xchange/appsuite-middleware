@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
-import com.openexchange.index.solr.SolrCoreStore;
 import com.openexchange.index.solr.internal.SolrIndexMysql;
 import com.openexchange.index.solr.internal.SolrCore;
 import com.openexchange.tools.sql.SQLTestCase;

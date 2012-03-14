@@ -60,8 +60,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
-import com.openexchange.index.solr.IndexServer;
-import com.openexchange.index.solr.SolrCoreStore;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 

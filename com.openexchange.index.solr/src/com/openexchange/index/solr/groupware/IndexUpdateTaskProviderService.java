@@ -47,79 +47,37 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.groupware;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 
 /**
- * {@link SolrCoreStore}
+ * {@link IndexUpdateTaskProviderService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreStore {
-    
-    private int id;
-    
-    private String uri;
-    
-    private int maxCores;
-    
-    
-    public SolrCoreStore() {
+public class IndexUpdateTaskProviderService implements UpdateTaskProviderService {
+
+    private List<UpdateTaskV2> updateTasks;
+
+    public IndexUpdateTaskProviderService(final UpdateTaskV2... updateTasks) {
         super();
-    }    
-    
-    /**
-     * Gets the id
-     *
-     * @return The id
-     */
-    public int getId() {
-        return id;
-    }
-    
-    /**
-     * Sets the id
-     *
-     * @param id The id to set
-     */
-    public void setId(final int id) {
-        this.id = id;
+        if (updateTasks == null || updateTasks.length == 0) {
+            this.updateTasks = Collections.EMPTY_LIST;
+        } else {
+            this.updateTasks = Arrays.asList(updateTasks);
+        }
     }
 
-    /**
-     * Gets the uri
-     *
-     * @return The uri
-     */
-    public String getUri() {
-        return uri;
+    @Override
+    public Collection<UpdateTaskV2> getUpdateTasks() {
+        return updateTasks;
     }
-    
-    /**
-     * Sets the uri
-     *
-     * @param uri The uri to set
-     */
-    public void setUri(final String uri) {
-        this.uri = uri;
-    }
-    
-    /**
-     * Gets the maxCores
-     *
-     * @return The maxCores
-     */
-    public int getMaxCores() {
-        return maxCores;
-    }
-    
-    /**
-     * Sets the maxCores
-     *
-     * @param maxCores The maxCores to set
-     */
-    public void setMaxCores(final int maxCores) {
-        this.maxCores = maxCores;
-    }
+
 }

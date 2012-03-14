@@ -55,19 +55,18 @@ import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.ConfigIndexService;
-import com.openexchange.index.solr.SolrCoreStore;
+import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 
 
 /**
- * {@link ConfigIndexServiceImpl}
+ * {@link SolrCoreConfigServiceImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConfigIndexServiceImpl implements ConfigIndexService {    
+public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {    
 
-    public ConfigIndexServiceImpl() {
+    public SolrCoreConfigServiceImpl() {
         super();
     }
     

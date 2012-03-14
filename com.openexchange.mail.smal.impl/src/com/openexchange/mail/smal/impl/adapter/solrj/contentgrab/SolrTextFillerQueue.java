@@ -82,7 +82,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.index.solr.ConfigIndexService;
+import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -445,7 +445,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         boolean rollback = false;
         try {
             solrServer =
-                serverManagement.getSolrServer(SMALServiceLookup.getServiceStatic(ConfigIndexService.class).getReadOnlyURL(
+                serverManagement.getSolrServer(SMALServiceLookup.getServiceStatic(SolrCoreConfigService.class).getReadOnlyURL(
                     contextId,
                     userId,
                     Types.EMAIL));

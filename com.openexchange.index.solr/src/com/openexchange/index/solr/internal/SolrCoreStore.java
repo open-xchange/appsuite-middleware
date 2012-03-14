@@ -49,72 +49,77 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.solr.ConfigIndexService;
-import com.openexchange.index.solr.IndexServer;
-import com.openexchange.index.solr.IndexUrl;
-import com.openexchange.index.solr.SolrCoreStore;
 
 
 /**
- * {@link StaticConfigIndexService} - Only for testing purpose!!!
+ * {@link SolrCoreStore}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class StaticConfigIndexService implements ConfigIndexService {
-
-    private final IndexUrl indexUrl;
+public class SolrCoreStore {
+    
+    private int id;
+    
+    private String uri;
+    
+    private int maxCores;
+    
+    
+    public SolrCoreStore() {
+        super();
+    }    
+    
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
+    
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(final int id) {
+        this.id = id;
+    }
 
     /**
-     * Initializes a new {@link StaticConfigIndexService}.
+     * Gets the uri
+     *
+     * @return The uri
      */
-    public StaticConfigIndexService() {
-        super();
-        final IndexServer server = new IndexServer();
-        server.setUrl("http://10.20.31.1:8580");
-        server.setConnectionTimeout(1000);
-        server.setMaxConnectionsPerHost(100);
-        server.setSoTimeout(3000);
-        final SolrCore core = new StaticSolrCore();
-        core.setServer(server);
-        indexUrl = new IndexUrlImpl(core);
+    public String getUri() {
+        return uri;
     }
-
-    @Override
-    public List<SolrCoreStore> getAllStores() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    
+    /**
+     * Sets the uri
+     *
+     * @param uri The uri to set
+     */
+    public void setUri(final String uri) {
+        this.uri = uri;
     }
-
-    @Override
-    public int registerCoreStore(final SolrCoreStore store) throws OXException {
-        // TODO Auto-generated method stub
-        return 0;
+    
+    /**
+     * Gets the maxCores
+     *
+     * @return The maxCores
+     */
+    public int getMaxCores() {
+        return maxCores;
     }
-
-    @Override
-    public void modifyCoreStore(final SolrCoreStore store) throws OXException {
-        // TODO Auto-generated method stub
-        
+    
+    /**
+     * Sets the maxCores
+     *
+     * @param maxCores The maxCores to set
+     */
+    public void setMaxCores(final int maxCores) {
+        this.maxCores = maxCores;
     }
-
-    @Override
-    public void unregisterCoreStore(final int storeId) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void createCore(final int contextId, final int userId, final int module) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void deleteCore(final int contextId, final int userId, final int module) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
 }

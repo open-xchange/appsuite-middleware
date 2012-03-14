@@ -47,69 +47,44 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.groupware;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
+import com.openexchange.database.AbstractCreateTableImpl;
+
 
 /**
- * {@link ConfigIndexService} - The configuration interface for index module.
+ * {@link IndexCreateTableService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ConfigIndexService { 
-    /**
-     * Gets a list of all available core stores.
-     * 
-     * @return The store list.
-     * @throws OXException
-     */
-    List<SolrCoreStore> getAllStores() throws OXException;
+public class IndexCreateTableService extends AbstractCreateTableImpl {
     
-    /**
-     * Registers a new solr core store.
-     * 
-     * @param store The store.
-     * @return The stores id.
-     * @throws OXException
-     */
-    int registerCoreStore(SolrCoreStore store) throws OXException;
+    private static final String CT_CORES =
+        "CREATE TABLE solrCores (" +
+            "cid int(10) unsigned NOT NULL," +
+            "uid int(10) unsigned NOT NULL," +
+            "module int(10) unsigned NOT NULL," +
+            "store int(10) unsigned NOT NULL," +
+            "active tinyint(1) unsigned NOT NULL," +
+            "server varchar(32) DEFAULT NULL,  " +
+            "PRIMARY KEY  (cid,uid,module)," +
+            "KEY server (server)," +
+            "KEY store (store)" +
+         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
     
-    /**
-     * Modifies an existing core.
-     * 
-     * @param store The store to modify. Must contain id!
-     * @throws OXException
-     */
-    void modifyCoreStore(SolrCoreStore store) throws OXException;
-    
-    /**
-     * Unregisters a core store.
-     * 
-     * @param storeId The id of the store to unregister.
-     * @throws OXException
-     */
-    void unregisterCoreStore(int storeId) throws OXException;
-    
-    /**
-     * Creates a new solr core. The core will be inactive after creation.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void createCore(int contextId, int userId, int module) throws OXException;
-    
-    /**
-     * Deletes a core. If the core is running, it will be stopped first.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void deleteCore(int contextId, int userId, int module) throws OXException;
-    
+
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return new String[] { "solrCores" };
+    }
+
+    @Override
+    protected String[] getCreateStatements() {        
+        return new String[] { CT_CORES };
+    }
 }

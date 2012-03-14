@@ -47,112 +47,114 @@
  *
  */
 
-package com.openexchange.index.solr;
-
+package com.openexchange.index.solr.internal;
 
 
 /**
- * {@link IndexServerImpl}
+ * {@link IndexUrl} - The URL to an index host.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IndexServer {
+public final class IndexUrl {
 
-    private String url;
+    private static final String DELIM = "/";
 
-    private int soTimeout;
+    private final String fullUrl;
 
-    private int connectionTimeout;
+    private final IndexServer server;
 
-    private int maxConnectionsPerHost;
-
-
-    public IndexServer() {
-      super();
-      soTimeout = 1000;
-      connectionTimeout = 100;
-      maxConnectionsPerHost = 100;
+    /**
+     * Initializes a new {@link IndexUrl}.
+     *
+     * @param core The target solr core of this url.
+     */
+    public IndexUrl(final SolrCore core) {
+        super();
+        server = core.getServer();
+        fullUrl = server.getUrl() + DELIM + core.getIdentifier().toString();
     }
 
+    /**
+     * Gets the string representation of the URL
+     *
+     * @return The URL's string representation
+     */
     public String getUrl() {
-        return url;
+        return fullUrl;
     }
 
+    /**
+     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
+     * <p>
+     * Default is <code>1000</code>.
+     *
+     * @return The setting for SO_TIMEOUT
+     */
     public int getSoTimeout() {
-        return soTimeout;
+        return server.getSoTimeout();
     }
 
+    /**
+     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
+     * <p>
+     * Default is <code>100</code>.
+     *
+     * @return The connection timeout
+     */
     public int getConnectionTimeout() {
-        return connectionTimeout;
+        return server.getConnectionTimeout();
     }
 
+    /**
+     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
+     * <p>
+     * Default is <code>100</code>.
+     *
+     * @return The max. number of connections per host
+     */
     public int getMaxConnectionsPerHost() {
-        return maxConnectionsPerHost;
+        return server.getMaxConnectionsPerHost();
     }
 
     /**
-     * Sets the url
+     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
      *
-     * @param url The url to set
+     * @return A hash code value for this object.
+     * @see java.lang.Object#equals(java.lang.Object)
      */
-    public void setUrl(final String url) {
-        this.url = url;
-    }
-
-    /**
-     * Sets the soTimeout
-     *
-     * @param soTimeout The soTimeout to set
-     */
-    public void setSoTimeout(final int soTimeout) {
-        this.soTimeout = soTimeout;
-    }
-
-    /**
-     * Sets the connectionTimeout
-     *
-     * @param connectionTimeout The connectionTimeout to set
-     */
-    public void setConnectionTimeout(final int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
-    }
-
-    /**
-     * Sets the maxConnectionsPerHost
-     *
-     * @param maxConnectionsPerHost The maxConnectionsPerHost to set
-     */
-    public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
-        this.maxConnectionsPerHost = maxConnectionsPerHost;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + ((fullUrl == null) ? 0 : fullUrl.hashCode());
         return result;
     }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     *
+     * @param obj The reference object with which to compare.
+     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
+     * @see #hashCode()
+     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!(obj instanceof IndexUrl)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final IndexServer other = (IndexServer) obj;
-        if (url == null) {
-            if (other.url != null) {
+        final IndexUrl other = (IndexUrl) obj;
+        if (fullUrl == null) {
+            if (other.fullUrl != null) {
                 return false;
             }
-        } else if (!url.equals(other.url)) {
+        } else if (!fullUrl.equals(other.fullUrl)) {
             return false;
         }
         return true;
     }
+
 }

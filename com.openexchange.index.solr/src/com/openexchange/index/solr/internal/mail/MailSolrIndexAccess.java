@@ -112,7 +112,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
      * @see com.openexchange.index.IndexAccess#addAttachments(com.openexchange.index.IndexDocument)
      */
     @Override
-    public void addAttachments(final IndexDocument document) throws OXException {
+    public void addAttachments(final IndexDocument<MailMessage> document) throws OXException {
         // TODO Auto-generated method stub
 
     }

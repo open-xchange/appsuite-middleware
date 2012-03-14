@@ -64,11 +64,11 @@ import com.openexchange.timer.TimerService;
  */
 public class SolrIndexAccessManager {
 
-    private final ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess> accessMap;
+    private final ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess<?>> accessMap;
 
     public SolrIndexAccessManager() {
         super();
-        accessMap = new ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess>();
+        accessMap = new ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess<?>>();
         final TimerService timerService = Services.getService(TimerService.class);
         timerService.scheduleAtFixedRate(
             new SolrCoreShutdownTask(this),
@@ -77,10 +77,10 @@ public class SolrIndexAccessManager {
             TimeUnit.MINUTES);
     }
 
-    public IndexAccess acquireIndexAccess(final SolrIndexIdentifier identifier) throws OXException {
-        AbstractSolrIndexAccess cachedIndexAccess = accessMap.get(identifier);
+    public IndexAccess<?> acquireIndexAccess(final SolrIndexIdentifier identifier) throws OXException {
+        AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(identifier);
         if (null == cachedIndexAccess) {
-            final AbstractSolrIndexAccess newAccess = createIndexAccessByType(identifier);
+            final AbstractSolrIndexAccess<?> newAccess = createIndexAccessByType(identifier);
             cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
             if (null == cachedIndexAccess) {
                 cachedIndexAccess = newAccess;
@@ -91,8 +91,8 @@ public class SolrIndexAccessManager {
         return cachedIndexAccess;
     }
 
-    public void releaseIndexAccess(final IndexAccess indexAccess) {
-        final AbstractSolrIndexAccess cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess) indexAccess).getIdentifier());
+    public void releaseIndexAccess(final IndexAccess<?> indexAccess) {
+        final AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess<?>) indexAccess).getIdentifier());
         if (null != cachedIndexAccess) {
             final int retainCount = cachedIndexAccess.decrementRetainCount();
             if (retainCount == 0) {
@@ -101,9 +101,9 @@ public class SolrIndexAccessManager {
         }
     }
 
-    public List<AbstractSolrIndexAccess> getActivePrimaryAccesses() {
-        final List<AbstractSolrIndexAccess> accessList = new ArrayList<AbstractSolrIndexAccess>();
-        for (final AbstractSolrIndexAccess access : accessMap.values()) {
+    public List<AbstractSolrIndexAccess<?>> getActivePrimaryAccesses() {
+        final List<AbstractSolrIndexAccess<?>> accessList = new ArrayList<AbstractSolrIndexAccess<?>>();
+        for (final AbstractSolrIndexAccess<?> access : accessMap.values()) {
             if (access.isPrimary()) {
                 accessList.add(access);
             }
@@ -118,7 +118,7 @@ public class SolrIndexAccessManager {
         }
     }
 
-    private AbstractSolrIndexAccess createIndexAccessByType(final SolrIndexIdentifier identifier) throws OXException {
+    private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrIndexIdentifier identifier) throws OXException {
         return null;
     }
 }

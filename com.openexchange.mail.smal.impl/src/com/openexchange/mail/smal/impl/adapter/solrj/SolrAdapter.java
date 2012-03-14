@@ -90,7 +90,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.index.solr.ConfigIndexService;
+import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.IndexUrl;
 import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.IndexRange;
@@ -485,7 +485,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     }
 
     private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
-        final ConfigIndexService configIndexService = SMALServiceLookup.getServiceStatic(ConfigIndexService.class);
+        final SolrCoreConfigService configIndexService = SMALServiceLookup.getServiceStatic(SolrCoreConfigService.class);
         if (readWrite) {
             return configIndexService.getWriteURL(session.getContextId(), session.getUserId(), Types.EMAIL);
         }
