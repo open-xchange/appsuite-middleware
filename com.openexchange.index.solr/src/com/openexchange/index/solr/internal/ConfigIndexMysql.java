@@ -153,7 +153,7 @@ public class ConfigIndexMysql {
             DBUtils.closeSQLStuff(rs, stmt);
         }
         
-        final SolrCore core = new SolrCore(cid, uid, module);
+        final SolrCore core = new SolrCore(new SolrIndexIdentifier(cid, uid, module));
         core.setStore(getCoreStore(con, storeId));
         final IndexServer indexServer = new IndexServer();
         indexServer.setUrl(server);    

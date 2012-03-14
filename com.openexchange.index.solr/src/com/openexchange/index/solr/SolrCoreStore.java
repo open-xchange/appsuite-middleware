@@ -124,15 +124,15 @@ public class SolrCoreStore {
         this.maxCores = maxCores;
     }
     
-    /**
-     * Returns the name for the user and modules solr core.
-     * @param cid The context id.
-     * @param uid The user id.
-     * @param module The module. See {@link Types}.
-     * @return The core name.
-     */
-    public static String getCoreName(final int cid, final int uid, final int module) {
-        return "sc_c" + cid + "_u" + uid + "_m" + module;
-    }
+//    /**
+//     * Returns the name for the user and modules solr core.
+//     * @param cid The context id.
+//     * @param uid The user id.
+//     * @param module The module. See {@link Types}.
+//     * @return The core name.
+//     */
+//    public static String getCoreName(final int cid, final int uid, final int module) {
+//        return "sc_c" + cid + "_u" + uid + "_m" + module;
+//    }
 
 }

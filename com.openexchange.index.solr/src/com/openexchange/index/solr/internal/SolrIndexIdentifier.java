@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,69 +49,91 @@
 
 package com.openexchange.index.solr.internal;
 
-import com.openexchange.index.solr.IndexServer;
-import com.openexchange.index.solr.SolrCoreStore;
-
 /**
- * {@link SolrCore}
+ * {@link SolrIndexIdentifier}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCore {
+public class SolrIndexIdentifier {
 
-    private IndexServer server;
-    
-    private SolrCoreStore store;
+    private final int contextId;
 
-    private SolrIndexIdentifier identifier;
-    
+    private final int userId;
 
-    public SolrCore(final SolrIndexIdentifier identifier) {
+    private final int module;
+
+    /**
+     * Initializes a new {@link SolrIndexIdentifier}.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     */
+    public SolrIndexIdentifier(int contextId, int userId, int module) {
         super();
-        this.identifier = identifier;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.module = module;
     }
 
     /**
-     * Gets the server
+     * Gets the contextId
      * 
-     * @return The server
+     * @return The contextId
      */
-    public IndexServer getServer() {
-        return server;
+    public int getContextId() {
+        return contextId;
     }
 
     /**
-     * Sets the server
+     * Gets the userId
      * 
-     * @param server The server to set
+     * @return The userId
      */
-    public void setServer(final IndexServer server) {
-        this.server = server;
+    public int getUserId() {
+        return userId;
     }
-    
+
     /**
-     * Gets the store
-     *
-     * @return The store
+     * Gets the module
+     * 
+     * @return The module
      */
-    public SolrCoreStore getStore() {
-        return store;
+    public int getModule() {
+        return module;
     }
-    
-    /**
-     * Sets the store
-     *
-     * @param store The store to set
-     */
-    public void setStore(final SolrCoreStore store) {
-        this.store = store;
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + module;
+        result = prime * result + userId;
+        return result;
     }
-    
-    /**
-     * Returns the cores name.
-     * @return The name.
-     */
-    public SolrIndexIdentifier getIdentifier() {
-        return identifier;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SolrIndexIdentifier other = (SolrIndexIdentifier) obj;
+        if (contextId != other.contextId)
+            return false;
+        if (module != other.module)
+            return false;
+        if (userId != other.userId)
+            return false;
+        return true;
     }
+
+    @Override
+    public String toString() {
+        return "sc_c" + contextId + "_u" + userId + "_m" + module;
+    }
+
 }
