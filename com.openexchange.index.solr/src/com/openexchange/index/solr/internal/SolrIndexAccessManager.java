@@ -51,40 +51,72 @@ package com.openexchange.index.solr.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.timer.TimerService;
 
 
 /**
- * {@link SolrCoreShutdownTask}
+ * {@link SolrIndexAccessManager}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreShutdownTask implements Runnable {
+public class SolrIndexAccessManager {
     
-    /**
-     * Timeout in minutes.
-     */
-    public static final long TIMEOUT = 60;
-    
-    private final SolrIndexAccessManager indexAccessManager;
+    private final ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess> accessMap;
     
     
-    public SolrCoreShutdownTask(final SolrIndexAccessManager indexFacade) {
+    public SolrIndexAccessManager() {
         super();
-        this.indexAccessManager = indexFacade;
+        accessMap = new ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess>();
+        final TimerService timerService = Services.getService(TimerService.class);
+        timerService.scheduleAtFixedRate(new SolrCoreShutdownTask(this), SolrCoreShutdownTask.TIMEOUT, SolrCoreShutdownTask.TIMEOUT, TimeUnit.MINUTES);
     }
-
-    @Override
-    public void run() {
-        final List<AbstractSolrIndexAccess> accessList = indexAccessManager.getActivePrimaryAccesses();
-        final List<SolrIndexIdentifier> indentifers = new ArrayList<SolrIndexIdentifier>();
-        final long barrier = System.currentTimeMillis() - (TIMEOUT * 3600);
-        for (final AbstractSolrIndexAccess access : accessList) {
-            if (access.getLastAccess() <= barrier) {
-                indentifers.add(access.getIdentifier());
-                access.release();                
+    
+    public IndexAccess acquireIndexAccess(final SolrIndexIdentifier identifier) throws OXException {
+        AbstractSolrIndexAccess cachedIndexAccess = accessMap.get(identifier);
+        if (null == cachedIndexAccess) {
+            final AbstractSolrIndexAccess newAccess = createIndexAccessByType(identifier);
+            cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
+            if (null == cachedIndexAccess) {
+                cachedIndexAccess = newAccess;
             }
         }
         
-        indexAccessManager.removeFromCache(indentifers);
+        cachedIndexAccess.incrementRetainCount();
+        return cachedIndexAccess;
+    }
+
+    public void releaseIndexAccess(final IndexAccess indexAccess) throws OXException {
+        final AbstractSolrIndexAccess cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess) indexAccess).getIdentifier());
+        if (null != cachedIndexAccess) {
+            final int retainCount = cachedIndexAccess.decrementRetainCount();
+            if (retainCount == 0) {
+                cachedIndexAccess.release();
+            }
+        }   
+    }
+    
+    public List<AbstractSolrIndexAccess> getActivePrimaryAccesses() {
+        final List<AbstractSolrIndexAccess> accessList = new ArrayList<AbstractSolrIndexAccess>();
+        for (final AbstractSolrIndexAccess access : accessMap.values()) {
+            if (access.isPrimary()) {
+                accessList.add(access);
+            }
+        }
+        
+        return accessList;
+    }
+    
+    public void removeFromCache(final List<SolrIndexIdentifier> identifiers) {
+        for (final SolrIndexIdentifier identifier : identifiers) {
+            accessMap.remove(identifier);
+        }       
+    }
+    
+    private AbstractSolrIndexAccess createIndexAccessByType(final SolrIndexIdentifier identifier) {
+        return null;
     }
 }

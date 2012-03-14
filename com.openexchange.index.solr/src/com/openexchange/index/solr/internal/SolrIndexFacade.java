@@ -49,46 +49,29 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacade;
 import com.openexchange.session.Session;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link SolrIndexFacade} - The Solr {@link IndexFacade} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SolrIndexFacade implements IndexFacade {
+public class SolrIndexFacade implements IndexFacade {	
 	
-	private final ConcurrentHashMap<SolrIndexIdentifier, SolrIndexAccess> accessMap;
-	
-	
-	public SolrIndexFacade() {
+	private final SolrIndexAccessManager solrIndexAccessManager;
+
+    public SolrIndexFacade() {
 		super();
-		accessMap = new ConcurrentHashMap<SolrIndexIdentifier, SolrIndexAccess>();
-		final TimerService timerService = Services.getService(TimerService.class);
-		timerService.scheduleAtFixedRate(new SolrCoreShutdownTask(this), SolrCoreShutdownTask.TIMEOUT, SolrCoreShutdownTask.TIMEOUT, TimeUnit.MINUTES);
-	}
+		solrIndexAccessManager = new SolrIndexAccessManager();	
+    }
 	
     @Override
     public IndexAccess acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
         final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
-        SolrIndexAccess cachedIndexAccess = accessMap.get(identifier);
-        if (null == cachedIndexAccess) {
-            final SolrIndexAccess newAccess = new SolrIndexAccess(identifier);
-            cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
-            if (null == cachedIndexAccess) {
-                cachedIndexAccess = newAccess;
-            }
-        }
-        cachedIndexAccess.incrementRetainCount();
-        return cachedIndexAccess;
+        return solrIndexAccessManager.acquireIndexAccess(identifier);
     }
 
     @Override
@@ -98,29 +81,6 @@ public class SolrIndexFacade implements IndexFacade {
 
 	@Override
 	public void releaseIndexAccess(final IndexAccess indexAccess) throws OXException {
-	    final SolrIndexAccess cachedIndexAccess = accessMap.get(((SolrIndexAccess) indexAccess).getIdentifier());
-        if (null != cachedIndexAccess) {
-            final int retainCount = cachedIndexAccess.decrementRetainCount();
-            if (retainCount == 0) {
-                cachedIndexAccess.release();
-            }
-        }	
-	}
-	
-	public List<SolrIndexAccess> getActivePrimaryAccesses() {
-	    final List<SolrIndexAccess> accessList = new ArrayList<SolrIndexAccess>();
-	    for (final SolrIndexAccess access : accessMap.values()) {
-	        if (access.isPrimary()) {
-	            accessList.add(access);
-	        }
-	    }
-	    
-	    return accessList;
-	}
-	
-	public void removeFromCache(final List<SolrIndexIdentifier> identifiers) {
-	    for (final SolrIndexIdentifier identifier : identifiers) {
-	        accessMap.remove(identifier);
-	    }	    
+	    solrIndexAccessManager.releaseIndexAccess(indexAccess);
 	}
 }
