@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class Enabled implements PreferencesItemService {
 
-    private static final String ENABLED = "com.openexchange.unifiedinbox";
+    private static final String ENABLED = "com.openexchange.unifiedinbox.enabled";
 
     final ConfigViewFactory configViews;
 
@@ -79,7 +79,7 @@ public class Enabled implements PreferencesItemService {
     }
 
     public String[] getPath() {
-        return new String[] { "modules", "unifiedMail", "module" };
+        return new String[] { "modules", "mailaccount", "unifiedMail" };
     }
 
     public IValueHandler getSharedValue() {
