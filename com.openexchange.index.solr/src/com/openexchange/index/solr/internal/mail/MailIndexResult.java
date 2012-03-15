@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,67 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr.internal.mail;
 
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexResult;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link Indexes} - Utility class.
+ * {@link MailIndexResult} - The mail <code>IndexResult</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Indexes {
+public final class MailIndexResult implements IndexResult<MailMessage> {
+
+    private long numFound;
+
+    private List<IndexDocument<MailMessage>> mails;
 
     /**
-     * Initializes a new {@link Indexes}.
+     * Initializes a new {@link MailIndexResult}.
      */
-    private Indexes() {
-        super();
+    public MailIndexResult() {
+        this(0L);
     }
-
-    private static final class EmptyIndexResult implements IndexResult<Object>, Serializable {
-
-        private static final long serialVersionUID = 619652174130414850L;
-
-        protected EmptyIndexResult() {
-            super();
-        }
-
-        @Override
-        public long getNumFound() {
-            return 0L;
-        }
-
-        @Override
-        public List<IndexDocument<Object>> getResults() {
-            return Collections.emptyList();
-        }
-
-    }
-
-    private static final EmptyIndexResult EMPTY_INDEX_RESULT = new EmptyIndexResult();
 
     /**
-     * Gets the empty <b>IndexResult</b> (immutable). This <b>IndexResult</b> is serializable.
+     * Initializes a new {@link MailIndexResult}.
      * 
-     * @return The empty <b>IndexResult</b>
+     * @param numFound The <code>numFound</code> to set
      */
-    @SuppressWarnings("unchecked")
-    public static final <V> IndexResult<V> emptyResult() {
-        return (IndexResult<V>) EMPTY_INDEX_RESULT;
+    public MailIndexResult(final long numFound) {
+        super();
+        this.numFound = numFound;
+    }
+
+    @Override
+    public long getNumFound() {
+        return numFound;
+    }
+
+    /**
+     * Sets the <code>numFound</code>
+     * 
+     * @param numFound The <code>numFound</code> to set
+     */
+    public void setNumFound(final long numFound) {
+        this.numFound = numFound;
+    }
+
+    @Override
+    public List<IndexDocument<MailMessage>> getResults() {
+        return mails;
+    }
+
+    /**
+     * Sets the mails
+     * 
+     * @param mails The mails to set
+     */
+    public void setResults(final List<IndexDocument<MailMessage>> mails) {
+        this.mails = mails;
     }
 
 }

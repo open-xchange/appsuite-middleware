@@ -56,9 +56,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.internet.InternetAddress;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.Services;
+import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
+import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -85,6 +91,38 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
      */
     private SolrInputDocumentHelper() {
         super();
+    }
+
+    /**
+     * Reads a <code>IndexDocument&lt;MailMessage&gt;</code> from given <code>SolrDocument</code>.
+     * 
+     * @param document The Solr document
+     * @param mailFillers The fillers to use
+     * @return The filled <code>IndexDocument&lt;MailMessage&gt;</code> instance
+     * @throws OXException If reading <code>MailMessage</code> from given <code>SolrDocument</code> fails
+     */
+    public IndexDocument<MailMessage> readDocument(final SolrDocument document, final List<MailFiller> mailFillers) throws OXException {
+        /*
+         * Parse id, full name and account id
+         */
+        final MailMessage mail = new IDMailMessage();
+        if (document.containsKey(FIELD_ID)) {
+            mail.setMailId(document.getFieldValue(FIELD_ID).toString());
+        }
+        if (document.containsKey(FIELD_FULL_NAME)) {
+            mail.setFolder(document.getFieldValue(FIELD_FULL_NAME).toString());
+        }
+        if (document.containsKey(FIELD_ACCOUNT)) {
+            mail.setAccountId(MailFillers.<Integer> getFieldValue(FIELD_ACCOUNT, document).intValue());
+        }
+        /*
+         * Iterate mail fillers
+         */
+        for (final MailFiller mailFiller : mailFillers) {
+            mailFiller.fill(mail, document);
+        }
+        // Return mail
+        return new StandardIndexDocument<MailMessage>(mail, IndexDocument.Type.MAIL);
     }
 
     /**

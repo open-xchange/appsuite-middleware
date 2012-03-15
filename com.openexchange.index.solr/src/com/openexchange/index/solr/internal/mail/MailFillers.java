@@ -81,6 +81,27 @@ public final class MailFillers implements SolrMailConstants {
     }
 
     /**
+     * Gets all available mail fillers
+     * 
+     * @return All available fillers
+     */
+    public static List<MailFiller> allFillers() {
+        final List<MailFiller> list = new ArrayList<MailFiller>(12);
+        list.add(COLOR_LABEL_FILLER);
+        list.add(CONTENT_TYPE_FILLER);
+        list.add(SIZE_FILLER);
+        list.add(RECEIVED_DATE_FILLER);
+        list.add(SENT_DATE_FILLER);
+        list.add(FROM_FILLER);
+        list.add(TO_FILLER);
+        list.add(CC_FILLER);
+        list.add(BCC_FILLER);
+        list.add(FLAGS_FILLER);
+        list.add(SUBJECT_FILLER);
+        return list;
+    }
+
+    /**
      * Gets the mail fillers for given fields
      * 
      * @param mailFields The fields or <code>null</code> for all available fillers
