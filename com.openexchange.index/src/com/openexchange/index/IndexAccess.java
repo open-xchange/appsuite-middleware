@@ -73,8 +73,9 @@ public interface IndexAccess<V> {
      * 
      * @param documents The documents to add
      * @throws OXException If add operation fails
+     * @throws InterruptedException If interrupted while adding
      */
-    void addEnvelopeData(Collection<IndexDocument<V>> documents) throws OXException;
+    void addEnvelopeData(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
 
     /**
      * Adds specified document's content to associated index.
@@ -89,8 +90,9 @@ public interface IndexAccess<V> {
      * 
      * @param documents The documents to add
      * @throws OXException If add operation fails
+     * @throws InterruptedException If interrupted while adding
      */
-    void addContent(Collection<IndexDocument<V>> documents) throws OXException;
+    void addContent(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
 
     /**
      * Adds specified document's attachments to associated index.
@@ -105,8 +107,9 @@ public interface IndexAccess<V> {
      * 
      * @param documents The documents to add
      * @throws OXException If add operation fails
+     * @throws InterruptedException If interrupted while adding
      */
-    void addAttachments(Collection<IndexDocument<V>> documents) throws OXException;
+    void addAttachments(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
 
     /**
      * Deletes a document by identifier.
@@ -130,8 +133,9 @@ public interface IndexAccess<V> {
      * @param parameters The query parameters
      * @return The query result
      * @throws OXException If query fails
+     * @throws InterruptedException If interrupted while retrieving results
      */
-    IndexResult query(QueryParameters parameters) throws OXException;
+    IndexResult<V> query(QueryParameters parameters) throws OXException, InterruptedException;
 
     /**
      * Gets the trigger type for this access.

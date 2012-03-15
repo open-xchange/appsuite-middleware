@@ -52,9 +52,15 @@ package com.openexchange.index.solr.internal.mail;
 import static com.openexchange.index.solr.internal.SolrUtils.commitSane;
 import static com.openexchange.index.solr.internal.SolrUtils.rollback;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
@@ -74,9 +80,33 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailSolrIndexAccess.class));
+
+    private static final int ADD_ROWS = 2000;
+
+    private static final int QUERY_ROWS = 2000;
+
+    private static final int ALL_ROWS = 4000;
+
+    private static final int DELETE_ROWS = 25;
+
+    private static final int CHANGE_ROWS = 25;
+
+    private static final int GET_ROWS = 25;
+
+    /*-
+     * ------------------- Member stuff --------------------
+     */
+
+    /**
+     * The trigger type.
+     */
     private final TriggerType triggerType;
 
-    private final SolrInputDocumentHelper helper;
+    /**
+     * The helper instance.
+     */
+    protected final SolrInputDocumentHelper helper;
 
     /**
      * Initializes a new {@link MailSolrIndexAccess}.
@@ -95,9 +125,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor();
-            final SolrInputDocument inputDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
-            // TODO: Continue....
-            
+            solrServer.add(helper.inputDocumentFor(document.getObject(), userId, contextId));
             /*
              * Commit sane
              */
@@ -114,14 +142,96 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.index.IndexAccess#addEnvelopeData(java.util.Collection)
-     */
     @Override
-    public void addEnvelopeData(final Collection<IndexDocument<MailMessage>> documents) throws OXException {
-        // TODO Auto-generated method stub
-
+    public void addEnvelopeData(final Collection<IndexDocument<MailMessage>> col) throws OXException, InterruptedException {
+        if (col == null || col.isEmpty()) {
+            return;
+        }
+        final List<IndexDocument<MailMessage>> documents;
+        if (col instanceof List) {
+            documents = (List<IndexDocument<MailMessage>>) col;
+        } else {
+            documents = new ArrayList<IndexDocument<MailMessage>>(col);
+        }
+        CommonsHttpSolrServer solrServer = null;
+        boolean rollback = false;
+        try {
+            solrServer = solrServerFor();
+            final long now = System.currentTimeMillis();
+            final int chunkSize = ADD_ROWS;
+            final int size = documents.size();
+            final Thread thread = Thread.currentThread();
+            try {
+                //textFillerQueue.pause();
+                int off = 0;
+                while (off < size) {
+                    if (thread.isInterrupted()) {
+                        Thread.interrupted();
+                        throw new InterruptedException("Thread interrupted while adding Solr input documents.");
+                    }
+                    int endIndex = off + chunkSize;
+                    if (endIndex >= size) {
+                        endIndex = size;
+                    }
+                    final List<IndexDocument<MailMessage>> subList = documents.subList(off, endIndex);
+                    try {
+                        solrServer.add(new MailDocumentIterator(subList.iterator(), now, userId, contextId));
+                        rollback = true;
+                    } catch (final SolrServerException e) {
+                        if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
+                            throw e;
+                        }
+                        final CommonsHttpSolrServer noTimeoutSolrServer = null ; //solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
+                        final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), now, userId, contextId);
+                        final int itSize = subList.size();
+                        for (int i = 0; i < itSize; i++) {
+                            if (thread.isInterrupted()) {
+                                Thread.interrupted();
+                                throw new InterruptedException("Thread interrupted while adding Solr input documents.");
+                            }
+                            noTimeoutSolrServer.add(it.next());
+                            rollback = true;
+                        }
+                    }
+                    off = endIndex;
+                }
+            } catch (final SolrException e) {
+                if (rollback) {
+                    // Batch failed
+                    rollback(solrServer);
+                    rollback = false;
+                }
+                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(documents.iterator(), now, userId, contextId); it.hasNext();) {
+                    if (thread.isInterrupted()) {
+                        Thread.interrupted();
+                        throw new InterruptedException("Thread interrupted while adding Solr input documents.");
+                    }
+                    final SolrInputDocument inputDocument = it.next();
+                    try {
+                        solrServer.add(inputDocument);
+                        rollback = true;
+                    } catch (final Exception addFailed) {
+                        LOG.warn(
+                            "Mail input document could not be added: id=" + inputDocument.getFieldValue("id") + " fullName=" + inputDocument.getFieldValue("full_name"),
+                            addFailed);
+                    }
+                }
+            }
+            
+            /*
+             * Commit sane
+             */
+            commitSane(solrServer);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(solrServer);
+            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /*
@@ -197,6 +307,45 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     @Override
     public TriggerType getTriggerType() {
         return triggerType;
+    }
+
+    private static final class MailDocumentIterator implements Iterator<SolrInputDocument> {
+
+        private final int contextId;
+        
+        private final int userId;
+
+        private final Iterator<IndexDocument<MailMessage>> iterator;
+
+        private final long now;
+
+        private final SolrInputDocumentHelper helper;
+
+        protected MailDocumentIterator(final Iterator<IndexDocument<MailMessage>> iterator, final long now, final int userId, final int contextId) {
+            super();
+            this.contextId = contextId;
+            this.userId = userId;
+            this.iterator = iterator;
+            this.now = now;
+            helper = SolrInputDocumentHelper.getInstance();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public SolrInputDocument next() {
+            final IndexDocument<MailMessage> document = iterator.next();
+            final SolrInputDocument inputDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
+            return inputDocument;
+        }
+
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
     }
 
 }
