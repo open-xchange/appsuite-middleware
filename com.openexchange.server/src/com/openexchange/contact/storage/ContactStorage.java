@@ -148,6 +148,19 @@ public interface ContactStorage {
     SearchIterator<Contact> deleted(int contextID, String folderId, Date since, ContactField[] fields) throws OXException;
 
     /**
+     * Gets a list of deleted contacts in a folder with specified fields.
+     * 
+     * @param contextID the context ID
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum deletion time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> deleted(int contextID, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
      * Gets a list of modified contacts in a folder with specified fields.
      * 
      * @param contextID the context ID
@@ -158,6 +171,19 @@ public interface ContactStorage {
      * @throws OXException
      */
     SearchIterator<Contact> modified(int contextID, String folderId, Date since, ContactField[] fields) throws OXException;
+
+    /**
+     * Gets a list of modified contacts in a folder with specified fields.
+     * 
+     * @param contextID the context ID
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+	SearchIterator<Contact> modified(int contextID, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.

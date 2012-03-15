@@ -128,8 +128,18 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
+	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, final Date since, final ContactField[] fields) throws OXException {
+		return this.getDeletedContacts(session, folderId, since, fields, null);
+	}
+
+	@Override
 	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since) throws OXException {
-		return this.getDeletedContacts(session, folderId, since, null);
+		return this.getModifiedContacts(session, folderId, since, null);
+	}
+
+	@Override
+	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, final ContactField[] fields) throws OXException {
+		return this.getModifiedContacts(session, folderId, since, fields, SortOptions.EMPTY);
 	}
 
 	@Override
@@ -181,23 +191,23 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, final SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(since, "since");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
-		return this.getContacts(false, contextID, userID, folderId, null, null, fields, SortOptions.EMPTY, since);
+		return this.getContacts(false, contextID, userID, folderId, null, null, fields, sortOptions, since);
 	}
 	
 	@Override
-	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(since, "since");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
-		return this.getContacts(true, contextID, userID, folderId, null, null, fields, SortOptions.EMPTY, since);
+		return this.getContacts(true, contextID, userID, folderId, null, null, fields, sortOptions, since);
 	}
 
 	@Override
@@ -626,13 +636,13 @@ public class ContactServiceImpl implements ContactService {
 		SearchIterator<Contact> contacts = null;
 		if (null != since) {
 			contacts = deleted ? storage.deleted(contextID, folderID, since, queriedFields) : 
-				storage.modified(contextID, folderID, since, queriedFields);
+				storage.modified(contextID, folderID, since, queriedFields, sortOptions);
 		} else if (null != ids) {
 			contacts = storage.list(contextID, folderID, ids, queriedFields, sortOptions);
 		} else if (null == term) {
 			contacts = storage.all(contextID, folderID, queriedFields, sortOptions);
 		} else {
-			contacts = storage.search(contextID, folderID, term, queriedFields);
+			contacts = storage.search(contextID, folderID, term, queriedFields, sortOptions);
 		} 
 		if (null == contacts) {
 			throw ContactExceptionCodes.UNEXPECTED_ERROR.create("got no search results from storage");

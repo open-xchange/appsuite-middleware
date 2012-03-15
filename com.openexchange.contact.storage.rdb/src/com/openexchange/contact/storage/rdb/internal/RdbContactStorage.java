@@ -347,8 +347,17 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
     @Override
+    public SearchIterator<Contact> deleted(final int contextID, final String folderId, final Date since, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    	return this.getContacts(true, contextID, folderId, null, since, fields, null, sortOptions);
+    }
+
+    @Override
     public SearchIterator<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields) throws OXException {
     	return this.getContacts(false, contextID, folderId, null, since, fields, null, null);
+    }
+
+    public SearchIterator<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, contextID, folderId, null, since, fields, null, sortOptions);
     }
 
     @Override

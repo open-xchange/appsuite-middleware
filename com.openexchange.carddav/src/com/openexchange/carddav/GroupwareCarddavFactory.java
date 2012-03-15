@@ -71,6 +71,7 @@ import com.openexchange.carddav.reports.Syncstatus;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -567,8 +569,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			final ContactField[] fields = new ContactField[] { ContactField.LAST_MODIFIED };
 			Date lastModified = folder.getLastModifiedUTC();
 			SearchIterator<Contact> iterator = null;
+			final SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
+			sortOptions.setLimit(1);			
 			try {
-				iterator = getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, fields);			
+				iterator = getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
 				while (iterator.hasNext()) {
 					lastModified = Tools.getLatestModified(lastModified, iterator.next());
 				}
@@ -576,7 +580,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				close(iterator);
 			}				
 			try {
-				iterator = getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, fields);			
+				iterator = getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
 				while (iterator.hasNext()) {
 					lastModified = Tools.getLatestModified(lastModified, iterator.next());
 				}

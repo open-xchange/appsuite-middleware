@@ -204,6 +204,18 @@ public interface ContactService {
      */
     SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
 
+    /**
+     * Gets a list of deleted contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum deletion time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of modified contacts in a folder with all fields.
@@ -228,6 +240,19 @@ public interface ContactService {
      */
     SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
 
+    /**
+     * Gets a list of modified contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
     /**
      * Searches for contacts.
      * 
