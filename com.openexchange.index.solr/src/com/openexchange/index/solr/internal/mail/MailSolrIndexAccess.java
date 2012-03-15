@@ -162,7 +162,6 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final int size = documents.size();
             final Thread thread = Thread.currentThread();
             try {
-                //textFillerQueue.pause();
                 int off = 0;
                 while (off < size) {
                     if (thread.isInterrupted()) {
@@ -181,7 +180,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                         if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
                             throw e;
                         }
-                        final CommonsHttpSolrServer noTimeoutSolrServer = null ; //solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
+                        final CommonsHttpSolrServer noTimeoutSolrServer = solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
                         final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), now, userId, contextId);
                         final int itSize = subList.size();
                         for (int i = 0; i < itSize; i++) {
@@ -217,7 +216,6 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                     }
                 }
             }
-            
             /*
              * Commit sane
              */
@@ -312,7 +310,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     private static final class MailDocumentIterator implements Iterator<SolrInputDocument> {
 
         private final int contextId;
-        
+
         private final int userId;
 
         private final Iterator<IndexDocument<MailMessage>> iterator;
