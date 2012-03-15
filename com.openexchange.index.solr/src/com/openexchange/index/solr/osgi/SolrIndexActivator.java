@@ -51,22 +51,14 @@ package com.openexchange.index.solr.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.CreateTableUpdateTask;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacade;
 import com.openexchange.index.solr.SolrCoreConfigService;
-import com.openexchange.index.solr.groupware.IndexCreateServerTableTask;
-import com.openexchange.index.solr.groupware.IndexCreateTableService;
-import com.openexchange.index.solr.groupware.IndexDeleteListener;
-import com.openexchange.index.solr.groupware.IndexUpdateTaskProviderService;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrCoreConfigServiceImpl;
 import com.openexchange.index.solr.internal.SolrIndexFacade;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -83,7 +75,8 @@ public class SolrIndexActivator extends HousekeepingActivator {
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class };
+        return new Class[] {
+            DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override

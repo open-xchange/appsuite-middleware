@@ -51,11 +51,15 @@ package com.openexchange.index.solr.internal;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.Locale;
+import java.util.Set;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
+import com.openexchange.index.IndexConstants;
+import com.openexchange.langdetect.LanguageDetectionService;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link SolrUtils} - Utility methods for Solr.
@@ -64,13 +68,45 @@ import com.openexchange.log.Log;
  */
 public final class SolrUtils {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrUtils.class));
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SolrUtils.class);
+    
+    private static final Locale DEFAULT_LOCALE = LanguageDetectionService.DEFAULT_LOCALE;
+
+    private static final Set<Locale> KNOWN_LOCALES = IndexConstants.KNOWN_LOCALES;
 
     /**
      * Initializes a new {@link SolrUtils}.
      */
     private SolrUtils() {
         super();
+    }
+
+    /**
+     * Detects the locale.
+     *
+     * @param str The string source
+     * @return The detected locale
+     * @throws OXException If language detection fails
+     */
+    public static Locale detectLocale(final String str) throws OXException {
+        try {
+            final LanguageDetectionService detectionService = Services.getService(LanguageDetectionService.class);
+            if (null == detectionService) {
+                LOG.warn("Missing language detection service. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
+                return DEFAULT_LOCALE;
+            }
+            final Locale locale = detectionService.findLanguages(str).get(0);
+            if (KNOWN_LOCALES.contains(locale)) {
+                return locale;
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
+            }
+            return DEFAULT_LOCALE;
+        } catch (final IllegalStateException e) {
+            // Missing service
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
+        }
     }
 
     /**
