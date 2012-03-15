@@ -65,8 +65,8 @@ public class TranslatedSingleTest extends TestCase {
 
     private final String key;
 
-    public TranslatedSingleTest(final String name, final Locale locale, final String key) {
-        super(name);
+    public TranslatedSingleTest(final Locale locale, final String key) {
+        super("Translation single test for " + locale.toString() + " for string " + key);
         this.locale = locale;
         this.key = key;
     }

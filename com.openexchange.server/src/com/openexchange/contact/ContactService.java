@@ -49,140 +49,129 @@
 
 package com.openexchange.contact;
 
-import java.util.Collection;
 import java.util.Date;
 
-import com.openexchange.contact.storage.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link ContactService} - Provides access methods to the Contact module.
+ * {@link ContactService} - Provides access to the contact module.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- *
  */
 public interface ContactService {
 	
     /**
      * Gets a contact with all fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
      * @return the contact
      * @throws OXException
      */
-    Contact get(int contextID, int userID, String folderId, String id) throws OXException;
+    Contact getContact(Session session, String folderId, String id) throws OXException;
     
     /**
      * Gets a contact with specified fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
      * @param fields the contact fields that should be retrieved
      * @return the contact
      * @throws OXException
      */
-    Contact get(int contextID, int userID, String folderId, String id, ContactField[] fields) throws OXException;
+    Contact getContact(Session session, String folderId, String id, ContactField[] fields) throws OXException;
     
     /**
      * Gets all contacts with all fields in a folder.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(int contextID, int userID, String folderId) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId) throws OXException;
 
     /**
      * Gets all contacts with all fields in a folder.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param sortOptions the options to sort the results 
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(int contextID, int userID, String folderId, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets all contacts with specified fields in a folder.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param fields the contact fields that should be retrieved
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(int contextID, int userID, String folderId, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields) throws OXException;
 
     /**
      * Gets all contacts with specified fields in a folder.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param fields the contact fields that should be retrieved
      * @param sortOptions the options to sort the results 
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(int contextID, int userID, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of contacts with all fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param ids the object IDs 
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(int contextID, int userID, String folderId, String[] ids) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids) throws OXException;
 
     /**
      * Gets a list of contacts with all fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param ids the object IDs 
      * @param sortOptions the options to sort the results 
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(int contextID, int userID, String folderId, String[] ids, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of contacts with specified fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param ids the object IDs 
      * @param fields the contact fields that should be retrieved
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(int contextID, int userID, String folderId, String[] ids, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields) throws OXException;
 
     /**
      * Gets a list of contacts with specified fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param ids the object IDs 
      * @param fields the contact fields that should be retrieved
@@ -190,116 +179,159 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(int contextID, int userID, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of deleted contacts in a folder with all fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum deletion time to consider
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> deleted(int contextID, int userID, String folderId, Date since) throws OXException;
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since) throws OXException;
 
     /**
      * Gets a list of deleted contacts in a folder with specified fields.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum deletion time to consider
      * @param fields the contact fields that should be retrieved
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> deleted(int contextID, int userID, String folderId, Date since, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
 
+    /**
+     * Gets a list of deleted contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum deletion time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Gets a list of modified contacts in a folder with all fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since) throws OXException;
+
+    /**
+     * Gets a list of modified contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
+
+    /**
+     * Gets a list of modified contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
     /**
      * Searches for contacts.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, int userID, SearchTerm<O> term) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term) throws OXException;
 
     /**
      * Searches for contacts.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, int userID, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, int userID, SearchTerm<O> term, ContactField[] fields) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException;
 
     /**
      * Searches for contacts.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
+     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(int contextID, int userID, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param contact the contact to create
      * @throws OXException
      */
-    void create(int contextID, int userID, String folderId, Contact contact) throws OXException;
+    void createContact(Session session, String folderId, Contact contact) throws OXException;
     
     /**
      * Updates a contact. 
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
+     * @param id the object ID
      * @param contact the contact to update
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void update(int contextID, int userID, String folderId, Contact contact, Date lastRead) throws OXException;
+    void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
      * Deletes a contact.
      * 
-     * @param contextID the context ID
-     * @param userID the ID of the user performing the operation
+     * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void delete(int contextID, int userID, String folderId, String id, Date lastRead) throws OXException;
-    
-    
+    void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException;
 
 }

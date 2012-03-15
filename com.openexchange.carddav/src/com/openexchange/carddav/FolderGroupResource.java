@@ -56,7 +56,7 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -219,7 +219,7 @@ public class FolderGroupResource extends CarddavResource {
         if (null != this.contactUIDsToAddToFolder && 0 < this.contactUIDsToAddToFolder.size()) {
         	final int newFolderID = this.folderToSave.getObjectID();
         	try {
-				final ContactSQLInterface contactInterface = this.factory.getContactInterface();
+        		final ContactService contactService = this.factory.getContactService();
             	for (final String uid : this.contactUIDsToAddToFolder) {
 					Contact contact = this.factory.getState().get(uid);
 					if (null == contact) {
@@ -230,7 +230,7 @@ public class FolderGroupResource extends CarddavResource {
 		                contact = new Contact();
 		                contact.setUid(uid);
 						contact.setParentFolderID(newFolderID);
-						contactInterface.insertContactObject(contact);
+						contactService.createContact(factory.getSession(), Integer.toString(newFolderID), contact);
 		                LOG.debug(this.getUrl() + ": created " + uid + ".");
 					} else {
 						/*
@@ -238,7 +238,8 @@ public class FolderGroupResource extends CarddavResource {
 						 */
 						final int previousFolderID = contact.getParentFolderID();
 						contact.setParentFolderID(newFolderID);
-						contactInterface.updateContactObject(contact, previousFolderID, new Date());
+						contactService.updateContact(factory.getSession(), Integer.toString(previousFolderID), 
+								Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
 		                LOG.debug(this.getUrl() + ": moved " + uid + ".");
 					}
             	}

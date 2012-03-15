@@ -49,15 +49,16 @@
 
 package com.openexchange.contact.storage;
 
-import java.util.Collection;
 import java.util.UUID;
 
 import org.junit.Test;
 
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link SearchTest}
@@ -73,6 +74,7 @@ public class SearchTest extends ContactStorageTest {
          */
         final String folderId = "500011";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Horst Horstensen");
         contact.setGivenName("Horst");
         contact.setSurName("Horstensen");
@@ -86,19 +88,13 @@ public class SearchTest extends ContactStorageTest {
 		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		term.addOperand(new ColumnOperand("uid"));
 		term.addOperand(new ConstantOperand<String>(contact.getUid()));
-		final Collection<Contact> result = getStorage().search(getContextID(), term);
+		final SearchIterator<Contact> result = getStorage().search(getContextID(), folderId, term, ContactField.values());
 		/*
 		 * verify search result
 		 */
 		assertNotNull("got no search result", result);
 		assertTrue("got no search result", 0 < result.size());
-		Contact foundContact = null;
-		for (final Contact c : result) {
-			if (contact.getUid().equals(c.getUid())) {
-				foundContact = c;
-				break;
-			}
-		}
+		Contact foundContact = findContact(contact.getUid(), result); 
         assertNotNull("contact not in search results", foundContact);
         assertEquals("display name wrong", contact.getDisplayName(), foundContact.getDisplayName());
         assertEquals("surname wrong", contact.getSurName(), foundContact.getSurName());

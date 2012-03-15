@@ -109,8 +109,6 @@ public final class SessionHandler {
 
     private static ScheduledTimerTask longSessionContainerRotator;
 
-    private static ScheduledTimerTask cleaner;
-
     /**
      * Initializes a new {@link SessionHandler session handler}
      */
@@ -481,6 +479,14 @@ public final class SessionHandler {
         return sessionData.countSessions();
     }
 
+    public static int[] getNumberOfLongTermSessions() {
+        return sessionData.getLongTermSessionsPerContainer();
+    }
+
+    public static int[] getNumberOfShortTermSessions() {
+        return sessionData.getShortTermSessionsPerContainer();
+    }
+
     private static void postSessionCreation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
@@ -579,20 +585,6 @@ public final class SessionHandler {
             longSessionContainerRotator =
                 service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
         }
-        final SessionData data = sessionData;
-        final Runnable task = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    data.checkEmAll();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
-        };
-        final long lifeTime = config.getLifeTime();
-        cleaner = service.scheduleWithFixedDelay(task, lifeTime, lifeTime);
     }
 
     public static void removeTimerService() {
@@ -604,13 +596,6 @@ public final class SessionHandler {
             shortSessionContainerRotator.cancel(false);
             shortSessionContainerRotator = null;
         }
-        if (cleaner != null) {
-            cleaner.cancel(false);
-            cleaner = null;
-        }
         sessionData.removeTimerService();
     }
-
-
-
 }

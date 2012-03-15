@@ -54,13 +54,17 @@ import java.util.EnumMap;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
+import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 
 /**
  * {@link DistListMapper} - Maps distribution list related fields to a corresponding {@link Mapping} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DistListMapper extends DefaultMapper<DistListMember, DistListMemberField> {
+public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemberField> {
 	
 	public DistListMapper() {
 		super();
@@ -72,11 +76,16 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
 	}
 
 	@Override
-	protected EnumMap<DistListMemberField, Mapping<? extends Object, DistListMember>> createMappings() {
-		final EnumMap<DistListMemberField, Mapping<? extends Object, DistListMember>> mappings = new 
-				EnumMap<DistListMemberField, Mapping<? extends Object, DistListMember>>(DistListMemberField.class);
+	public DistListMemberField[] newArray(int size) {
+		return new DistListMemberField[size];
+	}
 
-		mappings.put(DistListMemberField.PARENT_CONTACT_ID, new IntegerMapping<DistListMember>("intfield01") {
+	@Override
+	protected EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> createMappings() {
+		final EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> mappings = new 
+				EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>>(DistListMemberField.class);
+
+		mappings.put(DistListMemberField.PARENT_CONTACT_ID, new IntegerMapping<DistListMember>("intfield01", "Parent contact ID") {
 
             @Override
             public void set(DistListMember member, Integer value) { 
@@ -94,7 +103,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.CONTACT_ID, new IntegerMapping<DistListMember>("intfield02") {
+		mappings.put(DistListMemberField.CONTACT_ID, new IntegerMapping<DistListMember>("intfield02", "Contact ID") {
 
             @Override
             public void set(DistListMember member, Integer value) { 
@@ -112,7 +121,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.MAIL_FIELD, new IntegerMapping<DistListMember>("intfield03") {
+		mappings.put(DistListMemberField.MAIL_FIELD, new IntegerMapping<DistListMember>("intfield03", "Mail Field") {
 
             @Override
             public void set(DistListMember member, Integer value) { 
@@ -130,7 +139,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.CONTACT_FOLDER_ID, new IntegerMapping<DistListMember>("intfield04") {
+		mappings.put(DistListMemberField.CONTACT_FOLDER_ID, new IntegerMapping<DistListMember>("intfield04", "Contact Folder ID") {
 
             @Override
             public void set(DistListMember member, Integer value) { 
@@ -148,7 +157,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.DISPLAY_NAME, new VarCharMapping<DistListMember>("field01") {
+		mappings.put(DistListMemberField.DISPLAY_NAME, new VarCharMapping<DistListMember>("field01", "Display Name") {
 
             @Override
             public void set(DistListMember member, String value) { 
@@ -166,7 +175,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.LAST_NAME, new VarCharMapping<DistListMember>("field02") {
+		mappings.put(DistListMemberField.LAST_NAME, new VarCharMapping<DistListMember>("field02", "Last Name") {
 
             @Override
             public void set(DistListMember member, String value) { 
@@ -184,7 +193,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.FIRST_NAME, new VarCharMapping<DistListMember>("field03") {
+		mappings.put(DistListMemberField.FIRST_NAME, new VarCharMapping<DistListMember>("field03", "First Name") {
 
             @Override
             public void set(DistListMember member, String value) { 
@@ -202,7 +211,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.MAIL, new VarCharMapping<DistListMember>("field04") {
+		mappings.put(DistListMemberField.MAIL, new VarCharMapping<DistListMember>("field04", "Mail") {
 
             @Override
             public void set(DistListMember member, String value) throws OXException { 
@@ -220,7 +229,7 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
             }
         });
 		
-		mappings.put(DistListMemberField.CONTEXT_ID, new IntegerMapping<DistListMember>("cid") {
+		mappings.put(DistListMemberField.CONTEXT_ID, new IntegerMapping<DistListMember>("cid", "Context ID") {
 
             @Override
             public void set(DistListMember member, Integer value) { 

@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -21,6 +22,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -75,7 +77,7 @@ public class ContactStorageTest extends TestCase {
         if (null != this.rememberedContacts && 0 < rememberedContacts.size()) {
             for (final Contact contact : rememberedContacts) {
                 try {
-                    this.getStorage().delete(getContextID(), Integer.toString(contact.getParentFolderID()), 
+                    this.getStorage().delete(getContextID(), getUserID(), Integer.toString(contact.getParentFolderID()), 
                         Integer.toString(contact.getObjectID()), new Date(0));
                 } catch (final Exception e) {
                     LOG.error("error cleaning up contact", e);
@@ -95,20 +97,26 @@ public class ContactStorageTest extends TestCase {
     }
 
     protected Contact findContact(final String uid, final String folderID) throws OXException {
-        for (final Contact c : getStorage().all(getContextID(), folderID)) {
-            if (uid.equals(c.getUid())) {
-                return c;
-            }
-        }
-        return null;
+    	return findContact(uid, getStorage().all(getContextID(), folderID, ContactField.values()));
     }
     
     protected Contact findContact(final String uid, final String folderID, final Date since) throws OXException {
-        for (final Contact c : getStorage().modified(getContextID(), folderID, since)) {
-            if (uid.equals(c.getUid())) {
-                return c;
-            }
-        }
+    	return findContact(uid, getStorage().modified(getContextID(), folderID, since, ContactField.values()));
+    }
+    
+    protected static Contact findContact(final String uid, final SearchIterator<Contact> iter) throws OXException {
+    	try {
+    		while (iter.hasNext()) {
+    			final Contact c = iter.next();
+                if (uid.equals(c.getUid())) {
+                    return c;
+                }
+    		}
+    	} finally {
+    		if (null != iter) {
+    			iter.close();
+    		}
+    	}
         return null;
     }
     
@@ -120,5 +128,7 @@ public class ContactStorageTest extends TestCase {
         return this.session.getContextId();
     }
 
-
+    protected int getUserID() {
+        return this.session.getUserId();
+    }
 }

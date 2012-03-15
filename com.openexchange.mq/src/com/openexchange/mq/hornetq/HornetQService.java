@@ -79,6 +79,19 @@ public final class HornetQService implements MQService {
 
     private static final String SERVER = "-" + UUIDs.getUnformattedString(UUID.randomUUID());
 
+    /**
+     * Gets the unique server identifier prefixed with <code>'-'</code> character.
+     *
+     * @return The server identifier prefixed with <code>'-'</code> character
+     */
+    public static String getServer() {
+        return SERVER;
+    }
+
+    /*-
+     * --------------------- Members -----------------------
+     */
+
     private final HornetQEmbeddedJMS jmsServer;
 
     private final ConnectionFactory defaultConnectionFactory;
@@ -326,7 +339,7 @@ public final class HornetQService implements MQService {
     @Override
     public Topic lookupTopic(final String name) throws OXException {
         try {
-            final Topic topic = (Topic) jmsServer.lookup(name);
+            final Topic topic = (Topic) jmsServer.lookup(PREFIX_TOPIC + name);
             if (null == topic) {
                 throw MQExceptionCodes.TOPIC_NOT_FOUND.create(PREFIX_TOPIC + name);
             }
@@ -371,7 +384,7 @@ public final class HornetQService implements MQService {
     @Override
     public Topic lookupLocalOnlyTopic(final String name) throws OXException {
         try {
-            final Topic topic = (Topic) jmsServer.lookup(name);
+            final Topic topic = (Topic) jmsServer.lookup(PREFIX_TOPIC + name + SERVER);
             if (null == topic) {
                 throw MQExceptionCodes.TOPIC_NOT_FOUND.create(PREFIX_TOPIC + name + SERVER);
             }

@@ -169,7 +169,7 @@ public class SearchTermAdapter {
 				stringBuilder.append(' ').append(operation.getSqlRepresentation());
 			} else  if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && i != terms.length - 1) {
 				//don't place an operator after the last operand
-				stringBuilder.append(' ').append(operation.getSqlRepresentation()).append("    ");
+				stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
 			}
 		}
 		stringBuilder.append(" ) ");
@@ -177,19 +177,35 @@ public class SearchTermAdapter {
 	
     private void append(final Operand<?> operand) throws OXException {
 		if (Operand.Type.COLUMN.equals(operand.getType())) {
+			ContactField field = null;
 			final Object value = operand.getValue();
 			if (null == value) {
 				throw new IllegalArgumentException("column operand without value: " + operand);
-			}
-			//TODO: don't use getByAjaxName in storage layer
-			final String columnLabel = Mappers.CONTACT.get(ContactField.getByAjaxName(value.toString())).getColumnLabel();
+			} else if (ContactField.class.isInstance(value)) {
+				field = (ContactField)value;
+			} else {
+				//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
+				field = ContactField.getByAjaxName(value.toString());
+			}			
+			final String columnLabel = Mappers.CONTACT.get(field).getColumnLabel();
 			if (null != this.charset) {
 				stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(this.charset).append(')');
 			} else {
 				stringBuilder.append(columnLabel);
 			}
 		} else if (Operand.Type.CONSTANT.equals(operand.getType())) {
-			parameters.add(operand.getValue());
+			Object value = operand.getValue();
+			if (null == value) {
+				throw new IllegalArgumentException("got no value for contact operand");
+			} else if (String.class.isInstance(value)) {
+				final String stringValue = (String)value;
+				if (stringValue.contains("*")) {
+					value = stringValue.replaceAll("\\*", "%");
+					final int index = stringBuilder.lastIndexOf("=");
+					stringBuilder.replace(index, index + 1, "LIKE");		
+				}
+			}
+			parameters.add(value);
 			stringBuilder.append('?');
 		} else {
 			throw new IllegalArgumentException("unknown type in operand: " + operand.getType());

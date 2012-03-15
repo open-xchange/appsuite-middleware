@@ -137,7 +137,7 @@ public class Bug16141Test extends AbstractAJAXSession {
     }
 
     private InputStream getMailAndReplaceAddress(String fileName) throws IOException {
-        InputStreamReader isr = new InputStreamReader(new FileInputStream(testMailDir + File.separatorChar + fileName), "UTF-8");
+        InputStreamReader isr = new InputStreamReader(new FileInputStream(new File(testMailDir, fileName)), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();

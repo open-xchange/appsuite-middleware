@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.config.actions;
 
+import org.json.JSONObject;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -79,7 +81,7 @@ public final class SetRequest extends AbstractConfigRequest<SetResponse> {
 
     @Override
     public Object getBody() {
-        return value;
+        return null == value ? JSONObject.NULL : value;
     }
 
     @Override

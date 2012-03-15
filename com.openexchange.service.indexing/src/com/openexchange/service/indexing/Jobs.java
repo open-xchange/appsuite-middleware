@@ -58,6 +58,8 @@ import com.openexchange.exception.OXException;
  */
 public final class Jobs {
 
+    private static final int DEFAULT_PRIORITY = IndexingJob.DEFAULT_PRIORITY;
+
     /**
      * Initializes a new {@link Jobs}.
      */
@@ -72,7 +74,7 @@ public final class Jobs {
      * @return A new {@link IndexingJob job} for specified task
      */
     public static IndexingJob jobFor(final Runnable task) {
-        return jobFor(task, 4);
+        return jobFor(task, DEFAULT_PRIORITY);
     }
 
     /**
@@ -92,12 +94,15 @@ public final class Jobs {
 
         private final Runnable task;
 
+        private final long timeStamp;
+
         private int priority;
 
         protected RunnableJob(final Runnable task, final int priority) {
             super();
             this.task = task;
             this.priority = priority;
+            timeStamp = System.currentTimeMillis();
         }
 
         @Override
@@ -138,6 +143,16 @@ public final class Jobs {
         @Override
         public void afterExecute(final Throwable t) {
             // Nope
+        }
+
+        @Override
+        public long getTimeStamp() {
+            return timeStamp;
+        }
+
+        @Override
+        public Origin getOrigin() {
+            return Origin.ACTIVE;
         }
 
     }
