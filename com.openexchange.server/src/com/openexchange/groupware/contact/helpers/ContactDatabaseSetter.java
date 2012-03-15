@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact.helpers;
 
 import static com.openexchange.java.Autoboxing.i;
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
@@ -102,6 +103,38 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
         
         final boolean value = castIntegerToBoolean(objects[1]);    
         conObj.setPrivateFlag(value);
+        return conObj;
+    }
+    
+    @Override
+    public Object creationdate(final Object... objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreationDate");
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+
+        final long timestamp = (Long) objects[1];
+        final Date value = new Date(timestamp);
+        conObj.setCreationDate(value);
+        return conObj;
+    }
+
+    @Override
+    public Object lastmodified(final Object... objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("LastModified");
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+
+        final long timestamp = (Long) objects[1];
+        final Date value = new Date(timestamp);
+        conObj.setLastModified(value);
         return conObj;
     }
     
