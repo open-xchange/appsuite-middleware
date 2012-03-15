@@ -54,6 +54,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * Implementation of the object pool.
@@ -484,9 +487,8 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
         @Override
         public void run() {
             try {
-                final Thread thread = new Thread(SynchronizedPool.this);
-                thread.setName("PoolCleaner");
-                thread.start();
+                final ThreadPoolService poolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                poolService.submit(ThreadPools.task(SynchronizedPool.this, "PoolCleaner"));
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
