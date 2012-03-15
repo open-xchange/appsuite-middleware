@@ -1465,8 +1465,7 @@ public class ContactSetter implements ContactSwitcher {
             return conObj;
         }
 
-        final long timestamp = (Long) objects[1];
-        final Date value = new Date(timestamp);
+        final Date value = (Date) objects[1];
         conObj.setCreationDate(value);
         return conObj;
     }
@@ -1481,8 +1480,7 @@ public class ContactSetter implements ContactSwitcher {
             return conObj;
         }
 
-        final long timestamp = (Long) objects[1];
-        final Date value = new Date(timestamp);
+        final Date value = (Date) objects[1];
         conObj.setLastModified(value);
         return conObj;
     }

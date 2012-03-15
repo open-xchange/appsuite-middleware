@@ -486,9 +486,11 @@ public class ContactCopyTask implements CopyUserTaskService {
     private String buildInsertContactsSql(final List<ContactField> contactFields) {
         final StringBuilder sb = new StringBuilder("INSERT INTO prg_contacts (");
         boolean first = true;
+        int count = 0;
         for (final ContactField field : contactFields) {
             if (field.isDBField()) {
-                final String dbName = field.getDbName();
+                count++;
+                final String dbName = field.getFieldName();
                 if (first) {
                     sb.append(dbName);
                     first = false;
@@ -499,14 +501,12 @@ public class ContactCopyTask implements CopyUserTaskService {
             }
         }
         sb.append(") VALUES (");
-        for (int i = 0; i < contactFields.size(); i++) {
-            if (contactFields.get(i).isDBField()) {
-                if (i == 0) {
-                    sb.append("?");
-                } else {
-                    sb.append(", ?");
-                }
-            }
+        for (int i = 0; i < count; i++) {
+            if (i == 0) {
+                sb.append("?");
+            } else {
+                sb.append(", ?");
+            } 
         }
         sb.append(")");
         
