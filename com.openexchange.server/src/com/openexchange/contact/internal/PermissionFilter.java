@@ -47,78 +47,39 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+package com.openexchange.contact.internal;
 
 import com.openexchange.exception.OXException;
-
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.iterator.FilteringSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link DefaultMapping} - 
+ * {@link PermissionFilter} - Filters a search iterator based on a user's 
+ * permission.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @param <T>
- * @param <O>
  */
-public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
+public class PermissionFilter {
 	
-	private final String columnName;
-	private final String readableName;
-	private final int sqlType;
-	
-	public DefaultMapping(final String columnName, final String readableName, final int sqlType) {
-		super();
-		this.sqlType = sqlType;
-		this.columnName = columnName;
-		this.readableName = readableName;
-	}
+	/**
+	 * Creates a new permission based filtering search iterator. 
+	 * 
+	 * @param delegate 
+	 * @param userID
+	 * @param canReadAll
+	 * @return
+	 * @throws OXException
+	 */
+	public static FilteringSearchIterator<Contact> create(final SearchIterator<Contact> delegate, final int userID, 
+			final boolean canReadAll) throws OXException {
+		return new FilteringSearchIterator<Contact>(delegate) {
 
-	@Override
-	public void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException {
-		final T value = this.get(object);
-		if (null != value) {
-			statement.setObject(parameterIndex, value, this.getSqlType());
-		} else {
-			statement.setNull(parameterIndex, this.getSqlType());
-		}
-	}
-
-	@Override
-	public void set(ResultSet resultSet, O object) throws SQLException, OXException {
-		final T value = this.get(resultSet);
-		if (false == resultSet.wasNull()) {
-			this.set(object, value);
-		}
-	}
-
-	@Override
-	public boolean equals(O object1, O object2) {
-		final T value1 = this.get(object1);
-		final T value2 = this.get(object2);
-		return null == value1 ? null == value2 : value1.equals(value2);
+			@Override
+			public boolean accept(final Contact contact) throws OXException {
+				return contact.getCreatedBy() == userID || canReadAll && false == contact.getPrivateFlag();			
+			}
+		};
 	}
 	
-	@Override
-	public String getColumnLabel() {
-		return this.columnName;
-	}
-
-	@Override
-	public String getReadableName() {
-		return this.readableName;
-	}
-
-	@Override
-	public int getSqlType() {
-		return this.sqlType;
-	}
-
-	@Override
-	public String toString() {
-		return this.getColumnLabel();
-	}
-
 }

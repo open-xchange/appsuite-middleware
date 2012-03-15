@@ -47,28 +47,39 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.contact;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Date;
-
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.search.Order;
 
 /**
- * {@link DateMapping} - 
+ * {@link SortOrder} - The sort order 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DateMapping<O> extends DefaultMapping<Date, O> {
+public final class SortOrder {
+	
+	private final ContactField by;
+	private final Order order;
+	
+	public SortOrder(final ContactField by, final Order order) {
+		this.by = by;
+		this.order = order;
+	}
 
-	public DateMapping(final String columnName, final String readableName) {
-		super(columnName, readableName, Types.DATE);
+	/**
+	 * @return the order
+	 */
+	public Order getOrder() {
+		return order;
+	}
+
+	/**
+	 * @return the by
+	 */
+	public ContactField getBy() {
+		return by;
 	}
 	
-	@Override
-	public Date get(ResultSet resultSet) throws SQLException {
-		return resultSet.getDate(this.getColumnLabel());
-	}
 	
 }

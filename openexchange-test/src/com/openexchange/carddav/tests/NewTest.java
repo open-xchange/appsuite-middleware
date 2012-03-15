@@ -76,7 +76,6 @@ public class NewTest extends CardDAVTest {
 		 * fetch sync token for later synchronization
 		 */
 		final String syncToken = super.fetchSyncToken();
-		System.out.println("testCreateSimpleOnClient: got sync token: " + syncToken);
 		/*
 		 * create contact
 		 */
@@ -103,7 +102,6 @@ public class NewTest extends CardDAVTest {
          * verify contact on server
          */
         final Contact contact = super.getContact(uid);
-		System.out.println("testCreateSimpleOnClient: contact last modified: " + contact.getLastModified().getTime());
         super.rememberForCleanUp(contact);        
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
@@ -125,7 +123,6 @@ public class NewTest extends CardDAVTest {
 		 * fetch sync token for later synchronization
 		 */
 		final String syncToken = super.fetchSyncToken();		
-		System.out.println("testCreateSimpleOnServer: got sync token: " + syncToken);
 		/*
 		 * create contact
 		 */
@@ -138,8 +135,6 @@ public class NewTest extends CardDAVTest {
 		contact.setDisplayName(firstName + " " + lastName);
 		contact.setUid(uid);
 		super.rememberForCleanUp(super.create(contact));
-		System.out.println("testCreateSimpleOnServer: insert response timestamp: " + super.getManager().getLastResponse().getTimestamp().getTime());
-		System.out.println("testCreateSimpleOnServer: contact last modified: " + contact.getLastModified().getTime());
         /*
          * verify contact on client
          */

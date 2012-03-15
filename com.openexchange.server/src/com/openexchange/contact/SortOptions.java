@@ -47,39 +47,117 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.contact;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.search.Order;
 
 /**
- * {@link SortOrder} - The sort order 
+ * {@link SortOptions} - Specifies sort options for the results of storage operations. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SortOrder {
+public final class SortOptions {
 	
-	private final ContactField by;
-	private final Order order;
+	public static final SortOptions EMPTY = new SortOptions();
 	
-	public SortOrder(final ContactField by, final Order order) {
-		this.by = by;
+	private SortOrder order[];	
+	private String collation;
+	private int rangeStart;
+	private int limit;
+	
+	public static final SortOrder Order(final ContactField by, final Order order) {
+		return new SortOrder(by, order);
+	}
+	
+	public SortOptions(final String collation, final SortOrder... order) {
+		super();
+		this.collation = collation;
 		this.order = order;
+	}
+
+	public SortOptions(final SortOrder... order) {
+		this(null, order);
+	}
+
+	public SortOptions(final String collation) {
+		this(collation, (SortOrder[])null);
+	}
+
+	public SortOptions() {
+		this((SortOrder[])null);
+	}
+
+	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
+		this(collation, Order(orderBy, order));
+	}
+	
+	public SortOptions(final ContactField orderBy, final Order order) {
+		this(Order(orderBy, order));
+	}
+	
+	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
+		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
+	}
+	
+	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
+		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
+	}
+	
+	/**
+	 * @return the collation
+	 */
+	public String getCollation() {
+		return collation;
+	}
+
+	/**
+	 * @param collation the collation to set
+	 */
+	public void setCollation(String collation) {
+		this.collation = collation;
 	}
 
 	/**
 	 * @return the order
 	 */
-	public Order getOrder() {
+	public SortOrder[] getOrder() {
 		return order;
 	}
 
 	/**
-	 * @return the by
+	 * @param order the orderBy to set
 	 */
-	public ContactField getBy() {
-		return by;
+	public void setOrderBy(SortOrder[] order) {
+		this.order = order;
 	}
-	
-	
+
+	/**
+	 * @return the rangeStart
+	 */
+	public int getRangeStart() {
+		return rangeStart;
+	}
+
+	/**
+	 * @param rangeStart the rangeStart to set
+	 */
+	public void setRangeStart(int rangeStart) {
+		this.rangeStart = rangeStart;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public int getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+
 }

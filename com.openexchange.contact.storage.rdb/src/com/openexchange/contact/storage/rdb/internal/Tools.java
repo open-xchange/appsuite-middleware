@@ -59,11 +59,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.contact.storage.TruncatedContactAttribute;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
-import com.openexchange.contact.storage.rdb.mapping.Mapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -142,7 +142,7 @@ public final class Tools {
         	final String columnLabel = truncatedColumns[i];
         	final int maximumSize =  getMaximumSize(connection, table, columnLabel);
         	final ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
-    		final Mapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
+    		final DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
     		final Object object = mapping.get(contact);
 			final int actualSize = null != object && String.class.isInstance(object) ? 
 					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;

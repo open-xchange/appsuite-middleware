@@ -54,13 +54,17 @@ import java.util.EnumMap;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
+import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 
 /**
  * {@link DistListMapper} - Maps distribution list related fields to a corresponding {@link Mapping} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DistListMapper extends DefaultMapper<DistListMember, DistListMemberField> {
+public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemberField> {
 	
 	public DistListMapper() {
 		super();
@@ -72,9 +76,14 @@ public class DistListMapper extends DefaultMapper<DistListMember, DistListMember
 	}
 
 	@Override
-	protected EnumMap<DistListMemberField, Mapping<? extends Object, DistListMember>> createMappings() {
-		final EnumMap<DistListMemberField, Mapping<? extends Object, DistListMember>> mappings = new 
-				EnumMap<DistListMemberField, Mapping<? extends Object, DistListMember>>(DistListMemberField.class);
+	public DistListMemberField[] newArray(int size) {
+		return new DistListMemberField[size];
+	}
+
+	@Override
+	protected EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> createMappings() {
+		final EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> mappings = new 
+				EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>>(DistListMemberField.class);
 
 		mappings.put(DistListMemberField.PARENT_CONTACT_ID, new IntegerMapping<DistListMember>("intfield01", "Parent contact ID") {
 

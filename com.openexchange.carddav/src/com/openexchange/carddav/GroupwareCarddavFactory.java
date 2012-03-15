@@ -89,6 +89,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.SessionHolder;
@@ -358,6 +359,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		private List<UserizedFolder> allFolders = null;		
 		private HashSet<String> folderBlacklist = null;		
 		private int defaultFolderId = Integer.MIN_VALUE;
+		private ContactService contactService = null;
 		
 		/**
 		 * Initializes a new {@link State}
@@ -366,6 +368,13 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		public State(final GroupwareCarddavFactory factory) {
 			super();
 			this.factory = factory;
+		}
+		
+		private ContactService getContactService() throws OXException {
+			if (null == this.contactService) {
+				contactService = this.factory.getContactService();
+			}
+			return contactService;
 		}
 
 		/**
@@ -557,16 +566,23 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		public Date getLastModified(final UserizedFolder folder) throws OXException {
 			final ContactField[] fields = new ContactField[] { ContactField.LAST_MODIFIED };
 			Date lastModified = folder.getLastModifiedUTC();
-			final Collection<Contact> modifiedContacts = factory.getContactService().modified(
-					factory.getSession(), folder.getID(), lastModified, fields);
-			for (final Contact contact : modifiedContacts) {
-				lastModified = Tools.getLatestModified(lastModified, contact);
-			}
-			final Collection<Contact> deletedContacts = factory.getContactService().deleted(
-					factory.getSession(), folder.getID(), lastModified, fields);
-			for (final Contact contact : deletedContacts) {
-				lastModified = Tools.getLatestModified(lastModified, contact);
-			}
+			SearchIterator<Contact> iterator = null;
+			try {
+				iterator = getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, fields);			
+				while (iterator.hasNext()) {
+					lastModified = Tools.getLatestModified(lastModified, iterator.next());
+				}
+			} finally {
+				close(iterator);
+			}				
+			try {
+				iterator = getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, fields);			
+				while (iterator.hasNext()) {
+					lastModified = Tools.getLatestModified(lastModified, iterator.next());
+				}
+			} finally {
+				close(iterator);
+			}				
 			return lastModified;
 		}
 		
@@ -610,8 +626,18 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public Collection<Contact> getModifiedContacts(final Date since, final int folderId) throws OXException  {
-			return factory.getContactService().modified(factory.getSession(), Integer.toString(folderId), since, BASIC_FIELDS);
+		public List<Contact> getModifiedContacts(final Date since, final int folderId) throws OXException  {
+			final List<Contact> contacts = new ArrayList<Contact>();
+			SearchIterator<Contact> iterator = null;
+			try {
+				iterator = getContactService().getModifiedContacts(factory.getSession(), Integer.toString(folderId), since, BASIC_FIELDS);
+				while (iterator.hasNext()) {
+					contacts.add(iterator.next());						
+				}
+			} finally {
+				close(iterator);
+			}
+			return contacts;
 		}
 		
 		/**
@@ -637,10 +663,20 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public Collection<Contact> getDeletedContacts(final Date since, final int folderId) throws OXException  {
-			return factory.getContactService().deleted(factory.getSession(), Integer.toString(folderId), since, BASIC_FIELDS);
+		public List<Contact> getDeletedContacts(final Date since, final int folderId) throws OXException  {
+			final List<Contact> contacts = new ArrayList<Contact>();
+			SearchIterator<Contact> iterator = null;
+			try {
+				iterator = getContactService().getDeletedContacts(factory.getSession(), Integer.toString(folderId), since, BASIC_FIELDS);
+				while (iterator.hasNext()) {
+					contacts.add(iterator.next());						
+				}
+			} finally {
+				close(iterator);
+			}
+			return contacts;
 		}
-		
+
 		/**
 		 * Determines whether the supplied folder is blacklisted and should be ignored or not.
 		 * @param userizedFolder
@@ -683,7 +719,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @throws ContextException
 		 */
 		private Contact load(final int objectId, final int inFolder) throws OXException {
-			final Contact contact = factory.getContactService().get(factory.getSession(), Integer.toString(inFolder), 
+			final Contact contact = getContactService().getContact(factory.getSession(), Integer.toString(inFolder), 
 					Integer.toString(objectId));
 			if (null == contact) {
 				LOG.warn("Contact '" + objectId + "' in folder '" + inFolder + "' not found.");
@@ -702,28 +738,36 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			final HashMap<String, Contact> cache = new HashMap<String, Contact>();			
 			final List<UserizedFolder> folders = this.getFolders(); 
 			for (final UserizedFolder folder : folders) {
-				final Collection<Contact> contacts = factory.getContactService().all(factory.getSession(), folder.getID(), BASIC_FIELDS);
-				for (final Contact contact : contacts) {
-					if (contact.getMarkAsDistribtuionlist()) {
-						continue;
-					} 
-					contact.setParentFolderID(Integer.parseInt(folder.getID()));
-					if (false == contact.containsUid() && false == this.tryAddUID(contact, folder)) {
-						LOG.warn("No UID found in contact '" + contact.toString() + "', skipping.");
-						continue;
+				final int folderId = Integer.parseInt(folder.getID());
+				SearchIterator<Contact> iterator = null;
+				try {
+					iterator = getContactService().getAllContacts(factory.getSession(), folder.getID(), BASIC_FIELDS);
+					while (iterator.hasNext()) {
+						final Contact contact = iterator.next();
+						if (contact.getMarkAsDistribtuionlist()) {
+							continue;
+						} 
+						contact.setParentFolderID(folderId);
+						if (false == contact.containsUid() && false == this.tryAddUID(contact, folder)) {
+							LOG.warn("No UID found in contact '" + contact.toString() + "', skipping.");
+							continue;
+						}
+						cache.put(contact.getUid(), contact);
 					}
-					cache.put(contact.getUid(), contact);
+				} finally {
+					close(iterator);
 				}
 			}	
 			return cache;
 		}
+		
 		
 		private boolean tryAddUID(final Contact contact, final UserizedFolder folder) {
             if (Permission.WRITE_OWN_OBJECTS < folder.getOwnPermission().getWritePermission()) {
             	LOG.debug("Adding uid for contact '" + contact.toString() + "'.");
 				try {
 					contact.setUid(UUID.randomUUID().toString());			
-					factory.getContactService().update(factory.getSession(), folder.getID(), Integer.toString(contact.getObjectID()), 
+					getContactService().updateContact(factory.getSession(), folder.getID(), Integer.toString(contact.getObjectID()), 
 							contact, contact.getLastModified());
 					return true;
 				} catch (final OXException e) {
@@ -731,6 +775,16 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				}
             }
 			return false;
+		}
+
+		private static void close(final SearchIterator<Contact> iterator) {
+			if (null != iterator) {
+				try { 
+					iterator.close();
+				} catch (final OXException e) { 
+					LOG.error(e.getMessage(), e); 
+				}
+			}
 		}
 	}
 }

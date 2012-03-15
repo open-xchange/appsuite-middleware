@@ -57,13 +57,22 @@ import java.util.EnumMap;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
+import com.openexchange.groupware.tools.mappings.database.DateMapping;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
+import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
+import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 
 /**
  * {@link ContactMapper} - Maps contact related fields to a corresponding {@link Mapping} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactMapper extends DefaultMapper<Contact, ContactField> {
+public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 	
 	public ContactMapper() {
 		super();
@@ -75,9 +84,14 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 	}
 
 	@Override
-	protected EnumMap<ContactField, Mapping<? extends Object, Contact>> createMappings() {
-		final EnumMap<ContactField, Mapping<? extends Object, Contact>> mappings = new 
-				EnumMap<ContactField, Mapping<? extends Object, Contact>>(ContactField.class);
+	public ContactField[] newArray(int size) {
+		return new ContactField[size];
+	}
+
+	@Override
+	protected EnumMap<ContactField, DbMapping<? extends Object, Contact>> createMappings() {
+		final EnumMap<ContactField, DbMapping<? extends Object, Contact>> mappings = new 
+				EnumMap<ContactField, DbMapping<? extends Object, Contact>>(ContactField.class);
 
         mappings.put(ContactField.DISPLAY_NAME, new VarCharMapping<Contact>("field01", "Display name") {
 
@@ -1717,6 +1731,29 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
+        mappings.put(ContactField.DISTRIBUTIONLIST, new DefaultDbMapping<DistributionListEntryObject[], Contact>(null, null, 0) {
+
+			@Override
+			public void set(Contact contact, DistributionListEntryObject[] value) {
+                contact.setDistributionList(value);
+			}
+
+			@Override
+			public boolean isSet(Contact contact) {
+				return contact.containsDistributionLists();
+			}
+
+			@Override
+			public DistributionListEntryObject[] get(Contact contact) {
+                return contact.getDistributionList();
+			}
+
+			@Override
+			public DistributionListEntryObject[] get(ResultSet resultSet) throws SQLException {
+				return null;
+			}
+		});
+
         mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>("intfield03", "Number of links") {
 
             @Override
@@ -1897,7 +1934,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>("image1", "Image 1", Types.VARBINARY) {
+        mappings.put(ContactField.IMAGE1, new DefaultDbMapping<byte[], Contact>("image1", "Image 1", Types.VARBINARY) {
 
 			@Override
 			public void set(Contact contact, byte[] value) {

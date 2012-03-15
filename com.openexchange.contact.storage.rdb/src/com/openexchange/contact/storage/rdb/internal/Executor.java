@@ -63,8 +63,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.contact.storage.SortOptions;
-import com.openexchange.contact.storage.SortOrder;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
@@ -163,6 +163,9 @@ public class Executor {
         }
         if (null != sortOptions && SortOptions.EMPTY != sortOptions) {
         	stringBuilder.append(' ').append(getOrderClause(sortOptions));
+        	if (0 < sortOptions.getLimit()) {
+            	stringBuilder.append(' ').append(getLimitClause(sortOptions));
+        	}
         }
         stringBuilder.append(';');
         /*
@@ -423,6 +426,20 @@ public class Executor {
     			for (int i = 1; i < order.length; i++) {
     				stringBuilder.append(' ').append(getOrderClause(order[i], collator));
     			}
+    		}
+    	}
+    	return stringBuilder.toString();
+    }
+    
+    private static String getLimitClause(final SortOptions sortOptions) throws OXException {
+    	final StringBuilder stringBuilder = new StringBuilder();
+    	if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+    		if (0 < sortOptions.getLimit()) {
+    			stringBuilder.append("LIMIT ");
+    			if (0 < sortOptions.getRangeStart()) {
+    				stringBuilder.append(sortOptions.getRangeStart()).append(',');
+    			}
+    			stringBuilder.append(sortOptions.getLimit());
     		}
     	}
     	return stringBuilder.toString();

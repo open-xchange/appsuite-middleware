@@ -78,7 +78,7 @@ public final class Mapper {
 	}
 
 	/**
-	 * Gets a mapping for th esupplied field.
+	 * Gets a mapping for the supplied field.
 	 * 
 	 * @param field the contact field
 	 * @return the mapping

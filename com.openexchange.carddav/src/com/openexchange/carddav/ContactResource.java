@@ -160,7 +160,7 @@ public class ContactResource extends CarddavResource {
         	/*
         	 * Insert contact
         	 */
-        	this.factory.getContactService().create(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
+        	this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
             LOG.debug(this.getUrl() + ": created.");
         } catch (final OXException e) {
         	if (Tools.isImageProblem(e)) {
@@ -199,7 +199,7 @@ public class ContactResource extends CarddavResource {
     		/*
     		 * Delete contact
     		 */
-        	this.factory.getContactService().delete(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
+        	this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
         			Integer.toString(contact.getObjectID()),  contact.getLastModified());
             LOG.debug(this.getUrl() + ": deleted.");
             this.contact = null;
@@ -228,7 +228,7 @@ public class ContactResource extends CarddavResource {
         	/*
         	 * Update contact 
         	 */
-        	this.factory.getContactService().update(factory.getSession(), Integer.toString(contact.getParentFolderID()),
+        	this.factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
         			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
             LOG.debug(this.getUrl() + ": saved.");
         } catch (final OXException e) {
