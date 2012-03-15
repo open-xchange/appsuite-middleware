@@ -60,7 +60,6 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.impl.EntityCleanUp;
 import com.openexchange.publish.impl.FolderCleanUpEventHandler;
@@ -68,19 +67,16 @@ import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
 
 /**
  * {@link CleanUpActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CleanUpActivator extends HousekeepingActivator {
 
     private List<ServiceRegistration<?>> registrations;
 
-    private Whiteboard whiteboard;
-
     @Override
     public void startBundle() throws Exception {
-        whiteboard = new Whiteboard(context);
-        final ContextService contexts = whiteboard.getService(ContextService.class);
+        final ContextService contexts = getService(ContextService.class);
 
         final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.getDefaultStorage());
 
@@ -112,14 +108,11 @@ public class CleanUpActivator extends HousekeepingActivator {
             registration.unregister();
         }
         registrations = null;
-        whiteboard.close();
-        whiteboard = null;
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[] { ContextService.class };
     }
 
 }

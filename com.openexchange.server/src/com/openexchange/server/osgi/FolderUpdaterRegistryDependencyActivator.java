@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,28 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.server.osgi;
 
-import java.util.Collection;
-import org.osgi.framework.BundleContext;
-import com.openexchange.tools.global.OXCloseable;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link WhiteboardFactoryService}
+ * {@link FolderUpdaterRegistryDependencyActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface WhiteboardFactoryService<T> {
-    public T create(BundleContext context, Collection<OXCloseable> closeables);
-    public Class<T> getType();
+public class FolderUpdaterRegistryDependencyActivator extends HousekeepingActivator {
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{FolderUpdaterRegistry.class};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        ServerServiceRegistry.getInstance().addService(FolderUpdaterRegistry.class, getService(FolderUpdaterRegistry.class));
+    }
+
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,57 +49,52 @@
 
 package com.openexchange.osgi;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.global.OXCloseable;
-
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * {@link Whiteboard}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * {@link DefaultServiceProvider}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Whiteboard implements OXCloseable {
+public class DefaultServiceProvider<S> implements ServiceProvider<S> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Whiteboard.class));
+    private static final class RankedService<S> implements Comparable<RankedService<S>> {
 
-    private final List<OXCloseable> closeables = new LinkedList<OXCloseable>();
+        protected final int ranking;
 
-    private final BundleContext context;
+        protected final S service;
 
-    private final DynamicWhiteboardFactory factory;
+        protected RankedService(S service, int ranking) {
+            super();
+            this.service = service;
+            this.ranking = ranking;
+        }
 
-    public Whiteboard(final BundleContext context) {
-        this.context = context;
-        factory = new DynamicWhiteboardFactory(context);
-        closeables.add(factory);
+        @Override
+        public int compareTo(RankedService<S> o) {
+            int thisVal = this.ranking;
+            int anotherVal = o.ranking;
+            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+        }
+
     }
 
-    public <T> T getService(final Class<T> klass) {
-        return factory.createWhiteboardService(context, klass, closeables, null);
-    }
+    private final Set<RankedService<S>> set;
 
-    public <T> T getService(final Class<T> klass, final DynamicServiceStateListener listener) {
-        return factory.createWhiteboardService(context, klass, closeables, listener);
-    }
-
-    public boolean isActive(final Object o) {
-        return factory.isActive(o);
+    public DefaultServiceProvider() {
+        super();
+        set = new TreeSet<RankedService<S>>();
     }
 
     @Override
-    public void close() throws OXException {
-        for(final OXCloseable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (final OXException x) {
-                LOG.error(x);
-            }
-        }
+    public S getService() {
+        return set.isEmpty() ? null : set.iterator().next().service;
     }
+
+    @Override
+    public void addService(S service, int ranking) {
+        set.add(new RankedService<S>(service, ranking));
+    }
+
 }

@@ -57,7 +57,6 @@ import com.openexchange.config.cascade.context.ContextConfigProvider;
 import com.openexchange.config.cascade.context.ContextSetConfigProvider;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.userconf.UserConfigurationService;
 
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
@@ -82,10 +81,8 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
             registerService(ConfigProviderService.class, provider, properties);
         }
 
-        {
-            Whiteboard whiteboard = new Whiteboard(context);
-
-            ConfigViewFactory configViews = whiteboard.getService(ConfigViewFactory.class);
+        {   
+            ConfigViewFactory configViews = getService(ConfigViewFactory.class);
 
             ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration, userConfigs, configViews);
 

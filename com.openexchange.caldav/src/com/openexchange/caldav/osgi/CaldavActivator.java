@@ -51,6 +51,7 @@ package com.openexchange.caldav.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.mixins.CalendarHomeSet;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
@@ -63,7 +64,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
@@ -79,10 +79,14 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavActivator extends HousekeepingActivator {
+    
+    private static final String SERVLET_PATH = "/servlet/dav/caldav";
+    
+    private static final String NULL_PATH = "/servlet/dav/dev/null";
 
     private static final Log LOG = LogFactory.getLog(CaldavActivator.class);
     
-    private static final Class[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class};
+    private static final Class<?>[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class, HttpService.class};
 
     private OSGiPropertyMixin mixin;
     
@@ -97,8 +101,9 @@ public class CaldavActivator extends HousekeepingActivator {
             CalDAV.setServiceLookup(this);
             CaldavPerformer.setServices(this);
             
-            rememberTracker(new ServletRegistration(context, new CalDAV(), "/servlet/dav/caldav"));
-            rememberTracker(new ServletRegistration(context, new DevNullServlet(), "/servlet/dav/dev/null")); // FIXME activate this elsewhere
+            HttpService httpService = getService(HttpService.class);
+            httpService.registerServlet(SERVLET_PATH, new CalDAV(), null, null);
+            httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
             
             CaldavPerformer performer = CaldavPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
@@ -123,6 +128,10 @@ public class CaldavActivator extends HousekeepingActivator {
     
     @Override
     protected void stopBundle() throws Exception {
+        HttpService httpService = getService(HttpService.class);
+        httpService.unregister(SERVLET_PATH);
+        httpService.unregister(NULL_PATH);
+        
         mixin.close();
         super.stopBundle();
     }

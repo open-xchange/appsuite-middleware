@@ -51,8 +51,8 @@ package com.openexchange.webdav.acl.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalServlet;
@@ -71,7 +71,7 @@ public class WebdavACLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+        return new Class<?>[] { UserService.class, HttpService.class };
     }
 
     @Override
@@ -79,7 +79,7 @@ public class WebdavACLActivator extends HousekeepingActivator {
         try {
             WebdavPrincipalPerformer.setServices(this);
 
-            rememberTracker(new ServletRegistration(context, new WebdavPrincipalServlet(), "/servlet/dav/principals/users"));
+            getService(HttpService.class).registerServlet("/servlet/dav/principals/users", new WebdavPrincipalServlet(), null, null);
 
             final WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);

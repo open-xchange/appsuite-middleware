@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,29 @@
  *
  */
 
-package com.openexchange.tools.service;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.List;
-import javax.servlet.http.HttpServlet;
-import org.osgi.framework.BundleContext;
-import com.openexchange.ajax.SessionServlet;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
+package com.openexchange.osgi;
 
 
 /**
- * {@link SessionServletRegistration}
+ * {@link ServiceProvider}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class SessionServletRegistration extends ServletRegistration {
+public interface ServiceProvider<S> {
 
-    public SessionServletRegistration(BundleContext context, HttpServlet item, String alias, String...configKeys) {
-        super(context, item, alias, addSessionConfigKeys(configKeys));
-    }
+    /**
+     * Gets the highest-ranked service available in this provider
+     * 
+     * @return The highest-ranked service
+     */
+    S getService();
 
-    private static List<String> addSessionConfigKeys(String[] configKeys) {
-        List<String> allKeys = new ArrayList<String>(Arrays.asList(configKeys));
-        allKeys.add(Property.IP_CHECK.getPropertyName());
-        allKeys.add(Property.COOKIE_HASH.getPropertyName());
-        return allKeys;
-    }
-
-    @Override
-    protected void customizeInitParams(Dictionary<String, String> initParams) {
-        ConfigurationService configurationService = getService(ConfigurationService.class);
-        final String text = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
-        if(text != null) {
-            initParams.put(SessionServlet.SESSION_WHITELIST_FILE, text);
-        }
-    }
-
-
+    /**
+     * Adds specified service to this service provider
+     * 
+     * @param service The service
+     * @param ranking The service's ranking
+     */
+    void addService(S service, int ranking);
 
 }

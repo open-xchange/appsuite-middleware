@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,79 +49,33 @@
 
 package com.openexchange.osgi;
 
-import java.util.Dictionary;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-
-
 /**
- * {@link ConditionalRegistration}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * {@link SimpleServiceProvider}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ConditionalRegistration {
-    protected BundleContext context;
-    protected String serviceName;
-    protected Object service;
-    protected Dictionary dictionary;
-    protected ServiceRegistration registration;
-    private boolean running;
+public final class SimpleServiceProvider<S> implements ServiceProvider<S> {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConditionalRegistration.class));
+    private final S service;
 
-    public ConditionalRegistration(final BundleContext context, final String serviceName, final Object service, final Dictionary dict) {
-        this.context = context;
-        this.serviceName = serviceName;
+    /**
+     * Initializes a new {@link SimpleServiceProvider}.
+     * 
+     * @param service The service
+     */
+    public SimpleServiceProvider(S service) {
+        super();
         this.service = service;
-        dictionary = dict;
     }
 
-    public void check() {
-        if(!running) {
-            return;
-        }
-        if(!registered() && mustRegister()) {
-            register();
-        } else if (registered() && ! mustRegister()) {
-            unregister();
-        }
+    @Override
+    public S getService() {
+        return service;
     }
 
-    private synchronized void unregister() {
-        if(registration != null) {
-            LOG.info("Unregistering "+service+" as "+serviceName+". ");
-            registration.unregister();
-            registration = null;
-        }
-    }
-
-
-    private synchronized void register() {
-        if(registration == null && service != null && running) {
-            registration = context.registerService(serviceName, service, dictionary);
-            LOG.info("Registering "+service+" as "+serviceName);
-        }
-    }
-
-    protected boolean mustRegister() {
-        return true;
-    }
-
-    private synchronized boolean registered() {
-        return registration != null;
-    }
-
-    public void start() {
-        running = true;
-        check();
-    }
-
-    public void close() {
-        running = false;
-        unregister();
+    @Override
+    public void addService(S service, int ranking) {
+        // Nope
     }
 
 }

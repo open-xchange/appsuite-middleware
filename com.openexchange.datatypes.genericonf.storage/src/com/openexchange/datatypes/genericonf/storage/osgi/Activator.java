@@ -50,7 +50,7 @@
 package com.openexchange.datatypes.genericonf.storage.osgi;
 
 import com.openexchange.database.CreateTableService;
-import com.openexchange.database.osgiservice.WhiteboardDBProvider;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
@@ -62,14 +62,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[] { DBProvider.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
-        mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
+        mySQLGenericConfigurationStorage.setDBProvider(getService(DBProvider.class));
         registerService(DeleteListener.class, new ClearGenConfTables(), null);
         registerService(CreateTableService.class, new CreateGenConfTables(), null);
         registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);

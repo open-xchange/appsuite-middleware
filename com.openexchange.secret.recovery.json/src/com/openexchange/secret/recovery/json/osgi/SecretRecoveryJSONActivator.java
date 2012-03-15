@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -68,18 +67,15 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class };
+        return new Class<?>[] { SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            final Whiteboard whiteboard = new Whiteboard(context);
-
-            final SecretService secretService = whiteboard.getService(SecretService.class);
-            final SecretMigrator migrator = whiteboard.getService(SecretMigrator.class);
-            final SecretInconsistencyDetector detector = whiteboard.getService(SecretInconsistencyDetector.class);
+            final SecretService secretService = getService(SecretService.class);
+            final SecretMigrator migrator = getService(SecretMigrator.class);
+            final SecretInconsistencyDetector detector = getService(SecretInconsistencyDetector.class);
 
             AbstractSecretRecoveryAction.detector = detector;
             AbstractSecretRecoveryAction.migrator = migrator;

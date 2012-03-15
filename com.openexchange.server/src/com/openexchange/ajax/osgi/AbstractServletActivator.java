@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,62 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.ajax.osgi;
 
-import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CachingLoader;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.InfostoreDocumentLoader;
-import com.openexchange.publish.impl.InfostoreFolderLoader;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
- * {@link LoaderActivator}
+ * {@link AbstractServletActivator}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class LoaderActivator extends HousekeepingActivator {
+public abstract class AbstractServletActivator extends HousekeepingActivator {
 
-    @Override
-    public void startBundle() throws Exception {
-        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractServletActivator.class));
 
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserService users = getService(UserService.class);
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
-        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
-        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
+    private List<String> servlets = new ArrayList<String>();
 
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactInterfaceFactory.class));
-        compositeLoader.registerLoader("contacts", contactLoader);
+    protected void registerServlet(String alias, HttpServlet servlet, HttpService httpService) {
+        registerServlet(alias, servlet, null, httpService);
+    }
 
-        registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
+    protected void registerServlet(String alias, HttpServlet servlet, Dictionary<String, String> params, HttpService httpService) {
+        try {
+            httpService.registerServlet(alias, servlet, params, null);
+            servlets.add(alias);
+        } catch (ServletException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NamespaceException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
+    protected void cleanUp() {
+        unregisterServlets();
+        super.cleanUp();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };
+    private void unregisterServlets() {
+        HttpService httpService = getService(HttpService.class);
+        for (String servlet : servlets) {
+            httpService.unregister(servlet);
+        }
+    }
+    
+    protected void unregisterServlet(String alias) {
+        HttpService httpService = getService(HttpService.class);
+        httpService.unregister(alias);
+        servlets.remove(alias);
     }
 
 }

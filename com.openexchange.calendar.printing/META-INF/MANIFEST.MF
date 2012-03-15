@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.calendar.printing.osgi.CalendarPrintingActiva
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.osgi,
  com.openexchange.api2,
  com.openexchange.exception,
  com.openexchange.group,

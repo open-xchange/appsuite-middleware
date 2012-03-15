@@ -50,6 +50,7 @@
 package com.openexchange.frontend.uwa.json.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.frontend.uwa.json.actions.UWAActions;
@@ -58,23 +59,18 @@ import com.openexchange.frontend.uwa.json.servlet.UWAWidgetServlet;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.service.ServletRegistration;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link UWAJSONActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UWAJSONActivator extends HousekeepingActivator {
-
-    private ServletRegistration servletRegistration;
+public class UWAJSONActivator extends AbstractSessionServletActivator {
 
     private static final Class[] CLASSES = new Class[] { UWAWidgetServiceFactory.class, HttpService.class, ConfigViewFactory.class };
 
     @Override
-    protected Class<?>[] getNeededServices() {
+    protected Class<?>[] getAdditionalNeededServices() {
         return CLASSES;
     }
 
@@ -88,17 +84,9 @@ public class UWAJSONActivator extends HousekeepingActivator {
 
         UWAWidgetServlet.FACTORY = actions;
 
-        servletRegistration = new SessionServletRegistration(context, new UWAWidgetServlet(), "/ajax/uwaWidgets");
+        registerSessionServlet("/ajax/uwaWidgets", new UWAWidgetServlet());
 
         registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        if (servletRegistration != null) {
-            servletRegistration.close();
-        }
-        super.stopBundle();
     }
 
 }

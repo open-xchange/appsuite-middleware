@@ -57,7 +57,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  *
@@ -68,8 +67,6 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
     private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
-
-	private SessionServletRegistration servletRegistration;
 
 	public MobilityProvisioningActivator() {
 		super();
@@ -113,9 +110,8 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 					}
 				}
 			}
-
-			this.servletRegistration = new SessionServletRegistration(context, new MobilityProvisioningServlet(), SERVLET_PATH);
-			this.servletRegistration.open();
+ 
+			getService(HttpService.class).registerServlet(SERVLET_PATH, new MobilityProvisioningServlet(), null, null);
 
             track(ActionService.class, new ActionServiceListener(context));
             openTrackers();
@@ -129,11 +125,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-		    if(this.servletRegistration != null) {
-	            this.servletRegistration.close();
-	            this.servletRegistration = null;
-		    }
-
+		    getService(HttpService.class).unregister(SERVLET_PATH);
             /*
              * Close service trackers
              */
