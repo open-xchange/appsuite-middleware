@@ -54,23 +54,32 @@ import static com.openexchange.index.solr.internal.SolrUtils.rollback;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.TriggerType;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.SolrIndexIdentifier;
+import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -292,14 +301,63 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.index.IndexAccess#query(com.openexchange.index.QueryParameters)
-     */
     @Override
     public IndexResult<MailMessage> query(final QueryParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (null == parameters) {
+            return Indexes.emptyList();
+        }
+        try {
+            final CommonsHttpSolrServer solrServer = solrServerFor();
+            final String handler = parameters.getHandler();
+            final String queryString = parameters.getQueryString();
+            final int offset = parameters.getOff();
+            final int length = parameters.getLen();
+            /*
+             * Page-wise retrieval
+             */
+            final Integer rows = Integer.valueOf(length > QUERY_ROWS ? QUERY_ROWS : length);
+            final String[] fieldArray;
+            final int off;
+            final long numFound;
+            final List<MailMessage> mails;
+            final List<MailFiller> mailFillers;
+            {
+                final SolrQuery solrQuery = new SolrQuery().setQuery(queryString);
+                solrQuery.setStart(Integer.valueOf(offset));
+                solrQuery.setRows(rows);
+                final Set<String> set = new HashSet<String>(fields.length);
+                for (final MailField field : fields) {
+                    final List<String> list = field2Name.get(field);
+                    if (null != list) {
+                        for (final String str : list) {
+                            set.add(str);
+                        }
+                    }
+                }
+                addMandatoryField(set);
+                fieldArray = set.toArray(new String[set.size()]);
+                solrQuery.setFields(fieldArray);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                numFound = results.getNumFound();
+                if (numFound <= 0) {
+                    return Collections.emptyList();
+                }
+                mails = new ArrayList<MailMessage>((int) numFound);
+                mailFillers = fillersFor(mailFields);
+                final int size = results.size();
+                for (int i = 0; i < size; i++) {
+                    mails.add(readDocument(results.get(i), mailFillers));
+                }
+                off = size;
+            }
+            
+        
+        } catch (final SolrServerException e) {
+            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
