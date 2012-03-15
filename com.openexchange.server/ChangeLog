@@ -1,3 +1,7 @@
+* 2012-03-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21776: Using already established threads awaiting tasks in thread pool
+
 * 2012-03-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 21762: Introduced config tree entry "modules/unifiedMail/module"" to signal presence of Unified Mail feature
