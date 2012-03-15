@@ -56,13 +56,33 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.tools.mappings.DefaultMapper;
 
 /**
- * {@link Mapper} - Maps contact fields to contact mappings
+ * {@link ContactMapper} - Maps contact fields to contact mappings
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class Mapper {
+public class ContactMapper extends DefaultMapper<Contact, ContactField> {
+	
+    private static final ContactMapper INSTANCE = new ContactMapper();
+
+    /**
+     * Gets the ContactMapper instance.
+     *
+     * @return The ContactMapper instance.
+     */
+    public static ContactMapper getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link ContactMapper}.
+     */
+    private ContactMapper() {
+        super();
+        
+    }
 
 	/**
 	 * Validates all properties of the supplied contact by executing the 
@@ -71,72 +91,34 @@ public final class Mapper {
 	 * @param contact the contact to validate
 	 * @throws OXException
 	 */
-	public static void validateAll(final Contact contact) throws OXException {
-		for (Mapping<? extends Object> mapping : mappings.values()) {
+	public void validateAll(final Contact contact) throws OXException {
+		for (ContactMapping<? extends Object> mapping : mappings.values()) {
 			mapping.validate(contact);			
 		}
 	}
 
-	/**
-	 * Gets a mapping for the supplied field.
-	 * 
-	 * @param field the contact field
-	 * @return the mapping
-	 * @throws OXException
-	 */
-	public static final Mapping<? extends Object> get(final ContactField field) throws OXException {
-		final Mapping<? extends Object> mapping = mappings.get(field);
-		if (null == mapping) {
-			throw OXException.general("No mapping for field " + field + ".");
-		}
-		return mapping;
-	}
-	
-	/**
-	 * Creates a new contact and sets all those properties that are different 
-	 * in the supplied contact to the values from the second contact, thus, 
-	 * generating some kind of a 'delta' contact object.
-	 * 
-	 * @param original the original contact
-	 * @param update the updated contact
-	 * @return a contact containing the properties that are different
-	 * @throws OXException
-	 */
-	public static Contact getDifferences(final Contact original, final Contact update) throws OXException {
-		final Contact delta = new Contact();
-		for (final Mapping<? extends Object> mapping : mappings.values()) {
-			if (mapping.isSet(update) && (false == mapping.isSet(original) || false == mapping.equals(original, update))) {
-				mapping.copy(update, delta);
-			}
-		}
-		return delta;
+
+	@Override
+	public Contact newInstance() {
+		return new Contact();
 	}
 
-	/**
-	 * Creates a new contact and sets all properties to the values found in the 
-	 * supplied contacts, preferring the updated one. Doing so, the result 
-	 * represents a new contact that is merged from the supplied ones.   
-	 * 
-	 * @param original the contact to merge the differences into
-	 * @param update the contact containing the changes
-	 * @return the merged contact
-	 * @throws OXException
-	 */
-	public static Contact mergeDifferences(final Contact original, final Contact update) throws OXException {
-		final Contact merged = new Contact();
-		for (final Mapping<? extends Object> mapping : mappings.values()) {
-			mapping.copy(mapping.isSet(update) ? update : original, merged);
-		}
-		return merged;
+	@Override
+	public ContactField[] newArray(int size) {
+		return new ContactField[size];
 	}
+
+	@Override
+	protected EnumMap<ContactField, ? extends com.openexchange.groupware.tools.mappings.Mapping<? extends Object, Contact>> getMappings() {
+		return mappings;
+	}	
 
 	/**
 	 * Holds all known contact mappings.
 	 */
-	private static final EnumMap<ContactField, Mapping<? extends Object>> mappings;	
+	private static final EnumMap<ContactField, ContactMapping<? extends Object>> mappings;	
 	static {
-		mappings = new EnumMap<ContactField, Mapping<? extends Object>>(ContactField.class);
-
+		mappings = new EnumMap<ContactField, ContactMapping<? extends Object>>(ContactField.class);
         mappings.put(ContactField.DISPLAY_NAME, new StringMapping() {
 
             @Override
@@ -1739,7 +1721,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.OBJECT_ID, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.OBJECT_ID, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1757,7 +1739,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1775,7 +1757,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_LINKS, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.NUMBER_OF_LINKS, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1793,7 +1775,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.DISTRIBUTIONLIST, new DefaultMapping<DistributionListEntryObject[]>() {
+        mappings.put(ContactField.DISTRIBUTIONLIST, new ContactMapping<DistributionListEntryObject[]>() {
 
             @Override
             public void set(Contact contact, DistributionListEntryObject[] value) { 
@@ -1833,7 +1815,7 @@ public final class Mapper {
 //            }
 //        });
 
-        mappings.put(ContactField.FOLDER_ID, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.FOLDER_ID, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1851,7 +1833,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.CONTEXTID, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.CONTEXTID, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1869,7 +1851,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.CREATED_BY, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.CREATED_BY, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1887,7 +1869,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.MODIFIED_BY, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.MODIFIED_BY, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -1905,7 +1887,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.CREATION_DATE, new DefaultMapping<Date>() {
+        mappings.put(ContactField.CREATION_DATE, new ContactMapping<Date>() {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -1923,7 +1905,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED, new DefaultMapping<Date>() {
+        mappings.put(ContactField.LAST_MODIFIED, new ContactMapping<Date>() {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -1941,7 +1923,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.BIRTHDAY, new DefaultMapping<Date>() {
+        mappings.put(ContactField.BIRTHDAY, new ContactMapping<Date>() {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -1959,7 +1941,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.ANNIVERSARY, new DefaultMapping<Date>() {
+        mappings.put(ContactField.ANNIVERSARY, new ContactMapping<Date>() {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -1977,7 +1959,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[]>() {
+        mappings.put(ContactField.IMAGE1, new ContactMapping<byte[]>() {
 
             @Override
             public void set(Contact contact, byte[] value) { 
@@ -1999,7 +1981,7 @@ public final class Mapper {
 			}
         });
 
-        mappings.put(ContactField.IMAGE_LAST_MODIFIED, new DefaultMapping<Date>() {
+        mappings.put(ContactField.IMAGE_LAST_MODIFIED, new ContactMapping<Date>() {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -2017,7 +1999,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.INTERNAL_USERID, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.INTERNAL_USERID, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2035,7 +2017,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.COLOR_LABEL, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.COLOR_LABEL, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2071,7 +2053,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.DEFAULT_ADDRESS, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.DEFAULT_ADDRESS, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2089,7 +2071,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new DefaultMapping<Boolean>() {
+        mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new ContactMapping<Boolean>() {
 
             @Override
             public void set(Contact contact, Boolean value) { 
@@ -2111,7 +2093,7 @@ public final class Mapper {
 			}
         });
 
-        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2183,7 +2165,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_IMAGES, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.NUMBER_OF_IMAGES, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2202,7 +2184,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new DefaultMapping<Date>() {
+        mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new ContactMapping<Date>() {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -2220,7 +2202,7 @@ public final class Mapper {
             }
         });
 
-        mappings.put(ContactField.USE_COUNT, new DefaultMapping<Integer>() {
+        mappings.put(ContactField.USE_COUNT, new ContactMapping<Integer>() {
 
             @Override
             public void set(Contact contact, Integer value) { 

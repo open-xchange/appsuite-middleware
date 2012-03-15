@@ -47,33 +47,63 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
+package com.openexchange.contact;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link DefaultMapping} - Default mapping properties in contacts using 
- * a generic comparison for the <code>copy</code>-and <code>equals</code>-
- * operations and providing an emtpy validation routine. 
+ * {@link TruncatedContactAttribute} - {@link Truncated} implementation using 
+ * contact fields to identify the truncated attribute. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultMapping<T> implements Mapping<T> {
-
-	@Override
-	public void validate(Contact contact) throws OXException {
-	}
-
-	@Override
-	public boolean equals(Contact contact1, Contact contact2) {
-		final T value1 = this.get(contact1);
-		final T value2 = this.get(contact2);
-        return null == value1 ? null == value2 : value1.equals(value2);
+public class TruncatedContactAttribute implements Truncated {
+	
+	private final ContactField field;
+	private final int maxSize;
+	private final int length;
+	
+	/**
+	 * Initializes a new {@link TruncatedContactAttribute}.
+	 * 
+	 * @param field the field where the data truncation occurred
+	 * @param maxSize the maximum size for the attribute
+	 * @param length the actual length of the value
+	 */
+	public TruncatedContactAttribute(final ContactField field, final int maxSize, final int length) {
+		this.field = field;
+		this.maxSize = maxSize;
+		this.length = length;		 
 	}
 	
+	/**
+	 * Gets the field representing the contact attribute where the data 
+	 * truncation occurred.
+	 * 
+	 * @return the field
+	 */
+	public ContactField getField() {
+		return this.field;
+	}
+
+	/**
+	 * {@link Deprecated} - use <code>getField()</code> directly and determine 
+	 * field ID in ajax layer internally afterwards.
+	 */
+	@Deprecated 
 	@Override
-	public void copy(Contact from, Contact to) throws OXException {
-		this.set(to, this.get(from));
+	public int getId() {
+		return this.getField().getNumber();
+	}
+
+	@Override
+	public int getMaxSize() {
+		return this.maxSize;
+	}
+
+	@Override
+	public int getLength() {
+		return this.length;
 	}
 }

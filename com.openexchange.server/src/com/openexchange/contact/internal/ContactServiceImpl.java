@@ -57,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.internal.mapping.Mapper;
+import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -309,7 +309,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		Mapper.validateAll(contact);		
+		ContactMapper.getInstance().validateAll(contact);		
 		/*
 		 * check folder
 		 */
@@ -367,7 +367,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		Mapper.validateAll(contact);
+		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		}
@@ -412,7 +412,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = Mapper.getDifferences(storedContact, contact);
+		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		} else if (delta.containsObjectID()) {
@@ -458,15 +458,15 @@ public class ContactServiceImpl implements ContactService {
 			/*
 			 * different storage, perform delete & create of complete contact information
 			 */
-			final Contact movedContact = Mapper.mergeDifferences(storedContact, delta); 
-			targetStorage.create(contextID, targetFolderId, movedContact);
+			ContactMapper.getInstance().mergeDifferences(storedContact, delta); 
+			targetStorage.create(contextID, targetFolderId, storedContact);
 			try {
 				sourceStorage.delete(contextID, userID, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
 				LOG.warn("error deleting contact from source folder, rolling back move operation", e);
-				// simple rollback for now
-				targetStorage.delete(contextID, userID, targetFolderId, Integer.toString(movedContact.getObjectID()), 
-						movedContact.getLastModified());
+				// TODO: simple rollback for now
+				targetStorage.delete(contextID, userID, targetFolderId, Integer.toString(storedContact.getObjectID()), 
+						storedContact.getLastModified());
 				throw e;
 			}
 		}
@@ -478,7 +478,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		Mapper.validateAll(contact);
+		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		}
@@ -516,7 +516,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = Mapper.getDifferences(storedContact, contact);
+		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		} else if (delta.containsObjectID()) {
