@@ -57,9 +57,11 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.carddav.mapping.ContactMapper;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -81,27 +83,27 @@ public class ContactResource extends CarddavResource {
 	/**
 	 * All contact fields that may be set in vCards
 	 */
-    private static final int[] CARDDAV_FIELDS = {
-    	Contact.DISPLAY_NAME, // FN
-    	Contact.SUR_NAME, Contact.GIVEN_NAME, // N
-    	Contact.COMPANY, // ORG
-    	Contact.EMAIL1, // EMAIL;type=WORK
-    	Contact.EMAIL2, // EMAIL;type=HOME
-    	Contact.CELLULAR_TELEPHONE1, // TEL;type=VOICE;type=CELL
-    	Contact.CELLULAR_TELEPHONE2, // TEL;type=VOICE;type=IPHONE
-    	Contact.TELEPHONE_HOME1, // TEL;type=VOICE;type=HOME
-    	Contact.TELEPHONE_BUSINESS1, // TEL;type=VOICE;type=WORK
-    	Contact.TELEPHONE_BUSINESS2, // TEL;type=VOICE;type=MAIN //TODO:Contact.TELEPHONE_COMPANY?
-    	Contact.FAX_HOME, // TEL;type=HOME;type=FAX
-    	Contact.FAX_BUSINESS, // TEL;type=WORK;type=FAX
-    	Contact.FAX_OTHER, // TEL;type=OTHER;type=FAX
-    	Contact.TELEPHONE_PAGER, // TEL;type=PAGER
-    	Contact.NOTE, // NOTE
-    	Contact.URL, // URL
-    	Contact.STREET_HOME, Contact.POSTAL_CODE_HOME, Contact.CITY_HOME, Contact.COUNTRY_HOME, // ADR;TYPE=home
-    	Contact.STREET_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, // ADR;TYPE=work
-    	Contact.PROFESSION, // TITLE
-    };
+//    private static final int[] CARDDAV_FIELDS = {
+//    	Contact.DISPLAY_NAME, // FN
+//    	Contact.SUR_NAME, Contact.GIVEN_NAME, // N
+//    	Contact.COMPANY, // ORG
+//    	Contact.EMAIL1, // EMAIL;type=WORK
+//    	Contact.EMAIL2, // EMAIL;type=HOME
+//    	Contact.CELLULAR_TELEPHONE1, // TEL;type=VOICE;type=CELL
+//    	Contact.CELLULAR_TELEPHONE2, // TEL;type=VOICE;type=IPHONE
+//    	Contact.TELEPHONE_HOME1, // TEL;type=VOICE;type=HOME
+//    	Contact.TELEPHONE_BUSINESS1, // TEL;type=VOICE;type=WORK
+//    	Contact.TELEPHONE_BUSINESS2, // TEL;type=VOICE;type=MAIN //TODO:Contact.TELEPHONE_COMPANY?
+//    	Contact.FAX_HOME, // TEL;type=HOME;type=FAX
+//    	Contact.FAX_BUSINESS, // TEL;type=WORK;type=FAX
+//    	Contact.FAX_OTHER, // TEL;type=OTHER;type=FAX
+//    	Contact.TELEPHONE_PAGER, // TEL;type=PAGER
+//    	Contact.NOTE, // NOTE
+//    	Contact.URL, // URL
+//    	Contact.STREET_HOME, Contact.POSTAL_CODE_HOME, Contact.CITY_HOME, Contact.COUNTRY_HOME, // ADR;TYPE=home
+//    	Contact.STREET_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, // ADR;TYPE=work
+//    	Contact.PROFESSION, // TITLE
+//    };
 
     private static final OXContainerConverter converter = new OXContainerConverter((TimeZone) null, (String) null);
     
@@ -296,21 +298,29 @@ public class ContactResource extends CarddavResource {
 		        /*
 		         * Check for property changes
 		         */
-		        for (final int field : ContactResource.CARDDAV_FIELDS) {
-					if (this.contact.contains(field)) {
-						if (false == newContact.contains(field)) {
+				for (final Mapping<? extends Object, Contact> mapping : ContactMapper.getInstance().getMappings().values()) {
+					if (mapping.isSet(this.contact)) {
+						if (false == mapping.isSet(newContact)) {
 							// set this one explicitly so that the property gets removed during update
-							newContact.set(field, newContact.get(field));
-						} else {
-							final Object oldValue = this.contact.get(field);
-							final Object newValue = newContact.get(field);
-							if (null == oldValue && null == newValue || null != oldValue && oldValue.equals(newValue)) {
-								// this is no change, so ignore in update
-								newContact.remove(field);								
-							}
+							mapping.copy(newContact, newContact);
 						}
 					}
 				}
+//		        for (final int field : ContactResource.CARDDAV_FIELDS) {
+//					if (this.contact.contains(field)) {
+//						if (false == newContact.contains(field)) {
+//							// set this one explicitly so that the property gets removed during update
+//							newContact.set(field, newContact.get(field));
+//						} else {
+//							final Object oldValue = this.contact.get(field);
+//							final Object newValue = newContact.get(field);
+//							if (null == oldValue && null == newValue || null != oldValue && oldValue.equals(newValue)) {
+//								// this is no change, so ignore in update
+//								newContact.remove(field);								
+//							}
+//						}
+//					}
+//				}
 		        /*
 		         * Never update the UID
 		         */

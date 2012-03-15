@@ -97,7 +97,6 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 		}
 	}
 
-
 	@Override
 	public Contact newInstance() {
 		return new Contact();
