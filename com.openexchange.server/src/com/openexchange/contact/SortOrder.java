@@ -47,72 +47,39 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
+package com.openexchange.contact;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.search.Order;
 
 /**
- * {@link Mapping} - Generic mapping operations for contact properties.
+ * {@link SortOrder} - The sort order 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Mapping<T> {
+public final class SortOrder {
 	
-	/**
-	 * Gets a value indicating whether the mapped property is set in the 
-	 * supplied contact or not. This is usually done by passing the result
-	 * of the contact instance's <code>containsXXX</code>-method.
-	 * 
-	 * @param contact the contact
-	 * @return <code>true</code>, if the property is set, <code>false</code>,
-	 * otherwise.
-	 */
-	boolean isSet(Contact contact);
+	private final ContactField by;
+	private final Order order;
+	
+	public SortOrder(final ContactField by, final Order order) {
+		this.by = by;
+		this.order = order;
+	}
 
 	/**
-	 * Sets the mapped property in the contact to the given value.
-	 * 
-	 * @param contact the contact to set the property for
-	 * @param value the value to set
-	 * @throws OXException
+	 * @return the order
 	 */
-	void set(Contact contact, T value) throws OXException;
-	
-	/**
-	 * Gets the mapped property's value from a contact.
-	 * 
-	 * @param contact the contact to get the property value from
-	 * @return the value
-	 */
-	T get(Contact contact);
+	public Order getOrder() {
+		return order;
+	}
 
 	/**
-	 * Validates the property in a contact, throwing exceptions if validation
-	 * fails.
-	 * 
-	 * @param contact the contact to validate the property for
-	 * @throws OXException 
+	 * @return the by
 	 */
-	void validate(Contact contact) throws OXException;
-
-	/**
-	 * Gets a value indicating whether a property's value is equal in two 
-	 * contacts or not.
-	 * 
-	 * @param contact1 the first contact for comparison
-	 * @param contact2 the second contact for comparison
-	 * @return
-	 */
-	boolean equals(Contact contact1, Contact contact2);
+	public ContactField getBy() {
+		return by;
+	}
 	
-	/**
-	 * Copies the value of a property in one contact to another one.
-	 * 
-	 * @param from the contact to read the property value from
-	 * @param to the contact to set the property
-	 * @throws OXException
-	 */
-	void copy(Contact from, Contact to) throws OXException;
 	
 }

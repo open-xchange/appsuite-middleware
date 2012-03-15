@@ -54,8 +54,13 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.push.udp.registry.PushServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * MultiCastPushSocket
@@ -67,7 +72,7 @@ public class PushMulticastSocket implements Runnable {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMulticastSocket.class));
 
-    private Thread thread;
+    private Future<Object> thread;
 
     private static MulticastSocket multicastSocket;
 
@@ -89,9 +94,8 @@ public class PushMulticastSocket implements Runnable {
                 multicastSocket = new MulticastSocket(multicastPort);
                 multicastSocket.joinGroup(multicastAddress);
 
-                thread = new Thread(this);
-                thread.setName(PushMulticastSocket.class.getName());
-                thread.start();
+                final ThreadPoolService threadPool = PushServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+                thread = threadPool.submit(ThreadPools.task(this));
             } else {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Multicast Socket is disabled");
@@ -133,11 +137,14 @@ public class PushMulticastSocket implements Runnable {
         }
         if (null != thread) {
             try {
-                thread.join();
+                thread.get();
             } catch (final InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
                 LOG.error(e.getMessage(), e);
+            } catch (final ExecutionException e) {
+                final Throwable cause = e.getCause();
+                LOG.error(cause.getMessage(), cause);
             }
             thread = null;
         }

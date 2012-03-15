@@ -47,44 +47,68 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.groupware.tools.mappings.database;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.openexchange.exception.OXException;
-
+import com.openexchange.groupware.tools.mappings.DefaultMapping;
 
 /**
- * {@link DefaultMapping} - 
+ * {@link DefaultDbMapping} - Abstract {@link DbMapping} implementation.
  *
+ * @param <T> the type of the property
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @param <T>
- * @param <O>
  */
-public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
-	
-	private final String columnName;
+public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implements DbMapping<T, O> {
+
+	private final String columnLabel;
+	private final String readableName;
 	private final int sqlType;
 	
-	public DefaultMapping(final String columnName, final int sqlType) {
+	/**
+	 * Initializes a new {@link DefaultDbMapping}.
+	 * 
+	 * @param columnLabel the column label
+	 * @param sqlType the SQL type
+	 */
+	public DefaultDbMapping(final String columnLabel, final int sqlType) {
+		this(columnLabel, null, sqlType);
+	}
+
+	/**
+	 * Initializes a new {@link DefaultDbMapping}.
+	 * 
+	 * @param columnLabel the column label
+	 * @param readableName the readable label
+	 * @param sqlType the SQL type
+	 */
+	public DefaultDbMapping(final String columnLabel, final String readableName, final int sqlType) {
+		super();
 		this.sqlType = sqlType;
-		this.columnName = columnName;
+		this.columnLabel = columnLabel;
+		this.readableName = readableName;
 	}
 
 	@Override
-	public void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException {
-		final T value = this.get(object);
-		if (null != value) {
-			statement.setObject(parameterIndex, value, this.getSqlType());
+	public void set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
+		if (this.isSet(object)) {
+			final T value = this.get(object);
+			if (null != value) {
+				statement.setObject(parameterIndex, value, this.getSqlType());
+			} else {
+				statement.setNull(parameterIndex, this.getSqlType());
+			}
 		} else {
 			statement.setNull(parameterIndex, this.getSqlType());
 		}
 	}
 
 	@Override
-	public void set(ResultSet resultSet, O object) throws SQLException, OXException {
+	public void set(final ResultSet resultSet, final O object) throws SQLException, OXException {
 		final T value = this.get(resultSet);
 		if (false == resultSet.wasNull()) {
 			this.set(object, value);
@@ -92,15 +116,13 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
 	}
 
 	@Override
-	public boolean equals(O object1, O object2) {
-		final T value1 = this.get(object1);
-		final T value2 = this.get(object2);
-		return null == value1 ? null == value2 : value1.equals(value2);
-	}
-	
-	@Override
 	public String getColumnLabel() {
-		return this.columnName;
+		return this.columnLabel;
+	}
+
+	@Override
+	public String getReadableName() {
+		return this.readableName;
 	}
 
 	@Override
@@ -110,7 +132,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
 
 	@Override
 	public String toString() {
-		return this.getColumnLabel();
+		return String.format("[%s] %s", this.getColumnLabel(), this.getReadableName());
 	}
-
+	
 }

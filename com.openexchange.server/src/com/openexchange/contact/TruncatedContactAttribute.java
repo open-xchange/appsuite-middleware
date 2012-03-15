@@ -47,88 +47,63 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.contact;
 
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.search.Order;
 
 /**
- * {@link SortOptions} - Specifies sort options for the results of storage operations. 
+ * {@link TruncatedContactAttribute} - {@link Truncated} implementation using 
+ * contact fields to identify the truncated attribute. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SortOptions {
+public class TruncatedContactAttribute implements Truncated {
 	
-	public static final SortOptions EMPTY = new SortOptions();
+	private final ContactField field;
+	private final int maxSize;
+	private final int length;
 	
-	private SortOrder order[];
-	
-	private String collation;
-	
-	public static final SortOrder Order(final ContactField by, final Order order) {
-		return new SortOrder(by, order);
-	}
-	
-	public SortOptions(final String collation, final SortOrder... order) {
-		super();
-		this.collation = collation;
-		this.order = order;
-	}
-
-	public SortOptions(final SortOrder... order) {
-		this(null, order);
-	}
-
-	public SortOptions(final String collation) {
-		this(collation, (SortOrder[])null);
-	}
-
-	public SortOptions() {
-		this((SortOrder[])null);
-	}
-
-	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
-		this(collation, Order(orderBy, order));
-	}
-	
-	public SortOptions(final ContactField orderBy, final Order order) {
-		this(Order(orderBy, order));
-	}
-	
-	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
-	}
-	
-	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
-		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
+	/**
+	 * Initializes a new {@link TruncatedContactAttribute}.
+	 * 
+	 * @param field the field where the data truncation occurred
+	 * @param maxSize the maximum size for the attribute
+	 * @param length the actual length of the value
+	 */
+	public TruncatedContactAttribute(final ContactField field, final int maxSize, final int length) {
+		this.field = field;
+		this.maxSize = maxSize;
+		this.length = length;		 
 	}
 	
 	/**
-	 * @return the collation
+	 * Gets the field representing the contact attribute where the data 
+	 * truncation occurred.
+	 * 
+	 * @return the field
 	 */
-	public String getCollation() {
-		return collation;
+	public ContactField getField() {
+		return this.field;
 	}
 
 	/**
-	 * @param collation the collation to set
+	 * {@link Deprecated} - use <code>getField()</code> directly and determine 
+	 * field ID in ajax layer internally afterwards.
 	 */
-	public void setCollation(String collation) {
-		this.collation = collation;
+	@Deprecated 
+	@Override
+	public int getId() {
+		return this.getField().getNumber();
 	}
 
-	/**
-	 * @return the order
-	 */
-	public SortOrder[] getOrder() {
-		return order;
+	@Override
+	public int getMaxSize() {
+		return this.maxSize;
 	}
 
-	/**
-	 * @param order the orderBy to set
-	 */
-	public void setOrderBy(SortOrder[] order) {
-		this.order = order;
+	@Override
+	public int getLength() {
+		return this.length;
 	}
-
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.internal;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
@@ -57,9 +56,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.internal.mapping.Mapper;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ContactServiceImpl} - {@link ContactService} implementation.
@@ -88,63 +88,73 @@ public class ContactServiceImpl implements ContactService {
 	 */    
     
 	@Override
-	public Contact get(Session session, String folderId, String id) throws OXException {
-		return this.get(session, folderId, id, null);
+	public Contact getContact(Session session, String folderId, String id) throws OXException {
+		return this.getContact(session, folderId, id, null);
 	}
 
 	@Override
-	public Collection<Contact> all(Session session, String folderId) throws OXException {
-		return this.all(session, folderId, null, null);
+	public SearchIterator<Contact> getAllContacts(Session session, String folderId) throws OXException {
+		return this.getAllContacts(session, folderId, null, null);
 	}
 
 	@Override
-	public Collection<Contact> all(Session session, String folderId, SortOptions sortOptions) throws OXException {
-		return this.all(session, folderId, null, sortOptions);
+	public SearchIterator<Contact> getAllContacts(Session session, String folderId, SortOptions sortOptions) throws OXException {
+		return this.getAllContacts(session, folderId, null, sortOptions);
 	}
 
 	@Override
-	public Collection<Contact> all(Session session, String folderId, ContactField[] fields) throws OXException {
-		return this.all(session, folderId, fields, null);
+	public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields) throws OXException {
+		return this.getAllContacts(session, folderId, fields, null);
 	}
 
 	@Override
-	public Collection<Contact> list(Session session, String folderId, String[] ids) throws OXException {
-		return this.list(session, folderId, ids, null, null);
+	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids) throws OXException {
+		return this.getContacts(session, folderId, ids, null, null);
 	}
 
 	@Override
-	public Collection<Contact> list(Session session, String folderId, String[] ids, SortOptions sortOptions) throws OXException {
-		return this.list(session, folderId, ids, null, sortOptions);
+	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, SortOptions sortOptions) throws OXException {
+		return this.getContacts(session, folderId, ids, null, sortOptions);
 	}
 
 	@Override
-	public Collection<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields) throws OXException {
-		return this.list(session, folderId, ids, fields, null);
+	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields) throws OXException {
+		return this.getContacts(session, folderId, ids, fields, null);
 	}
 
 	@Override
-	public Collection<Contact> deleted(Session session, String folderId, Date since) throws OXException {
-		return this.deleted(session, folderId, since, null);
+	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since) throws OXException {
+		return this.getDeletedContacts(session, folderId, since, null);
 	}
 
 	@Override
-	public Collection<Contact> modified(Session session, String folderId, Date since) throws OXException {
-		return this.deleted(session, folderId, since, null);
+	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, final Date since, final ContactField[] fields) throws OXException {
+		return this.getDeletedContacts(session, folderId, since, fields, null);
 	}
 
 	@Override
-	public <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term) throws OXException {
-		return this.search(session, folderId, term, null, null);
+	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since) throws OXException {
+		return this.getModifiedContacts(session, folderId, since, null);
 	}
 
 	@Override
-	public <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
-		return this.search(session, folderId, term, null, sortOptions);
+	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, final ContactField[] fields) throws OXException {
+		return this.getModifiedContacts(session, folderId, since, fields, SortOptions.EMPTY);
 	}
 
 	@Override
-	public <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException {
-		return this.search(session, folderId, term, fields, null);
+	public <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term) throws OXException {
+		return this.searchContacts(session, folderId, term, null, null);
+	}
+
+	@Override
+	public <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
+		return this.searchContacts(session, folderId, term, null, sortOptions);
+	}
+
+	@Override
+	public <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException {
+		return this.searchContacts(session, folderId, term, fields, null);
 	}
 	
 	/*
@@ -152,7 +162,7 @@ public class ContactServiceImpl implements ContactService {
 	 */
 
 	@Override
-	public <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+	public <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(term, "term");
@@ -162,7 +172,7 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public Collection<Contact> all(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+	public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		final int contextID = session.getContextId();
@@ -171,7 +181,7 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public Collection<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
+	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(ids, "ids");
@@ -181,27 +191,27 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public Collection<Contact> modified(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, final SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(since, "since");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
-		return this.getContacts(false, contextID, userID, folderId, null, null, fields, SortOptions.EMPTY, since);
+		return this.getContacts(false, contextID, userID, folderId, null, null, fields, sortOptions, since);
 	}
 	
 	@Override
-	public Collection<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(since, "since");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
-		return this.getContacts(true, contextID, userID, folderId, null, null, fields, SortOptions.EMPTY, since);
+		return this.getContacts(true, contextID, userID, folderId, null, null, fields, sortOptions, since);
 	}
 
 	@Override
-	public Contact get(final Session session, final String folderId, final String id, final ContactField[] fields) throws OXException {
+	public Contact getContact(final Session session, final String folderId, final String id, final ContactField[] fields) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(id, "id");
@@ -211,7 +221,7 @@ public class ContactServiceImpl implements ContactService {
 	}
 	
 	@Override
-	public void create(Session session, String folderId, Contact contact) throws OXException {
+	public void createContact(Session session, String folderId, Contact contact) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(contact, "contact");		
@@ -221,11 +231,11 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public void update(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
+	public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
 			throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(id, "idd");
+		checkArgNotNull(id, "id");
 		checkArgNotNull(lastRead, "lastRead");
 		checkArgNotNull(contact, "contact");
 		final int contextID = session.getContextId();
@@ -238,7 +248,7 @@ public class ContactServiceImpl implements ContactService {
 	}
 
 	@Override
-	public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
+	public void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException {
 		checkArgNotNull(session, "session");
 		checkArgNotNull(folderId, "folderId");
 		checkArgNotNull(id, "id");
@@ -299,7 +309,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		Mapper.validateAll(contact);		
+		ContactMapper.getInstance().validateAll(contact);		
 		/*
 		 * check folder
 		 */
@@ -330,6 +340,7 @@ public class ContactServiceImpl implements ContactService {
         contact.setModifiedBy(userID);
         contact.removeObjectID(); // set by storage during create
         contact.setNumberOfAttachments(0);
+        contact.setUseCount(0);
         if (contact.containsImage1()) {
         	contact.setImageLastModified(now);
         	if (null != contact.getImage1()) {
@@ -345,9 +356,6 @@ public class ContactServiceImpl implements ContactService {
         if (false == contact.containsFileAs() && contact.containsDisplayName()) {
             contact.setFileAs(contact.getDisplayName());
         }
-		if (false == contact.containsPrivateFlag()) {
-			contact.setPrivateFlag(false);
-		}	
 		/*
 		 * pass through to storage
 		 */
@@ -359,7 +367,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		Mapper.validateAll(contact);
+		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		}
@@ -404,7 +412,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = Mapper.getDifferences(storedContact, contact);
+		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		} else if (delta.containsObjectID()) {
@@ -450,15 +458,15 @@ public class ContactServiceImpl implements ContactService {
 			/*
 			 * different storage, perform delete & create of complete contact information
 			 */
-			final Contact movedContact = Mapper.mergeDifferences(storedContact, delta); 
-			targetStorage.create(contextID, targetFolderId, movedContact);
+			ContactMapper.getInstance().mergeDifferences(storedContact, delta); 
+			targetStorage.create(contextID, targetFolderId, storedContact);
 			try {
 				sourceStorage.delete(contextID, userID, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
 				LOG.warn("error deleting contact from source folder, rolling back move operation", e);
-				// simple rollback for now
-				targetStorage.delete(contextID, userID, targetFolderId, Integer.toString(movedContact.getObjectID()), 
-						movedContact.getLastModified());
+				// TODO: simple rollback for now
+				targetStorage.delete(contextID, userID, targetFolderId, Integer.toString(storedContact.getObjectID()), 
+						storedContact.getLastModified());
 				throw e;
 			}
 		}
@@ -470,7 +478,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		Mapper.validateAll(contact);
+		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		}
@@ -508,7 +516,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = Mapper.getDifferences(storedContact, contact);
+		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
 		} else if (delta.containsObjectID()) {
@@ -600,7 +608,7 @@ public class ContactServiceImpl implements ContactService {
 	 * @return the contacts
 	 * @throws OXException
 	 */
-	protected <O> Collection<Contact> getContacts(boolean deleted, final int contextID, final int userID, final String folderID, 
+	protected <O> SearchIterator<Contact> getContacts(boolean deleted, final int contextID, final int userID, final String folderID, 
 			final String[] ids, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions, 
 			final Date since) throws OXException {
 		/*
@@ -625,16 +633,16 @@ public class ContactServiceImpl implements ContactService {
 		 * get contacts from storage
 		 */		
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
-		Collection<Contact> contacts = null;
+		SearchIterator<Contact> contacts = null;
 		if (null != since) {
 			contacts = deleted ? storage.deleted(contextID, folderID, since, queriedFields) : 
-				storage.modified(contextID, folderID, since, queriedFields);
+				storage.modified(contextID, folderID, since, queriedFields, sortOptions);
 		} else if (null != ids) {
 			contacts = storage.list(contextID, folderID, ids, queriedFields, sortOptions);
 		} else if (null == term) {
 			contacts = storage.all(contextID, folderID, queriedFields, sortOptions);
 		} else {
-			contacts = storage.search(contextID, folderID, term, queriedFields);
+			contacts = storage.search(contextID, folderID, term, queriedFields, sortOptions);
 		} 
 		if (null == contacts) {
 			throw ContactExceptionCodes.UNEXPECTED_ERROR.create("got no search results from storage");
@@ -642,11 +650,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * filter results respecting object permission restrictions
 		 */
-		Tools.filterByObjectPermissions(contacts, userID, permission);
-		/*
-		 * deliver contacts
-		 */
-		return contacts;
+		return PermissionFilter.create(contacts, userID, permission.canReadAllObjects());	
 	}
 	
 	/*

@@ -47,39 +47,87 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.groupware.tools.mappings;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.search.Order;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SortOrder} - The sort order 
+ * {@link DefaultMapper} - Abstract {@link Mapping} implementation.
  *
+ * @param <O> the type of the object
+ * @param <E> the enum type for the fields
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SortOrder {
-	
-	private final ContactField by;
-	private final Order order;
-	
-	public SortOrder(final ContactField by, final Order order) {
-		this.by = by;
-		this.order = order;
+public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E> {
+
+	@Override
+	public Mapping<? extends Object, O> get(final E field) throws OXException {
+		if (null == field) {
+			throw new IllegalArgumentException("field");
+		}
+		final Mapping<? extends Object, O> mapping = getMappings().get(field);
+		if (null == mapping) {
+			throw OXException.notFound(field.toString());
+		}
+		return mapping;
 	}
 
-	/**
-	 * @return the order
-	 */
-	public Order getOrder() {
-		return order;
+	@Override
+	public void mergeDifferences(final O original, final O update) throws OXException {
+		if (null == original) {
+			throw new IllegalArgumentException("original");
+		}
+		if (null == update) {
+			throw new IllegalArgumentException("update");
+		}
+		for (final Mapping<? extends Object, O> mapping : getMappings().values()) {
+			if (mapping.isSet(update)) {
+				mapping.copy(update, original);	
+			}
+		}
 	}
 
-	/**
-	 * @return the by
-	 */
-	public ContactField getBy() {
-		return by;
+	@Override
+	public O getDifferences(final O original, final O update) throws OXException {
+		if (null == original) {
+			throw new IllegalArgumentException("original");
+		}
+		if (null == update) {
+			throw new IllegalArgumentException("update");
+		}
+		final O delta = newInstance();
+		for (final Mapping<? extends Object, O> mapping : getMappings().values()) {
+			if (mapping.isSet(update) && (false == mapping.isSet(original) || false == mapping.equals(original, update))) {
+				mapping.copy(update, delta);
+			}
+		}
+		return delta;
 	}
 	
+	@Override
+	public E[] getAssignedFields(final O object) {
+		if (null == object) {
+			throw new IllegalArgumentException("object");
+		}
+		final Set<E> setFields = new HashSet<E>(); 		
+		for (final Entry<E, ? extends Mapping<? extends Object, O>> entry : getMappings().entrySet()) {
+			if (entry.getValue().isSet(object)) {
+				setFields.add(entry.getKey());
+			}
+		}
+		return setFields.toArray(newArray(setFields.size()));
+	}
+	
+	/**
+	 * Gets the mappings for all possible values of the underlying enum. 
+	 * 
+	 * @return the mappings
+	 */
+	protected abstract EnumMap<E, ? extends Mapping<? extends Object, O>> getMappings();
 	
 }

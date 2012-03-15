@@ -47,32 +47,39 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
+package com.openexchange.contact.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.data.Check;
-
+import com.openexchange.tools.iterator.FilteringSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link StringMapping} - Default mapping for String properties in Contacts.
+ * {@link PermissionFilter} - Filters a search iterator based on a user's 
+ * permission.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends ContactMapping<String> {
+public class PermissionFilter {
+	
+	/**
+	 * Creates a new permission based filtering search iterator. 
+	 * 
+	 * @param delegate 
+	 * @param userID
+	 * @param canReadAll
+	 * @return
+	 * @throws OXException
+	 */
+	public static FilteringSearchIterator<Contact> create(final SearchIterator<Contact> delegate, final int userID, 
+			final boolean canReadAll) throws OXException {
+		return new FilteringSearchIterator<Contact>(delegate) {
 
-	@Override
-	public void validate(final Contact contact) throws OXException {
-		if (this.isSet(contact)) {
-			final String value = this.get(contact);
-			if (null != value) {
-				final String result = Check.containsInvalidChars(value);
-				if (null != result) {
-					throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
-				}
+			@Override
+			public boolean accept(final Contact contact) throws OXException {
+				return contact.getCreatedBy() == userID || canReadAll && false == contact.getPrivateFlag();			
 			}
-		}
+		};
 	}
 	
 }

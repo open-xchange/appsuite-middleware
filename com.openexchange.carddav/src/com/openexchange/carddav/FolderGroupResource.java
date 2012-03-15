@@ -230,7 +230,7 @@ public class FolderGroupResource extends CarddavResource {
 		                contact = new Contact();
 		                contact.setUid(uid);
 						contact.setParentFolderID(newFolderID);
-						contactService.create(factory.getSession(), Integer.toString(newFolderID), contact);
+						contactService.createContact(factory.getSession(), Integer.toString(newFolderID), contact);
 		                LOG.debug(this.getUrl() + ": created " + uid + ".");
 					} else {
 						/*
@@ -238,7 +238,7 @@ public class FolderGroupResource extends CarddavResource {
 						 */
 						final int previousFolderID = contact.getParentFolderID();
 						contact.setParentFolderID(newFolderID);
-						contactService.update(factory.getSession(), Integer.toString(previousFolderID), 
+						contactService.updateContact(factory.getSession(), Integer.toString(previousFolderID), 
 								Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
 		                LOG.debug(this.getUrl() + ": moved " + uid + ".");
 					}

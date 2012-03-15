@@ -47,32 +47,74 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
+package com.openexchange.groupware.tools.mappings.database;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.tools.mappings.Mapping;
 
 
 /**
- * {@link StringMapping} - Default mapping for String properties in Contacts.
+ * {@link DbMapping} - Extends the generic mapping by database specific 
+ * operations.
  *
+ * @param <T> the type of the property
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends ContactMapping<String> {
-
-	@Override
-	public void validate(final Contact contact) throws OXException {
-		if (this.isSet(contact)) {
-			final String value = this.get(contact);
-			if (null != value) {
-				final String result = Check.containsInvalidChars(value);
-				if (null != result) {
-					throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
-				}
-			}
-		}
-	}
+public interface DbMapping<T, O> extends Mapping<T, O> {
+	
+	/**
+	 * Gets the value of the mapped property from a result set.
+	 * 
+	 * @param resultSet the result set to get the property from
+	 * @return the value
+	 * @throws SQLException
+	 */
+	T get(ResultSet resultSet) throws SQLException;
+	
+	/**
+	 * Gets the column label of the mapped property.
+	 *  
+	 * @return the column label
+	 */
+	String getColumnLabel();
+	
+	/**
+	 * Gets the readable name of the mapped property.
+	 *  
+	 * @return the readable name
+	 */
+	String getReadableName();
+	
+	/**
+	 * Gets the underlying SQL type of the database column.
+	 *  
+	 * @return the SQL type
+	 */
+	int getSqlType();
+	
+	/**
+	 * Sets the value of the mapped property in a prepared statement.
+	 * 
+	 * @param statement the prepared statement to populate
+	 * @param parameterIndex the parameter index in the statement
+	 * @param object the object to read the value from
+	 * @throws SQLException
+	 */
+	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
+	
+	/**
+	 * Sets the value of the mapped property in an object.
+	 * 
+	 * @param resultSet the result set to read out the value from
+	 * @param object the object to set the value
+	 * @throws SQLException
+	 * @throws OXException
+	 */
+	void set(ResultSet resultSet, O object) throws SQLException, OXException;
 	
 }

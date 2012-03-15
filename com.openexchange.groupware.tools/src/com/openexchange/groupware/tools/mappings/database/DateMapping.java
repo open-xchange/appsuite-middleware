@@ -47,32 +47,28 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
+package com.openexchange.groupware.tools.mappings.database;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.data.Check;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
 
 /**
- * {@link StringMapping} - Default mapping for String properties in Contacts.
+ * {@link DateMapping} - Database mapping for <code>Types.DATE</code>. 
  *
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends ContactMapping<String> {
+public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 
+	public DateMapping(final String columnName, final String readableName) {
+		super(columnName, readableName, Types.DATE);
+	}
+	
 	@Override
-	public void validate(final Contact contact) throws OXException {
-		if (this.isSet(contact)) {
-			final String value = this.get(contact);
-			if (null != value) {
-				final String result = Check.containsInvalidChars(value);
-				if (null != result) {
-					throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
-				}
-			}
-		}
+	public Date get(final ResultSet resultSet) throws SQLException {
+		return resultSet.getDate(this.getColumnLabel());
 	}
 	
 }

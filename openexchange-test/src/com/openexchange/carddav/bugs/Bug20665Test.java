@@ -341,6 +341,7 @@ public class Bug20665Test extends CardDAVTest {
         final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         final VCardResource card = assertContains(uid, addressData);
         assertNotNull("no PHOTO found in vCard", card.getVCard().getPhotos());
+        assertTrue("no PHOTO found in vCard", card.getVCard().getPhotos().hasNext());
         assertNotNull("no PHOTO data found in vCard", card.getVCard().getPhotos().next().getPhoto());
 	}
 }

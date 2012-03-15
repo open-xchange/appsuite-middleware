@@ -47,27 +47,79 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.groupware.tools.mappings.database;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.Mapper;
 
 /**
- * {@link IntegerMapping} - 
+ * {@link DbMapper} - Generic database mapper definition for field-wise 
+ * operations on objects
  *
+ * @param <O> the type of the object
+ * @param <E> the enum type for the fields
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class IntegerMapping<O> extends DefaultMapping<Integer, O> {
-
-	public IntegerMapping(String columnName) {
-		super(columnName, Types.INTEGER);
-	}
+public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	
 	@Override
-	public Integer get(ResultSet resultSet) throws SQLException {
-		return resultSet.getInt(this.getColumnLabel());
-	}
-	
+	DbMapping<? extends Object, O> get(E field) throws OXException;
+
+	/**
+	 * Gets the field whose mapping denotes the supplied column label. 
+	 * 
+	 * @param columnLabel the column label
+	 * @return the field, or <code>null</code> if no such field was found
+	 */
+	E getMappedField(String columnLabel);
+
+	/**
+	 * Creates a new object and sets all properties of the supplied fields 
+	 * from the result set.
+	 * 
+	 * @param resultSet the result set to create the object from 
+	 * @param fields the fields present in the result set
+	 * @return the object
+	 * @throws OXException
+	 * @throws SQLException
+	 */
+	O fromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException;
+
+	/**
+	 * Sets all parameters of the supplied fields in the statement to the 
+	 * values found in the object.
+	 * 
+	 * @param stmt the statement to set the parameters for
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @throws SQLException
+	 * @throws OXException
+	 */
+	void setParameters(PreparedStatement stmt, O object, E[] fields) throws SQLException, OXException;
+
+	/**
+	 * Constructs a string containing parameterized assignments of the supplied
+	 * fields for database statements using the mapped column names of the 
+	 * fields, separated by <code>,</code>-chars.
+	 * 
+	 * @param fields the fields to get the assignments for
+	 * @return the assignments string
+	 * @throws OXException
+	 */
+	String getAssignments(E[] fields) throws OXException;
+
+	/**
+	 * Gets a comma-separated string of the mapped column names for the 
+	 * supplied fields. 
+	 * 
+	 * @param fields the fields
+	 * @return the columns string
+	 * @throws OXException
+	 */
+	String getColumns(E[] fields) throws OXException;
+
 }

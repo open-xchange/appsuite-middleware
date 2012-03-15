@@ -50,29 +50,24 @@
 package com.openexchange.contact.internal.mapping;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.data.Check;
-
 
 /**
- * {@link StringMapping} - Default mapping for String properties in Contacts.
+ * {@link ContactMapping} - Mapping operations for contact properties.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends ContactMapping<String> {
+public abstract class ContactMapping<T> extends com.openexchange.groupware.tools.mappings.DefaultMapping<T, Contact> {
 
-	@Override
-	public void validate(final Contact contact) throws OXException {
-		if (this.isSet(contact)) {
-			final String value = this.get(contact);
-			if (null != value) {
-				final String result = Check.containsInvalidChars(value);
-				if (null != result) {
-					throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
-				}
-			}
-		}
+	/**
+	 * Validates the property in a contact, throwing exceptions if validation
+	 * fails.
+	 * 
+	 * @param contact the contact to validate the property for
+	 * @throws OXException 
+	 */
+	public void validate(Contact contact) throws OXException {
+		
 	}
-	
+
 }

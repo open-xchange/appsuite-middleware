@@ -47,28 +47,27 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.groupware.tools.mappings.database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Date;
-
 
 /**
- * {@link DateMapping} - 
+ * {@link BigIntMapping} - Database mapping for <code>Types.BIGINT</code>. 
  *
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DateMapping<O> extends DefaultMapping<Date, O> {
+public abstract class BigIntMapping<O> extends DefaultDbMapping<Long, O> {
 
-	public DateMapping(final String columnName) {
-		super(columnName, Types.DATE);
+	public BigIntMapping(final String columnName, final String readableName) {
+		super(columnName, readableName, Types.BIGINT);
 	}
 	
 	@Override
-	public Date get(ResultSet resultSet) throws SQLException {
-		return resultSet.getDate(this.getColumnLabel());
+	public Long get(final ResultSet resultSet) throws SQLException {
+		return resultSet.getLong(this.getColumnLabel());
 	}
-	
+
 }

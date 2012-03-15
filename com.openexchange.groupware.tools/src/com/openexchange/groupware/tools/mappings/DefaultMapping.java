@@ -47,27 +47,29 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.groupware.tools.mappings;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link BigIntMapping} - 
+ * {@link DefaultMapping} - Abstract {@link Mapping} implementation.
  *
+ * @param <T> the type of the property
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class BigIntMapping<O> extends DefaultMapping<Long, O> {
+public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
 
-	public BigIntMapping(String columnName) {
-		super(columnName, Types.BIGINT);
+	@Override
+	public boolean equals(final O object1, final O object2) {
+		final T value1 = this.get(object1);
+		final T value2 = this.get(object2);
+		return null == value1 ? null == value2 : value1.equals(value2);
+	}
+
+	@Override
+	public void copy(O from, O to) throws OXException {
+		this.set(to, this.get(from));
 	}
 	
-	@Override
-	public Long get(ResultSet resultSet) throws SQLException {
-		return resultSet.getLong(this.getColumnLabel());
-	}
-
 }

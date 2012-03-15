@@ -47,33 +47,27 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.groupware.tools.mappings.database;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.EnumSet;
-import java.util.Set;
-
-import com.openexchange.exception.OXException;
+import java.sql.Types;
 
 /**
- * {@link Mapper} - 
+ * {@link IntegerMapping} - Database mapping for <code>Types.INTEGER</code>. 
  *
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Mapper<O, E extends Enum<E>> extends Factory<O> {
+public abstract class IntegerMapping<O> extends DefaultDbMapping<Integer, O> {
+
+	public IntegerMapping(final String columnName, final String readableName) {
+		super(columnName, readableName, Types.INTEGER);
+	}
 	
-	Mapping<? extends Object, O> get(E field) throws OXException;
-	
-	void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException;
-	
-	O fromResultSet(final ResultSet resultSet, final E[] fields) throws OXException, SQLException;
-	
-	String getAssignments(final E[] fields) throws OXException;
-	
-	String getColumns(final E[] fields) throws OXException;
-	
-	Set<E> filter(final E[] fields, final EnumSet<E> validFields, final E... mandatoryFields);
+	@Override
+	public Integer get(final ResultSet resultSet) throws SQLException {
+		return resultSet.getInt(this.getColumnLabel());
+	}
 	
 }

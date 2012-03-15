@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +60,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
-import com.openexchange.contact.storage.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.fields.QueryFields;
+import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -72,6 +72,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -128,7 +129,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 final Contact imageData = executor.selectSingle(connection, Table.IMAGES, contextID, objectID, 
                     queryFields.getImageDataFields());
                 if (null != imageData) {
-                    contact = merge(contact, imageData);
+                	Mappers.CONTACT.mergeDifferences(contact, imageData);
                 }
             }
             /*
@@ -276,13 +277,13 @@ public class RdbContactStorage extends DefaultContactStorage {
             connection.setAutoCommit(false);
             final Date now = new Date();
             contact.setLastModified(now);
-            final QueryFields queryFields = new QueryFields(getAssignedFields(contact));
+            final QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
             /*
              * update image data if needed
              */
             if (queryFields.hasImageData()) {
                 contact.setImageLastModified(now);
-                queryFields.update(super.getAssignedFields(contact));
+                queryFields.update(Mappers.CONTACT.getAssignedFields(contact));
                 if (null == contact.getImage1()) {
                     // delete previous image if exists
                     executor.delete(connection, Table.IMAGES, contextID, objectID, now.getTime());
@@ -326,6 +327,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             connection.commit();
         	committed = true;
+        } catch (final DataTruncation e) {
+            DBUtils.rollback(connection);
+            throw Tools.truncation(connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
         } finally {
@@ -338,27 +342,36 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public Collection<Contact> deleted(final int contextID, final String folderId, final Date since, final ContactField[] fields) throws OXException {
+    public SearchIterator<Contact> deleted(final int contextID, final String folderId, final Date since, final ContactField[] fields) throws OXException {
     	return this.getContacts(true, contextID, folderId, null, since, fields, null, null);
     }
 
     @Override
-    public Collection<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields) throws OXException {
-    	return this.getContacts(false, contextID, folderId, null, since, fields, null, null);
+    public SearchIterator<Contact> deleted(final int contextID, final String folderId, final Date since, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    	return this.getContacts(true, contextID, folderId, null, since, fields, null, sortOptions);
     }
 
     @Override
-    public <O> Collection<Contact> search(final int contextID, final String folderId, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields) throws OXException {
+    	return this.getContacts(false, contextID, folderId, null, since, fields, null, null);
+    }
+
+    public SearchIterator<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, contextID, folderId, null, since, fields, null, sortOptions);
+    }
+
+    @Override
+    public <O> SearchIterator<Contact> search(final int contextID, final String folderId, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, contextID, folderId, null, null, fields, term, sortOptions);
     }  
     
     @Override
-    public Collection<Contact> all(final int contextID, final String folderId, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> all(final int contextID, final String folderId, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, contextID, folderId, null, null, fields, null, sortOptions);
     }
     
     @Override
-    public Collection<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, contextID, folderId, ids, null, fields, null, sortOptions);
     }
 
@@ -376,7 +389,7 @@ public class RdbContactStorage extends DefaultContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    private <O> Collection<Contact> getContacts(final boolean deleted, final int contextID, final String folderID, final String[] ids, final Date since, 
+    private <O> SearchIterator<Contact> getContacts(final boolean deleted, final int contextID, final String folderID, final String[] ids, final Date since, 
     		final ContactField[] fields, final SearchTerm<O> term, final SortOptions sortOptions) throws OXException {
         /*
          * prepare select
@@ -414,7 +427,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                     contacts = mergeDistListData(connection, deleted ? Table.DELETED_DISTLIST : Table.DISTLIST, contextID, contacts);
                 }
             }
-            return contacts;
+            return getSearchIterator(contacts);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
         } finally {
@@ -436,7 +449,8 @@ public class RdbContactStorage extends DefaultContactStorage {
         return contacts;
     }
 
-    private List<Contact> mergeImageData(final Connection connection, final Table table, final int contextID, final List<Contact> contacts, final ContactField[] fields) throws SQLException, OXException {
+    private List<Contact> mergeImageData(final Connection connection, final Table table, final int contextID, final List<Contact> contacts, 
+    		final ContactField[] fields) throws SQLException, OXException {
         final int[] objectIDs = getObjectIDsWithImages(contacts);
         if (null != objectIDs && 0 < objectIDs.length) {
         	final List<Contact> imagaDataList = executor.select(connection, table, contextID, Integer.MIN_VALUE, objectIDs, Long.MIN_VALUE, fields, null, null);
@@ -445,9 +459,28 @@ public class RdbContactStorage extends DefaultContactStorage {
             }
         }
         return contacts;
-    }    
+    }
 
-    private int[] getObjectIDsWithImages(final List<Contact> contacts) {
+    private static List<Contact> mergeByID(final List<Contact> into, final List<Contact> from) throws OXException {
+        if (null == into) {
+            throw new IllegalArgumentException("into");
+        } else if (null == from) {
+            throw new IllegalArgumentException("from");
+        }        
+        for (final Contact fromData : from) {
+            final int objectID = fromData.getObjectID();
+            for (int i = 0; i < into.size(); i++) {
+                final Contact intoData = into.get(i);
+                if (objectID == intoData.getObjectID()) {
+                	Mappers.CONTACT.mergeDifferences(intoData, fromData);
+                    break;
+                }
+            }
+        }
+        return into;
+    }
+
+	private int[] getObjectIDsWithImages(final List<Contact> contacts) {
         int i = 0;
         final int[] objectIDs = new int[contacts.size()];
         for (final Contact contact : contacts) {

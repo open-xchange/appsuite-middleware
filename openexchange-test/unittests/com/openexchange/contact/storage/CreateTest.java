@@ -77,6 +77,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500002";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Otto Maier");
         contact.setGivenName("Otto");
         contact.setSurName("Maier");
@@ -102,6 +103,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500004";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Dirk Dampf");
         contact.setGivenName("Dirk");
         contact.setSurName("Dampf");
@@ -129,6 +131,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500003";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setSurName("Distributionlist 77");
         contact.setUid(UUID.randomUUID().toString());
         contact.setDistributionList(new DistributionListEntryObject[] {
@@ -159,6 +162,7 @@ public class CreateTest extends ContactStorageTest {
          */
         final String folderId = "500001";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("René Müller");
         contact.setGivenName("René");
         contact.setSurName("Müller");
@@ -187,6 +191,7 @@ public class CreateTest extends ContactStorageTest {
             contactsInFolders.put(Integer.toString(i), new ArrayList<Contact>());
             for (int j = 1; j <= 33; j++) {
                 final Contact contact = new Contact();
+                contact.setCreatedBy(getUserID());
                 contact.setDisplayName("Kontakt_" + i + " Test_" + j);
                 contact.setGivenName("Kontakt_" + i);
                 contact.setSurName("Test_" + j);

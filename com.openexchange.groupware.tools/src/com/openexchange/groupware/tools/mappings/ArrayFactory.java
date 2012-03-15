@@ -47,32 +47,22 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.data.Check;
-
+package com.openexchange.groupware.tools.mappings;
 
 /**
- * {@link StringMapping} - Default mapping for String properties in Contacts.
+ * {@link ArrayFactory} - Generic array factory.
  *
+ * @param <T> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends ContactMapping<String> {
-
-	@Override
-	public void validate(final Contact contact) throws OXException {
-		if (this.isSet(contact)) {
-			final String value = this.get(contact);
-			if (null != value) {
-				final String result = Check.containsInvalidChars(value);
-				if (null != result) {
-					throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
-				}
-			}
-		}
-	}
+public interface ArrayFactory<T> {
+	
+	/**
+	 * Creates a new typed array with the given size.
+	 * 
+	 * @param size the size
+	 * @return the typed array
+	 */
+	T[] newArray(int size);
 	
 }

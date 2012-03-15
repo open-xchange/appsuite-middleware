@@ -47,27 +47,64 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
+package com.openexchange.groupware.tools.mappings;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link VarCharMapping} - 
+ * {@link Mapping} - Generic operations for mapped object properties.
  *
+ * @param <T> the type of the property
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class VarCharMapping<O> extends DefaultMapping<String, O> {
+public interface Mapping<T, O> {
 	
-	public VarCharMapping(String columnName) {
-		super(columnName, Types.VARCHAR);
-	}
+	/**
+	 * Gets a value indicating whether the mapped property is set in the 
+	 * supplied object or not. This is usually done by passing the result
+	 * of the object's <code>containsXXX</code>-method.
+	 * 
+	 * @param object the object
+	 * @return <code>true</code>, if the property is set, <code>false</code>,
+	 * otherwise.
+	 */
+	boolean isSet(O object);
 
-	@Override
-	public String get(ResultSet resultSet) throws SQLException {
-		return resultSet.getString(this.getColumnLabel());
-	}
+	/**
+	 * Sets the mapped property in the object to the given value.
+	 * 
+	 * @param object the object to set the property for
+	 * @param value the value to set
+	 * @throws OXException
+	 */
+	void set(O object, T value) throws OXException;
+	
+	/**
+	 * Gets the mapped property's value from a object.
+	 * 
+	 * @param object the object to get the property value from
+	 * @return the value
+	 */
+	T get(O object);
 
+	/**
+	 * Gets a value indicating whether a property's value is equal in two 
+	 * objects or not.
+	 * 
+	 * @param object1 the first object for comparison
+	 * @param object2 the second object for comparison
+	 * @return
+	 */
+	boolean equals(O object1, O object2);
+	
+	/**
+	 * Copies the value of a property in one object to another one.
+	 * 
+	 * @param from the object to read the property value from
+	 * @param to the object to set the property
+	 * @throws OXException
+	 */
+	void copy(O from, O to) throws OXException;
+	
 }

@@ -6,7 +6,9 @@ package com.openexchange.contact.storage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
 import junit.framework.TestCase;
+
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -20,6 +22,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -94,20 +97,26 @@ public class ContactStorageTest extends TestCase {
     }
 
     protected Contact findContact(final String uid, final String folderID) throws OXException {
-        for (final Contact c : getStorage().all(getContextID(), folderID, ContactField.values())) {
-            if (uid.equals(c.getUid())) {
-                return c;
-            }
-        }
-        return null;
+    	return findContact(uid, getStorage().all(getContextID(), folderID, ContactField.values()));
     }
     
     protected Contact findContact(final String uid, final String folderID, final Date since) throws OXException {
-        for (final Contact c : getStorage().modified(getContextID(), folderID, since, ContactField.values())) {
-            if (uid.equals(c.getUid())) {
-                return c;
-            }
-        }
+    	return findContact(uid, getStorage().modified(getContextID(), folderID, since, ContactField.values()));
+    }
+    
+    protected static Contact findContact(final String uid, final SearchIterator<Contact> iter) throws OXException {
+    	try {
+    		while (iter.hasNext()) {
+    			final Contact c = iter.next();
+                if (uid.equals(c.getUid())) {
+                    return c;
+                }
+    		}
+    	} finally {
+    		if (null != iter) {
+    			iter.close();
+    		}
+    	}
         return null;
     }
     

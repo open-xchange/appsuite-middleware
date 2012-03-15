@@ -47,33 +47,56 @@
  *
  */
 
-package com.openexchange.contact.internal.mapping;
+package com.openexchange.groupware.tools.mappings;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link DefaultMapping} - Default mapping properties in contacts using 
- * a generic comparison for the <code>copy</code>-and <code>equals</code>-
- * operations and providing an emtpy validation routine. 
+ * {@link Mapper} - Generic mapper definition for field-wise operations on objects
  *
+ * @param <O> the type of the object
+ * @param <E> the enum type for the fields
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultMapping<T> implements Mapping<T> {
-
-	@Override
-	public void validate(Contact contact) throws OXException {
-	}
-
-	@Override
-	public boolean equals(Contact contact1, Contact contact2) {
-		final T value1 = this.get(contact1);
-		final T value2 = this.get(contact2);
-        return null == value1 ? null == value2 : value1.equals(value2);
-	}
+public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E> {
 	
-	@Override
-	public void copy(Contact from, Contact to) throws OXException {
-		this.set(to, this.get(from));
-	}
+	/**
+	 * Gets a mapping for the supplied field.
+	 * 
+	 * @param field the field
+	 * @return the mapping
+	 * @throws OXException
+	 */
+	Mapping<? extends Object, O> get(E field) throws OXException;
+	
+	/**
+	 * Merges all differences that are set in the updated object into the 
+	 * original one.
+	 * 
+	 * @param original the object to merge the differences into
+	 * @param update the {@link O} containing the changes
+	 * @throws OXException
+	 */
+	void mergeDifferences(final O original, final O update) throws OXException;
+	
+	/**
+	 * Creates a new object and sets all those properties that are different 
+	 * in the supplied object to the values from the second one, thus, 
+	 * generating some kind of a 'delta' object.
+	 * 
+	 * @param original the original object
+	 * @param update the updated object
+	 * @return an object containing the properties that are different
+	 * @throws OXException
+	 */
+	O getDifferences(final O original, final O update) throws OXException;
+
+	/**
+	 * Gets an array of all mapped fields that are set in the supplied object.
+	 * 
+	 * @param object the object 
+	 * @return the set fields
+	 */
+	E[] getAssignedFields(O object);
+	
 }

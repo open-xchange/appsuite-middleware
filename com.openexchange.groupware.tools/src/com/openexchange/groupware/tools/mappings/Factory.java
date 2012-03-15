@@ -47,38 +47,21 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mapping;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import com.openexchange.exception.OXException;
+package com.openexchange.groupware.tools.mappings;
 
 /**
- * {@link Mapping} - Generic mapping operations providing conversion routines between 
- * database and java representations for object properties.
+ * {@link Factory} - Generic factory.
  *
+ * @param <T> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Mapping<T, O> {
+public interface Factory<T> {
 	
-	boolean isSet(O object);
-
-	void set(O object, T value) throws OXException;
-	
-	T get(O object);
-	
-	T get(ResultSet resultSet) throws SQLException;
-	
-	String getColumnLabel();
-	
-	int getSqlType();
-	
-	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
-	
-	void set(ResultSet resultSet, O object) throws SQLException, OXException;
-
-	boolean equals(O object1, O object2);
+	/**
+	 * Creates a new instance of the underlying type.
+	 * 
+	 * @return the new instance
+	 */
+	T newInstance();
 	
 }

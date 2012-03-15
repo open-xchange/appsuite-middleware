@@ -47,63 +47,117 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.fields;
+package com.openexchange.contact;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.search.Order;
 
 /**
- * {@link UpdateFields} - Determines which {@link ContactField}s are needed from each of the database tables where contact information 
- * is stored. Also ensures that the <code>ContactField.NUMBER_OF_IMAGES</code> and <code>ContactField.NUMBER_OF_DISTRIBUTIONLIST</code> 
- * are queried automatically when needed.    
+ * {@link SortOptions} - Specifies sort options for the results of storage operations. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UpdateFields {
-    
-    private ContactField[] contactDataFields;
-    private ContactField[] imageDataFields;
-    private ContactField[] distListDataFields;
-    private boolean hasImageData;
-    private boolean hasContactData;
-    private boolean hasDistListData;
-    
-    /**
-     * Initializes a new {@link UpdateFields}.
-     * 
-     * @param fields
-     */
-    public UpdateFields(final ContactField[] fields) {
-        this.update(fields);
-    }
-    
-    public void update(ContactField[] fields) {
-        if (null == fields) {
-            throw new IllegalArgumentException("fields");
-        }        
-    }
-    
-    public ContactField[] getContactDataFields() {
-        return this.contactDataFields;
-    }
-    
-    public ContactField[] getImageDataFields() {
-        return this.imageDataFields;
-    }
-    
-    public ContactField[] getDistListDataFields() {
-        return this.distListDataFields;
-    }    
-    
-    public boolean hasImageData() {
-        return this.hasImageData;
-    }
+public final class SortOptions {
+	
+	public static final SortOptions EMPTY = new SortOptions();
+	
+	private SortOrder order[];	
+	private String collation;
+	private int rangeStart;
+	private int limit;
+	
+	public static final SortOrder Order(final ContactField by, final Order order) {
+		return new SortOrder(by, order);
+	}
+	
+	public SortOptions(final String collation, final SortOrder... order) {
+		super();
+		this.collation = collation;
+		this.order = order;
+	}
 
-    public boolean hasContactData() {
-        return this.hasContactData;
-    }
+	public SortOptions(final SortOrder... order) {
+		this(null, order);
+	}
 
-    public boolean hasDistListData() {
-        return this.hasDistListData;
-    }
+	public SortOptions(final String collation) {
+		this(collation, (SortOrder[])null);
+	}
+
+	public SortOptions() {
+		this((SortOrder[])null);
+	}
+
+	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
+		this(collation, Order(orderBy, order));
+	}
+	
+	public SortOptions(final ContactField orderBy, final Order order) {
+		this(Order(orderBy, order));
+	}
+	
+	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
+		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
+	}
+	
+	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
+		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
+	}
+	
+	/**
+	 * @return the collation
+	 */
+	public String getCollation() {
+		return collation;
+	}
+
+	/**
+	 * @param collation the collation to set
+	 */
+	public void setCollation(String collation) {
+		this.collation = collation;
+	}
+
+	/**
+	 * @return the order
+	 */
+	public SortOrder[] getOrder() {
+		return order;
+	}
+
+	/**
+	 * @param order the orderBy to set
+	 */
+	public void setOrderBy(SortOrder[] order) {
+		this.order = order;
+	}
+
+	/**
+	 * @return the rangeStart
+	 */
+	public int getRangeStart() {
+		return rangeStart;
+	}
+
+	/**
+	 * @param rangeStart the rangeStart to set
+	 */
+	public void setRangeStart(int rangeStart) {
+		this.rangeStart = rangeStart;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public int getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
 
 }
