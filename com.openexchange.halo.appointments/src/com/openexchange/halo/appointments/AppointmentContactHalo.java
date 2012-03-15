@@ -64,12 +64,13 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.halo.AbstractContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public class AppointmentContactHalo implements HaloContactDataSource {
+public class AppointmentContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
 	private final ServiceLookup services;
 
@@ -142,20 +143,6 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 	@Override
 	public boolean isAvailable(ServerSession session) {
 		return session.getUserConfiguration().hasCalendar();
-	}
-
-	protected List<String> getEMailAddresses(Contact contact) {
-		List<String> addresses = new LinkedList<String>();
-		if (contact.containsEmail1()) {
-			addresses.add(contact.getEmail1());
-		}
-		if (contact.containsEmail2()) {
-			addresses.add(contact.getEmail2());
-		}
-		if (contact.containsEmail3()) {
-			addresses.add(contact.getEmail3());
-		}
-		return addresses;
 	}
 
 }
