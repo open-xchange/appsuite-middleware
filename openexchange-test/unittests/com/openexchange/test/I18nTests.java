@@ -99,7 +99,7 @@ public final class I18nTests {
                 final Object instance = clazz.newInstance();
                 for (final Field field : clazz.getFields()) {
                     if (String.class.isAssignableFrom(field.getType())) {
-                         tests.addTest(new TranslatedSingleTest("testTranslation", locale, (String) field.get(instance)));
+                         tests.addTest(new TranslatedSingleTest(locale, (String) field.get(instance)));
                     }
                 }
             }
@@ -109,7 +109,7 @@ public final class I18nTests {
             }
             removeUnwantedZones(timeZoneIDs);
             for (String timeZoneID : timeZoneIDs) {
-                tests.addTest(new TranslatedSingleTest("testTranslation", locale, timeZoneID.replace('_', ' ')));
+                tests.addTest(new TranslatedSingleTest(locale, timeZoneID.replace('_', ' ')));
             }
             tests.addTest(new Bug14154Test("testContainingPattern", locale));
         }
