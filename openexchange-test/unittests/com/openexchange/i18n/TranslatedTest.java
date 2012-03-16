@@ -96,7 +96,6 @@ public class TranslatedTest {
         com.openexchange.subscribe.facebook.FormStrings.class,
         com.openexchange.subscribe.linkedin.FormStrings.class,
         com.openexchange.subscribe.microformats.FormStrings.class,
-        com.openexchange.subscribe.msn.FormStrings.class,
         com.openexchange.unifiedinbox.NameStrings.class
     };
 
@@ -142,7 +141,7 @@ public class TranslatedTest {
     }
 
     @AfterClass
-    public static void shutdown() throws Exception {
+    public static void shutdown() {
         Init.dropI18NBundle();
         Init.dropConfigBundle();
         Init.dropProperty();
