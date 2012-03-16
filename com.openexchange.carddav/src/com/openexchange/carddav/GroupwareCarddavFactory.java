@@ -111,8 +111,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  */
 public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
-	public static final CarddavProtocol PROTOCOL = new CarddavProtocol();
-
+	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 	private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
 	private static final Log LOG = LogFactory.getLog(GroupwareCarddavFactory.class);
 	private static final int SC_DELETED = 404;
@@ -124,8 +123,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private final UserService users;
 	private final ContactService contactService;	
 	
-	public GroupwareCarddavFactory(final FolderService folders, final SessionHolder sessionHolder, 
-			final ConfigViewFactory configs, final UserService users, final ContactService contactService) {
+	public GroupwareCarddavFactory(final FolderService folders, final SessionHolder sessionHolder, final ConfigViewFactory configs, 
+			final UserService users, final ContactService contactService) {
 		super();
 		this.folders = folders;
 		this.sessionHolder = sessionHolder;

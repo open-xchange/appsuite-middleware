@@ -57,11 +57,13 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.carddav.mapping.ContactMapper;
+import com.openexchange.carddav.mapping.CardDAVMapper;
+import com.openexchange.carddav.mapping.CardDAVMapping;
+import com.openexchange.contact.TruncatedContactAttribute;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -172,6 +174,16 @@ public class ContactResource extends CarddavResource {
             	LOG.warn(this.getUrl() + ": " + e.getMessage() + " - creating contact without image.");
             	this.contact.removeImage1();
             	this.create();
+        	} else if (Tools.isDataTruncation(e)) {
+        		/*
+        		 * handle by trimming truncated fields
+        		 */
+            	if (this.trimTruncatedAttributes(e)) {
+            		LOG.warn(this.getUrl() + ": " + e.getMessage() + " - creating contact with trimmed fields.");
+            		this.create();
+            	} else {
+            		throw super.internalError(e);
+            	}
         	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
         		/*
         		 * handle by overriding sync-token
@@ -241,6 +253,16 @@ public class ContactResource extends CarddavResource {
             	LOG.warn(this.getUrl() + ": " + e.getMessage() + " - saving contact without image.");
             	this.contact.removeImage1();
             	this.save();
+        	} else if (Tools.isDataTruncation(e)) {
+        		/*
+        		 * handle by trimming truncated fields
+        		 */
+            	if (this.trimTruncatedAttributes(e)) {
+            		LOG.warn(this.getUrl() + ": " + e.getMessage() + " - saving contact with trimmed fields.");
+            		this.save();
+            	} else {
+            		throw super.internalError(e);
+            	}
         	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
         		/*
         		 * handle by overriding sync-token
@@ -298,11 +320,16 @@ public class ContactResource extends CarddavResource {
 		        /*
 		         * Check for property changes
 		         */
-				for (final Mapping<? extends Object, Contact> mapping : ContactMapper.getInstance().getMappings().values()) {
+				for (final CardDAVMapping<? extends Object> mapping : CardDAVMapper.getInstance().getMappings().values()) {
 					if (mapping.isSet(this.contact)) {
 						if (false == mapping.isSet(newContact)) {
 							// set this one explicitly so that the property gets removed during update
 							mapping.copy(newContact, newContact);
+						}
+					} else {
+						if (mapping.equals(contact, newContact)) {
+							// this is no change, so ignore in update
+							mapping.remove(newContact);
 						}
 					}
 				}
@@ -368,5 +395,32 @@ public class ContactResource extends CarddavResource {
 	@Override
 	protected String getUID() {
     	return this.exists() ? this.contact.getUid() : null;
+	}
+	
+	private boolean trimTruncatedAttributes(final OXException e) {
+		boolean hasTrimmed = false;
+		if (null != this.contact && null != e && null != e.getProblematics()) {
+			for (final ProblematicAttribute problematicAttribute : e.getProblematics()) {
+				if (TruncatedContactAttribute.class.isInstance(problematicAttribute)) {
+					hasTrimmed |= this.trimTruncatedAttribute((TruncatedContactAttribute)problematicAttribute);
+				}
+			}
+		}
+		return hasTrimmed;
+	}
+	
+	private boolean trimTruncatedAttribute(final TruncatedContactAttribute truncatedAttribute) {
+		if (null != this.contact && null != truncatedAttribute.getField() && 0 < truncatedAttribute.getMaxSize()) {
+			try {
+				final CardDAVMapping<? extends Object> mapping = CardDAVMapper.getInstance().get(truncatedAttribute.getField());
+				if (null != mapping) {
+					return mapping.truncate(contact, truncatedAttribute.getMaxSize());
+				}
+			} catch (final OXException x) {
+				// no success
+				LOG.warn("error trying to handle truncated attribute", x);
+			}
+		}
+		return false;
 	}
 }

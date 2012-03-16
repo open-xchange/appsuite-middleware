@@ -1,3 +1,7 @@
+* 2012-03-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21732: Added automatic handling for data truncation errors
+
 * 2012-03-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 21776: Using already established threads awaiting tasks in thread pool

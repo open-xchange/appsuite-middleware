@@ -134,6 +134,9 @@ public class Tools {
     	;
     }
 
+    public static boolean isDataTruncation(final OXException e) {
+    	return ContactExceptionCodes.DATA_TRUNCATION.equals(e);
+    }
 	
 }
  
