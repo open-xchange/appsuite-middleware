@@ -47,15 +47,27 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.index.solr;
 
 
 /**
- * {@link SolrMailConstants}
+ * {@link SolrMailConstants} - Solr-specific constants for mail module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SolrMailConstants {
+
+    public static final int ADD_ROWS = 2000;
+
+    public static final int QUERY_ROWS = 2000;
+
+    public static final int ALL_ROWS = 4000;
+
+    public static final int DELETE_ROWS = 25;
+
+    public static final int CHANGE_ROWS = 25;
+
+    public static final int GET_ROWS = 25;
 
     public static final String FIELD_TIMESTAMP = "timestamp";
 

@@ -53,17 +53,29 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.SolrMailConstants;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SMALAccessService;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.mail.smal.adaper.IndexService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.StandardIndexingJob;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.mail.Constants;
@@ -77,9 +89,32 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMailJob extends StandardIndexingJob {
+public abstract class AbstractMailJob extends StandardIndexingJob implements SolrMailConstants {
 
     private static final long serialVersionUID = 8617301658519763880L;
+
+    /**
+     * The insert type.
+     */
+    public static enum InsertType {
+        /**
+         * Mail headers.
+         */
+        ENVELOPE,
+        /**
+         * Header & body of the mail
+         */
+        BODY,
+        /**
+         * Whole mail including its attachments (default)
+         */
+        ATTACHMENTS;
+    }
+
+    /**
+     * The mail index document type.
+     */
+    protected static final Type MAIL = IndexDocument.Type.MAIL;
 
     /**
      * The job's information.
@@ -114,16 +149,61 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
 
     @Override
     public Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, MailService.class, IndexService.class, SMALAccessService.class };
+        return new Class<?>[] { DatabaseService.class, MailService.class, IndexFacadeService.class, SMALAccessService.class };
     }
 
     /**
-     * Gets the tracked index adapter.
+     * Gets the associated index access.
      * 
-     * @return The adapter
+     * @return The index access
+     * @throws OXException If access cannot be returned
      */
-    protected IndexAdapter getAdapter() {
-        return Services.getService(IndexService.class).getAdapter();
+    protected IndexAccess<MailMessage> getIndexAccess() throws OXException {
+        final IndexFacadeService service = Services.getService(IndexFacadeService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexFacadeService.class.getName());
+        }
+        return service.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, userId, contextId);
+    }
+
+    /**
+     * Releases specified index access.
+     * 
+     * @param indexAccess The index access to release (<code>null</code> is no-op)
+     */
+    protected static void releaseAccess(final IndexAccess<MailMessage> indexAccess) {
+        if (null == indexAccess) {
+            return;
+        }
+        final IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
+        if (null != indexFacade) {
+            try {
+                indexFacade.releaseIndexAccess(indexAccess);
+            } catch (final OXException e) {
+                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailJob.class));
+                log.warn("Closing index access failed.", e);
+            } catch (final RuntimeException e) {
+                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailJob.class));
+                log.warn("Closing index access failed.", e);
+            }
+        }
+    }
+
+    /**
+     * Converts <code>MailMessage</code> collection to an <code>IndexDocument</code> list.
+     * 
+     * @param mails The <code>MailMessage</code> collection
+     * @return The <code>IndexDocument</code> list
+     */
+    protected static List<IndexDocument<MailMessage>> toDocuments(final Collection<MailMessage> mails) {
+        if (null == mails) {
+            return Collections.emptyList();
+        }
+        final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(mails.size());
+        for (final MailMessage mail : mails) {
+            documents.add(new StandardIndexDocument<MailMessage>(mail, MAIL));
+        }
+        return documents;
     }
 
     /**
@@ -147,7 +227,8 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
          */
         final Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
         session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getSmalAccessService().getUnwrappedInstance(session, accountId);
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+            getSmalAccessService().getUnwrappedInstance(session, accountId);
         /*
          * Safety close & not cacheable
          */

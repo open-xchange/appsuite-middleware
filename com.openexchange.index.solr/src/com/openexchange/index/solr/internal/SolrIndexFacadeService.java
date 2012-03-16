@@ -51,34 +51,34 @@ package com.openexchange.index.solr.internal;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexFacade;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.session.Session;
 
 /**
- * {@link SolrIndexFacade} - The Solr {@link IndexFacade} implementation.
+ * {@link SolrIndexFacadeService} - The Solr {@link IndexFacadeService} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SolrIndexFacade implements IndexFacade {	
+public class SolrIndexFacadeService implements IndexFacadeService {	
 	
 	private final SolrIndexAccessManager solrIndexAccessManager;
 
     /**
-     * Initializes a new {@link SolrIndexFacade}.
+     * Initializes a new {@link SolrIndexFacadeService}.
      */
-    public SolrIndexFacade() {
+    public SolrIndexFacadeService() {
 		super();
 		solrIndexAccessManager = new SolrIndexAccessManager();	
     }
 	
     @Override
-    public IndexAccess<?> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
+    public <V> IndexAccess<V> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
         final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
-        return solrIndexAccessManager.acquireIndexAccess(identifier);
+        return (IndexAccess<V>) solrIndexAccessManager.acquireIndexAccess(identifier);
     }
 
     @Override
-    public IndexAccess<?> acquireIndexAccess(final int module, final Session session) throws OXException {
+    public <V> IndexAccess<V> acquireIndexAccess(final int module, final Session session) throws OXException {
         return acquireIndexAccess(module, session.getUserId(), session.getContextId());
     }
 

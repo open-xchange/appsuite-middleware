@@ -72,7 +72,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
+import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 import com.openexchange.mail.smal.impl.jobqueue.jobs.AddByIDsJob;
 import com.openexchange.mail.smal.impl.jobqueue.jobs.ChangeByIDsJob;

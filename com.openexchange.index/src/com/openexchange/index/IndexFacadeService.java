@@ -53,12 +53,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link IndexFacade} - Provides appropriate {@link IndexAccess} instances.
+ * {@link IndexFacadeService} - Provides appropriate {@link IndexAccess} instances.
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexFacade {
+public interface IndexFacadeService {
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
@@ -71,7 +71,7 @@ public interface IndexFacade {
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess<?> acquireIndexAccess(int module, Session session) throws OXException;
+    <V> IndexAccess<V> acquireIndexAccess(int module, Session session) throws OXException;
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
@@ -82,7 +82,7 @@ public interface IndexFacade {
      * @return The acquired index access.
      * @throws OXException If acquiring an index access fails for any reason
      */
-    IndexAccess<?> acquireIndexAccess(int module, int userId, int contextId) throws OXException;
+    <V> IndexAccess<V> acquireIndexAccess(int module, int userId, int contextId) throws OXException;
 
     /**
      * Releases specified {@link IndexAccess} instance.

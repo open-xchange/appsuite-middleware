@@ -53,11 +53,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.index.IndexFacade;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrCoreConfigServiceImpl;
-import com.openexchange.index.solr.internal.SolrIndexFacade;
+import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -86,7 +86,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
         LOG.info("Starting Bundle com.openexchange.index.solr");
         Services.setServiceLookup(this);
 
-        registerService(IndexFacade.class, new SolrIndexFacade());
+        registerService(IndexFacadeService.class, new SolrIndexFacadeService());
         final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
         registerService(SolrCoreConfigService.class, indexService);
 

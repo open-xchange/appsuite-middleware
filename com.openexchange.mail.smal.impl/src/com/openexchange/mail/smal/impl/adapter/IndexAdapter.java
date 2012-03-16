@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.adaper;
+package com.openexchange.mail.smal.impl.adapter;
 
 import java.util.Collection;
 import java.util.List;

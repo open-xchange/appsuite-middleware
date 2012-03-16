@@ -53,10 +53,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
 
 /**
  * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
@@ -105,23 +104,31 @@ public final class RemoveByIDsJob extends AbstractMailJob {
         if (null == mailIds) {
             return;
         }
+        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            try {
-                final IndexAdapter indexAdapter = getAdapter();
-                final Session session = new FakeSession(info.primaryPassword, userId, contextId);
-                indexAdapter.deleteMessages(mailIds, fullName, accountId, session);
-            } finally {
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("RemoverJob \"" + info + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
-                }
+            indexAccess = getIndexAccess();
+            final StringBuilder queryBuilder = new StringBuilder(128);
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+            final int resLen = queryBuilder.length();
+            // Iterate identifiers
+            for (final String id : mailIds) {
+                queryBuilder.setLength(resLen);
+                queryBuilder.append(" AND (").append(FIELD_ID).append(":\"").append(id).append("\")");
+                indexAccess.deleteByQuery(queryBuilder.toString());
+            }
+            if (DEBUG) {
+                LOG.debug(mailIds.size() + " mails deleted from index; folder job: " + info);
             }
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
+        } finally {
+            releaseAccess(indexAccess);
         }
     }
 

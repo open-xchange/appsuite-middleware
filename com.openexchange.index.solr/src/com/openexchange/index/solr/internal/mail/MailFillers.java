@@ -59,6 +59,7 @@ import org.apache.solr.common.SolrDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.solr.SolrMailConstants;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -217,7 +218,7 @@ public final class MailFillers implements SolrMailConstants {
         }
     }
 
-    private static final MailFiller COLOR_LABEL_FILLER = new MailFiller() {
+    public static final MailFiller COLOR_LABEL_FILLER = new MailFiller() {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
@@ -326,7 +327,7 @@ public final class MailFillers implements SolrMailConstants {
         }
     };
 
-    private static final MailFiller FLAGS_FILLER = new MailFiller() {
+    public static final MailFiller FLAGS_FILLER = new MailFiller() {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {

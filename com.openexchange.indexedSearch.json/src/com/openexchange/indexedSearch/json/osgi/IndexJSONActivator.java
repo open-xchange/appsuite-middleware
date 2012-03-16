@@ -50,9 +50,9 @@
 package com.openexchange.indexedSearch.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.indexedSearch.json.IndexActionFactory;
 import com.openexchange.indexedSearch.json.ResultConverters;
-import com.openexchange.mail.smal.adaper.IndexService;
 
 /**
  * {@link IndexJSONActivator}
@@ -72,7 +72,7 @@ public class IndexJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IndexService.class };
+        return new Class<?>[] { IndexFacadeService.class };
     }
 
     @Override

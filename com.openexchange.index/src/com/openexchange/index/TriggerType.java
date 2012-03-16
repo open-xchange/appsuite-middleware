@@ -50,7 +50,7 @@
 package com.openexchange.index;
 
 /**
- * {@link TriggerType} - The trigger type for an established {@link IndexFacade}.
+ * {@link TriggerType} - The trigger type for an established {@link IndexFacadeService}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

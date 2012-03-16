@@ -51,8 +51,8 @@ package com.openexchange.mail.smal.impl.jobqueue.jobs;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
 import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;

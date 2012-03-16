@@ -50,8 +50,8 @@
 package com.openexchange.mail.smal.impl.adapter.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.mail.smal.adaper.IndexService;
+import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
+import com.openexchange.mail.smal.impl.adapter.IndexService;
 
 
 /**

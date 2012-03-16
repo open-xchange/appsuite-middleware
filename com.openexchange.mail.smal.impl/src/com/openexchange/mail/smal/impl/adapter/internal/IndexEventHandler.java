@@ -52,8 +52,8 @@ package com.openexchange.mail.smal.impl.adapter.internal;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.mail.smal.adaper.IndexService;
 import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
