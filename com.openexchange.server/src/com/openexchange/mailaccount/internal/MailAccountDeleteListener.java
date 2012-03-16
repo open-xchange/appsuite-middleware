@@ -49,18 +49,27 @@
 
 package com.openexchange.mailaccount.internal;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountDeleteListener} - {@link DeleteListener} for mail account storage.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountDeleteListener implements DeleteListener {
@@ -75,15 +84,55 @@ public class MailAccountDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             final int user = deleteEvent.getId();
             final int cid = deleteEvent.getContext().getContextId();
-            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-            for (final MailAccount account : accounts) {
-                storageService.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
+            final OXException[] cup = new OXException[1];
+            final TIntList ids = getUserMailAccountIDs(user, cid, writeCon);
+            ids.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(final int accountId) {
+                    try {
+                        storageService.deleteMailAccount(accountId, Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
+                        return true;
+                    } catch (final OXException e) {
+                        cup[0] = e;
+                        return false;
+                    } catch (final RuntimeException e) {
+                        cup[0] = MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        return false;
+                    }
+                }
+            });
+            final OXException err = cup[0];
+            if (null != err) {
+                throw err;
             }
+        }
+    }
+
+    private TIntList getUserMailAccountIDs(final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, user);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return new TIntLinkedList();
+            }
+            final TIntList ids = new TIntArrayList(8);
+            do {
+                ids.add(result.getInt(1));
+            } while (result.next());
+            return ids;
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
         }
     }
 
