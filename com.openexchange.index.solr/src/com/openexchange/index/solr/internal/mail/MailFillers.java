@@ -163,7 +163,15 @@ public final class MailFillers implements SolrMailConstants {
         void fill(MailMessage mail, SolrDocument doc) throws OXException;
     }
 
-    private static final class FullNameFiller implements MailFiller {
+    /**
+     * {@link FullNameFiller} - The <code>MailFiller</code> for full name.
+     */
+    public static final class FullNameFiller implements MailFiller {
+
+        /**
+         * The default filler for full name.
+         */
+        public static final FullNameFiller DEFAULT = new FullNameFiller();
 
         private final String fullName;
 
@@ -172,13 +180,25 @@ public final class MailFillers implements SolrMailConstants {
             this.fullName = fullName;
         }
 
+        private FullNameFiller() {
+            this(null);
+        }
+
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setFolder(fullName);
+            mail.setFolder(null == fullName ? MailFillers.<String> getFieldValue(FIELD_FULL_NAME, doc) : fullName);
         }
     }
 
-    private static final class AccountIdFiller implements MailFiller {
+    /**
+     * {@link AccountIdFiller} - The <code>MailFiller</code> for account identifier.
+     */
+    public static final class AccountIdFiller implements MailFiller {
+
+        /**
+         * The default filler for account identifier.
+         */
+        public static final AccountIdFiller DEFAULT = new AccountIdFiller();
 
         private final int accountId;
 
@@ -187,9 +207,13 @@ public final class MailFillers implements SolrMailConstants {
             this.accountId = accountId;
         }
 
+        private AccountIdFiller() {
+            this(-1);
+        }
+
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setAccountId(accountId);
+            mail.setAccountId(accountId < 0 ? MailFillers.<Integer> getFieldValue(FIELD_ACCOUNT, doc).intValue() : accountId);
         }
     }
 
