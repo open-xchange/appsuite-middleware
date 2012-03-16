@@ -63,7 +63,7 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class};
+        return new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class, ConfigViewFactory.class};
     }
 
     @Override
