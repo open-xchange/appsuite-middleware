@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.publish.Entity;
 import com.openexchange.publish.PublicationStorage;
+import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -79,8 +80,7 @@ public class IsPublished implements AdditionalFolderField {
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory
 			.getLog(IsPublished.class));
 
-	private final PublicationStorage storage;
-
+	
 	private static final Set<Integer> ID_BLACKLIST = new HashSet<Integer>() {
 
 		{
@@ -96,11 +96,7 @@ public class IsPublished implements AdditionalFolderField {
 			add(-1);
 		}
 	};
-
-	public IsPublished(final PublicationStorage storage) {
-		this.storage = storage;
-	}
-
+	
 	@Override
     public int getColumnID() {
 		return 3010;
@@ -165,7 +161,7 @@ public class IsPublished implements AdditionalFolderField {
 		}
 		try {
 
-			isPublished.putAll(storage.isPublished(folderIdsToQuery,
+			isPublished.putAll(getStorage().isPublished(folderIdsToQuery,
 					session.getContext()));
 			List<Object> retval = new ArrayList<Object>(folder.size());
 			for (FolderObject f : folder) {
@@ -193,6 +189,10 @@ public class IsPublished implements AdditionalFolderField {
 			LOG.error(e.getMessage(), e);
 		}
 		return allFalse(folder.size());
+	}
+
+	private PublicationStorage getStorage() {
+		return AbstractPublicationService.getDefaultStorage();
 	}
 
 	private List<Object> allFalse(int size) {

@@ -65,7 +65,7 @@ public class FolderFieldActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        registerService(AdditionalFolderField.class, new HasSubscriptions(AbstractSubscribeService.STORAGE));
+        registerService(AdditionalFolderField.class, new HasSubscriptions());
     }
 
     @Override
