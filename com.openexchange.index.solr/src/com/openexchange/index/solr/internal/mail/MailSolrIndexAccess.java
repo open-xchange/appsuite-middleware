@@ -150,7 +150,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             map.put(MailField.COLOR_LABEL, singletonList(FIELD_COLOR_LABEL));
             map.put(MailField.CONTENT_TYPE, singletonList(FIELD_ATTACHMENT));
             // {
-            // final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            // final Set<Locale> knownLocales = IndexConstants.KNOWN_LOCALES;
             // final List<String> names = new ArrayList<String>(knownLocales.size());
             // final StringBuilder tmp = new StringBuilder("content_"); //8
             // for (final Locale loc : knownLocales) {
@@ -574,6 +574,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         return triggerType;
     }
 
+    /**
+     * The <code>SolrInputDocument</code> iterator for <code>MailMessage</code>s.
+     */
     private static final class MailDocumentIterator implements Iterator<SolrInputDocument> {
 
         private final int contextId;
@@ -584,6 +587,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
         private final SolrInputDocumentHelper helper;
 
+        /**
+         * Initializes a new {@link MailDocumentIterator}.
+         */
         protected MailDocumentIterator(final Iterator<IndexDocument<MailMessage>> iterator, final int userId, final int contextId) {
             super();
             this.contextId = contextId;
@@ -610,7 +616,21 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         }
     }
 
-    private static void addMandatoryField(final Set<String> set) {
+    /**
+     * Adds mandatory fields to specified set:
+     * <ul>
+     * <li>UUID</li>
+     * <li>ID</li>
+     * <li>FULL_NAME</li>
+     * <li>ACCOUNT</li>
+     * <li>USER</li>
+     * <li>CONTEXT</li>
+     * <li>CONTENT_FLAG</li>
+     * </ul>
+     * 
+     * @param set The set to add to
+     */
+    private static void addMandatoryFields(final Set<String> set) {
         set.add(FIELD_UUID);
         set.add(FIELD_ID);
         set.add(FIELD_FULL_NAME);
@@ -620,6 +640,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         set.add(FIELD_CONTENT_FLAG);
     }
 
+    /**
+     * Checks for an empty string.
+     */
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;

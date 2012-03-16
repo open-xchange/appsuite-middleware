@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.index.solr.osgi;
 
 import org.apache.commons.logging.Log;
@@ -57,6 +58,7 @@ import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrCoreConfigServiceImpl;
 import com.openexchange.index.solr.internal.SolrIndexFacade;
+import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -64,7 +66,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link SolrIndexActivator} - The activator of the index bundle.
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,33 +74,28 @@ public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
 
-    
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class };
+            DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
+            LanguageDetectionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting Bundle com.openexchange.index.solr");
         Services.setServiceLookup(this);
-        
+
         registerService(IndexFacade.class, new SolrIndexFacade());
         final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
-        registerService(SolrCoreConfigService.class, indexService);     
-        
+        registerService(SolrCoreConfigService.class, indexService);
+
         /*
-         * Register UpdateTasks and DeleteListener. Uncomment for production.
-         *
-        final DatabaseService dbService = getService(DatabaseService.class);
-        final CreateTableService createTableService = new IndexCreateTableService();
-        registerService(CreateTableService.class, createTableService);        
-        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(
-            new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService),
-            new IndexCreateServerTableTask(dbService)
-        ));
-        registerService(DeleteListener.class, new IndexDeleteListener(indexService));
-        */        
+         * Register UpdateTasks and DeleteListener. Uncomment for production. final DatabaseService dbService =
+         * getService(DatabaseService.class); final CreateTableService createTableService = new IndexCreateTableService();
+         * registerService(CreateTableService.class, createTableService); registerService(UpdateTaskProviderService.class, new
+         * IndexUpdateTaskProviderService( new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService), new
+         * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
+         */
     }
 }
