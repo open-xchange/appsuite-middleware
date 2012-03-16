@@ -1895,7 +1895,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     final String url = result.getString(2);
                     if (null != url) {
                         current.parseMailServerURL(url);
-                        if (checkMailServer(server, addr, current) && current.getMailPort() == port && (null != login && login.equals(result.getString(3)))) {
+                        if (checkMailServer(server, addr, current) && checkProtocol(mailAccount.getMailProtocol(), current.getMailProtocol()) && current.getMailPort() == port && (null != login && login.equals(result.getString(3)))) {
                             throw MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
                         }
                     }
@@ -1928,6 +1928,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             return server.equalsIgnoreCase(mailServer);
         }
+    }
+
+    private static boolean checkProtocol(final String protocol1, final String protocol2) {
+        if (isEmpty(protocol1) || isEmpty(protocol2)) {
+            return false;
+        }
+        return protocol1.equalsIgnoreCase(protocol2);
     }
 
     private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int user, final int cid, final Connection con) throws OXException {
@@ -1965,7 +1972,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null == excepts || !excepts.contains(id)) {
                     final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
                     current.parseTransportServerURL(result.getString(2));
-                    if (checkTransportServer(server, addr, current) && current.getTransportPort() == port && (null != login && login.equals(result.getString(3)))) {
+                    if (checkTransportServer(server, addr, current) && checkProtocol(mailAccount.getTransportProtocol(), current.getTransportProtocol()) && current.getTransportPort() == port && (null != login && login.equals(result.getString(3)))) {
                         throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(user), I(cid));
                     }
                 }
