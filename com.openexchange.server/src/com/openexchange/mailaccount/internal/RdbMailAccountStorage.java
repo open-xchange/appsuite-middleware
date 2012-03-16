@@ -110,6 +110,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -737,7 +738,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final TIntList ids = new TIntArrayList(8);
             do {
                 final String url = result.getString(2);
-                if (null != MailProviderRegistry.getRealMailProvider(ProviderUtility.extractProtocol(url, null))) {
+                if (null != MailProviderRegistry.getRealMailProvider(ProviderUtility.extractProtocol(url, URIDefaults.IMAP.getProtocol()))) {
                     ids.add(result.getInt(1));
                 }
             } while (result.next());
