@@ -107,11 +107,12 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
         @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
             try {
-                if (null == queue) {
+                final ScalingQueue scalingQueue = queue;
+                if (null == scalingQueue) {
                     // Strange...
                     executor.getQueue().put(r);
                 } else {
-                    if (!queue.superOffer(r)) {
+                    if (!scalingQueue.superOffer(r)) {
                         /*
                          * Task cannot be re-enqueued, trigger originally associated handler or default handler
                          */
