@@ -1392,7 +1392,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 for (int i = 0; i < sz; i++) {
                                     final FileStorageAccount fsa = fsAccounts.get(i);
                                     final FileStorageFolderIdentifier fsfi =
-                                        new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), MessagingFolder.ROOT_FULLNAME);
+                                        new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), FileStorageFolder.ROOT_FULLNAME);
                                     l.add(new String[] { fsfi.toString(), fsa.getDisplayName()});
                                 }
                             }
