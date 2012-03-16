@@ -69,7 +69,7 @@ public class FolderFieldActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        registerService = context.registerService(AdditionalFolderField.class.getName(), new IsPublished(AbstractPublicationService.getDefaultStorage()), null);
+        registerService = context.registerService(AdditionalFolderField.class.getName(), new IsPublished(), null);
     }
 
     @Override

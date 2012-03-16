@@ -96,8 +96,6 @@ public class LostAndFoundUnitTests {
     	tests.addTestSuite(com.openexchange.groupware.update.CreatePublishTablesTest.class);
     	tests.addTestSuite(com.openexchange.groupware.update.CreateSubscribeTableTest.class);
     	tests.addTestSuite(com.openexchange.groupware.update.RenamePersonalInfostoreFoldersTest.class);
-    	tests.addTestSuite(com.openexchange.i18n.Bug14154Test.class);
-    	tests.addTestSuite(com.openexchange.i18n.TranslatedSingleTest.class);
     	tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
     	tests.addTestSuite(com.openexchange.mail.MailFolderTest.class);
     	tests.addTestSuite(com.openexchange.mail.MailJSONHandlerTest.class);

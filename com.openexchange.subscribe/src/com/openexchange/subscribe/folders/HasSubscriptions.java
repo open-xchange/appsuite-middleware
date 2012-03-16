@@ -61,6 +61,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.tools.session.ServerSession;
 
@@ -85,12 +86,6 @@ public class HasSubscriptions implements AdditionalFolderField {
         add(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
     }};
 
-    private final SubscriptionStorage storage;
-
-    public HasSubscriptions(final SubscriptionStorage storage) {
-        super();
-        this.storage = storage;
-    }
 
     @Override
     public int getColumnID() {
@@ -132,7 +127,7 @@ public class HasSubscriptions implements AdditionalFolderField {
              return allFalse(folder.size());
          }
          try {
-             hasSubscriptions.putAll(storage.hasSubscriptions(session.getContext(), folderIdsToQuery));
+             hasSubscriptions.putAll(AbstractSubscribeService.STORAGE.hasSubscriptions(session.getContext(), folderIdsToQuery));
              final List<Object> retval = new ArrayList<Object>(folder.size());
              for(final String fn : folderIds) {
                  if (hasSubscriptions.get(fn).booleanValue()) {

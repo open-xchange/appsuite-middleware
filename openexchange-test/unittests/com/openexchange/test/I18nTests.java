@@ -49,17 +49,12 @@
 
 package com.openexchange.test;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
-import com.openexchange.i18n.Bug14154Test;
-import com.openexchange.i18n.TranslatedSingleTest;
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.i18n.Bug14154Test;
+import com.openexchange.i18n.TranslatedTest;
 
 /**
  * Tests if everything is translated into all languages.
@@ -68,79 +63,19 @@ import junit.framework.TestSuite;
  */
 public final class I18nTests {
 
-    private static final Locale[] locales = new Locale[] {
+    public static final Locale[] LOCALES = new Locale[] {
         Locale.GERMANY,
         Locale.FRANCE
-    };
-
-    private static final Class<?>[] i18nClasses = new Class<?>[] {
-        com.openexchange.groupware.i18n.FolderStrings.class,
-        com.openexchange.groupware.i18n.Groups.class,
-        com.openexchange.groupware.i18n.MailStrings.class,
-        com.openexchange.groupware.i18n.Notifications.class,
-        com.openexchange.messaging.facebook.FormStrings.class,
-        com.openexchange.messaging.rss.FormStrings.class,
-        com.openexchange.messaging.twitter.FormStrings.class,
-        com.openexchange.publish.online.infostore.FormStrings.class,
-        com.openexchange.publish.microformats.MicroformatStrings.class,
-        com.openexchange.publish.microformats.FormStrings.class,
-        com.openexchange.subscribe.crawler.internal.FormStrings.class,
-        com.openexchange.subscribe.microformats.FormStrings.class
     };
 
     private I18nTests() {
         super();
     }
 
-    public static Test suite() throws InstantiationException, IllegalAccessException {
+    public static Test suite() {
         final TestSuite tests = new TestSuite();
-        for (final Locale locale : locales) {
-            for (final Class<?> clazz : i18nClasses) {
-                final Object instance = clazz.newInstance();
-                for (final Field field : clazz.getFields()) {
-                    if (String.class.isAssignableFrom(field.getType())) {
-                         tests.addTest(new TranslatedSingleTest("testTranslation", locale, (String) field.get(instance)));
-                    }
-                }
-            }
-            List<String> timeZoneIDs = new ArrayList<String>();
-            for (String timeZoneID : TimeZone.getAvailableIDs()) {
-                timeZoneIDs.add(timeZoneID);
-            }
-            removeUnwantedZones(timeZoneIDs);
-            for (String timeZoneID : timeZoneIDs) {
-                tests.addTest(new TranslatedSingleTest("testTranslation", locale, timeZoneID.replace('_', ' ')));
-            }
-            tests.addTest(new Bug14154Test("testContainingPattern", locale));
-        }
+        tests.addTest(new JUnit4TestAdapter(TranslatedTest.class));
+        tests.addTest(new JUnit4TestAdapter(Bug14154Test.class));
         return tests;
     }
-
-    private static void removeUnwantedZones(List<String> timeZoneIDs) {
-        Pattern[] patterns = new Pattern[whiteRegex.length];
-        int i = 0;
-        for (String regex : whiteRegex) {
-            patterns[i++] = Pattern.compile(regex);
-        }
-        Iterator<String> iter = timeZoneIDs.iterator();
-        while (iter.hasNext()) {
-            String timeZoneID = iter.next();
-            boolean isWhiteListed = false;
-            for (Pattern pattern : patterns) {
-                isWhiteListed = pattern.matcher(timeZoneID).matches();
-                if (isWhiteListed) {
-                    break;
-                }
-            }
-            if (!isWhiteListed) {
-                iter.remove();
-            }
-        }
-    }
-
-    private static final String[] whiteRegex = {
-        "Africa/.*", "America/.*", "Antarctica/.*", "Arctic/.*", "Asia/.*", "Atlantic/.*", "Australia/.*", "Brazil/.*", "Canada/.*",
-        "Chile/.*", "Cuba", "Egypt", "Eire", "Europe/.*", "Greenwich", "Hongkong", "Iceland", "Indian/.*", "Iran", "Israel", "Jamaica",
-        "Japan", "Kwajalein", "Libya", "Mexico/.*", "Mideast/.*", "Navajo", "Pacific/.*", "Poland", "Portugal", "Singapore", "Turkey",
-        "US/.*", "UTC", "Zulu" };
 }
