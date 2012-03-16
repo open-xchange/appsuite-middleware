@@ -68,6 +68,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link Tools} - Static utility functions for the contact service.
@@ -113,7 +114,8 @@ public final class Tools {
 				}
 				
 			});
-			final Collection<Contact> contacts = storage.search(contextID, folderID, term, new ContactField[] { ContactField.OBJECT_ID });
+			final SearchIterator<Contact> contacts = storage.search(contextID, folderID, term, new ContactField[] { 
+					ContactField.OBJECT_ID });
 			if (null != contacts && 0 < contacts.size()) {
 				throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(contextID, update.getObjectID());
 			}

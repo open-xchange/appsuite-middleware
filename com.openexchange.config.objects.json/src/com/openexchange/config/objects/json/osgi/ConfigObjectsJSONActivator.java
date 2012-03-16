@@ -49,14 +49,12 @@
 
 package com.openexchange.config.objects.json.osgi;
 
-import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.config.objects.json.ConfigObjectActionFactory;
 import com.openexchange.config.objects.json.ConfigObjectServlet;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 
 /**
@@ -64,13 +62,11 @@ import com.openexchange.tools.service.SessionServletRegistration;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ConfigObjectsJSONActivator extends HousekeepingActivator {
-
-    private SessionServletRegistration servletRegistration;
+public class ConfigObjectsJSONActivator extends AbstractSessionServletActivator {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{HttpService.class, ConfigObjectRegistryFactory.class};
+    protected Class<?>[] getAdditionalNeededServices() {
+        return new Class<?>[]{ConfigObjectRegistryFactory.class};
     }
 
     @Override
@@ -79,17 +75,8 @@ public class ConfigObjectsJSONActivator extends HousekeepingActivator {
         ConfigObjectServlet.ACTIONS = factory;
 
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));
+        registerSessionServlet("/ajax/cobjects", new ConfigObjectServlet());
 
-        servletRegistration = new SessionServletRegistration(context, new ConfigObjectServlet(), "/ajax/cobjects");
-
-    }
-
-   @Override
-    protected void stopBundle() throws Exception {
-        if (servletRegistration != null) {
-            servletRegistration.close();
-        }
-        super.stopBundle();
     }
 
 }

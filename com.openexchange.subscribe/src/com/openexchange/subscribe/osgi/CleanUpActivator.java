@@ -51,7 +51,6 @@ package com.openexchange.subscribe.osgi;
 
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.internal.FolderCleanUpEventHandler;
 
@@ -64,13 +63,11 @@ import com.openexchange.subscribe.internal.FolderCleanUpEventHandler;
  */
 public class CleanUpActivator extends HousekeepingActivator {
 
-    private Whiteboard whiteboard;
     private FolderCleanUpEventHandler folderCleanUpEventHandler;
 
     @Override
     public void startBundle() throws Exception {
-        whiteboard = new Whiteboard(context);
-        final ContextService contexts = whiteboard.getService(ContextService.class);
+        final ContextService contexts = getService(ContextService.class);
 
 
         folderCleanUpEventHandler = new FolderCleanUpEventHandler(context, AbstractSubscribeService.STORAGE, contexts);
@@ -79,13 +76,11 @@ public class CleanUpActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         folderCleanUpEventHandler.close();
-        whiteboard.close();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[] { ContextService.class };
     }
 
 }

@@ -35,6 +35,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.settings.extensions"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/>

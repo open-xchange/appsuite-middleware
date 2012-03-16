@@ -94,7 +94,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
         new com.openexchange.contact.osgi.ContactServiceActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
-        new com.openexchange.groupware.tasks.osgi.TaskActivator()
+        new com.openexchange.groupware.tasks.osgi.TaskActivator(),
+        new FolderUpdaterRegistryDependencyActivator()
     };
 
     public ServerCompositeActivator() {

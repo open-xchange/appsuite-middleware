@@ -169,7 +169,7 @@ public class SearchTermAdapter {
 				stringBuilder.append(' ').append(operation.getSqlRepresentation());
 			} else  if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && i != terms.length - 1) {
 				//don't place an operator after the last operand
-				stringBuilder.append(' ').append(operation.getSqlRepresentation()).append("    ");
+				stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
 			}
 		}
 		stringBuilder.append(" ) ");
@@ -194,7 +194,18 @@ public class SearchTermAdapter {
 				stringBuilder.append(columnLabel);
 			}
 		} else if (Operand.Type.CONSTANT.equals(operand.getType())) {
-			parameters.add(operand.getValue());
+			Object value = operand.getValue();
+			if (null == value) {
+				throw new IllegalArgumentException("got no value for contact operand");
+			} else if (String.class.isInstance(value)) {
+				final String stringValue = (String)value;
+				if (stringValue.contains("*")) {
+					value = stringValue.replaceAll("\\*", "%");
+					final int index = stringBuilder.lastIndexOf("=");
+					stringBuilder.replace(index, index + 1, "LIKE");		
+				}
+			}
+			parameters.add(value);
 			stringBuilder.append('?');
 		} else {
 			throw new IllegalArgumentException("unknown type in operand: " + operand.getType());

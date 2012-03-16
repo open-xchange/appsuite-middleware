@@ -72,6 +72,7 @@ public class UpdateTest extends ContactStorageTest {
          */
         final String folderId = "500002";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Otto Maier");
         contact.setGivenName("Otto");
         contact.setSurName("Maier");
@@ -116,6 +117,7 @@ public class UpdateTest extends ContactStorageTest {
          */
         final String folderId = "500004";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Dirk Dampf");
         contact.setGivenName("Dirk");
         contact.setSurName("Dampf");
@@ -158,6 +160,7 @@ public class UpdateTest extends ContactStorageTest {
          */
         final String folderId = "500003";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setSurName("Distributionlist 52");
         contact.setUid(UUID.randomUUID().toString());
         contact.setDistributionList(new DistributionListEntryObject[] {
@@ -209,6 +212,7 @@ public class UpdateTest extends ContactStorageTest {
          */
         final String folderId = "500007";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Bernd Bein");
         contact.setGivenName("Bernd");
         contact.setSurName("Bein");
@@ -250,6 +254,7 @@ public class UpdateTest extends ContactStorageTest {
          */
         final String folderId = "500004";
         final Contact contact = new Contact();
+        contact.setCreatedBy(getUserID());
         contact.setDisplayName("Dirk Dampf");
         contact.setGivenName("Dirk");
         contact.setSurName("Dampf");

@@ -49,31 +49,20 @@
 
 package com.openexchange.publish.json.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationServlet;
 import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationTargetServlet;
 import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.tools.service.SessionServletRegistration;
 
-public class ServletActivator extends HousekeepingActivator {
+public class ServletActivator extends AbstractSessionServletActivator {
 
     private static final String TARGET_ALIAS = "ajax/publicationTargets";
     private static final String PUB_ALIAS = "ajax/publications";
-
-    List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, PublicationTargetDiscoveryService.class, ConfigurationService.class };
-    }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
@@ -101,12 +90,8 @@ public class ServletActivator extends HousekeepingActivator {
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
 
-        servletRegistrations.add(new SessionServletRegistration(context, new PublicationTargetServlet(), TARGET_ALIAS));
-        servletRegistrations.add(new SessionServletRegistration(context, new PublicationServlet(), PUB_ALIAS));
-
-        for (final SessionServletRegistration reg : servletRegistrations) {
-            reg.open();
-        }
+        registerSessionServlet(TARGET_ALIAS, new PublicationTargetServlet());
+        registerSessionServlet(PUB_ALIAS, new PublicationServlet());
     }
 
     @Override
@@ -119,12 +104,6 @@ public class ServletActivator extends HousekeepingActivator {
         PublicationTargetServlet.setFactory(null);
 
         cleanUp();
-
-        for (final SessionServletRegistration reg : servletRegistrations) {
-            reg.close();
-        }
-        servletRegistrations.clear();
-
     }
 
     @Override
@@ -135,5 +114,10 @@ public class ServletActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregister();
+    }
+
+    @Override
+    protected Class<?>[] getAdditionalNeededServices() {
+        return new Class<?>[] { PublicationTargetDiscoveryService.class, ConfigurationService.class };
     }
 }

@@ -49,22 +49,20 @@
 
 package com.openexchange.contact;
 
-import java.util.Collection;
 import java.util.Date;
 
-import com.openexchange.contact.storage.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link ContactService} - Provides access methods to the Contact module.
+ * {@link ContactService} - Provides access to the contact module.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- *
  */
 public interface ContactService {
 	
@@ -77,7 +75,7 @@ public interface ContactService {
      * @return the contact
      * @throws OXException
      */
-    Contact get(Session session, String folderId, String id) throws OXException;
+    Contact getContact(Session session, String folderId, String id) throws OXException;
     
     /**
      * Gets a contact with specified fields.
@@ -89,7 +87,7 @@ public interface ContactService {
      * @return the contact
      * @throws OXException
      */
-    Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException;
+    Contact getContact(Session session, String folderId, String id, ContactField[] fields) throws OXException;
     
     /**
      * Gets all contacts with all fields in a folder.
@@ -99,7 +97,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(Session session, String folderId) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId) throws OXException;
 
     /**
      * Gets all contacts with all fields in a folder.
@@ -110,7 +108,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(Session session, String folderId, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets all contacts with specified fields in a folder.
@@ -121,7 +119,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(Session session, String folderId, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields) throws OXException;
 
     /**
      * Gets all contacts with specified fields in a folder.
@@ -133,7 +131,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> all(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of contacts with all fields.
@@ -144,7 +142,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(Session session, String folderId, String[] ids) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids) throws OXException;
 
     /**
      * Gets a list of contacts with all fields.
@@ -156,7 +154,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(Session session, String folderId, String[] ids, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of contacts with specified fields.
@@ -168,7 +166,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields) throws OXException;
 
     /**
      * Gets a list of contacts with specified fields.
@@ -181,7 +179,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of deleted contacts in a folder with all fields.
@@ -192,7 +190,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> deleted(Session session, String folderId, Date since) throws OXException;
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since) throws OXException;
 
     /**
      * Gets a list of deleted contacts in a folder with specified fields.
@@ -204,8 +202,20 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
 
+    /**
+     * Gets a list of deleted contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum deletion time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Gets a list of modified contacts in a folder with all fields.
@@ -216,7 +226,7 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> modified(Session session, String folderId, Date since) throws OXException;
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since) throws OXException;
 
     /**
      * Gets a list of modified contacts in a folder with specified fields.
@@ -228,8 +238,21 @@ public interface ContactService {
      * @return the contacts
      * @throws OXException
      */
-    Collection<Contact> modified(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException;
 
+    /**
+     * Gets a list of modified contacts in a folder with specified fields.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param since the exclusive minimum modification time to consider
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
     /**
      * Searches for contacts.
      * 
@@ -239,7 +262,7 @@ public interface ContactService {
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term) throws OXException;
 
     /**
      * Searches for contacts.
@@ -251,7 +274,7 @@ public interface ContactService {
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.
@@ -263,7 +286,7 @@ public interface ContactService {
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException;
 
     /**
      * Searches for contacts.
@@ -276,7 +299,7 @@ public interface ContactService {
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> Collection<Contact> search(Session session, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.
@@ -286,7 +309,7 @@ public interface ContactService {
      * @param contact the contact to create
      * @throws OXException
      */
-    void create(Session session, String folderId, Contact contact) throws OXException;
+    void createContact(Session session, String folderId, Contact contact) throws OXException;
     
     /**
      * Updates a contact. 
@@ -298,7 +321,7 @@ public interface ContactService {
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
+    void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
      * Deletes a contact.
@@ -309,6 +332,6 @@ public interface ContactService {
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
+    void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException;
 
 }

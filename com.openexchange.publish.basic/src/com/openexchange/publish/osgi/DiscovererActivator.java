@@ -55,7 +55,6 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.database.PublicationUserDeleteListener;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -73,11 +72,8 @@ public class DiscovererActivator extends HousekeepingActivator {
 
     private OSGiPublicationTargetDiscovererCollector discovererCollector;
 
-    private Whiteboard whiteboard;
-
     @Override
     public void startBundle() throws Exception {
-        whiteboard = new Whiteboard(context);
 
         pubServiceCollector = new OSGiPublicationTargetCollector(context);
         discovererCollector = new OSGiPublicationTargetDiscovererCollector(context);
@@ -93,11 +89,11 @@ public class DiscovererActivator extends HousekeepingActivator {
 
         registerService(PublicationTargetDiscoveryService.class, compositeDiscovererCollector, discoveryDict);
 
-        final DBProvider provider = whiteboard.getService(DBProvider.class);
-        final GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
+        final DBProvider provider = getService(DBProvider.class);
+        final GenericConfigurationStorageService confStorage = getService(GenericConfigurationStorageService.class);
 
         AbstractPublicationService.setDefaultStorage( new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector) );
-        AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(whiteboard.getService(UserConfigurationService.class));
+        AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(getService(UserConfigurationService.class));
 
         final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setDiscoveryService(compositeDiscovererCollector);
@@ -113,14 +109,11 @@ public class DiscovererActivator extends HousekeepingActivator {
         pubServiceCollector = null;
         discovererCollector.close();
         discovererCollector = null;
-        whiteboard.close();
-        whiteboard = null;
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[] { DBProvider.class, GenericConfigurationStorageService.class, UserConfigurationService.class };
     }
 
 }

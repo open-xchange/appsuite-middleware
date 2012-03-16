@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.site.osgi;
 
+import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -56,7 +57,6 @@ import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.site.Constants;
 import com.openexchange.publish.site.SitePublicationService;
 import com.openexchange.publish.site.SiteServlet;
-import com.openexchange.tools.service.ServletRegistration;
 
 
 /**
@@ -68,7 +68,8 @@ public class SitePublicationActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED = new Class<?>[]{
         ContextService.class,
-        IDBasedFileAccessFactory.class
+        IDBasedFileAccessFactory.class,
+        HttpService.class
     };
 
     @Override
@@ -79,7 +80,8 @@ public class SitePublicationActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(PublicationService.class, SitePublicationService.getInstance());
-        rememberTracker(new ServletRegistration(context, new SiteServlet(), Constants.PUBLICATION_ROOT_URL));
+        
+        getService(HttpService.class).registerServlet(Constants.PUBLICATION_ROOT_URL, new SiteServlet(), null, null);
 
         openTrackers();
 

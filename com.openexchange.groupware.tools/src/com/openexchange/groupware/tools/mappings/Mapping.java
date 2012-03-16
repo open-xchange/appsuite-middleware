@@ -1,0 +1,110 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.tools.mappings;
+
+import com.openexchange.exception.OXException;
+
+/**
+ * {@link Mapping} - Generic operations for mapped object properties.
+ *
+ * @param <T> the type of the property
+ * @param <O> the type of the object
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public interface Mapping<T, O> {
+	
+	/**
+	 * Gets a value indicating whether the mapped property is set in the 
+	 * supplied object or not. This is usually done by passing the result
+	 * of the object's <code>containsXXX</code>-method.
+	 * 
+	 * @param object the object
+	 * @return <code>true</code>, if the property is set, <code>false</code>,
+	 * otherwise.
+	 */
+	boolean isSet(O object);
+
+	/**
+	 * Sets the mapped property in the object to the given value.
+	 * 
+	 * @param object the object to set the property for
+	 * @param value the value to set
+	 * @throws OXException
+	 */
+	void set(O object, T value) throws OXException;
+	
+	/**
+	 * Gets the mapped property's value from a object.
+	 * 
+	 * @param object the object to get the property value from
+	 * @return the value
+	 */
+	T get(O object);
+
+	/**
+	 * Gets a value indicating whether a property's value is equal in two 
+	 * objects or not.
+	 * 
+	 * @param object1 the first object for comparison
+	 * @param object2 the second object for comparison
+	 * @return
+	 */
+	boolean equals(O object1, O object2);
+	
+	/**
+	 * Copies the value of a property in one object to another one.
+	 * 
+	 * @param from the object to read the property value from
+	 * @param to the object to set the property
+	 * @throws OXException
+	 */
+	void copy(O from, O to) throws OXException;
+	
+}

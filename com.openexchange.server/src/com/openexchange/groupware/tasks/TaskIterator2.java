@@ -61,12 +61,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -102,7 +107,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
 
     private OXException exc;
 
-    private final Thread runner;
+    private final Future<Object> runner;
 
     private final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
@@ -148,8 +153,8 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         this.additionalAttributes = Collections.toArray(tmp2);
         this.type = type;
         this.con = con;
-        runner = new Thread(this);
-        runner.start();
+        final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        runner = threadPool.submit(ThreadPools.task(this));
     }
 
     private void modifyAdditionalAttributes(final List<Integer> additional) {
@@ -168,11 +173,13 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     @Override
     public void close() throws OXException {
         try {
-            runner.join();
+            runner.get();
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             throw TaskExceptionCode.THREAD_ISSUE.create(e);
+        } catch (final ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
 

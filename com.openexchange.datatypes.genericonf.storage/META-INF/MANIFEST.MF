@@ -7,7 +7,6 @@ Bundle-Activator: com.openexchange.datatypes.genericonf.storage.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.database,
- com.openexchange.database.osgiservice,
  com.openexchange.database.provider,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,

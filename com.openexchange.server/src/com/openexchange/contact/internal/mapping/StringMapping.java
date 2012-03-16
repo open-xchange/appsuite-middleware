@@ -60,7 +60,7 @@ import com.openexchange.groupware.data.Check;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends DefaultMapping<String> {
+public abstract class StringMapping extends ContactMapping<String> {
 
 	@Override
 	public void validate(final Contact contact) throws OXException {

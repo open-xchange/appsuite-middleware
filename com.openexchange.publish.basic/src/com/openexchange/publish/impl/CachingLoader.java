@@ -55,9 +55,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -71,13 +71,11 @@ public class CachingLoader implements PublicationDataLoaderService {
     private static final String CACHE_REGION = "com.openexchange.publish.dataloader";
 
     private PublicationDataLoaderService delegate = null;
-    private final Whiteboard whiteboard;
     private final CacheService cachingService;
 
-    public CachingLoader(final Whiteboard whiteboard, final PublicationDataLoaderService delegate) {
-        this.whiteboard = whiteboard;
+    public CachingLoader(final ServiceLookup services, final PublicationDataLoaderService delegate) {
         this.delegate = delegate;
-        this.cachingService = whiteboard.getService(CacheService.class);
+        this.cachingService = services.getService(CacheService.class);
     }
 
     @Override
@@ -139,9 +137,6 @@ public class CachingLoader implements PublicationDataLoaderService {
     }
 
     private Cache getCache() throws OXException {
-        if(! whiteboard.isActive(cachingService)) {
-            return null;
-        }
         return cachingService.getCache(CACHE_REGION);
     }
 

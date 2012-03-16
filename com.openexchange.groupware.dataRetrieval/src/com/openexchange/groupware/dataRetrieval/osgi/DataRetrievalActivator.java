@@ -50,8 +50,7 @@
 package com.openexchange.groupware.dataRetrieval.osgi;
 
 import java.util.Map;
-import org.osgi.service.http.HttpService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.groupware.dataRetrieval.actions.RetrievalActions;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.FileDeliveryServlet;
@@ -59,43 +58,20 @@ import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.groupware.dataRetrieval.servlets.RetrievalServlet;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
-import com.openexchange.tools.service.ServletRegistration;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link DataRetrievalActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DataRetrievalActivator extends HousekeepingActivator {
+public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     private static final String NAMESPACE = "com.openexchange.groupware.dataRetrieval.tokens";
 
     private OSGIDataProviderRegistry dataProviderRegistry;
 
-    private ServletRegistration servletRegistration1;
-
-    private ServletRegistration servletRegistration2;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // IGNORE
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // IGNORE
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         Services.SERVICE_LOOKUP = this;
         dataProviderRegistry = new OSGIDataProviderRegistry(context);
@@ -115,21 +91,14 @@ public class DataRetrievalActivator extends HousekeepingActivator {
 
         final AJAXActionServiceAdapterHandler actionService = new AJAXActionServiceAdapterHandler(retrievalActions, Paths.MODULE);
 
-        servletRegistration1 = new SessionServletRegistration(context, new RetrievalServlet(), "/ajax/" + Paths.MODULE);
-        servletRegistration2 = new ServletRegistration(context, new FileDeliveryServlet(), Paths.FILE_DELIVERY_PATH);
-
+        registerSessionServlet("/ajax/" + Paths.MODULE, new RetrievalServlet());
+        registerServlet(Paths.FILE_DELIVERY_PATH, new FileDeliveryServlet());
         registerService(MultipleHandlerFactoryService.class, actionService, null);
 
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (servletRegistration1 != null) {
-            servletRegistration1.remove();
-        }
-        if (servletRegistration2 != null) {
-            servletRegistration2.remove();
-        }
 
         unregisterServices();
 
@@ -139,6 +108,11 @@ public class DataRetrievalActivator extends HousekeepingActivator {
             containerRetrievalService.destroyRandomTokenContainer(NAMESPACE, null);
         }
 
+    }
+
+    @Override
+    protected Class<?>[] getAdditionalNeededServices() {
+        return new Class<?>[] { SessionSpecificContainerRetrievalService.class };
     }
 
 }

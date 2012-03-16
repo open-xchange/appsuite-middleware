@@ -1,9 +1,13 @@
+
 package com.openexchange.mobile.configuration.generator.osgi;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.generator.MobileConfigServlet;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
@@ -14,16 +18,15 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, TemplateService.class, ThreadPoolService.class };
-    public static final String ALIAS = "/servlet/mobileconfig";
+    private static final Class<?>[] NEEDED_SERVICES = {
+        ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class };
 
-    private ServletRegistration registration;
+    public static final String ALIAS = "/servlet/mobileconfig";
 
     public Activator() {
     }
@@ -92,21 +95,18 @@ public class Activator extends HousekeepingActivator {
     }
 
     private void register() {
-        if(registration != null) {
-            return;
+        try {
+            getService(HttpService.class).registerServlet(ALIAS, new MobileConfigServlet(), null, null);
+        } catch (ServletException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NamespaceException e) {
+            LOG.error(e.getMessage(), e);
         }
-
-        registration = new ServletRegistration(context, new MobileConfigServlet(), ALIAS);
         LOG.info("MobileConfig servlet registered");
     }
 
     public void unregister() {
-        if (registration == null) {
-            return;
-        }
-        registration.remove();
-        registration = null;
+        getService(HttpService.class).unregister(ALIAS);
     }
-
 
 }

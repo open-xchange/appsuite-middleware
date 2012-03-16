@@ -47,14 +47,11 @@
  *
  */
 
-
 package com.openexchange.templating.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceDependentRegistration;
-import com.openexchange.osgi.Whiteboard;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.impl.OXIntegration;
@@ -64,54 +61,30 @@ import com.openexchange.templating.impl.OXIntegration;
  */
 public class Activator extends HousekeepingActivator {
 
-    private Whiteboard whiteboard;
-    private ServiceDependentRegistration<TemplateServiceImpl> serviceRegistration;
-
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
 
     @Override
     public void startBundle() throws Exception {
-        whiteboard = new Whiteboard(context);
 
+        ConfigurationService config = getService(ConfigurationService.class);
+        final OXIntegration integration = new OXIntegration(getService(InfostoreFacade.class));
+        final TemplateServiceImpl templates = new TemplateServiceImpl(config);
+        templates.setOXFolderHelper(integration);
+        templates.setInfostoreHelper(integration);
+        registerService(TemplateService.class, templates);
 
-        this.serviceRegistration = new ServiceDependentRegistration<TemplateServiceImpl>(context, TemplateService.class.getName(), whiteboard) {
-            private ConfigurationService config;
+        final boolean hasProperty = config.getProperty(TemplateServiceImpl.PATH_PROPERTY) != null;
+        if (!hasProperty) {
+            final IllegalStateException exception = new IllegalStateException("Missing Property " + TemplateServiceImpl.PATH_PROPERTY);
+            exception.fillInStackTrace();
 
-            @Override
-            public TemplateServiceImpl configure(final TemplateServiceImpl service) {
-                config = get(ConfigurationService.class);
-                final OXIntegration integration = new OXIntegration(get(InfostoreFacade.class));
-                final TemplateServiceImpl templates = new TemplateServiceImpl(config);
-                templates.setOXFolderHelper(integration);
-                templates.setInfostoreHelper(integration);
-                return templates;
-            }
-
-            @Override
-            public boolean validateServices() {
-                final boolean hasProperty = config.getProperty(TemplateServiceImpl.PATH_PROPERTY) != null;
-                if(!hasProperty) {
-                    final IllegalStateException exception = new IllegalStateException("Missing Property "+TemplateServiceImpl.PATH_PROPERTY);
-                    exception.fillInStackTrace();
-
-                    LOG.error(TemplateServiceImpl.PATH_PROPERTY+" is not set. Templating will remain inactive.",exception);
-                }
-                return hasProperty;
-            }
-        };
-
-        serviceRegistration.start();
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        serviceRegistration.close();
-        whiteboard.close();
+            LOG.error(TemplateServiceImpl.PATH_PROPERTY + " is not set. Templating will remain inactive.", exception);
+        }
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[] { ConfigurationService.class, InfostoreFacade.class };
     }
 
 }
