@@ -1895,7 +1895,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     final String url = result.getString(2);
                     if (null != url) {
                         current.parseMailServerURL(url);
-                        if (checkMailServer(server, addr, current) && current.getMailPort() == port && login.equals(result.getString(3))) {
+                        if (checkMailServer(server, addr, current) && current.getMailPort() == port && (null != login && login.equals(result.getString(3)))) {
                             throw MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
                         }
                     }
@@ -1965,7 +1965,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null == excepts || !excepts.contains(id)) {
                     final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
                     current.parseTransportServerURL(result.getString(2));
-                    if (checkTransportServer(server, addr, current) && current.getTransportPort() == port && login.equals(result.getString(3))) {
+                    if (checkTransportServer(server, addr, current) && current.getTransportPort() == port && (null != login && login.equals(result.getString(3)))) {
                         throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(user), I(cid));
                     }
                 }
