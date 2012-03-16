@@ -49,55 +49,75 @@
 
 package com.openexchange.i18n;
 
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.server.services.I18nServices;
-import junit.framework.TestCase;
+import com.openexchange.test.I18nTests;
 
 /**
  * {@link Bug14154Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug14154Test extends TestCase {
+@RunWith(value = Parameterized.class)
+public class Bug14154Test {
 
     private static final Pattern pattern = Pattern.compile("(#.*?#)");
 
     private final Locale locale;
 
-    public Bug14154Test(String name, Locale locale) {
-        super(name);
+    public Bug14154Test(final Locale locale) {
+        super();
         this.locale = locale;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @BeforeClass
+    public static void setUp() throws Exception {
         Init.injectProperty();
         Init.startAndInjectConfigBundle();
         Init.startAndInjectI18NBundle();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         Init.dropI18NBundle();
         Init.dropConfigBundle();
         Init.dropProperty();
-        super.tearDown();
     }
 
+    @Test
     public void testContainingPattern() {
         final I18nService i18nService = I18nServices.getInstance().getService(locale);
         assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
         final String translation = i18nService.getLocalized(MailStrings.FORWARD_PREFIX);
         assertNotNull("Mail forwarding template is not translated.", translation);
-        Matcher matcher = pattern.matcher(MailStrings.FORWARD_PREFIX);
+        final Matcher matcher = pattern.matcher(MailStrings.FORWARD_PREFIX);
         while (matcher.find()) {
-            String replacer = matcher.group();
+            final String replacer = matcher.group();
             assertTrue("Translation does not contain the pattern " + replacer + ".", translation.indexOf(replacer) >= 0);
         }
+    }
+
+    @Parameters
+    public static Collection<Object[]> data() {
+        final List<Object[]> retval = new ArrayList<Object[]>();
+        for (final Locale locale : I18nTests.LOCALES) {
+            retval.add(new Object[] { locale });
+        }
+        return retval;
     }
 }
