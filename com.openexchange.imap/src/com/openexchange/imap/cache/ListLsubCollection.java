@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.cache.ListLsubEntry.ChangeState;
 import com.openexchange.mail.mime.MimeMailException;
+import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
@@ -936,7 +937,9 @@ final class ListLsubCollection {
          * Perform command: LIST "" <full-name>
          */
         final String mbox = BASE64MailboxEncoder.encode(fullName);
-        final Response[] r = protocol.command("LIST \"\" \"" + mbox + "\"", null);
+        final Argument args = new Argument();   
+        args.writeString(mbox);
+        final Response[] r = protocol.command("LIST \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             ListLsubEntryImpl listLsubEntry = null;
@@ -982,7 +985,9 @@ final class ListLsubCollection {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final Response[] r = protocol.command("LSUB \"\" \"" + mbox + "\"", null);
+        final Argument args = new Argument();   
+        args.writeString(mbox);
+        final Response[] r = protocol.command("LSUB \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             boolean ret = false;
@@ -1079,10 +1084,12 @@ final class ListLsubCollection {
          * Perform command: LIST "" "INBOX"
          */
         final String command = lsub ? "LSUB" : "LIST";
-        final Response[] r =
-            protocol.command(
-                new StringBuilder(command).append(" \"\" \"").append(BASE64MailboxEncoder.encode(fullName)).append("\"").toString(),
-                null);
+        String mbox = BASE64MailboxEncoder.encode(fullName);
+        Argument args = new Argument();
+        args.writeString(mbox);
+        final Response[] r = protocol.command(new StringBuilder(command).append(" \"\"").toString(), args);
+        args = null;
+        mbox = null;
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             ListLsubEntryImpl retval = null;
