@@ -236,7 +236,7 @@ public class SearchTest extends AbstractContactTest {
 
             for (final Object[] row : rows) {
                 assertTrue(((String) row[1]).startsWith("Must"));
-                assertTrue(((String) row[2]).startsWith("U"));
+                assertTrue((((String) row[2]).length() > 0 && ((String) row[2]).charAt(0) == 'U'));
             }
 
         } finally {

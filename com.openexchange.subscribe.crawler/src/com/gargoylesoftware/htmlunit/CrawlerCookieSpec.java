@@ -117,7 +117,7 @@ public class CrawlerCookieSpec extends CookieSpecBase {
             // domain must match host
             if (!host.endsWith(cookie.getDomain())) {
                 String s = cookie.getDomain();
-                if (s.startsWith(".")) {
+                if (s.length() > 0 && s.charAt(0) == '.') {
                     s = s.substring(1, s.length());
                 }
 //                if (!host.equals(s)) {

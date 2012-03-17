@@ -65,7 +65,7 @@ public class AjaxInit {
                 myFile = new File(new StringBuilder().append(ajaxPropertiesDir)
                         .append(fileName).toString());
                 if (!myFile.isDirectory() && myFile.canRead()
-                        && !myFile.getName().startsWith(".")) {
+                        && (myFile.getName().length() == 0 || myFile.getName().charAt(0) != '.')) {
                     fileList.add(myFile.getAbsolutePath());
                 }
             }

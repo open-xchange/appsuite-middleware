@@ -194,8 +194,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                 allSubscriptionsOnThisFolder.addAll(subscriptions);
             }
         }
-        if (allSubscriptionsOnThisFolder.size() >= 2){return true;}
-        else {return false;}
+        return allSubscriptionsOnThisFolder.size() >= 2;
     }
 
 

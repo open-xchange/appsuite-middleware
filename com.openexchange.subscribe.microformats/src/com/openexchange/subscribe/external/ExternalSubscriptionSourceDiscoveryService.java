@@ -207,7 +207,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             return relative;
         }
 
-        if(relative.startsWith("/")) {
+        if(relative.length() > 0 && relative.charAt(0) == '/') {
             return resolveServerRelative(sibling, relative);
         }
 

@@ -186,17 +186,12 @@ public class Attachment extends DataObject {
 
     @Override
     public boolean equals(final Object o) {
-        if (o instanceof Attachment) {
-            final Attachment attachmentobject = (Attachment) o;
-
-            if (filename.equals(attachmentobject.getFilename())) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
+        if (!(o instanceof Attachment)) {
             return false;
         }
+        final Attachment attachmentobject = (Attachment) o;
+
+        return filename.equals(attachmentobject.getFilename());
     }
 
     @Override

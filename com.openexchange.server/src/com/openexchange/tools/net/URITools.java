@@ -63,20 +63,20 @@ public final class URITools {
         super();
     }
 
-    public static final URI changeHost(URI uri, String newHost) throws URISyntaxException {
+    public static final URI changeHost(final URI uri, final String newHost) throws URISyntaxException {
         return new URI(uri.getScheme(), uri.getUserInfo(), newHost, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
     }
 
-    public static final URI generateURI(String protocol, String host, int port) throws URISyntaxException {
+    public static final URI generateURI(final String protocol, final String host, final int port) throws URISyntaxException {
         return new URI(protocol, null, host, port, null, null, null);
     }
 
-    public static final String getHost(URI uri) {
+    public static final String getHost(final URI uri) {
         String retval = uri.getHost();
         if (null == retval || retval.length() == 0) {
             return retval;
         }
-        if (retval.indexOf(':') > 0 && retval.startsWith("[") && retval.endsWith("]")) {
+        if (retval.indexOf(':') > 0 && (retval.length() > 0 && retval.charAt(0) == '[') && retval.endsWith("]")) {
             retval = retval.substring(1, retval.length() -1);
         }
         return retval;

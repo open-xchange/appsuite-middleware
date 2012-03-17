@@ -80,7 +80,7 @@ public class LanguageProfilerBuilderTest extends TestCase {
                     stream, encoding));
             String line = reader.readLine();
             while (line != null) {
-                if (line.length() > 0 && !line.startsWith("#")) {// skips the
+                if (line.length() > 0 && (line.length() == 0 || line.charAt(0) != '#')) {// skips the
                                                                  // ngp
                                                                  // header/comment
                     int space = line.indexOf(' ');

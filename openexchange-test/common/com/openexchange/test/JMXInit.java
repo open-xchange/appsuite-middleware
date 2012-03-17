@@ -66,7 +66,7 @@ public class JMXInit {
             // Pruefe jeden im Verzeichnis vorhandenen Namen:
             for (final String fileName : dir.list()) {
                 myFile = new File(new StringBuilder().append(jmxPropertiesDir).append(fileName).toString());
-                if (!myFile.isDirectory() && myFile.canRead() && !myFile.getName().startsWith(".")) {
+                if (!myFile.isDirectory() && myFile.canRead() && (myFile.getName().length() == 0 || myFile.getName().charAt(0) != '.')) {
                     fileList.add(myFile.getAbsolutePath());
                 }
             }

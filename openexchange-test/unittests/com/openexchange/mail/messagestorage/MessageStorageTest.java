@@ -481,11 +481,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     private boolean equalsCheckWithNull(final HeaderCollection a, final HeaderCollection b) {
         if (null == a) {
-            if (null == b) {
-                return true;
-            } else {
-                return false;
-            }
+            return null == b;
         } else {
             // Here we have to remove the X-OX-Marker header because this is only used internally and should
             // not be included in the test
@@ -504,11 +500,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     private boolean equalsCheckWithNull(final Object a, final Object b) {
         if (null == a) {
-            if (null == b) {
-                return true;
-            } else {
-                return false;
-            }
+            return null == b;
         } else {
             return a.equals(b);
         }
@@ -516,11 +508,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     private boolean equalsCheckWithNull(final String a, final String b) {
         if (null == a) {
-            if (null == b) {
-                return true;
-            } else {
-                return false;
-            }
+            return null == b;
         } else {
             return a.trim().equals(b.trim());
         }
