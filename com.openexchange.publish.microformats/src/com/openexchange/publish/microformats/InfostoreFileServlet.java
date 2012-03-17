@@ -67,11 +67,13 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -172,7 +174,14 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
 
     private DocumentMetadata loadMetadata(final Publication publication, final int infoId, final User user, final UserConfiguration userConfig) throws OXException {
-        return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
+        try {
+            return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
+        } catch (final OXException e) {
+            if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
+                throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
+            }
+            throw e;
+        }
     }
 
     private void writeFile(final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -201,7 +210,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
         resp.setHeader("Content-Disposition", "attachment; filename=\""
              + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
-        String fileMIMEType = document.getFileMIMEType();
+        final String fileMIMEType = document.getFileMIMEType();
         if (fileMIMEType != null) {
             resp.setContentType(fileMIMEType);
         }

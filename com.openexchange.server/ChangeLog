@@ -2,6 +2,7 @@
 
  - Fix for bug 21754: Dealing with a mail containing a <blockquote> mess
  - Fix for bug 21787: Using JavaMail tooling when composing LIST/LSUB commands
+ - Fix for bug 21791: Improved error message if a published document has been deleted in the meantime
 
 * 2012-03-16 - tobias.friedrich@open-xchange.com
 

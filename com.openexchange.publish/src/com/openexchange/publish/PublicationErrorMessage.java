@@ -51,6 +51,7 @@ package com.openexchange.publish;
 
 import static com.openexchange.publish.PublicationExceptionMessages.ACCESS_DENIED_MSG;
 import static com.openexchange.publish.PublicationExceptionMessages.ID_GIVEN_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.NOT_EXIST_MSG;
 import static com.openexchange.publish.PublicationExceptionMessages.NO_LOADER_FOUND_MSG;
 import static com.openexchange.publish.PublicationExceptionMessages.PARSE_EXCEPTION_MSG;
 import static com.openexchange.publish.PublicationExceptionMessages.PUBLICATION_NOT_FOUND_MSG;
@@ -89,7 +90,13 @@ public enum PublicationErrorMessage implements OXExceptionCode {
      */
     PublicationNotFound(CATEGORY_USER_INPUT, 5, PUBLICATION_NOT_FOUND_MSG),
     UniquenessConstraintViolation(CATEGORY_USER_INPUT, 6, UNIQUENESS_CONSTRAINT_VIOLATION),
-    AccessDenied(CATEGORY_PERMISSION_DENIED, 7, ACCESS_DENIED_MSG);
+    AccessDenied(CATEGORY_PERMISSION_DENIED, 7, ACCESS_DENIED_MSG),
+    /**
+     * Published document has been deleted in meantime and therefore is no longer available.
+     */
+    NotExist(CATEGORY_PERMISSION_DENIED, 8, NOT_EXIST_MSG),
+    
+    ;
 
     private Category category;
     private int errorCode;

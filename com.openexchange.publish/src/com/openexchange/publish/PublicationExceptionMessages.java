@@ -73,6 +73,8 @@ public class PublicationExceptionMessages implements LocalizableStrings {
 
     public static final String ACCESS_DENIED_MSG = "You do not have the permissions to undertake the chosen action (%s)";
 
+    public static final String NOT_EXIST_MSG = "Published document has been deleted in meantime and therefore is no longer available.";
+
     private PublicationExceptionMessages() {
         super();
     }
