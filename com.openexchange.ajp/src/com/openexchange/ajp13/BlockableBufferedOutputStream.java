@@ -190,11 +190,6 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
         lastAccessed = System.currentTimeMillis();
     }
 
-    @Override
-    public void close() throws IOException {
-        super.close();
-    }
-
     /**
      * Sets the last-accessed time stamp.
      *

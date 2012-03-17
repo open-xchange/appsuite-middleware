@@ -771,9 +771,10 @@ public class AJPv13Response {
         if (strLength > 0) {
             final char[] chars = strValue.toCharArray();
             final byte[] bytes = new byte[strLength];
-            for (int i = 0; i < strLength; i++) {
+            System.arraycopy(chars, 0, bytes, 0, strLength);
+            /*for (int i = 0; i < strLength; i++) {
                 bytes[i] = (byte) chars[i];
-            }
+            }*/
             c = writeByteArray(bytes, byteArray, c);
         }
         byteArray[c] = 0;
