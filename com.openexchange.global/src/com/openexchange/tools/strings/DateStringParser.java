@@ -71,11 +71,11 @@ public class DateStringParser implements StringParser {
 
     }
 
-    public DateStringParser(StringParser subParser) {
+    public DateStringParser(final StringParser subParser) {
         this.subParser = subParser;
     }
 
-    public void setSubParser(StringParser subParser) {
+    public void setSubParser(final StringParser subParser) {
         this.subParser = subParser;
     }
 
@@ -84,11 +84,11 @@ public class DateStringParser implements StringParser {
     }
 
     @Override
-    public <T> T parse(String s, Class<T> t) {
+    public <T> T parse(final String s, final Class<T> t) {
         if(t != Date.class || s == null) {
             return null;
         }
-        Long parsed = subParser.parse(s, Long.class);
+        final Long parsed = subParser.parse(s, Long.class);
         if(parsed != null) {
             return (T) new Date(parsed.longValue());
         }
@@ -96,24 +96,24 @@ public class DateStringParser implements StringParser {
     }
 
     // Plucked from HCalendarParser
-    private static Date parseDate(String data){
-        List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
-        int[] styles = new int [] {SimpleDateFormat.FULL, SimpleDateFormat.LONG, SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT };
-        for(Locale loc: locales){
-            for(int dateStyle: styles){
-                for(int timeStyle: styles){
-                    DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
+    private static Date parseDate(final String data){
+        final List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
+        final int[] styles = new int [] {SimpleDateFormat.FULL, SimpleDateFormat.LONG, SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT };
+        for(final Locale loc: locales){
+            for(final int dateStyle: styles){
+                for(final int timeStyle: styles){
+                    final DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
                     try { return sdf.parse(data);
-                        } catch (ParseException e) {/*Next*/ };
+                        } catch (final ParseException e) {/*Next*/ }
                 }
-                DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
+                final DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
                 try { return sdf.parse(data);
-                    } catch (ParseException e) {/*Next*/ }
+                    } catch (final ParseException e) {/*Next*/ }
                 }
         }
-        DateFormat sdf = SimpleDateFormat.getInstance();
+        final DateFormat sdf = SimpleDateFormat.getInstance();
         try { return sdf.parse(data);
-            } catch (ParseException e) {/*Next*/ }
+            } catch (final ParseException e) {/*Next*/ }
 
         return null;
     }

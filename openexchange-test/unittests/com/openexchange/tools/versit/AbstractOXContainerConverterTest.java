@@ -1,8 +1,8 @@
 package com.openexchange.tools.versit;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
-
+import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -15,8 +15,6 @@ import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-
-import junit.framework.TestCase;
 
 public abstract class AbstractOXContainerConverterTest extends TestCase {
 
@@ -87,11 +85,11 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 
-		final Appointment appointmentObj = oxContainerConverter.convertAppointment(versitObject);;
+		final Appointment appointmentObj = oxContainerConverter.convertAppointment(versitObject);
 		return appointmentObj.getPrivateFlag();
 	}
 
-	public AbstractOXContainerConverterTest(String name) {
+	public AbstractOXContainerConverterTest(final String name) {
 		super(name);
 	}
 

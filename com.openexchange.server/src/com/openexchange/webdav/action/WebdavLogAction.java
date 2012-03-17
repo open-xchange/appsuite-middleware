@@ -70,14 +70,15 @@ public class WebdavLogAction extends AbstractAction {
 	private boolean logBody;
 	private boolean logResponse;
 
-	public void perform(WebdavRequest req, WebdavResponse res)
+	@Override
+    public void perform(WebdavRequest req, WebdavResponse res)
 			throws WebdavProtocolException {
 		StringBuilder b = new StringBuilder();
 		try {
 			b.append("URL: "); b.append(req.getUrl()); b.append('\n');
 			for(final String header : req.getHeaderNames()) {
 			    if(CONFIDENTIAL_HEADERS.contains(header.toUpperCase())) {
-			        b.append(header); b.append(": "); b.append("xxxxxxxxxxx"); b.append('\n');;
+			        b.append(header); b.append(": "); b.append("xxxxxxxxxxx"); b.append('\n');
 			    } else {
 			        b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
 			    }

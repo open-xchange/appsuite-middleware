@@ -83,29 +83,29 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
     private List<Appointment> calendarData;
 
     @Override
-    public Collection<Appointment> parse(Reader html) throws OXException {
-        DOMParser parser = new DOMParser();
+    public Collection<Appointment> parse(final Reader html) throws OXException {
+        final DOMParser parser = new DOMParser();
         reset();
         try {
             parser.parse(new InputSource(html));
-            Document doc = parser.getDocument();
+            final Document doc = parser.getDocument();
             recurse(doc.getFirstChild());
             System.out.println();
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             OXMFSubscriptionErrorMessage.IOException.create(e, e.getMessage());
         }
         return calendarData;
     }
 
-    private void recurse(Node node) {
+    private void recurse(final Node node) {
         if(node == null) {
             return;
         }
         extractInformation(node);
 
-        NodeList children = node.getChildNodes();
+        final NodeList children = node.getChildNodes();
 
         if(children != null && children.getLength() != 0) {
             for(int i = 0, length =children.getLength(); i < length; i++) {
@@ -114,18 +114,18 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
         }
     }
 
-    private void extractInformation(Node node) {
+    private void extractInformation(final Node node) {
         if(node.getNodeType() != Node.ELEMENT_NODE) {
             return;
         }
-        Element elem = (Element) node;
+        final Element elem = (Element) node;
 
-        List<String> classes = getClasses(elem);
+        final List<String> classes = getClasses(elem);
         if(classes == null) {
             return;
         }
 
-        String name = node.getNodeName();
+        final String name = node.getNodeName();
 
         String value = null;
         if("ABBR".equalsIgnoreCase(name)){
@@ -139,9 +139,9 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
         storeInformation(elem, value);
     }
 
-    private void storeInformation(Element elem, String value){
-        List<String> classes = getClasses(elem);
-        for(String classname: classes){
+    private void storeInformation(final Element elem, final String value){
+        final List<String> classes = getClasses(elem);
+        for(final String classname: classes){
             if("vevent".equalsIgnoreCase(classname)) {
                 calendarData.add(new Appointment());
             }
@@ -163,24 +163,24 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
         }
     }
 
-    public static Date parseDate(String data){
-        List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
-        int[] styles = new int [] {SimpleDateFormat.FULL, SimpleDateFormat.LONG, SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT };
-        for(Locale loc: locales){
-            for(int dateStyle: styles){
-                for(int timeStyle: styles){
-                    DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
+    public static Date parseDate(final String data){
+        final List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
+        final int[] styles = new int [] {SimpleDateFormat.FULL, SimpleDateFormat.LONG, SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT };
+        for(final Locale loc: locales){
+            for(final int dateStyle: styles){
+                for(final int timeStyle: styles){
+                    final DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
                     try { return sdf.parse(data);
-                        } catch (ParseException e) {/*Next*/ };
+                        } catch (final ParseException e) {/*Next*/ }
                 }
-                DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
+                final DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
                 try { return sdf.parse(data);
-                    } catch (ParseException e) {/*Next*/ }
+                    } catch (final ParseException e) {/*Next*/ }
                 }
         }
-        DateFormat sdf = SimpleDateFormat.getInstance();
+        final DateFormat sdf = SimpleDateFormat.getInstance();
         try { return sdf.parse(data);
-            } catch (ParseException e) {/*Next*/ }
+            } catch (final ParseException e) {/*Next*/ }
 
         return null;
     }
@@ -195,9 +195,9 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
         return calendarData.get(calendarData.size() - 1);
     }
 
-    private List<String> getClasses(Element node) {
-            String[] classes = node.getAttribute("class").split("\\s+");
-            List<String> keys = Arrays.asList(classes);
+    private List<String> getClasses(final Element node) {
+            final String[] classes = node.getAttribute("class").split("\\s+");
+            final List<String> keys = Arrays.asList(classes);
             if(keys.size() == 0) {
                 return null;
             }

@@ -2,13 +2,13 @@ import jcifs.smb.SmbFile;
 
 public class ListTypes {
 
-    public static void main( String[] argv ) throws Exception {
+    public static void main( final String[] argv ) throws Exception {
 
-        SmbFile file = new SmbFile( argv[0] );
+        final SmbFile file = new SmbFile( argv[0] );
 
-        long t1 = System.currentTimeMillis();
-        SmbFile[] files = file.listFiles();
-        long t2 = System.currentTimeMillis() - t1;
+        final long t1 = System.currentTimeMillis();
+        final SmbFile[] files = file.listFiles();
+        final long t2 = System.currentTimeMillis() - t1;
 
         for( int i = 0; i < files.length; i++ ) {
             System.out.print( " " + files[i].getName() );
@@ -34,7 +34,7 @@ public class ListTypes {
                 case SmbFile.TYPE_COMM:
                     System.out.println( "[TYPE_COMM]" );
                     break;
-            };
+            }
         }
         System.out.println( files.length + " files in " + t2 + "ms" );
     }

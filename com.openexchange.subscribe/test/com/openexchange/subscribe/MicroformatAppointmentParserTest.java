@@ -22,9 +22,9 @@ public class MicroformatAppointmentParserTest extends TestCase {
         try {
             defaultStartDate = dateFormat.parse("1935-01-08, 12:00:00 GMT");
             defaultEndDate = dateFormat.parse("1977-08-16, 13:00:00 GMT");
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
-        };
+        }
         wellBehavedHtml =
             "<div class=\"ox-appointment\">\n" +
             "   <span class=\"title\">My appointment</span>\n"+
@@ -37,11 +37,11 @@ public class MicroformatAppointmentParserTest extends TestCase {
     }
 
     public void testShouldWorkUnderBestPossibleCircumstances(){
-        MicroformatAppointmentParser parser = new MicroformatAppointmentParser();
+        final MicroformatAppointmentParser parser = new MicroformatAppointmentParser();
         parser.parse(wellBehavedHtml);
-        Collection<CalendarDataObject> appointments = parser.getAppointments();
+        final Collection<CalendarDataObject> appointments = parser.getAppointments();
         assertEquals("Should contain one element", 1, appointments.size());
-        CalendarDataObject appointment = appointments.iterator().next();
+        final CalendarDataObject appointment = appointments.iterator().next();
         assertEquals("Should parse title", "My appointment", appointment.getTitle());
         assertEquals("Should parse note", "There are many appointments but this one is mine", appointment.getNote() );
         assertEquals("Should parse location", "Your place or mine?", appointment.getLocation() );

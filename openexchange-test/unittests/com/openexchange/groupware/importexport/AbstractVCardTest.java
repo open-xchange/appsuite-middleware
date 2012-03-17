@@ -49,13 +49,11 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -80,13 +78,14 @@ public class AbstractVCardTest extends AbstractContactTest {
 		Init.startServer();
 		final UserStorage uStorage = UserStorage.getInstance();
 
-		String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");;
-		String name = loginParts[0];
+		final String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
+		final String name = loginParts[0];
 		String context = null;
-		if(loginParts.length == 2)
-		    context = loginParts[1];
-		else
-		    context = "defaultcontext";
+		if(loginParts.length == 2) {
+            context = loginParts[1];
+        } else {
+            context = "defaultcontext";
+        }
 
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
         userId = uStorage.getUserId(name, ctx);

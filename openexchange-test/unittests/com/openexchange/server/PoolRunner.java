@@ -10,7 +10,6 @@ package com.openexchange.server;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 
@@ -40,7 +39,7 @@ public class PoolRunner implements Runnable {
     }
 
     public void start() {
-        run = new Thread(this);
+        run = new Thread(this, "PoolRunner");
         run.start();
     }
 

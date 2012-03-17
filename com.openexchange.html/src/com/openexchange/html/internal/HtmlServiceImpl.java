@@ -891,7 +891,6 @@ public final class HtmlServiceImpl implements HtmlService {
         while (m.find() && m.end() < end) {
             mr.appendLiteralReplacement(sb, "");
         }
-        ;
         mr.appendTail(sb);
         return sb.toString();
     }

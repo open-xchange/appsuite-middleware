@@ -98,7 +98,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
 
     @Override
     public void execute(final WebClient webClient) throws OXException {
-        HtmlPage loginPage = null;;
+        HtmlPage loginPage = null;
         try {
             // Get the page, fill in the credentials and submit the login form
             loginPage = webClient.getPage(url);
@@ -128,7 +128,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (ElementNotFoundException e){
+        } catch (final ElementNotFoundException e){
             LOG.error("The page that does not contain the needed form : \n" + loginPage.getWebResponse().getContentAsString());
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }

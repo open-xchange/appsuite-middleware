@@ -139,7 +139,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         }
         while (!writeCounter.compareAndSet(value, value + 1)) {
             while (((value = writeCounter.get()) & 1) == 1) {
-                ;
+                // Nothing
             }
         }
         while (running.get() > 0) {
@@ -160,7 +160,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         Lock lock = null;
         do {
             while (((save = writeCounter.get()) & 1) == 1) {
-                ;
+                // Nothing
             }
             lock = obtainLock ? runLock : null;
         } while (save != writeCounter.get());

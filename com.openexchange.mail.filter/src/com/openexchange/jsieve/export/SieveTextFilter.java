@@ -467,7 +467,7 @@ public final class SieveTextFilter {
                     final String errormsg = rightrule.getErrormsg();
                     rightrule.setErrormsg(null != errormsg ? errormsg + CRLF + errortext: errortext);
                     if (handleRuleError(wholetext, commentedtext, ruleComment, rightrule)) {
-                        erroradded = true;;
+                        erroradded = true;
                     }
                 } else {
                     rightrule.setRuleComments(ruleComment);

@@ -792,7 +792,7 @@ final class SessionData {
                         LOG.error("Moving session to first container failed.", e);
                     }
                 }
-            }).start();
+            }, "Move2FirstContainer").start();
         } else {
             threadPoolService.submit(task);
         }

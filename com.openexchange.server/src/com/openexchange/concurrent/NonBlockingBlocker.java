@@ -96,12 +96,12 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         int value;
         // Wait for an even value
         while (((value = mutex.get()) & 1) == 1) {
-            ;
+            // nothing in body
         }
         // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
         while (!mutex.compareAndSet(value, value | 1)) {
             while (((value = mutex.get()) & 1) == 1) {
-                ;
+                // nothing
             }
         }
         return value | 1;
@@ -129,12 +129,12 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // Already blocked?
             int value;
             while (((value = sync.get()) & 1) == 1) {
-                ;
+                // Nothing
             }
             // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
             while (!sync.compareAndSet(value, value + 1)) {
                 while (((value = sync.get()) & 1) == 1) {
-                    ;
+                    // Nothing
                 }
             }
             owner = cur;
@@ -163,7 +163,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             int save;
             do {
                 while (((save = sync.get()) & 1) == 1) {
-                    ;
+                    // Nothing
                 }
             } while (save != sync.get());
             running.put(currentThread, PRESENT);

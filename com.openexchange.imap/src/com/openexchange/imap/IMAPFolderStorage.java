@@ -2129,7 +2129,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             String fn;
             while (!(fn = f.getFullName()).equals(defaultFolder)) {
                 list.add(FolderCache.getCachedFolder(fn, this));
-                ;
                 f = (IMAPFolder) f.getParent();
             }
             return list.toArray(new MailFolder[list.size()]);

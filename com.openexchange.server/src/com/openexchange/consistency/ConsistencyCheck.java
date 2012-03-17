@@ -115,7 +115,7 @@ public class ConsistencyCheck {
             config.setSource("context");
             if (! parseId(lexer, config)) {
                 System.exit( noid() );
-            };
+            }
         } else if (lexer.consume("all") || lexer.consume("everywhere")) {
             config.setSource("all");
         } else {

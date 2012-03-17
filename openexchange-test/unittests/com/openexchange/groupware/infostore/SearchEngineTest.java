@@ -48,14 +48,12 @@
  */
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -120,7 +118,7 @@ public class SearchEngineTest extends TestCase {
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 
         userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
-        userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);;
+        userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);
 
         folderId = _getPrivateInfostoreFolder(ctx,user,session);
         folderId2 = _getPrivateInfostoreFolder(ctx, user2, session2);

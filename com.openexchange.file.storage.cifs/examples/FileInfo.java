@@ -16,10 +16,10 @@ public class FileInfo {
         "TYPE_WORKGROUP"
     };
 
-    public static void main( String argv[] ) throws Exception {
-        int i, start, end;;
-        SimpleDateFormat sdf = new SimpleDateFormat( "MM/dd/yy hh:mm:ss a" );
-        GregorianCalendar cal = new GregorianCalendar();
+    public static void main( final String argv[] ) throws Exception {
+        int i, start, end;
+        final SimpleDateFormat sdf = new SimpleDateFormat( "MM/dd/yy hh:mm:ss a" );
+        final GregorianCalendar cal = new GregorianCalendar();
         SmbFile f;
 
         if( argv.length < 2 ) {
@@ -27,7 +27,7 @@ public class FileInfo {
         }
 
         if( argv.length == 3 ) {
-            SmbFile tmp = new SmbFile( argv[0] );
+            final SmbFile tmp = new SmbFile( argv[0] );
             f = new SmbFile( tmp.toString(), argv[1] );
             start = Integer.parseInt( argv[2] );
         } else {

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -64,6 +63,7 @@ import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -2643,7 +2643,7 @@ public class AppointmentBugTests extends TestCase {
             move.setParentFolderID(fid2);
 
             csql2.updateAppointmentObject(move, shared_folder_id, new Date());
-            CalendarDataObject moved = csql2.getObjectById(object_id, shared_folder_id);
+            final CalendarDataObject moved = csql2.getObjectById(object_id, shared_folder_id);
             assertNotNull("Should find the newly moved appointment", moved);
 
         } finally {
@@ -3066,7 +3066,7 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check participants length", 2, update.getParticipants().length);
 
         final CalendarDataObject update_user_delete = new CalendarDataObject();
-        update_user_delete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));;
+        update_user_delete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
 
         participants = new Participants();
         participants.add(p1);

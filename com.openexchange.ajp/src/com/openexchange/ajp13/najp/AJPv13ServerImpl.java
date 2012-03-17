@@ -128,14 +128,14 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             if (threadArr.length > 0) {
                 final CountDownLatch startGate = new CountDownLatch(1);
                 final StringBuilder sb = new StringBuilder(32);
-                threadArr[0] = new Thread(new GateRunnable(startGate, this, LOG));
-                threadArr[0].setName(sb.append("AJPServer-").append(DF.format((1))).toString());
+                threadArr[0] = new Thread(new GateRunnable(startGate, this, LOG), sb.append("AJPServer-").append(DF.format((1))).toString());
+                // threadArr[0].setName(sb.append("AJPServer-").append(DF.format((1))).toString());
                 threadArr[0].setPriority(Thread.MAX_PRIORITY);
                 threadArr[0].start();
                 for (int i = 1; i < threadArr.length; i++) {
-                    threadArr[i] = new Thread(new GateRunnable(startGate, this, LOG));
                     sb.setLength(0);
-                    threadArr[i].setName(sb.append("AJPServer-").append(DF.format((i + 1))).toString());
+                    threadArr[i] = new Thread(new GateRunnable(startGate, this, LOG), sb.append("AJPServer-").append(DF.format((i + 1))).toString());
+                    // threadArr[i].setName(sb.append("AJPServer-").append(DF.format((i + 1))).toString());
                     threadArr[i].setPriority(Thread.MAX_PRIORITY);
                     threadArr[i].start();
                 }

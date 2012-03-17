@@ -673,7 +673,7 @@ public class LinkedTransferQueue<E> extends AbstractQueue<E>
                            (t = tail)   != null &&
                            (s = t.next) != null && // advance and retry
                            (s = s.next) != null && s != t) {
-                        ;
+                        // nothing...
                     }
                 }
                 return p;
