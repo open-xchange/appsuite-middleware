@@ -1090,7 +1090,7 @@ public final class MimeMessageUtility {
         for (int i = 0; !needQuoting && i < len; i++) {
             final char c = chars[i];
             needQuoting =
-                (c == '"' || c == '\\' || (c < 040 && c != '\r' && c != '\n' && c != '\t') || c >= 0177 || RFC822.indexOf(c) >= 0);
+                (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0);
         }
         try {
             if (!needQuoting) {

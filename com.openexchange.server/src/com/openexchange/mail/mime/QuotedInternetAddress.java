@@ -687,7 +687,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
                 break; // done with local part
             }
-            if (c <= 040 || c >= 0177) {
+            if (c <= 32 || c >= 127) {
                 throw new AddressException("Local address contains control or whitespace", addr.toString());
             }
             if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
@@ -727,7 +727,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (c == '[') {
                 return; // domain literal, don't validate
             }
-            if (c <= 040 || c >= 0177) {
+            if (c <= 32 || c >= 127) {
                 throw new AddressException("Domain contains control or whitespace", addr.toString());
             }
             if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
@@ -1133,7 +1133,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
                 sb.append('"');
                 return sb.toString();
-            } else if ((c < 040 && c != '\r' && c != '\n' && c != '\t') || c >= 0177 || RFC822.indexOf(c) >= 0) {
+            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0) {
                 // These characters cause the string to be quoted
                 needQuoting = true;
             }
@@ -1156,7 +1156,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (c == '"' || c == '\\') {
                 // need to escape them and then quote the whole string
                 needQuoting = true;
-            } else if ((c < 040 && c != '\r' && c != '\n' && c != '\t') || c >= 0177 || RFC822.indexOf(c) >= 0) {
+            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0) {
                 // These characters cause the string to be quoted
                 needQuoting = true;
             }

@@ -230,7 +230,7 @@ public class Argument {
     byte b;
     for (int i = 0; i < len; i++) {
         b = bytes[i];
-        if (b == '\0' || b == '\r' || b == '\n' || ((b & 0xff) > 0177)) {
+        if (b == '\0' || b == '\r' || b == '\n' || ((b & 0xff) > 127)) {
         // NUL, CR or LF means the bytes need to be sent as literals
         literal(bytes, protocol);
         return;
