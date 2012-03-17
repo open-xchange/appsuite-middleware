@@ -163,14 +163,14 @@ public class WebdavPath implements Iterable<String>{
     @Override
 	public String toString(){
         final StringBuilder b = new StringBuilder("/");
-        for(final String component : components) { b.append(component).append("/"); }
+        for(final String component : components) { b.append(component).append('/'); }
         b.setLength(b.length()-1);
         return b.toString();
     }
 
     public String toEscapedString() {
         final StringBuilder b = new StringBuilder("/");
-        for(final String component : components) { b.append(_escape(component)).append("/"); }
+        for(final String component : components) { b.append(_escape(component)).append('/'); }
         b.setLength(b.length()-1);
         return b.toString();
     }

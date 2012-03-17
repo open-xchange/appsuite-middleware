@@ -309,7 +309,7 @@ public class LdapContactInterface implements ContactInterface {
                 addFilterFor(mappings.getEmail1(), searchobject.getEmail1(), user);
                 addFilterFor(mappings.getEmail2(), searchobject.getEmail2(), user);
                 addFilterFor(mappings.getEmail3(), searchobject.getEmail3(), user);
-                user.append(")");
+                user.append(')');
             }
             if (both || ContactTypes.distributionlists.equals(contacttype)) {
                 addFilterFor(mappings.getDistributionlistname(), searchobject.getDisplayName(), distri);
@@ -516,13 +516,13 @@ public class LdapContactInterface implements ContactInterface {
     private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
         if (null != searchString && null != fieldname) {
             if ("*".equals(searchString)) {
-                sb.append("(");
+                sb.append('(');
                 sb.append(fieldname);
                 sb.append("=*)");
             } else {
-                sb.append("(");
+                sb.append('(');
                 sb.append(fieldname);
-                sb.append("=");
+                sb.append('=');
                 sb.append(escapeLDAPSearchFilter(searchString));
                 sb.append("*)");
             }

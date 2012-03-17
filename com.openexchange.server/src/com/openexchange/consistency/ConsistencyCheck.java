@@ -358,7 +358,7 @@ public class ConsistencyCheck {
         private String getPolicyString() {
             final StringBuilder sb = new StringBuilder();
             for(final String condition : policies.keySet()) {
-                sb.append(condition).append(":").append(policies.get(condition)).append(",");
+                sb.append(condition).append(':').append(policies.get(condition)).append(',');
             }
             sb.setLength(sb.length()-1);
             return sb.toString();

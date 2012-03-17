@@ -266,7 +266,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         sb.append(')');
                     }
                 }
-                sb.append("\n");
+                sb.append('\n');
             }
         }
     }

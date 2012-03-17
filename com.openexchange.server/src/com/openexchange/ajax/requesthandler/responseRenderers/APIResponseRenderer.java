@@ -140,7 +140,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 ResponseWriter.write(response, w);
 
                 StringBuilder sb = new StringBuilder(call);
-                sb.append("(");
+                sb.append('(');
                 sb.append(w.toString());
                 sb.append(");");
                 resp.setContentType("text/javascript");

@@ -357,7 +357,7 @@ public final class Tools {
         }
 
         if (cd.indexOf(';') < 0 && filename != null) {
-            cd = new StringBuilder(64).append(cd).append("; filename=\"").append(filename).append("\"").toString();
+            cd = new StringBuilder(64).append(cd).append("; filename=\"").append(filename).append('"').toString();
         }
 
         resp.setHeader("Content-Disposition", cd);

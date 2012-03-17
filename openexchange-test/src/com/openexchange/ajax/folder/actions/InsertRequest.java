@@ -101,7 +101,7 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
             final StringBuilder parentBuilder = new StringBuilder();
             for (int i = 0; i < (parts.length - 1); i++) {
                 parentBuilder.append(parts[i]);
-                parentBuilder.append("/");
+                parentBuilder.append('/');
             }
             final String parent = parentBuilder.substring(0, parentBuilder.length() - 1);
             params.add(new Parameter(FolderFields.FOLDER_ID, parent));

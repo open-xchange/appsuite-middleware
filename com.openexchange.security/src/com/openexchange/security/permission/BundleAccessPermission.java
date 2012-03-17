@@ -134,7 +134,7 @@ public final class BundleAccessPermission extends BasicPermission {
 				/*
 				 * Escape special regular expression characters
 				 */
-				s.append("\\");
+				s.append('\\');
 				s.append(c);
 			} else {
 				s.append(c);

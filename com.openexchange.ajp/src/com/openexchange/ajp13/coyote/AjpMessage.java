@@ -455,7 +455,7 @@ public final class AjpMessage {
             if (!Character.isISOControl((char) buf[i])) {
                 sb.append(new Character((char) buf[i]));
             } else {
-                sb.append(".");
+                sb.append('.');
             }
         }
     }

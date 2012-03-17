@@ -231,7 +231,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource 
                 builder.append("folder=").append(folder);
             }
         }
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

@@ -360,9 +360,9 @@ public class ICal4JParser implements ICalParser {
                     if(!line.matches("\\s*")) {
                         read = true;
                         if(timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
-                        	timezoneInfo.append(line).append("\n");
+                        	timezoneInfo.append(line).append('\n');
                         } else {
-                        	chunk.append(line).append("\n");
+                        	chunk.append(line).append('\n');
                         }
                     }
                 	if(line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958

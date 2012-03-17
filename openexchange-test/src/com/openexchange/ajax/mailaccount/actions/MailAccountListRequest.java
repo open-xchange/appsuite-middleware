@@ -75,7 +75,7 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
 
         StringBuilder bob = new StringBuilder();
         for(int colId : cols) {
-            bob.append(colId).append(",");
+            bob.append(colId).append(',');
         }
         bob.setLength(bob.length()-1);
         this.columns = bob.toString();

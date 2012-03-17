@@ -158,7 +158,7 @@ public final class LoggableImpl implements Loggable {
         if (callerTrace != null) {
             builder.append("callerTrace=").append("<available>");
         }
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

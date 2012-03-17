@@ -350,7 +350,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         } catch (final OXException e) {
                                             log.warn(
                                                 new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                                    "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
+                                                    "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
                                                 e);
                                             addWarning(e);
                                             continue NextIndex;
@@ -613,7 +613,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 } catch (final OXException e) {
                                     log.warn(
                                         new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                            "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
+                                            "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
                                         e);
                                     addWarning(e);
                                     continue NextIndex;

@@ -266,7 +266,7 @@ public abstract class SQLTestCase extends TestCase {
 
         builder.setLength(builder.length()-2);
         questionMarks.setLength(questionMarks.length()-2);
-        builder.append(") VALUES (").append(questionMarks).append(")");
+        builder.append(") VALUES (").append(questionMarks).append(')');
 
         exec(builder.toString(), values);
     }

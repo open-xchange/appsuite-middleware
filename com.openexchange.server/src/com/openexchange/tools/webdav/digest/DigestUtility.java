@@ -137,14 +137,14 @@ public final class DigestUtility {
          */
         final StringBuilder tmp = new StringBuilder(128);
         final String firstDigest =
-            digest2HexString(md5Digest.digest(tmp.append(localAuthorization.user).append(":").append(localAuthorization.realm).append(":").append(
+            digest2HexString(md5Digest.digest(tmp.append(localAuthorization.user).append(':').append(localAuthorization.realm).append(':').append(
                 password).toString().getBytes()));
         /*
          * Calculate second digest: "<method>" + ":" + "<URI>"
          */
         tmp.setLength(0);
         final String secondDigest =
-            digest2HexString(md5Digest.digest((tmp.append(method).append(":").append(localAuthorization.uri).toString()).getBytes()));
+            digest2HexString(md5Digest.digest((tmp.append(method).append(':').append(localAuthorization.uri).toString()).getBytes()));
         /*-
          * Calculate third digest dependent on "qop" value:
          * if qop is missing or not equal to "auth": digest1 + ":" + "<nonceValue>" + ":" + digest2
@@ -152,10 +152,10 @@ public final class DigestUtility {
          */
         tmp.setLength(0);
         if ("auth".equals(localAuthorization.qop)) {
-            tmp.append(firstDigest).append(":").append(localAuthorization.nOnce).append(":").append(localAuthorization.nc).append(":").append(
-                localAuthorization.cnonce).append(":").append(localAuthorization.qop).append(":").append(secondDigest);
+            tmp.append(firstDigest).append(':').append(localAuthorization.nOnce).append(':').append(localAuthorization.nc).append(':').append(
+                localAuthorization.cnonce).append(':').append(localAuthorization.qop).append(':').append(secondDigest);
         } else {
-            tmp.append(firstDigest).append(":").append(localAuthorization.nOnce).append(":").append(secondDigest);
+            tmp.append(firstDigest).append(':').append(localAuthorization.nOnce).append(':').append(secondDigest);
         }
         return digest2HexString(md5Digest.digest(tmp.toString().getBytes()));
     }

@@ -2217,7 +2217,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         for (; s < end; s+=Constants.MILLI_DAY) {
             if (a <= activeDates.length) {
                 System.out.print(activeDates[a-1]);
-                System.out.print(" ");
+                System.out.print(' ');
                 if (a % 7 == 0) {
                     System.out.println("");
                 }

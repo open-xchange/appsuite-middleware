@@ -132,7 +132,7 @@ public final class FolderField {
         if (name != null) {
             builder.append("name=").append(name);
         }
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

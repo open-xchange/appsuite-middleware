@@ -161,7 +161,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                     key = line.trim();
                 } else {
                     templateText.append(line);
-                    templateText.append("\n");
+                    templateText.append('\n');
                 }
             }
             templates.put(key, new StringTemplate(templateText.toString()));

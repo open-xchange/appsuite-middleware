@@ -162,7 +162,7 @@ public class AuditEventHandler implements EventHandler {
                 log.append("TITLE: ").append(appointment.getTitle()).append("; ");
                 log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
                 log.append("END DATE: ").append(appointment.getEndDate()).append("; ");
-                log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append(";");
+                log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append(';');
 
                 break ModuleSwitch;
             case Types.CONTACT:
@@ -189,8 +189,8 @@ public class AuditEventHandler implements EventHandler {
                 log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
                 log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
                 log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
-                log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(";");
-                log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(";");
+                log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
+                log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
 
                 break ModuleSwitch;
             case Types.TASK:
@@ -214,7 +214,7 @@ public class AuditEventHandler implements EventHandler {
                 log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName()).append("; ");
                 log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
                 log.append("TITLE: ").append(task.getTitle()).append("; ");
-                log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(";");
+                log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
 
                 break ModuleSwitch;
             case Types.INFOSTORE:
@@ -239,7 +239,7 @@ public class AuditEventHandler implements EventHandler {
                 log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName()).append("; ");
                 log.append("TITLE: ").append(document.getTitle()).append("; ");
                 log.append("TITLE: ").append(document.getFileName()).append("; ");
-                log.append("FOLDER: ").append(getPathToRoot((int) document.getFolderId(), commonEvent.getSession())).append(";");
+                log.append("FOLDER: ").append(getPathToRoot((int) document.getFolderId(), commonEvent.getSession())).append(';');
 
                 break ModuleSwitch;
             }

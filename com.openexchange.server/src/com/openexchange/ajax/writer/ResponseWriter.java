@@ -289,7 +289,7 @@ public final class ResponseWriter {
     }
 
     private static void writeElementTo(final StackTraceElement element, final StringBuilder sb) {
-        sb.append(element.getClassName()).append(".").append(element.getMethodName());
+        sb.append(element.getClassName()).append('.').append(element.getMethodName());
         if (element.isNativeMethod()) {
             sb.append("(Native Method)");
         } else {

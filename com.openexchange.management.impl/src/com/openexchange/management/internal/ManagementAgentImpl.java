@@ -125,7 +125,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             jmxURL = addConnectorServer(jmxURLStr, jmxLogin, jmxPassword);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(128).append("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(
-                    jmxURL).append("\n").toString());
+                    jmxURL).append('\n').toString());
             }
             running.set(true);
         } catch (final OXException e) {

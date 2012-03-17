@@ -103,7 +103,7 @@ public final class UnifiedMailMessage extends MailMessage {
                 builder.append("folder=").append(folder);
             }
         }
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

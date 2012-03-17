@@ -338,7 +338,7 @@ public final class HCard implements Serializable {
                     }
 					sb.append("<span class=\"type\">").append(s2h(type)).append("</span>");
 				}
-				sb.append("]");
+				sb.append(']');
 			}
 			sb.append(":<br />");
 			if ( streetAddress.length() > 0 ) {
@@ -461,7 +461,7 @@ public final class HCard implements Serializable {
                     }
 					sb.append("<span class=\"type\">").append(s2h(type)).append("</span>");
 				}
-				sb.append("]");
+				sb.append(']');
 			}
 			sb.append(": ");
 			sb.append("<span class=\"value\">").append(s2h(value)).append("</span></div>");
@@ -531,7 +531,7 @@ public final class HCard implements Serializable {
                     }
 					sb.append("<span class=\"type\">").append(s2h(type)).append("</span>");
 				}
-				sb.append("]");
+				sb.append(']');
 			}
 			sb.append(": ");
 			sb.append("<a href=\"mailto:").append(s2a(value)).append("\" class=\"value\">").append(s2h(value)).append("</a></div>");
@@ -698,7 +698,7 @@ public final class HCard implements Serializable {
 		private String xfnRelsToString() {
 			StringBuilder out = new StringBuilder();
 			for ( XFNRelationship rel : rels ) {
-                out.append(rel).append(" ");
+                out.append(rel).append(' ');
             }
 			out.setLength(out.length() -1);
 			return out.toString();
@@ -718,16 +718,16 @@ public final class HCard implements Serializable {
                 sb.append("<a class=\"url\" href=\"");
             } else {
 				for ( XFNRelationship rel : rels ) {
-                    sb.append(rel).append(" ");
+                    sb.append(rel).append(' ');
                 }
 				sb.setCharAt(sb.length() -1, ':');
 				sb.append(" <a class=\"url\" rel=\"");
 				for ( XFNRelationship rel : rels ) {
-                    sb.append(s2a(rel.toString())).append(" ");
+                    sb.append(s2a(rel.toString())).append(' ');
                 }
 				sb.setCharAt(sb.length() -1, '"');
 			}
-			sb.append(" ").append(url.toASCIIString()).append("\">").append(s2h(url.toString())).append("</a><br />");
+			sb.append(' ').append(url.toASCIIString()).append("\">").append(s2h(url.toString())).append("</a><br />");
 			return sb.toString();
 		}
 	}

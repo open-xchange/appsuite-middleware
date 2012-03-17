@@ -198,7 +198,7 @@ public final class BundleTestCache extends AbstractBundleTest {
         url.append("&columns=");
         for (final int col : columns) {
             url.append(col);
-            url.append(",");
+            url.append(',');
         }
         url.deleteCharAt(url.length() - 1);
 

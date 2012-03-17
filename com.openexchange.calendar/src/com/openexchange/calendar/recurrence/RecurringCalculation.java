@@ -131,42 +131,42 @@ public class RecurringCalculation {
     private final String getState() {
         final StringBuilder builder = new StringBuilder(1024);
         builder.append("Recurring Calculation State:\n");
-        builder.append("recurring_type: ").append(recurring_type).append("\n");
-        builder.append("recurring_interval: ").append(recurring_interval).append("\n");
-        builder.append("recurring_days: ").append(recurring_days).append("\n");
-        builder.append("recurring_day_in_month: ").append(recurring_day_in_month).append("\n");
-        builder.append("recurring_month: ").append(recurring_month).append("\n");
-        builder.append("\n");
-        builder.append("change_exceptions: ").append(changeExceptions).append("\n");
-        builder.append("delete_exceptions: ").append(deleteExceptions).append("\n");
-        builder.append("\n");
-        builder.append("contains_occurrence: ").append(contains_occurrence).append("\n");
-        builder.append("occurrence_value: ").append(occurrence_value).append("\n");
-        builder.append("\n");
-        builder.append("contains_days: ").append(contains_days).append("\n");
-        builder.append("contains_day_in_month: ").append(contains_day_in_month).append("\n");
-        builder.append("contains_month: ").append(contains_month).append("\n");
-        builder.append("contains_until: ").append(contains_until).append("\n");
-        builder.append("\n");
-        builder.append("recurrence_calculator: ").append(recurrence_calculator).append("\n");
-        builder.append("\n");
-        builder.append("diff: ").append(diff).append("\n");
-        builder.append("\n");
-        builder.append("start_of_series: ").append(start_of_series).append("\n");
-        builder.append("normalized_start_of_series: ").append(normalized_start_of_series).append("\n");
-        builder.append("end_of_series: ").append(end_of_series).append("\n");
-        builder.append("until: ").append(until).append("\n");
-        builder.append("\n");
-        builder.append("range_start: ").append(range_start).append("\n");
-        builder.append("range_end: ").append(range_end).append("\n");
-        builder.append("pos: ").append(pos).append("\n");
-        builder.append("\n");
-        builder.append("calc_timezone: ").append(calc_timezone).append("\n");
-        builder.append("\n");
-        builder.append("PMAXTC: ").append(PMAXTC).append("\n");
-        builder.append("\n");
-        builder.append("TTL: ").append(TTL).append("\n");
-        builder.append("operationCounter: ").append(operationCounter).append("\n");
+        builder.append("recurring_type: ").append(recurring_type).append('\n');
+        builder.append("recurring_interval: ").append(recurring_interval).append('\n');
+        builder.append("recurring_days: ").append(recurring_days).append('\n');
+        builder.append("recurring_day_in_month: ").append(recurring_day_in_month).append('\n');
+        builder.append("recurring_month: ").append(recurring_month).append('\n');
+        builder.append('\n');
+        builder.append("change_exceptions: ").append(changeExceptions).append('\n');
+        builder.append("delete_exceptions: ").append(deleteExceptions).append('\n');
+        builder.append('\n');
+        builder.append("contains_occurrence: ").append(contains_occurrence).append('\n');
+        builder.append("occurrence_value: ").append(occurrence_value).append('\n');
+        builder.append('\n');
+        builder.append("contains_days: ").append(contains_days).append('\n');
+        builder.append("contains_day_in_month: ").append(contains_day_in_month).append('\n');
+        builder.append("contains_month: ").append(contains_month).append('\n');
+        builder.append("contains_until: ").append(contains_until).append('\n');
+        builder.append('\n');
+        builder.append("recurrence_calculator: ").append(recurrence_calculator).append('\n');
+        builder.append('\n');
+        builder.append("diff: ").append(diff).append('\n');
+        builder.append('\n');
+        builder.append("start_of_series: ").append(start_of_series).append('\n');
+        builder.append("normalized_start_of_series: ").append(normalized_start_of_series).append('\n');
+        builder.append("end_of_series: ").append(end_of_series).append('\n');
+        builder.append("until: ").append(until).append('\n');
+        builder.append('\n');
+        builder.append("range_start: ").append(range_start).append('\n');
+        builder.append("range_end: ").append(range_end).append('\n');
+        builder.append("pos: ").append(pos).append('\n');
+        builder.append('\n');
+        builder.append("calc_timezone: ").append(calc_timezone).append('\n');
+        builder.append('\n');
+        builder.append("PMAXTC: ").append(PMAXTC).append('\n');
+        builder.append('\n');
+        builder.append("TTL: ").append(TTL).append('\n');
+        builder.append("operationCounter: ").append(operationCounter).append('\n');
         return builder.toString();
     }
 
@@ -1145,7 +1145,7 @@ public class RecurringCalculation {
      * @param cal
      * @param days
      */
-    private void addWorkdays(Calendar cal, int days) {
+    private void addWorkdays(final Calendar cal, int days) {
         while (days > 1 || isWeekend(cal)) {
             if (!isWeekend(cal)) {
                 days--;
@@ -1154,7 +1154,7 @@ public class RecurringCalculation {
         }
     }
 
-    private boolean isWeekend(Calendar cal) {
+    private boolean isWeekend(final Calendar cal) {
         return cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY;
     }
 

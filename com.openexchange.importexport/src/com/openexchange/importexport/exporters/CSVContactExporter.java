@@ -281,9 +281,9 @@ public class CSVContactExporter implements Exporter {
     protected String convertToLine(final List<String> line) {
         final StringBuilder bob = new StringBuilder();
         for (final String str : line) {
-            bob.append("\"");
+            bob.append('"');
             bob.append(str.replace("\"", "\"\""));
-            bob.append("\"");
+            bob.append('"');
             bob.append(com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITER);
         }
         bob.setCharAt(bob.length() - 1, com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER);

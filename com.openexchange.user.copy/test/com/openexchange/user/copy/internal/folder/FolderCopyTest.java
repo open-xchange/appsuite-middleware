@@ -327,7 +327,7 @@ public class FolderCopyTest extends AbstractUserCopyTest {
                 sb.append(folder.getObjectID());
             }
         }        
-        sb.append(")");
+        sb.append(')');
         
         final Statement stmt = srcCon.createStatement();
         stmt.executeUpdate(sb.toString());

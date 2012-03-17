@@ -1757,7 +1757,7 @@ public class DatabaseImpl extends DBService {
         final StringBuilder ignoreVersionsList = new StringBuilder(ignoreVersions.size() * 4 + 2);
         ignoreVersionsList.append('(');
         for (final DocumentMetadata documentMetadata : ignoreVersions) {
-            ignoreVersionsList.append(documentMetadata.getVersion()).append(",");
+            ignoreVersionsList.append(documentMetadata.getVersion()).append(',');
         }
         ignoreVersionsList.setCharAt(ignoreVersionsList.length() - 1, ')');
 

@@ -607,7 +607,7 @@ public class SieveHandler {
 
         setScriptStatus(script_name, false, commandBuilder);
 
-        final String delete = commandBuilder.append(SIEVE_DELETE).append("\"").append(script_name).append("\"").append(CRLF).toString();
+        final String delete = commandBuilder.append(SIEVE_DELETE).append('"').append(script_name).append('"').append(CRLF).toString();
         commandBuilder.setLength(0);
 
         bos_sieve.write(delete.getBytes(com.openexchange.java.Charsets.UTF_8));
@@ -675,7 +675,7 @@ public class SieveHandler {
         final String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"PLAIN\" ").toString();
         commandBuilder.setLength(0);
 
-        final String user_size = commandBuilder.append("{").append((user_auth_pass_64.length() - 2)).append("+}").append(CRLF).toString();
+        final String user_size = commandBuilder.append('{').append((user_auth_pass_64.length() - 2)).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
         // We don't need to specify an encoding here because all strings contain only ASCII Text

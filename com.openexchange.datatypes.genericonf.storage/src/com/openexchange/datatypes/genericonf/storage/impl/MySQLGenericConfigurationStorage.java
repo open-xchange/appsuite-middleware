@@ -307,7 +307,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
         builder.append(whereIterator.getFrom());
         builder.append(" WHERE ");
-        builder.append("(");
+        builder.append('(');
         builder.append(whereIterator.getWhere());
         builder.append(") AND p.cid = ?");
         whereIterator.addReplacement(I(ctx.getContextId()));

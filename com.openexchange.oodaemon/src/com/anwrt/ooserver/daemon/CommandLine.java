@@ -237,7 +237,7 @@ public final class CommandLine {
         System.out.println("\ncommand : Daemon " + OPTION_PREFIX + _optConfig + " <CONFIGURATION_FILE_PATH> [" + OPTION_PREFIX + _optAdmin + " ADMIN_COMMAND] [" + OPTION_PREFIX + _optLogger + " <LOG_LEVEL>] \n");
         System.out.println("          Daemon --version");
         System.out.println("          Daemon --help");
-        System.out.println("\n");
+        System.out.println('\n');
         System.out.println(" CONFIGURATION_FILE_PATH :\n" + "   An xml configuration file required. \n" + "   An example could be found in <DAEMON_DIR>/config/ \n");
         printAdminCommands();
         System.out.println(" LOG_LEVEL : \n" + "   Specify a new log level \n" + "   (higher priority than the log level in config file). \n");

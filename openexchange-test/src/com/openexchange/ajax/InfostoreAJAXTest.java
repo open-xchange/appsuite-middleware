@@ -165,9 +165,9 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         final StringBuffer b = new StringBuffer("[ ");
         for(final int i : ids) {
             b.append(i);
-            b.append(" ");
+            b.append(' ');
         }
-        b.append("]");
+        b.append(']');
         return b.toString();
     }
 
@@ -185,7 +185,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         url.append("&columns=");
         for(final int col : columns) {
             url.append(col);
-            url.append(",");
+            url.append(',');
         }
         url.deleteCharAt(url.length()-1);
 
@@ -211,7 +211,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         url.append("&columns=");
         for(final int col : columns) {
             url.append(col);
-            url.append(",");
+            url.append(',');
         }
         url.deleteCharAt(url.length()-1);
 
@@ -226,7 +226,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
             }
             data.deleteCharAt(data.length()-1);
         }
-        data.append("]");
+        data.append(']');
 
         return putT(webConv,url.toString(), data.toString());
     }
@@ -246,7 +246,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         url.append("&columns=");
         for(final int col : columns) {
             url.append(col);
-            url.append(",");
+            url.append(',');
         }
         url.deleteCharAt(url.length()-1);
 
@@ -298,7 +298,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         url.append("&columns=");
         for(final int col : columns) {
             url.append(col);
-            url.append(",");
+            url.append(',');
         }
         url.deleteCharAt(url.length()-1);
 
@@ -488,7 +488,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
             data.deleteCharAt(data.length()-1);
         }
 
-        data.append("]");
+        data.append(']');
 
         final JSONObject response = put(webConv, url.toString(), data.toString());
         return response;
@@ -515,12 +515,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         if(versions.length > 0) {
             for(final int id : versions) {
                 data.append(id);
-                data.append(",");
+                data.append(',');
             }
             data.deleteCharAt(data.length()-1);
         }
 
-        data.append("]");
+        data.append(']');
 
         final String content = putS(webConv, url.toString(), data.toString());
         JSONArray arr = null;
@@ -670,7 +670,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         url.append("&columns=");
         for(final int c : columns) {
             url.append(c);
-            url.append(",");
+            url.append(',');
         }
         url.setLength(url.length()-1);
         if(folderId != -1) {
@@ -705,7 +705,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         url.append("&columns=");
         for(final int c : columns) {
             url.append(c);
-            url.append(",");
+            url.append(',');
         }
         url.setLength(url.length()-1);
         if(folderId != -1) {

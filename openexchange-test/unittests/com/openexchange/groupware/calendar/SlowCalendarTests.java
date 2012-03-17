@@ -142,7 +142,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
             final StringBuilder cols = new StringBuilder();
             for (final int col : COLS) {
-                cols.append(col).append(",");
+                cols.append(col).append(',');
             }
             cols.setLength(cols.length() - 1);
             final String COLS_STRING = cols.toString();

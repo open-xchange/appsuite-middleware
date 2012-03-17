@@ -480,7 +480,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(CalendarObject.DECLINE);
         } else {
             sb.append(" AND pdm.confirm IN (");
-            sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(")");
+            sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
         }
 
         if (free_busy_select) {
@@ -501,7 +501,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 sb.append(CalendarObject.DECLINE);
             } else {
                 sb.append(" AND pdm.confirm IN (");
-                sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(")");
+                sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
             }
         } else {
             sb.append(PDM_GROUP_BY_PD_INTFIELD01);
@@ -1304,7 +1304,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         } else {
             // Perform search over all folders in which the user has the right to see elements.
 
-            sb.append("(");
+            sb.append('(');
 
             // Look into the users private folders
             boolean first = true;
@@ -1361,7 +1361,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
             }
 
-            sb.append(")");
+            sb.append(')');
         }
 
         // Look for pattern
@@ -1517,7 +1517,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(PDM_OR);
             sb.append(collection.getFieldName(Appointment.CATEGORIES));
             sb.append(" LIKE ?");
-            sb.append(")");
+            sb.append(')');
             pattern = StringCollection.prepareForSearch(pattern);
         }
 
@@ -4434,7 +4434,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                  */
                 try {
                     mdao = CalendarMySQL.factory.createAppointmentSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     if (e.getCode() == OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber()) {
                         LOG.debug("Unable to access Exception-Master (User-ID:" + uid + "/Folder-ID:" + inFolder + "/Exception-ID:" + cdao.getObjectID() + "/Master-ID" + edao.getRecurrenceID() + ")", e);
                         takeCareOfMaster = false;

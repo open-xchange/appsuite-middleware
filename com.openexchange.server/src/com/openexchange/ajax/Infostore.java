@@ -700,7 +700,7 @@ public class Infostore extends PermissionServlet {
         w.print(ResponseFields.ERROR_PARAMS);
         w.print("\" : [");
         w.print(commaSeperatedErrorParams.toString());
-        w.print("}");
+        w.print('}');
         w.flush();
     }
 

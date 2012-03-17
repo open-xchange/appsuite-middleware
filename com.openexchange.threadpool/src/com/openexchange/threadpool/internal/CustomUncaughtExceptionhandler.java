@@ -108,7 +108,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
                         sb.append(')');
                     }
                 }
-                sb.append("\n");
+                sb.append('\n');
             }
         }
     }

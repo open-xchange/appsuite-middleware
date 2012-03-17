@@ -171,7 +171,7 @@ public class StatementBuilder implements IStatementBuilder {
 	}
 
 	protected void blank() {
-		fStringBuffer.append(" ");
+		fStringBuffer.append(' ');
 	}
 
 	protected void reset() {

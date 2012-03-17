@@ -235,7 +235,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         if (logLevel != null) {
             builder.append("logLevel=").append(logLevel);
         }
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

@@ -472,7 +472,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 final StringBuilder builder = new StringBuilder();
                 String s = null;
                 while ((s = r.readLine()) != null) {
-                    builder.append(s).append("\n");
+                    builder.append(s).append('\n');
                 }
                 return builder.toString();
             } catch (final IOException x) {

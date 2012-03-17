@@ -80,8 +80,8 @@ public class ICALFixtures {
     }
 
     private void localDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
-        bob.append("DTSTART:").append(dateTime.format(start)).append("\n");
-        bob.append("DTEND:").append(dateTime.format(end)).append("\n");
+        bob.append("DTSTART:").append(dateTime.format(start)).append('\n');
+        bob.append("DTEND:").append(dateTime.format(end)).append('\n');
     }
 
 
@@ -135,8 +135,8 @@ public class ICALFixtures {
 
 
     private void timezoneDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end, final String timeZone) {
-        bob.append("DTSTART;TZID=").append(timeZone).append(":").append(dateTime.format(start)).append("\n");
-        bob.append("DTEND;TZID=").append(timeZone).append(":").append(dateTime.format(end)).append("\n");
+        bob.append("DTSTART;TZID=").append(timeZone).append(':').append(dateTime.format(start)).append('\n');
+        bob.append("DTEND;TZID=").append(timeZone).append(':').append(dateTime.format(end)).append('\n');
     }
 
 
@@ -158,8 +158,8 @@ public class ICALFixtures {
     }
 
     private void customTimezoneDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
-        bob.append("DTSTART;TZID=").append("/custom/Japan").append(":").append(dateTime.format(start)).append("\n");
-        bob.append("DTEND;TZID=").append("/custom/Japan").append(":").append(dateTime.format(end)).append("\n");
+        bob.append("DTSTART;TZID=").append("/custom/Japan").append(':').append(dateTime.format(start)).append('\n');
+        bob.append("DTEND;TZID=").append("/custom/Japan").append(':').append(dateTime.format(end)).append('\n');
     }
 
 
@@ -169,8 +169,8 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginEvent(bob);
 
-        bob.append("DTSTART:").append(dateTime.format(start)).append("\n");
-        bob.append("DURATION:").append(duration).append("\n");
+        bob.append("DTSTART:").append(dateTime.format(start)).append('\n');
+        bob.append("DURATION:").append(duration).append('\n');
 
         endEvent(bob);
         endCalendar(bob);
@@ -185,7 +185,7 @@ public class ICALFixtures {
         for(int i = 0; i < properties.length; i++) {
             final String name = properties[i++];
             final String value = properties[i];
-            bob.append(name).append(":").append(value).append("\n");
+            bob.append(name).append(':').append(value).append('\n');
         }
 
         endStandardAppFields(bob);
@@ -197,7 +197,7 @@ public class ICALFixtures {
         standardAppFields(bob, start,end);
 
         for(final String mail : mails) {
-            bob.append("ATTENDEE:MAILTO:").append(mail).append("\n");
+            bob.append("ATTENDEE:MAILTO:").append(mail).append('\n');
         }
 
         endStandardAppFields(bob);
@@ -209,7 +209,7 @@ public class ICALFixtures {
         standardAppFields(bob, start,end);
         bob.append("RESOURCES:");
         for(final String resource : resources) {
-           bob.append(resource).append(",");
+           bob.append(resource).append(',');
         }
         bob.setCharAt(bob.length()-1, '\n');
 
@@ -236,7 +236,7 @@ public class ICALFixtures {
         standardAppFields(bob, start,end);
         bob.append("CATEGORIES:");
         for(final String category : categories) {
-            bob.append(category).append(",");
+            bob.append(category).append(',');
         }
         bob.setCharAt(bob.length()-1, '\n');
 
@@ -250,12 +250,12 @@ public class ICALFixtures {
         final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
-        bob.append("RRULE:").append(rrule).append("\n");
+        bob.append("RRULE:").append(rrule).append('\n');
 
         bob.append("EXDATE:");
 
         for(final Date exception : exceptions) {
-            bob.append(dateTime.format(exception)).append(",");
+            bob.append(dateTime.format(exception)).append(',');
         }
         bob.setCharAt(bob.length()-1,'\n');
 
@@ -267,12 +267,12 @@ public class ICALFixtures {
         final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
-        bob.append("RRULE:").append(rrule).append("\n");
+        bob.append("RRULE:").append(rrule).append('\n');
 
         bob.append("EXDATE;VALUE=DATE:");
 
         for(final Date exception : exceptions) {
-            bob.append(date.format(exception)).append(",");
+            bob.append(date.format(exception)).append(',');
         }
         bob.setCharAt(bob.length()-1,'\n');
 
@@ -286,9 +286,9 @@ public class ICALFixtures {
         standardAppFields(bob, start,end);
 
         bob.append("BEGIN:VALARM\n");
-        bob.append(trigger).append("\n");
+        bob.append(trigger).append('\n');
         bob.append("ACTION:DISPLAY\n");
-        bob.append("DESCRIPTION:").append(description).append("\n");
+        bob.append("DESCRIPTION:").append(description).append('\n');
         bob.append("END:VALARM\n");
 
         endStandardAppFields(bob);
@@ -370,7 +370,7 @@ public class ICALFixtures {
         for(int i = 0; i < properties.length; i++) {
             final String name = properties[i++];
             final String value = properties[i];
-            bob.append(name).append(":").append(value).append("\n");
+            bob.append(name).append(':').append(value).append('\n');
         }
 
         endStandardTodoFields(bob);
@@ -443,8 +443,8 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginTodo(bob);
 
-        bob.append("DTSTART:").append(dateTime.format(start)).append("\n");
-        bob.append("DURATION:").append(duration).append("\n");
+        bob.append("DTSTART:").append(dateTime.format(start)).append('\n');
+        bob.append("DURATION:").append(duration).append('\n');
 
         endTodo(bob);
         endCalendar(bob);
@@ -457,7 +457,7 @@ public class ICALFixtures {
         standardTodoFields(bob);
 
         for(final String mail : mails) {
-            bob.append("ATTENDEE:MAILTO:").append(mail).append("\n");
+            bob.append("ATTENDEE:MAILTO:").append(mail).append('\n');
         }
 
         endStandardTodoFields(bob);
@@ -470,7 +470,7 @@ public class ICALFixtures {
         standardTodoFields(bob);
         bob.append("CATEGORIES:");
         for(final String category : categories) {
-            bob.append(category).append(",");
+            bob.append(category).append(',');
         }
         bob.setCharAt(bob.length()-1, '\n');
 
@@ -489,7 +489,7 @@ public class ICALFixtures {
         for(int i = 0; i < properties.length; i++) {
             final String name = properties[i++];
             final String value = properties[i];
-            bob.append(name).append(":").append(value).append("\n");
+            bob.append(name).append(':').append(value).append('\n');
         }
 
 
@@ -506,12 +506,12 @@ public class ICALFixtures {
 
         utcDTStartAndDTEnd(bob, start, end);
 
-        bob.append("RRULE:").append(rrule).append("\n");
+        bob.append("RRULE:").append(rrule).append('\n');
 
         bob.append("EXDATE:");
 
         for(final Date exception : exceptions) {
-            bob.append(dateTime.format(exception)).append(",");
+            bob.append(dateTime.format(exception)).append(',');
         }
         bob.setCharAt(bob.length()-1,'\n');
 
@@ -528,12 +528,12 @@ public class ICALFixtures {
 
         utcDTStartAndDTEnd(bob, start, end);
 
-        bob.append("RRULE:").append(rrule).append("\n");
+        bob.append("RRULE:").append(rrule).append('\n');
 
         bob.append("EXDATE;VALUE=DATE:");
 
         for(final Date exception : exceptions) {
-            bob.append(date.format(exception)).append(",");
+            bob.append(date.format(exception)).append(',');
         }
         bob.setCharAt(bob.length()-1,'\n');
 
@@ -551,9 +551,9 @@ public class ICALFixtures {
         utcDTStartAndDTEnd(bob, start, end);
 
         bob.append("BEGIN:VALARM\n");
-        bob.append(trigger).append("\n");
+        bob.append(trigger).append('\n');
         bob.append("ACTION:DISPLAY\n");
-        bob.append("DESCRIPTION:").append(description).append("\n");
+        bob.append("DESCRIPTION:").append(description).append('\n');
         bob.append("END:VALARM\n");
 
         endTodo(bob);
@@ -580,7 +580,7 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginTodo(bob);
 
-        bob.append("DUE;VALUE=DATE:").append(date.format(due)).append("\n");
+        bob.append("DUE;VALUE=DATE:").append(date.format(due)).append('\n');
 
         endTodo(bob);
         endCalendar(bob);
@@ -619,7 +619,7 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginEvent(bob);
 
-        bob.append(property).append(":").append(dateTime.format(date)).append("\n");
+        bob.append(property).append(':').append(dateTime.format(date)).append('\n');
 
         endEvent(bob);
         endCalendar(bob);
@@ -652,9 +652,9 @@ public class ICALFixtures {
         standardAppFields(bob, start,end);
 
         bob.append("BEGIN:VALARM\n");
-        bob.append(trigger).append("\n");
+        bob.append(trigger).append('\n');
         bob.append("ACTION:AUDIO\n");
-        bob.append("ATTACH:").append(audioFile).append("\n");
+        bob.append("ATTACH:").append(audioFile).append('\n');
         bob.append("END:VALARM\n");
 
         endStandardAppFields(bob);
@@ -667,7 +667,7 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginEvent(bob);
 
-        bob.append("DTSTART;VALUE=DATE:").append(date.format(start)).append("\n");
+        bob.append("DTSTART;VALUE=DATE:").append(date.format(start)).append('\n');
 
         endEvent(bob);
         endCalendar(bob);
@@ -681,7 +681,7 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginEvent(bob);
 
-        bob.append("DTSTART:").append(date.format(start)).append("\n");
+        bob.append("DTSTART:").append(date.format(start)).append('\n');
 
         endEvent(bob);
         endCalendar(bob);

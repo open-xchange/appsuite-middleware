@@ -68,7 +68,7 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
     public MailAccountAllRequest(boolean failOnError, int...cols) {
         StringBuilder bob = new StringBuilder();
         for(int colId : cols) {
-            bob.append(colId).append(",");
+            bob.append(colId).append(',');
         }
         bob.setLength(bob.length()-1);
         this.columns = bob.toString();

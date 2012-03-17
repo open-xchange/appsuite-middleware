@@ -875,7 +875,7 @@ public class FolderProperties {
             try {
                 final T valueOf = setter.valueOf(property);
                 setter.set(valueOf);
-                parameterObject.getLog().append("\t").append(paramname).append(": ").append(valueOf).append('\n');
+                parameterObject.getLog().append('\t').append(paramname).append(": ").append(valueOf).append('\n');
             } catch (final IllegalArgumentException e) {
                 throw LdapExceptionCode.MISSING_ATTRIBUTE.create(property);
             }

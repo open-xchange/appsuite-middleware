@@ -90,7 +90,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
         for(int i = 0, size = categoriesList.size(); i < size; i++) {
             final net.fortuna.ical4j.model.property.Categories categories = (net.fortuna.ical4j.model.property.Categories) categoriesList.get(i);
             for(final Iterator<Object> catObjects = categories.getCategories().iterator(); catObjects.hasNext();) {
-                bob.append(catObjects.next()).append(",");
+                bob.append(catObjects.next()).append(',');
             }
         }
         if(bob.length() > 0) {

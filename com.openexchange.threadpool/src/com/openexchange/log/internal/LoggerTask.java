@@ -274,7 +274,7 @@ final class LoggerTask extends AbstractTask<Object> {
                             sb.append(')');
                         }
                     }
-                    sb.append("\n");
+                    sb.append('\n');
                     logClass = className;
                     break;
                 }

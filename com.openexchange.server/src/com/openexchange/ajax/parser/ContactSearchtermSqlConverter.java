@@ -189,11 +189,11 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 			}
 
 			if(operation.getSqlPosition() == OperationPosition.AFTER)
-				bob.append(" ").append(operation.getSqlRepresentation());
+				bob.append(' ').append(operation.getSqlRepresentation());
 
 			if(operation.getSqlPosition() == OperationPosition.BETWEEN)
 				if((i+1) < operands.length) //don't place an operator after the last operand here
-					bob.append(" ").append(operation.getSqlRepresentation()).append(" ");
+					bob.append(' ').append(operation.getSqlRepresentation()).append(' ');
 
 		}
 		bob.append(" ) ");
@@ -212,10 +212,10 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 			traverseViaInOrder(operands[i]);
 
 			if(operation.getSqlPosition() == OperationPosition.AFTER)
-				bob.append(" ").append(operation.getSqlRepresentation());
+				bob.append(' ').append(operation.getSqlRepresentation());
 			if(operation.getSqlPosition() == OperationPosition.BETWEEN)
 				if((i+1) < operands.length) //don't place an operator after the last operand
-					bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
+					bob.append(' ').append(operation.getSqlRepresentation()).append("    ");
 		}
 		bob.append(" ) ");
 
@@ -261,7 +261,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	protected String handleCharset(String field) {
 		if(charset == null)
 			return field;
-		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(")").toString();
+		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(')').toString();
 	}
 
 	/**
@@ -270,7 +270,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	protected String handlePrefix(String field) {
 		if(getPrefix() == null)
 			return field;
-		return new StringBuilder(getPrefix()).append(".").append(field).toString();
+		return new StringBuilder(getPrefix()).append('.').append(field).toString();
 	}
 
 

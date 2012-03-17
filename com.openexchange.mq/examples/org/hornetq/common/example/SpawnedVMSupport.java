@@ -82,7 +82,7 @@ public class SpawnedVMSupport
       {
          vmarg = vmarg.replaceAll("/", "\\\\");
       }
-      sb.append(vmarg).append(" ");
+      sb.append(vmarg).append(' ');
       String pathSeparater = System.getProperty("path.separator");
       classPath = classPath + pathSeparater + ".";
 
@@ -92,7 +92,7 @@ public class SpawnedVMSupport
       }
       else
       {
-         sb.append("-cp").append(" ").append(classPath).append(" ");
+         sb.append("-cp").append(' ').append(classPath).append(' ');
       }
 
       // FIXME - not good to assume path separator
@@ -102,7 +102,7 @@ public class SpawnedVMSupport
          libPath = libPath.replaceAll("/", "\\\\");
          libPath = "\"" + libPath + "\"";
       }
-      sb.append("-Djava.library.path=").append(libPath).append(" ");
+      sb.append("-Djava.library.path=").append(libPath).append(' ');
       if(debug)
       {
          sb.append("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 ");

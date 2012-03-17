@@ -120,14 +120,14 @@ public class ReplyAllTest extends AbstractReplyTest {
 
     protected String adresses(String... mails){
         StringBuilder builder = new StringBuilder();
-        builder.append("[");
+        builder.append('[');
         for(String mail: mails){
             builder.append("[null,");
             builder.append(mail);
             builder.append("],");
         }
         builder.deleteCharAt(builder.length() - 1);
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

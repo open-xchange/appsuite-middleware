@@ -135,7 +135,7 @@ public final class ScriptCoordinate {
         buffer.append(startLineNumber);
         buffer.append(" column ");
         buffer.append(startColumnNumber);
-        buffer.append(".");
+        buffer.append('.');
         return buffer.toString();
     }
 

@@ -114,7 +114,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
             String line = buffy.readLine();
             while (line != null){
                 bob.append (line);
-                bob.append ("\n");
+                bob.append ('\n');
                 line = buffy.readLine();
             }
         } finally {

@@ -826,7 +826,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 final String error = Check.containsInvalidChars((String) value);
                 if (null != error) {
                     invalid = true;
-                    errors.append(field.getName()).append(" ").append(error).append("\n");
+                    errors.append(field.getName()).append(' ').append(error).append('\n');
                 }
             }
         }

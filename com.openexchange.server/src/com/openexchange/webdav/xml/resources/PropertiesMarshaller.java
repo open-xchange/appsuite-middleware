@@ -134,10 +134,10 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		final Element href = new Element("href", DAV_NS);
         final StringBuilder builder = new StringBuilder(uriPrefix);
         if(builder.charAt(builder.length()-1) != '/') {
-			builder.append("/");
+			builder.append('/');
 		}
         for(final String component : uri) {
-            builder.append(escape(component)).append("/");
+            builder.append(escape(component)).append('/');
         }
         if (!trailingSlash) {
             builder.setLength(builder.length()-1);

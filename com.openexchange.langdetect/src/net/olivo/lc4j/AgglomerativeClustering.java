@@ -210,7 +210,7 @@ public class AgglomerativeClustering {
 			LOG.info( "step " + ( n - numClusters + 1 ) + " - " + ( numClusters - 1 ) + " clusters left:" );
 			for ( int i = 0; i < n; i++ ) {
 				if ( clusters[i].size() != 0 ) {
-					System.out.print( "\t" );
+					System.out.print( '\t' );
 					for ( int j = 0; j < clusters[i].size(); j++ ) {
 						System.out.print( "<" + files[clusters[i].get( j )].getName() + "> " );
 					}

@@ -140,7 +140,7 @@ public final class BundleTestIMAP extends AbstractBundleTest {
             sb.append(cols[0]);
             for (int i = 1; i < cols.length; i++) {
                 // sb.append("%2C").append(cols[i]);
-                sb.append(",").append(cols[i]);
+                sb.append(',').append(cols[i]);
             }
             colsStr = sb.toString();
         } else {

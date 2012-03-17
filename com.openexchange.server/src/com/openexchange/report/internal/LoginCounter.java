@@ -188,7 +188,7 @@ public class LoginCounter implements LoginCounterMBean {
             if (c == '*') {
                 s.append(".*");
             } else if (c == '?') {
-                s.append(".");
+                s.append('.');
             } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
                 s.append('\\');
                 s.append(c);

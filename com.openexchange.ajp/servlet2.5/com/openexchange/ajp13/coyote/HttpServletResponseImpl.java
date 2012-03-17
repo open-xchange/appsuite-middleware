@@ -604,7 +604,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         }
         final StringBuilder sb = new StringBuilder(path);
         if (httpSessionId != null && sb.length() > 0) {
-            sb.append("/");
+            sb.append('/');
             sb.append(AJPv13RequestHandler.JSESSIONID_URI);
             sb.append(httpSessionId);
         }

@@ -107,7 +107,7 @@ public class PeerServerListener {
 
             StringBuilder b = new StringBuilder();
             for (String string : event) {
-                b.append(string).append("\t");
+                b.append(string).append('\t');
             }
 
             System.out.println(b);
@@ -122,10 +122,10 @@ public class PeerServerListener {
         byte[] data;
         try {
             for(Object o : args) {
-                b.append(o.toString()).append("\1");
+                b.append(o.toString()).append('\1');
             }
             b.setLength(b.length()-1);
-            StringBuilder b2 = new StringBuilder().append(PushRequest.MAGIC).append("\1").append(b.length()).append("\1").append(b);
+            StringBuilder b2 = new StringBuilder().append(PushRequest.MAGIC).append('\1').append(b.length()).append('\1').append(b);
             data = b2.toString().getBytes(com.openexchange.java.Charsets.US_ASCII);
             DatagramPacket datagramPackage = new DatagramPacket(data, data.length, remoteAddress, remotePort);
             mySocket.send(datagramPackage);

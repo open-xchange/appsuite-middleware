@@ -4616,33 +4616,33 @@ public class Contact extends CommonObject implements Serializable {
         final StringBuilder name = new StringBuilder(32);
         if (containsTitle()) {
             name.append(getTitle());
-            name.append(" ");
+            name.append(' ');
         }
         if (containsYomiFirstName()) {
             name.append(getYomiFirstName());
-            name.append(" ");
+            name.append(' ');
         } else if (containsGivenName()) {
             name.append(getGivenName());
-            name.append(" ");
+            name.append(' ');
         }
         if (containsMiddleName()) {
             name.append(getMiddleName());
-            name.append(" ");
+            name.append(' ');
         }
         if (containsYomiLastName()) {
             name.append(getYomiLastName());
-            name.append(" ");
+            name.append(' ');
         } else if (containsSurName()) {
             name.append(getSurName());
-            name.append(" ");
+            name.append(' ');
         }
         if (containsSuffix()) {
             name.append(getSuffix());
-            name.append(" ");
+            name.append(' ');
         }
         if (containsEmail1()) {
             if (name.length() > 0) {
-                name.append("(");
+                name.append('(');
                 name.append(getEmail1());
                 name.append(") ");
             } else {

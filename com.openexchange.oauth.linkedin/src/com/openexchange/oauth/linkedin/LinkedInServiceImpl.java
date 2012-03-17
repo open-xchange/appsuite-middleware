@@ -230,10 +230,10 @@ public class LinkedInServiceImpl implements LinkedInService{
 		} else {
 			final StringBuilder b = new StringBuilder("http://api.linkedin.com/v1/people::(");
 			for(final String s : email) {
-				b.append("email=").append(s).append(",");
+				b.append("email=").append(s).append(',');
 			}
 			b.setLength(b.length()-1);
-			b.append("):(").append(RELATION_TO_VIEWER).append(",").append(PERSONAL_FIELDS).append(")");
+			b.append("):(").append(RELATION_TO_VIEWER).append(',').append(PERSONAL_FIELDS).append(')');
 			uri = b.toString();
 		}
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);

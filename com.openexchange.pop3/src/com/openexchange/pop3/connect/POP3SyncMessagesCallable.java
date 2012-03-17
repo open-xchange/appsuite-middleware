@@ -204,7 +204,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             // Fallback to 10 minutes
             LOG.warn(
                 new StringBuilder(128).append("Missing POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                    "\"").append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes."),
+                    '"').append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes."),
                 new Throwable());
             return FALLBACK_MINUTES * 60L * 1000L;
         }

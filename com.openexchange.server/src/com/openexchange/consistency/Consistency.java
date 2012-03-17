@@ -217,7 +217,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final Iterator<String> itstr = set.iterator();
         final StringBuilder sb = new StringBuilder();
         while (itstr.hasNext()) {
-            sb.append(itstr.next()).append("\n");
+            sb.append(itstr.next()).append('\n');
         }
         output(sb.toString());
     }

@@ -137,7 +137,7 @@ public class IndexTest extends TestCase {
 
 	public static String _join(final String...strings) {
 		final StringBuffer b = new StringBuffer();
-		for(final String s : strings) { b.append(s).append(","); }
+		for(final String s : strings) { b.append(s).append(','); }
 		b.setLength(b.length()-1);
 		return b.toString();
 	}

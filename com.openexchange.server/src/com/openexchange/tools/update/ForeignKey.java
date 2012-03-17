@@ -126,7 +126,7 @@ final class ForeignKey {
         StringBuilder sb = new StringBuilder();
         sb.append("FK ");
         sb.append(name);
-        sb.append(" ");
+        sb.append(' ');
         sb.append(foreignTable);
         sb.append(' ');
         sb.append(foreignColumns);

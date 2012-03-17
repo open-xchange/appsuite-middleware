@@ -86,7 +86,7 @@ public class CountPerms {
         for (int p = 0; p < 16; p++) {
             int len = 15 - permissionNames[p].length();
             while( len > 0 ) {
-                System.out.print( " " );
+                System.out.print( ' ' );
                 len--;
             }
             System.out.println( permissionNames[p] + ": " + permissionCounts[p] );

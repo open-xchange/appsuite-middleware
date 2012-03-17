@@ -379,7 +379,7 @@ public class Executor {
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
         if (Long.MIN_VALUE == minLastModified) {
-            stringBuilder.append(";");
+            stringBuilder.append(';');
         } else {
             stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
         }             
@@ -451,7 +451,7 @@ public class Executor {
     		stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
     	} else {
 			stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy())).append(" USING '")
-				.append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append("'");
+				.append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
     	}
 		if (Order.ASCENDING.equals(order.getOrder())) {
 			stringBuilder.append(" ASC");

@@ -149,7 +149,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
                 buffer.append(url.getProtocol());
                 buffer.append("://");
                 buffer.append(url.getHost());
-                buffer.append("/");
+                buffer.append('/');
                 if (url.getQuery() != null) {
                     buffer.append(url.getQuery());
                 }

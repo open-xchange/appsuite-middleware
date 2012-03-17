@@ -1193,14 +1193,14 @@ public class ContactMySql implements ContactSql {
                             sb.append(field);
                             sb.append(" NOT LIKE 'z%' AND ");
                         } else if (p.matches("\\d")) {
-                            sb.append(" ");
+                            sb.append(' ');
                             sb.append(field);
                             sb.append(" > '0%' AND ");
                             sb.append(field);
                             sb.append(" < 'a%' AND ");
                         } else if (!dot.equals(p) && !"all".equals(p)) {
                             final String fallbackField = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
-                            sb.append(" ");
+                            sb.append(' ');
 
                             sb.append('(').append(field).append(" IS NOT ? AND ").append(field).append(" LIKE ?)");
                             sb.append(" OR (").append(field).append(" IS ? AND ").append(fallbackField).append(" LIKE ?)");

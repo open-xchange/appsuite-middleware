@@ -371,10 +371,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             query.append(" AND ").append(whereConditions);
         }
         if(whereFolder != null && !conv.hasFolders()){ //if the filter does not check for folders...
-        	query.append(" AND ").append(whereFolder).append(" "); //...search all folders you have access rights to
+        	query.append(" AND ").append(whereFolder).append(' '); //...search all folders you have access rights to
         }
         if (null != sqlOrder) {
-        	query.append(sqlOrder).append(" ");
+        	query.append(sqlOrder).append(' ');
         }
 
         final String queryStr = query.toString();
@@ -1578,7 +1578,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         		.append(collation.getSqlCharset())
         		.append("') COLLATE '")
         		.append(collation.getSqlCollation())
-        		.append("'");
+        		.append('\'');
         }
 
         sqlOrder.append(' ');

@@ -163,7 +163,7 @@ public class DeferredActivatorCLT {
                                 System.out.println("Services missing for bundle " + bundle.toString() + ":");
                                 final StringBuilder sb = new StringBuilder();
                                 for (final Object o : (List) list) {
-                                    sb.append(o.toString()).append(",");
+                                    sb.append(o.toString()).append(',');
                                 }
                                 sb.deleteCharAt(sb.length() - 1);
                                 System.out.println(sb.toString());
@@ -188,7 +188,7 @@ public class DeferredActivatorCLT {
                             System.out.println("Services missing for bundle " + bundleName + ":");
                             final StringBuilder sb = new StringBuilder();
                             for (final Object o : missing) {
-                                sb.append(o.toString()).append(",");
+                                sb.append(o.toString()).append(',');
                             }
                             sb.deleteCharAt(sb.length() - 1);
                             System.out.println(sb.toString());

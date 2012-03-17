@@ -170,7 +170,7 @@ public final class TokenList {
         final Iterator<SecretService> it = queue.iterator();
         sb.append(it.next().toString());
         while (it.hasNext()) {
-            sb.append("\n").append(it.next().toString());
+            sb.append('\n').append(it.next().toString());
         }
         return sb.toString();
     }

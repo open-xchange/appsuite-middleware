@@ -119,7 +119,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                         sb.append(')');
                     }
                 }
-                sb.append("\n");
+                sb.append('\n');
             }
         }
     }

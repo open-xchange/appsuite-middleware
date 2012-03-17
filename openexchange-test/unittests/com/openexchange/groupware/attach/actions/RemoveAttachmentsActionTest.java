@@ -77,7 +77,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
     private int countDel() throws OXException, SQLException{
         final StringBuilder in = new StringBuilder();
         for(final AttachmentMetadata m : getAttachments()) {
-            in.append(m.getId()).append(",");
+            in.append(m.getId()).append(',');
         }
         in.setLength(in.length()-1);
 

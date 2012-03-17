@@ -75,7 +75,7 @@ public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
         }
         StringBuffer buf = new StringBuffer();
         buf.append(cookie.getName());
-        buf.append("=");
+        buf.append('=');
         String s = "\"" + cookie.getValue()+"\"";
         //System.out.println("quirkyCookieQuotes ensabled! ");
         if (s != null) {

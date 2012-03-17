@@ -968,7 +968,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         columnBuilder.append(temp);
                         first = false;
                     } else {
-                        columnBuilder.append(",");
+                        columnBuilder.append(',');
                         columnBuilder.append(temp);
                     }
                 }

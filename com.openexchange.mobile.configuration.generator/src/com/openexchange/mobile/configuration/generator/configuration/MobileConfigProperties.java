@@ -107,11 +107,11 @@ public class MobileConfigProperties {
         sb.append("\nLoading global " + bundlename + " properties...\n");
         for (final PropertyInterface prop : props) {
             final Object property = getProperty(configuration, prop);
-            sb.append("\t");
+            sb.append('\t');
             sb.append(prop.getName());
             sb.append(": ");
             sb.append(property);
-            sb.append("\n");
+            sb.append('\n');
             if (Required.Value.TRUE.equals(prop.getRequired().getValue()) && null == property) {
                 throw new ConfigurationException("Property " + prop.getName() + " not set but required.");
             }

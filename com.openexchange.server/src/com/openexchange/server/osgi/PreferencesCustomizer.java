@@ -84,7 +84,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
             final String[] path = item.getPath();
             for (int i = 0; i < path.length; i++) {
                 sb.append(path[i]);
-                sb.append("/");
+                sb.append('/');
             }
             sb.setLength(sb.length() - 1);
             LOG.error(sb.toString(), e);

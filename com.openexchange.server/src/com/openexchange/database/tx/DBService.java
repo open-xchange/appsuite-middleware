@@ -192,7 +192,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
                 final StringBuilder explanations = new StringBuilder();
                 for(final Undoable undo : failed) {
                     explanations.append(undo.error());
-                    explanations.append("\n");
+                    explanations.append('\n');
                 }
                 LOG.fatal(explanations.toString(),exception);
             }

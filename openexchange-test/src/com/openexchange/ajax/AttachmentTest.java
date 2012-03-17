@@ -190,10 +190,10 @@ public class AttachmentTest extends AbstractAJAXTest {
 		final StringBuffer data = new StringBuffer("[");
 		for(final int id : ids){
 			data.append(id);
-			data.append(",");
+			data.append(',');
 		}
 		data.setLength(data.length()-1);
-		data.append("]");
+		data.append(']');
 
 		return putT(webConv,url.toString(), data.toString());
 	}
@@ -219,7 +219,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 		final StringBuffer cols = new StringBuffer();
 		for(final int id : columns) {
 			cols.append(id);
-			cols.append(",");
+			cols.append(',');
 		}
 		cols.setLength(cols.length()-1);
 
@@ -239,15 +239,15 @@ public class AttachmentTest extends AbstractAJAXTest {
 		final StringBuffer data = new StringBuffer("[");
 		for(final int id : ids) {
 			data.append(id);
-			data.append(",");
+			data.append(',');
 		}
 		data.setLength(data.length()-1);
-		data.append("]");
+		data.append(']');
 
 		final StringBuffer cols = new StringBuffer();
 		for(final int col : columns) {
 			cols.append(col);
-			cols.append(",");
+			cols.append(',');
 		}
 		cols.setLength(cols.length()-1);
 

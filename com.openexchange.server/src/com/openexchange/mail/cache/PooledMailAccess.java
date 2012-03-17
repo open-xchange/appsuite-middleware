@@ -120,7 +120,7 @@ public final class PooledMailAccess implements Delayed {
         if (mailAccess != null) {
             builder.append("mailAccess=").append(mailAccess);
         }
-        builder.append("]");
+        builder.append(']');
         return builder.toString();
     }
 

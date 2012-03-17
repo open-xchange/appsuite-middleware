@@ -136,7 +136,7 @@ public final class ThreadPools {
                         sb.append(')');
                     }
                 }
-                sb.append("\n");
+                sb.append('\n');
             }
         }
     }

@@ -304,7 +304,7 @@ public final class DownloadUtility {
         if (-1 == pos) {
             return new StringBuilder(fileName).append('.').append(ext).toString();
         }
-        return new StringBuilder(fileName.substring(0, pos)).append(".").append(ext).toString();
+        return new StringBuilder(fileName.substring(0, pos)).append('.').append(ext).toString();
     }
 
     private static final String DEFAULT_FILENAME = "file.dat";

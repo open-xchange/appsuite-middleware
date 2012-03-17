@@ -128,7 +128,7 @@ public class Params {
     public String toString(){
     	StringBuffer buffy = new StringBuffer();
     	for(Parameter p: parameters)
-    		buffy.append("&").append(p.toString());
+    		buffy.append('&').append(p.toString());
 
     	buffy.replace(0, 1, "?");
     	return buffy.toString();

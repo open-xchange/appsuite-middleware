@@ -109,7 +109,7 @@ final class AJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler {
                         sb.append(')');
                     }
                 }
-                sb.append("\n");
+                sb.append('\n');
             }
         }
     }

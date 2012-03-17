@@ -301,7 +301,7 @@ public class LocalFileStorage implements FileStorage {
         // Forms the Output String
         final StringBuilder retval = new StringBuilder();
         for (int j = 0; j < vals.length; j++) {
-            retval.append("/");
+            retval.append('/');
             retval.append(vals[j]);
         }
         return retval.substring(1);

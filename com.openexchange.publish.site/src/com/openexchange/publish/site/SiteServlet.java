@@ -211,7 +211,7 @@ public class SiteServlet extends HttpServlet {
             final StringBuilder b = new StringBuilder();
             String l = null;
             while((l = r.readLine()) != null) {
-                b.append(l).append("\n");
+                b.append(l).append('\n');
             }
             f.setDescription(b.toString());
 

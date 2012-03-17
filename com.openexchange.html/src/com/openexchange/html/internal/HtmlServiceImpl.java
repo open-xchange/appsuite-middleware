@@ -304,7 +304,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                 sb.setLength(0);
                 appendLink(m.group(), sb);
-                targetBuilder.append("<!--").append(comment).append(" ").append(sb.toString()).append("-->");
+                targetBuilder.append("<!--").append(comment).append(' ').append(sb.toString()).append("-->");
                 lastMatch = m.end();
             }
             targetBuilder.append(content.substring(lastMatch));

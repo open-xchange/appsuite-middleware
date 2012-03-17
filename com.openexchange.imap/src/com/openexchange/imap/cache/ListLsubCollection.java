@@ -1937,7 +1937,7 @@ final class ListLsubCollection {
                         sb.append(')');
                     }
                 }
-                sb.append("\n");
+                sb.append('\n');
             }
         }
     }

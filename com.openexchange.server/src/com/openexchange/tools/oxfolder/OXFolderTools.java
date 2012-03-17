@@ -1208,7 +1208,7 @@ public class OXFolderTools {
             FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append(
             "((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(
             StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date > ?)").append(" AND (ot.module IN ").append(
-            StringCollection.getSqlInString(accessibleModules)).append(")").append(
+            StringCollection.getSqlInString(accessibleModules)).append(')').append(
             OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(" ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;

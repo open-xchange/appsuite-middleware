@@ -476,7 +476,7 @@ public class CalendarDataObject extends Appointment {
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName());
         sb.append('@');
-        sb.append("\n");
+        sb.append('\n');
         sb.append("object_id - title - start - end : ");
         sb.append(getObjectID());
         sb.append(STR_DELIM);
@@ -485,10 +485,10 @@ public class CalendarDataObject extends Appointment {
         sb.append(getStartDate());
         sb.append(STR_DELIM);
         sb.append(getEndDate());
-        sb.append("\n");
+        sb.append('\n');
         sb.append("context_id: ");
         sb.append(getContextID());
-        sb.append("\n");
+        sb.append('\n');
         sb.append("folder_information (parent:effective:action:type:move:move_action): ");
         sb.append(getParentFolderID());
         sb.append(':');
@@ -502,7 +502,7 @@ public class CalendarDataObject extends Appointment {
         sb.append(':');
         sb.append(getFolderMoveAction());
         sb.append(')');
-        sb.append("\n");
+        sb.append('\n');
         sb.append("recurrence: ");
         sb.append(getRecurrence());
         sb.append(" -- ");

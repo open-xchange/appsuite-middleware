@@ -131,9 +131,9 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	}
 
 	protected void addParam(final StringBuilder bob, final String param, final String value){
-		bob.append("&");
+		bob.append('&');
 		bob.append(param);
-		bob.append("=");
+		bob.append('=');
 		bob.append(value);
 	}
 

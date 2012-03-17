@@ -354,7 +354,7 @@ public class Group implements Cloneable {
         sb.append(" member:");
         for (final int member : getMember()) {
             sb.append(member);
-            sb.append(",");
+            sb.append(',');
         }
         sb.setCharAt(sb.length() - 1, ')');
         return sb.toString();

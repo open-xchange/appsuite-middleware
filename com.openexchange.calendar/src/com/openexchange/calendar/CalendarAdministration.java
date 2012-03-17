@@ -229,7 +229,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             StringBuilder builder = new StringBuilder("SELECT object_id, pfid FROM ").append(CalendarSql.PARTICIPANT_TABLE_NAME).append(" WHERE pfid IN (");
 
             while(iter.hasNext()) {
-                builder.append(iter.next().getObjectID()).append(",");
+                builder.append(iter.next().getObjectID()).append(',');
             }
             iter.close();
             builder.setCharAt(builder.length()-1,')');
@@ -245,7 +245,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 found = true;
                 final int id = rs.getInt(1);
                 final int folder = rs.getInt(2);
-                builder.append(id).append(",");
+                builder.append(id).append(',');
                 eventHandling(id, folder, ctx, session, CalendarOperation.DELETE, con);
             }
 
