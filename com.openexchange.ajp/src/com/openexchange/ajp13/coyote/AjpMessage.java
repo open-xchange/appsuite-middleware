@@ -461,11 +461,11 @@ public final class AjpMessage {
     }
 
     protected static String hex(final int x) {
-        String h = Integer.toHexString(x);
-        if (h.length() == 1) {
-            h = "0" + h;
+        String hex = Integer.toHexString(x);
+        if (hex.length() == 1) {
+            hex = "0" + hex;
         }
-        return h.substring(h.length() - 2);
+        return hex.substring(hex.length() - 2);
     }
 
 }

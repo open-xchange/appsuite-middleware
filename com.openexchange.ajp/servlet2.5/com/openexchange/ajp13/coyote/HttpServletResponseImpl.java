@@ -281,17 +281,17 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         if (contentType == null) {
             return;
         }
-        final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
-        if (m.find()) {
+        final Matcher matcher = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
+        if (matcher.find()) {
             /*
              * Check if getWriter() was already called
              */
-            if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(m.group(2))) {
+            if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(matcher.group(2))) {
                 throw new IllegalStateException("\"getWriter()\" has already been called. Not allowed to change its encoding afterwards");
             }
             do {
-                setCharacterEncoding(m.group(2));
-            } while (m.find());
+                setCharacterEncoding(matcher.group(2));
+            } while (matcher.find());
         } else if (characterEncoding == null) {
             /*
              * Corresponding to rfc

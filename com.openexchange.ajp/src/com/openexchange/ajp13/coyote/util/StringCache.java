@@ -52,6 +52,8 @@ package com.openexchange.ajp13.coyote.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import com.openexchange.log.Log;
 
@@ -80,7 +82,7 @@ public final class StringCache {
     /**
      * Statistics hash map for byte chunk.
      */
-    protected static HashMap bcStats = new HashMap(cacheSize);
+    protected static Map bcStats = new HashMap(cacheSize);
 
     /**
      * toString count for byte chunk.
@@ -95,7 +97,7 @@ public final class StringCache {
     /**
      * Statistics hash map for char chunk.
      */
-    protected static HashMap ccStats = new HashMap(cacheSize);
+    protected static Map ccStats = new HashMap(cacheSize);
 
     /**
      * toString count for char chunk.
@@ -232,7 +234,7 @@ public final class StringCache {
                             final int[] countA = (int[]) bcStats.get(entry);
                             final Integer count = new Integer(countA[0]);
                             // Add to the list for that count
-                            ArrayList list = (ArrayList) tempMap.get(count);
+                            List list = (ArrayList) tempMap.get(count);
                             if (list == null) {
                                 // Create list
                                 list = new ArrayList();
@@ -252,7 +254,7 @@ public final class StringCache {
                         int n = 0;
                         while (n < size) {
                             final Object key = tempMap.lastKey();
-                            final ArrayList list = (ArrayList) tempMap.get(key);
+                            final List list = (ArrayList) tempMap.get(key);
                             final ByteEntry[] list2 = (ByteEntry[]) list.toArray(new ByteEntry[list.size()]);
                             for (int i = 0; i < list.size() && n < size; i++) {
                                 final ByteEntry entry = (ByteEntry) list.get(i);
@@ -343,7 +345,7 @@ public final class StringCache {
                             final int[] countA = (int[]) ccStats.get(entry);
                             final Integer count = new Integer(countA[0]);
                             // Add to the list for that count
-                            ArrayList list = (ArrayList) tempMap.get(count);
+                            List list = (ArrayList) tempMap.get(count);
                             if (list == null) {
                                 // Create list
                                 list = new ArrayList();
@@ -363,7 +365,7 @@ public final class StringCache {
                         int n = 0;
                         while (n < size) {
                             final Object key = tempMap.lastKey();
-                            final ArrayList list = (ArrayList) tempMap.get(key);
+                            final List list = (ArrayList) tempMap.get(key);
                             final CharEntry[] list2 = (CharEntry[]) list.toArray(new CharEntry[list.size()]);
                             for (int i = 0; i < list.size() && n < size; i++) {
                                 final CharEntry entry = (CharEntry) list.get(i);

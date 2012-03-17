@@ -414,7 +414,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private void parseRequestHeaders(final HttpServletRequestWrapper servletRequest, final int numHeaders) throws AJPv13Exception {
         boolean contentTypeSet = false;
-        NextHeader: for (int i = numHeaders; i > 0; i--) {
+        nextHeader: for (int i = numHeaders; i > 0; i--) {
             final String headerName;
             final boolean isCookie;
             {
@@ -428,7 +428,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                     if (!contentTypeSet && (BYTE_CONTENT_TYPE == secondByte)) {
                         servletRequest.setContentType(parseString());
                         contentTypeSet = true;
-                        continue NextHeader;
+                        continue nextHeader;
                     }
                     isCookie = (BYTE_COOKIE == secondByte);
                 } else {
@@ -436,7 +436,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                     if (!contentTypeSet && HDR_CONTENT_TYPE.equalsIgnoreCase(headerName)) {
                         servletRequest.setContentType(parseString());
                         contentTypeSet = true;
-                        continue NextHeader;
+                        continue nextHeader;
                     }
                     isCookie = ("cookie".equalsIgnoreCase(headerName));
                 }
@@ -659,7 +659,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         final Cookie[] cookies = servletRequest.getCookies();
         Cookie jsessionIDCookie = null;
         if (cookies != null) {
-            NextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
+            nextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
                 final Cookie current = cookies[i];
                 if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(current.getName())) {
                     /*
@@ -679,7 +679,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
-                            continue NextCookie;
+                            continue nextCookie;
                         }
                         /*
                          * Check known JSESSIONIDs and corresponding HTTP session
@@ -694,7 +694,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
-                            continue NextCookie;
+                            continue nextCookie;
                         }
                         jsessionIDCookie = current;
                         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
@@ -714,7 +714,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
-                            continue NextCookie;
+                            continue nextCookie;
                         }
                         /*
                          * Check known JSESSIONIDs and corresponding HTTP session
@@ -729,7 +729,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
-                            continue NextCookie;
+                            continue nextCookie;
                         }
                         jsessionIDCookie = current;
                         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);

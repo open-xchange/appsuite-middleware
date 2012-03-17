@@ -438,8 +438,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     @Override
     public String getHeader(final String name) {
-        final String n = name.toLowerCase(Locale.ENGLISH);
-        return makeString(headers.get(n));
+        return makeString(headers.get(name.toLowerCase(Locale.ENGLISH)));
     }
 
     /**

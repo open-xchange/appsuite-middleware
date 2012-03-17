@@ -174,7 +174,9 @@ public final class DateTool {
                 date = format[i].parse(dateString);
                 return date.getTime();
             } catch (final ParseException e) {
+                // Ignore
             } catch (final StringIndexOutOfBoundsException e) {
+                // Ignore
             }
         }
         final String msg = "httpDate.pe: " + dateString;
