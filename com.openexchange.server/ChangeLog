@@ -1,3 +1,7 @@
+* 2012-03-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21754: Dealing with a mail containing a <blockquote> mess
+
 * 2012-03-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21732: Added automatic handling for data truncation errors

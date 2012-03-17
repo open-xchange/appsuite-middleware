@@ -487,6 +487,8 @@ public final class HtmlServiceImpl implements HtmlService {
         return retval;
     }
 
+    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n) +");
+
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
 //        final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
@@ -498,7 +500,7 @@ public final class HtmlServiceImpl implements HtmlService {
         String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
         text = whitespaceText(text);
         // Drop heading whitespaces
-        text = text.replaceFirst("^ *", "");
+        text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
         return text;
     }
 
@@ -525,6 +527,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final String BLOCKQUOTE_MARKER = SPECIAL+UUID.randomUUID().toString();
 
     private static final String BLOCKQUOTE_MARKER_END = BLOCKQUOTE_MARKER + END;
+
+    private static final Pattern PATTERN_MARKER = Pattern.compile(Pattern.quote(BLOCKQUOTE_MARKER) + "(?:" + Pattern.quote(END) + ")?");
 
     private static String quoteText(final String text) {
         if (text.indexOf(SPECIAL) < 0) {
@@ -557,7 +561,11 @@ public final class HtmlServiceImpl implements HtmlService {
             }
             sb.append(prefix).append(line).append(CRLF);
         }
-        return sb.toString();
+        final String retval = sb.toString();
+        if (retval.indexOf(SPECIAL) < 0) {
+            return retval;
+        }
+        return PATTERN_MARKER.matcher(retval).replaceAll("");
     }
 
     private static String getPrefixFor(final int quote) {
@@ -583,12 +591,12 @@ public final class HtmlServiceImpl implements HtmlService {
         return isWhitespace;
     }
 
-    private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("<blockquote.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("(<blockquote.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private static final Pattern PATTERN_BLOCKQUOTE_END = Pattern.compile("</blockquote>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BLOCKQUOTE_END = Pattern.compile("(</blockquote>)", Pattern.CASE_INSENSITIVE);
 
     private static String insertBlockquoteMarker(final String html) {
-        return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll(BLOCKQUOTE_MARKER)).replaceAll(BLOCKQUOTE_MARKER_END);
+        return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll("$1"+BLOCKQUOTE_MARKER)).replaceAll("$1"+BLOCKQUOTE_MARKER_END);
     }
 
     private static final String HTML_BR = "<br />";
