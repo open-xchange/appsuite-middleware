@@ -57,7 +57,7 @@ import java.io.IOException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CharChunk implements CharSequence {
+public final class CharChunk implements CharSequence {
 
  // Input interface, used when the buffer is emptied.
     public static interface CharInputChannel {

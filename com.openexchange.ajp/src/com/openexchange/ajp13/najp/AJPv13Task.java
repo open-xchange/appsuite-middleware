@@ -60,7 +60,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
-import com.openexchange.ajp13.AJPv13Request;
+import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -811,7 +811,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
         } // End of keepAlive()
 
         private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
-            AJPv13Request.writeChunked(remainingData, out);
+            AbstractAJPv13Request.writeChunked(remainingData, out);
             if (DEBUG_ENABLED) {
                 LOG.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
                     "\" to initiate a KEEP-ALIVE poll."));
@@ -819,7 +819,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
         }
 
         private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
-            AJPv13Request.writeEmpty(out);
+            AbstractAJPv13Request.writeEmpty(out);
             if (DEBUG_ENABLED) {
                 LOG.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
                     remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));

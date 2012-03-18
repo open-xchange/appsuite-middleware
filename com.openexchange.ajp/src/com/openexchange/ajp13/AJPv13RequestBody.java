@@ -59,7 +59,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13RequestBody extends AJPv13Request {
+public final class AJPv13RequestBody extends AbstractAJPv13Request {
 
     @Override
     public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {

@@ -82,7 +82,7 @@ import com.openexchange.tools.regex.RFC2616Regex;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13ForwardRequest extends AJPv13Request {
+public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ForwardRequest.class));
 

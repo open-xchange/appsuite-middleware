@@ -101,6 +101,7 @@ public class ServletContextWrapper implements ServletContext {
         /*
          * Resolve occurrences of "/../" in the normalized path
          */
+        final StringBuilder tmp = new StringBuilder(normalized.length());
         while (true) {
             final int index = normalized.indexOf("/../");
             if (index < 0) {
@@ -113,7 +114,8 @@ public class ServletContextWrapper implements ServletContext {
                 return (null);
             }
             final int index2 = normalized.lastIndexOf('/', index - 1);
-            normalized = normalized.substring(0, index2) + normalized.substring(index + 3);
+            tmp.setLength(0);
+            normalized = tmp.append(normalized.substring(0, index2)).append(normalized.substring(index + 3)).toString();
         }
         /*
          * Return the normalized path

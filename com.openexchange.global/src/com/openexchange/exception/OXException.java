@@ -719,7 +719,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param category The category to add
      * @return This exception with category added (for chained invocations)
      */
-    public OXException addCategory(final Category category) {
+    public final OXException addCategory(final Category category) {
         if (null != category) {
             if (categories.isEmpty() && EnumType.TRY_AGAIN.equals(category.getType()) && OXExceptionStrings.MESSAGE.equals(displayMessage)) {
                 displayMessage = OXExceptionStrings.MESSAGE_RETRY;

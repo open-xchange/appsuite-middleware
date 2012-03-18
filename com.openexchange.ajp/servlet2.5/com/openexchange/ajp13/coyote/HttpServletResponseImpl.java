@@ -832,9 +832,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * @param status The status to set
      * @param statusMsg The (optional) status message or <code>null</code>
      * @return The error message in bytes
-     * @throws IOException If an I/O error occurs
      */
-    public final byte[] composeAndSetError(final int status, final String statusMsg) throws IOException {
+    public final byte[] composeAndSetError(final int status, final String statusMsg) {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(status) : statusMsg;
         String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
@@ -868,9 +867,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * Gets the default error page.
      *
      * @return The default error page
-     * @throws IOException If an I/O error occurs
      */
-    public byte[] getErrorMessage() throws IOException {
+    public byte[] getErrorMessage() {
         String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
         if (HttpServletResponse.SC_NOT_FOUND == status) {
             final HttpServletRequestImpl request = ajpProcessor.getRequest();
