@@ -18,28 +18,28 @@ public class FacebookArchiveImporter extends AbstractImporter {
 	protected FacebookFriendsImporter delegate = new FacebookFriendsImporter();
 
 	@Override
-	protected String getNameForFieldInTruncationError(int id,
-			OXException dataTruncation) {
+	protected String getNameForFieldInTruncationError(final int id,
+			final OXException dataTruncation) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-    public boolean canImport(ServerSession sessObj, Format format,
-			List<String> folders, Map<String, String[]> optionalParams)
+    public boolean canImport(final ServerSession sessObj, final Format format,
+			final List<String> folders, final Map<String, String[]> optionalParams)
 			throws OXException {
 		return format == Format.FacebookArchive;
 	}
 
 	@Override
-    public List<ImportResult> importData(ServerSession sessObj, Format format,
-			InputStream is, List<String> folders,
-			Map<String, String[]> optionalParams) throws OXException {
+    public List<ImportResult> importData(final ServerSession sessObj, final Format format,
+			final InputStream is, final List<String> folders,
+			final Map<String, String[]> optionalParams) throws OXException {
 
 
 		List<ImportResult> results = new LinkedList<ImportResult>();
         try {
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
+            final ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
             ZipEntry entry;
 
 
@@ -53,8 +53,9 @@ public class FacebookArchiveImporter extends AbstractImporter {
 
             zis.close();
             is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (final IOException e) {
+            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FacebookArchiveImporter.class);
+            log.error("Unexpected exception.", e);
         }
 
 		return results;

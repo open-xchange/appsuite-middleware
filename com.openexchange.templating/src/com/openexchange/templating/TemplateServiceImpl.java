@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import static com.openexchange.templating.TemplateErrorMessage.IOException;
 import static com.openexchange.templating.TemplateErrorMessage.TemplateNotFound;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -83,7 +84,6 @@ import com.openexchange.templating.impl.OXInfostoreHelper;
 import com.openexchange.templating.impl.TemplatingHelperImpl;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
@@ -139,9 +139,9 @@ public class TemplateServiceImpl implements TemplateService {
         Template retval = null;
         try {
             final TemplateLoader templateLoader = new FileTemplateLoader(path);
-            String userDir = System.getProperty("user.dir");
+            final String userDir = System.getProperty("user.dir");
             System.setProperty("user.dir", templatePath);
-            Configuration config = new Configuration();
+            final Configuration config = new Configuration();
             System.setProperty("user.dir", userDir);
             config.setTemplateLoader(templateLoader);
             if (exceptionHandler != null) {
@@ -158,14 +158,14 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public OXTemplate loadTemplate(String templateName,
-    		String defaultTemplateName, Session session) throws OXException {
+    public OXTemplate loadTemplate(final String templateName,
+    		final String defaultTemplateName, final Session session) throws OXException {
     	return loadTemplate(templateName, defaultTemplateName, session, true);
     }
     
     @Override
-    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session sess, boolean createCopy) throws OXException {
-    	ServerSession session = ServerSessionAdapter.valueOf(sess);
+    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session sess, final boolean createCopy) throws OXException {
+    	final ServerSession session = ServerSessionAdapter.valueOf(sess);
         if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
         }
@@ -180,10 +180,10 @@ public class TemplateServiceImpl implements TemplateService {
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
-            String userDir = System.getProperty("user.dir");
-            String templatePath = config.getProperty(PATH_PROPERTY);
+            final String userDir = System.getProperty("user.dir");
+            final String templatePath = config.getProperty(PATH_PROPERTY);
             System.setProperty("user.dir", templatePath);
-            Configuration config = new Configuration();
+            final Configuration config = new Configuration();
             System.setProperty("user.dir", userDir);
             if (exceptionHandler != null) {
                 config.setTemplateExceptionHandler(exceptionHandler);
@@ -349,7 +349,7 @@ public class TemplateServiceImpl implements TemplateService {
     		final Properties index = new Properties();
     		InputStream inStream = null;
     		try {
-				inStream = new FileInputStream(file);
+				inStream = new BufferedInputStream(new FileInputStream(file));
 				index.load(inStream);
 				final Set<Entry<Object, Object>> entrySet = index.entrySet();
 
@@ -368,6 +368,7 @@ public class TemplateServiceImpl implements TemplateService {
 					try {
 						inStream.close();
 					} catch (final IOException e) {
+					    // Ignore
 					}
 				}
 			}
@@ -380,7 +381,7 @@ public class TemplateServiceImpl implements TemplateService {
 	@Override
     public List<String> getTemplateNames(final Session sess,
 			String... filter) throws OXException {
-    	ServerSession session = ServerSessionAdapter.valueOf(sess);
+    	final ServerSession session = ServerSessionAdapter.valueOf(sess);
 		if(filter == null) {
 			filter = new String[0];
 		}
@@ -421,7 +422,8 @@ public class TemplateServiceImpl implements TemplateService {
         return loadTemplate(templateName, defaultTemplateName, session);
     }
     
-    public TemplatingHelper createHelper(Object rootObject, Session session) {
+    @Override
+    public TemplatingHelper createHelper(final Object rootObject, final Session session) {
         return new TemplatingHelperImpl(rootObject, session, this);
     }
 

@@ -83,58 +83,59 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ShowMailAction implements AJAXActionService{
     
-    private ServiceLookup services;
+    private final ServiceLookup services;
     
-    public ShowMailAction(ServiceLookup services) {
+    public ShowMailAction(final ServiceLookup services) {
         this.services = services;
     }
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             // Parse Appointments
-            Appointment[] appointments = parse(request, session);
+            final Appointment[] appointments = parse(request, session);
             if (appointments.length == 0) {
-                JSONObject object = new JSONObject();
+                final JSONObject object = new JSONObject();
                 object.put("text", "Please send some appointments in the body");
                 object.put("html", "Please send some appointments in the body");
                 return new AJAXRequestResult(object);
             }
             // Generate Mail
-            NotificationMail mail = generateMail(appointments, request, session);
+            final NotificationMail mail = generateMail(appointments, request, session);
             
             // Put text and html into the response
-            JSONObject object = new JSONObject();
+            final JSONObject object = new JSONObject();
             object.put("text", mail.getText());
             object.put("html", mail.getHtml());
      
             return new AJAXRequestResult(object);
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
         	throw AjaxExceptionCodes.JSON_ERROR.create(x);
         }
     }
 
-    private Appointment[] parse(AJAXRequestData request, ServerSession session) throws OXException, JSONException {
-        AppointmentParser parser = new AppointmentParser(true, TimeZone.getTimeZone(session.getUser().getTimeZone()));
+    private Appointment[] parse(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+        final AppointmentParser parser = new AppointmentParser(true, TimeZone.getTimeZone(session.getUser().getTimeZone()));
         
-        Object data = request.getData();
+        final Object data = request.getData();
         if (data == null) {
             return new Appointment[0];
         }
         
         if (data instanceof JSONObject) {
-            JSONObject appointment = (JSONObject) data;
-            Appointment parsed = new Appointment();
+            final JSONObject appointment = (JSONObject) data;
+            final Appointment parsed = new Appointment();
             parser.parse(parsed, appointment);
             correctConfirm(parsed, appointment);
             return new Appointment[]{parsed};
         }
         
         if (data instanceof JSONArray) {
-            JSONArray appointments = (JSONArray) data;
-            List<Appointment> list = new ArrayList<Appointment>();
+            final JSONArray appointments = (JSONArray) data;
+            final List<Appointment> list = new ArrayList<Appointment>();
             for(int i = 0, size = appointments.length(); i < size; i++) {
-                JSONObject object = appointments.getJSONObject(i);
-                Appointment parsed = new Appointment();
+                final JSONObject object = appointments.getJSONObject(i);
+                final Appointment parsed = new Appointment();
                 parser.parse(parsed, object);
                 correctConfirm(parsed, object);
                 list.add(parsed);
@@ -145,62 +146,62 @@ public class ShowMailAction implements AJAXActionService{
         return new Appointment[0];
     }
 
-    private void correctConfirm(Appointment parsed, JSONObject object) throws JSONException {
-        Map<String, Integer> confirmMap = new HashMap<String, Integer>();
+    private void correctConfirm(final Appointment parsed, final JSONObject object) throws JSONException {
+        final Map<String, Integer> confirmMap = new HashMap<String, Integer>();
         if (object.has("participants")) {
-            JSONArray array = object.getJSONArray("participants");
+            final JSONArray array = object.getJSONArray("participants");
             for(int i = 0, size = array.length(); i < size; i++) {
-                JSONObject participantSpec = array.getJSONObject(i);
+                final JSONObject participantSpec = array.getJSONObject(i);
                 if (participantSpec.has("confirm")) {
-                    int confirm = participantSpec.getInt("confirm");
+                    final int confirm = participantSpec.getInt("confirm");
                     if (participantSpec.has("id")) {
                         confirmMap.put(participantSpec.get("id").toString(), confirm);
                     }
                     if (participantSpec.has("mail")) {
-                        confirmMap.put(participantSpec.getString("mail").toString().toLowerCase(), confirm);
+                        confirmMap.put(participantSpec.getString("mail").toLowerCase(), confirm);
                     }
                 }
             }
         }
         
         if (object.has("users")) {
-            JSONArray array = object.getJSONArray("users");
+            final JSONArray array = object.getJSONArray("users");
             for(int i = 0, size = array.length(); i < size; i++) {
-                JSONObject participantSpec = array.getJSONObject(i);
+                final JSONObject participantSpec = array.getJSONObject(i);
                 if (participantSpec.has("confirm")) {
-                    int confirm = participantSpec.getInt("confirm");
+                    final int confirm = participantSpec.getInt("confirm");
                     if (participantSpec.has("id")) {
                         confirmMap.put(participantSpec.get("id").toString(), confirm);
                     }
                     if (participantSpec.has("mail")) {
-                        confirmMap.put(participantSpec.getString("mail").toString().toLowerCase(), confirm);
+                        confirmMap.put(participantSpec.getString("mail").toLowerCase(), confirm);
                     }
                 }
             }
         }
 
         if (object.has("confirmations")) {
-            JSONArray array = object.getJSONArray("confirmations");
+            final JSONArray array = object.getJSONArray("confirmations");
             for(int i = 0, size = array.length(); i < size; i++) {
-                JSONObject participantSpec = array.getJSONObject(i);
+                final JSONObject participantSpec = array.getJSONObject(i);
                 if (participantSpec.has("status")) {
-                    int confirm = participantSpec.getInt("status");
+                    final int confirm = participantSpec.getInt("status");
                     if (participantSpec.has("id")) {
                         confirmMap.put(participantSpec.get("id").toString(), confirm);
                     }
                     if (participantSpec.has("mail")) {
-                        confirmMap.put(participantSpec.getString("mail").toString().toLowerCase(), confirm);
+                        confirmMap.put(participantSpec.getString("mail").toLowerCase(), confirm);
                     }
                 }
             }
         }
 
         
-        Participant[] participants = parsed.getParticipants();
+        final Participant[] participants = parsed.getParticipants();
         if (participants != null) {
-            for (Participant participant : participants) {
+            for (final Participant participant : participants) {
                 if (participant instanceof UserParticipant) {
-                    UserParticipant up = (UserParticipant) participant;
+                    final UserParticipant up = (UserParticipant) participant;
                     Integer confirmStatus = confirmMap.get(up.getIdentifier()+"");
                     if (confirmStatus == null) {
                         confirmStatus = confirmMap.get(up.getEmailAddress().toLowerCase());
@@ -213,7 +214,7 @@ public class ShowMailAction implements AJAXActionService{
                 } 
                 
                 if (participant instanceof ExternalUserParticipant) {
-                    ExternalUserParticipant ep = (ExternalUserParticipant) participant;
+                    final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
                     Integer confirmStatus = confirmMap.get(ep.getIdentifier());
                     if (confirmStatus == null) {
                         confirmStatus = confirmMap.get(ep.getEmailAddress().toLowerCase());
@@ -226,9 +227,9 @@ public class ShowMailAction implements AJAXActionService{
             }
         }
         
-        UserParticipant[] users = parsed.getUsers();
+        final UserParticipant[] users = parsed.getUsers();
         if (users != null) {
-            for (UserParticipant up : users) {
+            for (final UserParticipant up : users) {
                 Integer confirmStatus = confirmMap.get(up.getIdentifier()+"");
                 if (confirmStatus == null && up.getEmailAddress() != null) {
                     confirmStatus = confirmMap.get(up.getEmailAddress().toLowerCase());
@@ -240,9 +241,9 @@ public class ShowMailAction implements AJAXActionService{
             }
         }
         
-        ConfirmableParticipant[] confirmations = parsed.getConfirmations();
+        final ConfirmableParticipant[] confirmations = parsed.getConfirmations();
         if (confirmations != null) {
-            for (ConfirmableParticipant ep : confirmations) {
+            for (final ConfirmableParticipant ep : confirmations) {
                 Integer confirmStatus = confirmMap.get(ep.getIdentifier());
                 if (confirmStatus == null) {
                     confirmStatus = confirmMap.get(ep.getEmailAddress().toLowerCase());
@@ -256,15 +257,15 @@ public class ShowMailAction implements AJAXActionService{
         
     }
 
-    private NotificationMail generateMail(Appointment[] appointments, AJAXRequestData request, ServerSession session) throws OXException {
-        ITipMailGeneratorFactory service = services.getService(ITipMailGeneratorFactory.class);
+    private NotificationMail generateMail(final Appointment[] appointments, final AJAXRequestData request, final ServerSession session) throws OXException {
+        final ITipMailGeneratorFactory service = services.getService(ITipMailGeneratorFactory.class);
 
-        Appointment original = (appointments.length > 1) ? appointments[0] : null;
-        Appointment appointment = (appointments.length > 1) ? appointments[1] : appointments[0];
+        final Appointment original = (appointments.length > 1) ? appointments[0] : null;
+        final Appointment appointment = (appointments.length > 1) ? appointments[1] : appointments[0];
 
-        ITipMailGenerator generator = service.create(original, appointment, session, session.getUserId());
+        final ITipMailGenerator generator = service.create(original, appointment, session, session.getUserId());
         
-        String type = request.getParameter("type");
+        final String type = request.getParameter("type");
         if (type.equalsIgnoreCase("create")) {
             return generator.generateCreateMailFor(request.getParameter("mail"));
         } else if (type.equalsIgnoreCase("update")) {

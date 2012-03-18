@@ -333,8 +333,7 @@ public class ICalExporter implements Exporter {
                     exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
                     versitDefinition.writeEnd(versitWriter, versitObjectContainer);
                 } catch (final Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("Unexpected exception.", e);
                 } finally {
                     closeVersitResources(oxContainerConverter, versitWriter);
                 }

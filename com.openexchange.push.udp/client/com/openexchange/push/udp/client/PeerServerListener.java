@@ -65,6 +65,8 @@ import com.openexchange.push.udp.PushRequest;
  */
 public class PeerServerListener {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PeerServerListener.class);
+
     private final InetAddress remoteAddress;
     private final int remotePort;
 
@@ -74,7 +76,7 @@ public class PeerServerListener {
 
     private final DatagramSocket mySocket;
 
-    public PeerServerListener(String remoteHost, String remotePort, String myHost, String myPort) throws SocketException, UnknownHostException {
+    public PeerServerListener(final String remoteHost, final String remotePort, final String myHost, final String myPort) throws SocketException, UnknownHostException {
 
         this.remoteAddress = InetAddress.getByName(remoteHost);
         this.remotePort = Integer.parseInt(remotePort);
@@ -100,51 +102,51 @@ public class PeerServerListener {
 
     private void receiveAndPrint() {
         final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
-        System.out.println("I'm listenin'");
+        LOG.info("I'm listenin'");
         try {
             mySocket.receive(datagramPacket);
-            String[] event = new String(datagramPacket.getData(), com.openexchange.java.Charsets.UTF_8).split("\1");
+            final String[] event = new String(datagramPacket.getData(), com.openexchange.java.Charsets.UTF_8).split("\1");
 
-            StringBuilder b = new StringBuilder();
-            for (String string : event) {
+            final StringBuilder b = new StringBuilder();
+            for (final String string : event) {
                 b.append(string).append('\t');
             }
 
-            System.out.println(b);
+            LOG.info(b.toString());
 
-        } catch (Exception x) {
-            x.printStackTrace();
+        } catch (final Exception x) {
+            LOG.error("Unexpected exception.", x);
         }
     }
 
-    private void send(Object... args) throws IOException {
-        StringBuilder b = new StringBuilder();
+    private void send(final Object... args) throws IOException {
+        final StringBuilder b = new StringBuilder();
         byte[] data;
         try {
-            for(Object o : args) {
+            for(final Object o : args) {
                 b.append(o.toString()).append('\1');
             }
             b.setLength(b.length()-1);
-            StringBuilder b2 = new StringBuilder().append(PushRequest.MAGIC).append('\1').append(b.length()).append('\1').append(b);
+            final StringBuilder b2 = new StringBuilder().append(PushRequest.MAGIC).append('\1').append(b.length()).append('\1').append(b);
             data = b2.toString().getBytes(com.openexchange.java.Charsets.US_ASCII);
-            DatagramPacket datagramPackage = new DatagramPacket(data, data.length, remoteAddress, remotePort);
+            final DatagramPacket datagramPackage = new DatagramPacket(data, data.length, remoteAddress, remotePort);
             mySocket.send(datagramPackage);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public static void main(String[] args) {
-        String remoteHost = "192.168.33.24"; //args[0];
-        String remotePort = "44335"; //args[1];
+    public static void main(final String[] args) {
+        final String remoteHost = "192.168.33.24"; //args[0];
+        final String remotePort = "44335"; //args[1];
 
-        String myHost = "192.168.33.24"; //args[3];
-        String myPort = "44331"; //args[4];
+        final String myHost = "192.168.33.24"; //args[3];
+        final String myPort = "44331"; //args[4];
 
         try {
             new PeerServerListener(remoteHost, remotePort, myHost, myPort).send(PushRequest.REMOTE_HOST_REGISTER,"fe80::223:32ff:fec8:2bc8", myPort);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (final Exception e) {
+            LOG.error("Unexpected exception.", e);
         }
     }
 }

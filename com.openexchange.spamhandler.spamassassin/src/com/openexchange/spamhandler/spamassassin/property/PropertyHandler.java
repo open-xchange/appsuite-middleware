@@ -224,7 +224,7 @@ public class PropertyHandler {
         final String modestring = checkStringProperty(configuration, Parameters.spamd);
         try {
             this.setSpamd(Boolean.valueOf(modestring));
-            logBuilder.append("\t" + Parameters.spamd.getName() + ": ").append(this.isSpamd()).append('\n');
+            logBuilder.append('\t').append(Parameters.spamd.getName()).append(": ").append(this.isSpamd()).append('\n');
         } catch (final IllegalArgumentException e) {
             throw SpamhandlerSpamassassinConfigurationExceptionCode.MODE_TYPE_WRONG.create(modestring);
         }
@@ -236,7 +236,7 @@ public class PropertyHandler {
             }
         } else {
             this.setHostname(hostname);
-            logBuilder.append("\t" + Parameters.hostname.getName() + ": ").append(this.getHostname()).append('\n');
+            logBuilder.append('\t').append(Parameters.hostname.getName()).append(": ").append(this.getHostname()).append('\n');
         }
 
 
@@ -255,7 +255,7 @@ public class PropertyHandler {
         } else {
             try {
                 this.setTimeout(Long.parseLong(timeoutstring));
-                logBuilder.append("\t" + Parameters.timeout.getName() + ": ").append(this.getHostname()).append('\n');
+                logBuilder.append('\t').append(Parameters.timeout.getName()).append(": ").append(this.getHostname()).append('\n');
             } catch (final NumberFormatException e) {
                 throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NO_LONG.create(Parameters.timeout.getName(), timeoutstring);
             }
@@ -314,7 +314,7 @@ public class PropertyHandler {
             try {
                 final int parseInt = Integer.parseInt(value);
                 closure.setter(parseInt);
-                logBuilder.append("\t" + param.getName() + ": ").append(parseInt).append('\n');
+                logBuilder.append('\t').append(param.getName()).append(": ").append(parseInt).append('\n');
             } catch (final NumberFormatException e) {
                 throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NO_INTEGER.create(param.getName(), value);
             }

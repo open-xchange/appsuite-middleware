@@ -49,6 +49,7 @@
 
 package com.openexchange.config.internal;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -56,6 +57,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -268,7 +270,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private static Properties loadProperties(final File propFile) throws IOException {
-        final FileInputStream fis = new FileInputStream(propFile);
+        final InputStream fis = new BufferedInputStream(new FileInputStream(propFile));
         try {
             final Properties tmp = new Properties();
             tmp.load(fis);

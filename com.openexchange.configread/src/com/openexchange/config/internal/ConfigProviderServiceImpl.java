@@ -94,6 +94,9 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
     @Override
     public ServerProperty get(final String property, final int context, final int user) throws OXException {
+        if (null == property) {
+            return null;
+        }
         final ServerProperty basicProperty = properties.get(property);
         if (basicProperty != null) {
             return basicProperty;

@@ -254,7 +254,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 		final String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
     	final JSONObject data = extractJson(response);
-    	System.out.println(data);
+    	// System.out.println(data);
     	return data;
 	}
 

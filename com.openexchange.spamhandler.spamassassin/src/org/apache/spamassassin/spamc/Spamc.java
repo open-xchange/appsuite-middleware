@@ -1115,7 +1115,7 @@ public class Spamc {
 			"createSocket", parameterTypes);
 		final Object[] args = new Object[] { socket,
 			socket.getInetAddress().getHostName(),
-			new Integer(socket.getPort()), Boolean.TRUE };
+			Integer.valueOf(socket.getPort()), Boolean.TRUE };
 		socket = (Socket) createSocket.invoke(defaultSocketFactory,
 			args);
 	    } catch (final ClassNotFoundException e) {

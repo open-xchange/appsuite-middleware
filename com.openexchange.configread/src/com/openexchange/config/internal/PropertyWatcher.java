@@ -49,10 +49,12 @@
 
 package com.openexchange.config.internal;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -169,9 +171,9 @@ public final class PropertyWatcher implements FileListener {
 
     @Override
     public void onChange(final File file) {
-        final FileInputStream fis;
+        final InputStream fis;
         try {
-            fis = new FileInputStream(file);
+            fis = new BufferedInputStream(new FileInputStream(file));
         } catch (final FileNotFoundException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(e.getMessage(), e);
