@@ -22,7 +22,7 @@
 
 * 2012-03-13 - thorben.betten@open-xchange.com
 
- - Fix for bug 21762: Introduced config tree entry "modules/unifiedMail/module"" to signal presence of Unified Mail feature
+ - Fix for bug 21762: Introduced config tree entry to signal presence of Unified Mail feature
 
 * 2012-03-12 - marcus.klein@open-xchange.com
 
