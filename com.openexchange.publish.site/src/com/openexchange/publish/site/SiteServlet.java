@@ -268,7 +268,7 @@ public class SiteServlet extends HttpServlet {
         final List<IdAndName> subfolderIdAndNames = OXFolderLoader.getSubfolderIdAndNames(Integer.parseInt(entityId), ctx, null);
         for (final IdAndName idAndName : subfolderIdAndNames) {
             if (idAndName.getName().equals(currentElement)) {
-                return new Integer(idAndName.getFolderId()).toString();
+                return Integer.valueOf(idAndName.getFolderId()).toString();
             }
         }
         return null;
