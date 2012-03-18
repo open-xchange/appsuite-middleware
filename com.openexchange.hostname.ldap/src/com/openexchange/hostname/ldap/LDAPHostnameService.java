@@ -62,7 +62,7 @@ public class LDAPHostnameService implements HostnameService {
             }
 
             if (LOG.isDebugEnabled()) {
-                final StringBuilder sb = new StringBuilder('\n');
+                final StringBuilder sb = new StringBuilder(128).append('\n');
                 sb.append("LDAP search triggered with:\n");
                 sb.append("Filter: ");
                 sb.append(ownFilter);

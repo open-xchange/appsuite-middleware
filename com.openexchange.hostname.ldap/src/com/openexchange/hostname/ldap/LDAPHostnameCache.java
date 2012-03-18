@@ -127,7 +127,7 @@ public class LDAPHostnameCache {
 
     public void outputSettings() throws OXException {
         final ElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
-        final StringBuilder sb = new StringBuilder('\n');
+        final StringBuilder sb = new StringBuilder(128).append('\n');
         sb.append("Cache setting for hostname ldap bundle:\n");
         sb.append("\tCreate time: ");
         sb.append(defaultElementAttributes.getCreateTime());
