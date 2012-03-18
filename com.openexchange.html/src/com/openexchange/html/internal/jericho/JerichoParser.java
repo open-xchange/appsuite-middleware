@@ -82,6 +82,29 @@ public final class JerichoParser {
         super();
     }
 
+    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Ensure given HTML content has a <code>&lt;body&gt;</code> tag.
+     * 
+     * @param html The HTML content to check
+     * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
+     */
+    private static String checkBody(final String html) {
+        if (null == html) {
+            return html;
+        }
+        if (BODY_START.matcher(html).find()) {
+            return html;
+        }
+        // <body> tag missing
+        String sep = System.getProperty("line.separator");
+        if (null == sep) {
+            sep = "\n";
+        }
+        return new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>").toString();
+    }
+
     private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
@@ -94,7 +117,7 @@ public final class JerichoParser {
      */
     public static void parse(final String html, final JerichoHandler handler) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        final StreamedSource streamedSource = new StreamedSource(html);
+        final StreamedSource streamedSource = new StreamedSource(checkBody(html));
         streamedSource.setLogger(null);
         int lastSegmentEnd = 0;
         for (final Segment segment : streamedSource) {

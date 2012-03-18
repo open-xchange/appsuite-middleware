@@ -498,9 +498,10 @@ public final class HtmlServiceImpl implements HtmlService {
         String prepared = insertBlockquoteMarker(htmlContent);
         prepared = insertSpaceMarker(prepared);
         String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
-        text = whitespaceText(text);
         // Drop heading whitespaces
         text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
+        // ... but keep enforced ones
+        text = whitespaceText(text);
         return text;
     }
 

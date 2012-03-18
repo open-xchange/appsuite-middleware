@@ -2,6 +2,7 @@
 
  - Fix for bug 21785: Added needed javax.xml imports
  - Fix for bug 21772: Explicitly checking for empty IMAP folder prior to retrieving a message by UID
+ - Fix for bug 21757: Ensure presence of a <body> tag in parsed HTML content
 
 * 2012-03-17 - thorben.betten@open-xchange.com
 
