@@ -239,7 +239,7 @@ public class AttachmentCopyTest extends AbstractUserCopyTest {
                origin.getModuleId() == target.getModuleId() &&
                origin.getRtfFlag() == target.getRtfFlag();
             
-            return isEqual == true ? 0 : -1;
+            return isEqual ? 0 : -1;
         }
         
     }

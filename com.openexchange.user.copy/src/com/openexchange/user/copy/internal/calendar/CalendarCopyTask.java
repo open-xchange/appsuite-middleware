@@ -365,7 +365,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 stmt.setLong(i++, appointment.getLastModified().getTime());
                 stmt.setInt(i++, dstUsrId);
                 stmt.setInt(i++, appointment.getParentFolderID());
-                stmt.setInt(i++, appointment.getPrivateFlag() == true ? 1 : 0);
+                stmt.setInt(i++, appointment.getPrivateFlag() ? 1 : 0);
                 stmt.setInt(i++, dstCtxId);
                 stmt.setTimestamp(i++, new Timestamp(appointment.getStartDate().getTime()));      
                 stmt.setTimestamp(i++, new Timestamp(appointment.getEndDate().getTime()));   
@@ -376,7 +376,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 setIntOrNull(i++, stmt, appointment.getDays());
                 setIntOrNull(i++, stmt, appointment.getRecurrencePosition());
                 stmt.setInt(i++, appointment.getShownAs());
-                setIntOrNull(i++, stmt, appointment.getFullTime() == true ? 1 : 0);
+                setIntOrNull(i++, stmt, appointment.getFullTime() ? 1 : 0);
                 setIntOrNull(i++, stmt, appointment.getNumberOfAttachments());
                 setStringOrNull(i++, stmt, appointment.getTitle());
                 setStringOrNull(i++, stmt, appointment.getLocation());

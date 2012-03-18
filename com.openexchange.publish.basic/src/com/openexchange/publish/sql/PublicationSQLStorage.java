@@ -261,7 +261,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             readConnection = dbProvider.getReadConnection(ctx);
 
             SELECT select;
-            final List<Object> values = new ArrayList<Object>();;
+            final List<Object> values = new ArrayList<Object>();
             if (module == null) {
             	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                         new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
@@ -621,9 +621,9 @@ public class PublicationSQLStorage implements PublicationStorage {
     }
 
     @Override
-    public Map<Entity, Boolean> isPublished(List<Entity> entities, Context ctx) throws OXException {
-        Map<Entity, Boolean> retval = new HashMap<Entity, Boolean>();
-        for (Entity entity : entities) {
+    public Map<Entity, Boolean> isPublished(final List<Entity> entities, final Context ctx) throws OXException {
+        final Map<Entity, Boolean> retval = new HashMap<Entity, Boolean>();
+        for (final Entity entity : entities) {
             retval.put(entity, Boolean.FALSE);
         }
 
@@ -632,36 +632,36 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            ArrayList<Expression> placeholders = new ArrayList<Expression>(entities.size());
+            final ArrayList<Expression> placeholders = new ArrayList<Expression>(entities.size());
             for(int i = 0; i < entities.size(); i++) {
                 placeholders.add(PLACEHOLDER);
             }
-            SELECT select = new SELECT("module, entity").FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("entity", new LIST(placeholders))));
+            final SELECT select = new SELECT("module, entity").FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("entity", new LIST(placeholders))));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
-            for (Entity entity : entities) {
+            for (final Entity entity : entities) {
                 values.add(entity.getId());
             }
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             while (resultSet.next()) {
-                String entityType = resultSet.getString(1);
-                int entityId = resultSet.getInt(2);
-                Entity found = new Entity(entityType, entityId);
+                final String entityType = resultSet.getString(1);
+                final int entityId = resultSet.getInt(2);
+                final Entity found = new Entity(entityType, entityId);
                 if (retval.containsKey(found)) {
                     retval.put(found, Boolean.TRUE);
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);

@@ -234,7 +234,7 @@ public class ContactCopyTest extends AbstractUserCopyTest {
                 checkNullOrEquals(o1.getLastname(), o2.getLastname()) &&
                 checkNullOrEquals(o1.getEmailaddress(), o2.getEmailaddress());
             
-            return isEqual == true ? 0 : -1;
+            return isEqual ? 0 : -1;
         }
         
         private boolean checkNullOrEquals(final String str1, final String str2) {

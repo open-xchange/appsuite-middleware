@@ -85,7 +85,7 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<Ti
 
     @Override
     public TimerService addingService(final ServiceReference<TimerService> reference) {
-        final TimerService timerService = context.getService(reference);;
+        final TimerService timerService = context.getService(reference);
         ServiceRegistry.getInstance().addService(TimerService.class, timerService);
         scheduleTask(timerService);
         return timerService;

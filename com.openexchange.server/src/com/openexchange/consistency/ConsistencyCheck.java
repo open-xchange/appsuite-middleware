@@ -105,12 +105,12 @@ public class ConsistencyCheck {
             config.setSource("database");
             if (! parseId(lexer, config)) {
                 System.exit( noid() );
-            };
+            }
         } else if (lexer.consume("filestore")) {
             config.setSource("filestore");
             if (! parseId(lexer, config)) {
                 System.exit( noid() );
-            };
+            }
         } else if (lexer.consume("context")) {
             config.setSource("context");
             if (! parseId(lexer, config)) {

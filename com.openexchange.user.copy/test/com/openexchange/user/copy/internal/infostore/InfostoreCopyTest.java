@@ -173,7 +173,7 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
             AbstractUserCopyTest.checkNullOrEquals(o1.getCreationDate(), o2.getCreationDate()) &&
             AbstractUserCopyTest.checkNullOrEquals(o1.getLastModified(), o2.getLastModified());
             
-            return isEqual == true ? 0 : -1;
+            return isEqual ? 0 : -1;
         }
         
     }
@@ -244,7 +244,7 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
                     }
                 }
                 
-                return (isEqual && filesEqual) == true ? 0 : -1;
+                return (isEqual && filesEqual) ? 0 : -1;
             } else {
                 return -1;
             }

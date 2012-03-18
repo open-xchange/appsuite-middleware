@@ -106,7 +106,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     @Override
     public String call() {
         while (!done.get()) {
-            ;
+            // Loop
         }
 
         done.set(false);
@@ -120,7 +120,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     @Override
     public void update(final Observable o, final Object obj) {
         final UpdateMessages message = (UpdateMessages) obj;
-        String key = message.getKey();
+        final String key = message.getKey();
         if (key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED) || key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED)) {
             try {
                 this.content = streamProvider.getDocumentContent();
@@ -134,7 +134,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
             exception = PreviewExceptionCodes.ERROR.create(e);
             done.compareAndSet(false, true);
         } else if (key.equals(UpdateMessages.PREVIEW_IMAGE_CREATION_STARTED) || message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_FAILED)) {
-            Object data = message.getData();
+            final Object data = message.getData();
             System.out.println(data.toString());
         }
     }

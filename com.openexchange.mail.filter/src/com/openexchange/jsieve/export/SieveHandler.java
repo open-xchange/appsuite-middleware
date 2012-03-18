@@ -359,7 +359,7 @@ public class SieveHandler {
      * @throws IOException
      */
     public void setScript(final String script_name, final byte[] script, final StringBuilder commandBuilder) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
-        if (AUTH == false) {
+        if (!(AUTH)) {
             throw new OXSieveHandlerException("Script upload not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
@@ -522,7 +522,7 @@ public class SieveHandler {
      * @throws OXSieveHandlerException
      */
     public ArrayList<String> getScriptList() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        if (AUTH == false) {
+        if (!(AUTH)) {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
@@ -559,7 +559,7 @@ public class SieveHandler {
      * @throws OXSieveHandlerException
      */
     public String getActiveScript() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        if (AUTH == false) {
+        if (!(AUTH)) {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
@@ -596,7 +596,7 @@ public class SieveHandler {
      * @throws OXSieveHandlerException
      */
     public void remove(final String script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        if (AUTH == false) {
+        if (!(AUTH)) {
             throw new OXSieveHandlerException("Delete a script not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
         if (null == script_name) {
@@ -793,7 +793,7 @@ public class SieveHandler {
     }
     
     private void activate(final String sieve_script_name, final StringBuilder commandBuilder) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        if (AUTH == false) {
+        if (!(AUTH)) {
             throw new OXSieveHandlerException("Activate a script not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
@@ -818,7 +818,7 @@ public class SieveHandler {
     }
 
     private void deactivate(final String sieve_script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        if (AUTH == false) {
+        if (!(AUTH)) {
             throw new OXSieveHandlerException("Deactivate a script not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 

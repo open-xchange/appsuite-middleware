@@ -253,7 +253,7 @@ public class CalendarCopyTest extends AbstractUserCopyTest {
                 }
             }
             
-            return isEqual == true ? 0 : -1;
+            return isEqual ? 0 : -1;
         }
         
     }
