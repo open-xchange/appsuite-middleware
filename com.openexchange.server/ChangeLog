@@ -1,6 +1,7 @@
 * 2012-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 21785: Added needed javax.xml imports
+ - Fix for bug 21772: Explicitly checking for empty IMAP folder prior to retrieving a message by UID
 
 * 2012-03-17 - thorben.betten@open-xchange.com
 

@@ -681,6 +681,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         try {
             final int desiredMode = markSeen ? Folder.READ_WRITE : Folder.READ_ONLY;
             imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+            if (0 == imapFolder.getMessageCount()) {
+                return null;
+            }
             final IMAPMessage msg;
             {
                 final long start = System.currentTimeMillis();
