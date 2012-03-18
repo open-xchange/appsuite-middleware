@@ -84,7 +84,7 @@ public class FilterMatchTest extends TestCase {
         assertTrue(matches);
         assertEquals(2, captured.size());
         assertEquals(D("08.09.2011 22:00").getTime(), captured.get(0));
-        assertEquals(-1l, captured.get(1));
+        assertEquals(-1L, captured.get(1));
         
         filter = new Filter().addFilter(
             compFilter("VCALENDAR").addFilter(

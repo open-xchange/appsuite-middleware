@@ -654,7 +654,7 @@ public class AJAXRequestData {
 
         url.append(hostname);
         if (path != null) {
-            if (!path.startsWith("/")) {
+            if (path.length() == 0 || path.charAt(0) != '/') {
                 url.append('/');
             }
             url.append(path);
@@ -663,7 +663,7 @@ public class AJAXRequestData {
             url.append(";jsessionid=").append(route);
         }
         if (query != null) {
-            if (!query.startsWith("?")) {
+            if (query.length() == 0 || query.charAt(0) != '?') {
                 url.append('?');
             }
             url.append(query);

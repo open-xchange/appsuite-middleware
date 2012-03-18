@@ -1899,7 +1899,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         final StringBuilder retval = new StringBuilder(128);
         retval.append(values.get(0));
-        for (int i = 1, len = values.size(); i < len; i++) {
+        final int len = values.size();
+        for (int i = 1; i < len; i++) {
             retval.append(',').append(values.get(i));
         }
         return retval.toString();

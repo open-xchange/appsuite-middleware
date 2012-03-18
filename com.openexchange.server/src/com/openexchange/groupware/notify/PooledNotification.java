@@ -67,7 +67,7 @@ public final class PooledNotification implements Delayed {
     /**
      * 2 minutes delay
      */
-    private static final long MSEC_DELAY = 120000l;
+    private static final long MSEC_DELAY = 120000L;
 
     private final AtomicLong stamp;
 

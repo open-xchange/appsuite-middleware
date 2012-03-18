@@ -255,7 +255,7 @@ public final class StringCache {
                         while (n < size) {
                             final Object key = tempMap.lastKey();
                             final List list = (ArrayList) tempMap.get(key);
-                            final ByteEntry[] list2 = (ByteEntry[]) list.toArray(new ByteEntry[list.size()]);
+                            // final ByteEntry[] list2 = (ByteEntry[]) list.toArray(new ByteEntry[list.size()]);
                             for (int i = 0; i < list.size() && n < size; i++) {
                                 final ByteEntry entry = (ByteEntry) list.get(i);
                                 tempChunk.setBytes(entry.name, 0, entry.name.length);

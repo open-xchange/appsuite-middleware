@@ -755,7 +755,7 @@ public class Login extends AJAXServlet {
             final String[] lines = tmp.split("\n");
             for (String line : lines) {
                 line = line.replaceAll("\\s", "");
-                if (!line.equals("") && !line.startsWith("#")) {
+                if (!line.equals("") && (line.length() == 0 || line.charAt(0) != '#')) {
                     ranges.add(IPRange.parseRange(line));
                 }
             }

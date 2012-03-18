@@ -27,7 +27,7 @@ public class SMS {
 		return serverUrl;
 	}
 
-	public void setServerUrl(String serverUrl) {
+	public void setServerUrl(final String serverUrl) {
 		this.serverUrl = serverUrl;
 	}
 
@@ -35,7 +35,7 @@ public class SMS {
 		return text;
 	}
 
-	public void setText(String text) {
+	public void setText(final String text) {
 		this.text = text;
 	}
 
@@ -43,7 +43,7 @@ public class SMS {
 		return sipgateuser;
 	}
 
-	public void setSipgateuser(String sipgateuser) {
+	public void setSipgateuser(final String sipgateuser) {
 		this.sipgateuser = sipgateuser;
 	}
 
@@ -51,7 +51,7 @@ public class SMS {
 		return sipgatepass;
 	}
 
-	public void setSipgatepass(String sipgatepass) {
+	public void setSipgatepass(final String sipgatepass) {
 		this.sipgatepass = sipgatepass;
 	}
 
@@ -87,11 +87,11 @@ public class SMS {
 	public Map send() throws MalformedURLException, XmlRpcException {
 
 		// setup xml rpc client config
-		XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+		final XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
 		config.setServerURL(new URL(this.getServerUrl()));
 		config.setBasicUserName(this.getSipgateuser());
 		config.setBasicPassword(this.getSipgatepass());
-		XmlRpcClient client = new XmlRpcClient();
+		final XmlRpcClient client = new XmlRpcClient();
 		client.setConfig(config);
 
 		// Identify our client to API call
@@ -109,7 +109,7 @@ public class SMS {
 			// execute test call
 			result = (Map) client.execute("samurai.ClientIdentify", params);
 			// System.err.println(result);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			 wassendingsuccessfull = false;
 			 this.senderrormessage = e.getMessage();
 			 LOG.error("API error occured while executing samurai.ClientIdentify",e);
@@ -119,7 +119,7 @@ public class SMS {
 		result = null;
 
 		// generate remote uri for sms as recipient
-		Vector remoteUris = new Vector();
+		final Vector remoteUris = new Vector();
 		remoteUris.add("sip:" + this.getSMSNumber() + "@sipgate.net");
 
 		// fill up data for rpc call
@@ -133,7 +133,7 @@ public class SMS {
 		try {
 			// execute SMS sending......
 			result = (Map) client.execute("samurai.SessionInitiateMulti",params);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			wassendingsuccessfull = false;
 			this.senderrormessage = e.getMessage();
 			LOG.error("API error occured while executing samurai.SessionInitiateMulti",e);
@@ -152,9 +152,9 @@ public class SMS {
 		return result;
 	}
 
-	public String checkAndFormatRecipient(String my_recipient) throws Exception {
+	public String checkAndFormatRecipient(final String my_recipient) throws Exception {
 
-		String allowedCharsInNumber = "+0123456789";
+		final String allowedCharsInNumber = "+0123456789";
 
 		String to = my_recipient;
 
@@ -175,13 +175,13 @@ public class SMS {
 			}
 		}
 
-		if (to.startsWith("+")) {
+		if (to.length() > 0 && to.charAt(0) == '+') {
 			to = to.substring(1);
 		} else {
 			// remove leading 0 or 00
 			if(replaceleadingzerozero && to.startsWith("00")){
 				to = ""+to.substring(2);
-			} else if (replaceleadingzero && to.startsWith("0")){
+			} else if (replaceleadingzero && (to.length() > 0 && to.charAt(0) == '0')){
 				to = ""+to.substring(1);
 			}
 		}

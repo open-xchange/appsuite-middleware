@@ -78,7 +78,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
     @Override
     public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-       return; // EndDate only
+       // EndDate only
     }
 
     @Override

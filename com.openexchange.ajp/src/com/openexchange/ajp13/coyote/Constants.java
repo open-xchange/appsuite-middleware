@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
 
@@ -246,7 +247,7 @@ public final class Constants {
         "Content-Type", "Content-Language", "Content-Length", "Date", "Last-Modified", "Location", "Set-Cookie", "Set-Cookie2",
         "Servlet-Engine", "Status", "WWW-Authenticate" };
 
-    private static final Hashtable<String, Integer> responseTransHash = new Hashtable<String, Integer>(20);
+    private static final Map<String, Integer> responseTransHash = new Hashtable<String, Integer>(20);
 
     static {
         try {

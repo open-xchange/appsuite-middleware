@@ -344,8 +344,8 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         }
     }
 
-    private static LinkedList<String> newLinkedList(final String initialValue) {
-        final LinkedList<String> list = new LinkedList<String>();
+    private static List<String> newLinkedList(final String initialValue) {
+        final List<String> list = new LinkedList<String>();
         list.add(initialValue);
         return list;
     }

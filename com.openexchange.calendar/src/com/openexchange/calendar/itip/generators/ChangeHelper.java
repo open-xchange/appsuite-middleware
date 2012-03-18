@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
@@ -76,20 +75,20 @@ import com.openexchange.user.UserService;
  */
 public class ChangeHelper {
 
-    private ChangeDescriber describer;
+    private final ChangeDescriber describer;
     
-    private AppointmentDiff diff;
-    private Appointment update;
-    private Appointment original;
-    private TypeWrapper wrapper;
+    private final AppointmentDiff diff;
+    private final Appointment update;
+    private final Appointment original;
+    private final TypeWrapper wrapper;
 
-    private Context ctx;
+    private final Context ctx;
 
-	private Locale locale;
+	private final Locale locale;
 
-	private TimeZone timezone;
+	private final TimeZone timezone;
 
-    public ChangeHelper(Context ctx, NotificationParticipant participant, Appointment original, Appointment update, AppointmentDiff diff, Locale locale, TimeZone tz, TypeWrapper wrapper, AttachmentMemory attachmentMemory, ServiceLookup services, Style style) {
+    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Appointment original, final Appointment update, final AppointmentDiff diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, final AttachmentMemory attachmentMemory, final ServiceLookup services, final Style style) {
         super();
         this.original = original;
         this.update = update;
@@ -98,14 +97,14 @@ public class ChangeHelper {
         this.timezone = tz;
         this.wrapper = wrapper;
         this.ctx = ctx;
-        Rescheduling rescheduling = new Rescheduling(style);
+        final Rescheduling rescheduling = new Rescheduling(style);
         boolean interested = true;
         if (participant.getConfiguration() != null) {
         	interested = participant.getConfiguration().interestedInStateChanges();
         }
-        Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), style, interested);
-        Details details = new Details(style);
-        Attachments attachments = new Attachments(attachmentMemory);
+        final Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), style, interested);
+        final Details details = new Details(style);
+        final Attachments attachments = new Attachments(attachmentMemory);
     	
     	describer = new ChangeDescriber(rescheduling, details, participants, attachments);
         

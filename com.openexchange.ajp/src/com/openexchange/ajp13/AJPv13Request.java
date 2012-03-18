@@ -62,6 +62,8 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  */
 public abstract class AJPv13Request {
 
+    private static final byte[] EMPTY_BYTES = new byte[0];
+
     /**
      * Max size of an incoming request body:<br>
      * 8192 (8K) - 4 bytes (0x12 + 0x34 + data length integer).
@@ -171,7 +173,7 @@ public abstract class AJPv13Request {
         try {
             remainingData = ajpRequestHandler.getAndClearResponseData();
         } catch (final IOException e) {
-            remainingData = new byte[0];
+            remainingData = EMPTY_BYTES;
         }
         if (remainingData.length > 0) {
             /*
@@ -217,8 +219,6 @@ public abstract class AJPv13Request {
         }
     }
 
-    private static final byte[] EMPTY = new byte[0];
-
     /**
      * Writes an empty SEND_BODY package.
      *
@@ -229,7 +229,7 @@ public abstract class AJPv13Request {
     public static void writeEmpty(final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
         out.acquire();
         try {
-            out.write(AJPv13Response.getSendBodyChunkBytes(EMPTY));
+            out.write(AJPv13Response.getSendBodyChunkBytes(EMPTY_BYTES));
             out.flush();
         } finally {
             out.release();

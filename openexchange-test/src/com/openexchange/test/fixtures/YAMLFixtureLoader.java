@@ -119,9 +119,9 @@ public class YAMLFixtureLoader implements FixtureLoader {
         }
         StringBuilder sb = new StringBuilder();
         for (File path : loadPath) {
-            sb.append("\"");
+            sb.append('"');
             sb.append(path.getAbsolutePath());
-            sb.append("\"");
+            sb.append('"');
             sb.append(',');
         }
         if (sb.length() > 1) {

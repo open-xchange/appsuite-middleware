@@ -58,7 +58,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.tools.session.ServerSession;
 
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface InfostoreRequest {
 
-    InfostoreRequest require(Param...params) throws OXException ;
+    InfostoreRequest require(AbstractFileAction.Param...params) throws OXException ;
 
     InfostoreRequest requireBody() throws OXException;
 

@@ -59,12 +59,10 @@ import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.analyzers.RefreshITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.sim.SimBuilder;
 
 
@@ -76,69 +74,69 @@ import com.openexchange.sim.SimBuilder;
 public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
     @Test
     public void testMethod() {
-        List<ITipMethod> methods = new RefreshITipAnalyzer(null, null).getMethods();
+        final List<ITipMethod> methods = new RefreshITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.REFRESH), methods);
     }
     
     @Test
     public void testRefresh() throws OXException {
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setAppointment(appointment("123-123-123-123"));
         
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setObjectID(12);
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(appointment);
         
-        ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        assertEquals(12, ((Appointment) annotations.get(0).getAppointment()).getObjectID());
+        assertEquals(12, annotations.get(0).getAppointment().getObjectID());
         
         assertActions(analysis, ITipAction.SEND_APPOINTMENT);
     }
     
     @Test
     public void testRefreshException() throws OXException {
-        ITipMessage message = new ITipMessage();
-        CalendarDataObject requestedAppointment = appointment("123-123-123-123");
+        final ITipMessage message = new ITipMessage();
+        final CalendarDataObject requestedAppointment = appointment("123-123-123-123");
         requestedAppointment.setRecurrenceDatePosition(new Date(12345));
         message.addException(requestedAppointment);
         
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setObjectID(12);
         
-        CalendarDataObject exception = appointment("123-123-123-123");
+        final CalendarDataObject exception = appointment("123-123-123-123");
         exception.setObjectID(13);
         exception.setRecurrenceDatePosition(new Date(12345));
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(appointment);
         integrationBuilder.expectCall("getExceptions",appointment, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(exception)));
         
-        ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        assertEquals(13, ((Appointment) annotations.get(0).getAppointment()).getObjectID());
+        assertEquals(13, annotations.get(0).getAppointment().getObjectID());
         
         assertActions(analysis, ITipAction.SEND_APPOINTMENT);
     }
     
     @Test
     public void testRefreshUnknown() throws OXException {
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setAppointment(appointment("123-123-123-123"));
         
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
         
-        ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("An attendee wants to be brought up to date about an appointment that does not seem to exist. It was probably deleted at some point. It is best to just ignore this message.", annotations.get(0).getMessage());
         
@@ -147,25 +145,25 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
     
     @Test
     public void testRefreshUnknownException() throws OXException {
-        ITipMessage message = new ITipMessage();
-        CalendarDataObject requestedAppointment = appointment("123-123-123-123");
+        final ITipMessage message = new ITipMessage();
+        final CalendarDataObject requestedAppointment = appointment("123-123-123-123");
         requestedAppointment.setRecurrenceDatePosition(new Date(12345));
         message.addException(requestedAppointment);
         
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setObjectID(12);
         
-        CalendarDataObject exception = appointment("123-123-123-123");
+        final CalendarDataObject exception = appointment("123-123-123-123");
         exception.setObjectID(13);
-        exception.setRecurrenceDatePosition(new Date(5432100000l));
+        exception.setRecurrenceDatePosition(new Date(5432100000L));
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(appointment);
         integrationBuilder.expectCall("getExceptions",appointment, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(exception)));
         
-        ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("An attendee wants to be brought up to date about an appointment that does not seem to exist. It was probably deleted at some point. It is best to just ignore this message.", annotations.get(0).getMessage());
         

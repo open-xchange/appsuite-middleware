@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.BoundedIMAPStoreContainer.ImplType;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
@@ -184,7 +183,7 @@ public final class IMAPStoreCache {
 
     private final RefusedExecutionBehavior<Object> behavior;
 
-    private final ImplType implType;
+    private final BoundedIMAPStoreContainer.ImplType implType;
 
     /**
      * Initializes a new {@link IMAPStoreCache}.
@@ -198,8 +197,8 @@ public final class IMAPStoreCache {
         keys = new ConcurrentHashMap<IMAPStoreCache.User, Queue<Key>>();
 
         final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
-        final ImplType it = null == service ? ImplType.SEMAPHORE : ImplType.valueOf(service.getProperty("com.openexchange.imap.cacheImplType", "SEMAPHORE"));
-        implType = null == it ? ImplType.SEMAPHORE : it;
+        final BoundedIMAPStoreContainer.ImplType it = null == service ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : BoundedIMAPStoreContainer.ImplType.valueOf(service.getProperty("com.openexchange.imap.cacheImplType", "SEMAPHORE"));
+        implType = null == it ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : it;
     }
 
     private void init() {

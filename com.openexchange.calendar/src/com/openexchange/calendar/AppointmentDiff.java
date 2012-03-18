@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,32 +69,32 @@ public class AppointmentDiff {
 
     private static Map<Integer, Differ<? super Appointment>> specialDiffer = new HashMap<Integer, Differ<? super Appointment>>();
 
-    private List<FieldUpdate> updates;
+    private final List<FieldUpdate> updates;
 
-    private Set<String> differingFieldNames;
+    private final Set<String> differingFieldNames;
 
     static {
-        for (Differ<? super Appointment> differ : Appointment.differ) {
+        for (final Differ<? super Appointment> differ : Appointment.differ) {
             specialDiffer.put(differ.getColumn(), differ);
         }
     }
     
-    public static AppointmentDiff compare(Appointment original, Appointment update, int...skip) {
-        Set<Integer> skipList = new HashSet<Integer>(skip.length);
-        for (int columnToSkip : skip) {
+    public static AppointmentDiff compare(final Appointment original, final Appointment update, final int...skip) {
+        final Set<Integer> skipList = new HashSet<Integer>(skip.length);
+        for (final int columnToSkip : skip) {
             skipList.add(columnToSkip);
         }
-        AppointmentDiff retval = new AppointmentDiff();
+        final AppointmentDiff retval = new AppointmentDiff();
         
         
-        for (int column : Appointment.ALL_COLUMNS) {
+        for (final int column : Appointment.ALL_COLUMNS) {
             if (skipList.contains(column)) {
                 continue;
             }
             if (specialDiffer.containsKey(column)) {
-                Difference difference = specialDiffer.get(column).getDifference(original, update);
+                final Difference difference = specialDiffer.get(column).getDifference(original, update);
                 if (difference != null) {
-                    FieldUpdate fieldUpdate = retval.new FieldUpdate();
+                    final FieldUpdate fieldUpdate = retval.new FieldUpdate();
                     fieldUpdate.setFieldNumber(column);
                     fieldUpdate.setFieldName(CalendarField.getByColumn(column).getJsonName());
                     fieldUpdate.setOriginalValue(original.get(column));
@@ -104,7 +103,7 @@ public class AppointmentDiff {
                     retval.addUpdate(fieldUpdate);
                 }
             } else if (Differ.isDifferent(original, update, column)) {
-                FieldUpdate fieldUpdate = retval.new FieldUpdate();
+                final FieldUpdate fieldUpdate = retval.new FieldUpdate();
                 fieldUpdate.setFieldNumber(column);
                 fieldUpdate.setFieldName(CalendarField.getByColumn(column).getJsonName());
                 fieldUpdate.setOriginalValue(original.get(column));
@@ -129,13 +128,13 @@ public class AppointmentDiff {
         return updates;
     }
     
-    public void addUpdate(FieldUpdate fieldUpdate) {
+    public void addUpdate(final FieldUpdate fieldUpdate) {
         updates.add(fieldUpdate);
         differingFieldNames.add(fieldUpdate.getFieldName());
     }
 
-    public boolean anyFieldChangedOf(String...fields) {
-        for (String field : fields) {
+    public boolean anyFieldChangedOf(final String...fields) {
+        for (final String field : fields) {
             if (differingFieldNames.contains(field)) {
                 return true;
             }
@@ -144,9 +143,9 @@ public class AppointmentDiff {
     }
     
 
-	public boolean anyFieldChangedOf(int...fields) {
-		for (int field : fields) {
-			for (FieldUpdate upd : updates) {
+	public boolean anyFieldChangedOf(final int...fields) {
+		for (final int field : fields) {
+			for (final FieldUpdate upd : updates) {
 				if (upd.getFieldNumber() == field) {
 					return true;
 				}
@@ -156,20 +155,20 @@ public class AppointmentDiff {
 	}
 
     
-    public boolean onlyTheseChanged(String...fields) {
+    public boolean onlyTheseChanged(final String...fields) {
         if (differingFieldNames.size() > fields.length) {
             return false;
         }
-        Set<String> copy = new HashSet<String>(differingFieldNames);
-        for (String field : fields) {
+        final Set<String> copy = new HashSet<String>(differingFieldNames);
+        for (final String field : fields) {
             copy.remove(field);
         }
         return copy.isEmpty();
     }
 
     
-    public FieldUpdate getUpdateFor(String field) {
-        for (FieldUpdate update : updates) {
+    public FieldUpdate getUpdateFor(final String field) {
+        for (final FieldUpdate update : updates) {
             if (update.getFieldName().equals(field)) {
                 return update;
             }
@@ -194,7 +193,7 @@ public class AppointmentDiff {
             return fieldNumber;
         }
 
-        public void setFieldNumber(int fieldNumber) {
+        public void setFieldNumber(final int fieldNumber) {
             this.fieldNumber = fieldNumber;
         }
 
@@ -202,7 +201,7 @@ public class AppointmentDiff {
             return fieldName;
         }
 
-        public void setFieldName(String fieldName) {
+        public void setFieldName(final String fieldName) {
             this.fieldName = fieldName;
         }
 
@@ -210,7 +209,7 @@ public class AppointmentDiff {
             return originalValue;
         }
 
-        public void setOriginalValue(Object originalValue) {
+        public void setOriginalValue(final Object originalValue) {
             this.originalValue = originalValue;
         }
 
@@ -218,7 +217,7 @@ public class AppointmentDiff {
             return newValue;
         }
 
-        public void setNewValue(Object newValue) {
+        public void setNewValue(final Object newValue) {
             this.newValue = newValue;
         }
 
@@ -228,7 +227,7 @@ public class AppointmentDiff {
         }
 
         
-        public void setExtraInfo(Object extraInfo) {
+        public void setExtraInfo(final Object extraInfo) {
             this.extraInfo = extraInfo;
         }
         

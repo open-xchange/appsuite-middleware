@@ -57,7 +57,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -66,17 +65,16 @@ import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipChange.Type;
+import com.openexchange.calendar.itip.ITipIntegrationUtility;
+import com.openexchange.calendar.itip.Messages;
+import com.openexchange.calendar.itip.ParticipantChange;
 import com.openexchange.calendar.itip.generators.ArgumentType;
 import com.openexchange.calendar.itip.generators.Sentence;
 import com.openexchange.calendar.itip.generators.TypeWrapper;
 import com.openexchange.calendar.itip.generators.changes.ChangeDescriber;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
-import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
 import com.openexchange.calendar.itip.generators.changes.generators.Style;
-import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.Messages;
-import com.openexchange.calendar.itip.ParticipantChange;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
@@ -94,7 +92,6 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
@@ -107,22 +104,23 @@ import com.openexchange.user.UserService;
  */
 public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
-	public ReplyITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
+	public ReplyITipAnalyzer(final ITipIntegrationUtility util, final ServiceLookup services) {
 		super(util, services);
 	}
 
-	public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
+	@Override
+    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final Session session) throws OXException {
 
-		ITipAnalysis analysis = new ITipAnalysis();
+		final ITipAnalysis analysis = new ITipAnalysis();
 		analysis.setMessage(message);
 
-		CalendarDataObject update = message.getDataObject();
+		final CalendarDataObject update = message.getDataObject();
 
 		String uid = null;
 		if (update != null) {
 			uid = update.getUid();
 		} else {
-			for (Appointment appointment : message.exceptions()) {
+			for (final Appointment appointment : message.exceptions()) {
 				uid = appointment.getUid();
 				if (uid != null) {
 					break;
@@ -132,7 +130,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		
 		analysis.setUid(uid);
 
-		CalendarDataObject original = util.resolveUid(uid, session);
+		final CalendarDataObject original = util.resolveUid(uid, session);
 		if (original == null) {
 			analysis.addAnnotation(new ITipAnnotation(
 					Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
@@ -140,13 +138,13 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		}
 
 		if (update != null) {
-			ParticipantChange participantChange = applyParticipantChange(
+			final ParticipantChange participantChange = applyParticipantChange(
 					update, original, message.getMethod(), message);
 			if (participantChange != null) {
 				participantChange.setComment(message.getComment());
 			}
 			if (participantChange != null || message.getMethod() == ITipMethod.COUNTER) {
-				ITipChange change = new ITipChange();
+				final ITipChange change = new ITipChange();
 				change.setNewAppointment(update);
 				change.setCurrentAppointment(original);
 
@@ -157,15 +155,15 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			}
 		}
 
-		List<Appointment> exceptions = util.getExceptions(original, session);
-		for (CalendarDataObject exception : message.exceptions()) {
-			Appointment matchingException = findAndRemoveMatchingException(
+		final List<Appointment> exceptions = util.getExceptions(original, session);
+		for (final CalendarDataObject exception : message.exceptions()) {
+			final Appointment matchingException = findAndRemoveMatchingException(
 					exception, exceptions);
 			ITipChange change = new ITipChange();
 			change.setException(true);
 			change.setMaster(original);
 			if (matchingException != null) {
-				ParticipantChange participantChange = applyParticipantChange(
+				final ParticipantChange participantChange = applyParticipantChange(
 						exception, matchingException, message.getMethod(), message);
 				participantChange.setComment(message.getComment());
 
@@ -194,23 +192,23 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		return analysis;
 	}
 
-	private void describeReplyDiff(ITipMessage message, ITipChange change, TypeWrapper wrapper,
-			Session session) throws OXException {
+	private void describeReplyDiff(final ITipMessage message, final ITipChange change, final TypeWrapper wrapper,
+			final Session session) throws OXException {
 		if (services == null) {
 			return;
 		}
 		
-		ContextService contexts = services.getService(ContextService.class);
-		UserService users = services.getService(UserService.class);
+		final ContextService contexts = services.getService(ContextService.class);
+		final UserService users = services.getService(UserService.class);
 		
-		Context ctx = contexts.getContext(session.getContextId());
-		User user = users.getUser(session.getUserId(), ctx);
-		Locale locale = user.getLocale();
-		TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+		final Context ctx = contexts.getContext(session.getContextId());
+		final User user = users.getUser(session.getUserId(), ctx);
+		final Locale locale = user.getLocale();
+		final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
 		
 		if (message.getMethod() == ITipMethod.COUNTER) {
 			
-			AppointmentDiff diff = change.getDiff();
+			final AppointmentDiff diff = change.getDiff();
 			String displayName = null;
 			ConfirmStatus newStatus = null;
 			
@@ -219,10 +217,10 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			FieldUpdate update = diff
 					.getUpdateFor(AppointmentFields.CONFIRMATIONS);
 			if (update != null) {
-				Difference difference = (Difference) update.getExtraInfo();
-				List<Change> changed = difference.getChanged();
+				final Difference difference = (Difference) update.getExtraInfo();
+				final List<Change> changed = difference.getChanged();
 				if (changed != null && !changed.isEmpty()) {
-					ConfirmationChange chng = (ConfirmationChange) changed
+					final ConfirmationChange chng = (ConfirmationChange) changed
 							.get(0);
 					displayName = chng.getIdentifier();
 					newStatus = ConfirmStatus.byId(chng.getNewStatus());
@@ -232,10 +230,10 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			// Internal Participant
 			update = diff.getUpdateFor("users");
 			if (update != null && newStatus == null) {
-				Difference difference = (Difference) update.getExtraInfo();
-				List<Change> changed = difference.getChanged();
+				final Difference difference = (Difference) update.getExtraInfo();
+				final List<Change> changed = difference.getChanged();
 				if (changed != null && !changed.isEmpty()) {
-					ConfirmationChange chng = (ConfirmationChange) changed
+					final ConfirmationChange chng = (ConfirmationChange) changed
 							.get(0);
 					displayName = users.getUser(
 							Integer.valueOf(chng.getIdentifier()), ctx)
@@ -256,8 +254,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				.add(stateChange, ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
 			}
 			
-			Style style = Style.ASK;
-			ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
+			final Style style = Style.ASK;
+			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
 					new Details(style));
 			
 			change.setDiffDescription(cd.getChanges(ctx, change.getCurrentAppointment(), change.getNewAppointment(), diff, wrapper, locale, tz));
@@ -267,8 +265,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		}
 	}
 
-	private boolean containsPartyCrasher(ITipAnalysis analysis) {
-		for (ITipChange change : analysis.getChanges()) {
+	private boolean containsPartyCrasher(final ITipAnalysis analysis) {
+		for (final ITipChange change : analysis.getChanges()) {
 			if (change.getParticipantChange() != null
 					&& change.getParticipantChange().isPartyCrasher()) {
 				return true;
@@ -277,23 +275,23 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		return false;
 	}
 
-	private ParticipantChange applyParticipantChange(Appointment update,
-			Appointment original, ITipMethod method, ITipMessage message) {
+	private ParticipantChange applyParticipantChange(final Appointment update,
+			final Appointment original, final ITipMethod method, final ITipMessage message) {
 		
 		discardAllButFirst(update);
 		
-		ParticipantChange pChange = new ParticipantChange();
+		final ParticipantChange pChange = new ParticipantChange();
 		boolean noChange = true;
 		
 		if (method == ITipMethod.COUNTER) {
 			// Alright, the counter may overwrite any field
-			AppointmentDiff diff = AppointmentDiff.compare(original, update,
+			final AppointmentDiff diff = AppointmentDiff.compare(original, update,
 					Appointment.PARTICIPANTS, Appointment.USERS,
 					Appointment.CONFIRMATIONS);
-			Set<Integer> skipFields = skipFieldsInCounter(message);
+			final Set<Integer> skipFields = skipFieldsInCounter(message);
 			
 			
-			for(int field : Appointment.ALL_COLUMNS) {
+			for(final int field : Appointment.ALL_COLUMNS) {
 				if (skipFields.contains(field)) {
 					continue; // Skip
 				}
@@ -310,37 +308,37 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			}
 		} else {
 			// The Reply may only override participant states
-			AppointmentDiff diff = AppointmentDiff.compare(update, original,
+			final AppointmentDiff diff = AppointmentDiff.compare(update, original,
 					Appointment.PARTICIPANTS, Appointment.USERS,
 					Appointment.CONFIRMATIONS);
-			for (FieldUpdate upd : diff.getUpdates()) {
+			for (final FieldUpdate upd : diff.getUpdates()) {
 				update.set(upd.getFieldNumber(), upd.getNewValue());
 			}
 		}
 		
-		List<Participant> newParticipants = new ArrayList<Participant>();
-		Participant[] participants = original.getParticipants();
+		final List<Participant> newParticipants = new ArrayList<Participant>();
+		final Participant[] participants = original.getParticipants();
 		Set<String> notFound = new HashSet<String>();
-		Participant[] participants3 = update.getParticipants();
+		final Participant[] participants3 = update.getParticipants();
 		if (participants3 != null) {
-			for (Participant participant : participants3) {
+			for (final Participant participant : participants3) {
 				notFound.add(participant.getEmailAddress());
 			}
 		}
 
 		if (participants != null) {
-			for (Participant participant : participants) {
+			for (final Participant participant : participants) {
 				notFound.remove(participant.getEmailAddress());
 				boolean added = false;
 				if (participant instanceof UserParticipant) {
-					UserParticipant up = (UserParticipant) participant;
-					Participant[] participants2 = update.getParticipants();
+					final UserParticipant up = (UserParticipant) participant;
+					final Participant[] participants2 = update.getParticipants();
 					if (participants2 != null) {
-						for (Participant participant2 : participants2) {
+						for (final Participant participant2 : participants2) {
 							if (participant2 instanceof UserParticipant) {
-								UserParticipant up2 = (UserParticipant) participant2;
+								final UserParticipant up2 = (UserParticipant) participant2;
 								if (up2.getIdentifier() == up.getIdentifier()) {
-									UserParticipant nup = new UserParticipant(
+									final UserParticipant nup = new UserParticipant(
 											up.getIdentifier());
 									nup.setConfirm(up2.getConfirm());
 									nup.setConfirmMessage(up2.getConfirmMessage());
@@ -357,15 +355,15 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 						}
 					}
 				} else if (participant instanceof ExternalUserParticipant) {
-					ExternalUserParticipant ep = (ExternalUserParticipant) participant;
-					Participant[] participants2 = update.getParticipants();
+					final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
+					final Participant[] participants2 = update.getParticipants();
 					if (participants2 != null) {
-						for (Participant participant2 : participants2) {
+						for (final Participant participant2 : participants2) {
 							if (participant2 instanceof ExternalUserParticipant) {
-								ExternalUserParticipant ep2 = (ExternalUserParticipant) participant2;
+								final ExternalUserParticipant ep2 = (ExternalUserParticipant) participant2;
 								if (ep2.getEmailAddress().equalsIgnoreCase(
 										ep.getEmailAddress())) {
-									ExternalUserParticipant nup = new ExternalUserParticipant(
+									final ExternalUserParticipant nup = new ExternalUserParticipant(
 											ep.getEmailAddress());
 									nup.setStatus(ep2.getStatus());
 									nup.setMessage(ep2.getMessage());
@@ -389,8 +387,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			}
 
 			if (participants3 != null) {
-				for (String nf : notFound) {
-					for (Participant participant : participants3) {
+				for (final String nf : notFound) {
+					for (final Participant participant : participants3) {
 						if (nf.equalsIgnoreCase(participant.getEmailAddress())) {
 
 							newParticipants.add(participant);
@@ -406,25 +404,25 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		update.setParticipants(newParticipants);
 
 		// Users
-		List<UserParticipant> newUsers = new ArrayList<UserParticipant>();
-		UserParticipant[] users = original.getUsers();
+		final List<UserParticipant> newUsers = new ArrayList<UserParticipant>();
+		final UserParticipant[] users = original.getUsers();
 		notFound = new HashSet<String>();
-		UserParticipant[] users3 = update.getUsers();
+		final UserParticipant[] users3 = update.getUsers();
 		if (users3 != null) {
-			for (UserParticipant user : users3) {
+			for (final UserParticipant user : users3) {
 				notFound.add(user.getEmailAddress());
 			}
 		}
 
 		if (users != null) {
-			for (UserParticipant up : users) {
+			for (final UserParticipant up : users) {
 				notFound.remove(up.getEmailAddress());
 				boolean added = false;
-				UserParticipant[] users2 = update.getUsers();
+				final UserParticipant[] users2 = update.getUsers();
 				if (users2 != null) {
-					for (UserParticipant up2 : users2) {
+					for (final UserParticipant up2 : users2) {
 						if (up2.getIdentifier() == up.getIdentifier()) {
-							UserParticipant nup = new UserParticipant(
+							final UserParticipant nup = new UserParticipant(
 									up.getIdentifier());
 							nup.setConfirm(up2.getConfirm());
 							nup.setConfirmMessage(up2.getConfirmMessage());
@@ -446,8 +444,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			}
 
 			if (users3 != null) {
-				for (String nf : notFound) {
-					for (UserParticipant participant : users3) {
+				for (final String nf : notFound) {
+					for (final UserParticipant participant : users3) {
 						if (nf.equalsIgnoreCase(participant.getEmailAddress())) {
 
 							newUsers.add(participant);
@@ -463,31 +461,31 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		update.setUsers(newUsers);
 
 		// Confirmations
-		List<ConfirmableParticipant> newConfirmations = new ArrayList<ConfirmableParticipant>();
-		ConfirmableParticipant[] confirmations = original.getConfirmations();
+		final List<ConfirmableParticipant> newConfirmations = new ArrayList<ConfirmableParticipant>();
+		final ConfirmableParticipant[] confirmations = original.getConfirmations();
 		notFound = new HashSet<String>();
-		ConfirmableParticipant[] confirmations3 = update.getConfirmations();
+		final ConfirmableParticipant[] confirmations3 = update.getConfirmations();
 		if (confirmations3 != null) {
-			for (ConfirmableParticipant participant : confirmations3) {
+			for (final ConfirmableParticipant participant : confirmations3) {
 				notFound.add(participant.getEmailAddress());
 			}
 		}
 
 		if (confirmations != null) {
-			for (ConfirmableParticipant participant : confirmations) {
+			for (final ConfirmableParticipant participant : confirmations) {
 				notFound.remove(participant.getEmailAddress());
 				boolean added = false;
 				if (participant instanceof ExternalUserParticipant) {
-					ExternalUserParticipant ep = (ExternalUserParticipant) participant;
-					ConfirmableParticipant[] participants2 = update.getConfirmations();
+					final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
+					final ConfirmableParticipant[] participants2 = update.getConfirmations();
 					if (confirmations != null) {
 						if (participants2 != null) {
-							for (ConfirmableParticipant	 participant2 : participants2) {
+							for (final ConfirmableParticipant	 participant2 : participants2) {
 								if (participant2 instanceof ExternalUserParticipant) {
-									ExternalUserParticipant ep2 = (ExternalUserParticipant) participant2;
+									final ExternalUserParticipant ep2 = (ExternalUserParticipant) participant2;
 									if (ep2.getEmailAddress().equalsIgnoreCase(
 											ep.getEmailAddress())) {
-										ExternalUserParticipant nup = new ExternalUserParticipant(
+										final ExternalUserParticipant nup = new ExternalUserParticipant(
 												ep.getEmailAddress());
 										nup.setStatus(ep2.getStatus());
 										nup.setMessage(ep2.getMessage());
@@ -512,8 +510,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			}
 
 			if (confirmations3 != null) {
-				for (String nf : notFound) {
-					for (ConfirmableParticipant participant : confirmations3) {
+				for (final String nf : notFound) {
+					for (final ConfirmableParticipant participant : confirmations3) {
 						if (nf.equalsIgnoreCase(participant.getEmailAddress())) {
 
 							newConfirmations.add(participant);
@@ -535,8 +533,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		return pChange;
 	}
 
-	private Set<Integer> skipFieldsInCounter(ITipMessage message) {
-		Set<Integer> skipList = new HashSet<Integer>();
+	private Set<Integer> skipFieldsInCounter(final ITipMessage message) {
+		final Set<Integer> skipList = new HashSet<Integer>();
 		skipList.add(Appointment.NUMBER_OF_LINKS); 
 		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
 			skipList.add(Appointment.TITLE);
@@ -544,7 +542,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		return skipList;
 	}
 
-	private void discardAllButFirst(Appointment update) {
+	private void discardAllButFirst(final Appointment update) {
 		Participant[] participants = update.getParticipants();
 		if (participants != null && participants.length > 1) {
 			participants = new Participant[]{participants[0]};
@@ -564,7 +562,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		}
 	}
 
-	public List<ITipMethod> getMethods() {
+	@Override
+    public List<ITipMethod> getMethods() {
 		return Arrays.asList(ITipMethod.REPLY);
 	}
 

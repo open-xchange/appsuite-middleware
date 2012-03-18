@@ -109,6 +109,8 @@ public class OXServletException extends OXException {
          */
         NO_DEFAULT_CONSTRUCTOR("No default constructor specified in servlet class \"%s\"", Category.CATEGORY_ERROR, 9);
 
+        private static final Object[] EMPTY_ARGS = new Object[0];
+
         /**
          * Message of the exception.
          */
@@ -143,7 +145,7 @@ public class OXServletException extends OXException {
          * @return The newly created {@link OXException} instance.
          */
         public OXException create() {
-            return create(new Object[0]);
+            return create(EMPTY_ARGS);
         }
 
         /**

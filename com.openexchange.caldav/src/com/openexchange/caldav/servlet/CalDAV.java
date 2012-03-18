@@ -50,15 +50,11 @@
 package com.openexchange.caldav.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -85,7 +81,7 @@ public class CalDAV extends OXServlet {
     
     private static ServiceLookup services;
     
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
 
@@ -97,75 +93,75 @@ public class CalDAV extends OXServlet {
 
     @Override
     protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.COPY);
+        doIt(req, resp, CaldavPerformer.Action.COPY);
     }
 
     @Override
     protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.LOCK);
+        doIt(req, resp, CaldavPerformer.Action.LOCK);
     }
 
     @Override
     protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MKCOL);
+        doIt(req, resp, CaldavPerformer.Action.MKCOL);
     }
 
     @Override
     protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MOVE);
+        doIt(req, resp, CaldavPerformer.Action.MOVE);
     }
 
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.OPTIONS);
+        doIt(req, resp, CaldavPerformer.Action.OPTIONS);
     }
 
     @Override
     protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPFIND);
+        doIt(req, resp, CaldavPerformer.Action.PROPFIND);
     }
 
     @Override
     protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPPATCH);
+        doIt(req, resp, CaldavPerformer.Action.PROPPATCH);
     }
 
     @Override
     protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.UNLOCK);
+        doIt(req, resp, CaldavPerformer.Action.UNLOCK);
     }
 
     @Override
     protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.DELETE);
+        doIt(req, resp, CaldavPerformer.Action.DELETE);
     }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.GET);
+        doIt(req, resp, CaldavPerformer.Action.GET);
     }
 
     @Override
     protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.HEAD);
+        doIt(req, resp, CaldavPerformer.Action.HEAD);
     }
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PUT);
+        doIt(req, resp, CaldavPerformer.Action.PUT);
     }
 
     @Override
     protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.TRACE);
+        doIt(req, resp, CaldavPerformer.Action.TRACE);
     }
 
     @Override
-    protected void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.REPORT);
+    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, CaldavPerformer.Action.REPORT);
     }
 
-    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
+    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final CaldavPerformer.Action action) throws ServletException, IOException {
         ServerSession session;
         try {
             session = ServerSessionAdapter.valueOf(getSession(req));
@@ -186,11 +182,11 @@ public class CalDAV extends OXServlet {
         }
     }
 
-    private boolean checkPermission(ServerSession session) {
+    private boolean checkPermission(final ServerSession session) {
         try {
-            ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
+            final ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
             return property.isDefined() && property.get() && session.getUserConfiguration().hasCalendar();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return false;
         }
     }

@@ -319,12 +319,8 @@ public class TaskCopyTask implements CopyUserTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
-     */
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
-        return;
+        // Nothing to do
     }
 
 }

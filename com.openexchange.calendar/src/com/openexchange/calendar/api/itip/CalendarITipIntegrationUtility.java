@@ -75,8 +75,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.groupware.search.Order;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -88,40 +86,41 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
-    private AppointmentSqlFactoryService factory;
+    private final AppointmentSqlFactoryService factory;
 
-    private CalendarCollectionService calendarCollection;
+    private final CalendarCollectionService calendarCollection;
 
-    private ContextService contexts;
+    private final ContextService contexts;
 
-    public CalendarITipIntegrationUtility(AppointmentSqlFactory factory, CalendarCollectionService calendarCollection, ContextService contexts) {
+    public CalendarITipIntegrationUtility(final AppointmentSqlFactory factory, final CalendarCollectionService calendarCollection, final ContextService contexts) {
         this.factory = factory;
         this.contexts = contexts;
         this.calendarCollection = calendarCollection;
     }
 
     // TODO: Find a better way
-    public List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws OXException {
+    @Override
+    public List<Appointment> getConflicts(final CalendarDataObject appointment, final Session session) throws OXException {
     	if (appointment == null) {
     		return Collections.emptyList();
     	}
-        AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
-        List<Appointment> conflicts = new ArrayList<Appointment>();
+        final AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
+        final List<Appointment> conflicts = new ArrayList<Appointment>();
         boolean checkedUser = false;
         if (appointment.getParticipants() != null) {
-            for (Participant participant : appointment.getParticipants()) {
+            for (final Participant participant : appointment.getParticipants()) {
                 if (!UserParticipant.class.isInstance(participant)) {
                     continue;
                 }
-                UserParticipant userParticipant = (UserParticipant) participant;
+                final UserParticipant userParticipant = (UserParticipant) participant;
                 checkedUser = checkedUser || userParticipant.getIdentifier() == session.getUserId();
-                SearchIterator<Appointment> freeBusyInformation = appointments.getFreeBusyInformation(
+                final SearchIterator<Appointment> freeBusyInformation = appointments.getFreeBusyInformation(
                     userParticipant.getIdentifier(),
                     Participant.USER,
                     appointment.getStartDate(),
                     appointment.getEndDate());
                 while (freeBusyInformation.hasNext()) {
-                    Appointment next = freeBusyInformation.next();
+                    final Appointment next = freeBusyInformation.next();
                     next.setParticipants(new Participant[] { userParticipant });
                     conflicts.add(next);
                 }
@@ -129,13 +128,13 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             }
         }
         if (!checkedUser) {
-            SearchIterator<Appointment> freeBusyInformation = appointments.getFreeBusyInformation(
+            final SearchIterator<Appointment> freeBusyInformation = appointments.getFreeBusyInformation(
                 session.getUserId(),
                 Participant.USER,
                 appointment.getStartDate(),
                 appointment.getEndDate());
             while (freeBusyInformation.hasNext()) {
-                Appointment next = freeBusyInformation.next();
+                final Appointment next = freeBusyInformation.next();
                 next.setParticipants(new Participant[] { new UserParticipant(session.getUserId()) });
                 conflicts.add(next);
             }
@@ -161,71 +160,77 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     static {
         int i = 0;
-        for (int col : Appointment.ALL_COLUMNS) {
+        for (final int col : Appointment.ALL_COLUMNS) {
             if (!EXEMPT.contains(col)) { // FIXME: Broken fields, fix underlying calendar
                 EXCEPTION_FIELDS[i++] = col;
             }
         }
     }
 
-    public List<Appointment> getExceptions(Appointment original, Session session) throws OXException {
-        CalendarDataObject[] changeExceptionsByRecurrence = calendarCollection.getChangeExceptionsByRecurrence(
+    @Override
+    public List<Appointment> getExceptions(final Appointment original, final Session session) throws OXException {
+        final CalendarDataObject[] changeExceptionsByRecurrence = calendarCollection.getChangeExceptionsByRecurrence(
             original.getObjectID(),
             EXCEPTION_FIELDS,
             session);
-        List<Appointment> appointments = new ArrayList<Appointment>(changeExceptionsByRecurrence.length);
-        for (CalendarDataObject calendarDataObject : changeExceptionsByRecurrence) {
+        final List<Appointment> appointments = new ArrayList<Appointment>(changeExceptionsByRecurrence.length);
+        for (final CalendarDataObject calendarDataObject : changeExceptionsByRecurrence) {
             appointments.add(calendarDataObject);
         }
         return appointments;
     }
 
-    public CalendarDataObject resolveUid(String uid, Session session) throws OXException {
-        AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
-        int resolved = appointments.resolveUid(uid);
+    @Override
+    public CalendarDataObject resolveUid(final String uid, final Session session) throws OXException {
+        final AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
+        final int resolved = appointments.resolveUid(uid);
         if (resolved == 0) {
             return null;
         }
         try {
             return appointments.getObjectById(resolved);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
     
-    public Appointment reloadAppointment(Appointment appointment, Session session) throws OXException {
+    @Override
+    public Appointment reloadAppointment(final Appointment appointment, final Session session) throws OXException {
         try {
             return factory.createAppointmentSql(session).getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
     
-	public Appointment loadAppointment(Appointment appointment, Session session) throws OXException {
+	@Override
+    public Appointment loadAppointment(final Appointment appointment, final Session session) throws OXException {
 	       try {
 	        	if (appointment.getObjectID() <= 0) {
-	                AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
+	                final AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
 	            	appointment.setObjectID(appointments.resolveUid(appointment.getUid()));
 	        	}
 	            return factory.createAppointmentSql(session).getObjectById(appointment.getObjectID());
-	        } catch (SQLException e) {
+	        } catch (final SQLException e) {
 	        	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
 	        }
 	    }
 
 
-    public void createAppointment(CalendarDataObject appointment, Session session) throws OXException {
-        Context ctx = contexts.getContext(session.getContextId());
+    @Override
+    public void createAppointment(final CalendarDataObject appointment, final Session session) throws OXException {
+        final Context ctx = contexts.getContext(session.getContextId());
         appointment.setContext(ctx);
         appointment.setIgnoreConflicts(true);
         factory.createAppointmentSql(session).insertAppointmentObject(appointment);
     }
 
-    public void updateAppointment(CalendarDataObject appointment, Session session, Date clientLastModified) throws OXException {
-        Context ctx = contexts.getContext(session.getContextId());
+    @Override
+    public void updateAppointment(final CalendarDataObject appointment, final Session session, final Date clientLastModified) throws OXException {
+        final Context ctx = contexts.getContext(session.getContextId());
         appointment.setContext(ctx);
         appointment.setIgnoreConflicts(true);
-        AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
+        final AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
         boolean checkPermissions = false;
         if (appointment.getParentFolderID() <= 0) {
         	try {
@@ -241,25 +246,26 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             			appointment.setParentFolderID(getPrivateCalendarFolderId(session));
             		}
             	}
-        	} catch (OXException x) {
+        	} catch (final OXException x) {
         		// IGNORE
-        	} catch (SQLException e) {
+        	} catch (final SQLException e) {
         		// IGNORE
         	}
         }
         appointments.updateAppointmentObject(appointment, appointment.getParentFolderID(), clientLastModified, checkPermissions);
     }
     
-    public int getFolderIdForUser(int appId, int userId, int contextId) throws OXException {
+    @Override
+    public int getFolderIdForUser(final int appId, final int userId, final int contextId) throws OXException {
     	if (appId <= 0) {
     		return 0;
     	}
-    	Session mockSession = new ITipSession(userId, contextId);
-    	AppointmentSQLInterface appointments = factory.createAppointmentSql(mockSession);
+    	final Session mockSession = new ITipSession(userId, contextId);
+    	final AppointmentSQLInterface appointments = factory.createAppointmentSql(mockSession);
     	return appointments.getFolder(appId);
     }
     
-    private int getPrincipalsFolderId(CalendarDataObject appointment, Session session) throws OXException {
+    private int getPrincipalsFolderId(final CalendarDataObject appointment, final Session session) throws OXException {
     	
     	if (appointment.getPrincipalId() <= 0) {
     		return 0;
@@ -267,14 +273,16 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     	return getFolderIdForUser(appointment.getObjectID(), appointment.getPrincipalId(), session.getContextId());
 	}
 
-	public void changeConfirmationForExternalParticipant(Appointment appointment, ConfirmationChange change, Session session) throws OXException {
-        AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
+	@Override
+    public void changeConfirmationForExternalParticipant(final Appointment appointment, final ConfirmationChange change, final Session session) throws OXException {
+        final AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
         
         appointments.setExternalConfirmation(appointment.getObjectID(), appointment.getParentFolderID(), change.getIdentifier(), change.getNewStatus(), change.getNewMessage());
     }
 
-    public void deleteAppointment(Appointment appointment, Session session, Date clientLastModified) throws OXException {
-        CalendarDataObject toDelete = new CalendarDataObject();
+    @Override
+    public void deleteAppointment(final Appointment appointment, final Session session, final Date clientLastModified) throws OXException {
+        final CalendarDataObject toDelete = new CalendarDataObject();
         toDelete.setObjectID(appointment.getObjectID());
         toDelete.setParentFolderID(appointment.getParentFolderID());
         if (appointment.containsRecurrencePosition()) {
@@ -282,17 +290,17 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         } else if (appointment.containsRecurrenceDatePosition()) {
             toDelete.setRecurrenceDatePosition(new Date(startOfTheDay(appointment.getRecurrenceDatePosition())));
         }
-        Context ctx = contexts.getContext(session.getContextId());
+        final Context ctx = contexts.getContext(session.getContextId());
         toDelete.setContext(ctx);
         try {
 			factory.createAppointmentSql(session).deleteAppointmentObject(toDelete, toDelete.getParentFolderID(), clientLastModified);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
 		}
     }
     
-    private long startOfTheDay(Date recurrenceDatePosition) {
-        GregorianCalendar calendar = new GregorianCalendar();
+    private long startOfTheDay(final Date recurrenceDatePosition) {
+        final GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTime(recurrenceDatePosition);
         calendar.set(Calendar.HOUR, 0);
@@ -301,8 +309,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         return calendar.getTimeInMillis();
     }
 
-    public int getPrivateCalendarFolderId(Session session) throws OXException {
-        Context ctx = contexts.getContext(session.getContextId());
+    @Override
+    public int getPrivateCalendarFolderId(final Session session) throws OXException {
+        final Context ctx = contexts.getContext(session.getContextId());
         final OXFolderAccess acc = new OXFolderAccess(ctx);
         return acc.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
     }

@@ -114,7 +114,7 @@ public class RedirectServlet extends HttpServlet {
     }
 
     private boolean isServerRelative(final String location) {
-        return location.startsWith("/");
+        return location.length() > 0 && location.charAt(0) == '/';
     }
 
     private String assumeRelative(final String referer, final String location) {

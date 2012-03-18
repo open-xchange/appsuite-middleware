@@ -97,6 +97,8 @@ import com.openexchange.java.Charsets;
  */
 public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
+    private static final byte[] EMPTY_BYTES = new byte[0];
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerImpl.class));
 
     private HttpServlet servlet;
@@ -324,7 +326,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             /*
              * This condition is reached when no content-length header was present in forward request package (transfer-encoding: chunked)
              */
-            request.setData(new byte[0]);
+            request.setData(EMPTY_BYTES);
         }
     }
 
@@ -629,7 +631,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         ajpConblocker.acquire();
         try {
             if (null == response) {
-                return new byte[0];
+                return EMPTY_BYTES;
             }
             final byte[] data = response.getServletOutputStream().getData();
             response.getServletOutputStream().clearByteBuffer();

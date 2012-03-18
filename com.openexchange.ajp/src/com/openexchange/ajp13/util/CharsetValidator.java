@@ -97,7 +97,7 @@ public final class CharsetValidator {
     public void checkCharset(final String charset) throws UnsupportedEncodingException {
         final IgnoreCaseString key = IgnoreCaseString.valueOf(charset);
         final Boolean b = map.get(key);
-        if (Boolean.FALSE == b) {
+        if (Boolean.FALSE.equals(b)) {
             throw new UnsupportedEncodingException(charset);
         }
         if (null == b) {

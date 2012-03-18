@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -110,13 +109,13 @@ public enum CalendarField {
 
     private String jsonName;
 
-    private CalendarField(int columnNumber, String jsonName) {
+    private CalendarField(final int columnNumber, final String jsonName) {
         this.columnNumber = columnNumber;
         this.jsonName = jsonName;
     }
 
-    public static CalendarField getByColumn(int column) {
-        for (CalendarField field: values()) {
+    public static CalendarField getByColumn(final int column) {
+        for (final CalendarField field: values()) {
             if (field.getColumnNumber() == column) {
                 return field;
             }

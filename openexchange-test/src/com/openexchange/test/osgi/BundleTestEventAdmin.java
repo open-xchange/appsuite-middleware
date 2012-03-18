@@ -115,7 +115,7 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
             final Appointment newApp = createAppointmentObject(
                 "TestAppointment",
                 System.currentTimeMillis(),
-                System.currentTimeMillis() + 3600l,
+                System.currentTimeMillis() + 3600L,
                 getStandardCalendarFolder(getWebConversation(), loginTest.getHostName(), sessionId));
             final JSONObject appointmentObject = insertAppointment(
                 getWebConversation(),

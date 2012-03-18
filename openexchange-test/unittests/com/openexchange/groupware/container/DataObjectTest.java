@@ -157,8 +157,8 @@ public class DataObjectTest extends TestCase {
 
     public void fillDataObject(DataObject dataObject) {
         dataObject.setCreatedBy(1);
-        dataObject.setCreationDate(new Date(2l));
-        dataObject.setLastModified(new Date(3l));
+        dataObject.setCreationDate(new Date(2L));
+        dataObject.setLastModified(new Date(3L));
         dataObject.setModifiedBy(4);
         dataObject.setObjectID(5);
 

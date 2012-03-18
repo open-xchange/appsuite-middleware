@@ -51,14 +51,12 @@ package com.openexchange.calendar.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.api.CalendarFeature;
 import com.openexchange.calendar.api.itip.CalendarITipIntegrationUtility;
 import com.openexchange.calendar.api.itip.DefaultNotificationParticipantResolver;
 import com.openexchange.calendar.itip.AppointmentNotificationPool;
-import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
 import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.calendar.itip.ITipFeature;
@@ -114,7 +112,7 @@ public class ITipActivator extends HousekeepingActivator {
         final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
         final TimerService timers = getService(TimerService.class);
 		
-        int interval = config.getIntProperty("com.openexchange.calendar.notify.interval", 120000);
+        final int interval = config.getIntProperty("com.openexchange.calendar.notify.interval", 120000);
         final AttachmentMemory attachmentMemory = new AttachmentMemory(interval * 3, timers);
 
         MailSenderService sender = new DefaultMailSenderService(emitter, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
@@ -125,7 +123,7 @@ public class ITipActivator extends HousekeepingActivator {
         final NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
 
         
-		AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, interval);
+		final AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, interval);
         sender = new PoolingMailSenderService(pool, sender);
         
         
@@ -149,7 +147,7 @@ public class ITipActivator extends HousekeepingActivator {
 
     public static void setFeatureIfPossible() {
         if (factory != null && !features.isEmpty()) {
-        	for (CalendarFeature feature : features) {
+        	for (final CalendarFeature feature : features) {
 				factory.addCalendarFeature(feature);
 			}
         }

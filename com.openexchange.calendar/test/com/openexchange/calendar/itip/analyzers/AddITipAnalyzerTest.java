@@ -49,7 +49,10 @@
 
 package com.openexchange.calendar.itip.analyzers;
 
-import static org.junit.Assert.*;
+import static com.openexchange.time.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,17 +63,14 @@ import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
-import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.ITipChange.Type;
+import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.Messages;
-import com.openexchange.calendar.itip.analyzers.AddITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.sim.SimBuilder;
-import static com.openexchange.time.TimeTools.*;
 
 /**
  * {@link AddITipAnalyzerTest}
@@ -80,37 +80,37 @@ import static com.openexchange.time.TimeTools.*;
 public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     @Test
     public void testMethod() {
-        List<ITipMethod> methods = new AddITipAnalyzer(null, null).getMethods();
+        final List<ITipMethod> methods = new AddITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.ADD), methods);
     }
     
     @Test
     public void testAddChangeException() throws OXException {
         
-        CalendarDataObject newException = appointment("123-123-123-123");
+        final CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         newException.setStartDate(D("Tomorrow at 09:00"));
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.addException(newException);
         
-        CalendarDataObject existingSeries = appointment("123-123-123-123");
+        final CalendarDataObject existingSeries = appointment("123-123-123-123");
         existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(existingSeries);
         integrationBuilder.expectCall("getExceptions", existingSeries, session).andReturn(Collections.emptyList());
         integrationBuilder.expectCall("getConflicts", newException, session).andReturn(Collections.emptyList());
 
         
-        ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
-        ITipChange change = changes.get(0);
+        final ITipChange change = changes.get(0);
         
         assertEquals(Type.CREATE, change.getType());
         assertTrue(change.isException());
@@ -126,29 +126,29 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     
     @Test
     public void testAddChangeExceptionWithoutRescheduling() throws OXException {
-        CalendarDataObject newException = appointment("123-123-123-123");
+        final CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.addException(newException);
         
-        CalendarDataObject existingSeries = appointment("123-123-123-123");
+        final CalendarDataObject existingSeries = appointment("123-123-123-123");
         existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(existingSeries);
         integrationBuilder.expectCall("getExceptions", existingSeries, session).andReturn(Collections.emptyList());
         integrationBuilder.expectCall("getConflicts", newException, session).andReturn(Collections.emptyList());
 
         
-        ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
-        ITipChange change = changes.get(0);
+        final ITipChange change = changes.get(0);
         
         assertEquals(Type.CREATE, change.getType());
         assertTrue(change.isException());
@@ -165,29 +165,29 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     
     @Test
     public void testAddChangeExceptionWithConflicts() throws OXException {
-        CalendarDataObject newException = appointment("123-123-123-123");
+        final CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         newException.setStartDate(D("Tomorrow at 09:00"));
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.addException(newException);
         
-        CalendarDataObject existingSeries = appointment("123-123-123-123");
+        final CalendarDataObject existingSeries = appointment("123-123-123-123");
         existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(existingSeries);
         integrationBuilder.expectCall("getExceptions", existingSeries, session).andReturn(Collections.emptyList());
         integrationBuilder.expectCall("getConflicts", newException, session).andReturn(Arrays.asList(appointment("1"), appointment("2")));
         
-        ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
-        ITipChange change = changes.get(0);
+        final ITipChange change = changes.get(0);
         
         assertEquals(Type.CREATE, change.getType());
         assertTrue(change.isException());
@@ -203,24 +203,24 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     // Error Cases
     @Test
     public void testAddChangeExceptionToNonexistingAppointment() throws OXException {
-        CalendarDataObject newException = appointment("123-123-123-123");
+        final CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.addException(newException);
                 
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
         
-        ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(0, changes.size());
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         
-        ITipAnnotation error = annotations.get(0);
+        final ITipAnnotation error = annotations.get(0);
         assertEquals(Messages.ADD_TO_UNKNOWN, error.getMessage());
 
         assertActions(analysis, ITipAction.REFRESH);
@@ -230,28 +230,28 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     
     @Test
     public void testAddChangeWhereAlreadyAChangeExists() throws OXException {
-        CalendarDataObject newException = appointment("123-123-123-123");
+        final CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.addException(newException);
         
-        CalendarDataObject existingSeries = appointment("123-123-123-123");
+        final CalendarDataObject existingSeries = appointment("123-123-123-123");
         existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
-        CalendarDataObject existingException = newException.clone();
+        final CalendarDataObject existingException = newException.clone();
         existingException.setObjectID(13);
         
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(existingSeries);
         integrationBuilder.expectCall("getExceptions", existingSeries, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(existingException)));
         integrationBuilder.expectCall("getConflicts", newException, session).andReturn(Collections.emptyList());
 
-        ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new AddITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
         assertEquals(13, changes.get(0).getCurrentAppointment().getObjectID());

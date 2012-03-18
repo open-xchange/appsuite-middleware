@@ -89,6 +89,8 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.watcher.Task {
 
+    private static final StackTraceElement[] EMPTY_STACK = new StackTraceElement[0];
+
     /**
      * The logger constant.
      */
@@ -331,7 +333,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
     @Override
     public StackTraceElement[] getStackTrace() {
         if (null == thread) {
-            return new StackTraceElement[0];
+            return EMPTY_STACK;
         }
         return thread.getStackTrace();
     }

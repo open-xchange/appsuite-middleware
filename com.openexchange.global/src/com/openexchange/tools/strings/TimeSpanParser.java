@@ -67,12 +67,12 @@ public class TimeSpanParser  implements StringParser {
     private static final Map<String, Long> UNITS = new HashMap<String, Long>() {
         private static final long serialVersionUID = 4341197305332412108L;
     {
-        put("MS", L(1l));
-        put("S", L(1000l));
-        put("M", L(1000l*60));
-        put("H", L(1000l*60*60));
-        put("D", L(1000l*60*60*24));
-        put("W", L(1000l*60*60*24*7));
+        put("MS", L(1L));
+        put("S", L(1000L));
+        put("M", L(1000L*60));
+        put("H", L(1000L*60*60));
+        put("D", L(1000L*60*60*24));
+        put("W", L(1000L*60*60*24*7));
     }};
 
     /**

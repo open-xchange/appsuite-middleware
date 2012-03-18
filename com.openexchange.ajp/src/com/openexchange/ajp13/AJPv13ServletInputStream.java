@@ -62,6 +62,8 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  */
 public final class AJPv13ServletInputStream extends ServletInputStream {
 
+    private static final byte[] EMPTY_BYTES = new byte[0];
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ServletInputStream.class));
 
     private final AJPv13Connection ajpCon;
@@ -95,7 +97,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
     }
 
     private void ensureAccess() throws IOException {
-        if (Thread.currentThread() != owner) {
+        if (!Thread.currentThread().equals(owner)) {
             throw new IOException(new StringBuilder(128).append("Illegal access to input stream through thread \"").append(
                 Thread.currentThread().getName()).append("\" but should be \"").append(owner.getName()).append('"').toString());
         }
@@ -284,7 +286,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
     public byte[] peekData() throws IOException {
         final int len = available();
         if (0 == len) {
-            return new byte[0];
+            return EMPTY_BYTES;
         }
         final byte[] retval = new byte[len];
         System.arraycopy(data, pos, retval, 0, len);

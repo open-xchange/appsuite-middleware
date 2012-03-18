@@ -136,7 +136,7 @@ public class HttpServletManager {
      */
     final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap, final boolean nonBlocking) {
         synchronized (HttpServletManager.class) {
-            if (DummyHttpServletManager.INSTANCE == instance) {
+            if (DummyHttpServletManager.INSTANCE.equals(instance)) {
                 if (nonBlocking) {
                     instance = new NonBlockingHttpServletManager(servletConstructorMap);
                 } else {
@@ -151,7 +151,7 @@ public class HttpServletManager {
      */
     final static void shutdownHttpServletManager() {
         synchronized (HttpServletManager.class) {
-            if (DummyHttpServletManager.INSTANCE != instance) {
+            if (!DummyHttpServletManager.INSTANCE.equals(instance)) {
                 instance = DummyHttpServletManager.INSTANCE;
             }
         }

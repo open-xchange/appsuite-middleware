@@ -54,10 +54,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
@@ -80,7 +78,6 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -100,12 +97,12 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     private final CalendarCollection calendarCollection;
 
-	private AttachmentMemory attachmentMemory;
+	private final AttachmentMemory attachmentMemory;
 	
 	private static class AppointmentAddress {
-		private int id;
-		private int cid;
-		public AppointmentAddress(int id, int cid) {
+		private final int id;
+		private final int cid;
+		public AppointmentAddress(final int id, final int cid) {
 			super();
 			this.id = id;
 			this.cid = cid;
@@ -119,18 +116,23 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 			return result;
 		}
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			AppointmentAddress other = (AppointmentAddress) obj;
-			if (cid != other.cid)
-				return false;
-			if (id != other.id)
-				return false;
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+                return true;
+            }
+			if (obj == null) {
+                return false;
+            }
+			if (getClass() != obj.getClass()) {
+                return false;
+            }
+			final AppointmentAddress other = (AppointmentAddress) obj;
+			if (cid != other.cid) {
+                return false;
+            }
+			if (id != other.id) {
+                return false;
+            }
 			return true;
 		}
 		
@@ -139,7 +141,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 	private static ConcurrentHashMap<AppointmentAddress, AppointmentAddress> createNewLimbo = new ConcurrentHashMap<AppointmentAddress, AppointmentAddress>();
 
 
-    public NotifyingCalendar(final ITipMailGeneratorFactory generators, final MailSenderService sender, final AppointmentSQLInterface delegate, AttachmentMemory attachmentMemory, final ServiceLookup services, final Session session) {
+    public NotifyingCalendar(final ITipMailGeneratorFactory generators, final MailSenderService sender, final AppointmentSQLInterface delegate, final AttachmentMemory attachmentMemory, final ServiceLookup services, final Session session) {
         super(session, services);
         this.delegate = delegate;
         this.generators = generators;
@@ -149,10 +151,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         calendarCollection = new CalendarCollection();
     }
 
+    @Override
     public long attachmentAction(final int objectId, final int uid, final int folderId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
     	attachmentMemory.rememberAttachmentChange(uid, c.getContextId());
     	
-    	long retval = delegate.attachmentAction(objectId, uid, folderId, session, c, numberOfAttachments);
+    	final long retval = delegate.attachmentAction(objectId, uid, folderId, session, c, numberOfAttachments);
     	// Trigger Update Mail unless attachment is in create new limbo
     	if (!createNewLimbo.containsKey(new AppointmentAddress(uid, c.getContextId()))) {
     		try {
@@ -169,7 +172,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                         sender.sendMail(mail, session);
                     }
                 }
-    		} catch (SQLException e) {
+    		} catch (final SQLException e) {
     			throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
     		}
     	}
@@ -177,18 +180,22 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     	
     }
 
+    @Override
     public boolean checkIfFolderContainsForeignObjects(final int user_id, final int inFolder, final Connection readCon) throws OXException, SQLException {
         return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder, readCon);
     }
 
+    @Override
     public boolean checkIfFolderContainsForeignObjects(final int user_id, final int inFolder) throws OXException, SQLException {
         return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder);
     }
 
+    @Override
     public void deleteAppointmentObject(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified) throws OXException, SQLException {
         deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, true);
     }
 
+    @Override
     public void deleteAppointmentObject(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException, SQLException {
         CalendarDataObject original = null;
         try {
@@ -223,74 +230,92 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 		}
     }
 
+    @Override
     public void deleteAppointmentsInFolder(final int inFolder, final Connection writeCon) throws OXException, SQLException {
         delegate.deleteAppointmentsInFolder(inFolder, writeCon);
     }
 
+    @Override
     public void deleteAppointmentsInFolder(final int inFolder) throws OXException, SQLException {
         delegate.deleteAppointmentsInFolder(inFolder);
     }
 
+    @Override
     public SearchIterator<Appointment> getActiveAppointments(final int user_uid, final Date start, final Date end, final int[] cols) throws OXException {
         return delegate.getActiveAppointments(user_uid, start, end, cols);
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetween(final int user_uid, final Date start, final Date end, final int[] cols, final int orderBy, final Order order) throws OXException, SQLException {
         return delegate.getAppointmentsBetween(user_uid, start, end, cols, orderBy, order);
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int folderId, final int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return delegate.getAppointmentsBetweenInFolder(folderId, cols, start, end, from, to, orderBy, orderDir);
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int folderId, final int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException, SQLException {
         return delegate.getAppointmentsBetweenInFolder(folderId, cols, start, end, orderBy, order);
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchObject, final int orderBy, final Order orderDir, final int[] cols) throws OXException, SQLException {
         return delegate.getAppointmentsByExtendedSearch(searchObject, orderBy, orderDir, cols);
     }
 
+    @Override
     public SearchIterator<Appointment> getDeletedAppointmentsInFolder(final int folderId, final int[] cols, final Date since) throws OXException, SQLException {
         return delegate.getDeletedAppointmentsInFolder(folderId, cols, since);
     }
 
+    @Override
     public int getFolder(final int objectId) throws OXException {
         return delegate.getFolder(objectId);
     }
 
+    @Override
     public SearchIterator<Appointment> getFreeBusyInformation(final int id, final int type, final Date start, final Date end) throws OXException {
         return delegate.getFreeBusyInformation(id, type, start, end);
     }
 
+    @Override
     public boolean getIncludePrivateAppointments() {
         return delegate.getIncludePrivateAppointments();
     }
 
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsBetween(final int userId, final Date start, final Date end, final int[] cols, final Date since, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return delegate.getModifiedAppointmentsBetween(userId, start, end, cols, since, orderBy, orderDir);
     }
 
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, final int[] cols, final Date since) throws OXException, SQLException {
         return delegate.getModifiedAppointmentsInFolder(fid, start, end, cols, since);
     }
 
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final int[] cols, final Date since) throws OXException {
         return delegate.getModifiedAppointmentsInFolder(fid, cols, since);
     }
 
+    @Override
     public CalendarDataObject getObjectById(final int objectId, final int inFolder) throws OXException, SQLException {
         return delegate.getObjectById(objectId, inFolder);
     }
 
+    @Override
     public SearchIterator<Appointment> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
         return delegate.getObjectsById(objectIdAndInFolder, cols);
     }
 
+    @Override
     public boolean[] hasAppointmentsBetween(final Date start, final Date end) throws OXException {
         return delegate.hasAppointmentsBetween(start, end);
     }
 
+    @Override
     public Appointment[] insertAppointmentObject(final CalendarDataObject cdao) throws OXException {
         try {
             final Appointment[] retval = delegate.insertAppointmentObject(cdao);
@@ -319,30 +344,37 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
 
 
+    @Override
     public boolean isFolderEmpty(final int uid, final int fid, final Connection readCon) throws OXException, SQLException {
         return delegate.isFolderEmpty(uid, fid, readCon);
     }
 
+    @Override
     public boolean isFolderEmpty(final int uid, final int fid) throws OXException, SQLException {
         return delegate.isFolderEmpty(uid, fid);
     }
 
+    @Override
     public int resolveUid(final String uid) throws OXException {
         return delegate.resolveUid(uid);
     }
 
+    @Override
     public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir, final int[] cols) throws OXException {
         return delegate.searchAppointments(searchObj, orderBy, orderDir, cols);
     }
 
+    @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         return delegate.setExternalConfirmation(oid, folderId, mail, confirm, message);
     }
 
+    @Override
     public void setIncludePrivateAppointments(final boolean include) {
         delegate.setIncludePrivateAppointments(include);
     }
 
+    @Override
     public Date setUserConfirmation(final int object_id, final int folderId, final int user_id, final int confirm, final String confirm_message) throws OXException {
         try {
             final CalendarDataObject original = getObjectById(object_id);
@@ -383,31 +415,36 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         }
     }
 
+    @Override
     public Appointment[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
         return updateAppointmentObject(cdao, inFolder, clientLastModified, true);
     }
 
+    @Override
     public CalendarDataObject getObjectById(final int objectId) throws OXException, SQLException {
         return delegate.getObjectById(objectId);
     }
     
     
 
+    @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(
-			String email, int[] cols, Date start, Date end, int orderBy,
-			Order order) throws OXException {
+			final String email, final int[] cols, final Date start, final Date end, final int orderBy,
+			final Order order) throws OXException {
 		return delegate.getAppointmentsWithExternalParticipantBetween(email,
 				cols, start, end, orderBy, order);
 	}
 
-	public List<Appointment> getAppointmentsWithUserBetween(User user,
-			int[] cols, Date start, Date end, int orderBy, Order order)
+	@Override
+    public List<Appointment> getAppointmentsWithUserBetween(final User user,
+			final int[] cols, final Date start, final Date end, final int orderBy, final Order order)
 			throws OXException {
 		return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
 				orderBy, order);
 	}
 
-	public Appointment[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
+	@Override
+    public Appointment[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
         try {
             final CalendarDataObject original = getObjectById(cdao.getObjectID());
             final Appointment[] retval = delegate.updateAppointmentObject(cdao, inFolder, clientLastModified, checkPermissions);

@@ -403,12 +403,12 @@ public class ResourceTest extends AbstractResourceTest{
 	@Override
     public Object contentLength() throws WebdavProtocolException {
 		WebdavResource res = createResource();
-		final Long defaultLength = 0l;
+		final Long defaultLength = 0L;
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
 		assertEquals(defaultLength, res.getLength());
 
 		try {
-			res.setLength(1l);
+			res.setLength(1L);
 		} catch (final OXException e) {
 			e.printStackTrace();
 			fail(e.toString());
@@ -417,14 +417,14 @@ public class ResourceTest extends AbstractResourceTest{
 		res = res.reload();
 
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
-		assertEquals((Long)1l, res.getLength());
+		assertEquals((Long)1L, res.getLength());
 
 		final WebdavProperty prop = Protocol.GETCONTENTLENGTH_LITERAL.getWebdavProperty();
 		prop.setValue("2");
 		res.putProperty(prop);
 
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
-		assertEquals((Long)2l, res.getLength());
+		assertEquals((Long)2L, res.getLength());
 
 		{
 			final String content = "Hello, I'm the content!";

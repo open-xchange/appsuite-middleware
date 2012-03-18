@@ -251,9 +251,9 @@ public abstract class AJAXTest {
             base.append("flags", "vacation");
             final JSONObject test = new JSONObject();
             test.put("id", "allof");
-            test.append("tests", currentdate(1183759200000l, "ge"));
-            test.append("tests", currentdate(1183759200000l, "le"));
-            test.append("tests", currentdate(1183759200000l, "is"));
+            test.append("tests", currentdate(1183759200000L, "ge"));
+            test.append("tests", currentdate(1183759200000L, "le"));
+            test.append("tests", currentdate(1183759200000L, "is"));
             base.put("test", test);
             final JSONObject action = new JSONObject();
 //            action.put("id", "keep");

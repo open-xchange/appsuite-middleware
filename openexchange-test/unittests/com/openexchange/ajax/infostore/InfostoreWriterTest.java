@@ -27,7 +27,7 @@ public class InfostoreWriterTest extends TestCase {
 
 	private static final List<DocumentMetadata> DUMMY_DATA = new ArrayList<DocumentMetadata>();
 
-	private static final Date now = new Date(1153481105872l);
+	private static final Date now = new Date(1153481105872L);
 
 
 	static {

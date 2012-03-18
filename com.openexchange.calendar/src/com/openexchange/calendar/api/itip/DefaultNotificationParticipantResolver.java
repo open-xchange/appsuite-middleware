@@ -55,7 +55,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -93,15 +92,15 @@ import com.openexchange.user.UserService;
 public class DefaultNotificationParticipantResolver implements
 		NotificationParticipantResolver {
 
-	private UserService userService;
-	private GroupService groupService;
-	private ConfigurationService config;
-	private ResourceService resources;
-	private ITipIntegrationUtility util;
+	private final UserService userService;
+	private final GroupService groupService;
+	private final ConfigurationService config;
+	private final ResourceService resources;
+	private final ITipIntegrationUtility util;
 
-	public DefaultNotificationParticipantResolver(GroupService groupService,
-			UserService userService, ResourceService resources,
-			ConfigurationService config, ITipIntegrationUtility util) {
+	public DefaultNotificationParticipantResolver(final GroupService groupService,
+			final UserService userService, final ResourceService resources,
+			final ConfigurationService config, final ITipIntegrationUtility util) {
 		super();
 		this.groupService = groupService;
 		this.userService = userService;
@@ -111,29 +110,30 @@ public class DefaultNotificationParticipantResolver implements
 	}
 
 	// TODO: Principal
-	public List<NotificationParticipant> resolveAllRecipients(
-			Appointment original, Appointment appointment, User user,
-			User onBehalfOf, Context ctx) throws OXException {
-		NotificationConfiguration defaultConfiguration = getDefaultConfiguration(
+	@Override
+    public List<NotificationParticipant> resolveAllRecipients(
+			final Appointment original, final Appointment appointment, final User user,
+			final User onBehalfOf, final Context ctx) throws OXException {
+		final NotificationConfiguration defaultConfiguration = getDefaultConfiguration(
 				user, ctx);
 
-		Map<Integer, UserParticipant> userIds = new HashMap<Integer, UserParticipant>();
-		List<ExternalUserParticipant> externalParticipants = new ArrayList<ExternalUserParticipant>(
+		final Map<Integer, UserParticipant> userIds = new HashMap<Integer, UserParticipant>();
+		final List<ExternalUserParticipant> externalParticipants = new ArrayList<ExternalUserParticipant>(
 				appointment.getParticipants().length);
-		Set<String> externalGuardian = new HashSet<String>();
+		final Set<String> externalGuardian = new HashSet<String>();
 
-		Set<Integer> groupIds = new HashSet<Integer>();
-		Set<Integer> resourceIds = new HashSet<Integer>();
+		final Set<Integer> groupIds = new HashSet<Integer>();
+		final Set<Integer> resourceIds = new HashSet<Integer>();
 
 		Participant[] participants = appointment.getParticipants();
 		if (participants != null) {
-			for (Participant participant : participants) {
+			for (final Participant participant : participants) {
 				if (participant instanceof UserParticipant) {
-					UserParticipant userParticipant = (UserParticipant) participant;
+					final UserParticipant userParticipant = (UserParticipant) participant;
 					userIds.put(userParticipant.getIdentifier(),
 							userParticipant);
 				} else if (participant instanceof ExternalUserParticipant) {
-					ExternalUserParticipant ep = (ExternalUserParticipant) participant;
+					final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
 					if (!externalGuardian.contains(ep.getEmailAddress()
 							.toLowerCase())) {
 						externalParticipants.add(ep);
@@ -141,10 +141,10 @@ public class DefaultNotificationParticipantResolver implements
 								.add(ep.getEmailAddress().toLowerCase());
 					}
 				} else if (participant instanceof GroupParticipant) {
-					GroupParticipant gp = (GroupParticipant) participant;
+					final GroupParticipant gp = (GroupParticipant) participant;
 					groupIds.add(gp.getIdentifier());
 				} else if (participant instanceof ResourceParticipant) {
-					ResourceParticipant rp = (ResourceParticipant) participant;
+					final ResourceParticipant rp = (ResourceParticipant) participant;
 					resourceIds.add(rp.getIdentifier());
 				}
 			}
@@ -152,7 +152,7 @@ public class DefaultNotificationParticipantResolver implements
 
 		UserParticipant[] users = appointment.getUsers();
 		if (users != null) {
-			for (UserParticipant userParticipant : users) {
+			for (final UserParticipant userParticipant : users) {
 				userIds.put(userParticipant.getIdentifier(), userParticipant);
 			}
 		}
@@ -160,7 +160,7 @@ public class DefaultNotificationParticipantResolver implements
 		if (original != null) {
 			users = original.getUsers();
 			if (users != null) {
-				for (UserParticipant userParticipant : users) {
+				for (final UserParticipant userParticipant : users) {
 					if (!userIds.containsKey(userParticipant.getIdentifier())) {
 						userIds.put(userParticipant.getIdentifier(),
 								userParticipant);
@@ -170,16 +170,16 @@ public class DefaultNotificationParticipantResolver implements
 
 			participants = original.getParticipants();
 			if (participants != null) {
-				for (Participant participant : participants) {
+				for (final Participant participant : participants) {
 					if (participant instanceof UserParticipant) {
-						UserParticipant userParticipant = (UserParticipant) participant;
+						final UserParticipant userParticipant = (UserParticipant) participant;
 						if (!userIds.containsKey(userParticipant
 								.getIdentifier())) {
 							userIds.put(userParticipant.getIdentifier(),
 									userParticipant);
 						}
 					} else if (participant instanceof ExternalUserParticipant) {
-						ExternalUserParticipant ep = (ExternalUserParticipant) participant;
+						final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
 						if (!externalGuardian.contains(ep.getEmailAddress()
 								.toLowerCase())) {
 							externalParticipants.add(ep);
@@ -187,30 +187,30 @@ public class DefaultNotificationParticipantResolver implements
 									.toLowerCase());
 						}
 					} else if (participant instanceof GroupParticipant) {
-						GroupParticipant gp = (GroupParticipant) participant;
+						final GroupParticipant gp = (GroupParticipant) participant;
 						groupIds.add(gp.getIdentifier());
 					}
 				}
 			}
 		}
 
-		for (int id : groupIds) {
-			int[] member = groupService.getGroup(ctx, id).getMember();
-			for (int i : member) {
+		for (final int id : groupIds) {
+			final int[] member = groupService.getGroup(ctx, id).getMember();
+			for (final int i : member) {
 				if (!userIds.containsKey(i)) {
 					userIds.put(i, new UserParticipant(i));
 				}
 			}
 		}
 
-		User[] participantUsers = userService.getUser(ctx,
+		final User[] participantUsers = userService.getUser(ctx,
 				Autoboxing.Coll2i(userIds.keySet()));
 		String organizer = determineOrganizer(original, appointment, ctx);
 		if (organizer.startsWith("mailto:")) {
 			organizer = organizer.substring(7);
 		}
 
-		List<NotificationParticipant> retval = new ArrayList<NotificationParticipant>(
+		final List<NotificationParticipant> retval = new ArrayList<NotificationParticipant>(
 				participantUsers.length + externalParticipants.size() + 1);
 
 		boolean foundOrganizer = false;
@@ -218,13 +218,13 @@ public class DefaultNotificationParticipantResolver implements
 		boolean foundOnBehalfOf = false;
 		boolean foundPrincipal = false;
 		
-		int appId = (appointment.getObjectID() <= 0 && original != null) ? original.getObjectID() : appointment.getObjectID();
+		final int appId = (appointment.getObjectID() <= 0 && original != null) ? original.getObjectID() : appointment.getObjectID();
 
-		for (User u : participantUsers) {
-			String mail = u.getMail();
-			int id = u.getId();
+		for (final User u : participantUsers) {
+			final String mail = u.getMail();
+			final int id = u.getId();
 
-			Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
+			final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
 			roles.add((mail.equalsIgnoreCase(organizer) || id == appointment
 					.getOrganizerId()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
@@ -235,7 +235,7 @@ public class DefaultNotificationParticipantResolver implements
 				roles.add(ITipRole.PRINCIPAL);
 			}
 
-			NotificationParticipant participant = new NotificationParticipant(
+			final NotificationParticipant participant = new NotificationParticipant(
 					roles, false, mail, id);
 
 			foundOrganizer = foundOrganizer
@@ -248,7 +248,7 @@ public class DefaultNotificationParticipantResolver implements
 			participant.setDisplayName(u.getDisplayName());
 			participant.setLocale(u.getLocale());
 			participant.setTimezone(TimeZone.getTimeZone(u.getTimeZone()));
-			UserParticipant userParticipant = userIds.get(id);
+			final UserParticipant userParticipant = userIds.get(id);
 			if (userParticipant != null) {
 				participant.setConfirmStatus(ConfirmStatus.byId(userParticipant
 						.getConfirm()));
@@ -259,7 +259,7 @@ public class DefaultNotificationParticipantResolver implements
 			
 			participant.setFolderId(util.getFolderIdForUser(appId, u.getId(), ctx.getContextId()));
 
-			NotificationConfiguration configuration = defaultConfiguration
+			final NotificationConfiguration configuration = defaultConfiguration
 					.clone();
 			configure(u, ctx, configuration,
 					participant.hasRole(ITipRole.ORGANIZER));
@@ -269,10 +269,10 @@ public class DefaultNotificationParticipantResolver implements
 		// Add special users
 		// TODO: Make this DRY
 		if (!foundUser) {
-			String mail = user.getMail();
-			int id = user.getId();
+			final String mail = user.getMail();
+			final int id = user.getId();
 
-			Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
+			final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
 			roles.add((mail.equalsIgnoreCase(organizer) || id == appointment
 					.getOrganizerId()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
@@ -284,7 +284,7 @@ public class DefaultNotificationParticipantResolver implements
 				roles.add(ITipRole.PRINCIPAL);
 			}
 
-			NotificationParticipant participant = new NotificationParticipant(
+			final NotificationParticipant participant = new NotificationParticipant(
 					roles, false, mail, id);
 
 			foundOrganizer = foundOrganizer
@@ -304,7 +304,7 @@ public class DefaultNotificationParticipantResolver implements
 			participant.setFolderId(util.getFolderIdForUser(appId, user.getId(), ctx.getContextId()));
 
 
-			NotificationConfiguration configuration = defaultConfiguration
+			final NotificationConfiguration configuration = defaultConfiguration
 					.clone();
 			configure(user, ctx, configuration,
 					participant.hasRole(ITipRole.ORGANIZER));
@@ -313,10 +313,10 @@ public class DefaultNotificationParticipantResolver implements
 		}
 
 		if (!foundOnBehalfOf) {
-			String mail = onBehalfOf.getMail();
-			int id = onBehalfOf.getId();
+			final String mail = onBehalfOf.getMail();
+			final int id = onBehalfOf.getId();
 
-			Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
+			final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
 			roles.add(mail.equalsIgnoreCase(organizer) ? ITipRole.ORGANIZER
 					: ITipRole.ATTENDEE);
@@ -327,7 +327,7 @@ public class DefaultNotificationParticipantResolver implements
 				roles.add(ITipRole.PRINCIPAL);
 			}
 
-			NotificationParticipant participant = new NotificationParticipant(
+			final NotificationParticipant participant = new NotificationParticipant(
 					roles, false, mail, id);
 
 			foundOrganizer = foundOrganizer
@@ -346,7 +346,7 @@ public class DefaultNotificationParticipantResolver implements
 			participant.setContext(ctx);
 			participant.setFolderId(util.getFolderIdForUser(appId, onBehalfOf.getId(), ctx.getContextId()));
 
-			NotificationConfiguration configuration = defaultConfiguration
+			final NotificationConfiguration configuration = defaultConfiguration
 					.clone();
 			configure(onBehalfOf, ctx, configuration,
 					participant.hasRole(ITipRole.ORGANIZER));
@@ -355,12 +355,12 @@ public class DefaultNotificationParticipantResolver implements
 		}
 
 		if (!foundPrincipal && appointment.getPrincipalId() > 0) {
-			User principalUser = userService.getUser(
+			final User principalUser = userService.getUser(
 					appointment.getPrincipalId(), ctx);
-			String mail = principalUser.getMail();
-			int id = principalUser.getId();
+			final String mail = principalUser.getMail();
+			final int id = principalUser.getId();
 
-			Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
+			final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
 			roles.add(mail.equalsIgnoreCase(organizer) ? ITipRole.ORGANIZER
 					: ITipRole.ATTENDEE);
@@ -371,7 +371,7 @@ public class DefaultNotificationParticipantResolver implements
 				roles.add(ITipRole.PRINCIPAL);
 			}
 
-			NotificationParticipant participant = new NotificationParticipant(
+			final NotificationParticipant participant = new NotificationParticipant(
 					roles, false, mail, id);
 
 			foundOrganizer = foundOrganizer
@@ -389,7 +389,7 @@ public class DefaultNotificationParticipantResolver implements
 			participant.setFolderId(util.getFolderIdForUser(appId, principalUser.getId(), ctx.getContextId()));
 
 
-			NotificationConfiguration configuration = defaultConfiguration
+			final NotificationConfiguration configuration = defaultConfiguration
 					.clone();
 			configure(principalUser, ctx, configuration,
 					participant.hasRole(ITipRole.ORGANIZER));
@@ -398,16 +398,16 @@ public class DefaultNotificationParticipantResolver implements
 			retval.add(participant);
 		}
 
-		NotificationConfiguration resourceConfiguration = defaultConfiguration
+		final NotificationConfiguration resourceConfiguration = defaultConfiguration
 				.clone();
 		resourceConfiguration.setInterestedInChanges(true);
 		resourceConfiguration.setInterestedInStateChanges(true);
 		resourceConfiguration.setSendITIP(false);
 
-		for (Integer resourceId : resourceIds) {
-			Resource resource = resources.getResource(resourceId, ctx);
+		for (final Integer resourceId : resourceIds) {
+			final Resource resource = resources.getResource(resourceId, ctx);
 			if (resource.getMail() != null) {
-				NotificationParticipant participant = new NotificationParticipant(
+				final NotificationParticipant participant = new NotificationParticipant(
 						ITipRole.ATTENDEE, false, resource.getMail());
 				participant.setLocale(user.getLocale());
 				participant.setTimezone(TimeZone.getDefault());
@@ -418,27 +418,27 @@ public class DefaultNotificationParticipantResolver implements
 
 		}
 
-		Map<String, ConfirmableParticipant> statusMap = new HashMap<String, ConfirmableParticipant>();
-		ConfirmableParticipant[] confirmations = appointment.getConfirmations();
+		final Map<String, ConfirmableParticipant> statusMap = new HashMap<String, ConfirmableParticipant>();
+		final ConfirmableParticipant[] confirmations = appointment.getConfirmations();
 		if (confirmations != null) {
-			for (ConfirmableParticipant p : confirmations) {
+			for (final ConfirmableParticipant p : confirmations) {
 				statusMap.put(p.getEmailAddress(), p);
 			}
 		}
 
-		for (ExternalUserParticipant e : externalParticipants) {
-			String mail = e.getEmailAddress();
-			ITipRole role = (mail.equalsIgnoreCase(organizer)) ? ITipRole.ORGANIZER
+		for (final ExternalUserParticipant e : externalParticipants) {
+			final String mail = e.getEmailAddress();
+			final ITipRole role = (mail.equalsIgnoreCase(organizer)) ? ITipRole.ORGANIZER
 					: ITipRole.ATTENDEE;
 
 			foundOrganizer = foundOrganizer || role == ITipRole.ORGANIZER;
 
-			NotificationParticipant participant = new NotificationParticipant(
+			final NotificationParticipant participant = new NotificationParticipant(
 					role, true, mail);
 			participant.setDisplayName(e.getDisplayName());
 			participant.setTimezone(TimeZone.getDefault());
 			participant.setLocale(user.getLocale());
-			ConfirmableParticipant cp = statusMap.get(e.getEmailAddress());
+			final ConfirmableParticipant cp = statusMap.get(e.getEmailAddress());
 			if (cp != null) {
 				participant.setConfirmStatus(cp.getStatus());
 				participant.setComment(cp.getMessage());
@@ -448,10 +448,10 @@ public class DefaultNotificationParticipantResolver implements
 		}
 
 		if (!foundOrganizer) {
-			User organizerUser = discoverOrganizer(appointment, ctx);
-			NotificationParticipant notificationOrganizer = new NotificationParticipant(
+			final User organizerUser = discoverOrganizer(appointment, ctx);
+			final NotificationParticipant notificationOrganizer = new NotificationParticipant(
 					ITipRole.ORGANIZER, organizerUser == null, organizer);
-			NotificationConfiguration configuration = defaultConfiguration.clone();
+			final NotificationConfiguration configuration = defaultConfiguration.clone();
 			if (organizerUser != null) {
 				configure(organizerUser, ctx, configuration, true);
 				notificationOrganizer.setUser(organizerUser);
@@ -465,7 +465,7 @@ public class DefaultNotificationParticipantResolver implements
 		return retval;
 	}
 
-	private User discoverOrganizer(Appointment appointment, Context ctx) throws OXException {
+	private User discoverOrganizer(final Appointment appointment, final Context ctx) throws OXException {
 		if (appointment.getOrganizerId() > 0) {
 			return userService.getUser(appointment.getOrganizerId(), ctx);
 		} else {
@@ -478,20 +478,20 @@ public class DefaultNotificationParticipantResolver implements
 			}
 			try {
 				return userService.searchUser(organizer, ctx);
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				return null;
 			}
 		}
 	}
 
-	private String determineOrganizer(Appointment original,
-			Appointment appointment, Context ctx) throws OXException {
+	private String determineOrganizer(final Appointment original,
+			final Appointment appointment, final Context ctx) throws OXException {
 		String organizer = appointment.getOrganizer();
 		if (organizer == null && original != null) {
 			organizer = original.getOrganizer();
 		}
 		if (organizer == null) {
-			User owner = userService.getUser(appointment.getCreatedBy(), ctx);
+			final User owner = userService.getUser(appointment.getCreatedBy(), ctx);
 			organizer = owner.getMail();
 		}
 		if (organizer == null) {
@@ -500,34 +500,35 @@ public class DefaultNotificationParticipantResolver implements
 		return organizer.toLowerCase();
 	}
 
-	public List<NotificationParticipant> getAllParticipants(
-			List<NotificationParticipant> allRecipients,
-			Appointment appointment, User user, Context ctx) {
-		Set<Integer> userIds = new HashSet<Integer>();
-		UserParticipant[] users = appointment.getUsers();
+	@Override
+    public List<NotificationParticipant> getAllParticipants(
+			final List<NotificationParticipant> allRecipients,
+			final Appointment appointment, final User user, final Context ctx) {
+		final Set<Integer> userIds = new HashSet<Integer>();
+		final UserParticipant[] users = appointment.getUsers();
 		if (users != null) {
-			for (UserParticipant userParticipant : users) {
+			for (final UserParticipant userParticipant : users) {
 				userIds.add(userParticipant.getIdentifier());
 			}
 		}
 
-		Set<String> externals = new HashSet<String>();
-		Participant[] participants = appointment.getParticipants();
+		final Set<String> externals = new HashSet<String>();
+		final Participant[] participants = appointment.getParticipants();
 		if (participants != null) {
-			for (Participant p : participants) {
+			for (final Participant p : participants) {
 				if (p instanceof UserParticipant) {
-					UserParticipant up = (UserParticipant) p;
+					final UserParticipant up = (UserParticipant) p;
 					userIds.add(up.getIdentifier());
 				}
 				if (p instanceof ExternalUserParticipant) {
-					ExternalUserParticipant ep = (ExternalUserParticipant) p;
+					final ExternalUserParticipant ep = (ExternalUserParticipant) p;
 					externals.add(ep.getEmailAddress().toLowerCase());
 				}
 			}
 		}
 
-		List<NotificationParticipant> filtered = new ArrayList<NotificationParticipant>();
-		for (NotificationParticipant p : allRecipients) {
+		final List<NotificationParticipant> filtered = new ArrayList<NotificationParticipant>();
+		for (final NotificationParticipant p : allRecipients) {
 			if (p.isExternal()
 					&& externals.contains(p.getEmail().toLowerCase())) {
 				filtered.add(p);
@@ -541,20 +542,21 @@ public class DefaultNotificationParticipantResolver implements
 
 	}
 
-	public List<NotificationParticipant> getResources(Appointment appointment,
-			Context ctx) throws OXException {
-		Participant[] participants = appointment.getParticipants();
+	@Override
+    public List<NotificationParticipant> getResources(final Appointment appointment,
+			final Context ctx) throws OXException {
+		final Participant[] participants = appointment.getParticipants();
 		if (participants == null) {
 			return Collections.emptyList();
 		}
-		List<NotificationParticipant> resourceParticipants = new ArrayList<NotificationParticipant>();
-		for (Participant participant : participants) {
+		final List<NotificationParticipant> resourceParticipants = new ArrayList<NotificationParticipant>();
+		for (final Participant participant : participants) {
 			if (participant instanceof ResourceParticipant) {
-				ResourceParticipant rp = (ResourceParticipant) participant;
-				Resource resource = resources.getResource(rp.getIdentifier(),
+				final ResourceParticipant rp = (ResourceParticipant) participant;
+				final Resource resource = resources.getResource(rp.getIdentifier(),
 						ctx);
 
-				NotificationParticipant np = new NotificationParticipant(
+				final NotificationParticipant np = new NotificationParticipant(
 						ITipRole.ATTENDEE, false, resource.getMail());
 				np.setDisplayName(resource.getDisplayName());
 				resourceParticipants.add(np);
@@ -563,9 +565,9 @@ public class DefaultNotificationParticipantResolver implements
 		return resourceParticipants;
 	}
 
-	private NotificationConfiguration getDefaultConfiguration(User user,
-			Context ctx) {
-		NotificationConfiguration configuration = new NotificationConfiguration();
+	private NotificationConfiguration getDefaultConfiguration(final User user,
+			final Context ctx) {
+		final NotificationConfiguration configuration = new NotificationConfiguration();
 
 		configuration.setIncludeHTML(true); // TODO: pay attention to user
 											// preferences
@@ -580,11 +582,11 @@ public class DefaultNotificationParticipantResolver implements
 		return configuration;
 	}
 
-	private void configure(User user, Context ctx,
-			NotificationConfiguration config, boolean isOrganizer) {
-		UserSettingMailStorage usmStorage = UserSettingMailStorage
+	private void configure(final User user, final Context ctx,
+			final NotificationConfiguration config, final boolean isOrganizer) {
+		final UserSettingMailStorage usmStorage = UserSettingMailStorage
 				.getInstance();
-		UserSettingMail usm = usmStorage.getUserSettingMail(user.getId(), ctx);
+		final UserSettingMail usm = usmStorage.getUserSettingMail(user.getId(), ctx);
 
 		config.setInterestedInChanges(usm.isNotifyAppointments());
 		if (isOrganizer) {

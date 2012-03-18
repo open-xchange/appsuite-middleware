@@ -735,8 +735,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         }
     }
 
-    private static LinkedList<String> newLinkedList(final String initialValue) {
-        final LinkedList<String> list = new LinkedList<String>();
+    private static List<String> newLinkedList(final String initialValue) {
+        final List<String> list = new LinkedList<String>();
         list.add(initialValue);
         return list;
     }
@@ -810,7 +810,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         final StringBuilder retval = new StringBuilder(128);
         final List<String> list = headers.get(name);
         retval.append(list.get(0));
-        for (int i = 1, len = list.size(); i < len; i++) {
+        final int len = list.size();
+        for (int i = 1; i < len; i++) {
             retval.append(',').append(list.get(i));
         }
         return retval.toString();

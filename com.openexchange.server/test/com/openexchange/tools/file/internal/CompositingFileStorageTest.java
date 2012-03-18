@@ -193,14 +193,14 @@ public class CompositingFileStorageTest extends TestCase {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder builder = new SimBuilder();
-        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(12l);
+        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(12L);
 
         cStore.addStore("hash", new SimBuilder().getSim(FileStorage.class));
         cStore.addStore(builder.getSim(FileStorage.class));
 
         long fileSize = cStore.getFileSize("ab/cd/ef/12345");
 
-        assertEquals(12l, fileSize);
+        assertEquals(12L, fileSize);
 
         builder.assertAllWereCalled();
     }
@@ -209,14 +209,14 @@ public class CompositingFileStorageTest extends TestCase {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
         SimBuilder builder = new SimBuilder();
-        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(12l);
+        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(12L);
 
         cStore.addStore(new SimBuilder().getSim(FileStorage.class));
         cStore.addStore("hash", builder.getSim(FileStorage.class));
 
         long fileSize = cStore.getFileSize("hash/ab/cd/ef/12345");
 
-        assertEquals(12l, fileSize);
+        assertEquals(12L, fileSize);
 
         builder.assertAllWereCalled();
     }

@@ -53,17 +53,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
-import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipAnnotation;
+import com.openexchange.calendar.itip.ITipChange;
+import com.openexchange.calendar.itip.ITipChange.Type;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.Messages;
-import com.openexchange.calendar.itip.ITipChange.Type;
-import com.openexchange.calendar.itip.generators.HTMLWrapper;
 import com.openexchange.calendar.itip.generators.TypeWrapper;
-import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -87,20 +84,22 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
      * @param util
      * @param services TODO
      */
-    public CancelITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
+    public CancelITipAnalyzer(final ITipIntegrationUtility util, final ServiceLookup services) {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
         return Arrays.asList(ITipMethod.CANCEL);
     }
 
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
+    @Override
+    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final Session session) throws OXException {
         
-        ITipAnalysis analysis = new ITipAnalysis();
+        final ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
-        ITipChange change = new ITipChange();
+        final ITipChange change = new ITipChange();
         change.setType(Type.DELETE);
 
         CalendarDataObject appointment = message.getDataObject();
@@ -121,7 +120,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         }
         change.setCurrentAppointment(toDelete);
         if (appointment.containsRecurrenceDatePosition()) {
-            List<Appointment> exceptions = util.getExceptions((CalendarDataObject) toDelete, session);
+            final List<Appointment> exceptions = util.getExceptions(toDelete, session);
             toDelete = findAndRemoveMatchingException(appointment, exceptions);
             if (toDelete == null) {
                 toDelete = appointment;
@@ -130,7 +129,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
             change.setException(true);
         }
         // Update toDelete with changes in this cancel mail
-        for (int field: Appointment.ALL_COLUMNS) {
+        for (final int field: Appointment.ALL_COLUMNS) {
         	if (appointment.contains(field)) {
         		toDelete.set(field, appointment.get(field));
         	}

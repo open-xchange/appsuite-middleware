@@ -548,7 +548,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         CalendarDataObject otherException = changedException.clone();
         otherException.setObjectID(14);
-        otherException.setRecurrenceDatePosition(new Date(5432210000l)); // Needs to be different
+        otherException.setRecurrenceDatePosition(new Date(5432210000L)); // Needs to be different
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(Arrays.asList(otherException, originalException));
@@ -604,7 +604,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         CalendarDataObject otherException = changedException.clone();
         otherException.setObjectID(14);
-        otherException.setRecurrenceDatePosition(new Date(5432210000l)); // Needs to be different
+        otherException.setRecurrenceDatePosition(new Date(5432210000L)); // Needs to be different
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(Arrays.asList(otherException, originalException));
@@ -661,7 +661,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         CalendarDataObject otherException = changedException.clone();
         otherException.setObjectID(14);
-        otherException.setRecurrenceDatePosition(new Date(5432210000l)); // Needs to be different
+        otherException.setRecurrenceDatePosition(new Date(5432210000L)); // Needs to be different
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(Arrays.asList(otherException, originalException));
@@ -721,7 +721,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         CalendarDataObject deletedException = ex1.clone();
         deletedException.setObjectID(14);
-        deletedException.setRecurrenceDatePosition(new Date(5432210000l));
+        deletedException.setRecurrenceDatePosition(new Date(5432210000L));
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(Arrays.asList(deletedException, originalException));

@@ -282,10 +282,9 @@ public class AllTest extends AppointmentTest {
             }
         }
         } finally {
-            if(objectId == -1) {
-                return;
+            if(objectId != -1) {
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
             }
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
         }
     }
 

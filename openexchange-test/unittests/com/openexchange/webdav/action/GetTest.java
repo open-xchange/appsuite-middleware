@@ -60,32 +60,32 @@ public class GetTest extends ActionTestCase {
 	}
 
 	public void testPartial() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 
 		rangeTest(INDEX_HTML_URL, "2-5", getBytes(INDEX_HTML_URL, 2, 5));
 	}
 
 
 	public void testPartialWithOpenEnd() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 
 		rangeTest(INDEX_HTML_URL, "5-", getBytes(INDEX_HTML_URL, 5, 10));
 	}
 
 	public void testPartialWithOpenBeginning() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 
 		rangeTest(INDEX_HTML_URL, "-5", getBytes(INDEX_HTML_URL, 6, 10));
 	}
 
 	public void testPartialWithOpenBeginningTooMuch() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 
 		rangeTest(INDEX_HTML_URL, "-23", getBytes(INDEX_HTML_URL, 0, 10));
 	}
 
 	public void testBogusRange() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 
 		rangeTest(INDEX_HTML_URL, "5-2", new byte[0]);
 
@@ -93,7 +93,7 @@ public class GetTest extends ActionTestCase {
 	}
 
 	public void testRangeOutsideLength() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 		try {
 			rangeTest(INDEX_HTML_URL, "23-25", getBytes(INDEX_HTML_URL, 0, 10));
 			fail();
@@ -103,7 +103,7 @@ public class GetTest extends ActionTestCase {
 	}
 
 	public void testMultipleRanges() throws Exception {
-		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
+		assertEquals((Long) 11L, factory.resolveResource(INDEX_HTML_URL).getLength());
 		final byte[] all = getBytes(INDEX_HTML_URL, 0, 10);
 		final byte[] expect = new byte[]{all[0], all[10]};
 		rangeTest(INDEX_HTML_URL, "0-0,-1", expect);

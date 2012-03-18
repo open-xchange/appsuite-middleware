@@ -362,7 +362,7 @@ public final class FolderJob extends AbstractMailJob {
     }
 
     private void chunkedAdd(final List<String> ids, final IndexAdapter indexAdapter, final Session session) throws OXException {
-        final long st = DEBUG ? System.currentTimeMillis() : 0l;
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final int configuredBlockSize = Constants.CHUNK_SIZE;
         if (configuredBlockSize <= 0) {
             add2Index(ids, fullName, indexAdapter, session);

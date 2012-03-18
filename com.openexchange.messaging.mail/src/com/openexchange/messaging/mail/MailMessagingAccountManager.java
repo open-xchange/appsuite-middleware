@@ -636,6 +636,6 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
-        return; // We do this elsewhere
+        // We do this elsewhere
     }
 }

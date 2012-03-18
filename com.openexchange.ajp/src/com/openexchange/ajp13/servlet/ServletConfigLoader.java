@@ -97,7 +97,7 @@ public final class ServletConfigLoader {
      * @param m - the destination map
      * @param props - the source properties
      */
-    private static void addProps(final Map<String, String> m, final Properties props) {
+    private static void addProps(final Map<String, String> m, final Map<Object, Object> props) {
         for (final Map.Entry<Object, Object> entry : props.entrySet()) {
             m.put((String) entry.getKey(), (String) entry.getValue());
         }
@@ -495,7 +495,7 @@ public final class ServletConfigLoader {
      * @throws UnsupportedOperationException If this method is invoked on default instance obtained via {@link #getDefaultInstance()}
      */
     public void setDefaultConfig(final ServletConfig config) {
-        if (this == defaultInstance) {
+        if (this.equals(defaultInstance)) {
             throw new UnsupportedOperationException("Default servlet config must not be changed for default instance");
         }
         defaultConfig = config;
@@ -508,7 +508,7 @@ public final class ServletConfigLoader {
      * @throws UnsupportedOperationException If this method is invoked on default instance obtained via {@link #getDefaultInstance()}
      */
     public void setDefaultContext(final ServletContext context) {
-        if (this == defaultInstance) {
+        if (this.equals(defaultInstance)) {
             throw new UnsupportedOperationException("Default servlet context must not be changed for default instance");
         }
         defaultContext = context;

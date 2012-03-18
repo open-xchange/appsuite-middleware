@@ -61,7 +61,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPTracer.TracerState;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -338,7 +337,7 @@ public final class AllFetch {
                  * Enable tracer
                  */
                 final SBOutputStream sbout = DEBUG ? new SBOutputStream() : null;
-                final TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
+                final IMAPTracer.TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
                 try {
                     final Response[] r = protocol.command(command, null);
                     final int len = r.length - 1;
@@ -422,7 +421,7 @@ public final class AllFetch {
      * @param sbout The output stream written to in the meantime
      * @param tracerState The trace state
      */
-    protected static void restoreTracerFor(final IMAPProtocol protocol, final SBOutputStream sbout, final TracerState tracerState) {
+    protected static void restoreTracerFor(final IMAPProtocol protocol, final SBOutputStream sbout, final IMAPTracer.TracerState tracerState) {
         if (null == tracerState) {
             return;
         }
@@ -464,7 +463,7 @@ public final class AllFetch {
      * @param sbout The output stream to write to
      * @return The trace state
      */
-    protected static TracerState traceStateFor(final IMAPProtocol protocol, final SBOutputStream sbout) {
+    protected static IMAPTracer.TracerState traceStateFor(final IMAPProtocol protocol, final SBOutputStream sbout) {
         try {
             return IMAPTracer.enableTrace(protocol, sbout);
         } catch (final SecurityException e) {

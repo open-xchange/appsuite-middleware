@@ -56,13 +56,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.caldav.GroupwareCaldavFactory.State;
 import com.openexchange.caldav.mixins.CTag;
 import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
@@ -102,7 +98,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     
     private static final Log LOG = LogFactory.getLog(CaldavCollection.class);
 
-    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory) {
+    public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory) {
         super();
         this.folder = folder;
         this.factory = factory;
@@ -117,7 +113,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
         );
     }
 
-    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory, int order) {
+    public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory, final int order) {
         super();
         this.folder = folder;
         this.factory = factory;
@@ -149,22 +145,22 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected boolean isset(Property p) {
+    protected boolean isset(final Property p) {
         if (p.getId() == Protocol.GETCONTENTLANGUAGE || p.getId() == Protocol.GETCONTENTLENGTH || p.getId() == Protocol.GETETAG) {
             return false;
         }
@@ -172,18 +168,18 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     }
 
     @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
+    public void setCreationDate(final Date date) throws WebdavProtocolException {
         // IGNORE, this is not writable
     }
 
     @Override
 	public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        State state = factory.getState();
-        List<Appointment> appointments = state.getFolder(getId());
-        List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
+        final GroupwareCaldavFactory.State state = factory.getState();
+        final List<Appointment> appointments = state.getFolder(getId());
+        final List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
 
-        for (Appointment appointment : appointments) {
-            CaldavResource resource = new CaldavResource(this, appointment, factory);
+        for (final Appointment appointment : appointments) {
+            final CaldavResource resource = new CaldavResource(this, appointment, factory);
             children.add(resource);
         }
         
@@ -195,7 +191,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     private static final Pattern NAME_PATTERN = Pattern.compile("^(\\d+)\\.ics");
     private static final Pattern UUID_PATTERN = Pattern.compile("(.+?)\\.ics");
     
-    public CaldavResource getChild(String name) throws WebdavProtocolException {
+    public CaldavResource getChild(final String name) throws WebdavProtocolException {
         Matcher matcher = NAME_PATTERN.matcher(name);
         int id = -1;
         if (!matcher.find()) {
@@ -218,7 +214,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
         }
         
         
-        Appointment appointment = factory.getState().get(id , getId());
+        final Appointment appointment = factory.getState().get(id , getId());
         if (appointment == null) {
             // Not Found
             return new CaldavResource(this, getUrl().dup().append(name), factory);
@@ -251,10 +247,10 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
 	            final Permission[] permissions = this.folder.getPermissions();
 	            for (final Permission permission : permissions) {
 	                if (permission.isAdmin()) {
-	                    int entity = permission.getEntity();
+	                    final int entity = permission.getEntity();
 	                    try {
 	                        ownerName = factory.resolveUser(entity).getDisplayName();
-	                    } catch (WebdavProtocolException e) {
+	                    } catch (final WebdavProtocolException e) {
 	                        LOG.error(e.getMessage(), e);
 	                        ownerName = new Integer(entity).toString();
 	                    }
@@ -276,7 +272,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     }
 
     @Override
-	public WebdavLock getLock(String token) throws WebdavProtocolException {
+	public WebdavLock getLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
@@ -286,7 +282,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     }
 
     @Override
-	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+	public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
@@ -306,7 +302,7 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     }
 
     @Override
-	public void lock(WebdavLock lock) throws WebdavProtocolException {
+	public void lock(final WebdavLock lock) throws WebdavProtocolException {
         // IGNORE
     }
 
@@ -316,12 +312,12 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     }
 
     @Override
-	public void setDisplayName(String displayName) throws WebdavProtocolException {
+	public void setDisplayName(final String displayName) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-	public void unlock(String token) throws WebdavProtocolException {
+	public void unlock(final String token) throws WebdavProtocolException {
         // IGNORE
     }
     
@@ -351,18 +347,18 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     
     
     @Override
-	public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
-        List<Object> arguments = new ArrayList<Object>(2);
+	public List<WebdavResource> filter(final Filter filter) throws WebdavProtocolException {
+        final List<Object> arguments = new ArrayList<Object>(2);
         if (RANGE_QUERY_ANALYZER.match(filter, arguments) && ! arguments.isEmpty()) {
-            State state = factory.getState();
-            Date start = toDate(arguments.get(0));
-            Date end = toDate(arguments.get(1));
+            final GroupwareCaldavFactory.State state = factory.getState();
+            final Date start = toDate(arguments.get(0));
+            final Date end = toDate(arguments.get(1));
             
-            List<Appointment> appointments = state.getAppointmentsInFolderAndRange(getId(), start, end);
-            List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
+            final List<Appointment> appointments = state.getAppointmentsInFolderAndRange(getId(), start, end);
+            final List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
 
-            for (Appointment appointment : appointments) {
-                CaldavResource resource = new CaldavResource(this, appointment, factory);
+            for (final Appointment appointment : appointments) {
+                final CaldavResource resource = new CaldavResource(this, appointment, factory);
                 children.add(resource);
             }
             
@@ -372,8 +368,8 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
         throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
     }
 
-    private Date toDate(Object object) {
-        long tstamp = (Long) object;
+    private Date toDate(final Object object) {
+        final long tstamp = (Long) object;
         if (tstamp == -1) {
             return null;
         }

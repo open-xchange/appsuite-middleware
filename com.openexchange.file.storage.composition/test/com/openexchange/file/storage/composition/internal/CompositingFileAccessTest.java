@@ -139,7 +139,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     @Test
     public void testGetDeltaWithoutSort() throws OXException {
 
-        fileAccess.expectCall("getDelta", folderId.getFolderId(), 12l, Arrays.asList(
+        fileAccess.expectCall("getDelta", folderId.getFolderId(), 12L, Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
             File.Field.FOLDER_ID,
@@ -154,7 +154,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     @Test
     public void testGetDeltaWithSort() throws OXException {
 
-        fileAccess.expectCall("getDelta", folderId.getFolderId(), 12l, Arrays.asList(
+        fileAccess.expectCall("getDelta", folderId.getFolderId(), 12L, Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
             File.Field.FOLDER_ID,
@@ -288,7 +288,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testLock() throws OXException {
-        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337l);
+        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337L);
 
         lock(fileId.toUniqueID(), 1337);
 
@@ -306,7 +306,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testTouch() throws OXException {
-        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337l);
+        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337L);
 
         lock(fileId.toUniqueID(), 1337);
 
@@ -315,7 +315,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testRemoveDocument() throws OXException {
-        fileAccess.expectCall("removeDocument", folderId.getFolderId(), 12l);
+        fileAccess.expectCall("removeDocument", folderId.getFolderId(), 12L);
 
         removeDocument(folderId.toUniqueID(), 12);
 
@@ -331,11 +331,11 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         fileAccess.expectCall("hashCode").andReturn(2); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(2); // Store it
 
-        fileAccess.expectCall("removeDocument", Arrays.asList(tuple), 12l).andReturn(Arrays.asList(tuple));
+        fileAccess.expectCall("removeDocument", Arrays.asList(tuple), 12L).andReturn(Arrays.asList(tuple));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
-        fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12l).andReturn(Arrays.asList(tuple2));
+        fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12L).andReturn(Arrays.asList(tuple2));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
@@ -556,7 +556,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         // Secondly the original must be deleted
 
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
 
         move(file, EMPTY_INPUT_STREAM, 1337, null);
 
@@ -591,7 +591,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         // And lastly the original must be deleted
 
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
 
         move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
 
@@ -624,7 +624,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         // Lastly the original must be deleted
 
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
 
         move(file, null, 1337, null);
 
@@ -659,7 +659,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         // And lastly the original must be deleted
 
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
 
         move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
 

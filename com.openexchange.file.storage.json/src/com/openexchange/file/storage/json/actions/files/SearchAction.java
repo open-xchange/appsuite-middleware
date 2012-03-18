@@ -83,7 +83,7 @@ public class SearchAction extends AbstractFileAction {
 
         final SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), request.getColumns(), request.getSearchFolderId(), request.getSortingField(), request.getSortingOrder(), request.getStart(), request.getEnd());
 
-        return results(results, 0l, request);
+        return results(results, 0L, request);
     }
 
 }

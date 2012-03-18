@@ -260,7 +260,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         throw new PoolingException("Pool exhausted.");
                     case BLOCK:
                         final String threadName = Thread.currentThread().getName();
-                        final boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000l);
+                        final boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000L);
                         if (writeWarning) {
                             lastWarning = System.currentTimeMillis();
                             final PoolingException warn = new PoolingException("Thread " + threadName

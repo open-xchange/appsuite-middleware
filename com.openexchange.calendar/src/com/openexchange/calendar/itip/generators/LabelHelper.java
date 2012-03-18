@@ -53,29 +53,16 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.notify.EmailableParticipant;
-import com.openexchange.groupware.notify.LinkableState;
-import com.openexchange.groupware.notify.NotificationConfig;
-import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.tools.HTMLUtils;
-import com.openexchange.i18n.tools.RenderMap;
-import com.openexchange.i18n.tools.StringTemplate;
-import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -86,16 +73,16 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class LabelHelper {
-    private NotificationMail mail;
-    private Context ctx;
-    private TypeWrapper wrapper;
-    private DateHelper dateHelper;
-    private UserService users;
-    private HTMLUtils html;
-	private Locale locale;
+    private final NotificationMail mail;
+    private final Context ctx;
+    private final TypeWrapper wrapper;
+    private final DateHelper dateHelper;
+    private final UserService users;
+    private final HTMLUtils html;
+	private final Locale locale;
 	private TimeZone timezone;
 	private DelegationState delegationState;
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	private static String fallbackHostname;
 	static {
@@ -106,7 +93,7 @@ public class LabelHelper {
         }
     }
 	
-    public LabelHelper(DateHelper dateHelper, TimeZone timezone, NotificationMail mail, Locale locale, Context ctx, TypeWrapper wrapper, ServiceLookup services) {
+    public LabelHelper(final DateHelper dateHelper, final TimeZone timezone, final NotificationMail mail, final Locale locale, final Context ctx, final TypeWrapper wrapper, final ServiceLookup services) {
         super();
         this.services = services;
         this.mail = mail;
@@ -132,7 +119,7 @@ public class LabelHelper {
    
     
     public String getShowAs() {
-        Appointment appointment = mail.getAppointment();
+        final Appointment appointment = mail.getAppointment();
         switch(appointment.getShownAs()) {
         case Appointment.RESERVED: return new Sentence(Messages.RESERVERD).getMessage(locale);
         case Appointment.TEMPORARY: return new Sentence(Messages.TEMPORARY).getMessage(locale);
@@ -143,7 +130,7 @@ public class LabelHelper {
     }
     
     public String getShowAsClass() {
-        Appointment appointment = mail.getAppointment();
+        final Appointment appointment = mail.getAppointment();
         switch(appointment.getShownAs()) {
         case Appointment.RESERVED: return "reserved";
         case Appointment.TEMPORARY: return "temporary";
@@ -154,7 +141,7 @@ public class LabelHelper {
     }
     
     public String getNoteAsHTML() {
-        String note = mail.getAppointment().getNote();
+        final String note = mail.getAppointment().getNote();
         if (note == null) {
             return "";
         }
@@ -247,11 +234,11 @@ public class LabelHelper {
     	if (mail.getRecipient().isExternal() || mail.getRecipient().isResource()) {
     		return "";
     	}
-    	ConfigurationService config = services.getService(ConfigurationService.class);
-		String template = config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]");
-    	String webpath = config.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
-    	int objectId = (mail.getAppointment() != null) ? mail.getAppointment().getObjectID() : mail.getOriginal().getObjectID();
-    	String module = "calendar";
+    	final ConfigurationService config = services.getService(ConfigurationService.class);
+		final String template = config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]");
+    	final String webpath = config.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+    	final int objectId = (mail.getAppointment() != null) ? mail.getAppointment().getObjectID() : mail.getOriginal().getObjectID();
+    	final String module = "calendar";
     	int folder = mail.getRecipient().getFolderId();
     	if (folder == 0) {
     		folder = mail.getAppointment().getParentFolderID();
@@ -260,7 +247,7 @@ public class LabelHelper {
     	
     	String hostname = null;
     	
-    	HostnameService hostnameService = services.getOptionalService(HostnameService.class);
+    	final HostnameService hostnameService = services.getOptionalService(HostnameService.class);
     	if (hostnameService != null) {
     		hostname = hostnameService.getHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
     	} 
@@ -278,7 +265,7 @@ public class LabelHelper {
     	if (mail.getAttachments().isEmpty() || mail.getRecipient().isExternal()) {
     		return "";
     	}
-    	String directLink = getDirectLink();
+    	final String directLink = getDirectLink();
     	return new Sentence(Messages.HAS_ATTACHMENTS).add(directLink, ArgumentType.REFERENCE).getMessage(wrapper, locale);
     }
     
@@ -342,7 +329,7 @@ public class LabelHelper {
     }
     
     public String getJustification() {
-    	NotificationParticipant recipient = mail.getRecipient();
+    	final NotificationParticipant recipient = mail.getRecipient();
     	if (recipient.hasRole(ITipRole.PRINCIPAL)) {
     		return new Sentence(Messages.PRINCIPAL_JUSTIFICATION).getMessage(wrapper, locale);
     	} else if (recipient.hasRole(ITipRole.ORGANIZER)) {
@@ -371,8 +358,9 @@ public class LabelHelper {
     
     protected class OnMyBehalf implements DelegationState {
 
-		public String statusChange(NotificationParticipant participant,
-				ConfirmStatus status) {
+		@Override
+        public String statusChange(final NotificationParticipant participant,
+				final ConfirmStatus status) {
 			
 			String msg = null;
 	        String statusString = null;
@@ -385,19 +373,23 @@ public class LabelHelper {
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
 		}
 
-		public String getDeleteIntroduction() {
+		@Override
+        public String getDeleteIntroduction() {
             return new Sentence(Messages.DELETE_ON_YOUR_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
 
-		public String getUpdateIntroduction() {
+		@Override
+        public String getUpdateIntroduction() {
         	return new Sentence(Messages.UPDATE_ON_YOUR_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
  		}
 
-		public String getDeclineCounterIntroduction() {
+		@Override
+        public String getDeclineCounterIntroduction() {
         	return "FIXME"; // This makes little sense
 		}
 
-		public String getCreateIntroduction() {
+		@Override
+        public String getCreateIntroduction() {
             return new Sentence(Messages.CREATE_ON_YOUR_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
     	
@@ -405,8 +397,9 @@ public class LabelHelper {
     
     protected class OnBehalfOfAnother implements DelegationState {
 
-		public String statusChange(NotificationParticipant participant,
-				ConfirmStatus status) {
+		@Override
+        public String statusChange(final NotificationParticipant participant,
+				final ConfirmStatus status) {
 			String msg = null;
 	        String statusString = null;
 	        switch (status) {
@@ -417,19 +410,23 @@ public class LabelHelper {
 	        }
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);		}
 
-		public String getDeleteIntroduction() {
+		@Override
+        public String getDeleteIntroduction() {
             return new Sentence(Messages.DELETE_ON_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
 
-		public String getUpdateIntroduction() {
+		@Override
+        public String getUpdateIntroduction() {
         	return new Sentence(Messages.UPDATE_ON_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
  		}
 
-		public String getDeclineCounterIntroduction() {
+		@Override
+        public String getDeclineCounterIntroduction() {
         	return new Sentence(Messages.DECLINECOUNTER_ON_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getAppointment().getTitle(), ArgumentType.UPDATED).getMessage(wrapper, locale);
 		}
 
-		public String getCreateIntroduction() {
+		@Override
+        public String getCreateIntroduction() {
             return new Sentence(Messages.CREATE_ON_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOnBehalfOf().getDisplayName()).getMessage(wrapper, locale);
 		}
     	
@@ -437,8 +434,9 @@ public class LabelHelper {
     
     protected class OnNoOnesBehalf implements DelegationState {
 
-		public String statusChange(NotificationParticipant participant,
-				ConfirmStatus status) {
+		@Override
+        public String statusChange(final NotificationParticipant participant,
+				final ConfirmStatus status) {
 			String msg = null;
 	        String statusString = null;
 	        switch (status) {
@@ -450,19 +448,23 @@ public class LabelHelper {
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
 		}
 
-		public String getDeleteIntroduction() {
+		@Override
+        public String getDeleteIntroduction() {
             return new Sentence(Messages.DELETE_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
 
-		public String getUpdateIntroduction() {
+		@Override
+        public String getUpdateIntroduction() {
         	return new Sentence(Messages.UPDATE_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
  		}
 
-		public String getDeclineCounterIntroduction() {
+		@Override
+        public String getDeclineCounterIntroduction() {
         	return new Sentence(Messages.DECLINECOUNTER_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getAppointment().getTitle(), ArgumentType.UPDATED).getMessage(wrapper, locale);
 		}
 
-		public String getCreateIntroduction() {
+		@Override
+        public String getCreateIntroduction() {
             return new Sentence(Messages.CREATE_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
     	

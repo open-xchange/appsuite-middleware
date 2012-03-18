@@ -240,7 +240,7 @@ public class LdapServer {
     }
 
     public void setContext(final String context) {
-        this.context = new Integer(context).intValue();
+        this.context = Integer.parseInt(context);
     }
 
     public int getContext() {

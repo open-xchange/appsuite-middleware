@@ -49,6 +49,8 @@
 
 package com.openexchange.calendar.itip.analyzers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,14 +62,11 @@ import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.ITipChange.Type;
-import com.openexchange.calendar.itip.analyzers.CancelITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.sim.SimBuilder;
-import static org.junit.Assert.*;
 
 /**
  * {@link CancelITipAnalyzerTest}
@@ -78,31 +77,31 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
     
     @Test
     public void testMethod() {
-        List<ITipMethod> methods = new CancelITipAnalyzer(null, null).getMethods();
+        final List<ITipMethod> methods = new CancelITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.CANCEL), methods);
     }
     
     @Test
     public void testCancel() throws OXException {
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setAppointment(appointment);
     
-        SimBuilder integrationBuilder = new SimBuilder();
-        CalendarDataObject original = appointment("123-123-123-123");
+        final SimBuilder integrationBuilder = new SimBuilder();
+        final CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
-        ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
+        final ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
         
-        ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
-        ITipChange change = changes.get(0);
+        final ITipChange change = changes.get(0);
         
         assertEquals(ITipChange.Type.DELETE, change.getType());
         assertEquals(12, change.getDeletedAppointment().getObjectID());
@@ -114,35 +113,35 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
     
     @Test
     public void testCancelChangeException() throws OXException {
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setAppointment(appointment);
     
-        SimBuilder integrationBuilder = new SimBuilder();
-        CalendarDataObject original = appointment("123-123-123-123");
+        final SimBuilder integrationBuilder = new SimBuilder();
+        final CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
         
-        CalendarDataObject exception = appointment("123-123-123-123");
+        final CalendarDataObject exception = appointment("123-123-123-123");
         exception.setObjectID(23);
         exception.setRecurrenceDatePosition(new Date(12345));
         
-        CalendarDataObject otherException = appointment("123-123-123-123");
+        final CalendarDataObject otherException = appointment("123-123-123-123");
         otherException.setObjectID(24);
-        otherException.setRecurrenceDatePosition(new Date(54321000000l));
+        otherException.setRecurrenceDatePosition(new Date(54321000000L));
         
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, exception)));
 
-        ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
+        final ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
         
-        ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
-        ITipChange change = changes.get(0);
+        final ITipChange change = changes.get(0);
 
         assertEquals(ITipChange.Type.DELETE, change.getType());
         assertTrue(change.isException());
@@ -156,27 +155,27 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
     
     @Test
     public void testCreateDeleteException() throws OXException {
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setAppointment(appointment);
     
-        SimBuilder integrationBuilder = new SimBuilder();
-        CalendarDataObject original = appointment("123-123-123-123");
+        final SimBuilder integrationBuilder = new SimBuilder();
+        final CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
                 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(Collections.emptyList());
 
-        ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
+        final ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
         
-        ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(1, changes.size());
         
-        ITipChange change = changes.get(0);
+        final ITipChange change = changes.get(0);
 
         assertEquals(ITipChange.Type.CREATE_DELETE_EXCEPTION, change.getType());
         assertTrue(change.isException());
@@ -198,26 +197,26 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
     
     @Test
     public void testCancelDeletedAppointment() throws OXException {
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setAppointment(appointment);
     
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
-        ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
+        final ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
         
-        ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(0, changes.size());
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         
-        ITipAnnotation error = annotations.get(0);
+        final ITipAnnotation error = annotations.get(0);
         assertEquals("The organizer would like to cancel an appointment that could not be found.", error.getMessage());
 
         assertActions(analysis, ITipAction.IGNORE);
@@ -228,27 +227,27 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
 
     @Test
     public void testCancelUnknownException() throws OXException {
-        CalendarDataObject appointment = appointment("123-123-123-123");
+        final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setAppointment(appointment);
     
-        SimBuilder integrationBuilder = new SimBuilder();
+        final SimBuilder integrationBuilder = new SimBuilder();
 
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
-        ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
+        final ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
         
-        ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
+        final ITipAnalysis analysis = new CancelITipAnalyzer(utility, null).analyze(message, null, null, session);
         
-        List<ITipChange> changes = analysis.getChanges();
+        final List<ITipChange> changes = analysis.getChanges();
         assertEquals(0, changes.size());
         
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
+        final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         
-        ITipAnnotation error = annotations.get(0);
+        final ITipAnnotation error = annotations.get(0);
         assertEquals("The organizer would like to cancel an appointment that could not be found.", error.getMessage());
 
         assertActions(analysis, ITipAction.IGNORE);

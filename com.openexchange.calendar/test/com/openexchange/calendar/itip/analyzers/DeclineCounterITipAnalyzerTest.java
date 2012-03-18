@@ -160,7 +160,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         CalendarDataObject declinedForException = appointment("123-123-123-123");
         declinedForException.setObjectID(13);
-        declinedForException.setRecurrenceDatePosition(new Date(54321000000l));
+        declinedForException.setRecurrenceDatePosition(new Date(54321000000L));
         
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);

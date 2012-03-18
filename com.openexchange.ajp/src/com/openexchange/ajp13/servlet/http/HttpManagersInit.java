@@ -156,7 +156,7 @@ public final class HttpManagersInit implements Initialization {
                     /*
                      * Read properties from file
                      */
-                    final Properties properties = getPropertiesFromFile(propFiles[i]);
+                    final Map<Object, Object> properties = getPropertiesFromFile(propFiles[i]);
                     /*
                      * Initialize servlets' default constructors
                      */
@@ -195,7 +195,7 @@ public final class HttpManagersInit implements Initialization {
         return new StringBuilder(servletPath.length() + 1).append('/').append(servletPath).toString();
     }
 
-    private static Properties getPropertiesFromFile(final File f) throws IOException {
+    private static Map<Object, Object> getPropertiesFromFile(final File f) throws IOException {
         final FileInputStream fis = new FileInputStream(f);
         try {
             final Properties properties = new Properties();

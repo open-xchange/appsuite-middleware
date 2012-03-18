@@ -64,13 +64,12 @@ import java.util.TimeZone;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
-import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnalyzer;
 import com.openexchange.calendar.itip.ITipChange;
+import com.openexchange.calendar.itip.ITipChange.Type;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.Messages;
-import com.openexchange.calendar.itip.ITipChange.Type;
 import com.openexchange.calendar.itip.generators.ArgumentType;
 import com.openexchange.calendar.itip.generators.HTMLWrapper;
 import com.openexchange.calendar.itip.generators.Sentence;
@@ -115,19 +114,20 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	protected ITipIntegrationUtility util;
 	protected ServiceLookup services;
 	
-	public ITipAnalysis analyze(ITipMessage message, Map<String, String> header,
-			String style, Session session) throws OXException {
+	@Override
+    public ITipAnalysis analyze(final ITipMessage message, Map<String, String> header,
+			final String style, final Session session) throws OXException {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
 		header = lowercase(header);
 		if (services != null) {
 			
-			ContextService contexts = services.getService(ContextService.class);
-			UserService users = services.getService(UserService.class);
+			final ContextService contexts = services.getService(ContextService.class);
+			final UserService users = services.getService(UserService.class);
 		
-			Context ctx = contexts.getContext(session.getContextId());
-			User user = users.getUser(session.getUserId(), ctx);
+			final Context ctx = contexts.getContext(session.getContextId());
+			final User user = users.getUser(session.getUserId(), ctx);
 			
 			return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
 		
@@ -136,9 +136,9 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return analyze(message, header, wrapperFor(style), null, null, null, session);
 	}
 	
-	private Map<String, String> lowercase(Map<String, String> header) {
-		Map<String, String> copy = new HashMap<String, String>();
-		for(Map.Entry<String, String> entry : header.entrySet()) {
+	private Map<String, String> lowercase(final Map<String, String> header) {
+		final Map<String, String> copy = new HashMap<String, String>();
+		for(final Map.Entry<String, String> entry : header.entrySet()) {
 			copy.put(entry.getKey().toLowerCase(), entry.getValue());
 		}
 		return copy;
@@ -146,13 +146,13 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
 	protected abstract ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException;
 
-	public AbstractITipAnalyzer(ITipIntegrationUtility util,
-			ServiceLookup services) {
+	public AbstractITipAnalyzer(final ITipIntegrationUtility util,
+			final ServiceLookup services) {
 		this.util = util;
 		this.services = services;
 	}
 
-	protected TypeWrapper wrapperFor(String style) {
+	protected TypeWrapper wrapperFor(final String style) {
 		TypeWrapper w = new PassthroughWrapper();
 		if (style != null && style.equalsIgnoreCase("html")) {
 			w = new HTMLWrapper();
@@ -161,20 +161,20 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 	
 
-	public void describeDiff(ITipChange change, TypeWrapper wrapper,
-			Session session) throws OXException {
+	public void describeDiff(final ITipChange change, final TypeWrapper wrapper,
+			final Session session) throws OXException {
 		if (services == null) {
 			change.setDiffDescription(new ArrayList<String>());
 			return;
 		}
 
-		ContextService contexts = services.getService(ContextService.class);
-		UserService users = services.getService(UserService.class);
-		GroupService groups = services.getService(GroupService.class);
-		ResourceService resources = services.getService(ResourceService.class);
+		final ContextService contexts = services.getService(ContextService.class);
+		final UserService users = services.getService(UserService.class);
+		final GroupService groups = services.getService(GroupService.class);
+		final ResourceService resources = services.getService(ResourceService.class);
 
-		Context ctx = contexts.getContext(session.getContextId());
-		User user = users.getUser(session.getUserId(), ctx);
+		final Context ctx = contexts.getContext(session.getContextId());
+		final User user = users.getUser(session.getUserId(), ctx);
 
 		switch (change.getType()) {
 		case CREATE:
@@ -189,8 +189,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			break;
 		}
 
-		Appointment currentAppointment = change.getCurrentAppointment();
-		CalendarDataObject newAppointment = change.getNewAppointment();
+		final Appointment currentAppointment = change.getCurrentAppointment();
+		final CalendarDataObject newAppointment = change.getNewAppointment();
 
 		if (currentAppointment == null || newAppointment == null) {
 			change.setDiffDescription(new ArrayList<String>());
@@ -214,11 +214,11 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			}
 		}
 
-		ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
+		final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
 				new Details(style), new Participants(users, groups, resources,
 						style, true));
 
-		List<String> descriptions = cd.getChanges(ctx, currentAppointment,
+		final List<String> descriptions = cd.getChanges(ctx, currentAppointment,
 				newAppointment, change.getDiff(), wrapper, user.getLocale(),
 				TimeZone.getTimeZone(user.getTimeZone()));
 		change.setDiffDescription(descriptions);
@@ -240,9 +240,9 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 	}
 
-	private void deleteIntro(ITipChange change, UserService users, Context ctx,
-			TypeWrapper wrapper, Locale locale) throws OXException {
-		String displayName = displayNameFor(change.getDeletedAppointment()
+	private void deleteIntro(final ITipChange change, final UserService users, final Context ctx,
+			final TypeWrapper wrapper, final Locale locale) throws OXException {
+		final String displayName = displayNameFor(change.getDeletedAppointment()
 				.getOrganizer(), users, ctx);
 		change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(
 				displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
@@ -250,8 +250,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
 	}
 
-	private void updateIntro(ITipChange change, UserService users, Context ctx,
-			TypeWrapper wrapper, Locale locale) throws OXException {
+	private void updateIntro(final ITipChange change, final UserService users, final Context ctx,
+			final TypeWrapper wrapper, final Locale locale) throws OXException {
 		String displayName = displayNameFor(change.getCurrentAppointment()
 				.getOrganizer(), users, ctx);
 		if (onlyStateChanged(change.getDiff())) {
@@ -259,14 +259,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			
 			ConfirmStatus newStatus = null;
 
-			AppointmentDiff diff = change.getDiff();
+			final AppointmentDiff diff = change.getDiff();
 			FieldUpdate update = diff
 					.getUpdateFor(AppointmentFields.CONFIRMATIONS);
 			if (update != null) {
-				Difference difference = (Difference) update.getExtraInfo();
-				List<Change> changed = difference.getChanged();
+				final Difference difference = (Difference) update.getExtraInfo();
+				final List<Change> changed = difference.getChanged();
 				if (changed != null && !changed.isEmpty()) {
-					ConfirmationChange chng = (ConfirmationChange) changed
+					final ConfirmationChange chng = (ConfirmationChange) changed
 							.get(0);
 					displayName = chng.getIdentifier();
 					newStatus = ConfirmStatus.byId(chng.getNewStatus());
@@ -276,10 +276,10 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			// Internal Participant
 			update = diff.getUpdateFor("users");
 			if (update != null && newStatus == null) {
-				Difference difference = (Difference) update.getExtraInfo();
-				List<Change> changed = difference.getChanged();
+				final Difference difference = (Difference) update.getExtraInfo();
+				final List<Change> changed = difference.getChanged();
 				if (changed != null && !changed.isEmpty()) {
-					ConfirmationChange chng = (ConfirmationChange) changed
+					final ConfirmationChange chng = (ConfirmationChange) changed
 							.get(0);
 					displayName = users.getUser(
 							Integer.valueOf(chng.getIdentifier()), ctx)
@@ -319,13 +319,13 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 	}
 
-	private boolean onlyStateChanged(AppointmentDiff diff) {
+	private boolean onlyStateChanged(final AppointmentDiff diff) {
 		// First, let's see if any fields besides the state tracking fields have
 		// changed
-		HashSet<String> differing = new HashSet<String>(
+		final HashSet<String> differing = new HashSet<String>(
 				diff.getDifferingFieldNames());
 
-		for (String field : new String[] { AppointmentFields.PARTICIPANTS,
+		for (final String field : new String[] { AppointmentFields.PARTICIPANTS,
 				AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS }) {
 			differing.remove(field);
 		}
@@ -334,13 +334,13 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 
 		// Hm, okay, so no let's see if any participants were added or removed.
-		for (String field : new String[] { AppointmentFields.PARTICIPANTS,
+		for (final String field : new String[] { AppointmentFields.PARTICIPANTS,
 				AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS }) {
-			FieldUpdate update = diff.getUpdateFor(field);
+			final FieldUpdate update = diff.getUpdateFor(field);
 			if (update == null) {
 				continue;
 			}
-			Difference extraInfo = (Difference) update.getExtraInfo();
+			final Difference extraInfo = (Difference) update.getExtraInfo();
 			if (!extraInfo.getAdded().isEmpty()) {
 				return false;
 			}
@@ -353,17 +353,17 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return true;
 	}
 
-	private void createIntro(ITipChange change, UserService users, Context ctx,
-			TypeWrapper wrapper, Locale locale) throws OXException {
-		String displayName = displayNameFor(change.getNewAppointment()
+	private void createIntro(final ITipChange change, final UserService users, final Context ctx,
+			final TypeWrapper wrapper, final Locale locale) throws OXException {
+		final String displayName = displayNameFor(change.getNewAppointment()
 				.getOrganizer(), users, ctx);
 		change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(
 				displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
 				locale));
 	}
 
-	protected String displayNameFor(String organizer, UserService users,
-			Context ctx) throws OXException {
+	protected String displayNameFor(String organizer, final UserService users,
+			final Context ctx) throws OXException {
 		if (organizer == null) {
 			return "unknown";
 		}
@@ -373,24 +373,24 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 
 		try {
-			User result = users.searchUser(organizer, ctx);
+			final User result = users.searchUser(organizer, ctx);
 			if (result != null) {
 				if (result.getDisplayName() != null) {
 					return result.getDisplayName();
 				}
 			}
-		} catch (OXException x) {
+		} catch (final OXException x) {
 			return organizer;
 		}
 
 		return organizer;
 	}
 
-	protected Appointment findAndRemoveMatchingException(Appointment exception,
-			List<Appointment> exceptions) {
-		for (Iterator<Appointment> iterator = exceptions.iterator(); iterator
+	protected Appointment findAndRemoveMatchingException(final Appointment exception,
+			final List<Appointment> exceptions) {
+		for (final Iterator<Appointment> iterator = exceptions.iterator(); iterator
 				.hasNext();) {
-			Appointment existingException = iterator.next();
+			final Appointment existingException = iterator.next();
 			if (sameDay(existingException.getRecurrenceDatePosition(),
 					(exception.getRecurrenceDatePosition()))) {
 				iterator.remove();
@@ -400,16 +400,16 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return null;
 	}
 
-	private boolean sameDay(Date date1, Date date2) {
-		GregorianCalendar gregorianCalendar1 = new GregorianCalendar();
+	private boolean sameDay(final Date date1, final Date date2) {
+		final GregorianCalendar gregorianCalendar1 = new GregorianCalendar();
 		gregorianCalendar1.setTime(date1);
 		gregorianCalendar1.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-		GregorianCalendar gregorianCalendar2 = new GregorianCalendar();
+		final GregorianCalendar gregorianCalendar2 = new GregorianCalendar();
 		gregorianCalendar2.setTime(date2);
 		gregorianCalendar2.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-		for (int field : new int[] { Calendar.DAY_OF_YEAR, Calendar.YEAR }) {
+		for (final int field : new int[] { Calendar.DAY_OF_YEAR, Calendar.YEAR }) {
 			if (gregorianCalendar1.get(field) != gregorianCalendar2.get(field)) {
 				return false;
 			}
@@ -418,14 +418,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return true;
 	}
 
-	public boolean doAppointmentsDiffer(Appointment update, Appointment original) {
-		AppointmentDiff diff = AppointmentDiff.compare(original, update, SKIP);
+	public boolean doAppointmentsDiffer(final Appointment update, final Appointment original) {
+		final AppointmentDiff diff = AppointmentDiff.compare(original, update, SKIP);
 
 		return !diff.getDifferingFieldNames().isEmpty();
 	}
 
-	public boolean hasConflicts(ITipAnalysis analysis) {
-		for (ITipChange change : analysis.getChanges()) {
+	public boolean hasConflicts(final ITipAnalysis analysis) {
+		for (final ITipChange change : analysis.getChanges()) {
 			if (change.getConflicts() != null
 					&& !change.getConflicts().isEmpty()) {
 				return true;
@@ -434,34 +434,34 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return false;
 	}
 
-	public void purgeConflicts(ITipAnalysis analysis) {
-		Map<Integer, ITipChange> knownAppointments = new HashMap<Integer, ITipChange>();
-		for (ITipChange change : analysis.getChanges()) {
-			Appointment currentAppointment = change.getCurrentAppointment();
+	public void purgeConflicts(final ITipAnalysis analysis) {
+		final Map<Integer, ITipChange> knownAppointments = new HashMap<Integer, ITipChange>();
+		for (final ITipChange change : analysis.getChanges()) {
+			final Appointment currentAppointment = change.getCurrentAppointment();
 			if (currentAppointment != null) {
 				knownAppointments.put(currentAppointment.getObjectID(), change);
 			}
-			Appointment deletedAppointment = change.getDeletedAppointment();
+			final Appointment deletedAppointment = change.getDeletedAppointment();
 			if (deletedAppointment != null) {
 				knownAppointments.put(deletedAppointment.getObjectID(), change);
 			}
 		}
 
-		for (ITipChange change : analysis.getChanges()) {
-			List<Appointment> conflicts = change.getConflicts();
+		for (final ITipChange change : analysis.getChanges()) {
+			final List<Appointment> conflicts = change.getConflicts();
 			if (conflicts == null) {
 				continue;
 			}
-			CalendarDataObject newAppointment = change.getNewAppointment();
+			final CalendarDataObject newAppointment = change.getNewAppointment();
 			if (newAppointment == null) {
 				continue;
 			}
-			Appointment currentAppointment = change.getCurrentAppointment();
-			CalendarDataObject masterAppointment = change
+			final Appointment currentAppointment = change.getCurrentAppointment();
+			final CalendarDataObject masterAppointment = change
 					.getMasterAppointment();
-			for (Iterator<Appointment> iterator = conflicts.iterator(); iterator
+			for (final Iterator<Appointment> iterator = conflicts.iterator(); iterator
 					.hasNext();) {
-				Appointment conflict = iterator.next();
+				final Appointment conflict = iterator.next();
 				if (currentAppointment != null
 						&& (currentAppointment.getObjectID() == conflict
 								.getObjectID())) {
@@ -474,7 +474,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 					iterator.remove();
 					continue;
 				}
-				ITipChange changeToConflict = knownAppointments.get(conflict
+				final ITipChange changeToConflict = knownAppointments.get(conflict
 						.getObjectID());
 				if (changeToConflict == null) {
 					continue;
@@ -482,7 +482,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 				if (changeToConflict.getType() == ITipChange.Type.DELETE) {
 					iterator.remove();
 				} else {
-					CalendarDataObject changedAppointment = changeToConflict
+					final CalendarDataObject changedAppointment = changeToConflict
 							.getNewAppointment();
 					if (changedAppointment == null) {
 						continue;
@@ -495,7 +495,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 	}
 
-	public boolean overlaps(CalendarDataObject app1, CalendarDataObject app2) {
+	public boolean overlaps(final CalendarDataObject app1, final CalendarDataObject app2) {
 		if (app2.getStartDate().after(app1.getEndDate())) {
 			return false;
 		}
@@ -507,8 +507,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return true;
 	}
 
-	public boolean isCreate(ITipAnalysis analysis) {
-		for (ITipChange change : analysis.getChanges()) {
+	public boolean isCreate(final ITipAnalysis analysis) {
+		for (final ITipChange change : analysis.getChanges()) {
 			if (change.getType() == Type.CREATE) {
 				return true;
 			}
@@ -516,10 +516,10 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return false;
 	}
 
-	public boolean rescheduling(ITipAnalysis analysis) {
-		for (ITipChange change : analysis.getChanges()) {
+	public boolean rescheduling(final ITipAnalysis analysis) {
+		for (final ITipChange change : analysis.getChanges()) {
 			if (change.getType() == Type.CREATE && change.isException()) {
-				AppointmentDiff diff = AppointmentDiff.compare(
+				final AppointmentDiff diff = AppointmentDiff.compare(
 						change.getCurrentAppointment(),
 						change.getNewAppointment());
 				if (diff.anyFieldChangedOf(AppointmentFields.START_DATE,
@@ -531,7 +531,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			if (change.getType() != Type.UPDATE) {
 				return true;
 			}
-			AppointmentDiff diff = change.getDiff();
+			final AppointmentDiff diff = change.getDiff();
 			if (diff != null
 					&& diff.anyFieldChangedOf(AppointmentFields.START_DATE,
 							AppointmentFields.END_DATE)) {
@@ -541,14 +541,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return false;
 	}
 	
-	protected void ensureParticipant(CalendarDataObject appointment, Session session) {
-        int confirm = CalendarDataObject.NONE;
-        Participant[] participants = appointment.getParticipants();
+	protected void ensureParticipant(final CalendarDataObject appointment, final Session session) {
+        final int confirm = CalendarDataObject.NONE;
+        final Participant[] participants = appointment.getParticipants();
         boolean found = false;
         if (null != participants) {
-            for (Participant participant : participants) {
+            for (final Participant participant : participants) {
                 if (participant instanceof UserParticipant) {
-                    UserParticipant up = (UserParticipant) participant;
+                    final UserParticipant up = (UserParticipant) participant;
                     if (up.getIdentifier() == session.getUserId()) {
                         found = true;
                     }
@@ -557,20 +557,20 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         }
 
         if (!found) {
-            UserParticipant up = new UserParticipant(session.getUserId());
+            final UserParticipant up = new UserParticipant(session.getUserId());
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }
-            Participant[] tmp = appointment.getParticipants();
-            List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
+            final Participant[] tmp = appointment.getParticipants();
+            final List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
             participantList.add(up);
             appointment.setParticipants(participantList);
         }
         
         found = false;
-        UserParticipant[] users = appointment.getUsers();
+        final UserParticipant[] users = appointment.getUsers();
         if (users != null) {
-            for (UserParticipant userParticipant : users) {
+            for (final UserParticipant userParticipant : users) {
                 if (userParticipant.getIdentifier() == session.getUserId()) {
                     found = true;
                 }
@@ -578,12 +578,12 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         }
         
         if (!found) {
-            UserParticipant up = new UserParticipant(session.getUserId());
+            final UserParticipant up = new UserParticipant(session.getUserId());
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }
-            UserParticipant[] tmp = appointment.getUsers();
-            List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
+            final UserParticipant[] tmp = appointment.getUsers();
+            final List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
             participantList.add(up);
             appointment.setUsers(participantList);
         }

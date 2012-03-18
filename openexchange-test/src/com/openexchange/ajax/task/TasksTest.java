@@ -112,9 +112,9 @@ public class TasksTest extends AbstractAJAXTest {
         task.setCreationDate(new Date());
         Date lastModified = new Date();
         task.setLastModified(lastModified);
-        task.setStartDate(new Date(1133964000000l));
-        task.setEndDate(new Date(1133967600000l));
-        task.setAfterComplete(new Date(1133971200000l));
+        task.setStartDate(new Date(1133964000000L));
+        task.setEndDate(new Date(1133967600000L));
+        task.setAfterComplete(new Date(1133971200000L));
         task.setNote("Description");
         task.setStatus(Task.NOT_STARTED); //FIXME!
         task.setPriority(Task.NORMAL);

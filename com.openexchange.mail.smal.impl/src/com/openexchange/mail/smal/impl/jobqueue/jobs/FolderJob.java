@@ -539,7 +539,7 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     private int chunkedAddWithoutJobs(final List<String> ids, final IndexAdapter indexAdapter) throws OXException {
-        final long st = DEBUG ? System.currentTimeMillis() : 0l;
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final JobQueue queue = JobQueue.getInstance();
         final int configuredBlockSize = Constants.CHUNK_SIZE;
         if (configuredBlockSize <= 0) {
@@ -584,7 +584,7 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     private int chunkedAddWithJobs(final List<String> ids, final IndexAdapter indexAdapter) throws OXException, InterruptedException {
-        final long st = DEBUG ? System.currentTimeMillis() : 0l;
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final JobQueue queue = JobQueue.getInstance();
         final int size = ids.size();
         final StringBuilder idBuilder = new StringBuilder(identifier);

@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
-import com.openexchange.groupware.notify.State;
 import com.openexchange.session.Session;
 
 
@@ -81,17 +80,17 @@ import com.openexchange.session.Session;
 public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
 
     protected ITipIntegrationUtility util;
-    private MailSenderService sender;
-    private ITipMailGeneratorFactory mailGenerators;
+    private final MailSenderService sender;
+    private final ITipMailGeneratorFactory mailGenerators;
 
-    public AbstrakterDingeMacher(ITipIntegrationUtility util, MailSenderService mailSender,  ITipMailGeneratorFactory mailGenerators) {
+    public AbstrakterDingeMacher(final ITipIntegrationUtility util, final MailSenderService mailSender,  final ITipMailGeneratorFactory mailGenerators) {
         super();
         this.util = util;
         this.sender = mailSender;
         this.mailGenerators = mailGenerators;
     }
     
-    protected Appointment determineOriginalAppointment(ITipChange change, Map<String, CalendarDataObject> processed, Session session) throws OXException {
+    protected Appointment determineOriginalAppointment(final ITipChange change, final Map<String, CalendarDataObject> processed, final Session session) throws OXException {
         Appointment currentAppointment = change.getCurrentAppointment();
         if (currentAppointment == null) {
             if (change.isException()) {
@@ -107,30 +106,30 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         return currentAppointment;
     }
     
-    protected void ensureFolderId(Appointment appointment, Session session) throws OXException {
-        int privateCalendarFolderId = util.getPrivateCalendarFolderId(session);
+    protected void ensureFolderId(final Appointment appointment, final Session session) throws OXException {
+        final int privateCalendarFolderId = util.getPrivateCalendarFolderId(session);
         appointment.setParentFolderID(privateCalendarFolderId);
         
     }
     
-    protected void writeMail(ITipAction action, Appointment original, Appointment appointment, Session session) throws OXException {
+    protected void writeMail(final ITipAction action, Appointment original, final Appointment appointment, final Session session) throws OXException {
         switch (action) {
         case COUNTER:
             return;
         default: //Continue normally
         }
-        Appointment filled = fillup(original, appointment);
+        final Appointment filled = fillup(original, appointment);
         original = constructOriginalForMail(action, original, filled, session);
         
-        ITipMailGenerator generator = mailGenerators.create(original, filled, session, session.getUserId());
+        final ITipMailGenerator generator = mailGenerators.create(original, filled, session, session.getUserId());
         switch (action) {
         case CREATE: 
             if (!generator.userIsTheOrganizer()) {
                 return;
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
-            for (NotificationParticipant p : recipients) {
-                NotificationMail mail = generator.generateCreateExceptionMailFor(p);
+            for (final NotificationParticipant p : recipients) {
+                final NotificationMail mail = generator.generateCreateExceptionMailFor(p);
                 if (mail != null) {
                     sender.sendMail(mail, session);
                 }
@@ -141,8 +140,8 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
                 return;
             }
             recipients = generator.getRecipients();
-        	for (NotificationParticipant p : recipients) {
-                NotificationMail mail = generator.generateUpdateMailFor(p);
+        	for (final NotificationParticipant p : recipients) {
+                final NotificationMail mail = generator.generateUpdateMailFor(p);
                 if (mail != null ) {
                     sender.sendMail(mail, session);
                 }
@@ -150,8 +149,8 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         	break;
         case DECLINECOUNTER:
             recipients = generator.getRecipients();
-            for (NotificationParticipant p : recipients) {
-                NotificationMail mail = generator.generateDeclineCounterMailFor(p);
+            for (final NotificationParticipant p : recipients) {
+                final NotificationMail mail = generator.generateDeclineCounterMailFor(p);
                 if (mail != null) {
                     sender.sendMail(mail, session);
                 }
@@ -159,8 +158,8 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         	break;
         case SEND_APPOINTMENT:
             recipients = generator.getRecipients();
-            for (NotificationParticipant p : recipients) {
-                NotificationMail mail = generator.generateCreateMailFor(p);
+            for (final NotificationParticipant p : recipients) {
+                final NotificationMail mail = generator.generateCreateMailFor(p);
                 if (mail != null) {
                     sender.sendMail(mail, session);
                 }
@@ -168,8 +167,8 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         	break;
         case REFRESH:
             recipients = generator.getRecipients();
-            for (NotificationParticipant p : recipients) {
-                NotificationMail mail = generator.generateRefreshMailFor(p);
+            for (final NotificationParticipant p : recipients) {
+                final NotificationMail mail = generator.generateRefreshMailFor(p);
                 if (mail != null) {
                     sender.sendMail(mail, session);
                 }
@@ -177,8 +176,8 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         	break;
         default:
             recipients = generator.getRecipients();
-            for (NotificationParticipant p : recipients) {
-                NotificationMail mail = generator.generateUpdateMailFor(p);
+            for (final NotificationParticipant p : recipients) {
+                final NotificationMail mail = generator.generateUpdateMailFor(p);
                 if (mail != null) {
                     sender.sendMail(mail, session);
                 }
@@ -186,18 +185,18 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         }
     }
     
-    private Appointment constructOriginalForMail(ITipAction action, Appointment original, Appointment appointment, Session session) {
+    private Appointment constructOriginalForMail(final ITipAction action, final Appointment original, final Appointment appointment, final Session session) {
         switch (action) {
         case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case ACCEPT_AND_REPLACE: case ACCEPT_PARTY_CRASHER: case DECLINE: case TENTATIVE: return constructFakeOriginal(appointment, session);
         default: return original;
         }
     }
 
-    private Appointment constructFakeOriginal(Appointment appointment, Session session) {
-        Appointment clone = appointment.clone();
-        Participant[] participants = clone.getParticipants();
-        List<Participant> changed = new ArrayList<Participant>();
-        for (Participant participant : participants) {
+    private Appointment constructFakeOriginal(final Appointment appointment, final Session session) {
+        final Appointment clone = appointment.clone();
+        final Participant[] participants = clone.getParticipants();
+        final List<Participant> changed = new ArrayList<Participant>();
+        for (final Participant participant : participants) {
             if (participant instanceof UserParticipant) {
                 UserParticipant up = (UserParticipant) participant;
                 if (up.getIdentifier() == session.getUserId()) {
@@ -213,8 +212,8 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         
         clone.setParticipants(changed);
         
-        UserParticipant[] users = clone.getUsers();
-        List<UserParticipant> changedUsers = new ArrayList<UserParticipant>();
+        final UserParticipant[] users = clone.getUsers();
+        final List<UserParticipant> changedUsers = new ArrayList<UserParticipant>();
         for (UserParticipant up : users) {
             if (up.getIdentifier() == session.getUserId()) {
                 up = new UserParticipant(up.getIdentifier());
@@ -227,15 +226,15 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         return clone;
     }
 
-    private Appointment fillup(Appointment original, Appointment appointment) {
+    private Appointment fillup(final Appointment original, final Appointment appointment) {
         if (original == null) {
             return appointment;
         }
-        AppointmentDiff diff = AppointmentDiff.compare(original, appointment);
+        final AppointmentDiff diff = AppointmentDiff.compare(original, appointment);
         
-        Appointment copy = original.clone();
-        List<FieldUpdate> updates = diff.getUpdates();
-        for (FieldUpdate fieldUpdate : updates) {
+        final Appointment copy = original.clone();
+        final List<FieldUpdate> updates = diff.getUpdates();
+        for (final FieldUpdate fieldUpdate : updates) {
             copy.set(fieldUpdate.getFieldNumber(), fieldUpdate.getNewValue());
         }
         

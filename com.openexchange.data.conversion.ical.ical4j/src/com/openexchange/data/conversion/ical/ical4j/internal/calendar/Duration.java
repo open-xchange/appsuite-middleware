@@ -69,7 +69,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
 
     @Override
     public void emit(final Mode mode, final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        return; // Always emitting endDate
+        // Always emitting endDate
     }
 
     @Override

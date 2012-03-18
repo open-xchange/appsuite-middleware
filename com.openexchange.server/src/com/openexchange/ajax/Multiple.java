@@ -250,8 +250,8 @@ public class Multiple extends SessionServlet {
                     return state;
                 } finally {
                 	jsonWriter.endObject();
-                    return state;
                 }
+                return state;
             }
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {

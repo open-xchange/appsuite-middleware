@@ -313,7 +313,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject originalException = changedException.clone();
         originalException.setObjectID(23);
         CalendarDataObject otherException = changedException.clone();
-        otherException.setRecurrenceDatePosition(new Date(5432100000l));
+        otherException.setRecurrenceDatePosition(new Date(5432100000L));
         
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, originalException)));
         
@@ -423,7 +423,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject originalException = changedException.clone();
         originalException.setObjectID(23);
         CalendarDataObject otherException = changedException.clone();
-        otherException.setRecurrenceDatePosition(new Date(5432100000l));
+        otherException.setRecurrenceDatePosition(new Date(5432100000L));
         
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, originalException)));
         
@@ -530,7 +530,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject originalException = changedException.clone();
         originalException.setObjectID(23);
         CalendarDataObject otherException = changedException.clone();
-        otherException.setRecurrenceDatePosition(new Date(5432100000l));
+        otherException.setRecurrenceDatePosition(new Date(5432100000L));
         
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, originalException)));
         
@@ -660,7 +660,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         // Along with one other non matching exceptions 
         CalendarDataObject otherException = changedException.clone();
-        otherException.setRecurrenceDatePosition(new Date(5432100000l));
+        otherException.setRecurrenceDatePosition(new Date(5432100000L));
         
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException)));
         

@@ -3108,11 +3108,11 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTitle("testBug10663");
         cdao.setIgnoreConflicts(true);
         // 21.12.2007 13:00:00 CET
-        cdao.setStartDate(new Date(1198238400000l));
+        cdao.setStartDate(new Date(1198238400000L));
         // 21.12.2007 14:00:00 CET
-        cdao.setEndDate(new Date(1198242000000l));
+        cdao.setEndDate(new Date(1198242000000L));
         // 18.05.2008
-        cdao.setUntil(new Date(1211068800000l));
+        cdao.setUntil(new Date(1211068800000L));
         // Recurrence calculator aka duration of a single appointment in days
         cdao.setRecurrenceCalculator(0);
         // Recurrence type: 3
@@ -3160,11 +3160,11 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setTimezone("America/New_York");
         //
-        cdao.setStartDate(new Date(1219271400000l));
+        cdao.setStartDate(new Date(1219271400000L));
         //
-        cdao.setEndDate(new Date(1219271400000l + Constants.MILLI_HOUR));
+        cdao.setEndDate(new Date(1219271400000L + Constants.MILLI_HOUR));
         //
-        cdao.setUntil(new Date(1219449600000l));
+        cdao.setUntil(new Date(1219449600000L));
         // Recurrence calculator aka duration of a single appointment in days
         cdao.setRecurrenceCalculator(0);
         // Recurrence type: 1
@@ -3202,9 +3202,9 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setTimezone(TIMEZONE);
         //
-        cdao.setStartDate(new Date(1193011200000l));
+        cdao.setStartDate(new Date(1193011200000L));
         //
-        cdao.setEndDate(new Date(1193270400000l));
+        cdao.setEndDate(new Date(1193270400000L));
 
         // Recurrence calculator aka duration of a single appointment in days
         cdao.setRecurrenceCalculator(3);
@@ -3223,7 +3223,7 @@ public class AppointmentBugTests extends TestCase {
         final int object_id = cdao.getObjectID();
         assertTrue("Object was created", object_id > 0);
 
-        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 1193176800000l, 1193263200000l, 0);
+        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 1193176800000L, 1193263200000L, 0);
         assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 1, 1, rss.size());
     }
 
@@ -3247,9 +3247,9 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setTimezone(TIMEZONE);
         // 28.07.2008 00:00h
-        cdao.setStartDate(new Date(1217203200000l));
+        cdao.setStartDate(new Date(1217203200000L));
         // 29.07.2008 00:00h
-        cdao.setEndDate(new Date(1217289600000l));
+        cdao.setEndDate(new Date(1217289600000L));
         // Full-time
         cdao.setFullTime(true);
         // Recurrence calculator aka duration of a single appointment in days
@@ -3259,7 +3259,7 @@ public class AppointmentBugTests extends TestCase {
         // Interval: 1
         cdao.setInterval(1);
         // Until 03.08.2008
-        cdao.setUntil(new Date(1217721600000l));
+        cdao.setUntil(new Date(1217721600000L));
 
         // Create in storage
         final CalendarSql csql = new CalendarSql(so);
@@ -3274,10 +3274,10 @@ public class AppointmentBugTests extends TestCase {
 
             // edao should denote the first occurrence in recurring appointment
             // Start time: 1217203200000l = 28.07.2008 00:00h
-            assertEquals("Unexpected start time in first occurrence", 1217203200000l, edao.getStartDate().getTime());
+            assertEquals("Unexpected start time in first occurrence", 1217203200000L, edao.getStartDate().getTime());
 
             // End time: 1217289600000l = 29.07.2008 00:00h
-            assertEquals("Unexpected end time in first occurrence", 1217289600000l, edao.getEndDate().getTime());
+            assertEquals("Unexpected end time in first occurrence", 1217289600000L, edao.getEndDate().getTime());
 
             // Calculate last occurrence
             final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(edao, 0, 0, 0, CalendarCollection.MAX_OCCURRENCESE, true);
@@ -3285,10 +3285,10 @@ public class AppointmentBugTests extends TestCase {
             assertTrue("Calculated last occurrence is null", rr != null);
 
             // Last occurrence should be on 03.08.2008: 1217721600000
-            assertEquals("Unexpected last occurrence's start time: ", 1217721600000l, rr.getStart());
+            assertEquals("Unexpected last occurrence's start time: ", 1217721600000L, rr.getStart());
 
             // Check end date which should be 04.08.2008: 1217808000000
-            assertEquals("Unexpected last occurrence's end time: ", 1217808000000l, rr.getEnd());
+            assertEquals("Unexpected last occurrence's end time: ", 1217808000000L, rr.getEnd());
         } finally {
             hardDelete(object_id, context);
         }
@@ -3314,9 +3314,9 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setTimezone(TIMEZONE);
         // 22.09.2008 12:00h
-        cdao.setStartDate(new Date(1222084800000l));
+        cdao.setStartDate(new Date(1222084800000L));
         // 22.09.2008 13:00h
-        cdao.setEndDate(new Date(1222088400000l));
+        cdao.setEndDate(new Date(1222088400000L));
         // No full-time
         cdao.setFullTime(false);
         // Recurrence calculator aka duration of a single appointment in days
@@ -3328,7 +3328,7 @@ public class AppointmentBugTests extends TestCase {
         // days: Mo - Fr
         cdao.setDays(62);
         // Until 29.09.2008 00:00h
-        cdao.setUntil(new Date(1222646400000l));
+        cdao.setUntil(new Date(1222646400000L));
 
         // Create in storage
         final CalendarSql csql = new CalendarSql(so);
@@ -3343,10 +3343,10 @@ public class AppointmentBugTests extends TestCase {
 
             // edao should denote the first occurrence in recurring appointment
             // Start time: 1217203200000l = 28.07.2008 00:00h
-            assertEquals("Unexpected start time in first occurrence", 1222084800000l, edao.getStartDate().getTime());
+            assertEquals("Unexpected start time in first occurrence", 1222084800000L, edao.getStartDate().getTime());
 
             // End time: 1217289600000l = 29.07.2008 00:00h
-            assertEquals("Unexpected end time in first occurrence", 1222088400000l, edao.getEndDate().getTime());
+            assertEquals("Unexpected end time in first occurrence", 1222088400000L, edao.getEndDate().getTime());
 
             // Calculate last occurrence
             final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(edao, 0, 0, 0, CalendarCollection.MAX_OCCURRENCESE, true);
@@ -3357,10 +3357,10 @@ public class AppointmentBugTests extends TestCase {
             assertTrue("Calculated last occurrence is null", rr != null);
 
             // Last occurrence should be on 29.09.2008 12:00h: 1222689600000
-            assertEquals("Unexpected last occurrence's start time: ", 1222689600000l, rr.getStart());
+            assertEquals("Unexpected last occurrence's start time: ", 1222689600000L, rr.getStart());
 
             // Check end date which should be 29.09.2008 13:00h: 1222693200000
-            assertEquals("Unexpected last occurrence's end time: ", 1222693200000l, rr.getEnd());
+            assertEquals("Unexpected last occurrence's end time: ", 1222693200000L, rr.getEnd());
         } finally {
             hardDelete(object_id, context);
         }

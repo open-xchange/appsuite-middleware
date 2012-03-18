@@ -157,8 +157,8 @@ public class Bug13501Test extends AbstractAJAXSession {
 
         columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_COUNT, Appointment.START_DATE, Appointment.END_DATE };
 
-        startSearch = new Date(1246233600000l); // 29.06.2009 00:00:00
-        endSearch = new Date(1249257600000l); // 03.08.2009 00:00:00
+        startSearch = new Date(1246233600000L); // 29.06.2009 00:00:00
+        endSearch = new Date(1249257600000L); // 03.08.2009 00:00:00
     }
 
     @Override

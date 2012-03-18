@@ -87,7 +87,6 @@ import net.htmlparser.jericho.Source;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.AllFetch.LowCostItem;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.RightsCache;
@@ -2398,7 +2397,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             if (allFetch) {
                 lowCostFields.add(MailField.RECEIVED_DATE);
-                final LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
+                final AllFetch.LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
                 final long start = System.currentTimeMillis();
                 retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order), imapConfig, session);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -2440,27 +2439,27 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private static final MailFields FIELDS_ENV = new MailFields(new MailField[] {
         MailField.SENT_DATE, MailField.FROM, MailField.TO, MailField.CC, MailField.BCC, MailField.SUBJECT });
 
-    private static LowCostItem[] getLowCostItems(final MailFields fields) {
-        final Set<LowCostItem> l = EnumSet.noneOf(LowCostItem.class);
+    private static AllFetch.LowCostItem[] getLowCostItems(final MailFields fields) {
+        final Set<AllFetch.LowCostItem> l = EnumSet.noneOf(AllFetch.LowCostItem.class);
         if (fields.contains(MailField.RECEIVED_DATE)) {
-            l.add(LowCostItem.INTERNALDATE);
+            l.add(AllFetch.LowCostItem.INTERNALDATE);
         }
         if (fields.contains(MailField.ID)) {
-            l.add(LowCostItem.UID);
+            l.add(AllFetch.LowCostItem.UID);
         }
         if (fields.contains(MailField.FLAGS) || fields.contains(MailField.COLOR_LABEL)) {
-            l.add(LowCostItem.FLAGS);
+            l.add(AllFetch.LowCostItem.FLAGS);
         }
         if (fields.contains(MailField.CONTENT_TYPE)) {
-            l.add(LowCostItem.BODYSTRUCTURE);
+            l.add(AllFetch.LowCostItem.BODYSTRUCTURE);
         }
         if (fields.contains(MailField.SIZE)) {
-            l.add(LowCostItem.SIZE);
+            l.add(AllFetch.LowCostItem.SIZE);
         }
         if (fields.containsAny(FIELDS_ENV)) {
-            l.add(LowCostItem.ENVELOPE);
+            l.add(AllFetch.LowCostItem.ENVELOPE);
         }
-        return l.toArray(new LowCostItem[l.size()]);
+        return l.toArray(new AllFetch.LowCostItem[l.size()]);
     }
 
     private static final EnumSet<MailField> LOW_COST = EnumSet.of(

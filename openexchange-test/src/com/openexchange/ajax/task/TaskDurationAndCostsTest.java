@@ -108,8 +108,8 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     public void testDurationAndCosts() throws Exception {
         task.setTargetCosts(11.5f);
         task.setActualCosts(4.728f);
-        task.setActualDuration(7l);
-        task.setTargetDuration(15l);
+        task.setActualDuration(7L);
+        task.setTargetDuration(15L);
         UpdateRequest req = new UpdateRequest(task, tz, false);
         try {
             UpdateResponse response = client.execute(req);

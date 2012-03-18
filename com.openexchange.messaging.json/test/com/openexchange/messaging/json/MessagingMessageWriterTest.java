@@ -333,7 +333,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
 
-        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic", "http://url.tld").inStrictOrder();
+        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337L, 1234567L, 313, 12, 13, "Supercontent!", "pic", "http://url.tld").inStrictOrder();
 
         assertValidates(assertion, fieldsJSON);
     }

@@ -55,17 +55,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
+import com.openexchange.calendar.itip.ITipChange.Type;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.Messages;
-import com.openexchange.calendar.itip.ITipChange.Type;
-import com.openexchange.calendar.itip.generators.HTMLWrapper;
 import com.openexchange.calendar.itip.generators.TypeWrapper;
-import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -73,7 +70,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -84,16 +80,18 @@ import com.openexchange.session.Session;
  */
 public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
-    public UpdateITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
+    public UpdateITipAnalyzer(final ITipIntegrationUtility util, final ServiceLookup services) {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
         return Arrays.asList(ITipMethod.REQUEST, ITipMethod.COUNTER, ITipMethod.PUBLISH);
     }
 
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
-        ITipAnalysis analysis = new ITipAnalysis();
+    @Override
+    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final Session session) throws OXException {
+        final ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
         ITipChange change = new ITipChange();
@@ -105,7 +103,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         } else if (message.exceptions().iterator().hasNext()) {
             uid = message.exceptions().iterator().next().getUid();
         }
-        CalendarDataObject original = util.resolveUid(uid, session);
+        final CalendarDataObject original = util.resolveUid(uid, session);
         if (update == null) {
             update = original;
         }
@@ -136,7 +134,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         if (differ && message.getDataObject() != null) {
-        	CalendarDataObject dao = message.getDataObject().clone();
+        	final CalendarDataObject dao = message.getDataObject().clone();
         	ensureParticipant(dao, session);
         	change.setNewAppointment(dao);
 
@@ -153,7 +151,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         	exception = exception.clone();
         	ensureParticipant(exception, session);
 
-            Appointment matchingException = findAndRemoveMatchingException(exception, exceptions);
+            final Appointment matchingException = findAndRemoveMatchingException(exception, exceptions);
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
@@ -167,7 +165,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 change.setType(ITipChange.Type.CREATE);
             }
             if (master == null) {
-            	ITipAnnotation annotation = new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale); // FIXME: Choose better message once we can introduce new sentences again.
+            	final ITipAnnotation annotation = new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale); // FIXME: Choose better message once we can introduce new sentences again.
             	annotation.setAppointment(exception);
             	analysis.addAnnotation(annotation);
             	break;
@@ -180,7 +178,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         if (exceptions != null && !exceptions.isEmpty()) {
-            for (Appointment unmentionedExceptions : exceptions) {
+            for (final Appointment unmentionedExceptions : exceptions) {
                 change = new ITipChange();
                 change.setException(true);
                 change.setType(ITipChange.Type.DELETE);
@@ -236,8 +234,8 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         return analysis;
     }
 
-    private boolean updateOrNew(ITipAnalysis analysis) {
-        for (ITipChange change : analysis.getChanges()) {
+    private boolean updateOrNew(final ITipAnalysis analysis) {
+        for (final ITipChange change : analysis.getChanges()) {
             if (change.getType() == Type.UPDATE || change.getType() == Type.CREATE) {
                 return true;
             }

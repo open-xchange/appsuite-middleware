@@ -136,7 +136,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             iter = sqlInterface.searchAppointments(searchObj, Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);
 
-            sqlInterface.hasAppointmentsBetween(SUPER_START, new Date(SUPER_START.getTime() + 3600000l * 24 * 30));
+            sqlInterface.hasAppointmentsBetween(SUPER_START, new Date(SUPER_START.getTime() + 3600000L * 24 * 30));
 
             // Check AppointmentRequest interface methods
 
@@ -191,7 +191,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
                 AJAXServlet.PARAMETER_START,
                 String.valueOf(SUPER_START.getTime()),
                 AJAXServlet.PARAMETER_END,
-                String.valueOf(SUPER_START.getTime() + 3600000l * 24 * 30)));
+                String.valueOf(SUPER_START.getTime() + 3600000L * 24 * 30)));
 
             // List
             final JSONArray idArray = new JSONArray();

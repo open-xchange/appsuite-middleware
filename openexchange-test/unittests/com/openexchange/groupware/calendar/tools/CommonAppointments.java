@@ -191,8 +191,8 @@ public class CommonAppointments {
         cdao.setParentFolderID(privateFolder);
         cdao.setIgnoreConflicts(true);
 
-        final long FIVE_DAYS = 5l*24l*3600000l;
-        final long THREE_HOURS = 3l*3600000l;
+        final long FIVE_DAYS = 5L*24L*3600000L;
+        final long THREE_HOURS = 3L*3600000L;
 
         cdao.setStartDate(new Date(FUTURE + FIVE_DAYS));
         cdao.setEndDate(new Date(FUTURE + FIVE_DAYS + THREE_HOURS));

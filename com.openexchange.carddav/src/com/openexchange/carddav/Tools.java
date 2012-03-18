@@ -52,7 +52,6 @@ package com.openexchange.carddav;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -104,7 +103,7 @@ public class Tools {
      * @return
      */
     public static String extractFolderId(final String name) {
-    	if (null != name && 0 < name.length() && name.startsWith("f")) {
+    	if (null != name && 0 < name.length() && name.charAt(0) == 'f') {
             final Matcher matcher = FOLDER_NAME.matcher(name);
             if (matcher.find()) {
                 return matcher.group(1);

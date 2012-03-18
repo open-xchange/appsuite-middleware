@@ -363,7 +363,7 @@ public class CollectionTest extends ResourceTest {
 
 
 		try {
-			res.setLength(23l);
+			res.setLength(23L);
 			fail("Could update length");
 		} catch (final WebdavProtocolException x) {
 			assertTrue(true);

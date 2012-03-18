@@ -98,7 +98,7 @@ public class Bug11695Test extends CalendarSqlTest {
         appointment.setDays(62); // Monday til friday
         appointment.setTitle("testShouldCalculateProperWeeklyRecurrence2");
         appointment.setInterval(1);
-        appointment.setUntil(new Date(1222041600000l));
+        appointment.setUntil(new Date(1222041600000L));
         appointments.save(appointment);
         clean.add(appointment);
         // Check for 6 occurrences

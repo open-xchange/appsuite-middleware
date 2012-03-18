@@ -70,7 +70,6 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.cache.ListLsubEntry.ChangeState;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -748,7 +747,7 @@ final class ListLsubCollection {
                         sharedNamespace,
                         ATTRIBUTES_NON_EXISTING_NAMESPACE,
                         separator,
-                        ChangeState.UNDEFINED,
+                        ListLsubEntry.ChangeState.UNDEFINED,
                         true,
                         false,
                         Boolean.FALSE,
@@ -768,7 +767,7 @@ final class ListLsubCollection {
                         userNamespace,
                         ATTRIBUTES_NON_EXISTING_NAMESPACE,
                         separator,
-                        ChangeState.UNDEFINED,
+                        ListLsubEntry.ChangeState.UNDEFINED,
                         true,
                         false,
                         Boolean.FALSE,
@@ -830,7 +829,7 @@ final class ListLsubCollection {
                             parentFullName,
                             ATTRIBUTES_NON_EXISTING_PARENT,
                             separator,
-                            ChangeState.UNDEFINED,
+                            ListLsubEntry.ChangeState.UNDEFINED,
                             true,
                             false,
                             Boolean.TRUE,
@@ -1299,7 +1298,7 @@ final class ListLsubCollection {
          * Check attributes
          */
         final Set<String> attributes;
-        ChangeState changeState = ChangeState.UNDEFINED;
+        ListLsubEntry.ChangeState changeState = ListLsubEntry.ChangeState.UNDEFINED;
         boolean canOpen = true;
         boolean hasInferiors = true;
         Boolean hasChildren = null;
@@ -1312,10 +1311,10 @@ final class ListLsubCollection {
                 final String attr = s[i].toLowerCase(Locale.US);
                 switch (POS_MAP.get(attr)) {
                 case 1:
-                    changeState = ChangeState.CHANGED;
+                    changeState = ListLsubEntry.ChangeState.CHANGED;
                     break;
                 case 2:
-                    changeState = ChangeState.UNCHANGED;
+                    changeState = ListLsubEntry.ChangeState.UNCHANGED;
                     break;
                 case 3:
                     canOpen = false;
@@ -1449,8 +1448,8 @@ final class ListLsubCollection {
         }
 
         @Override
-        public ChangeState getChangeState() {
-            return ChangeState.UNCHANGED;
+        public ListLsubEntry.ChangeState getChangeState() {
+            return ListLsubEntry.ChangeState.UNCHANGED;
         }
 
         @Override
