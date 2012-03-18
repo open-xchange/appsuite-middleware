@@ -1,3 +1,7 @@
+* 2012-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21785: Added needed javax.xml imports
+
 * 2012-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 21754: Dealing with a mail containing a <blockquote> mess
