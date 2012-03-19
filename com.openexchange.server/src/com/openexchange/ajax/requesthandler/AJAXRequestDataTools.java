@@ -88,6 +88,17 @@ public class AJAXRequestDataTools {
         return INSTANCE;
     }
 
+    /*-
+     * ----------------------- Member stuff -----------------------
+     */
+    
+    /**
+     * Initializes a new {@link AJAXRequestDataTools}.
+     */
+    protected AJAXRequestDataTools() {
+        super();
+    }
+
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
      * 
@@ -95,6 +106,7 @@ public class AJAXRequestDataTools {
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
      * @param session The associated session
+     * @param prefix The part of request's URI considered as prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
      * @return An appropriate {@link AJAXRequestData} instance
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
