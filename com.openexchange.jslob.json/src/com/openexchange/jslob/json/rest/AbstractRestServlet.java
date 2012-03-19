@@ -47,79 +47,75 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.jslob.json.rest;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.AbstractMethodHandler;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MethodHandlerImplementation}
- *
+ * {@link AbstractRestServlet} - The abstract Servlet to handle REST-like requests.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PutMethodHandler extends AbstractMethodHandler {
+public abstract class AbstractRestServlet extends DispatcherServlet {
+
+    private static final long serialVersionUID = 3164103914795844167L;
+
+    private final AJAXRequestDataTools ajaxRequestDataTools;
 
     /**
-     * Initializes a new {@link PutMethodHandler}.
+     * Initializes a new {@link AbstractRestServlet}.
      */
-    public PutMethodHandler() {
+    protected AbstractRestServlet() {
         super();
+        ajaxRequestDataTools = new RestRequestDataTools(this);
     }
 
     @Override
-    protected String getModule() {
-        return "conversation";
+    protected AJAXRequestDataTools getAjaxRequestDataTools() {
+        return ajaxRequestDataTools;
     }
 
-    @Override
-    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
-        if (isEmpty(pathInfo)) {
-            final String action = req.getParameter("action");
-            if (null == action) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
-            }
-            requestData.setAction(action);
-        } else {
-            final String[] pathElements = SPLIT_PATH.split(pathInfo);
-            final int length = pathElements.length;
-            if (0 == length) {
-                final String action = req.getParameter("action");
-                if (null == action) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
-                }
-                requestData.setAction(action);
-            } else if (1 == length) {
-                /*-
-                 * "Update conv."
-                 *  PUT /conversation/11
-                 */
-                final String element = pathElements[0];
-                requestData.setAction("update");
-                requestData.putParameter("id", element);
-            } else if ("message".equals(pathElements[1])) {
-                if (2 == length) {
-                    throw AjaxExceptionCodes.BAD_REQUEST.create();
-                }
-                /*-
-                 * "Update message"
-                 *  PUT /conversation/11/message/1234
-                 */
-                requestData.putParameter("id", pathElements[0]);
-                requestData.setAction("updateMessage");
-                requestData.putParameter("messageId", pathElements[2]);
-            } else {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-            }
+    /**
+     * Gets the method handler appropriate for specified method.
+     * 
+     * @param method The HTTP method
+     * @return The associated method handler or <code>null</code> if none appropriate
+     */
+    public abstract MethodHandler getMethodHandler(Method method);
+
+    private static final class RestRequestDataTools extends AJAXRequestDataTools {
+
+        private final AbstractRestServlet servlet;
+
+        public RestRequestDataTools(final AbstractRestServlet servlet) {
+            super();
+            this.servlet = servlet;
         }
-    }
 
-    @Override
-    protected boolean shouldApplyBody() {
-        return true;
+        @Override
+        public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
+            if (isFileUpload) {
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+            }
+            /*
+             * Parse dependent on HTTP method and/or servlet path
+             */
+            final Method method = Method.valueOf(req);
+            if (null == method) {
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+            }
+            final MethodHandler methodHandler = servlet.getMethodHandler(method);
+            if (null == methodHandler) {
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+            }
+            return methodHandler.parseRequest(req, session, servlet);
+        }
     }
 
 }

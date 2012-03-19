@@ -47,64 +47,40 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.jslob.json.rest.jslob;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.AbstractMethodHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import com.openexchange.jslob.json.rest.AbstractRestServlet;
+import com.openexchange.jslob.json.rest.Method;
+import com.openexchange.jslob.json.rest.MethodHandler;
 
 /**
- * {@link MethodHandlerImplementation}
- *
+ * {@link JSlobRestServlet} - The REST servlet for JSlob module.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PostMethodHandler extends AbstractMethodHandler {
+public final class JSlobRestServlet extends AbstractRestServlet {
+
+    private static final long serialVersionUID = 531054544302924919L;
+
+    private final Map<Method, MethodHandler> handlerMap;
 
     /**
-     * Initializes a new {@link PostMethodHandler}.
+     * Initializes a new {@link JSlobRestServlet}.
      */
-    public PostMethodHandler() {
+    public JSlobRestServlet() {
         super();
+        final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
+        m.put(Method.GET, new GetMethodHandler());
+        // m.put(Method.PUT, new PutMethodHandler());
+        handlerMap = Collections.unmodifiableMap(m);
     }
 
     @Override
-    protected String getModule() {
-        return "conversation";
-    }
-
-    @Override
-    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
-        if (isEmpty(pathInfo)) {
-            requestData.setAction("new");
-        } else {
-            final String[] pathElements = SPLIT_PATH.split(pathInfo);
-            final int length = pathElements.length;
-            if (0 == length) {
-                requestData.setAction("new");
-            } else if (1 == length) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create();
-            } else if ("message".equals(pathElements[1])) {
-                if (2 == length) {
-                    throw AjaxExceptionCodes.BAD_REQUEST.create();
-                }
-                /*-
-                 * "Post new message for Conv. #11"
-                 *  POST /conversation/11/message
-                 */
-                requestData.putParameter("id", pathElements[0]);
-                requestData.setAction("newMessage");
-            } else {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-            }
-        }
-    }
-
-    @Override
-    protected boolean shouldApplyBody() {
-        return true;
+    public MethodHandler getMethodHandler(final Method method) {
+        return handlerMap.get(method);
     }
 
 }

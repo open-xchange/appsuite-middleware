@@ -58,10 +58,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jslob.json.action.JSlobAction;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link JSlobActionFactory}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlobActionFactory implements AJAXActionServiceFactory {

@@ -59,10 +59,9 @@ import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link GetAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAction extends JSlobAction {
@@ -86,7 +85,7 @@ public final class GetAction extends JSlobAction {
 
         final String id = jslobRequest.checkParameter("id");
         final JSlob jslob = jslobService.get(id, jslobRequest.getUserId(), jslobRequest.getContextId());
-        
+
         final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
         if (!isEmpty(serlvetRequestURI)) {
             final List<JSONPathElement> jPath = JSONPathElement.parsePath(serlvetRequestURI);

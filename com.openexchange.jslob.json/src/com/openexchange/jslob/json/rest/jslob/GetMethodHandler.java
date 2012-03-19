@@ -47,19 +47,19 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.jslob.json.rest.jslob;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.AbstractMethodHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.json.rest.AbstractMethodHandler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link MethodHandlerImplementation}
- *
+ * {@link GetMethodHandler} - Serves the REST-like <code>GET</code> request.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetMethodHandler extends AbstractMethodHandler {
@@ -73,8 +73,11 @@ public final class GetMethodHandler extends AbstractMethodHandler {
 
     @Override
     protected String getModule() {
-        return "conversation";
+        return "jslob";
     }
+
+    // GET /jslob (all)
+    // GET /jslob/id (get)
 
     @Override
     protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
@@ -85,14 +88,14 @@ public final class GetMethodHandler extends AbstractMethodHandler {
             final int length = pathElements.length;
             if (0 == length) {
                 /*-
-                 * "Get all conversations"
-                 *  GET /conversation
+                 * "Get all roster's presences"
+                 *  GET /jslob
                  */
                 requestData.setAction("all");
             } else if (1 == length) {
                 /*-
-                 * "Get specific conversation"
-                 *  GET /conversation/11
+                 * "Get specific presence"
+                 *  GET /jslob/11
                  */
                 final String element = pathElements[0];
                 if (element.indexOf(',') < 0) {
@@ -105,33 +108,6 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                         array.put(id);
                     }
                     requestData.setData(array);
-                }
-            } else if ("message".equals(pathElements[1])) {
-                if (2 == length) {
-                    /*-
-                     * "Get all messages"
-                     *  GET /conversation/11/message?since=<long:timestamp>
-                     */
-                    requestData.setAction("allMessages");
-                    requestData.putParameter("id", pathElements[0]);
-                } else {
-                    /*-
-                     * "Get specific message"
-                     *  GET /conversation/11/message/1234
-                     */
-                    requestData.putParameter("id", pathElements[0]);
-                    final String element = pathElements[2];
-                    if (element.indexOf(',') < 0) {
-                        requestData.setAction("getMessage");
-                        requestData.putParameter("messageId", element);
-                    } else {
-                        requestData.setAction("listMessages");
-                        final JSONArray array = new JSONArray();
-                        for (final String id : SPLIT_CSV.split(element)) {
-                            array.put(id);
-                        }
-                        requestData.setData(array);
-                    }
                 }
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);

@@ -47,79 +47,32 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.jslob.json.rest;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.AbstractMethodHandler;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MethodHandlerImplementation}
- *
+ * Handles requests in a REST-like manner for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PutMethodHandler extends AbstractMethodHandler {
+public interface MethodHandler {
 
     /**
-     * Initializes a new {@link PutMethodHandler}.
+     * Parses REST-like HTTP Servlet request to an appropriate {@link AJAXRequestData} instance.
+     * 
+     * @param req The HTTP Servlet request
+     * @param session The session
+     * @param servlet The dispatcher Servlet
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
      */
-    public PutMethodHandler() {
-        super();
-    }
-
-    @Override
-    protected String getModule() {
-        return "conversation";
-    }
-
-    @Override
-    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
-        if (isEmpty(pathInfo)) {
-            final String action = req.getParameter("action");
-            if (null == action) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
-            }
-            requestData.setAction(action);
-        } else {
-            final String[] pathElements = SPLIT_PATH.split(pathInfo);
-            final int length = pathElements.length;
-            if (0 == length) {
-                final String action = req.getParameter("action");
-                if (null == action) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
-                }
-                requestData.setAction(action);
-            } else if (1 == length) {
-                /*-
-                 * "Update conv."
-                 *  PUT /conversation/11
-                 */
-                final String element = pathElements[0];
-                requestData.setAction("update");
-                requestData.putParameter("id", element);
-            } else if ("message".equals(pathElements[1])) {
-                if (2 == length) {
-                    throw AjaxExceptionCodes.BAD_REQUEST.create();
-                }
-                /*-
-                 * "Update message"
-                 *  PUT /conversation/11/message/1234
-                 */
-                requestData.putParameter("id", pathElements[0]);
-                requestData.setAction("updateMessage");
-                requestData.putParameter("messageId", pathElements[2]);
-            } else {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-            }
-        }
-    }
-
-    @Override
-    protected boolean shouldApplyBody() {
-        return true;
-    }
+    AJAXRequestData parseRequest(HttpServletRequest req, ServerSession session, DispatcherServlet servlet) throws IOException, OXException;
 
 }
