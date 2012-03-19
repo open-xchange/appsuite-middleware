@@ -47,58 +47,37 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
-
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-
+package com.openexchange.tools.images;
 
 /**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ScaleType}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public enum ScaleType {
+    COVER("cover"), CONTAIN("contain"), AUTO("auto");
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+    private String keyword;
 
-        DimensionConstrain constrain;
-        switch (scaleType) {
-        case COVER:
-            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
-            break;
-        case CONTAIN:
-            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
-            break;
-        default:
-            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
-            break;
-        }
-        ResampleOp op = new ResampleOp(constrain);
-
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-        
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    private ScaleType(String keyword) {
+        this.keyword = keyword;
     }
 
+    public String getKeyword() {
+        return keyword;
+    }
 
-
+    public static ScaleType getType(String keyword) {
+        if (keyword == null) {
+            return AUTO;
+        }
+        keyword = keyword.trim().toLowerCase();
+        if (keyword.equals(COVER.getKeyword())) {
+            return COVER;
+        } else if (keyword.equals(CONTAIN.getKeyword())) {
+            return CONTAIN;
+        } else {
+            return AUTO;
+        }
+    }
 }

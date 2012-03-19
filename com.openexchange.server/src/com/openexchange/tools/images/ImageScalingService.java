@@ -52,12 +52,12 @@ package com.openexchange.tools.images;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 /**
  * {@link ImageScalingService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ImageScalingService {
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException;
+
+    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException;
 }

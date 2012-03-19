@@ -49,56 +49,46 @@
 
 package com.openexchange.tools.images.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
+import java.awt.Dimension;
 import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 
 /**
- * {@link JavaImageScalingService}
+ * {@link AutoDimensionConstrain}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public class AutoDimensionConstrain extends DimensionConstrain {
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+    private int width;
 
-        DimensionConstrain constrain;
-        switch (scaleType) {
-        case COVER:
-            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
-            break;
-        case CONTAIN:
-            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
-            break;
-        default:
-            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
-            break;
-        }
-        ResampleOp op = new ResampleOp(constrain);
+    private int height;
 
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-        
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    public AutoDimensionConstrain(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
+    public Dimension getDimension(Dimension dimension) {
+        if (width <= 0 && height <= 0) {
+            return dimension;
+        }
 
+        double scaleWidth;
+        double scaleHeight;
+        if (height <= 0) {
+            scaleHeight = scaleWidth = width / (double) dimension.width;
+        } else if (width <= 0) {
+            scaleHeight = scaleWidth = height / (double) dimension.height;
+        } else {
+            scaleWidth = width / (double) dimension.width;
+            scaleHeight = height / (double) dimension.height;
+        }
+
+        int dstWidth = (int) Math.round(dimension.width * scaleWidth);
+        int dstHeight = (int) Math.round(dimension.height * scaleHeight);
+
+        return new Dimension(dstWidth, dstHeight);
+    }
 
 }

@@ -64,6 +64,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -74,7 +80,10 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
+import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -93,11 +102,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
     private static final String INFOSTORE_VERSION = "infoVersion";
-
+    
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
 
     private static OXMFPublicationService infostorePublisher = null;
-
+    
 
     public static void setInfostorePublisher(final OXMFPublicationService service) {
         infostorePublisher = service;
@@ -121,7 +130,12 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         userConfigs = service;
     }
 
+    private static FileResponseRenderer fileResponseRenderer = null;
 
+    public static void setFileResponseRenderer(FileResponseRenderer renderer) {
+    	fileResponseRenderer = renderer;
+    }
+    
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Map<String, String> args = getPublicationArguments(req);
@@ -152,7 +166,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             final InputStream fileData = loadFile(publication, infoId, user, userConfig);
 
             startedWriting = true;
-            writeFile(metadata, fileData, req, resp);
+            writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
 
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -183,38 +197,14 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             throw e;
         }
     }
-
-    private void writeFile(final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        configureHeaders(metadata, req, resp);
-        write(fileData, resp);
+    
+    private void writeFile(final Session session, final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+    	AJAXRequestData request = AJAXRequestDataTools.parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/infostore");
+    	AJAXRequestResult result = new AJAXRequestResult(new FileHolder(fileData, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName()), "file");
+    	
+    	fileResponseRenderer.write(request, result, req, resp);
     }
-
-    private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
-        BufferedInputStream bis = null;
-        OutputStream output = null;
-        try {
-            bis = new BufferedInputStream(is);
-            output = new BufferedOutputStream(resp.getOutputStream());
-            int i;
-            while((i = bis.read()) != -1) {
-                output.write(i);
-            }
-            output.flush();
-        } finally {
-            if(bis != null) {
-                bis.close();
-            }
-        }
-    }
-
-    private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        resp.setHeader("Content-Disposition", "attachment; filename=\""
-             + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
-        final String fileMIMEType = document.getFileMIMEType();
-        if (fileMIMEType != null) {
-            resp.setContentType(fileMIMEType);
-        }
-    }
+    
     private static final boolean isIE(final HttpServletRequest req) {
         final String userAgent = req.getHeader("User-Agent");
         return null != userAgent && userAgent.contains("MSIE");

@@ -61,6 +61,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -69,6 +75,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -98,6 +107,12 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
         contacts = service;
     }
+    
+    private static FileResponseRenderer fileResponseRenderer = null;
+    
+    public static void setFileResponseRenderer(FileResponseRenderer renderer) {
+    	fileResponseRenderer = renderer;
+    }
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -123,7 +138,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
 
             final Contact contact = loadContact(publication, folderId, contactId);
 
-            writeImage(contact, resp);
+            writeImage(contact, req, resp, new PublicationSession(publication));
 
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -133,11 +148,17 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
 
     }
 
-    private void writeImage(final Contact contact, final HttpServletResponse resp) throws IOException {
-        resp.setContentType(contact.getImageContentType());
-        final ServletOutputStream outputStream = resp.getOutputStream();
-        outputStream.write(contact.getImage1());
-        outputStream.flush();
+    private void writeImage(final Contact contact, final HttpServletRequest req, final HttpServletResponse resp, final Session session) throws IOException, OXException {
+        
+        AJAXRequestData request = AJAXRequestDataTools.parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/");
+        
+        ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
+        holder.setContentType(contact.getImageContentType());
+        AJAXRequestResult result = new AJAXRequestResult(holder, "file");
+        
+        
+        fileResponseRenderer.write(request, result, req, resp);
+        
     }
 
     private Contact loadContact(final Publication publication, final int folderId, final int contactId) throws OXException {

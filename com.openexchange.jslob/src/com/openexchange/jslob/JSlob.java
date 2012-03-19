@@ -79,6 +79,8 @@ public class JSlob {
 
     private JSONObject jsonObject;
 
+    private JSlobId id;
+
     /**
      * Initializes a new empty {@link JSlob}.
      */
@@ -94,6 +96,26 @@ public class JSlob {
     public JSlob(final JSONObject jsonObject) {
         super();
         this.jsonObject = jsonObject;
+    }
+
+    /**
+     * Gets the identifier
+     * 
+     * @return The identifier
+     */
+    public JSlobId getId() {
+        return id;
+    }
+
+    /**
+     * Sets the identifier
+     * 
+     * @param id The identifier to set
+     * @return This JSlob with new identifier applied
+     */
+    public JSlob setId(final JSlobId id) {
+        this.id = id;
+        return this;
     }
 
     /**
