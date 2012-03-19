@@ -74,7 +74,9 @@ public final class JSlobRestServlet extends AbstractRestServlet {
         super();
         final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
         m.put(Method.GET, new GetMethodHandler());
-        // m.put(Method.PUT, new PutMethodHandler());
+        m.put(Method.PUT, new PutMethodHandler());
+        m.put(Method.POST, new PostMethodHandler());
+        m.put(Method.DELETE, new DeleteMethodHandler());
         handlerMap = Collections.unmodifiableMap(m);
     }
 

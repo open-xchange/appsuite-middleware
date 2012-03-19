@@ -47,53 +47,77 @@
  *
  */
 
-package com.openexchange.jslob.json;
+package com.openexchange.jslob.json.rest.jslob;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.json.action.JSlobAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.jslob.json.rest.AbstractMethodHandler;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link JSlobActionFactory}
+ * {@link PostMethodHandler} - Serves the REST-like <code>POST</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlobActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, JSlobAction> actions;
+public final class PostMethodHandler extends AbstractMethodHandler {
 
     /**
-     * Initializes a new {@link JSlobActionFactory}.
-     * 
-     * @param services The service look-up
+     * Initializes a new {@link PostMethodHandler}.
      */
-    public JSlobActionFactory(final ServiceLookup services) {
+    public PostMethodHandler() {
         super();
-        actions = new ConcurrentHashMap<String, JSlobAction>(4);
-        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services));
-    }
-
-    private void addJSlobAction(final JSlobAction jslobAction) {
-        actions.put(jslobAction.getAction(), jslobAction);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected String getModule() {
+        return "jslob";
+    }
+
+    // POST /jslob/id/<path> (set)
+
+    @Override
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+        // E.g. pathInfo="11" (preceding "jslob" removed)
+        if (isEmpty(pathInfo)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        final String[] pathElements = SPLIT_PATH.split(pathInfo);
+        final int length = pathElements.length;
+        if (0 == length) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        if (1 == length) {
+            /*-
+             *  PUT /jslob/11
+             */
+            requestData.setAction("update");
+            requestData.putParameter("id", pathElements[0]);
+        } else if (2 == length) {
+            /*-
+             *  PUT /jslob/11/<path>
+             */
+            requestData.setAction("update");
+            requestData.putParameter("id", pathElements[0]);
+            try {
+                final JSONObject jObject = new JSONObject();
+                jObject.put("path", pathElements[1]);
+                jObject.put("value", requestData.getData());
+                requestData.setData(jObject, "json");
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()); 
+            }
+        } else {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+        }
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected boolean shouldApplyBody() {
+        return true;
     }
 
 }

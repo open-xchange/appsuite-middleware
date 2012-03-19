@@ -83,9 +83,11 @@ public final class SetAction extends JSlobAction {
 
         final String id = jslobRequest.checkParameter("id");
         final Object data = jslobRequest.getRequestData().getData();
+        /*
+         * A null value is considered as a remove operation
+         */
         final JSlob jslob = null == data ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getUserId(), jslobRequest.getContextId());
-
         return new AJAXRequestResult();
     }
 

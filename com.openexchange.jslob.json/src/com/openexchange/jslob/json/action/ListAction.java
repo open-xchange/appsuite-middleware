@@ -47,53 +47,59 @@
  *
  */
 
-package com.openexchange.jslob.json;
+package com.openexchange.jslob.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.json.action.JSlobAction;
+import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link JSlobActionFactory}
+ * {@link ListAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlobActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, JSlobAction> actions;
+public final class ListAction extends JSlobAction {
 
     /**
-     * Initializes a new {@link JSlobActionFactory}.
+     * Initializes a new {@link ListAction}.
      * 
      * @param services The service look-up
      */
-    public JSlobActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, JSlobAction>(4);
-        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services));
-    }
-
-    private void addJSlobAction(final JSlobAction jslobAction) {
-        actions.put(jslobAction.getAction(), jslobAction);
+    public ListAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException, JSONException {
+        String serviceId = jslobRequest.getParameter("serviceId", String.class);
+        if (null == serviceId) {
+            serviceId = DEFAULT_SERVICE_ID;
+        }
+        final JSlobService jslobService = getJSlobService(serviceId);
+
+        final JSONArray ids = (JSONArray) jslobRequest.getRequestData().getData();
+        final int length = ids.length();
+        final List<JSlob> jslobs = new ArrayList<JSlob>(length);
+
+        final int contextId = jslobRequest.getContextId();
+        final int userId = jslobRequest.getUserId();
+        for (int i = 0; i < length; i++) {
+            jslobs.add(jslobService.get(ids.getString(i), userId, contextId));
+        }
+
+        return new AJAXRequestResult(jslobs, "jslob");
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public String getAction() {
+        return "list";
     }
 
 }
