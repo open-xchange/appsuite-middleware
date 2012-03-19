@@ -70,6 +70,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -234,7 +235,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Scale to new input stream
              */
-            final InputStream scaled = scaler.scale(file.getStream(), width, height);
+            final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
             return new FileHolder(scaled, -1, "image/png", "");
         } finally {
             Streams.close(file);

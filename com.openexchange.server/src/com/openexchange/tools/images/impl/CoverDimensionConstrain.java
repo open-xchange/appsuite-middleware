@@ -49,56 +49,39 @@
 
 package com.openexchange.tools.images.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
+import java.awt.Dimension;
 import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-
 
 /**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link CoverDimensionConstrain}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public class CoverDimensionConstrain extends DimensionConstrain {
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+    private int minWidth;
 
-        DimensionConstrain constrain;
-        switch (scaleType) {
-        case COVER:
-            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
-            break;
-        case CONTAIN:
-            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
-            break;
-        default:
-            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
-            break;
-        }
-        ResampleOp op = new ResampleOp(constrain);
+    private int minHeight;
 
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-        
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    public CoverDimensionConstrain(int minWidth, int minHeight) {
+        this.minWidth = minWidth;
+        this.minHeight = minHeight;
     }
 
+    public Dimension getDimension(Dimension dimension) {
+        if (minWidth <= 0 && minHeight <= 0) {
+            return dimension;
+        }
 
+        double scaleWidth = minWidth <= 0 ? 0.0 : minWidth / (double) dimension.width; // Calculate Width factor
+        double scaleHeight = minHeight <= 0 ? 0.0 : minHeight / (double) dimension.height; // Calculate Height factor
+
+        double scale = Math.max(scaleWidth, scaleHeight); // Choose largest boundary
+
+        int dstWidth = (int) Math.round(dimension.width * scale);
+        int dstHeight = (int) Math.round(dimension.height * scale);
+
+        return new Dimension(dstWidth, dstHeight);
+    }
 
 }
