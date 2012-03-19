@@ -52,6 +52,7 @@ package com.openexchange.chat.json.rest;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -65,30 +66,19 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
 
     private static final long serialVersionUID = 3164103914795844167L;
 
+    private final AJAXRequestDataTools ajaxRequestDataTools;
+
     /**
      * Initializes a new {@link AbstractRestServlet}.
      */
-    public AbstractRestServlet() {
+    protected AbstractRestServlet() {
         super();
+        ajaxRequestDataTools = new RestRequestDataTools(this);
     }
 
     @Override
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
-        if (isFileUpload) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
-        }
-        /*
-         * Parse dependent on HTTP method and/or servlet path
-         */
-        final Method method = Method.valueOf(req);
-        if (null == method) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
-        }
-        final MethodHandler methodHandler = getMethodHandler(method);
-        if (null == methodHandler) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
-        }
-        return methodHandler.parseRequest(req, session, this);
+    protected AJAXRequestDataTools getAjaxRequestDataTools() {
+        return ajaxRequestDataTools;
     }
 
     /**
@@ -97,6 +87,35 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
      * @param method The HTTP method
      * @return The associated method handler or <code>null</code> if none appropriate
      */
-    protected abstract MethodHandler getMethodHandler(Method method);
+    public abstract MethodHandler getMethodHandler(Method method);
+
+    private static final class RestRequestDataTools extends AJAXRequestDataTools {
+
+        private final AbstractRestServlet servlet;
+
+        public RestRequestDataTools(final AbstractRestServlet servlet) {
+            super();
+            this.servlet = servlet;
+        }
+
+        @Override
+        public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
+            if (isFileUpload) {
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+            }
+            /*
+             * Parse dependent on HTTP method and/or servlet path
+             */
+            final Method method = Method.valueOf(req);
+            if (null == method) {
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+            }
+            final MethodHandler methodHandler = servlet.getMethodHandler(method);
+            if (null == methodHandler) {
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+            }
+            return methodHandler.parseRequest(req, session, servlet);
+        }
+    }
 
 }

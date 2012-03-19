@@ -51,15 +51,8 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
@@ -69,18 +62,11 @@ import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -122,7 +108,10 @@ public class DispatcherServlet extends SessionServlet {
         return DISPATCHER.get();
     }
 
-    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();
+    /**
+     * The prefix reference.
+     */
+    protected static final AtomicReference<String> PREFIX = new AtomicReference<String>();
 
     /**
      * Sets the prefix.
@@ -145,10 +134,25 @@ public class DispatcherServlet extends SessionServlet {
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
     /**
+     * The default <code>AJAXRequestDataTools</code>.
+     */
+    protected final AJAXRequestDataTools defaultRequestDataTools;
+
+    /**
      * Initializes a new {@link DispatcherServlet}.
      */
     public DispatcherServlet() {
         super();
+        defaultRequestDataTools = AJAXRequestDataTools.getInstance();
+    }
+
+    /**
+     * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
+     * 
+     * @return The <code>AJAXRequestDataTools</code> instance
+     */
+    protected AJAXRequestDataTools getAjaxRequestDataTools() {
+        return defaultRequestDataTools;
     }
 
     /**
@@ -213,7 +217,7 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData requestData = AJAXRequestDataTools.parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
+            final AJAXRequestData requestData = getAjaxRequestDataTools().parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
             requestData.setSession(session);
             /*
              * Start dispatcher processing

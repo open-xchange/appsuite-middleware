@@ -82,7 +82,7 @@ public final class RosterRestServlet extends AbstractRestServlet {
     }
 
     @Override
-    protected MethodHandler getMethodHandler(final Method method) {
+    public MethodHandler getMethodHandler(final Method method) {
         return HANDLER_MAP.get(method);
     }
 
