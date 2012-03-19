@@ -54,6 +54,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -67,6 +69,7 @@ import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -87,7 +90,7 @@ public class ServletActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class};
+        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageScalingService.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -131,8 +134,9 @@ public class ServletActivator extends HousekeepingActivator {
         final UserService users = getService(UserService.class);
         final ConfigurationService configService = getService(ConfigurationService.class);
         final HtmlService htmlService = getService(HtmlService.class);
+        final ImageScalingService imageScalingService = getService(ImageScalingService.class);
 
-        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null || htmlService == null) {
+        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null || htmlService == null || imageScalingService == null) {
             return;
         }
 
@@ -154,7 +158,12 @@ public class ServletActivator extends HousekeepingActivator {
         InfostoreFileServlet.setUserConfigs(userConfigs);
         InfostoreFileServlet.setUsers(users);
         InfostoreFileServlet.setInfostore(infostore);
-
+        
+        FileResponseRenderer renderer = new FileResponseRenderer();
+        renderer.setScaler(imageScalingService);
+		InfostoreFileServlet.setFileResponseRenderer(renderer);
+        ContactPictureServlet.setFileResponseRenderer(renderer);
+		
         registered = true;
         try {
             httpService.registerServlet("/publications", microformatServlet, null, null);
