@@ -106,6 +106,9 @@ public final class UpdateAction extends JSlobAction {
                  */
                 jslob = jslobService.get(id, userId, contextId);
             } else {
+                /*
+                 * Update by JSON data
+                 */
                 final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
                 if (jsonData.hasAndNotNull("path")) {
                     final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
