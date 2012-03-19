@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -91,7 +92,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
     @Override
     public AJAXRequestData parseRequest(final HttpServletRequest req, final ServerSession session, final DispatcherServlet servlet) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
-        servlet.parseHostName(retval, req, session);
+        AJAXRequestDataTools.parseHostName(retval, req, session);
         /*
          * Set the module
          */
