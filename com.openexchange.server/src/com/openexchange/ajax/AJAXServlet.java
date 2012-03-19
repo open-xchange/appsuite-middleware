@@ -588,7 +588,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
         final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
-        if (pos != -1) {
+        if (pos >= 0) {
             uri = uri.substring(pos + path.length());
         }
         return uri;
