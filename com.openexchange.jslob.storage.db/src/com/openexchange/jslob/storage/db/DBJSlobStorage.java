@@ -68,7 +68,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
-import com.openexchange.jslob.storage.JSlobId;
+import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.server.ServiceLookup;
 
@@ -352,7 +352,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (!rs.next()) {
                 return null;
             }
-            return new JSlob(new JSONObject(rs.getString(1)));
+            return new JSlob(new JSONObject(rs.getString(1))).setId(id);
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -386,7 +386,7 @@ public final class DBJSlobStorage implements JSlobStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT data FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt = con.prepareStatement("SELECT data, id FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id.getUser());
             stmt.setString(3, id.getServiceId());
@@ -396,7 +396,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             }
             final List<JSlob> list = new LinkedList<JSlob>();
             do {
-                list.add(new JSlob(new JSONObject(rs.getString(1))));
+                list.add(new JSlob(new JSONObject(rs.getString(1))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
             return list;
         } catch (final SQLException e) {

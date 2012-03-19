@@ -51,6 +51,7 @@ package com.openexchange.jslob.json.converter;
 
 import java.util.Collection;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -58,6 +59,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,24 +93,31 @@ public class JSlobJSONResultConverter implements ResultConverter {
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Object resultObject = result.getResultObject();
-        if (resultObject instanceof JSlob) {
-            final JSlob jslob = (JSlob) resultObject;
-            result.setResultObject(jslob.getJsonObject(), "json");
-            return;
+        try {
+            final Object resultObject = result.getResultObject();
+            if (resultObject instanceof JSlob) {
+                final JSlob jslob = (JSlob) resultObject;
+                result.setResultObject(convertJSlob(jslob), "json");
+                return;
+            }
+            /*
+             * Collection of JSlobs
+             */
+            @SuppressWarnings("unchecked") final Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
+            final JSONArray jArray = new JSONArray();
+            for (final JSlob jslob : jslobs) {
+                jArray.put(convertJSlob(jslob));
+            }
+            result.setResultObject(jArray, "json");
+        } catch (final JSONException e) {
+            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        /*
-         * Collection of JSlobs
-         */
-        @SuppressWarnings("unchecked") final Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
-        final JSONArray jArray = new JSONArray();
-        for (final JSlob jslob : jslobs) {
-            jArray.put(convertJSlob(jslob));
-        }
-        result.setResultObject(jArray, "json");
     }
 
-    private JSONObject convertJSlob(final JSlob jslob) {
+    private JSONObject convertJSlob(final JSlob jslob) throws JSONException {
+        final JSONObject json = new JSONObject();
+        json.put("id", jslob.getId().getId());
+        json.put("jslob", jslob.getJsonObject());
         return jslob.getJsonObject();
     }
 

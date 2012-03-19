@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.jslob;
 
 
 /**

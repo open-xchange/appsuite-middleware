@@ -52,6 +52,7 @@ package com.openexchange.jslob.storage;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
 
 /**
  * {@link JSlobStorage} - The JSlob storage.
