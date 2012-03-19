@@ -202,7 +202,7 @@ public final class ConfigJSlobService implements JSlobService {
             if (null != attributes) {
                 final ConfigView view = getConfigViewFactory().getView(user, context);
                 for (final AttributedProperty attributedProperty : attributes.values()) {
-                    final Object value = getPathFrom(attributedProperty.path, jObject);
+                    final Object value = JSONPathElement.getPathFrom(attributedProperty.path, jObject);
                     if (null != value) {
                         try {
                             final String oldValue = view.get(attributedProperty.propertyName, String.class);
@@ -489,62 +489,6 @@ public final class ConfigJSlobService implements JSlobService {
             }
         } else {
             current.put(name, value);
-        }
-    }
-
-    private static Object getPathFrom(final List<JSONPathElement> jPath, final JSONObject jObject) {
-        JSONObject jCurrent = jObject;
-        final int msize = jPath.size() - 1;
-        for (int i = 0; i < msize; i++) {
-            final JSONPathElement jPathElement = jPath.get(i);
-            final int index = jPathElement.getIndex();
-            final String name = jPathElement.getName();
-            if (index >= 0) {
-                /*
-                 * Denotes an index within a JSON array
-                 */
-                if (isInstance(name, JSONArray.class, jCurrent)) {
-                    try {
-                        final JSONArray jsonArray = jCurrent.getJSONArray(name);
-                        jCurrent = jsonArray.getJSONObject(index);
-                    } catch (final JSONException e) {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            } else {
-                /*
-                 * Denotes an element within a JSON object
-                 */
-                if (isInstance(name, JSONObject.class, jCurrent)) {
-                    try {
-                        jCurrent = jCurrent.getJSONObject(name);
-                    } catch (final JSONException e) {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            }
-        }
-        try {
-            final JSONPathElement leaf = jPath.get(msize);
-            final int index = leaf.getIndex();
-            final String name = leaf.getName();
-            final Object retval;
-            if (index >= 0) {
-                retval = jCurrent.getJSONArray(name).get(index);
-            } else {
-                retval = jCurrent.get(name);
-            }
-            if (retval instanceof JSONValue) {
-                // Not a leaf
-                return null;
-            }
-            return retval;
-        } catch (final JSONException e) {
-            return null;
         }
     }
 

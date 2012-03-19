@@ -49,8 +49,11 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
@@ -83,6 +86,13 @@ public final class GetAction extends JSlobAction {
 
         final String id = jslobRequest.checkParameter("id");
         final JSlob jslob = jslobService.get(id, jslobRequest.getUserId(), jslobRequest.getContextId());
+        
+        final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
+        if (!isEmpty(serlvetRequestURI)) {
+            final List<JSONPathElement> jPath = JSONPathElement.parsePath(serlvetRequestURI);
+            final Object object = JSONPathElement.getPathFrom(jPath, jslob);
+            return new AJAXRequestResult(null == object ? JSONObject.NULL : object, "json");
+        }
 
         return new AJAXRequestResult(jslob, "jslob");
     }
@@ -90,6 +100,18 @@ public final class GetAction extends JSlobAction {
     @Override
     public String getAction() {
         return "get";
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

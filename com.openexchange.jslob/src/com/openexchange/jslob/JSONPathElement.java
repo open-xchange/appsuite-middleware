@@ -52,6 +52,10 @@ package com.openexchange.jslob;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 
 /**
@@ -90,6 +94,91 @@ public final class JSONPathElement {
             throw JSlobExceptionCodes.INVALID_PATH.create(path);
         }
     }
+
+    /**
+     * Gets the value associated with specified path in given JSlob.
+     * 
+     * @param jPath The path
+     * @param jslob The JSlob
+     * @return The associated value or <code>null</code> if not present
+     */
+    public static Object getPathFrom(final List<JSONPathElement> jPath, final JSlob jslob) {
+        return getPathFrom(jPath, jslob.getJsonObject());
+    }
+
+    /**
+     * Gets the value associated with specified path in given JSON object.
+     * 
+     * @param jPath The path
+     * @param jslob The JSON object
+     * @return The associated value or <code>null</code> if not present
+     */
+    public static Object getPathFrom(final List<JSONPathElement> jPath, final JSONObject jObject) {
+        JSONObject jCurrent = jObject;
+        final int msize = jPath.size() - 1;
+        for (int i = 0; i < msize; i++) {
+            final JSONPathElement jPathElement = jPath.get(i);
+            final int index = jPathElement.getIndex();
+            final String name = jPathElement.getName();
+            if (index >= 0) {
+                /*
+                 * Denotes an index within a JSON array
+                 */
+                if (isInstance(name, JSONArray.class, jCurrent)) {
+                    try {
+                        final JSONArray jsonArray = jCurrent.getJSONArray(name);
+                        jCurrent = jsonArray.getJSONObject(index);
+                    } catch (final JSONException e) {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            } else {
+                /*
+                 * Denotes an element within a JSON object
+                 */
+                if (isInstance(name, JSONObject.class, jCurrent)) {
+                    try {
+                        jCurrent = jCurrent.getJSONObject(name);
+                    } catch (final JSONException e) {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
+        try {
+            final JSONPathElement leaf = jPath.get(msize);
+            final int index = leaf.getIndex();
+            final String name = leaf.getName();
+            final Object retval;
+            if (index >= 0) {
+                retval = jCurrent.getJSONArray(name).get(index);
+            } else {
+                retval = jCurrent.get(name);
+            }
+            if (retval instanceof JSONValue) {
+                // Not a leaf
+                return null;
+            }
+            return retval;
+        } catch (final JSONException e) {
+            return null;
+        }
+    }
+
+    private static boolean isInstance(final String name, final Class<? extends JSONValue> clazz, final JSONObject jsonObject) {
+        if (!jsonObject.hasAndNotNull(name)) {
+            return false;
+        }
+        return clazz.isInstance(jsonObject.opt(name));
+    }
+
+    /*-
+     * ----------------------------- Member stuff ---------------------------------
+     */
 
     private final String name;
 
