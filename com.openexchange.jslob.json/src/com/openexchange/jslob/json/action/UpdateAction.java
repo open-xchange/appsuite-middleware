@@ -84,20 +84,36 @@ public final class UpdateAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-
-        final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
-        final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
-        /*
-         * Update...
-         */
         final int userId = jslobRequest.getUserId();
         final int contextId = jslobRequest.getContextId();
-        jslobService.update(id, jsonUpdate, userId, contextId);
-        /*
-         * ... and write back
-         */
-        final JSlob jslob = jslobService.get(id, userId, contextId);
-        return new AJAXRequestResult(jslob, "jslob");
+
+        JSlob jslob;
+        {
+            final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
+            if (jsonData.hasAndNotNull("path")) {
+                final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
+                /*
+                 * Update...
+                 */
+                jslobService.update(id, jsonUpdate, userId, contextId);
+                /*
+                 * ... and write back
+                 */
+                jslob = jslobService.get(id, userId, contextId);
+            } else {
+                /*
+                 * Perform Set
+                 */
+                jslob = new JSlob(jsonData);
+                jslobService.set(id, jslob, userId, contextId);
+                /*
+                 * ... and write back
+                 */
+                jslob = jslobService.get(id, userId, contextId);
+            }
+            return new AJAXRequestResult(jslob, "jslob");
+        }
+        
     }
 
     @Override
