@@ -96,7 +96,7 @@ public final class UpdateAction extends JSlobAction {
                 /*
                  * Update by request path
                  */
-                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, jslobRequest.getRequestData().getData());
+                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, requestData.getData());
                 /*
                  * Update...
                  */
@@ -109,7 +109,7 @@ public final class UpdateAction extends JSlobAction {
                 /*
                  * Update by JSON data
                  */
-                final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
+                final JSONObject jsonData = (JSONObject) requestData.getData();
                 if (jsonData.hasAndNotNull("path")) {
                     final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
                     /*
