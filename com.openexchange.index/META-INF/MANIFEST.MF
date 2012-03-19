@@ -9,12 +9,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.exception,
- com.openexchange.groupware.update,
+ com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.tools.sql,
+ com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.index
-Require-Bundle: com.openexchange.global,
- com.openexchange.server

@@ -293,5 +293,6 @@ Bundle-ClassPath: .,
  lib/ical4j-1.0.jar,
  lib/xSocket-2.7.1.jar,
  lib/jacksum.jar,
- lib/java-image-scaling-0.8.5.jar
+ lib/java-image-scaling-0.8.5.jar,
+ lib/jericho-3.2.jar
 

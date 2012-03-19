@@ -50,22 +50,21 @@
 package com.openexchange.service.indexing.mail.job;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.QueryParameters;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.service.indexing.mail.FakeSession;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
 
 /**
  * {@link FlagsObserverJob}
@@ -116,11 +115,12 @@ public final class FlagsObserverJob extends AbstractMailJob {
         if (null == storageMails) {
             return;
         }
+        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            final IndexAdapter indexAdapter = getAdapter();
+            indexAccess = getIndexAccess();
             /*
              * Get the mails from index
              */
@@ -134,53 +134,70 @@ public final class FlagsObserverJob extends AbstractMailJob {
                     storageMap.put(mailId, m);
                 }
             }
-            final Session session = new FakeSession(info.primaryPassword, userId, contextId);
-            final List<MailMessage> indexedMails = indexAdapter.getMessages(mailIds, fullName, null, null, FIELDS, accountId, session);
-            final Map<String, MailMessage> indexMap;
-            if (indexedMails.isEmpty()) {
-                indexMap = Collections.emptyMap();
-            } else {
-                indexMap = new HashMap<String, MailMessage>(indexedMails.size());
-                for (final MailMessage mailMessage : indexedMails) {
-                    indexMap.put(mailMessage.getMailId(), mailMessage);
+            final int length = mailIds.length;
+            int off = 0;
+            final StringBuilder queryBuilder = new StringBuilder(128);
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+            final int resLen = queryBuilder.length();
+            final int maxRowx = GET_ROWS;
+            final String fieldId = FIELD_ID;
+            final Map<String, MailMessage> indexMap = new HashMap<String, MailMessage>(length);
+            while (off < length) {
+                int endIndex = off + maxRowx;
+                if (endIndex >= length) {
+                    endIndex = length;
                 }
+                final int len = endIndex - off;
+                queryBuilder.setLength(resLen);
+                queryBuilder.append(" AND (").append(fieldId).append(':').append(mailIds[off]);
+                for (int i = off + 1; i < len; i++) {
+                    queryBuilder.append(" OR ").append(fieldId).append(':').append(mailIds[i]);
+                }
+                queryBuilder.append(')');
+                final Map<String, Object> params = new HashMap<String, Object>(4);
+                // TODO: params.put("fields", FIELDS);
+                params.put("sort", FIELD_RECEIVED_DATE);
+                params.put("order", "desc");
+                final QueryParameters queryParameter =
+                    new QueryParameters.Builder(queryBuilder.toString()).setOffset(0).setLength(len).setType(
+                        IndexDocument.Type.MAIL).setParameters(params).build();
+                final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+                if (0 < indexResult.getNumFound()) {
+                    for (final IndexDocument<MailMessage> indexDocument : indexResult.getResults()) {
+                        final MailMessage mailMessage = indexDocument.getObject();
+                        indexMap.put(mailMessage.getMailId(), mailMessage);
+                    }
+                }
+                off = endIndex;
             }
             /*
              * Changed ones
              */
             Set<String> changedIds = new HashSet<String>(indexMap.keySet());
             List<MailMessage> changedMails = new ArrayList<MailMessage>(changedIds.size());
-            for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
-                final String mailId = iterator.next();
+            for (final String mailId : changedIds) {
                 final MailMessage storageMail = storageMap.get(mailId);
                 final MailMessage indexMail = indexMap.get(mailId);
-                boolean different = false;
-                if (storageMail.getFlags() != indexMail.getFlags()) {
+                if (FolderJob.isDifferent(storageMail, indexMail)) {
                     storageMail.setAccountId(accountId);
                     storageMail.setFolder(fullName);
                     storageMail.setMailId(mailId);
                     changedMails.add(storageMail);
-                    different = true;
-                }
-                if (storageMail.getFlags() != indexMail.getFlags()) {
-                    storageMail.setAccountId(accountId);
-                    storageMail.setFolder(fullName);
-                    storageMail.setMailId(mailId);
-                    changedMails.add(storageMail);
-                    different = true;
-                }
-                if (different) {
-                    iterator.remove();
                 }
             }
             changedIds = null;
             /*
              * Change flags
              */
-            indexAdapter.change(changedMails, session);
+            indexAccess.change(toDocuments(changedMails), IndexAccess.ALL_FIELDS);
             changedMails = null;
         } catch (final Exception e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
+        } finally {
+            releaseAccess(indexAccess);
         }
     }
 

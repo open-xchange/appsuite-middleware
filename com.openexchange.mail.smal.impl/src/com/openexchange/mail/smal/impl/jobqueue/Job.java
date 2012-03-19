@@ -54,9 +54,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.mail.smal.adaper.IndexService;
 import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
+import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 

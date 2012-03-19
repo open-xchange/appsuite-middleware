@@ -88,10 +88,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.index.ConfigIndexService;
-import com.openexchange.index.IndexUrl;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -103,13 +100,12 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
 import com.openexchange.mail.smal.impl.SMALExceptionCodes;
 import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapters;
 import com.openexchange.mail.smal.impl.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.impl.adapter.solrj.contentgrab.TextFiller;
-import com.openexchange.mail.smal.impl.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -377,8 +373,6 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
     private static final MailFields MAIL_FIELDS = new MailFields(FIELDS);
 
-    private volatile CommonsHttpSolrServerManagement solrServerManagement;
-
     private volatile SolrTextFillerQueue textFillerQueue;
 
     private final EnumMap<MailSortField, String> sortField2Name;
@@ -484,36 +478,22 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         set.add(FIELD_CONTENT_FLAG);
     }
 
-    private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
-        final ConfigIndexService configIndexService = SMALServiceLookup.getServiceStatic(ConfigIndexService.class);
-        if (readWrite) {
-            return configIndexService.getWriteURL(session.getContextId(), session.getUserId(), Types.EMAIL);
-        }
-        return configIndexService.getReadOnlyURL(session.getContextId(), session.getUserId(), Types.EMAIL);
+    private Object indexUrlFor(final Session session, final boolean readWrite) throws OXException {
+        return null;
     }
 
     private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
-        if (readWrite) {
-            return solrServerManagement.newSolrServer(indexUrlFor(session, true));
-        }
-        return solrServerManagement.getSolrServer(indexUrlFor(session, false));
+        return null;
     }
 
     @Override
     public void start() throws OXException {
-        final CommonsHttpSolrServerManagement cache = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
-        final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
-        q.start();
-        q.proceed();
+        // Nope
     }
 
     @Override
     public void stop() throws OXException {
-        final CommonsHttpSolrServerManagement solrServerCache = this.solrServerManagement;
-        if (null != solrServerCache) {
-            solrServerCache.shutDown();
-            this.solrServerManagement = null;
-        }
+        // Nope
     }
 
     @Override
@@ -1283,7 +1263,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                     throw e;
                 }
                 fillers.clear();
-                final CommonsHttpSolrServer noTimeoutSolrServer = solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
+                final CommonsHttpSolrServer noTimeoutSolrServer = null; //solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
                 final SolrDocumentIterator it = new SolrDocumentIterator(documents, map, fillers);
                 final int itSize = documents.size();
                 for (int i = 0; i < itSize; i++) {
@@ -1377,7 +1357,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                             throw e;
                         }
                         fillers.clear();
-                        final CommonsHttpSolrServer noTimeoutSolrServer = solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
+                        final CommonsHttpSolrServer noTimeoutSolrServer = null ; //solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
                         final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), session, now, fillers);
                         final int itSize = subList.size();
                         for (int i = 0; i < itSize; i++) {

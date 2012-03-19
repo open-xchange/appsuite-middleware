@@ -60,8 +60,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
 import com.openexchange.mail.smal.impl.SMALMailAccess;
+import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.session.Session;
 

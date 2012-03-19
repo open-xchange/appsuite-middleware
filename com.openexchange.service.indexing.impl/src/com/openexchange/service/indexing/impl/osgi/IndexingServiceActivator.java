@@ -57,9 +57,9 @@ import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SMALAccessService;
-import com.openexchange.mail.smal.adaper.IndexService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -94,7 +94,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
-            SMALAccessService.class, IndexService.class };
+            SMALAccessService.class, IndexFacadeService.class };
     }
 
     @Override

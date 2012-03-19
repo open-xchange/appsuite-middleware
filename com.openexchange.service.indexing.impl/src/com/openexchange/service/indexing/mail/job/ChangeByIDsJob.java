@@ -54,14 +54,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
 
 /**
  * {@link ChangeByIDsJob} - Changes the flags of specified mails in index.
@@ -110,18 +110,17 @@ public final class ChangeByIDsJob extends AbstractMailJob {
         if (null == mailIds || mailIds.isEmpty()) {
             return;
         }
+        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            final IndexAdapter indexAdapter = getAdapter();
+            indexAccess = getIndexAccess();
             final List<MailMessage> mails;
-            final Session session;
             {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
                     mailAccess = mailAccessFor();
-                    session = mailAccess.getSession();
                     /*
                      * Get the mails from mail storage
                      */
@@ -146,9 +145,11 @@ public final class ChangeByIDsJob extends AbstractMailJob {
             /*
              * Change flags
              */
-            indexAdapter.change(mails, session);
+            indexAccess.change(toDocuments(mails), IndexAccess.ALL_FIELDS);
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
+        } finally {
+            releaseAccess(indexAccess);
         }
     }
 
