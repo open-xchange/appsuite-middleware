@@ -88,13 +88,13 @@ public final class GetMethodHandler extends AbstractMethodHandler {
             final int length = pathElements.length;
             if (0 == length) {
                 /*-
-                 * "Get all roster's presences"
+                 * "Get all JSlobs"
                  *  GET /jslob
                  */
                 requestData.setAction("all");
             } else if (1 == length) {
                 /*-
-                 * "Get specific presence"
+                 * "Get specific JSlob"
                  *  GET /jslob/11
                  */
                 final String element = pathElements[0];
