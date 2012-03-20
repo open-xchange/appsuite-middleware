@@ -55,24 +55,24 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.smal.impl.SMALMailProviderRegistry;
+import com.openexchange.mail.smal.impl.SmalMailProviderRegistry;
 
 /**
  * Service tracker for mail providers
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
+public final class SmalProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALProviderServiceTracker.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalProviderServiceTracker.class));
 
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link SMALProviderServiceTracker}
+     * Initializes a new {@link SmalProviderServiceTracker}
      */
-    public SMALProviderServiceTracker(final BundleContext context) {
+    public SmalProviderServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -87,7 +87,7 @@ public final class SMALProviderServiceTracker implements ServiceTrackerCustomize
             return null;
         }
         try {
-            if (SMALMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
+            if (SmalMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
                     "' successfully registered in SMAL registry."));
             } else {
@@ -117,7 +117,7 @@ public final class SMALProviderServiceTracker implements ServiceTrackerCustomize
         if (null != service) {
             try {
                 final MailProvider provider = service;
-                SMALMailProviderRegistry.unregisterMailProvider(provider);
+                SmalMailProviderRegistry.unregisterMailProvider(provider);
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
                     "' successfully unregistered from SMAL registry."));
             } finally {

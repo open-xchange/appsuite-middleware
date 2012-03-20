@@ -51,7 +51,7 @@ package com.openexchange.mail.smal.impl.jobqueue.jobs;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.session.Session;
@@ -170,7 +170,7 @@ public final class RemoveFolderJob extends AbstractMailSyncJob {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             try {
                 final IndexAdapter indexAdapter = getAdapter();
-                final SessiondService service = SMALServiceLookup.getServiceStatic(SessiondService.class);
+                final SessiondService service = SmalServiceLookup.getServiceStatic(SessiondService.class);
                 final Session session = service.getAnyActiveSessionForUser(userId, contextId);
                 indexAdapter.deleteFolder(fullName, accountId, session);
             } finally {

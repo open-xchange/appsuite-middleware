@@ -116,8 +116,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.impl.SMALExceptionCodes;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalExceptionCodes;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -174,7 +174,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             MailAccount mailAccount = map.get(accountId);
             if (null == mailAccount) {
                 mailAccount =
-                    SMALServiceLookup.getServiceStatic(MailAccountStorageService.class).getMailAccount(accountId, userId, contextId);
+                    SmalServiceLookup.getServiceStatic(MailAccountStorageService.class).getMailAccount(accountId, userId, contextId);
                 map.put(accountId, mailAccount);
             }
             return mailAccount;
@@ -246,7 +246,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Safe start-up in separate thread
              */
-            final ThreadPoolService threadPool = SMALServiceLookup.getThreadPool();
+            final ThreadPoolService threadPool = SmalServiceLookup.getThreadPool();
             final TransportClient transportClient = client;
             final Future<Object> elasticSearchStartup = threadPool.submit(ThreadPools.task(new Runnable() {
 
@@ -262,22 +262,22 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 elasticSearchStartup.get(5, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (final ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, ElasticSearchException.class);
             } catch (final TimeoutException e) {
-                throw SMALExceptionCodes.INDEX_FAULT.create("Failed start-up of ElasticSearch cluster within 5 seconds.");
+                throw SmalExceptionCodes.INDEX_FAULT.create("Failed start-up of ElasticSearch cluster within 5 seconds.");
             }
             /*
              * Output cluster information
              */
             clusterInfo();
         } catch (final NoNodeAvailableException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final ElasticSearchException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -325,15 +325,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * No ElasticSearch node found.
              */
-            throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
         } catch (final RemoteTransportException e) {
             final Throwable cause = e.getMostSpecificCause();
             if (!(cause instanceof IndexAlreadyExistsException)) {
-                throw SMALExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
+                throw SmalExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
             }
             LOG.info("Index \"" + indexName + "\" already exists.");
         } catch (final Exception ex) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
         }
         /*
          * Put mappings
@@ -350,12 +350,12 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * No ElasticSearch node found.
              */
-            throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
         } catch (final RemoteTransportException e) {
             final Throwable cause = e.getMostSpecificCause();
-            throw SMALExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
         } catch (final Exception ex) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
         }
     }
 
@@ -791,9 +791,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             }
             return mail;
         } catch (final ElasticSearchException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1487,9 +1487,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final ElasticSearchException ese = (ElasticSearchException) e;
             final Throwable cause = ese.getMostSpecificCause();
             final Throwable launder = null == cause ? ese : cause;
-            return SMALExceptionCodes.INDEX_FAULT.create(launder, launder.getMessage());
+            return SmalExceptionCodes.INDEX_FAULT.create(launder, launder.getMessage());
         }
-        return SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        return SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
     /* (non-Javadoc)

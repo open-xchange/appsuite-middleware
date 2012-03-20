@@ -54,20 +54,20 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 
 /**
- * {@link SMALStaticProperties} - The header cache properties.
+ * {@link SmalStaticProperties} - The header cache properties.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALStaticProperties extends AbstractProtocolProperties {
+public final class SmalStaticProperties extends AbstractProtocolProperties {
 
-    private static final SMALStaticProperties instance = new SMALStaticProperties();
+    private static final SmalStaticProperties instance = new SmalStaticProperties();
 
     /**
      * Gets the instance.
      *
      * @return The instance
      */
-    public static SMALStaticProperties getInstance() {
+    public static SmalStaticProperties getInstance() {
         return instance;
     }
 
@@ -82,20 +82,20 @@ public final class SMALStaticProperties extends AbstractProtocolProperties {
     private int defaultRefreshRate;
 
     /**
-     * Initializes a new {@link SMALStaticProperties}.
+     * Initializes a new {@link SmalStaticProperties}.
      */
-    private SMALStaticProperties() {
+    private SmalStaticProperties() {
         super();
     }
 
     @Override
     protected void loadProperties0() throws OXException {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALStaticProperties.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalStaticProperties.class));
 
         final StringBuilder logBuilder = new StringBuilder(256);
         logBuilder.append("\nLoading global SMAL properties...\n");
 
-        final ConfigurationService configuration = SMALServiceLookup.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configuration = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
         {
             final String enabledStr = configuration.getProperty("com.openexchange.mail.headercache.enable", STR_TRUE).trim();
             enabled = Boolean.parseBoolean(enabledStr);

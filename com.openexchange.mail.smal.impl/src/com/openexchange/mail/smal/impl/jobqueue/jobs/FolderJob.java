@@ -76,8 +76,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
@@ -277,7 +277,7 @@ public final class FolderJob extends AbstractMailSyncJob {
     private Session getSession() {
         Session tmp = session;
         if (null == tmp) {
-            session = tmp = SMALServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
+            session = tmp = SmalServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
         }
         return tmp;
     }
@@ -338,7 +338,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                     final List<MailMessage> mails;
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     try {
-                        mailAccess = SMALMailAccess.getUnwrappedInstance(getSession(), accountId);
+                        mailAccess = SmalMailAccess.getUnwrappedInstance(getSession(), accountId);
                         mailAccess.connect(true);
                         /*
                          * At first check existence of denoted folder
@@ -367,7 +367,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                             mails = storageMails;
                         }
                     } finally {
-                        SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
                         mailAccess = null;
                     }
                     if (mails.isEmpty()) {
@@ -724,7 +724,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final Session session = getSession();
-            mailAccess = SMALMailAccess.getUnwrappedInstance(session, accountId);
+            mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
             mailAccess.connect(true);
             /*
              * Specify fields
@@ -734,12 +734,12 @@ public final class FolderJob extends AbstractMailSyncJob {
             fields.removeMailField(MailField.FULL);
             return mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray());
         } finally {
-            SMALMailAccess.closeUnwrappedInstance(mailAccess);
+            SmalMailAccess.closeUnwrappedInstance(mailAccess);
         }
     }
 
     private boolean deleteDBEntry() throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }

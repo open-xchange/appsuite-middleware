@@ -61,7 +61,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.jobqueue.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 
@@ -125,13 +125,13 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     private List<String> getList() throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            mailAccess = SmalMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             mailAccess.connect(true);
             final List<String> fullNames = new LinkedList<String>();
             handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, mailAccess.getFolderStorage(), fullNames);
             return fullNames;
         } finally {
-            SMALMailAccess.closeUnwrappedInstance(mailAccess);
+            SmalMailAccess.closeUnwrappedInstance(mailAccess);
         }
     }
 

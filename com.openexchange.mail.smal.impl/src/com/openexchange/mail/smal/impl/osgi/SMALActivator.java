@@ -62,9 +62,9 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.smal.SMALAccessService;
-import com.openexchange.mail.smal.impl.SMALProvider;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.SmalAccessService;
+import com.openexchange.mail.smal.impl.SmalProvider;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.mail.smal.impl.adapter.internal.IndexEventHandler;
@@ -86,19 +86,19 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
- * {@link SMALActivator} - The activator for Super-MAL bundle.
+ * {@link SmalActivator} - The activator for Super-MAL bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMALActivator extends HousekeepingActivator {
+public class SmalActivator extends HousekeepingActivator {
 
     private IndexService indexService;
     private JobQueueEventHandler eventHandler;
 
     /**
-     * Initializes a new {@link SMALActivator}.
+     * Initializes a new {@link SmalActivator}.
      */
-    public SMALActivator() {
+    public SmalActivator() {
         super();
     }
 
@@ -109,8 +109,8 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        SMALServiceLookup.getInstance().setServiceLookup(this);
-        track(MailProvider.class, new SMALProviderServiceTracker(context));
+        SmalServiceLookup.getInstance().setServiceLookup(this);
+        track(MailProvider.class, new SmalProviderServiceTracker(context));
         trackService(MailAccountStorageService.class);
         trackService(SessiondService.class);
         trackService(DatabaseService.class);
@@ -125,10 +125,10 @@ public class SMALActivator extends HousekeepingActivator {
          */
         {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", SMALProvider.PROTOCOL_SMAL.toString());
-            registerService(MailProvider.class, SMALProvider.getInstance(), dictionary);
+            dictionary.put("protocol", SmalProvider.PROTOCOL_SMAL.toString());
+            registerService(MailProvider.class, SmalProvider.getInstance(), dictionary);
 
-            registerService(SMALAccessService.class, new SMALAccessServiceImpl());
+            registerService(SmalAccessService.class, new SmalAccessServiceImpl());
         }
         /*
          * Register index service
@@ -141,7 +141,7 @@ public class SMALActivator extends HousekeepingActivator {
 
             registerService(IndexService.class, indexService);
             if (!addService(IndexService.class, indexService)) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALActivator.class)).error(
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalActivator.class)).error(
                     "IndexService could not be added.");
             }
         }
@@ -181,7 +181,7 @@ public class SMALActivator extends HousekeepingActivator {
             indexService.getAdapter().stop();
             indexService = null;
         }
-        SMALServiceLookup.getInstance().setServiceLookup(null);
+        SmalServiceLookup.getInstance().setServiceLookup(null);
     }
 
 }

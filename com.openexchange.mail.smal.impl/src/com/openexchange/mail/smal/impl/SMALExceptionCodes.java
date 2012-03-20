@@ -55,56 +55,56 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link SMALExceptionCodes} - Enumeration about all {@link OXException}s.
+ * {@link SmalExceptionCodes} - Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SMALExceptionCodes implements OXExceptionCode {
+public enum SmalExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SMALExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(SmalExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(SMALExceptionMessages.MISSING_PROPERTY_MSG, CATEGORY_ERROR, 2),
+    MISSING_PROPERTY(SmalExceptionMessages.MISSING_PROPERTY_MSG, CATEGORY_ERROR, 2),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(SMALExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 3),
+    INVALID_PROPERTY(SmalExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 3),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(SMALExceptionMessages.JSON_ERROR_MSG, CATEGORY_CONFIGURATION, 4),
+    JSON_ERROR(SmalExceptionMessages.JSON_ERROR_MSG, CATEGORY_CONFIGURATION, 4),
     /**
      * HTTP request to server %1$s failed. Status line: %2$s
      */
-    HTTP_REQUEST_FAILED(SMALExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 5),
+    HTTP_REQUEST_FAILED(SmalExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 5),
     /**
      * JSON request failed. Error code: %1$s. Error message: %2$s
      */
-    JSON_REQUEST_FAILED(SMALExceptionMessages.JSON_REQUEST_FAILED_MSG, CATEGORY_ERROR, 6),
+    JSON_REQUEST_FAILED(SmalExceptionMessages.JSON_REQUEST_FAILED_MSG, CATEGORY_ERROR, 6),
     /**
      * A remote error occurred: %1$s
      */
-    REMOTE_ERROR(SMALExceptionMessages.REMOTE_ERROR_MSG, CATEGORY_ERROR, 7),
+    REMOTE_ERROR(SmalExceptionMessages.REMOTE_ERROR_MSG, CATEGORY_ERROR, 7),
     /**
      * An index fault occurred: %1$s
      */
-    INDEX_FAULT(SMALExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 8),
+    INDEX_FAULT(SmalExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 8),
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(SMALExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 9),
+    HTTP_ERROR(SmalExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 9),
     /**
      * Unparseable HTTP response: %1$s
      */
-    UNPARSEABLE_HTTP_RESPONSE(SMALExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10),
+    UNPARSEABLE_HTTP_RESPONSE(SmalExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(SMALExceptionMessages.IO_ERROR_MSG, CATEGORY_CONNECTIVITY, 11),
+    IO_ERROR(SmalExceptionMessages.IO_ERROR_MSG, CATEGORY_CONNECTIVITY, 11),
 
 
     ;
@@ -115,7 +115,7 @@ public enum SMALExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private SMALExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SmalExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;

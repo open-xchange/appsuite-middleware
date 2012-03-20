@@ -62,7 +62,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.impl.SMALExceptionCodes;
+import com.openexchange.mail.smal.impl.SmalExceptionCodes;
 
 /**
  * {@link AbstractJSONHTTPMethod} - Abstract JSON HTTP method.
@@ -117,7 +117,7 @@ public abstract class AbstractJSONHTTPMethod<M extends HttpMethod> extends Abstr
      * @return A new VoipNow exception for failed request
      */
     protected static OXException newRequestFailedException(final String code, final String message) {
-        return SMALExceptionCodes.JSON_REQUEST_FAILED.create(code == null ? "" : code, message == null ? "" : message);
+        return SmalExceptionCodes.JSON_REQUEST_FAILED.create(code == null ? "" : code, message == null ? "" : message);
     }
 
     /**
@@ -189,7 +189,7 @@ public abstract class AbstractJSONHTTPMethod<M extends HttpMethod> extends Abstr
              */
             if (200 != responseCode) {
                 // GET request failed
-                throw SMALExceptionCodes.HTTP_REQUEST_FAILED.create(host, httpMethod.getStatusLine().toString());
+                throw SmalExceptionCodes.HTTP_REQUEST_FAILED.create(host, httpMethod.getStatusLine().toString());
             }
             return httpMethod;
         } catch (final OXException e) {
@@ -203,31 +203,31 @@ public abstract class AbstractJSONHTTPMethod<M extends HttpMethod> extends Abstr
                 closeResponse(httpMethod);
                 httpMethod.releaseConnection();
             }
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final NullPointerException e) {
             if (null != httpMethod) {
                 closeResponse(httpMethod);
                 httpMethod.releaseConnection();
             }
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final HttpException e) {
             if (null != httpMethod) {
                 closeResponse(httpMethod);
                 httpMethod.releaseConnection();
             }
-            throw SMALExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if (null != httpMethod) {
                 closeResponse(httpMethod);
                 httpMethod.releaseConnection();
             }
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             if (null != httpMethod) {
                 closeResponse(httpMethod);
                 httpMethod.releaseConnection();
             }
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

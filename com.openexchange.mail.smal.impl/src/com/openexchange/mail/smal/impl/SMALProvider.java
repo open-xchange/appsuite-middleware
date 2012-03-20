@@ -63,35 +63,35 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALProvider}
+ * {@link SmalProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALProvider extends AllMailProvider {
+public final class SmalProvider extends AllMailProvider {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALProvider.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalProvider.class));
 
     /**
      * SMAL protocol.
      */
     public static final Protocol PROTOCOL_SMAL = Protocol.PROTOCOL_ALL;
 
-    private static final SMALProvider instance = new SMALProvider();
+    private static final SmalProvider instance = new SmalProvider();
 
     /**
      * Gets the singleton instance of SMAL provider.
      *
      * @return The singleton instance of SMAL provider
      */
-    public static SMALProvider getInstance() {
+    public static SmalProvider getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link SMALProvider}.
+     * Initializes a new {@link SmalProvider}.
      */
-    private SMALProvider() {
+    private SmalProvider() {
         super();
     }
 
@@ -116,20 +116,20 @@ public final class SMALProvider extends AllMailProvider {
             /*
              * For initialization purpose
              */
-            return new SMALMailAccess(null, accountId);
+            return new SmalMailAccess(null, accountId);
         }
-        return new SMALMailAccess(session, accountId);
+        return new SmalMailAccess(session, accountId);
     }
 
     @Override
     protected AbstractProtocolProperties getProtocolProperties() {
-        return SMALStaticProperties.getInstance();
+        return SmalStaticProperties.getInstance();
     }
 
     @Override
     public MailPermission createNewMailPermission(final Session session, final int accountId) {
         try {
-            return SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission(session, accountId);
+            return SmalMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission(session, accountId);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return new DefaultMailPermission();

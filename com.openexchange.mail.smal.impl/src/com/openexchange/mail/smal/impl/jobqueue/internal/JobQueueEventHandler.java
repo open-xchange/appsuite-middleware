@@ -63,8 +63,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.jobqueue.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 import com.openexchange.mail.smal.impl.jobqueue.jobs.ElapsedFolderJob;
@@ -98,7 +98,7 @@ public final class JobQueueEventHandler implements EventHandler {
     public JobQueueEventHandler() {
         super();
         periodicJobs = new ConcurrentHashMap<Key, ConcurrentMap<String,ElapsedFolderJob>>();
-        final TimerService timerService = SMALServiceLookup.getServiceStatic(TimerService.class);
+        final TimerService timerService = SmalServiceLookup.getServiceStatic(TimerService.class);
         timerTask = timerService.scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), Constants.HOUR_MILLIS, Constants.HOUR_MILLIS);
     }
 
@@ -173,7 +173,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
+            final SessiondService sessiondService = SmalServiceLookup.getServiceStatic(SessiondService.class);
             if (null != sessiondService && sessiondService.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) != null) {
                 dropForLast(session);
             }
@@ -188,7 +188,7 @@ public final class JobQueueEventHandler implements EventHandler {
             /*
              * Add jobs
              */
-            final MailAccountStorageService storageService = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class);
+            final MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
             final long start = System.currentTimeMillis() + Constants.HOUR_MILLIS;
@@ -252,7 +252,7 @@ public final class JobQueueEventHandler implements EventHandler {
     private List<String> getPrimaryFullNames(final Session session) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = SMALMailAccess.getUnwrappedInstance(session, MailAccount.DEFAULT_ID);
+            mailAccess = SmalMailAccess.getUnwrappedInstance(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(true);
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             final List<String> fullNames = new ArrayList<String>(3);
@@ -261,7 +261,7 @@ public final class JobQueueEventHandler implements EventHandler {
             // fullNames.add(folderStorage.getTrashFolder());
             return fullNames;
         } finally {
-            SMALMailAccess.closeUnwrappedInstance(mailAccess);
+            SmalMailAccess.closeUnwrappedInstance(mailAccess);
         }
     }
 

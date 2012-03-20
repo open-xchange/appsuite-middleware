@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,53 +49,21 @@
 
 package com.openexchange.mail.smal.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link SmalExceptionMessages} - Exception messages that must be translated.
+ * {@link SmalFolderProcessor}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // Missing property: %1$s
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
-
-    // Invalid property value in property "%1$s": %2$s
-    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // HTTP request to server %1$s failed. Status line: %2$s
-    public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to server \"%1$s\" failed. Status line: %2$s";
-
-    // JSON request failed. Error code: %1$s. Error message: %2$s
-    public static final String JSON_REQUEST_FAILED_MSG = "JSON request failed. Error code: %1$s. Error message: %2$s";
-
-    // A remote error occurred: %1$s
-    public static final String REMOTE_ERROR_MSG = "A remote error occurred: %1$s";
-
-    // An index fault occurred: %1$s
-    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
-
-    // A HTTP error occurred: %1$s
-    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
-
-    // Unparseable HTTP response: %1$s
-    public static final String UNPARSEABLE_HTTP_RESPONSE_MSG = "Unparseable HTTP response: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+public final class SmalFolderProcessor {
 
     /**
-     * Initializes a new {@link SmalExceptionMessages}.
+     * Initializes a new {@link SmalFolderProcessor}.
      */
-    private SmalExceptionMessages() {
+    public SmalFolderProcessor() {
         super();
+        // TODO Auto-generated constructor stub
+
     }
 
 }

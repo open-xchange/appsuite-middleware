@@ -55,7 +55,7 @@ import java.util.Locale;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.langdetect.LanguageDetectionService;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -130,7 +130,7 @@ public final class IndexAdapters {
      */
     public static Locale detectLocale(final String str) throws OXException {
         try {
-            final LanguageDetectionService detectionService = SMALServiceLookup.getServiceStatic(LanguageDetectionService.class);
+            final LanguageDetectionService detectionService = SmalServiceLookup.getServiceStatic(LanguageDetectionService.class);
             if (null == detectionService) {
                 LOG.warn("Missing language detection service. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
                 return DEFAULT_LOCALE;

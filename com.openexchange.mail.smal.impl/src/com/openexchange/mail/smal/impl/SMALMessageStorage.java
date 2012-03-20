@@ -84,15 +84,15 @@ import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link SMALMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
+ * {@link SmalMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
  * index storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMessageStorage.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMessageStorage.class));
 
     private static enum MailResultType {
         STORAGE, INDEX;
@@ -198,11 +198,11 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     private final IMailMessageStorage messageStorage;
 
     /**
-     * Initializes a new {@link SMALMessageStorage}.
+     * Initializes a new {@link SmalMessageStorage}.
      *
      * @throws OXException If initialization fails
      */
-    public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
+    public SmalMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
         super(session, accountId, delegateMailAccess);
         messageStorage = delegateMailAccess.getMessageStorage();
     }

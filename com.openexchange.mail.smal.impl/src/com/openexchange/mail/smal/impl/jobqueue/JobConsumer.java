@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -221,7 +221,7 @@ final class JobConsumer extends AbstractTask<Object> {
                 public void run() {
                     try {
                         final boolean debug = LOG.isDebugEnabled();
-                        final ThreadPoolService threadPool = SMALServiceLookup.getThreadPool();
+                        final ThreadPoolService threadPool = SmalServiceLookup.getThreadPool();
                         final List<Job> tmp = jobs;
                         for (final Job job : tmp) {
                             performJob(job, threadPool, debug);
@@ -257,7 +257,7 @@ final class JobConsumer extends AbstractTask<Object> {
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
                     jobPerformerTask.setJobs2Perform(jobs);
-                    SMALServiceLookup.getThreadPool().submit(task, CallerRunsBehavior.getInstance());
+                    SmalServiceLookup.getThreadPool().submit(task, CallerRunsBehavior.getInstance());
                     if (quit) {
                         return null;
                     }

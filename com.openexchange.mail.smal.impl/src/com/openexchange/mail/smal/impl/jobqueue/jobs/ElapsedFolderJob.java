@@ -58,7 +58,7 @@ import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.jobqueue.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 import com.openexchange.tools.sql.DBUtils;
@@ -141,7 +141,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
     }
 
     private List<String> getElapsedFolders(final long now) throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return java.util.Collections.emptyList();
         }

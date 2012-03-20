@@ -69,20 +69,20 @@ import com.openexchange.mail.smal.impl.jobqueue.jobs.RemoveFolderJob;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALFolderStorage} - The SMAL folder storage.
+ * {@link SmalFolderStorage} - The SMAL folder storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
+public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
 
     private final IMailFolderStorage folderStorage;
 
     /**
-     * Initializes a new {@link SMALFolderStorage}.
+     * Initializes a new {@link SmalFolderStorage}.
      *
      * @throws OXException If initialization fails
      */
-    public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
+    public SmalFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
         super(session, accountId, delegateMailAccess);
         folderStorage = delegateMailAccess.getFolderStorage();
     }

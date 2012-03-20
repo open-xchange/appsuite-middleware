@@ -61,7 +61,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 
@@ -87,7 +87,7 @@ public final class JobQueue {
             synchronized (JobQueue.class) {
                 tmp = instance;
                 if (null == tmp) {
-                    instance = tmp = new JobQueue(SMALServiceLookup.getThreadPool());
+                    instance = tmp = new JobQueue(SmalServiceLookup.getThreadPool());
                 }
             }
         }

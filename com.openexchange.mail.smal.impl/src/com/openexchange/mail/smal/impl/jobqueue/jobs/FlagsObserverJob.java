@@ -61,7 +61,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.session.Session;
@@ -201,7 +201,7 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
             try {
                 final IndexAdapter indexAdapter = getAdapter();
                 final Session session =
-                    SMALServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
+                    SmalServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
                 /*
                  * Get the mails from index
                  */

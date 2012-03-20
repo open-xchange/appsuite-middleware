@@ -83,9 +83,9 @@ import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.smal.impl.SMALExceptionCodes;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalExceptionCodes;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.solrj.SolrConstants;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -155,7 +155,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * Starts consuming from queue.
      */
     public void start() {
-        future = SMALServiceLookup.getThreadPool().submit(ThreadPools.task(this, simpleName));
+        future = SmalServiceLookup.getThreadPool().submit(ThreadPools.task(this, simpleName));
     }
 
     /**
@@ -290,7 +290,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * @throws InterruptedException If thread is interrupted
      */
     protected void handleFillers(final List<TextFiller> groupedFillers) throws InterruptedException {
-        final ThreadPoolService poolService = SMALServiceLookup.getThreadPool();
+        final ThreadPoolService poolService = SmalServiceLookup.getThreadPool();
         final int size = groupedFillers.size();
         final int configuredBlockSize = MAX_FILLER_CHUNK;
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
@@ -584,20 +584,20 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             }
         } catch (final SolrServerException e) {
             rollback(rollback ? solrServer : null);
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
             rollback(rollback ? solrServer : null);
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             rollback(rollback ? solrServer : null);
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     private void grabTextFor(final List<TextFiller> fillers, final int contextId, final int userId, final int accountId, final Map<String, SolrDocument> documents, final List<SolrInputDocument> inputDocuments) throws OXException, InterruptedException {
         MailAccess<?, ?> access = null;
         try {
-            access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            access = SmalMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             final IMailMessageStorage messageStorage = access.getMessageStorage();
@@ -610,7 +610,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
                 contents = messageStorage.getPrimaryContents(fillers.get(0).getFullName(), mailIds);
             }
-            SMALMailAccess.closeUnwrappedInstance(access);
+            SmalMailAccess.closeUnwrappedInstance(access);
             access = null;
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
@@ -658,7 +658,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
             }
         } finally {
-            SMALMailAccess.closeUnwrappedInstance(access);
+            SmalMailAccess.closeUnwrappedInstance(access);
         }
     }
 

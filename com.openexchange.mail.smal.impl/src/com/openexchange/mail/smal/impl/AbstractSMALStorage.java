@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.smal.impl;
 
-import static com.openexchange.mail.smal.impl.SMALServiceLookup.getServiceStatic;
+import static com.openexchange.mail.smal.impl.SmalServiceLookup.getServiceStatic;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;

@@ -58,7 +58,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.session.Session;
@@ -199,7 +199,7 @@ public final class ChangeByIDsJob extends AbstractMailSyncJob {
                 {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     try {
-                        mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+                        mailAccess = SmalMailAccess.getUnwrappedInstance(userId, contextId, accountId);
                         session = mailAccess.getSession();
                         /*
                          * Get the mails from mail storage
@@ -214,7 +214,7 @@ public final class ChangeByIDsJob extends AbstractMailSyncJob {
                                 mailIds.toArray(new String[mailIds.size()]),
                                 FIELDS));
                     } finally {
-                        SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
                         mailAccess = null;
                     }
                 }

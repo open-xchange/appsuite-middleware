@@ -74,7 +74,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.mail.smal.SMALAccessService;
+import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.StandardIndexingJob;
 import com.openexchange.service.indexing.impl.Services;
@@ -149,7 +149,7 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
 
     @Override
     public Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, MailService.class, IndexFacadeService.class, SMALAccessService.class };
+        return new Class<?>[] { DatabaseService.class, MailService.class, IndexFacadeService.class, SmalAccessService.class };
     }
 
     /**
@@ -211,8 +211,8 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
      * 
      * @return The SMAL access service
      */
-    protected SMALAccessService getSmalAccessService() {
-        return Services.getService(SMALAccessService.class);
+    protected SmalAccessService getSmalAccessService() {
+        return Services.getService(SmalAccessService.class);
     }
 
     /**

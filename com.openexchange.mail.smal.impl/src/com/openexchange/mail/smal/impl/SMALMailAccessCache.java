@@ -59,13 +59,13 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALMailAccessCache}
+ * {@link SmalMailAccessCache}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALMailAccessCache implements IMailAccessCache {
+public final class SmalMailAccessCache implements IMailAccessCache {
 
-    private static volatile SMALMailAccessCache cacheInstance;
+    private static volatile SmalMailAccessCache cacheInstance;
 
     /**
      * Gets the singleton instance.
@@ -80,7 +80,7 @@ public final class SMALMailAccessCache implements IMailAccessCache {
                 tmp = cacheInstance;
                 if (null == tmp) {
                     final int max = MailAccess.MAX_PER_USER;
-                    tmp = cacheInstance = new SMALMailAccessCache(1 == max ? SingletonMailAccessCache.newInstance() : EnqueueingMailAccessCache.newInstance(max));
+                    tmp = cacheInstance = new SmalMailAccessCache(1 == max ? SingletonMailAccessCache.newInstance() : EnqueueingMailAccessCache.newInstance(max));
                 }
             }
         }
@@ -103,7 +103,7 @@ public final class SMALMailAccessCache implements IMailAccessCache {
 
     private final IMailAccessCache delegate;
 
-    private SMALMailAccessCache(final IMailAccessCache delegate) {
+    private SmalMailAccessCache(final IMailAccessCache delegate) {
         super();
         this.delegate = delegate;
     }

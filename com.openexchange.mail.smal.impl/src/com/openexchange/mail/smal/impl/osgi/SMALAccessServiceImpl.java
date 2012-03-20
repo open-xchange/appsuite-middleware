@@ -53,32 +53,32 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.smal.SMALAccessService;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
+import com.openexchange.mail.smal.SmalAccessService;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALAccessServiceImpl}
+ * {@link SmalAccessServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALAccessServiceImpl implements SMALAccessService {
+public final class SmalAccessServiceImpl implements SmalAccessService {
 
     /**
-     * Initializes a new {@link SMALAccessServiceImpl}.
+     * Initializes a new {@link SmalAccessServiceImpl}.
      */
-    public SMALAccessServiceImpl() {
+    public SmalAccessServiceImpl() {
         super();
     }
 
     @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getUnwrappedInstance(final Session session, final int accountId) throws OXException {
-        return SMALMailAccess.getUnwrappedInstance(session, accountId);
+        return SmalMailAccess.getUnwrappedInstance(session, accountId);
     }
 
     @Override
     public void closeUnwrappedInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
-        SMALMailAccess.closeUnwrappedInstance(mailAccess);
+        SmalMailAccess.closeUnwrappedInstance(mailAccess);
     }
 
 }

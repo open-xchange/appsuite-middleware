@@ -64,11 +64,11 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALMailProviderRegistry} - The {@link MailProvider} registry for SMAL bundle.
+ * {@link SmalMailProviderRegistry} - The {@link MailProvider} registry for SMAL bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALMailProviderRegistry {
+public final class SmalMailProviderRegistry {
 
     /**
      * The parameter name for SMAL provider.
@@ -76,7 +76,7 @@ public final class SMALMailProviderRegistry {
     private static final String SMAL_PROVIDER = "smal.provider";
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMailProviderRegistry.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMailProviderRegistry.class));
 
     /**
      * Concurrent map used as set for mail providers
@@ -84,9 +84,9 @@ public final class SMALMailProviderRegistry {
     private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new ConcurrentHashMap<Protocol, MailProvider>();
 
     /**
-     * Initializes a new {@link SMALMailProviderRegistry}
+     * Initializes a new {@link SmalMailProviderRegistry}
      */
-    private SMALMailProviderRegistry() {
+    private SmalMailProviderRegistry() {
         super();
     }
 

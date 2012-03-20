@@ -63,16 +63,16 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link SMALMailAccess} - The SMAL mail access.
+ * {@link SmalMailAccess} - The SMAL mail access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMessageStorage> {
+public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMessageStorage> {
 
     private static final long serialVersionUID = 3887048765113161340L;
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMailAccess.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMailAccess.class));
 
     private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
@@ -80,30 +80,30 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     private MailLogicTools logicTools;
 
-    private SMALMessageStorage messageStorage;
+    private SmalMessageStorage messageStorage;
 
-    private SMALFolderStorage folderStorage;
+    private SmalFolderStorage folderStorage;
 
     /**
-     * Initializes a new {@link SMALMailAccess}.
+     * Initializes a new {@link SmalMailAccess}.
      *
      * @param session The session
      * @param accountId The account identifier
      * @throws OXException If initialization fails
      */
-    public SMALMailAccess(final Session session, final int accountId) throws OXException {
+    public SmalMailAccess(final Session session, final int accountId) throws OXException {
         super(session, accountId);
         if (null == session) {
             delegateMailAccess = null;
         } else {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma =
-                SMALMailAccessCache.getInstance().removeMailAccess(session, accountId);
+                SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
             delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
         }
     }
 
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newDelegate(final Session session, final int accountId) throws OXException {
-        return SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
+        return SmalMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
     /**
@@ -116,7 +116,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
      * @throws OXException If {@link MailAccess} instance cannot be returned
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getUnwrappedInstance(final int userId, final int contextId, final int accountId) throws OXException {
-        final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
+        final SessiondService sessiondService = SmalServiceLookup.getServiceStatic(SessiondService.class);
         if (null != sessiondService) {
             final Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
             if (null != session) {
@@ -144,7 +144,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         final Object sLookup = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
         if (null == sLookup || Boolean.parseBoolean(sLookup.toString())) {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                SMALMailAccessCache.getInstance().removeMailAccess(session, accountId);
+                SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
@@ -152,7 +152,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         /*
          * Return new MailAccess instance
          */
-        final MailProvider mailProvider = SMALMailProviderRegistry.getMailProviderBySession(session, accountId);
+        final MailProvider mailProvider = SmalMailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId);
     }
 
@@ -229,7 +229,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             /*
              * Cache connection if desired/possible anymore
              */
-            if (put && mailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
+            if (put && mailAccess.isCacheable() && SmalMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
                 /*
                  * Successfully cached: return
                  */
@@ -261,23 +261,23 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     }
 
     @Override
-    public SMALFolderStorage getFolderStorage() throws OXException {
+    public SmalFolderStorage getFolderStorage() throws OXException {
         if (!connected) {
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
-            folderStorage = new SMALFolderStorage(session, accountId, delegateMailAccess);
+            folderStorage = new SmalFolderStorage(session, accountId, delegateMailAccess);
         }
         return folderStorage;
     }
 
     @Override
-    public SMALMessageStorage getMessageStorage() throws OXException {
+    public SmalMessageStorage getMessageStorage() throws OXException {
         if (!connected) {
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
-            messageStorage = new SMALMessageStorage(session, accountId, delegateMailAccess);
+            messageStorage = new SmalMessageStorage(session, accountId, delegateMailAccess);
         }
         return messageStorage;
     }
@@ -311,7 +311,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     @Override
     protected void shutdown() throws OXException {
         // Shut-down operations
-        SMALMailAccessCache.releaseInstance();
+        SmalMailAccessCache.releaseInstance();
     }
 
 }

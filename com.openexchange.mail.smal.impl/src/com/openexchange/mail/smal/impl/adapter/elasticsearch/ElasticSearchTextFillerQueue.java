@@ -79,8 +79,8 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.smal.impl.SMALMailAccess;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.text.TextProcessing;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -185,7 +185,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * Starts consuming from queue.
      */
     public void start() {
-        future = SMALServiceLookup.getThreadPool().submit(ThreadPools.task(this, simpleName));
+        future = SmalServiceLookup.getThreadPool().submit(ThreadPools.task(this, simpleName));
     }
 
     /**
@@ -275,7 +275,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * @param threadDesc The thread description
      */
     protected void handleFillers(final List<TextFiller> groupedFillers) {
-        final ThreadPoolService poolService = SMALServiceLookup.getThreadPool();
+        final ThreadPoolService poolService = SmalServiceLookup.getThreadPool();
         final int size = groupedFillers.size();
         final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
         if (size <= configuredBlockSize) {
@@ -406,7 +406,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
          */
         MailAccess<?, ?> access = null;
         try {
-            access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            access = SmalMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
             for (final TextFiller filler : fillers) {
                 final String mailId = filler.getMailId();
@@ -433,7 +433,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                 }
             }
         } finally {
-            SMALMailAccess.closeUnwrappedInstance(access);
+            SmalMailAccess.closeUnwrappedInstance(access);
             access = null;
         }
         /*

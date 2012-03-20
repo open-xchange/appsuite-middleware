@@ -55,20 +55,20 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link SMALServiceLookup}
- *
+ * {@link SmalServiceLookup}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALServiceLookup implements ServiceLookup {
+public final class SmalServiceLookup implements ServiceLookup {
 
-    private static final SMALServiceLookup INSTANCE = new SMALServiceLookup();
+    private static final SmalServiceLookup INSTANCE = new SmalServiceLookup();
 
     /**
      * Gets the instance
-     *
+     * 
      * @return The instance
      */
-    public static SMALServiceLookup getInstance() {
+    public static SmalServiceLookup getInstance() {
         return INSTANCE;
     }
 
@@ -83,7 +83,7 @@ public final class SMALServiceLookup implements ServiceLookup {
 
     /**
      * Gets the service of specified type
-     *
+     * 
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -95,16 +95,16 @@ public final class SMALServiceLookup implements ServiceLookup {
     private final AtomicReference<ServiceLookup> serviceLookupReference;
 
     /**
-     * Initializes a new {@link SMALServiceLookup}.
+     * Initializes a new {@link SmalServiceLookup}.
      */
-    private SMALServiceLookup() {
+    private SmalServiceLookup() {
         super();
         serviceLookupReference = new AtomicReference<ServiceLookup>();
     }
 
     /**
      * Gets the service of specified type
-     *
+     * 
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -117,20 +117,19 @@ public final class SMALServiceLookup implements ServiceLookup {
         }
         return serviceLookup.getService(clazz);
     }
-    
+
     @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
         final ServiceLookup serviceLookup = serviceLookupReference.get();
         if (null == serviceLookup) {
             return null;
         }
         return serviceLookup.getOptionalService(clazz);
     }
-    
 
     /**
      * Sets the service look-up
-     *
+     * 
      * @param serviceLookup The service look-up to set
      */
     public void setServiceLookup(final ServiceLookup serviceLookup) {
@@ -139,7 +138,7 @@ public final class SMALServiceLookup implements ServiceLookup {
 
     /**
      * Gets the service look-up
-     *
+     * 
      * @return The service look-up
      */
     public ServiceLookup getServiceLookup() {

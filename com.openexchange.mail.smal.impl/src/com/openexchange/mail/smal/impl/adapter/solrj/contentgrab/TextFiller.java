@@ -53,7 +53,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.impl.SMALExceptionCodes;
+import com.openexchange.mail.smal.impl.SmalExceptionCodes;
 import com.openexchange.mail.smal.impl.adapter.solrj.SolrConstants;
 import com.openexchange.session.Session;
 
@@ -99,7 +99,7 @@ public final class TextFiller implements SolrConstants {
         try {
             return (V) object;
         } catch (final ClassCastException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
         }
     }
 
@@ -126,7 +126,7 @@ public final class TextFiller implements SolrConstants {
         try {
             return (V) object;
         } catch (final ClassCastException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
         }
     }
 

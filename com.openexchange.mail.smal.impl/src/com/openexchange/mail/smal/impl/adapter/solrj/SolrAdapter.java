@@ -100,8 +100,8 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.impl.SMALExceptionCodes;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalExceptionCodes;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapters;
 import com.openexchange.mail.smal.impl.adapter.solrj.contentgrab.SolrTextFillerQueue;
@@ -579,9 +579,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             return mails;
         } catch (final SolrServerException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -718,9 +718,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 //            }
             return mails;
         } catch (final SolrServerException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -810,9 +810,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             return mails;
         } catch (final SolrServerException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -904,7 +904,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             return mails;
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -972,9 +972,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             return mails;
         } catch (final SolrServerException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1045,7 +1045,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 System.out.println("SolrServer.deleteByQuery() failed for query:\n" + query);
             }
             rollback(solrServer);
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
             if (!ran) {
                 LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
@@ -1053,7 +1053,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 System.out.println("SolrServer.deleteByQuery() failed for query:\n" + query);
             }
             rollback(solrServer);
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             if (!ran) {
                 LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
@@ -1061,7 +1061,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 System.out.println("SolrServer.deleteByQuery() failed for query:\n" + query);
             }
             rollback(solrServer);
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1086,13 +1086,13 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             commitSane(solrServer);
         } catch (final SolrServerException e) {
             rollback(solrServer);
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
             rollback(solrServer);
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             rollback(solrServer);
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1114,9 +1114,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final QueryResponse queryResponse = solrServer.query(solrQuery);
             return queryResponse.getResults().getNumFound() > 0;
         } catch (final SolrServerException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1181,13 +1181,13 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             throw e;
         } catch (final SolrServerException e) {
             rollback(rollback ? solrServer : null);
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
             rollback(rollback ? solrServer : null);
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             rollback(rollback ? solrServer : null);
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1276,11 +1276,11 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1312,13 +1312,13 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
         } catch (final SolrServerException e) {
             rollback(solrServer);
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
             rollback(solrServer);
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             rollback(solrServer);
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1404,17 +1404,17 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             if (rollback) {
                 rollback(solrServer);
             }
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw SmalExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
             if (rollback) {
                 rollback(solrServer);
             }
-            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             if (rollback) {
                 rollback(solrServer);
             }
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1915,7 +1915,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         try {
             return (V) value;
         } catch (final ClassCastException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
         }
     }
 
@@ -1926,8 +1926,8 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final ServerSession serverSession = (ServerSession) session;
                 locale = serverSession.getUser().getLocale();
             } else {
-                final Context context = SMALServiceLookup.getServiceStatic(ContextService.class).getContext(session.getContextId());
-                locale = SMALServiceLookup.getServiceStatic(UserService.class).getUser(session.getUserId(), context).getLocale();
+                final Context context = SmalServiceLookup.getServiceStatic(ContextService.class).getContext(session.getContextId());
+                locale = SmalServiceLookup.getServiceStatic(UserService.class).getUser(session.getUserId(), context).getLocale();
             }
             session.setParameter("solr.userLocale", locale);
         }

@@ -56,7 +56,7 @@ import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.jobqueue.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.tools.sql.DBUtils;
@@ -113,7 +113,7 @@ public abstract class AbstractMailSyncJob extends Job {
      * @throws OXException If an error occurs
      */
     protected boolean shouldSync(final String fullName, final long now, final long span) throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }
@@ -186,7 +186,7 @@ public abstract class AbstractMailSyncJob extends Job {
      * @throws OXException If an error occurs
      */
     protected boolean setTimestampAndUnsetSyncFlag(final String fullName, final long stamp) throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }
@@ -218,7 +218,7 @@ public abstract class AbstractMailSyncJob extends Job {
      * @throws OXException If an error occurs
      */
     protected boolean unsetSyncFlag(final String fullName) throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }
@@ -248,7 +248,7 @@ public abstract class AbstractMailSyncJob extends Job {
      * @throws OXException If removal fails
      */
     protected void dropFolderEntry(final String fullName) throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return;
         }
@@ -279,7 +279,7 @@ public abstract class AbstractMailSyncJob extends Job {
      * @throws OXException If an error occurs
      */
     protected boolean wasAbleToSetSyncFlag(final String fullName, final long now) throws OXException {
-        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }

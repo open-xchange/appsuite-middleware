@@ -56,11 +56,11 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALAccessService} - Simple service to acquire/release unwrapped {@link MailAccess} instances.
+ * {@link SmalAccessService} - Simple service to acquire/release unwrapped {@link MailAccess} instances.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SMALAccessService {
+public interface SmalAccessService {
 
     /**
      * Gets an un-wrapped {@link MailAccess} instance for specified account and session.

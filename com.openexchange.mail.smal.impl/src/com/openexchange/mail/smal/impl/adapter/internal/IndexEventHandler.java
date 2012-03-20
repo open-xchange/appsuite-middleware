@@ -52,7 +52,7 @@ package com.openexchange.mail.smal.impl.adapter.internal;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -103,7 +103,7 @@ public final class IndexEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
+            final IndexService indexService = SmalServiceLookup.getServiceStatic(IndexService.class);
             indexService.getAdapter().onSessionGone(session);
         } catch (final Exception e) {
             // Failed handling session
@@ -113,7 +113,7 @@ public final class IndexEventHandler implements EventHandler {
 
     private void handleAddedSession(final Session session) {
         try {
-            final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
+            final IndexService indexService = SmalServiceLookup.getServiceStatic(IndexService.class);
             indexService.getAdapter().onSessionAdd(session);
         } catch (final Exception e) {
             // Failed handling session
