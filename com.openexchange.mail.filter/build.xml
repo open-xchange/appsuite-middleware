@@ -8,8 +8,10 @@
     <!-- Constants -->
     <property name="jSievePrefix" value="org/apache"/>
     <property name="javaccDir" value="javacc"/>
+	<property name="libDir" value="lib"/>
+    <property name="srcDir" value="src"/>
 
-	<import file="build-project.xml" as="main"/>
+	<!-- <import file="build-project.xml" as="main"/> -->
 
     <!-- Third party libs -->
     <fileset dir="${libDir}" id="javaCCJars">
