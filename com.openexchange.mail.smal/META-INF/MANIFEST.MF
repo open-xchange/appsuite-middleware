@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Interface Bundle for Super-MAL
+Bundle-Name: Open-Xchange Super-MAL Interface Bundle
 Bundle-SymbolicName: com.openexchange.mail.smal
 Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
