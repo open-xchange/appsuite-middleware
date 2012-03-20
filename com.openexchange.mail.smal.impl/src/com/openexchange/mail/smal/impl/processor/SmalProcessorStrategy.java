@@ -71,27 +71,30 @@ public interface SmalProcessorStrategy {
     /**
      * Signals whether contained messages shall be completely added to index immediately.
      * 
+     * @param messageCount The message count or <code>-1</code> to consider folder's message count
      * @param folder The folder
      * @return <code>true</code> to fully add messages to index; otherwise <code>false</code>
      * @throws OXException If checking condition fails
      */
-    boolean addFull(MailFolder folder) throws OXException;
+    boolean addFull(int messageCount, MailFolder folder) throws OXException;
 
     /**
      * Signals whether contained messages shall be added with its contents to index immediately.
      * 
+     * @param messageCount The message count or <code>-1</code> to consider folder's message count
      * @param folder The folder
      * @return <code>true</code> to add messages with contents to index; otherwise <code>false</code>
      * @throws OXException If checking condition fails
      */
-    boolean addHeadersAndContent(MailFolder folder) throws OXException;
+    boolean addHeadersAndContent(int messageCount, MailFolder folder) throws OXException;
 
     /**
      * Signals whether contained messages shall be added to index immediately only considering headers.
      * 
+     * @param messageCount The message count or <code>-1</code> to consider folder's message count
      * @param folder The folder
      * @return <code>true</code> to perform a header-only add to index; otherwise <code>false</code>
      * @throws OXException If checking condition fails
      */
-    boolean addHeadersOnly(MailFolder folder) throws OXException;
+    boolean addHeadersOnly(int messageCount, MailFolder folder) throws OXException;
 }

@@ -79,6 +79,7 @@ import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 import com.openexchange.mail.smal.impl.jobqueue.internal.JobQueueEventHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -104,7 +105,7 @@ public class SmalActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class, IndexingService.class };
     }
 
     @Override

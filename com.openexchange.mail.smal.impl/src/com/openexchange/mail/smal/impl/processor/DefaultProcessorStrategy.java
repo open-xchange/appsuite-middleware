@@ -91,21 +91,21 @@ public final class DefaultProcessorStrategy implements SmalProcessorStrategy {
     }
 
     @Override
-    public boolean addFull(final MailFolder folder) throws OXException {
-        final int messageCount = folder.getMessageCount();
-        return messageCount <= (hasHighAttention(folder) ? FULL << 1 : FULL);
+    public boolean addFull(final int messageCount, final MailFolder folder) throws OXException {
+        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
+        return count <= (hasHighAttention(folder) ? FULL << 1 : FULL);
     }
 
     @Override
-    public boolean addHeadersAndContent(final MailFolder folder) throws OXException {
-        final int messageCount = folder.getMessageCount();
-        return messageCount <= (hasHighAttention(folder) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
+    public boolean addHeadersAndContent(final int messageCount, final MailFolder folder) throws OXException {
+        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
+        return count <= (hasHighAttention(folder) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
     }
 
     @Override
-    public boolean addHeadersOnly(final MailFolder folder) throws OXException {
-        final int messageCount = folder.getMessageCount();
-        return messageCount <= (hasHighAttention(folder) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
+    public boolean addHeadersOnly(final int messageCount, final MailFolder folder) throws OXException {
+        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
+        return count <= (hasHighAttention(folder) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
     }
 
 }

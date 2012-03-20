@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.index;
+package com.openexchange.mail.smal.impl.processor;
 
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
@@ -55,11 +55,11 @@ import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link MailMessageIndexDocumentHelper}
+ * {@link IndexDocumentHelper}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailMessageIndexDocumentHelper {
+public final class IndexDocumentHelper {
 
     /**
      * The <code>IndexDocument</code> mail type.
@@ -67,9 +67,9 @@ public final class MailMessageIndexDocumentHelper {
     private static final Type MAIL = Type.MAIL;
 
     /**
-     * Initializes a new {@link MailMessageIndexDocumentHelper}.
+     * Initializes a new {@link IndexDocumentHelper}.
      */
-    private MailMessageIndexDocumentHelper() {
+    private IndexDocumentHelper() {
         super();
     }
 

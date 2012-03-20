@@ -49,13 +49,37 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.solr.SolrMailConstants;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
+import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.session.Session;
 
 /**
@@ -63,7 +87,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalFolderProcessor {
+public final class SmalFolderProcessor implements SolrMailConstants {
 
     private final SmalProcessorStrategy strategy;
 
@@ -85,7 +109,11 @@ public final class SmalFolderProcessor {
         this.strategy = strategy;
     }
 
-    public void processFolder(final int accountId, final MailFolder folder, final Session session) throws OXException {
+    private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
+
+    private static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
+
+    public void processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
         if (!folder.isHoldsMessages()) {
             return;
         }
@@ -94,7 +122,7 @@ public final class SmalFolderProcessor {
             return;
         }
         if (messageCount < 0) {
-            submitAsJob(folder);
+            submitAsJob(folder, mailAccess);
         }
         /*
          * Decide...
@@ -106,28 +134,227 @@ public final class SmalFolderProcessor {
         }
         IndexAccess<MailMessage> indexAccess = null;
         try {
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            final boolean initial = !indexAccess.containsFolder(accountId, folder.getFullname());
+            indexAccess = facade.acquireIndexAccess(Types.EMAIL, mailAccess.getSession());
+            final int accountId = mailAccess.getAccountId();
+            final String fullName = folder.getFullname();
+            final boolean initial = !indexAccess.containsFolder(accountId, fullName);
             if (initial) {
-                if (strategy.addFull(folder)) {
-                    
-                } else if (strategy.addHeadersAndContent(folder)) {
-                    
-                } if (strategy.addHeadersOnly(folder)) {
-                    
+                /*-
+                 * 
+                 * Denoted folder has not been added to index before
+                 * 
+                 */
+                if (strategy.addFull(messageCount, folder)) { // headers, content + attachments
+                    final MailMessage[] messages =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            null,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            FIELDS_FULL);
+                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                    for (final MailMessage message : messages) {
+                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    }
+                    indexAccess.addAttachments(documents);
+                } else if (strategy.addHeadersAndContent(messageCount, folder)) { // headers + content
+                    final MailMessage[] messages =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            null,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            FIELDS_FULL);
+                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                    for (final MailMessage message : messages) {
+                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    }
+                    indexAccess.addContent(documents);
+                } else if (strategy.addHeadersOnly(messageCount, folder)) { // headers only
+                    final MailMessage[] messages =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            null,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            FIELDS_LOW_COST);
+                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                    for (final MailMessage message : messages) {
+                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    }
+                    indexAccess.addEnvelopeData(documents);
                 } else {
-                    submitAsJob(folder);
+                    submitAsJob(folder, mailAccess);
                 }
             } else {
-                
+                /*-
+                 * 
+                 * Denoted folder has already been added to index before
+                 * 
+                 */
+                final Map<String, MailMessage> storageMap;
+                final Map<String, MailMessage> indexMap;
+                {
+                    final List<Map<String, MailMessage>> tmp = getNewIds(fullName, indexAccess, mailAccess);
+                    storageMap = tmp.get(0);
+                    indexMap = tmp.get(1);
+                }
+                /*
+                 * New ones
+                 */
+                final Set<String> newIds = new HashSet<String>(storageMap.keySet());
+                newIds.removeAll(indexMap.keySet());
+                if (newIds.isEmpty()) {
+                    return;
+                }
+                final int size = newIds.size();
+                if (strategy.addFull(size, folder)) { // headers, content + attachments
+                    final MailMessage[] messages =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            null,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            FIELDS_FULL);
+                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                    for (final MailMessage message : messages) {
+                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    }
+                    indexAccess.addAttachments(documents);
+                } else if (strategy.addHeadersAndContent(size, folder)) { // headers + content
+                    final MailMessage[] messages =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            null,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            FIELDS_FULL);
+                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                    for (final MailMessage message : messages) {
+                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    }
+                    indexAccess.addContent(documents);
+                } else if (strategy.addHeadersOnly(size, folder)) { // headers only
+                    final MailMessage[] messages =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            null,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            FIELDS_LOW_COST);
+                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                    for (final MailMessage message : messages) {
+                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    }
+                    indexAccess.addEnvelopeData(documents);
+                } else {
+                    submitAsJob(folder, mailAccess, new ArrayList<MailMessage>(storageMap.values()), new ArrayList<MailMessage>(indexMap.values()));
+                }
             }
         } finally {
             releaseAccess(facade, indexAccess);
         }
     }
 
-    private void submitAsJob(final MailFolder folder) {
-        // TODO Auto-generated method stub
+    private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
+
+    private static List<Map<String, MailMessage>> getNewIds(final String fullName, final IndexAccess<MailMessage> indexAccess, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
+        /*
+         * Get the mails from storage
+         */
+        final Map<String, MailMessage> storageMap;
+        {
+            /*
+             * Fetch mails
+             */
+            final List<MailMessage> mails =
+                Arrays.asList(mailAccess.getMessageStorage().searchMessages(
+                    fullName,
+                    IndexRange.NULL,
+                    MailSortField.RECEIVED_DATE,
+                    OrderDirection.ASC,
+                    null,
+                    FIELDS_ID));
+            if (mails.isEmpty()) {
+                storageMap = Collections.emptyMap();
+            } else {
+                storageMap = new HashMap<String, MailMessage>(mails.size());
+                for (final MailMessage mailMessage : mails) {
+                    storageMap.put(mailMessage.getMailId(), mailMessage);
+                }
+            }
+        }
+        /*
+         * Get the mails from index
+         */
+        final Map<String, MailMessage> indexMap;
+        {
+            final String queryString;
+            {
+                final Session session = mailAccess.getSession();
+                final StringBuilder queryBuilder = new StringBuilder(128);
+                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(mailAccess.getAccountId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+                queryString = queryBuilder.toString();
+            }
+            final Map<String, Object> params = new HashMap<String, Object>(4);
+            // TODO: params.put("fields", mailFields);
+            params.put("sort", FIELD_RECEIVED_DATE);
+            params.put("order", "desc");
+            final QueryParameters queryParameter =
+                new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
+                    params).build();
+            final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+            final List<MailMessage> indexedMails;
+            if (0 >= indexResult.getNumFound()) {
+                indexedMails = Collections.emptyList();
+            } else {
+                final List<IndexDocument<MailMessage>> results = indexResult.getResults();
+                final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+                for (final IndexDocument<MailMessage> indexDocument : results) {
+                    mails.add(indexDocument.getObject());
+                }
+                indexedMails = mails;
+            }
+            if (indexedMails.isEmpty()) {
+                indexMap = Collections.emptyMap();
+            } else {
+                indexMap = new HashMap<String, MailMessage>(indexedMails.size());
+                for (final MailMessage mailMessage : indexedMails) {
+                    indexMap.put(mailMessage.getMailId(), mailMessage);
+                }
+            }
+        }
+        /*
+         * Return as list
+         */
+        final List<Map<String, MailMessage>> retval = new ArrayList<Map<String, MailMessage>>(2);
+        retval.add(storageMap);
+        retval.add(indexMap);
+        return retval;
+    }
+
+    private void submitAsJob(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        submitAsJob(folder, mailAccess, null, null);
+    }
+
+    private void submitAsJob(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final List<MailMessage> storageMails, final List<MailMessage> indexMails) throws OXException {
+        final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+        if (null == indexingService) {
+            return;
+        }
+        final Session session = mailAccess.getSession();
+        final MailConfig mailConfig = mailAccess.getMailConfig();
+        final Builder jobInfoBuilder =
+            new MailJobInfo.Builder(session.getUserId(), session.getContextId()).accountId(mailAccess.getAccountId()).login(
+                mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
+                mailConfig.isSecure()).primaryPassword(session.getPassword());
+        final FolderJob folderJob = new FolderJob(folder.getFullname(), jobInfoBuilder.build());
+        folderJob.setIndexMails(indexMails);
+        folderJob.setStorageMails(storageMails);
+        indexingService.addJob(folderJob);
     }
 
     private static void releaseAccess(final IndexFacadeService facade, final IndexAccess<MailMessage> indexAccess) {
