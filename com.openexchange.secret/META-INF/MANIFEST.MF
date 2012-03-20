@@ -13,6 +13,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.session,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
