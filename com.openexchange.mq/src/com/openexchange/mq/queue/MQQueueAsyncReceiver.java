@@ -76,9 +76,13 @@ public class MQQueueAsyncReceiver extends MQQueueResource {
      * 
      * @param queueName The name of queue to receive from
      * @throws OXException If initialization fails
+     * @throws NullPointerException If listener is <code>null</code>
      */
     public MQQueueAsyncReceiver(final String queueName, final MQQueueListener listener) throws OXException {
         super(queueName, listener);
+        if (null == listener) {
+            throw new NullPointerException("listener is null.");
+        }
         this.listener = listener;
     }
 

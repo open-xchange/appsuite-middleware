@@ -250,12 +250,10 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             solrServer = solrServerFor();
             final int chunkSize = ADD_ROWS;
             final int size = documents.size();
-            final Thread thread = Thread.currentThread();
             try {
                 int off = 0;
                 while (off < size) {
-                    if (thread.isInterrupted()) {
-                        Thread.interrupted();
+                    if (Thread.interrupted()) {
                         throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                     }
                     int endIndex = off + chunkSize;
@@ -274,8 +272,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                         final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), userId, contextId);
                         final int itSize = subList.size();
                         for (int i = 0; i < itSize; i++) {
-                            if (thread.isInterrupted()) {
-                                Thread.interrupted();
+                            if (Thread.interrupted()) {
                                 throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                             }
                             noTimeoutSolrServer.add(it.next());
@@ -291,8 +288,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                     rollback = false;
                 }
                 for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(documents.iterator(), userId, contextId); it.hasNext();) {
-                    if (thread.isInterrupted()) {
-                        Thread.interrupted();
+                    if (Thread.interrupted()) {
                         throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                     }
                     final SolrInputDocument inputDocument = it.next();
@@ -396,11 +392,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor();
-            final Thread thread = Thread.currentThread();
             for (final IndexDocument<MailMessage> document : documents) {
-                if (thread.isInterrupted()) {
+                if (Thread.interrupted()) {
                     // Clears the thread's interrupted flag
-                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while adding mail contents.");
                 }
                 addContent(document, solrServer);
@@ -587,11 +581,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor();
-            final Thread thread = Thread.currentThread();
             for (final IndexDocument<MailMessage> document : documents) {
-                if (thread.isInterrupted()) {
+                if (Thread.interrupted()) {
                     // Clears the thread's interrupted flag
-                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while changing mail contents.");
                 }
                 change(document, new HashSet<String>(Arrays.asList(fields)), solrServer);
@@ -733,11 +725,9 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 }
                 off += size;
             }
-            final Thread thread = Thread.currentThread();
             while (off < end) {
-                if (thread.isInterrupted()) {
+                if (Thread.interrupted()) {
                     // Clears the thread's interrupted flag
-                    Thread.interrupted();
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(queryString);

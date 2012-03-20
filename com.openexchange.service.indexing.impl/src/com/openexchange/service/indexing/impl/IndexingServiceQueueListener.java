@@ -67,19 +67,19 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceQueueListener.class));
 
-    private final IndexingJobExecutor executor;
+    private final IndexingJobExecutor jobExecutor;
 
     /**
      * Initializes a new {@link IndexingServiceQueueListener}.
      */
     public IndexingServiceQueueListener(final IndexingJobExecutor executor) {
         super();
-        this.executor = executor;
+        this.jobExecutor = executor;
     }
 
     @Override
     public void close() {
-        executor.stop();
+        jobExecutor.stop();
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
     @Override
     public void onObjectMessage(final ObjectMessage objectMessage) {
         try {
-            executor.addJob((IndexingJob) objectMessage.getObject());
+            jobExecutor.addJob((IndexingJob) objectMessage.getObject());
         } catch (final JMSException e) {
             LOG.warn("A JMS error occurred: " + e.getMessage(), e);
         } catch (final RuntimeException e) {
@@ -101,7 +101,7 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
     @Override
     public void onBytes(final byte[] bytes) {
         try {
-            executor.addJob(SerializableHelper.<IndexingJob> readObject(bytes));
+            jobExecutor.addJob(SerializableHelper.<IndexingJob> readObject(bytes));
         } catch (final ClassNotFoundException e) {
             LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
         } catch (final IOException e) {

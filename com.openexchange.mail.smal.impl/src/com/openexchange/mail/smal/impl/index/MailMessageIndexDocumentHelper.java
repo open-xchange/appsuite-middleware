@@ -62,6 +62,11 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public final class MailMessageIndexDocumentHelper {
 
     /**
+     * The <code>IndexDocument</code> mail type.
+     */
+    private static final Type MAIL = Type.MAIL;
+
+    /**
      * Initializes a new {@link MailMessageIndexDocumentHelper}.
      */
     private MailMessageIndexDocumentHelper() {
@@ -80,8 +85,7 @@ public final class MailMessageIndexDocumentHelper {
             return null;
         }
         mail.setAccountId(accountId);
-        return new StandardIndexDocument<MailMessage>(mail, Type.MAIL);
-
+        return new StandardIndexDocument<MailMessage>(mail, MAIL);
     }
 
 }

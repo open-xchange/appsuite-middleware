@@ -130,7 +130,8 @@ public final class IndexingServiceInit {
              */
             final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
             final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
-            receiver = new IndexingQueueAsyncReceiver(new IndexingServiceQueueListener(executor));
+            final IndexingServiceQueueListener listener = this.listener = new IndexingServiceQueueListener(executor);
+            receiver = new IndexingQueueAsyncReceiver(listener);
         }
     }
 
@@ -141,6 +142,7 @@ public final class IndexingServiceInit {
         final MQQueueAsyncReceiver receiver = this.receiver;
         if (null != receiver) {
             receiver.close();
+            this.listener = null;
             this.receiver = null;
         }
     }
@@ -159,6 +161,12 @@ public final class IndexingServiceInit {
             receiver.close();
             this.receiver = null;
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        drop();
+        super.finalize();
     }
 
     /**
