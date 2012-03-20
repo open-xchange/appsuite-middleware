@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.impl;
 
+import java.security.GeneralSecurityException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
@@ -150,9 +151,18 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          */
         final int ranking = secretService.getRanking();
         if (ranking >= 0) { // Greater than or equal to default ranking of zero
+            final String secret = secretService.getSecret(session);
             try {
-                return crypto.decrypt(toDecrypt, secretService.getSecret(session));
+                return crypto.decrypt(toDecrypt, secret);
             } catch (final OXException x) {
+                try {
+                    final String decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
+                    final String recrypted = crypto.encrypt(decrypted, secret);
+                    strategy.update(recrypted, customizationNote);
+                    return decrypted;
+                } catch (final GeneralSecurityException e) {
+                    // Ignore
+                }
                 // Ignore and try other
             }
         }
@@ -161,9 +171,18 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          * 
          * Try with last list entry first
          */
+        String secret = tokenList.peekLast().getSecret(session);
         try {
-            return crypto.decrypt(toDecrypt, tokenList.peekLast().getSecret(session));
+            return crypto.decrypt(toDecrypt, secret);
         } catch (final OXException x) {
+            try {
+                final String decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
+                final String recrypted = crypto.encrypt(decrypted, ranking >= 0 ? secretService.getSecret(session) : tokenList.peekLast().getSecret(session));
+                strategy.update(recrypted, customizationNote);
+                return decrypted;
+            } catch (final GeneralSecurityException e) {
+                // Ignore
+            }
             // Ignore and try other
         }
         /*
@@ -171,9 +190,15 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          */
         String decrypted = null;
         for (int i = off; null == decrypted && i >= 0; i--) {
+            secret = tokenList.get(i).getSecret(session);
             try {
-                decrypted = crypto.decrypt(toDecrypt, tokenList.get(i).getSecret(session));
+                decrypted = crypto.decrypt(toDecrypt, secret);
             } catch (final OXException x) {
+                try {
+                    decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
+                } catch (final GeneralSecurityException e) {
+                    // Ignore
+                }
                 // Ignore and try other
             }
         }
@@ -199,11 +224,28 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 try {
                     decrypted = decrypthWithPasswordSecretService(toDecrypt, session);
                 } catch (final OXException x) {
+                    try {
+                        decrypted = OldStyleDecrypt.decrypt(toDecrypt, session.getPassword());
+                    } catch (final GeneralSecurityException e) {
+                        // Ignore
+                    }
                     // Ignore and try other
                 }
             }
             if (decrypted == null) {
-                decrypted = decrypthWithSecretService(toDecrypt, session);
+                try {
+                    decrypted = decrypthWithSecretService(toDecrypt, session);
+                } catch (final OXException e) {
+                    try {
+                        decrypted = OldStyleDecrypt.decrypt(toDecrypt, secretService.getSecret(session));
+                    } catch (final GeneralSecurityException ignore) {
+                        // Ignore
+                    }
+                    if (null == decrypted) {
+                        // No more fall-backs available
+                        throw e;
+                    }
+                }
             }
         }
         /*
