@@ -53,20 +53,35 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link DefaultProcessorStrategy}
+ * {@link DefaultProcessorStrategy} - The default processor strategy.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DefaultProcessorStrategy implements SmalProcessorStrategy {
+public class DefaultProcessorStrategy implements SmalProcessorStrategy {
 
-    private static final int HEADERS_ONLY = 1000;
+    /**
+     * The max. number of messages that may be indexed with headers only.
+     */
+    protected static final int HEADERS_ONLY = 1000;
 
-    private static final int HEADERS_AND_CONTENT = 100;
+    /**
+     * The max. number of messages that may be indexed with their contents.
+     */
+    protected static final int HEADERS_AND_CONTENT = 100;
 
-    private static final int FULL = 25;
+    /**
+     * The max. number of messages that may be indexed completely.
+     */
+    protected static final int FULL = 25;
 
-    private static final String INBOX = "INBOX";
+    /**
+     * The constant identifier for INBOX mailbox.
+     */
+    protected static final String INBOX = "INBOX";
 
+    /**
+     * The singleton instance.
+     */
     private static final DefaultProcessorStrategy INSTANCE = new DefaultProcessorStrategy();
 
     /**
@@ -81,7 +96,7 @@ public final class DefaultProcessorStrategy implements SmalProcessorStrategy {
     /**
      * Initializes a new {@link DefaultProcessorStrategy}.
      */
-    private DefaultProcessorStrategy() {
+    protected DefaultProcessorStrategy() {
         super();
     }
 

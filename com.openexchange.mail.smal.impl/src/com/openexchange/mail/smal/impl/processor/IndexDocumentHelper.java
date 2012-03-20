@@ -49,13 +49,17 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link IndexDocumentHelper}
+ * {@link IndexDocumentHelper} - Helper to get <code>IndexDocument</code>s from <code>MailMessage</code>s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -71,6 +75,25 @@ public final class IndexDocumentHelper {
      */
     private IndexDocumentHelper() {
         super();
+    }
+
+    /**
+     * Gets the index documents for given mails.
+     * 
+     * @param mails The mails
+     * @param accountId The account identifier
+     * @return The index documents
+     */
+    public static List<IndexDocument<MailMessage>> documentsFor(final Collection<MailMessage> mails, final int accountId) {
+        if (null == mails || mails.isEmpty()) {
+            return Collections.<IndexDocument<MailMessage>> emptyList();
+        }
+        final List<IndexDocument<MailMessage>> list = new ArrayList<IndexDocument<MailMessage>>(mails.size());
+        for (final MailMessage mail : mails) {
+            mail.setAccountId(accountId);
+            list.add(new StandardIndexDocument<MailMessage>(mail, MAIL));
+        }
+        return list;
     }
 
     /**

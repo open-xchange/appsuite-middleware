@@ -113,6 +113,14 @@ public final class SmalFolderProcessor implements SolrMailConstants {
 
     private static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
 
+    /**
+     * Processes specified mail folder for its content being indexed.
+     * 
+     * @param folder The mail folder
+     * @param mailAccess The mail access
+     * @throws OXException If indexing fails for any reason
+     * @throws InterruptedException If processing is interrupted
+     */
     public void processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
         if (!folder.isHoldsMessages()) {
             return;
@@ -248,7 +256,11 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                     }
                     indexAccess.addEnvelopeData(documents);
                 } else {
-                    submitAsJob(folder, mailAccess, new ArrayList<MailMessage>(storageMap.values()), new ArrayList<MailMessage>(indexMap.values()));
+                    submitAsJob(
+                        folder,
+                        mailAccess,
+                        new ArrayList<MailMessage>(storageMap.values()),
+                        new ArrayList<MailMessage>(indexMap.values()));
                 }
             }
         } finally {
