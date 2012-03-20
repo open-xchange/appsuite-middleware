@@ -83,18 +83,29 @@ import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.session.Session;
 
 /**
- * {@link SmalFolderProcessor}
+ * {@link SmalFolderProcessor} - Processes a given mail folder for its content being indexed.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalFolderProcessor implements SolrMailConstants {
+
+    private static final SmalFolderProcessor INSTANCE = new SmalFolderProcessor();
+
+    /**
+     * Gets the default instance.
+     * 
+     * @return The default instance
+     */
+    public static SmalFolderProcessor getInstance() {
+        return INSTANCE;
+    }
 
     private final SmalProcessorStrategy strategy;
 
     /**
      * Initializes a new {@link SmalFolderProcessor}.
      */
-    public SmalFolderProcessor() {
+    private SmalFolderProcessor() {
         this(DefaultProcessorStrategy.getInstance());
     }
 
