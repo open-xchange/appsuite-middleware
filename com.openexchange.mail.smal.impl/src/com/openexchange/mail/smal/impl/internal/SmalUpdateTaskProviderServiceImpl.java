@@ -58,15 +58,15 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 
 
 /**
- * {@link SMALUpdateTaskProviderService}
+ * {@link SmalUpdateTaskProviderServiceImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SMALUpdateTaskProviderService implements UpdateTaskProviderService {
+public class SmalUpdateTaskProviderServiceImpl implements UpdateTaskProviderService {
 
     private final List<UpdateTaskV2> taskList;
 
-    public SMALUpdateTaskProviderService(final UpdateTaskV2... tasks) {
+    public SmalUpdateTaskProviderServiceImpl(final UpdateTaskV2... tasks) {
         super();
         if (null == tasks || 0 == tasks.length) {
             taskList = new ArrayList<UpdateTaskV2>(1);
