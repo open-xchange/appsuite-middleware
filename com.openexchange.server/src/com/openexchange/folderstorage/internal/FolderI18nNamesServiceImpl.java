@@ -55,10 +55,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link FolderI18nNamesServiceImpl} - Provides the localized folder names for specified folder modules.
@@ -167,10 +169,61 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
                             i18nNames.put(translated, translated);
                         }
                     }
+                    // Insert user-defined names considered as reserved folder identifiers
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null != service) {
+                        handleText(service.getText("folder-reserved-names"));
+                    }
                 }
             }
         }
         return Collections.unmodifiableSet(i18nNames.keySet());
+    }
+
+    private void handleText(final String text) {
+        if (null == text) {
+            return;
+        }
+        for (final String line : text.split("\r?\n")) {
+            if (!isEmpty(line) && '#' != line.charAt(0)) {
+                for (final String value : line.split(" *, *")) {
+                    processValue(value);
+                }
+            }
+        }
+    }
+
+    private void processValue(final String value) {
+        if (isEmpty(value)) {
+            return;
+        }
+        String val = value.trim();
+        if ('#' == val.charAt(0)) { // Comment line
+            return;
+        }
+        final int mlen = val.length() - 1;
+        if ('"' == val.charAt(0) && '"' == val.charAt(mlen)) {
+            if (0 == mlen) {
+                return;
+            }
+            val = val.substring(1, mlen);
+            if (isEmpty(val)) {
+                return;
+            }
+        }
+        i18nNames.put(val, val);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
