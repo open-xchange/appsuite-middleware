@@ -85,10 +85,10 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.TriggerType;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
-import com.openexchange.index.solr.SolrMailConstants;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.SolrIndexIdentifier;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -170,6 +170,15 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             allFields = set;
         }
         mailFields = new MailFields(field2Name.keySet());
+    }
+
+    /**
+     * Gets the field2name mapping
+     *
+     * @return The field2name mapping
+     */
+    public static EnumMap<MailField, List<String>> getField2name() {
+        return field2Name;
     }
 
     /**
@@ -670,28 +679,6 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 LOG.debug("MailSolrIndexAccess.deleteByQuery() failed for query:\n" + query);
             }
             rollback(solrServer);
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean containsFolder(final int accountId, final String fullName) throws OXException {
-        if (null == fullName || accountId < 0) {
-            return false;
-        }
-        try {
-            final CommonsHttpSolrServer solrServer = solrServerFor();
-            StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-            final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            queryBuilder = null;
-            solrQuery.setStart(Integer.valueOf(0));
-            solrQuery.setRows(Integer.valueOf(1));
-            return solrServer.query(solrQuery).getResults().getNumFound() > 0;
-        } catch (final SolrServerException e) {
-            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
             throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

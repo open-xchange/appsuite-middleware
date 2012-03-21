@@ -24,5 +24,9 @@
       <entry name="/topics/genericTopic"/>
    </topic>
    
+   <!-- The topic for Open-Xchange events -->
+   <topic name="oxEventTopic">
+      <entry name="/topics/oxEventTopic"/>
+   </topic>
 
 </configuration>

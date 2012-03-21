@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,62 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.processor;
+package com.openexchange.push.mq;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailFolder;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import com.openexchange.java.Streams;
+
 
 /**
- * {@link SmalProcessorStrategy} - The strategy for the {@link SmalFolderProcessor processor}.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SerializableHelper}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public interface SmalProcessorStrategy {
+public final class SerializableHelper {
 
     /**
-     * Determines if specified folder is considered as a folder with high attention; e.g. INBOX folder
-     * 
-     * @param folder The folder to check
-     * @return <code>true</code> for high attention folder; otherwise <code>false</code>
-     * @throws OXException If an error occurs
+     * Initializes a new {@link SerializableHelper}.
      */
-    boolean hasHighAttention(MailFolder folder) throws OXException;
+    private SerializableHelper() {
+        super();
+    }
 
     /**
-     * Signals whether contained messages shall be completely added to index immediately.
+     * Writes specified {@link Serializable serializable} object to a <code>byte</code> array.
      * 
-     * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folder The folder
-     * @return <code>true</code> to fully add messages to index; otherwise <code>false</code>
-     * @throws OXException If checking condition fails
+     * @param object The serializable object
+     * @return The resulting <code>byte</code> array
+     * @throws IOException If writing the object fails
      */
-    boolean addFull(int messageCount, MailFolder folder) throws OXException;
+    public static byte[] writeObject(final Serializable object) throws IOException {
+        if (null == object) {
+            return null;
+        }
+
+        final ByteArrayOutputStream sink = Streams.newByteArrayOutputStream(2048);
+        new ObjectOutputStream(sink).writeObject(object);
+        return sink.toByteArray();
+    }
 
     /**
-     * Signals whether contained messages shall be added with its contents to index immediately.
+     * Reads the object from specified <code>byte</code> array.
      * 
-     * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folder The folder
-     * @return <code>true</code> to add messages with contents to index; otherwise <code>false</code>
-     * @throws OXException If checking condition fails
+     * @param bytes The object's byte description
+     * @return The read object
+     * @throws IOException If reading the object fails
+     * @throws ClassNotFoundException If such a class is unknown to associated class loader
      */
-    boolean addHeadersAndContent(int messageCount, MailFolder folder) throws OXException;
+    @SuppressWarnings("unchecked")
+    public static <O> O readObject(final byte[] bytes) throws IOException, ClassNotFoundException {
+        if (null == bytes) {
+            return null;
+        }
 
-    /**
-     * Signals whether contained messages shall be added to index immediately only considering headers.
-     * 
-     * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folder The folder
-     * @return <code>true</code> to perform a header-only add to index; otherwise <code>false</code>
-     * @throws OXException If checking condition fails
-     */
-    boolean addHeadersOnly(int messageCount, MailFolder folder) throws OXException;
+        return (O) new ObjectInputStream(Streams.newByteArrayInputStream(bytes)).readObject();
+    }
+
 }

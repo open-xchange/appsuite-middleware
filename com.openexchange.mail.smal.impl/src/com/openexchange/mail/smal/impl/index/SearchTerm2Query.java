@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.adapter.solrj;
+package com.openexchange.mail.smal.impl.index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +75,7 @@ import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapters;
+import com.openexchange.mail.smal.impl.adapter.solrj.SolrConstants;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.

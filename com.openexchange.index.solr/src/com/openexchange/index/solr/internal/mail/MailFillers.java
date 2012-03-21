@@ -59,7 +59,7 @@ import org.apache.solr.common.SolrDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.SolrMailConstants;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;

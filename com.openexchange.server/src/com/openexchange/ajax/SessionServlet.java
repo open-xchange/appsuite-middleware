@@ -119,6 +119,9 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final String SESSION_KEY = "sessionObject";
+    
+    public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
+    
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
@@ -207,25 +210,54 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        final String sessionId = getSessionId(req);
-        final ServerSession session = getSession(req, sessionId, sessiondService);
-        if (!sessionId.equals(session.getSessionID())) {
-            if (INFO) {
-                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
-            }
-            throw SessionExceptionCodes.WRONG_SESSION.create();
+        if (req.getParameter("session") != null) {
+            final String sessionId = getSessionId(req);
+            final ServerSession session = getSession(req, sessionId, sessiondService);
+            verifySession(req, sessiondService, sessionId, session);
+            rememberSession(req, session);
         }
-        final Context ctx = session.getContext();
-        if (!ctx.isEnabled()) {
-            sessiondService.removeSession(sessionId);
-            if (INFO) {
-                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+        
+        // Try public session
+        Cookie[] cookies = req.getCookies();
+        
+        if (cookies != null) {
+            Session simpleSession = null;
+        	for (final Cookie cookie : cookies) {
+                if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
+                    simpleSession = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                    break;
+                }
             }
-            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        	
+        	if (simpleSession != null) {
+        		ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
+        		verifySession(req, sessiondService, session.getSessionID(), session);
+        		rememberPublicSession(req, session);
+        	}
+        	
         }
-        checkIP(session, req.getRemoteAddr());
-        rememberSession(req, session);
+
     }
+
+	private void verifySession(final HttpServletRequest req,
+			final SessiondService sessiondService, final String sessionId,
+			final ServerSession session) throws OXException {
+		if (!sessionId.equals(session.getSessionID())) {
+		    if (INFO) {
+		        LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+		    }
+		    throw SessionExceptionCodes.WRONG_SESSION.create();
+		}
+		final Context ctx = session.getContext();
+		if (!ctx.isEnabled()) {
+		    sessiondService.removeSession(sessionId);
+		    if (INFO) {
+		        LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+		    }
+		    throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+		}
+		checkIP(session, req.getRemoteAddr());
+	}
 
     /**
      * Checks the session ID supplied as a query parameter in the request URI.
@@ -624,6 +656,11 @@ public abstract class SessionServlet extends AJAXServlet {
         req.setAttribute(SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());
     }
+    
+    public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
+    	req.setAttribute(PUBLIC_SESSION_KEY, session);
+        session.setParameter("JSESSIONID", req.getSession().getId());	
+    }
 
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
@@ -675,7 +712,20 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the The remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
-        return (ServerSession) req.getAttribute(SESSION_KEY);
+    	return getSessionObject(req, false);
+    }
+    
+    protected static ServerSession getSessionObject(ServletRequest req,
+			boolean mayUseFallbackSession) {
+    	Object attribute = req.getAttribute(SESSION_KEY);
+    	if (attribute != null) {
+        	return (ServerSession) req.getAttribute(SESSION_KEY);
+    	}
+    	if (mayUseFallbackSession) {
+    		return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
+    	}
+    	
+    	return null;
     }
 
 }

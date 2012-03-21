@@ -89,7 +89,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
         whiteboardSecretService.open();
 
         final SecretUsesPasswordChecker checker = getService(SecretUsesPasswordChecker.class);
-        if (whiteboardSecretService.getRanking() < 0 && null != checker && checker.usesPassword()) {
+        if ((whiteboardSecretService.getRanking() < 0) && (null != checker) && checker.usesPassword()) {
             /*-
              * Token list in use and main entry uses password for secret retrieval.
              * 

@@ -68,7 +68,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.solr.SearchTerm2Query;
+import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -493,7 +493,7 @@ public final class FolderJob extends AbstractMailJob {
             /*
              * Specify fields
              */
-            final MailFields fields = new MailFields(SearchTerm2Query.getIndexableFields());
+            final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
             fields.removeMailField(MailField.BODY);
             fields.removeMailField(MailField.FULL);
             return Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));

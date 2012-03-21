@@ -254,6 +254,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         return Integer.parseInt(parameter);
     }
+    
+    @Override
+    public boolean isForSpecificVersion() {
+    	return getVersion() != FileStorageFileAccess.CURRENT_VERSION;
+    }
 
     @Override
     public Set<String> getIgnore() {

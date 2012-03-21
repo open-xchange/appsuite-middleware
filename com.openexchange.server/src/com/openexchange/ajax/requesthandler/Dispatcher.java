@@ -93,4 +93,10 @@ public interface Dispatcher {
      * @return true if it can handle the module request, false otherwise
      */
     boolean handles(String module);
+
+    /**
+     * Indicates whether the fallback session may be used for this action
+     * @throws OXException 
+     */
+	boolean mayUseFallbackSession(String module, String action) throws OXException;
 }
