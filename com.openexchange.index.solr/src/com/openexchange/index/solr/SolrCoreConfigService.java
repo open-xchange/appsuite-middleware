@@ -60,6 +60,7 @@ import com.openexchange.index.solr.internal.SolrCoreStore;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SolrCoreConfigService { 
+
     /**
      * Gets a list of all available core stores.
      * 

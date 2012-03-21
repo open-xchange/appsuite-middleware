@@ -50,51 +50,50 @@
 package com.openexchange.mail.smal.impl.processor;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link SmalProcessorStrategy} - The strategy for the {@link SmalFolderProcessor processor}.
+ * {@link IProcessorStrategy} - The strategy for the {@link Processor processor}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SmalProcessorStrategy {
+public interface IProcessorStrategy {
 
     /**
      * Determines if specified folder is considered as a folder with high attention; e.g. INBOX folder
      * 
-     * @param folder The folder to check
+     * @param folderInfo The information about the folder to check
      * @return <code>true</code> for high attention folder; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    boolean hasHighAttention(MailFolder folder) throws OXException;
+    boolean hasHighAttention(MailFolderInfo folderInfo) throws OXException;
 
     /**
      * Signals whether contained messages shall be completely added to index immediately.
      * 
      * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folder The folder
+     * @param folderInfo The information about the folder
      * @return <code>true</code> to fully add messages to index; otherwise <code>false</code>
      * @throws OXException If checking condition fails
      */
-    boolean addFull(int messageCount, MailFolder folder) throws OXException;
+    boolean addFull(int messageCount, MailFolderInfo folderInfo) throws OXException;
 
     /**
      * Signals whether contained messages shall be added with its contents to index immediately.
      * 
      * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folder The folder
+     * @param folderInfo The information about the folder
      * @return <code>true</code> to add messages with contents to index; otherwise <code>false</code>
      * @throws OXException If checking condition fails
      */
-    boolean addHeadersAndContent(int messageCount, MailFolder folder) throws OXException;
+    boolean addHeadersAndContent(int messageCount, MailFolderInfo folderInfo) throws OXException;
 
     /**
      * Signals whether contained messages shall be added to index immediately only considering headers.
      * 
      * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folder The folder
+     * @param folderInfo The information about the folder
      * @return <code>true</code> to perform a header-only add to index; otherwise <code>false</code>
      * @throws OXException If checking condition fails
      */
-    boolean addHeadersOnly(int messageCount, MailFolder folder) throws OXException;
+    boolean addHeadersOnly(int messageCount, MailFolderInfo folderInfo) throws OXException;
 }

@@ -49,77 +49,86 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import com.openexchange.exception.OXException;
-
 /**
- * {@link DefaultProcessorStrategy} - The default processor strategy.
+ * {@link ProcessingResult} - The result of a processed folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultProcessorStrategy implements IProcessorStrategy {
+public final class ProcessingResult {
 
     /**
-     * The max. number of messages that may be indexed with headers only.
+     * The empty processing result.
      */
-    protected static final int HEADERS_ONLY = 1000;
+    public static final ProcessingResult EMPTY_RESULT = new ProcessingResult(ProcessType.NONE, false, false);
+
+    private final boolean firstTime;
+
+    private final boolean hasHighAttention;
+
+    private final ProcessType processType;
 
     /**
-     * The max. number of messages that may be indexed with their contents.
+     * Initializes a new {@link ProcessingResult}.
      */
-    protected static final int HEADERS_AND_CONTENT = 100;
-
-    /**
-     * The max. number of messages that may be indexed completely.
-     */
-    protected static final int FULL = 25;
-
-    /**
-     * The constant identifier for INBOX mailbox.
-     */
-    protected static final String INBOX = "INBOX";
-
-    /**
-     * The singleton instance.
-     */
-    private static final DefaultProcessorStrategy INSTANCE = new DefaultProcessorStrategy();
-
-    /**
-     * Gets the instance
-     * 
-     * @return The instance
-     */
-    public static DefaultProcessorStrategy getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link DefaultProcessorStrategy}.
-     */
-    protected DefaultProcessorStrategy() {
+    public ProcessingResult(final ProcessType processType, final boolean hasHighAttention, final boolean firstTime) {
         super();
+        this.firstTime = firstTime;
+        this.processType = processType;
+        this.hasHighAttention = hasHighAttention;
+    }
+
+    /**
+     * Checks whether processing took place the first time for associated folder.
+     * 
+     * @return <code>true</code> for first time processing; otherwise <code>false</code>
+     */
+    public boolean isFirstTime() {
+        return firstTime;
+    }
+
+    /**
+     * Checks whether processed folder has high attention.
+     * 
+     * @return <code>true</code> if processed folder has high attention; otherwise <code>false</code>
+     */
+    public boolean isHasHighAttention() {
+        return hasHighAttention;
+    }
+
+    /**
+     * Gets the process type
+     * 
+     * @return The process type
+     */
+    public ProcessType getProcessType() {
+        return processType;
     }
 
     @Override
-    public boolean hasHighAttention(final MailFolderInfo folderInfo) throws OXException {
-        return INBOX.equals(folderInfo.getFullName());
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (hasHighAttention ? 1231 : 1237);
+        result = prime * result + ((processType == null) ? 0 : processType.hashCode());
+        return result;
     }
 
     @Override
-    public boolean addFull(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
-        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folderInfo) ? FULL << 1 : FULL);
-    }
-
-    @Override
-    public boolean addHeadersAndContent(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
-        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folderInfo) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
-    }
-
-    @Override
-    public boolean addHeadersOnly(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
-        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folderInfo) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ProcessingResult)) {
+            return false;
+        }
+        final ProcessingResult other = (ProcessingResult) obj;
+        if (hasHighAttention != other.hasHighAttention) {
+            return false;
+        }
+        if (processType != other.processType) {
+            return false;
+        }
+        return true;
     }
 
 }

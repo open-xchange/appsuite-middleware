@@ -66,7 +66,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.SolrMailConstants;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;

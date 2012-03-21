@@ -49,77 +49,58 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link DefaultProcessorStrategy} - The default processor strategy.
+ * {@link MailFolderInfo} - Provides needed information about the mail folder to process
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultProcessorStrategy implements IProcessorStrategy {
+public final class MailFolderInfo {
+
+    private final String fullName;
+
+    private final int messageCount;
 
     /**
-     * The max. number of messages that may be indexed with headers only.
-     */
-    protected static final int HEADERS_ONLY = 1000;
-
-    /**
-     * The max. number of messages that may be indexed with their contents.
-     */
-    protected static final int HEADERS_AND_CONTENT = 100;
-
-    /**
-     * The max. number of messages that may be indexed completely.
-     */
-    protected static final int FULL = 25;
-
-    /**
-     * The constant identifier for INBOX mailbox.
-     */
-    protected static final String INBOX = "INBOX";
-
-    /**
-     * The singleton instance.
-     */
-    private static final DefaultProcessorStrategy INSTANCE = new DefaultProcessorStrategy();
-
-    /**
-     * Gets the instance
+     * Initializes a new {@link MailFolderInfo}.
      * 
-     * @return The instance
+     * @param fullName The full name
+     * @param messageCount The message count or <code>-1</code> if denoted folder does not hold messages
      */
-    public static DefaultProcessorStrategy getInstance() {
-        return INSTANCE;
+    public MailFolderInfo(final String fullName, final int messageCount) {
+        super();
+        this.fullName = fullName;
+        this.messageCount = messageCount;
     }
 
     /**
-     * Initializes a new {@link DefaultProcessorStrategy}.
+     * Initializes a new {@link MailFolderInfo}.
+     * 
+     * @param mailFolder The mail folder
      */
-    protected DefaultProcessorStrategy() {
+    public MailFolderInfo(final MailFolder mailFolder) {
         super();
+        this.fullName = mailFolder.getFullname();
+        this.messageCount = mailFolder.isHoldsMessages() ? mailFolder.getMessageCount() : -1;
     }
 
-    @Override
-    public boolean hasHighAttention(final MailFolderInfo folderInfo) throws OXException {
-        return INBOX.equals(folderInfo.getFullName());
+    /**
+     * Gets the full name
+     * 
+     * @return The full name
+     */
+    public String getFullName() {
+        return fullName;
     }
 
-    @Override
-    public boolean addFull(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
-        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folderInfo) ? FULL << 1 : FULL);
-    }
-
-    @Override
-    public boolean addHeadersAndContent(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
-        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folderInfo) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
-    }
-
-    @Override
-    public boolean addHeadersOnly(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
-        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folderInfo) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
+    /**
+     * Gets the message count
+     * 
+     * @return The message count
+     */
+    public int getMessageCount() {
+        return messageCount;
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.mail;
 
 
 /**

@@ -58,6 +58,9 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.adapter.IndexService;
+import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
+import com.openexchange.mail.smal.impl.processor.IProcessorStrategy;
+import com.openexchange.mail.smal.impl.processor.Processor;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
@@ -108,6 +111,16 @@ public abstract class AbstractSMALStorage {
     protected final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
     /**
+     * The processor strategy to use.
+     */
+    protected final IProcessorStrategy processorStrategy;
+
+    /**
+     * The processor parameterized with <code>processorStrategy</code>.
+     */
+    protected final Processor processor;
+
+    /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
     protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
@@ -117,6 +130,8 @@ public abstract class AbstractSMALStorage {
         contextId = session.getContextId();
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
+        processorStrategy = DefaultProcessorStrategy.getInstance();
+        processor = new Processor(processorStrategy);
     }
 
     /**

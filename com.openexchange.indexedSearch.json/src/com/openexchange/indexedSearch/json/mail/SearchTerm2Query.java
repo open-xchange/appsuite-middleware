@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.indexedSearch.json.mail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,8 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import com.openexchange.index.IndexConstants;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
-import com.openexchange.mail.MailFields;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;
@@ -85,15 +84,6 @@ import com.openexchange.mail.search.ToTerm;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTerm2Query implements SolrMailConstants {
-
-    /**
-     * Gets the indexable fields.
-     * 
-     * @return The indexable fields
-     */
-    public static MailFields getIndexableFields() {
-        return MailSolrIndexAccess.getIndexableFields();
-    }
 
     private static final class SearchTerm2QueryVisitor implements SearchTermVisitor {
 

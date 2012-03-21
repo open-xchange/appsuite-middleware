@@ -47,68 +47,63 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.processor;
+package com.openexchange.index.solr.mail;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
-import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link IndexDocumentHelper} - Helper to get <code>IndexDocument</code>s from <code>MailMessage</code>s.
+ * {@link SolrMailUtility} - Provides utility methods for Solr mail access.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexDocumentHelper {
+public final class SolrMailUtility {
 
     /**
-     * The <code>IndexDocument</code> mail type.
+     * Initializes a new {@link SolrMailUtility}.
      */
-    private static final Type MAIL = Type.MAIL;
-
-    /**
-     * Initializes a new {@link IndexDocumentHelper}.
-     */
-    private IndexDocumentHelper() {
+    private SolrMailUtility() {
         super();
     }
 
     /**
-     * Gets the index documents for given mails.
+     * Gets the field2name mapping.
      * 
-     * @param mails The mails
-     * @param accountId The account identifier
-     * @return The index documents
+     * @return The field2name mapping
      */
-    public static List<IndexDocument<MailMessage>> documentsFor(final Collection<MailMessage> mails, final int accountId) {
-        if (null == mails || mails.isEmpty()) {
-            return Collections.<IndexDocument<MailMessage>> emptyList();
-        }
-        final List<IndexDocument<MailMessage>> list = new ArrayList<IndexDocument<MailMessage>>(mails.size());
-        for (final MailMessage mail : mails) {
-            mail.setAccountId(accountId);
-            list.add(new StandardIndexDocument<MailMessage>(mail, MAIL));
-        }
-        return list;
+    public static EnumMap<MailField, List<String>> getField2NameMap() {
+        return MailSolrIndexAccess.getField2name();
     }
 
     /**
-     * Gets the index document for given mail.
+     * Gets the indexable fields.
      * 
-     * @param mail The mail
-     * @param accountId The account identifier
-     * @return The index document
+     * @return The indexable fields
      */
-    public static IndexDocument<MailMessage> documentFor(final MailMessage mail, final int accountId) {
-        if (null == mail) {
-            return null;
+    public static MailFields getIndexableFields() {
+        return MailSolrIndexAccess.getIndexableFields();
+    }
+
+    /**
+     * Safely releases specified access using given facade.
+     * 
+     * @param facade The facade
+     * @param indexAccess The access
+     */
+    public static void releaseAccess(final IndexFacadeService facade, final IndexAccess<MailMessage> indexAccess) {
+        if (null != indexAccess) {
+            try {
+                facade.releaseIndexAccess(indexAccess);
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
-        mail.setAccountId(accountId);
-        return new StandardIndexDocument<MailMessage>(mail, MAIL);
     }
 
 }

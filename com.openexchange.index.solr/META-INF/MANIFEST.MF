@@ -59,6 +59,7 @@ Import-Package: com.openexchange.config,
  org.apache.commons.httpclient.util,
  org.apache.commons.logging,
  org.osgi.framework
-Export-Package: com.openexchange.index.solr
+Export-Package: com.openexchange.index.solr,
+ com.openexchange.index.solr.mail
 Bundle-ClassPath: lib/apache-solr-solrj-3.3.0.jar,
  .
