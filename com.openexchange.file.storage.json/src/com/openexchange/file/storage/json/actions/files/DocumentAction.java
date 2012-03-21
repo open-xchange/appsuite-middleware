@@ -52,14 +52,17 @@ package com.openexchange.file.storage.json.actions.files;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -74,8 +77,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
     @Parameter(name = "version", optional=true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
     @Parameter(name = "content_type", optional=true, description = "If present the response declares the given content_type in the Content-Type header.")
 }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
-@DispatcherNotes(defaultFormat = "file")
-public class DocumentAction extends AbstractFileAction {
+@DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
+public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService{
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
@@ -83,12 +86,45 @@ public class DocumentAction extends AbstractFileAction {
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-
+        
+        
         final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
 
         final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
-
-        return new AJAXRequestResult(fileHolder, "file");
+        AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        createAndSetETag(fileMetadata, request, result);
+        
+		return result;
     }
+
+	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
+		if (request.isForSpecificVersion()) {
+			setETag(null, -1, result);
+		} else {
+			setETag(getETag(fileMetadata), 0, result);
+		}
+	}
+
+	private String getETag(File fileMetadata) {
+		return "http://www.open-xchange.com/infostore/"+fileMetadata.getId()+"/"+fileMetadata.getVersion();
+	}
+
+	@Override
+	public boolean checkETag(String clientETag, AJAXRequestData requestData,
+			ServerSession session) throws OXException {
+		final AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
+		final IDBasedFileAccess fileAccess = request.getFileAccess();
+	    final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+		return getETag(fileMetadata).equals(clientETag);
+	}
+
+	@Override
+	public void setETag(String eTag, long expires, AJAXRequestResult result)
+			throws OXException {
+		 result.setExpires(expires);
+		 if (eTag != null) {
+		     result.setHeader("ETag", eTag);
+		 }
+	}
 }

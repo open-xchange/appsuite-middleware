@@ -285,4 +285,18 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
+	@Override
+	public boolean mayUseFallbackSession(String module, String action) throws OXException {
+		final AJAXActionServiceFactory factory = lookupFactory(module);
+        if (factory == null) {
+            return false;
+        }
+        DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+        if (actionMetadata == null) {
+        	return false;
+        }
+        
+		return actionMetadata.allowPublicSession();
+	}
+
 }

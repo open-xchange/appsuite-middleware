@@ -117,29 +117,13 @@ public class AJAXRequestDataTools {
         /*
          * Set the module
          */
-        {
-            String pathInfo = req.getRequestURI();
-            final int lastIndex = pathInfo.lastIndexOf(';');
-            if (lastIndex > 0) {
-                pathInfo = pathInfo.substring(0, lastIndex);
-            }
-            retval.setModule(pathInfo.substring(prefix.length()));
-        }
+        retval.setModule(getModule(prefix, req));
+        
         /*
          * Set request URI
          */
         retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
-        /*
-         * Set the action
-         */
-        {
-            final String action = req.getParameter("action");
-            if (null == action) {
-                retval.setAction(req.getMethod().toUpperCase(Locale.US));
-            } else {
-                retval.setAction(action);
-            }
-        }
+        retval.setAction(getAction(req));
         /*
          * Set the format
          */
@@ -263,4 +247,24 @@ public class AJAXRequestDataTools {
         }
         return startingChar == toCheck.charAt(i);
     }
+
+	public String getModule(String prefix, HttpServletRequest req) {
+		 String pathInfo = req.getRequestURI();
+         final int lastIndex = pathInfo.lastIndexOf(';');
+         if (lastIndex > 0) {
+        	 pathInfo = pathInfo.substring(0, lastIndex);
+         }
+         return pathInfo.substring(prefix.length());
+	}
+
+	public String getAction(HttpServletRequest req) {
+		 
+		final String action = req.getParameter("action");
+		if (null == action) {
+			return req.getMethod().toUpperCase(Locale.US);
+		} else {
+			return action;
+		}
+        
+	}
 }
