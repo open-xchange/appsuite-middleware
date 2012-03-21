@@ -49,78 +49,47 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailFolder;
-
 /**
- * {@link DefaultProcessorStrategy} - The default processor strategy.
+ * {@link ProcessingResult} - The result of a processed folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultProcessorStrategy implements IProcessorStrategy {
+public final class ProcessingResult {
 
     /**
-     * The max. number of messages that may be indexed with headers only.
+     * The empty processing result.
      */
-    protected static final int HEADERS_ONLY = 1000;
+    public static final ProcessingResult EMPTY_RESULT = new ProcessingResult(ProcessType.NONE, false);
+
+    private final boolean hasHighAttention;
+
+    private final ProcessType processType;
 
     /**
-     * The max. number of messages that may be indexed with their contents.
+     * Initializes a new {@link ProcessingResult}.
      */
-    protected static final int HEADERS_AND_CONTENT = 100;
-
-    /**
-     * The max. number of messages that may be indexed completely.
-     */
-    protected static final int FULL = 25;
-
-    /**
-     * The constant identifier for INBOX mailbox.
-     */
-    protected static final String INBOX = "INBOX";
-
-    /**
-     * The singleton instance.
-     */
-    private static final DefaultProcessorStrategy INSTANCE = new DefaultProcessorStrategy();
-
-    /**
-     * Gets the instance
-     * 
-     * @return The instance
-     */
-    public static DefaultProcessorStrategy getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link DefaultProcessorStrategy}.
-     */
-    protected DefaultProcessorStrategy() {
+    public ProcessingResult(final ProcessType processType, final boolean hasHighAttention) {
         super();
+        this.processType = processType;
+        this.hasHighAttention = hasHighAttention;
     }
 
-    @Override
-    public boolean hasHighAttention(final MailFolder folder) throws OXException {
-        return INBOX.equals(folder.getFullname());
+    /**
+     * Checks whether processed folder has high attention.
+     * 
+     * @return <code>true</code> if processed folder has high attention; otherwise <code>false</code>
+     */
+    public boolean isHasHighAttention() {
+        return hasHighAttention;
     }
 
-    @Override
-    public boolean addFull(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? FULL << 1 : FULL);
-    }
-
-    @Override
-    public boolean addHeadersAndContent(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
-    }
-
-    @Override
-    public boolean addHeadersOnly(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
+    /**
+     * Gets the process type
+     * 
+     * @return The process type
+     */
+    public ProcessType getProcessType() {
+        return processType;
     }
 
 }

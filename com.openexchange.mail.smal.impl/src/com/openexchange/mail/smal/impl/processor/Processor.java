@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.impl.processor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,38 +84,38 @@ import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.session.Session;
 
 /**
- * {@link SmalFolderProcessor} - Processes a given mail folder for its content being indexed.
+ * {@link Processor} - Processes a given mail folder for its content being indexed.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalFolderProcessor implements SolrMailConstants {
+public final class Processor implements SolrMailConstants {
 
-    private static final SmalFolderProcessor INSTANCE = new SmalFolderProcessor();
+    private static final Processor INSTANCE = new Processor();
 
     /**
      * Gets the default instance.
      * 
      * @return The default instance
      */
-    public static SmalFolderProcessor getInstance() {
+    public static Processor getInstance() {
         return INSTANCE;
     }
 
-    private final SmalProcessorStrategy strategy;
+    private final IProcessorStrategy strategy;
 
     /**
-     * Initializes a new {@link SmalFolderProcessor}.
+     * Initializes a new {@link Processor}.
      */
-    private SmalFolderProcessor() {
+    private Processor() {
         this(DefaultProcessorStrategy.getInstance());
     }
 
     /**
-     * Initializes a new {@link SmalFolderProcessor}.
+     * Initializes a new {@link Processor}.
      * 
      * @param strategy The strategy to lookup high attention folders
      */
-    public SmalFolderProcessor(final SmalProcessorStrategy strategy) {
+    public Processor(final IProcessorStrategy strategy) {
         super();
         assert null != strategy;
         this.strategy = strategy;
@@ -129,16 +130,17 @@ public final class SmalFolderProcessor implements SolrMailConstants {
      * 
      * @param folder The mail folder
      * @param mailAccess The mail access
+     * @return The processing result or {@link ProcessingResult#EMPTY_RESULT an empty result} if processing has been aborted
      * @throws OXException If indexing fails for any reason
      * @throws InterruptedException If processing is interrupted
      */
-    public void processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
+    public ProcessingResult processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
         if (!folder.isHoldsMessages()) {
-            return;
+            return ProcessingResult.EMPTY_RESULT;
         }
         final int messageCount = folder.getMessageCount();
         if (0 == messageCount) {
-            return;
+            return ProcessingResult.EMPTY_RESULT;
         }
         if (messageCount < 0) {
             submitAsJob(folder, mailAccess);
@@ -149,7 +151,7 @@ public final class SmalFolderProcessor implements SolrMailConstants {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
             // Index service missing
-            return;
+            return ProcessingResult.EMPTY_RESULT;
         }
         IndexAccess<MailMessage> indexAccess = null;
         try {
@@ -157,6 +159,7 @@ public final class SmalFolderProcessor implements SolrMailConstants {
             final int accountId = mailAccess.getAccountId();
             final String fullName = folder.getFullname();
             final boolean initial = !containsFolder(accountId, fullName, indexAccess);
+            final ProcessingResult processingResult;
             if (initial) {
                 /*-
                  * 
@@ -176,6 +179,10 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                         documents.add(IndexDocumentHelper.documentFor(message, accountId));
                     }
                     indexAccess.addAttachments(documents);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folder));
                 } else if (strategy.addHeadersAndContent(messageCount, folder)) { // headers + content
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -189,6 +196,10 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                         documents.add(IndexDocumentHelper.documentFor(message, accountId));
                     }
                     indexAccess.addContent(documents);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folder));
                 } else if (strategy.addHeadersOnly(messageCount, folder)) { // headers only
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -202,8 +213,16 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                         documents.add(IndexDocumentHelper.documentFor(message, accountId));
                     }
                     indexAccess.addEnvelopeData(documents);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folder));
                 } else {
                     submitAsJob(folder, mailAccess);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folder));
                 }
             } else {
                 /*-
@@ -224,7 +243,7 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                 final Set<String> newIds = new HashSet<String>(storageMap.keySet());
                 newIds.removeAll(indexMap.keySet());
                 if (newIds.isEmpty()) {
-                    return;
+                    return ProcessingResult.EMPTY_RESULT;
                 }
                 final int size = newIds.size();
                 if (strategy.addFull(size, folder)) { // headers, content + attachments
@@ -240,6 +259,10 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                         documents.add(IndexDocumentHelper.documentFor(message, accountId));
                     }
                     indexAccess.addAttachments(documents);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folder));
                 } else if (strategy.addHeadersAndContent(size, folder)) { // headers + content
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -253,6 +276,10 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                         documents.add(IndexDocumentHelper.documentFor(message, accountId));
                     }
                     indexAccess.addContent(documents);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folder));
                 } else if (strategy.addHeadersOnly(size, folder)) { // headers only
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -266,14 +293,22 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                         documents.add(IndexDocumentHelper.documentFor(message, accountId));
                     }
                     indexAccess.addEnvelopeData(documents);
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folder));
                 } else {
-                    submitAsJob(
-                        folder,
-                        mailAccess,
-                        new ArrayList<MailMessage>(storageMap.values()),
-                        new ArrayList<MailMessage>(indexMap.values()));
+                    submitAsJob(folder, mailAccess, storageMap.values(), indexMap.values());
+                    /*
+                     * Assign appropriate result
+                     */
+                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folder));
                 }
             }
+            /*
+             * Return result
+             */
+            return processingResult;
         } finally {
             releaseAccess(facade, indexAccess);
         }
@@ -291,7 +326,9 @@ public final class SmalFolderProcessor implements SolrMailConstants {
         final Map<String, Object> params = new HashMap<String, Object>(2);
         params.put("sort", FIELD_RECEIVED_DATE);
         params.put("order", "desc");
-        final QueryParameters queryParameters = new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setParameters(params).build();
+        final QueryParameters queryParameters =
+            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setParameters(
+                params).build();
         final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
         return result.getNumFound() > 0;
     }
@@ -380,7 +417,7 @@ public final class SmalFolderProcessor implements SolrMailConstants {
         submitAsJob(folder, mailAccess, null, null);
     }
 
-    private void submitAsJob(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final List<MailMessage> storageMails, final List<MailMessage> indexMails) throws OXException {
+    private void submitAsJob(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException {
         final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
         if (null == indexingService) {
             return;
@@ -392,8 +429,8 @@ public final class SmalFolderProcessor implements SolrMailConstants {
                 mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
                 mailConfig.isSecure()).primaryPassword(session.getPassword());
         final FolderJob folderJob = new FolderJob(folder.getFullname(), jobInfoBuilder.build());
-        folderJob.setIndexMails(indexMails);
-        folderJob.setStorageMails(storageMails);
+        folderJob.setIndexMails(new ArrayList<MailMessage>(indexMails));
+        folderJob.setStorageMails(new ArrayList<MailMessage>(storageMails));
         indexingService.addJob(folderJob);
     }
 

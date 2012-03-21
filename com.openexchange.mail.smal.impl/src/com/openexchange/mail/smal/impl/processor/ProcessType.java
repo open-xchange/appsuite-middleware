@@ -49,78 +49,35 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailFolder;
-
 /**
- * {@link DefaultProcessorStrategy} - The default processor strategy.
+ * The processing type.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultProcessorStrategy implements IProcessorStrategy {
+public enum ProcessType {
 
     /**
-     * The max. number of messages that may be indexed with headers only.
+     * None. Nothing was added to index.
      */
-    protected static final int HEADERS_ONLY = 1000;
-
+    NONE,
     /**
-     * The max. number of messages that may be indexed with their contents.
+     * Adding to index is performed with a separate, submitted job.
+     * <p>
+     * Execution time of this job is unknown, but is guaranteed to take place.
      */
-    protected static final int HEADERS_AND_CONTENT = 100;
-
+    JOB,
     /**
-     * The max. number of messages that may be indexed completely.
+     * Only headers were immediately added to index.
      */
-    protected static final int FULL = 25;
-
+    HEADERS_ONLY,
     /**
-     * The constant identifier for INBOX mailbox.
+     * Headers and content were immediately added to index.
      */
-    protected static final String INBOX = "INBOX";
-
+    HEADERS_AND_CONTENT,
     /**
-     * The singleton instance.
+     * Full mails (inc. attachments) were immediately added to index.
      */
-    private static final DefaultProcessorStrategy INSTANCE = new DefaultProcessorStrategy();
+    FULL,
 
-    /**
-     * Gets the instance
-     * 
-     * @return The instance
-     */
-    public static DefaultProcessorStrategy getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link DefaultProcessorStrategy}.
-     */
-    protected DefaultProcessorStrategy() {
-        super();
-    }
-
-    @Override
-    public boolean hasHighAttention(final MailFolder folder) throws OXException {
-        return INBOX.equals(folder.getFullname());
-    }
-
-    @Override
-    public boolean addFull(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? FULL << 1 : FULL);
-    }
-
-    @Override
-    public boolean addHeadersAndContent(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
-    }
-
-    @Override
-    public boolean addHeadersOnly(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
-    }
-
+    ;
 }
