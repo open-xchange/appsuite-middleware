@@ -47,55 +47,38 @@
  *
  */
 
-package com.openexchange.mail.smal.impl;
+package com.openexchange.mail.smal.impl.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+
 
 /**
- * {@link SmalExceptionMessages} - Exception messages that must be translated.
+ * {@link SmalUpdateTaskProviderServiceImpl}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SmalExceptionMessages implements LocalizableStrings {
+public class SmalUpdateTaskProviderServiceImpl implements UpdateTaskProviderService {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    private final List<UpdateTaskV2> taskList;
 
-    // Missing property: %1$s
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
-
-    // Invalid property value in property "%1$s": %2$s
-    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // HTTP request to server %1$s failed. Status line: %2$s
-    public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to server \"%1$s\" failed. Status line: %2$s";
-
-    // JSON request failed. Error code: %1$s. Error message: %2$s
-    public static final String JSON_REQUEST_FAILED_MSG = "JSON request failed. Error code: %1$s. Error message: %2$s";
-
-    // A remote error occurred: %1$s
-    public static final String REMOTE_ERROR_MSG = "A remote error occurred: %1$s";
-
-    // An index fault occurred: %1$s
-    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
-
-    // A HTTP error occurred: %1$s
-    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
-
-    // Unparseable HTTP response: %1$s
-    public static final String UNPARSEABLE_HTTP_RESPONSE_MSG = "Unparseable HTTP response: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    /**
-     * Initializes a new {@link SmalExceptionMessages}.
-     */
-    private SmalExceptionMessages() {
+    public SmalUpdateTaskProviderServiceImpl(final UpdateTaskV2... tasks) {
         super();
+        if (null == tasks || 0 == tasks.length) {
+            taskList = new ArrayList<UpdateTaskV2>(1);
+        } else {
+            taskList = new ArrayList<UpdateTaskV2>(tasks.length);
+            taskList.addAll(Arrays.asList(tasks));
+        }
+    }
+
+    @Override
+    public Collection<UpdateTaskV2> getUpdateTasks() {
+        return taskList;
     }
 
 }

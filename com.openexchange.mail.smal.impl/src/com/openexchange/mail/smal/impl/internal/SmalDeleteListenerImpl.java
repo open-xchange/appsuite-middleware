@@ -60,11 +60,11 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link SMALDeleteListener}
+ * {@link SmalDeleteListenerImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SMALDeleteListener implements DeleteListener {
+public class SmalDeleteListenerImpl implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {

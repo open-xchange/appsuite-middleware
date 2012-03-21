@@ -675,28 +675,6 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     }
 
     @Override
-    public boolean containsFolder(final int accountId, final String fullName) throws OXException {
-        if (null == fullName || accountId < 0) {
-            return false;
-        }
-        try {
-            final CommonsHttpSolrServer solrServer = solrServerFor();
-            StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-            final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            queryBuilder = null;
-            solrQuery.setStart(Integer.valueOf(0));
-            solrQuery.setRows(Integer.valueOf(1));
-            return solrServer.query(solrQuery).getResults().getNumFound() > 0;
-        } catch (final SolrServerException e) {
-            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     public IndexResult<MailMessage> query(final QueryParameters parameters) throws OXException, InterruptedException {
         if (null == parameters) {
             return Indexes.emptyResult();

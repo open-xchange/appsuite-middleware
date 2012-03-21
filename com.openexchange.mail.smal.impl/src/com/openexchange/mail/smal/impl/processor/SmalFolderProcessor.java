@@ -156,7 +156,7 @@ public final class SmalFolderProcessor implements SolrMailConstants {
             indexAccess = facade.acquireIndexAccess(Types.EMAIL, mailAccess.getSession());
             final int accountId = mailAccess.getAccountId();
             final String fullName = folder.getFullname();
-            final boolean initial = !indexAccess.containsFolder(accountId, fullName);
+            final boolean initial = !containsFolder(accountId, fullName, indexAccess);
             if (initial) {
                 /*-
                  * 
@@ -277,6 +277,23 @@ public final class SmalFolderProcessor implements SolrMailConstants {
         } finally {
             releaseAccess(facade, indexAccess);
         }
+    }
+
+    private boolean containsFolder(final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
+        if (null == fullName || accountId < 0) {
+            return false;
+        }
+        // Compose query string
+        final StringBuilder queryBuilder = new StringBuilder(128);
+        queryBuilder.append('(').append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+        queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+        // Query parameters
+        final Map<String, Object> params = new HashMap<String, Object>(2);
+        params.put("sort", FIELD_RECEIVED_DATE);
+        params.put("order", "desc");
+        final QueryParameters queryParameters = new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setParameters(params).build();
+        final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
+        return result.getNumFound() > 0;
     }
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };

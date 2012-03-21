@@ -91,6 +91,10 @@ public class FileResponseRenderer implements ResponseRenderer {
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
     private volatile ImageScalingService scaler;
+    
+    private final String DELIVERY = "delivery";
+    
+    private final String DOWNLOAD = "download";
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -123,6 +127,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        String delivery = req.getParameter(DELIVERY);
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
@@ -133,7 +138,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             file = scaleIfImage(request, file);
             documentData = new BufferedInputStream(file.getStream());
             final String userAgent = req.getHeader("user-agent");
-            if (SAVE_AS_TYPE.equals(contentType)) {
+            if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
                 resp.setContentType(contentType);
             } else {
