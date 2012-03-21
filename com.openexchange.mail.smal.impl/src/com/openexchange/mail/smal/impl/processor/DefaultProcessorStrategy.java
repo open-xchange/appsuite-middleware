@@ -50,7 +50,6 @@
 package com.openexchange.mail.smal.impl.processor;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link DefaultProcessorStrategy} - The default processor strategy.
@@ -101,26 +100,26 @@ public class DefaultProcessorStrategy implements IProcessorStrategy {
     }
 
     @Override
-    public boolean hasHighAttention(final MailFolder folder) throws OXException {
-        return INBOX.equals(folder.getFullname());
+    public boolean hasHighAttention(final MailFolderInfo folderInfo) throws OXException {
+        return INBOX.equals(folderInfo.getFullName());
     }
 
     @Override
-    public boolean addFull(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? FULL << 1 : FULL);
+    public boolean addFull(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
+        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
+        return count <= (hasHighAttention(folderInfo) ? FULL << 1 : FULL);
     }
 
     @Override
-    public boolean addHeadersAndContent(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
+    public boolean addHeadersAndContent(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
+        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
+        return count <= (hasHighAttention(folderInfo) ? HEADERS_AND_CONTENT << 1 : HEADERS_AND_CONTENT);
     }
 
     @Override
-    public boolean addHeadersOnly(final int messageCount, final MailFolder folder) throws OXException {
-        final int count = messageCount < 0 ? folder.getMessageCount() : messageCount;
-        return count <= (hasHighAttention(folder) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
+    public boolean addHeadersOnly(final int messageCount, final MailFolderInfo folderInfo) throws OXException {
+        final int count = messageCount < 0 ? folderInfo.getMessageCount() : messageCount;
+        return count <= (hasHighAttention(folderInfo) ? HEADERS_ONLY << 1 : HEADERS_ONLY);
     }
 
 }

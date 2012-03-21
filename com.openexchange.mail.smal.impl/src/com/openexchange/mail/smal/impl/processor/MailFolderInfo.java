@@ -49,51 +49,58 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link IProcessorStrategy} - The strategy for the {@link Processor processor}.
+ * {@link MailFolderInfo} - Provides needed information about the mail folder to process
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IProcessorStrategy {
+public final class MailFolderInfo {
+
+    private final String fullName;
+
+    private final int messageCount;
 
     /**
-     * Determines if specified folder is considered as a folder with high attention; e.g. INBOX folder
+     * Initializes a new {@link MailFolderInfo}.
      * 
-     * @param folderInfo The information about the folder to check
-     * @return <code>true</code> for high attention folder; otherwise <code>false</code>
-     * @throws OXException If an error occurs
+     * @param fullName The full name
+     * @param messageCount The message count or <code>-1</code> if denoted folder does not hold messages
      */
-    boolean hasHighAttention(MailFolderInfo folderInfo) throws OXException;
+    public MailFolderInfo(final String fullName, final int messageCount) {
+        super();
+        this.fullName = fullName;
+        this.messageCount = messageCount;
+    }
 
     /**
-     * Signals whether contained messages shall be completely added to index immediately.
+     * Initializes a new {@link MailFolderInfo}.
      * 
-     * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folderInfo The information about the folder
-     * @return <code>true</code> to fully add messages to index; otherwise <code>false</code>
-     * @throws OXException If checking condition fails
+     * @param mailFolder The mail folder
      */
-    boolean addFull(int messageCount, MailFolderInfo folderInfo) throws OXException;
+    public MailFolderInfo(final MailFolder mailFolder) {
+        super();
+        this.fullName = mailFolder.getFullname();
+        this.messageCount = mailFolder.isHoldsMessages() ? mailFolder.getMessageCount() : -1;
+    }
 
     /**
-     * Signals whether contained messages shall be added with its contents to index immediately.
+     * Gets the full name
      * 
-     * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folderInfo The information about the folder
-     * @return <code>true</code> to add messages with contents to index; otherwise <code>false</code>
-     * @throws OXException If checking condition fails
+     * @return The full name
      */
-    boolean addHeadersAndContent(int messageCount, MailFolderInfo folderInfo) throws OXException;
+    public String getFullName() {
+        return fullName;
+    }
 
     /**
-     * Signals whether contained messages shall be added to index immediately only considering headers.
+     * Gets the message count
      * 
-     * @param messageCount The message count or <code>-1</code> to consider folder's message count
-     * @param folderInfo The information about the folder
-     * @return <code>true</code> to perform a header-only add to index; otherwise <code>false</code>
-     * @throws OXException If checking condition fails
+     * @return The message count
      */
-    boolean addHeadersOnly(int messageCount, MailFolderInfo folderInfo) throws OXException;
+    public int getMessageCount() {
+        return messageCount;
+    }
+
 }

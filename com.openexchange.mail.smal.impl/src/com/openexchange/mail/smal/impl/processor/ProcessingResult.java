@@ -92,4 +92,31 @@ public final class ProcessingResult {
         return processType;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (hasHighAttention ? 1231 : 1237);
+        result = prime * result + ((processType == null) ? 0 : processType.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ProcessingResult)) {
+            return false;
+        }
+        final ProcessingResult other = (ProcessingResult) obj;
+        if (hasHighAttention != other.hasHighAttention) {
+            return false;
+        }
+        if (processType != other.processType) {
+            return false;
+        }
+        return true;
+    }
+
 }
