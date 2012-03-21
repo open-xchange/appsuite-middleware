@@ -171,13 +171,22 @@ public class FileResponseRenderer implements ResponseRenderer {
              * pragma header.
              */
             Tools.removeCachingHeader(resp);
-            /*
-             * ETag present?
-             */
-            final String eTag = result.getHeader("ETag");
-            if (null != eTag) {
-                final long expires = result.getExpires();
-                Tools.setETag(eTag, expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
+            if (delivery == null || !delivery.equalsIgnoreCase(DOWNLOAD)) {
+                /*
+                 * ETag present and caching?
+                 */
+                final String eTag = result.getHeader("ETag");
+                if (null != eTag) {
+                    final long expires = result.getExpires();
+                    Tools.setETag(eTag, expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
+                } else {
+                    final long expires = result.getExpires();
+                    if (expires < 0) {
+                        Tools.setExpiresInOneYear(resp);
+                    } else if (expires > 0) {
+                        Tools.setExpires(new Date(System.currentTimeMillis() + expires), resp);
+                    }
+                }
             }
             /*
              * Output binary content

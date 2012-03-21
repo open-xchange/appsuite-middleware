@@ -213,7 +213,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final ServerSession session = getSessionObject(httpRequest);
+            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(getAjaxRequestDataTools().getModule(PREFIX.get(), httpRequest), getAjaxRequestDataTools().getAction(httpRequest)));
             /*
              * Parse AJAXRequestData
              */
@@ -254,7 +254,9 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    /**
+  
+
+	/**
      * Sends a proper response to requesting client after request has been orderly dispatched.
      *
      * @param requestData The AJAX request data
