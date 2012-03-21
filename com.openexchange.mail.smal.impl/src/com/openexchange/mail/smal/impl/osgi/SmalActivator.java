@@ -70,7 +70,7 @@ import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.mail.smal.impl.adapter.internal.IndexEventHandler;
 import com.openexchange.mail.smal.impl.adapter.internal.IndexServiceImpl;
 import com.openexchange.mail.smal.impl.adapter.solrj.SolrAdapter;
-import com.openexchange.mail.smal.impl.internal.SMALDeleteListener;
+import com.openexchange.mail.smal.impl.internal.SmalDeleteListenerImpl;
 import com.openexchange.mail.smal.impl.internal.SMALUpdateTaskProviderService;
 import com.openexchange.mail.smal.impl.internal.tasks.CreateMailSyncTable;
 import com.openexchange.mail.smal.impl.internal.tasks.SMALCheckTableTask;
@@ -166,7 +166,7 @@ public class SmalActivator extends HousekeepingActivator {
         {
             registerService(CreateTableService.class, new CreateMailSyncTable());
             registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask(), new SMALCheckTableTask()));
-            registerService(DeleteListener.class, new SMALDeleteListener());
+            registerService(DeleteListener.class, new SmalDeleteListenerImpl());
         }
     }
 
