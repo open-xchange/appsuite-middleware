@@ -61,15 +61,6 @@ import com.openexchange.exception.OXException;
 public interface IndexAccess<V> {
 
     /**
-     * Checks if the denoted folder is already present.
-     * 
-     * @param accountId The account identifier
-     * @param fullName The folder's full name
-     * @return <code>true</code> if contaiend; otherwise <code>false</code>
-     */
-    boolean containsFolder(int accountId, String fullName) throws OXException;
-
-    /**
      * Adds specified document's headers to associated index.
      * 
      * @param document The document to add
