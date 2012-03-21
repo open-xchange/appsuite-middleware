@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.solr.SearchTerm2Query;
+import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -145,7 +145,7 @@ public final class AddByIDsJob extends AbstractMailJob {
                     /*
                      * Fetch mails
                      */
-                    final MailFields fields = new MailFields(SearchTerm2Query.getIndexableFields());
+                    final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
                     fields.removeMailField(MailField.BODY);
                     fields.removeMailField(MailField.FULL);
                     mails =

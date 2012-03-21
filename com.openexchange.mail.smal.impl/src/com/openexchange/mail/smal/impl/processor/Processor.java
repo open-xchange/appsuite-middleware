@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
+import static com.openexchange.index.solr.mail.SolrMailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,7 +66,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.solr.SolrMailConstants;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -77,6 +78,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
@@ -189,7 +191,7 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folderInfo), true);
                 } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -206,7 +208,7 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folderInfo), true);
                 } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -223,13 +225,13 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo), true);
                 } else {
                     submitAsJob(folderInfo, mailAccess);
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folderInfo), true);
                 }
             } else {
                 /*-
@@ -269,7 +271,7 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folderInfo), false);
                 } else if (strategy.addHeadersAndContent(size, folderInfo)) { // headers + content
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -286,7 +288,7 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folderInfo), false);
                 } else if (strategy.addHeadersOnly(size, folderInfo)) { // headers only
                     final MailMessage[] messages =
                         mailAccess.getMessageStorage().getAllMessages(
@@ -303,13 +305,13 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo), false);
                 } else {
                     submitAsJob(folderInfo, mailAccess, storageMap.values(), indexMap.values());
                     /*
                      * Assign appropriate result
                      */
-                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folderInfo));
+                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folderInfo), false);
                 }
             }
             /*
@@ -439,16 +441,6 @@ public final class Processor implements SolrMailConstants {
         folderJob.setIndexMails(new ArrayList<MailMessage>(indexMails));
         folderJob.setStorageMails(new ArrayList<MailMessage>(storageMails));
         indexingService.addJob(folderJob);
-    }
-
-    private static void releaseAccess(final IndexFacadeService facade, final IndexAccess<MailMessage> indexAccess) {
-        if (null != indexAccess) {
-            try {
-                facade.releaseIndexAccess(indexAccess);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
     }
 
 }

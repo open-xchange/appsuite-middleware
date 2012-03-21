@@ -106,6 +106,7 @@ import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapters;
 import com.openexchange.mail.smal.impl.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.impl.adapter.solrj.contentgrab.TextFiller;
+import com.openexchange.mail.smal.impl.index.SearchTerm2Query;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;

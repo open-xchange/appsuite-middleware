@@ -59,7 +59,9 @@ public final class ProcessingResult {
     /**
      * The empty processing result.
      */
-    public static final ProcessingResult EMPTY_RESULT = new ProcessingResult(ProcessType.NONE, false);
+    public static final ProcessingResult EMPTY_RESULT = new ProcessingResult(ProcessType.NONE, false, false);
+
+    private final boolean firstTime;
 
     private final boolean hasHighAttention;
 
@@ -68,10 +70,20 @@ public final class ProcessingResult {
     /**
      * Initializes a new {@link ProcessingResult}.
      */
-    public ProcessingResult(final ProcessType processType, final boolean hasHighAttention) {
+    public ProcessingResult(final ProcessType processType, final boolean hasHighAttention, final boolean firstTime) {
         super();
+        this.firstTime = firstTime;
         this.processType = processType;
         this.hasHighAttention = hasHighAttention;
+    }
+
+    /**
+     * Checks whether processing took place the first time for associated folder.
+     * 
+     * @return <code>true</code> for first time processing; otherwise <code>false</code>
+     */
+    public boolean isFirstTime() {
+        return firstTime;
     }
 
     /**

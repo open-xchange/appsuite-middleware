@@ -85,10 +85,10 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.TriggerType;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
-import com.openexchange.index.solr.SolrMailConstants;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.SolrIndexIdentifier;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -170,6 +170,15 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             allFields = set;
         }
         mailFields = new MailFields(field2Name.keySet());
+    }
+
+    /**
+     * Gets the field2name mapping
+     *
+     * @return The field2name mapping
+     */
+    public static EnumMap<MailField, List<String>> getField2name() {
+        return field2Name;
     }
 
     /**
