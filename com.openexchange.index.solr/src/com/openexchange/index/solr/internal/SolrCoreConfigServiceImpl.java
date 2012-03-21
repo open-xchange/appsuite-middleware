@@ -66,85 +66,97 @@ import com.openexchange.index.solr.SolrIndexExceptionCodes;
  */
 public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {    
 
+    private final SolrIndexMysql indexMysql;
+    
+
     public SolrCoreConfigServiceImpl() {
         super();
+        indexMysql = SolrIndexMysql.getInstance();
     }
     
     @Override
     public List<SolrCoreStore> getAllStores() throws OXException {
-        return SolrIndexMysql.getInstance().getCoreStores();
+        return indexMysql.getCoreStores();
     }
 
     @Override
     public int registerCoreStore(final SolrCoreStore store) throws OXException {
-        return SolrIndexMysql.getInstance().createCoreStoreEntry(store);
+        return indexMysql.createCoreStoreEntry(store);
     }
 
     @Override
     public void modifyCoreStore(final SolrCoreStore store) throws OXException {
-        SolrIndexMysql.getInstance().updateCoreStoreEntry(store);
+        indexMysql.updateCoreStoreEntry(store);
     }
 
     @Override
     public void unregisterCoreStore(final int storeId) throws OXException {
-        SolrIndexMysql.getInstance().removeCoreStoreEntry(storeId);
+        indexMysql.removeCoreStoreEntry(storeId);
     }
     
     @Override
-    public void createCore(final int cid, final int uid, final int module) throws OXException {
-        final SolrIndexMysql indexMysql = SolrIndexMysql.getInstance();
+    public void createCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
+        indexMysql.createCoreEntry(cid, uid, module);
+        
         final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
         final String baseUri = store.getUri();
         final SolrIndexIdentifier identifier = new SolrIndexIdentifier(cid, uid, module);
-        final String instanceUriStr = baseUri + File.pathSeparator + identifier.toString();
-        final String dataUriStr = baseUri + File.pathSeparator + identifier.toString() + File.pathSeparator + "data";
+        final SolrCoreConfiguration config = new SolrCoreConfiguration(baseUri, identifier);
+        
         URI instanceUri = null;
         URI dataUri = null;
         try {
-            instanceUri = new URI(instanceUriStr);            
+            instanceUri = new URI(config.getInstanceDir());
+            dataUri = new URI(config.getDataDir());
             final File instanceDir = new File(instanceUri);            
             if (instanceDir.exists()) {
                 throw SolrIndexExceptionCodes.INSTANCE_DIR_EXISTS.create(instanceDir.toString());
             }
             
             if (instanceDir.mkdir()) {                
-                dataUri = new URI(dataUriStr);
                 final File dataDir = new File(dataUri);
                 dataDir.mkdir();
             }
         } catch (final URISyntaxException e) {
             final String uri;
             if (instanceUri == null) {
-                uri = instanceUriStr;
+                uri = config.getInstanceDir();
             } else {
-                uri = dataUriStr;
+                uri = config.getDataDir();
             }
             throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, uri);
-        }  
+        }
     }
     
     @Override
-    public void deleteCore(final int cid, final int uid, final int module) throws OXException {
-        final SolrIndexMysql indexMysql = SolrIndexMysql.getInstance();
+    public void removeCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
         final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
         final String baseUri = store.getUri();
         final SolrIndexIdentifier identifier = new SolrIndexIdentifier(cid, uid, module);
-        final String uriStr = baseUri + File.pathSeparator + identifier.toString();        
+        final SolrCoreConfiguration config = new SolrCoreConfiguration(baseUri, identifier);
+         
         try {
-            final URI uri = new URI(uriStr);
+            final URI uri = new URI(config.getInstanceDir());
             final File instanceDir = new File(uri);
             if (instanceDir.exists()) {
                 deleteDir(instanceDir);
             }
         } catch (final URISyntaxException e) {
-            throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, uriStr);
+            throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, config.getInstanceDir());
         }        
+        
+        indexMysql.removeCoreEntry(cid, uid, module);
+    }
+    
+    @Override
+    public boolean coreEnvironmentExists(int contextId, int userId, int module) throws OXException {
+        return indexMysql.coreEntryExists(contextId, userId, module);
     }
     
     private boolean deleteDir(final File dir) {
         if (dir.isDirectory()) {
             final String[] children = dir.list();
-            for (int i=0; i<children.length; i++) {
+            for (int i = 0; i < children.length; i++) {
                 final boolean success = deleteDir(new File(dir, children[i]));
                 if (!success) {
                     return false;
@@ -153,5 +165,5 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
         }
 
         return dir.delete();
-    }    
+    }
 }

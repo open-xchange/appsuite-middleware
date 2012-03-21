@@ -94,6 +94,11 @@ public interface SolrCoreConfigService {
     void unregisterCoreStore(int storeId) throws OXException;
     
     /**
+     * Returns if a core environment already exists.
+     */
+    boolean coreEnvironmentExists(int contextId, int userId, int module) throws OXException;
+    
+    /**
      * Creates a new solr core. The core will be inactive after creation.
      * 
      * @param contextId
@@ -101,7 +106,7 @@ public interface SolrCoreConfigService {
      * @param module
      * @throws OXException
      */
-    void createCore(int contextId, int userId, int module) throws OXException;
+    void createCoreEnvironment(int contextId, int userId, int module) throws OXException;
     
     /**
      * Deletes a core. If the core is running, it will be stopped first.
@@ -111,6 +116,6 @@ public interface SolrCoreConfigService {
      * @param module
      * @throws OXException
      */
-    void deleteCore(int contextId, int userId, int module) throws OXException;
+    void removeCoreEnvironment(int contextId, int userId, int module) throws OXException;
     
 }

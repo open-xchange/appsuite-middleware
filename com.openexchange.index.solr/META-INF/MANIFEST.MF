@@ -36,6 +36,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.search,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.solr,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer,
@@ -61,4 +62,5 @@ Import-Package: com.openexchange.config,
  org.osgi.framework
 Export-Package: com.openexchange.index.solr
 Bundle-ClassPath: lib/apache-solr-solrj-3.3.0.jar,
+ lib/apache-solr-core-3.3.0.jar,
  .
