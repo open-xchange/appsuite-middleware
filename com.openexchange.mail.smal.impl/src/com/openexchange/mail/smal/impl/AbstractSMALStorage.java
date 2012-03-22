@@ -50,6 +50,8 @@
 package com.openexchange.mail.smal.impl;
 
 import static com.openexchange.mail.smal.impl.SmalServiceLookup.getServiceStatic;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -78,6 +80,11 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
+
+    /**
+     * The logger.
+     */
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
 
     /**
      * The fields containing only the mail identifier.
@@ -124,6 +131,9 @@ public abstract class AbstractSMALStorage {
      */
     protected final Processor processor;
 
+    /**
+     * The volatile job info reference.
+     */
     private volatile MailJobInfo jobInfo;
 
     /**

@@ -49,37 +49,149 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link ProcessingResult} - The result of a processed folder.
+ * {@link ProcessingProgress} - The state of an in-progress folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ProcessingResult {
+public final class ProcessingProgress {
 
     /**
      * The empty processing result.
      */
-    public static final ProcessingResult EMPTY_RESULT = new ProcessingResult(ProcessType.NONE, false, false);
+    public static final ProcessingProgress EMPTY_RESULT = new ProcessingProgress();
 
     private static final MailFields FIELDS_BODY_OR_FULL = new MailFields(MailField.FULL, MailField.BODY);
 
-    private final boolean firstTime;
+    private volatile boolean firstTime;
 
-    private final boolean hasHighAttention;
+    private volatile boolean hasHighAttention;
 
-    private final ProcessType processType;
+    private volatile ProcessType processType;
+
+    private volatile Future<Object> future;
 
     /**
-     * Initializes a new {@link ProcessingResult}.
+     * Initializes a new {@link ProcessingProgress}.
      */
-    public ProcessingResult(final ProcessType processType, final boolean hasHighAttention, final boolean firstTime) {
+    public ProcessingProgress() {
         super();
+        processType = ProcessType.NONE;
+    }
+
+    /**
+     * Sets the future
+     * 
+     * @param future The future to set
+     * @return This progress with argument applied
+     */
+    ProcessingProgress setFuture(final Future<Object> future) {
+        this.future = future;
+        return this;
+    }
+
+    /**
+     * Sets the first-time flag
+     * 
+     * @param firstTime The first-time flag to set
+     * @return This progress with argument applied
+     */
+    public ProcessingProgress setFirstTime(final boolean firstTime) {
         this.firstTime = firstTime;
-        this.processType = processType;
+        return this;
+    }
+
+    /**
+     * Sets the high-attention flag
+     * 
+     * @param hasHighAttention The high-attention flag to set
+     * @return This progress with argument applied
+     */
+    public ProcessingProgress setHasHighAttention(final boolean hasHighAttention) {
         this.hasHighAttention = hasHighAttention;
+        return this;
+    }
+
+    /**
+     * Sets the process type
+     * 
+     * @param processType The process type to set
+     * @return This progress with argument applied
+     */
+    public ProcessingProgress setProcessType(final ProcessType processType) {
+        this.processType = processType;
+        return this;
+    }
+
+    /**
+     * Awaits completion of associated processor's run.
+     * 
+     * @throws OXException If processor run failed
+     * @throws InterruptedException If waiting is aborted
+     */
+    public void awaitCompletion() throws OXException, InterruptedException {
+        final Future<Object> future = this.future;
+        if (null == future) {
+            return;
+        }
+        try {
+            future.get();
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof InterruptedException) {
+                throw (InterruptedException) cause;
+            }
+            try {
+                throw ThreadPools.launderThrowable(e, OXException.class);
+            } catch (final RuntimeException rte) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Cancels further processing.
+     */
+    public void cancel() {
+        final Future<Object> future = this.future;
+        if (null == future) {
+            return;
+        }
+        future.cancel(true);
+    }
+
+    /**
+     * Checks if associated processing task is already completed.
+     * 
+     * @return <code>true</code> if done; otherwise <code>false</code>
+     */
+    public boolean isDone() throws OXException, InterruptedException {
+        final Future<Object> future = this.future;
+        if (null == future || !future.isDone()) {
+            return false;
+        }
+        try {
+            future.get();
+            return true;
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof InterruptedException) {
+                throw (InterruptedException) cause;
+            }
+            try {
+                throw ThreadPools.launderThrowable(e, OXException.class);
+            } catch (final RuntimeException rte) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+            }
+        }
     }
 
     /**
@@ -149,10 +261,10 @@ public final class ProcessingResult {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ProcessingResult)) {
+        if (!(obj instanceof ProcessingProgress)) {
             return false;
         }
-        final ProcessingResult other = (ProcessingResult) obj;
+        final ProcessingProgress other = (ProcessingProgress) obj;
         if (hasHighAttention != other.hasHighAttention) {
             return false;
         }
