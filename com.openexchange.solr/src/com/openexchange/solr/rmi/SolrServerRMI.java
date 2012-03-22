@@ -47,42 +47,24 @@
  *
  */
 
-package com.openexchange.solr.internal;
+package com.openexchange.solr.rmi;
 
-import java.io.File;
-import java.io.IOException;
-import javax.xml.parsers.ParserConfigurationException;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.core.CoreContainer;
-import org.xml.sax.SAXException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrResponse;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link SolrServerManager}
- * 
+ * {@link SolrServerRMI}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrServerManager {
+public interface SolrServerRMI extends Remote {
+    
+    public static final String RMI_NAME = "OXSolrRMI";   
+    
+    SolrResponse request(SolrRequest request, String coreName, boolean commit) throws RemoteException, OXException;
 
-    private static final String SOLR_HOME = "/development/solr";
-
-    private static final String DEFAULT_CORE = "default";
-
-    private final SolrServer solrServer;
-
-    public SolrServerManager() throws ParserConfigurationException, IOException, SAXException {
-        super();
-        final File solrHome = new File(SOLR_HOME);
-        final File solrXml = new File(solrHome, "solr.xml");
-        final CoreContainer container = new CoreContainer();
-        container.load(SOLR_HOME, solrXml);
-        solrServer = new EmbeddedSolrServer(container, DEFAULT_CORE);
-    }
-
-    /**
-     * Shuts down the embedded solr instance.
-     */
-    public void shutDown() {
-
-    }
 }

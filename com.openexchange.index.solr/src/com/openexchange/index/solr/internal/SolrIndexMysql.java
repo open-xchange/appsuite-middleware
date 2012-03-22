@@ -152,9 +152,7 @@ public class SolrIndexMysql {
         
         final SolrCore core = new SolrCore(new SolrIndexIdentifier(cid, uid, module));
         core.setStore(getCoreStore(con, storeId));
-        final IndexServer indexServer = new IndexServer();
-        indexServer.setUrl(server);    
-        core.setServer(indexServer);
+        core.setServer(server);
         
         return core;
     }

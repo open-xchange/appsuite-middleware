@@ -52,8 +52,15 @@ package com.openexchange.solr.internal;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
@@ -69,13 +76,17 @@ import com.openexchange.solr.SolrProperties;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrManagementServiceImpl implements SolrManagementService {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrManagementServiceImpl.class));
 
-    private SolrServer solrServer;
+    private CoreContainer coreContainer;
+    
 
-    private final CoreContainer coreContainer;
-
-    public SolrManagementServiceImpl() throws OXException {
+    public SolrManagementServiceImpl() {
         super();
+    }
+
+    public void startUp() throws OXException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);
         final String solrXmlPath = config.getProperty(SolrProperties.PROP_SOLR_XML);
@@ -92,13 +103,12 @@ public class SolrManagementServiceImpl implements SolrManagementService {
         }
     }
 
-    public void startUp() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        solrServer = new EmbeddedSolrServer(coreContainer, config.getProperty(SolrProperties.PROP_DEFAULT_CORE_NAME));
-    }
-
     @Override
     public void createAndStartCore(final String coreName, final String instanceDir, final String dataDir, final String schemaPath, final String configPath) throws OXException {
+        if (coreContainer == null) {
+            // TODO: throw exception
+        }
+        
         final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, instanceDir);
         coreDescriptor.setDataDir(dataDir);
         coreDescriptor.setSchemaName(schemaPath);
@@ -108,20 +118,21 @@ public class SolrManagementServiceImpl implements SolrManagementService {
             solrCore = coreContainer.create(coreDescriptor);
             coreContainer.register(coreName, solrCore, false);
         } catch (final ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new OXException(e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new OXException(e);
         } catch (final SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new OXException(e);
         }
 
     }
 
     @Override
     public void shutdownCore(final String coreName) {
+        if (coreContainer != null) {
+            // TODO: throw exception
+        }
+        
         final SolrCore solrCore = coreContainer.remove(coreName);
         if (solrCore != null) {
             solrCore.close();
@@ -129,24 +140,81 @@ public class SolrManagementServiceImpl implements SolrManagementService {
     }
 
     public void shutdown() {
-        coreContainer.shutdown();
-        solrServer = null;
+        if (coreContainer != null) {
+            coreContainer.shutdown();
+        }
     }
 
     @Override
     public void reloadCore(final String coreName) throws OXException {
+        if (coreContainer != null) {
+            // TODO: throw exception
+        }
+        
         try {
             coreContainer.reload(coreName);
         } catch (final ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new OXException(e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new OXException(e);
         } catch (final SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new OXException(e);
         }
+    }
+
+    @Override
+    public SolrResponse request(final SolrRequest request, final String coreName, final boolean commit) throws OXException {
+        if (coreContainer != null) {
+            // TODO: throw exception
+        }
+        
+        final EmbeddedSolrServer solrServer = new EmbeddedSolrServer(coreContainer, coreName);
+        try {            
+            final SolrResponse response = request.process(solrServer);            
+            if (commit) {
+                final UpdateRequest commitRequest = new UpdateRequest();
+                commitRequest.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+                commitRequest.process(solrServer);
+            }
+            
+            return response;
+        } catch (SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+    
+    private void rollback(final SolrServer solrServer) {
+        try {
+            solrServer.rollback();
+        } catch (final Throwable t) {
+            LOG.warn("Rollback of Solr server failed.", t);
+            handleThrowable(t);
+        }
+    }
+    
+    private static final String MARKER = " ---=== /!\\ ===--- ";
+
+    /**
+     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
+     *
+     * @param t The <tt>Throwable</tt> to check
+     */
+    private void handleThrowable(final Throwable t) {
+        if (t instanceof ThreadDeath) {
+            LOG.fatal(MARKER + "Thread death" + MARKER, t);
+            throw (ThreadDeath) t;
+        }
+        if (t instanceof VirtualMachineError) {
+            LOG.fatal(
+                MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
+                t);
+            throw (VirtualMachineError) t;
+        }
+        // All other instances of Throwable will be silently swallowed
     }
 
 }

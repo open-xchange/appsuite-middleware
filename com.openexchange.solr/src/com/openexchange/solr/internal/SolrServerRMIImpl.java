@@ -47,69 +47,33 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.solr.internal;
 
+import java.rmi.RemoteException;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrResponse;
+import org.apache.solr.common.util.NamedList;
+import com.openexchange.exception.OXException;
+import com.openexchange.solr.SolrManagementService;
+import com.openexchange.solr.rmi.SolrServerRMI;
 
 /**
- * {@link SolrCore}
+ * {@link SolrServerRMIImpl}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCore {
+public class SolrServerRMIImpl implements SolrServerRMI {
 
-    private String server;
-    
-    private SolrCoreStore store;
+    private SolrManagementService solrService;
 
-    private SolrIndexIdentifier identifier;
-    
-
-    public SolrCore(final SolrIndexIdentifier identifier) {
+    public SolrServerRMIImpl(final SolrManagementService solrService) {
         super();
-        this.identifier = identifier;
+        this.solrService = solrService;
     }
 
-    /**
-     * Gets the server
-     * 
-     * @return The server
-     */
-    public String getServer() {
-        return server;
+    @Override
+    public SolrResponse request(final SolrRequest request, final String coreName, final boolean commit) throws RemoteException, OXException {
+        return solrService.request(request, coreName, commit);
     }
 
-    /**
-     * Sets the server
-     * 
-     * @param server The server to set
-     */
-    public void setServer(final String server) {
-        this.server = server;
-    }
-    
-    /**
-     * Gets the store
-     *
-     * @return The store
-     */
-    public SolrCoreStore getStore() {
-        return store;
-    }
-    
-    /**
-     * Sets the store
-     *
-     * @param store The store to set
-     */
-    public void setStore(final SolrCoreStore store) {
-        this.store = store;
-    }
-    
-    /**
-     * Returns the cores name.
-     * @return The name.
-     */
-    public SolrIndexIdentifier getIdentifier() {
-        return identifier;
-    }
 }

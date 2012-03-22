@@ -68,14 +68,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrResponse;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import org.apache.solr.common.util.NamedList;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -218,28 +222,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     @Override
     public void addEnvelopeData(final IndexDocument<MailMessage> document) throws OXException {
-        CommonsHttpSolrServer solrServer = null;
-        try {
-            solrServer = solrServerFor();
-            addEnvelopeData(document, solrServer);
-            /*
-             * Commit sane
-             */
-            commitSane(solrServer);
-        } catch (final SolrServerException e) {
-            rollback(solrServer);
-            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final IOException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private void addEnvelopeData(final IndexDocument<MailMessage> document, final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException {
-        solrServer.add(helper.inputDocumentFor(document.getObject(), userId, contextId));
+        final SolrInputDocument solrDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
+        addDocument(solrDocument, true);
     }
 
     @Override
@@ -253,103 +237,27 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         } else {
             documents = new ArrayList<IndexDocument<MailMessage>>(col);
         }
-        CommonsHttpSolrServer solrServer = null;
-        boolean rollback = false;
-        try {
-            solrServer = solrServerFor();
-            final int chunkSize = ADD_ROWS;
-            final int size = documents.size();
-            try {
-                int off = 0;
-                while (off < size) {
-                    if (Thread.interrupted()) {
-                        throw new InterruptedException("Thread interrupted while adding Solr input documents.");
-                    }
-                    int endIndex = off + chunkSize;
-                    if (endIndex >= size) {
-                        endIndex = size;
-                    }
-                    final List<IndexDocument<MailMessage>> subList = documents.subList(off, endIndex);
-                    try {
-                        solrServer.add(new MailDocumentIterator(subList.iterator(), userId, contextId));
-                        rollback = true;
-                    } catch (final SolrServerException e) {
-                        if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
-                            throw e;
-                        }
-                        final CommonsHttpSolrServer noTimeoutSolrServer = solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
-                        final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), userId, contextId);
-                        final int itSize = subList.size();
-                        for (int i = 0; i < itSize; i++) {
-                            if (Thread.interrupted()) {
-                                throw new InterruptedException("Thread interrupted while adding Solr input documents.");
-                            }
-                            noTimeoutSolrServer.add(it.next());
-                            rollback = true;
-                        }
-                    }
-                    off = endIndex;
-                }
-            } catch (final SolrException e) {
-                if (rollback) {
-                    // Batch failed
-                    rollback(solrServer);
-                    rollback = false;
-                }
-                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(documents.iterator(), userId, contextId); it.hasNext();) {
-                    if (Thread.interrupted()) {
-                        throw new InterruptedException("Thread interrupted while adding Solr input documents.");
-                    }
-                    final SolrInputDocument inputDocument = it.next();
-                    try {
-                        solrServer.add(inputDocument);
-                        rollback = true;
-                    } catch (final Exception addFailed) {
-                        LOG.warn(
-                            "Mail input document could not be added: id=" + inputDocument.getFieldValue("id") + " fullName=" + inputDocument.getFieldValue("full_name"),
-                            addFailed);
-                    }
-                }
+
+        final int chunkSize = ADD_ROWS;
+        final int size = documents.size();
+        int off = 0;
+        while (off < size) {
+            if (Thread.interrupted()) {
+                throw new InterruptedException("Thread interrupted while adding Solr input documents.");
             }
-            /*
-             * Commit sane
-             */
-            commitSane(solrServer);
-        } catch (final SolrServerException e) {
-            rollback(solrServer);
-            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final IOException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            int endIndex = off + chunkSize;
+            if (endIndex >= size) {
+                endIndex = size;
+            }
+            final List<IndexDocument<MailMessage>> subList = documents.subList(off, endIndex);
+            final List<SolrInputDocument> solrDocuments = helper.inputDocumentsFor(subList, userId, contextId);
+            addDocuments(solrDocuments, true);
+            off = endIndex;
         }
     }
 
     @Override
     public void addContent(final IndexDocument<MailMessage> document) throws OXException {
-        CommonsHttpSolrServer solrServer = null;
-        try {
-            solrServer = solrServerFor();
-            addContent(document, solrServer);
-            /*
-             * Commit sane
-             */
-            commitSane(solrServer);
-        } catch (final SolrServerException e) {
-            rollback(solrServer);
-            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final IOException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private void addContent(final IndexDocument<MailMessage> document, final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException, OXException {
         final MailMessage mailMessage = document.getObject();
         final int accountId = mailMessage.getAccountId();
         final MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());
@@ -363,12 +271,12 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
             queryBuilder = null;
             solrQuery.setStart(Integer.valueOf(0));
-            solrQuery.setRows(Integer.valueOf(1));
-            final QueryResponse queryResponse = solrServer.query(solrQuery);
+            solrQuery.setRows(Integer.valueOf(1));            
+            final QueryResponse queryResponse = query(solrQuery.getQuery());
             final SolrDocumentList results = queryResponse.getResults();
             final long numFound = results.getNumFound();
             if (numFound <= 0) {
-                addEnvelopeData(document, solrServer);
+                addEnvelopeData(document);
             } else {
                 solrDocument = results.get(0);
             }
@@ -392,35 +300,18 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final Locale locale = detectLocale(text);
             inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
         }
-        inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);
-        solrServer.add(inputDocument);
+        inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);        
+        addDocument(inputDocument, true);
     }
 
     @Override
     public void addContent(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
-        CommonsHttpSolrServer solrServer = null;
-        try {
-            solrServer = solrServerFor();
-            for (final IndexDocument<MailMessage> document : documents) {
-                if (Thread.interrupted()) {
-                    // Clears the thread's interrupted flag
-                    throw new InterruptedException("Thread interrupted while adding mail contents.");
-                }
-                addContent(document, solrServer);
+        for (final IndexDocument<MailMessage> document : documents) {
+            if (Thread.interrupted()) {
+                // Clears the thread's interrupted flag
+                throw new InterruptedException("Thread interrupted while adding mail contents.");
             }
-            /*
-             * Commit sane
-             */
-            commitSane(solrServer);
-        } catch (final SolrServerException e) {
-            rollback(solrServer);
-            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final IOException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(solrServer);
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            addContent(document);
         }
     }
 

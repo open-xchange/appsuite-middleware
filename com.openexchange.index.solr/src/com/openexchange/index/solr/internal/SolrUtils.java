@@ -54,6 +54,7 @@ import java.net.SocketTimeoutException;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.exception.OXException;
@@ -160,6 +161,16 @@ public final class SolrUtils {
                 return;
             }
             noTimeoutServer(solrServer).commit();
+        }
+    }
+    
+    public static void rollback(final SolrServer solrServer) {
+        if (null != solrServer) {
+            try {
+                solrServer.rollback();
+            } catch (final Throwable t) {
+                handleThrowable(t);
+            }
         }
     }
 
