@@ -955,6 +955,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            if (0 == imapFolder.getMessageCount()) {
+                return EMPTY_RETVAL;
+            }
             final TIntList seqNums;
             final List<ThreadSortNode> threadList;
             {
@@ -1071,6 +1074,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            if (0 == imapFolder.getMessageCount()) {
+                return EMPTY_RETVAL;
+            }
             /*
              * Shall a search be performed?
              */
