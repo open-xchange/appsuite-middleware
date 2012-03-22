@@ -51,7 +51,12 @@ package com.openexchange.secret.recovery.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Constants;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -61,7 +66,9 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -117,6 +124,29 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
              */
             migrator.open();
             whiteboardEncryptedItemDetector.open();
+            /*
+             * Register appropriate event handler
+             */
+            {
+                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryActivator.class));
+                final EventHandler eventHandler = new EventHandler() {
+                    
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
+                        final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
+                        final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                        try {
+                            migrator.migrate(oldPassword, newPassword, ServerSessionAdapter.valueOf(session));
+                        } catch (final Exception e) {
+                            log.warn("Password change event could not be handled.", e);
+                        }
+                    }
+                };
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
+                registerService(EventHandler.class, eventHandler, dict);
+            }
         } else {
             registerService(SecretInconsistencyDetector.class, new SecretInconsistencyDetector() {
                 

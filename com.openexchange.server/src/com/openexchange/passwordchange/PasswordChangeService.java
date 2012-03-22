@@ -52,8 +52,11 @@ package com.openexchange.passwordchange;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
@@ -216,6 +219,16 @@ public abstract class PasswordChangeService {
         } catch (final OXException e) {
             LOG.error("Updating password in user session failed", e);
             throw e;
+        }
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Map<String, Object> properties = new HashMap<String, Object>(5);
+            properties.put("com.openexchange.passwordchange.contextId", Integer.valueOf(session.getContextId()));
+            properties.put("com.openexchange.passwordchange.userId", Integer.valueOf(session.getUserId()));
+            properties.put("com.openexchange.passwordchange.session", session);
+            properties.put("com.openexchange.passwordchange.oldPassword", event.getOldPassword());
+            properties.put("com.openexchange.passwordchange.newPassword", event.getNewPassword());
+            eventAdmin.postEvent(new Event("com/openexchange/passwordchange", properties));
         }
     }
 

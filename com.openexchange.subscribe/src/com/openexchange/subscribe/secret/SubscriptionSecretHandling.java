@@ -101,8 +101,9 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
             }
             
             final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
-            
-            subscribeService.migrateSecret(session, oldSecret, newSecret);
+            if (null != subscribeService) {
+                subscribeService.migrateSecret(session, oldSecret, newSecret);
+            }
         }
     }
 
