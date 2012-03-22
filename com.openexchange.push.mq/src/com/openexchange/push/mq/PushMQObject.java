@@ -108,7 +108,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
         this.hostname = "";
         try {
             InetAddress addr = InetAddress.getLocalHost();
-            this.hostname = addr.getCanonicalHostName();
+            this.hostname = addr.getHostName();
         } catch (UnknownHostException e) {
             LOG.error(e.getMessage(), e);
         }
