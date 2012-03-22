@@ -956,7 +956,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
             if (0 == imapFolder.getMessageCount()) {
-                return EMPTY_RETVAL;
+                return Collections.emptyList();
             }
             final TIntList seqNums;
             final List<ThreadSortNode> threadList;
