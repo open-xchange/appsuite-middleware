@@ -25,5 +25,6 @@ Import-Package: com.openexchange.crypto,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker
 Export-Package: com.openexchange.secret.recovery

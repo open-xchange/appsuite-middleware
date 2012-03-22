@@ -867,6 +867,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 }
             } while (rs.next());
             closeSQLStuff(rs, stmt);
+            if (accounts.isEmpty()) {
+                return;
+            }
             /*
              * Update
              */
@@ -874,8 +877,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(3, contextId);
             stmt.setInt(4, session.getUserId());
             for (final OAuthAccount oAuthAccount : accounts) {
-                stmt.setString(1, cryptoService.encrypt(newSecret, oAuthAccount.getToken()));
-                stmt.setString(2, cryptoService.encrypt(newSecret, oAuthAccount.getSecret()));
+                stmt.setString(1, cryptoService.encrypt(oAuthAccount.getToken(), newSecret));
+                stmt.setString(2, cryptoService.encrypt(oAuthAccount.getSecret(), newSecret));
                 stmt.setInt(5, oAuthAccount.getId());
                 stmt.addBatch();
             }
@@ -884,7 +887,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            provider.releaseReadConnection(context, con);
+            provider.releaseWriteConnection(context, con);
         }
     }
 

@@ -56,9 +56,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
@@ -69,6 +72,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -77,6 +81,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
 import com.openexchange.service.indexing.IndexingService;
@@ -84,6 +89,8 @@ import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
 import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link Processor} - Processes a given mail folder for its content being indexed.
@@ -103,7 +110,7 @@ public final class Processor implements SolrMailConstants {
         return INSTANCE;
     }
 
-    private final IProcessorStrategy strategy;
+    protected final IProcessorStrategy strategy;
 
     /**
      * Initializes a new {@link Processor}.
@@ -124,35 +131,49 @@ public final class Processor implements SolrMailConstants {
     }
 
     /**
-     * Processes specified mail folder for its content being indexed.
+     * (Asynchronously) Processes specified mail folder for its content being indexed.
+     * <p>
+     * In case of immediate processing, the following steps were performed:
+     * <ul>
+     * <li>Adds missing documents to index</li>
+     * <li>Deletes removed documents from index</li>
+     * </ul>
      * 
      * @param folder The mail folder
-     * @param mailAccess The mail access
-     * @return The processing result or {@link ProcessingResult#EMPTY_RESULT an empty result} if processing has been aborted
-     * @throws OXException If indexing fails for any reason
+     * @param accountId The account identifier
+     * @param session The associated session
+     * @param params Optional parameters
+     * @return The processing result or {@link ProcessingProgress#EMPTY_RESULT an empty result} if processing has been aborted
      * @throws InterruptedException If processing is interrupted
      */
-    public ProcessingResult processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
-        return processFolder(new MailFolderInfo(folder), mailAccess);
+    public ProcessingProgress processFolder(final MailFolder folder, final int accountId, final Session session, final Map<String, Object> params) throws InterruptedException {
+        return processFolder(new MailFolderInfo(folder), accountId, session, params);
     }
 
-    private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
+    protected static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
 
-    private static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
+    protected static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
 
     /**
-     * Processes specified mail folder for its content being indexed.
+     * (Asynchronously) Processes specified mail folder for its content being indexed.
+     * <p>
+     * In case of immediate processing, the following steps were performed:
+     * <ul>
+     * <li>Adds missing documents to index</li>
+     * <li>Deletes removed documents from index</li>
+     * </ul>
      * 
      * @param folderInfo The mail folder information
-     * @param mailAccess The mail access
-     * @return The processing result or {@link ProcessingResult#EMPTY_RESULT an empty result} if processing has been aborted
-     * @throws OXException If indexing fails for any reason
+     * @param accountId The account identifier
+     * @param session The associated session
+     * @param params Optional parameters
+     * @return The processing result or {@link ProcessingProgress#EMPTY_RESULT an empty result} if processing has been aborted
      * @throws InterruptedException If processing is interrupted
      */
-    public ProcessingResult processFolder(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
+    public ProcessingProgress processFolder(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params) throws InterruptedException {
         final int messageCount = folderInfo.getMessageCount();
         if (0 <= messageCount) {
-            return ProcessingResult.EMPTY_RESULT;
+            return ProcessingProgress.EMPTY_RESULT;
         }
         /*
          * Decide...
@@ -160,170 +181,216 @@ public final class Processor implements SolrMailConstants {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
             // Index service missing
-            return ProcessingResult.EMPTY_RESULT;
+            return ProcessingProgress.EMPTY_RESULT;
         }
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, mailAccess.getSession());
-            final int accountId = mailAccess.getAccountId();
-            final String fullName = folderInfo.getFullName();
-            final boolean initial = !containsFolder(accountId, fullName, indexAccess);
-            final ProcessingResult processingResult;
-            if (initial) {
-                /*-
-                 * 
-                 * Denoted folder has not been added to index before
-                 * 
-                 */
-                if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
-                    final MailMessage[] messages =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            fullName,
-                            null,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            FIELDS_FULL);
-                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                    for (final MailMessage message : messages) {
-                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+        final ProcessingProgress processingResult = new ProcessingProgress();
+        final CountDownLatch latch = new CountDownLatch(1);
+        /*
+         * Create task
+         */
+        final Callable<Object> task = new Callable<Object>() {
+
+            @Override
+            public Object call() throws Exception {
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                IndexAccess<MailMessage> indexAccess = null;
+                boolean countDown = true;
+                try {
+                    indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+                    final String fullName = folderInfo.getFullName();
+                    final boolean initial = !containsFolder(accountId, fullName, indexAccess);
+                    mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
+                    if (initial) {
+                        /*-
+                         * 
+                         * Denoted folder has not been added to index before
+                         * 
+                         */
+                        processingResult.setFirstTime(true).setHasHighAttention(strategy.hasHighAttention(folderInfo));
+                        if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
+                            processingResult.setProcessType(ProcessType.FULL);
+                            latch.countDown();
+                            countDown = false;
+                            final MailMessage[] messages =
+                                mailAccess.getMessageStorage().getAllMessages(
+                                    fullName,
+                                    null,
+                                    MailSortField.RECEIVED_DATE,
+                                    OrderDirection.DESC,
+                                    FIELDS_FULL);
+                            final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                            for (final MailMessage message : messages) {
+                                documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                            }
+                            indexAccess.addAttachments(documents);
+                        } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
+                            processingResult.setProcessType(ProcessType.HEADERS_AND_CONTENT);
+                            latch.countDown();
+                            countDown = false;
+                            final MailMessage[] messages =
+                                mailAccess.getMessageStorage().getAllMessages(
+                                    fullName,
+                                    null,
+                                    MailSortField.RECEIVED_DATE,
+                                    OrderDirection.DESC,
+                                    FIELDS_FULL);
+                            final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                            for (final MailMessage message : messages) {
+                                documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                            }
+                            indexAccess.addContent(documents);
+                        } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
+                            processingResult.setProcessType(ProcessType.HEADERS_ONLY);
+                            latch.countDown();
+                            countDown = false;
+                            final MailMessage[] messages =
+                                mailAccess.getMessageStorage().getAllMessages(
+                                    fullName,
+                                    null,
+                                    MailSortField.RECEIVED_DATE,
+                                    OrderDirection.DESC,
+                                    FIELDS_LOW_COST);
+                            final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                            for (final MailMessage message : messages) {
+                                documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                            }
+                            indexAccess.addEnvelopeData(documents);
+                        } else {
+                            processingResult.setProcessType(ProcessType.JOB);
+                            latch.countDown();
+                            countDown = false;
+                            submitAsJob(folderInfo, mailAccess, params);
+                        }
+                    } else {
+                        /*-
+                         * 
+                         * Denoted folder has already been added to index before
+                         * 
+                         */
+                        processingResult.setFirstTime(false).setHasHighAttention(strategy.hasHighAttention(folderInfo));
+                        final Map<String, MailMessage> storageMap;
+                        final Map<String, MailMessage> indexMap;
+                        {
+                            final List<Map<String, MailMessage>> tmp = getNewIds(fullName, indexAccess, mailAccess);
+                            storageMap = tmp.get(0);
+                            indexMap = tmp.get(1);
+                        }
+                        /*
+                         * New ones
+                         */
+                        final Set<String> newIds = new HashSet<String>(storageMap.keySet());
+                        newIds.removeAll(indexMap.keySet());
+                        /*
+                         * Removed ones
+                         */
+                        final Set<String> deletedIds = new HashSet<String>(indexMap.keySet());
+                        deletedIds.removeAll(storageMap.keySet());
+                        if (!deletedIds.isEmpty()) {
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+
+                            final Iterator<String> iterator = deletedIds.iterator();
+                            final StringBuilder tmp = new StringBuilder(64);
+                            tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+                            tmp.append(MailPath.getMailPath(accountId, fullName, iterator.next()));
+                            final int resetLen = tmp.lastIndexOf(Character.toString(MailPath.SEPERATOR));
+                            indexAccess.deleteById(tmp.toString());
+                            while (iterator.hasNext()) {
+                                tmp.setLength(resetLen);
+                                tmp.append(iterator.next());
+                                indexAccess.deleteById(tmp.toString());
+                            }
+                        }
+                        if (newIds.isEmpty()) {
+                            // No new detected
+                            processingResult.setProcessType(ProcessType.NONE);
+                            latch.countDown();
+                            countDown = false;
+                        } else {
+                            final int size = newIds.size();
+                            if (strategy.addFull(size, folderInfo)) { // headers, content + attachments
+                                processingResult.setProcessType(ProcessType.FULL);
+                                latch.countDown();
+                                countDown = false;
+                                final MailMessage[] messages =
+                                    mailAccess.getMessageStorage().getAllMessages(
+                                        fullName,
+                                        null,
+                                        MailSortField.RECEIVED_DATE,
+                                        OrderDirection.DESC,
+                                        FIELDS_FULL);
+                                final List<IndexDocument<MailMessage>> documents =
+                                    new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                                for (final MailMessage message : messages) {
+                                    documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                                }
+                                indexAccess.addAttachments(documents);
+                            } else if (strategy.addHeadersAndContent(size, folderInfo)) { // headers + content
+                                processingResult.setProcessType(ProcessType.HEADERS_AND_CONTENT);
+                                latch.countDown();
+                                countDown = false;
+                                final MailMessage[] messages =
+                                    mailAccess.getMessageStorage().getAllMessages(
+                                        fullName,
+                                        null,
+                                        MailSortField.RECEIVED_DATE,
+                                        OrderDirection.DESC,
+                                        FIELDS_FULL);
+                                final List<IndexDocument<MailMessage>> documents =
+                                    new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                                for (final MailMessage message : messages) {
+                                    documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                                }
+                                indexAccess.addContent(documents);
+                            } else if (strategy.addHeadersOnly(size, folderInfo)) { // headers only
+                                processingResult.setProcessType(ProcessType.HEADERS_ONLY);
+                                latch.countDown();
+                                countDown = false;
+                                final MailMessage[] messages =
+                                    mailAccess.getMessageStorage().getAllMessages(
+                                        fullName,
+                                        null,
+                                        MailSortField.RECEIVED_DATE,
+                                        OrderDirection.DESC,
+                                        FIELDS_LOW_COST);
+                                final List<IndexDocument<MailMessage>> documents =
+                                    new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                                for (final MailMessage message : messages) {
+                                    documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                                }
+                                indexAccess.addEnvelopeData(documents);
+                            } else {
+                                processingResult.setProcessType(ProcessType.JOB);
+                                latch.countDown();
+                                countDown = false;
+                                submitAsJob(folderInfo, mailAccess, storageMap.values(), indexMap.values());
+                            }
+                        }
                     }
-                    indexAccess.addAttachments(documents);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folderInfo), true);
-                } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
-                    final MailMessage[] messages =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            fullName,
-                            null,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            FIELDS_FULL);
-                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                    for (final MailMessage message : messages) {
-                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    return null;
+                } finally {
+                    if (countDown) {
+                        latch.countDown();
                     }
-                    indexAccess.addContent(documents);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folderInfo), true);
-                } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
-                    final MailMessage[] messages =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            fullName,
-                            null,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            FIELDS_LOW_COST);
-                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                    for (final MailMessage message : messages) {
-                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
+                    if (null != mailAccess) {
+                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
                     }
-                    indexAccess.addEnvelopeData(documents);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo), true);
-                } else {
-                    submitAsJob(folderInfo, mailAccess);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folderInfo), true);
-                }
-            } else {
-                /*-
-                 * 
-                 * Denoted folder has already been added to index before
-                 * 
-                 */
-                final Map<String, MailMessage> storageMap;
-                final Map<String, MailMessage> indexMap;
-                {
-                    final List<Map<String, MailMessage>> tmp = getNewIds(fullName, indexAccess, mailAccess);
-                    storageMap = tmp.get(0);
-                    indexMap = tmp.get(1);
-                }
-                /*
-                 * New ones
-                 */
-                final Set<String> newIds = new HashSet<String>(storageMap.keySet());
-                newIds.removeAll(indexMap.keySet());
-                if (newIds.isEmpty()) {
-                    return ProcessingResult.EMPTY_RESULT;
-                }
-                final int size = newIds.size();
-                if (strategy.addFull(size, folderInfo)) { // headers, content + attachments
-                    final MailMessage[] messages =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            fullName,
-                            null,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            FIELDS_FULL);
-                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                    for (final MailMessage message : messages) {
-                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
-                    }
-                    indexAccess.addAttachments(documents);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.FULL, strategy.hasHighAttention(folderInfo), false);
-                } else if (strategy.addHeadersAndContent(size, folderInfo)) { // headers + content
-                    final MailMessage[] messages =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            fullName,
-                            null,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            FIELDS_FULL);
-                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                    for (final MailMessage message : messages) {
-                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
-                    }
-                    indexAccess.addContent(documents);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_AND_CONTENT, strategy.hasHighAttention(folderInfo), false);
-                } else if (strategy.addHeadersOnly(size, folderInfo)) { // headers only
-                    final MailMessage[] messages =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            fullName,
-                            null,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            FIELDS_LOW_COST);
-                    final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                    for (final MailMessage message : messages) {
-                        documents.add(IndexDocumentHelper.documentFor(message, accountId));
-                    }
-                    indexAccess.addEnvelopeData(documents);
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo), false);
-                } else {
-                    submitAsJob(folderInfo, mailAccess, storageMap.values(), indexMap.values());
-                    /*
-                     * Assign appropriate result
-                     */
-                    processingResult = new ProcessingResult(ProcessType.JOB, strategy.hasHighAttention(folderInfo), false);
+                    releaseAccess(facade, indexAccess);
                 }
             }
-            /*
-             * Return result
-             */
-            return processingResult;
-        } finally {
-            releaseAccess(facade, indexAccess);
-        }
+        };
+        /*
+         * Submit task & assign future
+         */
+        processingResult.setFuture(ThreadPools.getThreadPool().submit(ThreadPools.task(task), CallerRunsBehavior.getInstance()));
+        /*
+         * Return when result is initialized appropriately
+         */
+        latch.await();
+        return processingResult;
     }
 
-    private boolean containsFolder(final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
+    protected boolean containsFolder(final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
         if (null == fullName || accountId < 0) {
             return false;
         }
@@ -332,19 +399,15 @@ public final class Processor implements SolrMailConstants {
         queryBuilder.append('(').append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
         queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
         // Query parameters
-        final Map<String, Object> params = new HashMap<String, Object>(2);
-        params.put("sort", FIELD_RECEIVED_DATE);
-        params.put("order", "desc");
         final QueryParameters queryParameters =
-            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setParameters(
-                params).build();
+            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).build();
         final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
         return result.getNumFound() > 0;
     }
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
 
-    private static List<Map<String, MailMessage>> getNewIds(final String fullName, final IndexAccess<MailMessage> indexAccess, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
+    protected static List<Map<String, MailMessage>> getNewIds(final String fullName, final IndexAccess<MailMessage> indexAccess, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
         /*
          * Get the mails from storage
          */
@@ -422,11 +485,13 @@ public final class Processor implements SolrMailConstants {
         return retval;
     }
 
-    private void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        submitAsJob(folderInfo, mailAccess, null, null);
+    protected void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException {
+        final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+        final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
+        submitAsJob(folderInfo, mailAccess, storageMails, indexMails);
     }
 
-    private void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException {
+    protected void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException {
         final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
         if (null == indexingService) {
             return;
@@ -441,6 +506,11 @@ public final class Processor implements SolrMailConstants {
         folderJob.setIndexMails(new ArrayList<MailMessage>(indexMails));
         folderJob.setStorageMails(new ArrayList<MailMessage>(storageMails));
         indexingService.addJob(folderJob);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> V getParameter(final String name, final Map<String, Object> params) {
+        return (V) ((null == name) || (null == params) ? null : params.get(name));
     }
 
 }

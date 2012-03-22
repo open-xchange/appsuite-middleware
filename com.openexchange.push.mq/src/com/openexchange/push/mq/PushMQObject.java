@@ -50,10 +50,14 @@
 package com.openexchange.push.mq;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.StringCollection;
 
@@ -63,6 +67,8 @@ import com.openexchange.tools.StringCollection;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushMQObject extends AbstractPushMQObject implements Serializable {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQObject.class));
 
     private static final long serialVersionUID = -8490584616201401142L;
 
@@ -79,6 +85,8 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
     private final long timestamp;
     
     private final String topicName;
+    
+    private String hostname;
 
     /**
      * Initializes a new {@link PushMQObject}.
@@ -97,6 +105,24 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
         hash = hashCode0();
         this.timestamp = timestamp;
         this.topicName = topicName;
+        this.hostname = "";
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            this.hostname = addr.getHostName();
+        } catch (UnknownHostException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+    
+    public PushMQObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
+        super(contextId, isRemote);
+        this.folderId = folderId;
+        this.module = module;
+        this.users = users;
+        hash = hashCode0();
+        this.timestamp = timestamp;
+        this.topicName = topicName;
+        this.hostname = hostname;
     }
 
     private int hashCode0() {
@@ -152,6 +178,14 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
     public long getTimestamp() {
         return timestamp;
     }
+    
+    public String getTopicName() {
+        return topicName;
+    }
+    
+    public String getHostname() {
+        return hostname;
+    }
 
     @Override
     public int hashCode() {
@@ -195,12 +229,12 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
     public String toString() {
         return new StringBuilder().append("FOLDER_ID=").append(folderId).append(",MODULE=").append(module).append(",CONTEXT_ID=").append(
             getContextId()).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_REMOTE=").append(isRemote()).append(
-            ",TIMESTAMP=").append(timestamp).append(",TOPIC=").append(topicName).toString();
+            ",TIMESTAMP=").append(timestamp).append(",TOPIC=").append(topicName).append(",HOSTNAME=").append(hostname).toString();
     }
 
     public static PushMQObject parseString(String toParse) throws OXException {
         final Pattern regex = Pattern.compile(
-            "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(*?)",
+            "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(*?),HOSTNAME=(.*?)",
             Pattern.DOTALL);
         Matcher matcher = regex.matcher(toParse);
         if (!matcher.find()) {
@@ -223,7 +257,8 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
             boolean isRemote = Boolean.valueOf(matcher.group(5));
             long timestamp = Long.valueOf(matcher.group(6));
             String topicName = matcher.group(7);
-            return new PushMQObject(folderId, module, contextId, users, isRemote, timestamp, topicName);
+            String hostname = matcher.group(8);
+            return new PushMQObject(folderId, module, contextId, users, isRemote, timestamp, topicName, hostname);
         }
     }
 }

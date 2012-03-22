@@ -51,6 +51,8 @@ package com.openexchange.push.mq;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.jms.ObjectMessage;
@@ -109,30 +111,47 @@ public class PushMQListener implements MQTopicListener {
         try {
             Serializable obj = SerializableHelper.readObject(bytes);
             PushMQObject pushObj = (PushMQObject) obj;
-            if (eventAdmin != null && eventFactoryService != null) {
-                final int action;
-                final String topicName;
-                if (pushObj.getModule() == Types.FOLDER) {
-                    action = RemoteEvent.FOLDER_CHANGED;
-                    topicName = "com/openexchange/remote/folderchanged";
-                } else {
-                    action = RemoteEvent.FOLDER_CONTENT_CHANGED;
-                    topicName = "com/openexchange/remote/foldercontentchanged";
-                }
-                for (final int user : pushObj.getUsers()) {
-                    RemoteEvent remEvent = eventFactoryService.newRemoteEvent(pushObj.getFolderId(), user, pushObj.getContextId(), action, pushObj.getModule(), pushObj.getTimestamp());
-                    final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
-                    ht.put(RemoteEvent.EVENT_KEY, remEvent);
-                    eventAdmin.postEvent(new Event(topicName, ht));
+            if (!getHostname().equals(pushObj.getHostname())) {
+                if (eventAdmin != null && eventFactoryService != null) {
+                    final int action;
+                    final String topicName;
+                    if (pushObj.getModule() == Types.FOLDER) {
+                        action = RemoteEvent.FOLDER_CHANGED;
+                        topicName = "com/openexchange/remote/folderchanged";
+                    } else {
+                        action = RemoteEvent.FOLDER_CONTENT_CHANGED;
+                        topicName = "com/openexchange/remote/foldercontentchanged";
+                    }
+                    for (final int user : pushObj.getUsers()) {
+                        RemoteEvent remEvent = eventFactoryService.newRemoteEvent(
+                            pushObj.getFolderId(),
+                            user,
+                            pushObj.getContextId(),
+                            action,
+                            pushObj.getModule(),
+                            pushObj.getTimestamp());
+                        final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
+                        ht.put(RemoteEvent.EVENT_KEY, remEvent);
+                        eventAdmin.postEvent(new Event(topicName, ht));
+                    }
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
+    }
+    
+    private String getHostname() {
+        String hostname = "";
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            hostname = addr.getHostName();
+        } catch (UnknownHostException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return hostname;
     }
 
 }

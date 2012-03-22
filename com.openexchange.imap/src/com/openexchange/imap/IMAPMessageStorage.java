@@ -955,6 +955,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            if (0 == imapFolder.getMessageCount()) {
+                return Collections.emptyList();
+            }
             final TIntList seqNums;
             final List<ThreadSortNode> threadList;
             {
@@ -969,6 +972,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 threadList = ThreadSortUtil.parseThreadResponse(threadResp);
                 seqNums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
+            }
+            if (null == threadList) {
+                // No threads found
+                return Collections.<List<MailMessage>> singletonList(Arrays.asList(getAllMessages(fullName, null, sortField, order, mailFields)));
             }
             /*
              * Fetch messages
@@ -1067,6 +1074,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            if (0 == imapFolder.getMessageCount()) {
+                return EMPTY_RETVAL;
+            }
             /*
              * Shall a search be performed?
              */
@@ -1118,6 +1128,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 threadList = ThreadSortUtil.parseThreadResponse(threadResp);
                 seqnums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
+            }
+            if (null == threadList) {
+                // No threads found
+                return getAllMessages(fullName, indexRange, sortField, order, mailFields);
             }
             /*
              * Fetch messages
