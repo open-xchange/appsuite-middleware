@@ -57,32 +57,28 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.xml.sax.SAXException;
 
-
 /**
  * {@link SolrServerManager}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrServerManager {
-    
+
     private static final String SOLR_HOME = "/development/solr";
-    
+
     private static final String DEFAULT_CORE = "default";
-    
+
     private final SolrServer solrServer;
-    
-    
+
     public SolrServerManager() throws ParserConfigurationException, IOException, SAXException {
         super();
         final File solrHome = new File(SOLR_HOME);
         final File solrXml = new File(solrHome, "solr.xml");
         final CoreContainer container = new CoreContainer();
-        container.load(SOLR_HOME, solrXml);        
+        container.load(SOLR_HOME, solrXml);
         solrServer = new EmbeddedSolrServer(container, DEFAULT_CORE);
     }
-    
-    
-    
+
     /**
      * Shuts down the embedded solr instance.
      */

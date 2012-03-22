@@ -13,7 +13,7 @@ import com.openexchange.solr.internal.SolrManagementServiceImpl;
 */
 public class SolrActivator extends HousekeepingActivator {
 
-    private SolrManagementServiceImpl managementService;
+    private volatile SolrManagementServiceImpl managementService;
 
     @Override
     protected Class<?>[] getNeededServices() {        
@@ -23,7 +23,7 @@ public class SolrActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        managementService = new SolrManagementServiceImpl();
+        final SolrManagementServiceImpl managementService = this.managementService = new SolrManagementServiceImpl();
         managementService.startUp();
         
         registerService(SolrManagementService.class, managementService);
@@ -32,9 +32,10 @@ public class SolrActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        final SolrManagementServiceImpl managementService = this.managementService;
         if (managementService != null) {
             managementService.shutdown();
-            managementService = null;
+            this.managementService = null;
         }
     }
 
