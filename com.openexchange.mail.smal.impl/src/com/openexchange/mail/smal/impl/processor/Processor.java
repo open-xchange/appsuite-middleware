@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +70,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -125,15 +127,22 @@ public final class Processor implements SolrMailConstants {
 
     /**
      * Processes specified mail folder for its content being indexed.
+     * <p>
+     * In case of immediate processing, the following steps were performed:
+     * <ul>
+     * <li>Adds missing documents to index</li>
+     * <li>Deletes removed documents from index</li>
+     * </ul>
      * 
      * @param folder The mail folder
      * @param mailAccess The mail access
+     * @param params Optional parameters
      * @return The processing result or {@link ProcessingResult#EMPTY_RESULT an empty result} if processing has been aborted
      * @throws OXException If indexing fails for any reason
      * @throws InterruptedException If processing is interrupted
      */
-    public ProcessingResult processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
-        return processFolder(new MailFolderInfo(folder), mailAccess);
+    public ProcessingResult processFolder(final MailFolder folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException, InterruptedException {
+        return processFolder(new MailFolderInfo(folder), mailAccess, params);
     }
 
     private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
@@ -142,14 +151,21 @@ public final class Processor implements SolrMailConstants {
 
     /**
      * Processes specified mail folder for its content being indexed.
+     * <p>
+     * In case of immediate processing, the following steps were performed:
+     * <ul>
+     * <li>Adds missing documents to index</li>
+     * <li>Deletes removed documents from index</li>
+     * </ul>
      * 
      * @param folderInfo The mail folder information
      * @param mailAccess The mail access
+     * @param params Optional parameters
      * @return The processing result or {@link ProcessingResult#EMPTY_RESULT an empty result} if processing has been aborted
      * @throws OXException If indexing fails for any reason
      * @throws InterruptedException If processing is interrupted
      */
-    public ProcessingResult processFolder(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, InterruptedException {
+    public ProcessingResult processFolder(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException, InterruptedException {
         final int messageCount = folderInfo.getMessageCount();
         if (0 <= messageCount) {
             return ProcessingResult.EMPTY_RESULT;
@@ -227,7 +243,7 @@ public final class Processor implements SolrMailConstants {
                      */
                     processingResult = new ProcessingResult(ProcessType.HEADERS_ONLY, strategy.hasHighAttention(folderInfo), true);
                 } else {
-                    submitAsJob(folderInfo, mailAccess);
+                    submitAsJob(folderInfo, mailAccess, params);
                     /*
                      * Assign appropriate result
                      */
@@ -251,7 +267,30 @@ public final class Processor implements SolrMailConstants {
                  */
                 final Set<String> newIds = new HashSet<String>(storageMap.keySet());
                 newIds.removeAll(indexMap.keySet());
+                /*
+                 * Removed ones
+                 */
+                final Set<String> deletedIds = new HashSet<String>(indexMap.keySet());
+                deletedIds.removeAll(storageMap.keySet());
+                if (!deletedIds.isEmpty()) {
+                    final Session session = mailAccess.getSession();
+                    final int contextId = session.getContextId();
+                    final int userId = session.getUserId();
+
+                    final Iterator<String> iterator = deletedIds.iterator();
+                    final StringBuilder tmp = new StringBuilder(64);
+                    tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+                    tmp.append(MailPath.getMailPath(accountId, fullName, iterator.next()));
+                    final int resetLen = tmp.lastIndexOf(Character.toString(MailPath.SEPERATOR));
+                    indexAccess.deleteById(tmp.toString());
+                    while (iterator.hasNext()) {
+                        tmp.setLength(resetLen);
+                        tmp.append(iterator.next());
+                        indexAccess.deleteById(tmp.toString());
+                    }
+                }
                 if (newIds.isEmpty()) {
+                    // No new detected
                     return ProcessingResult.EMPTY_RESULT;
                 }
                 final int size = newIds.size();
@@ -332,12 +371,8 @@ public final class Processor implements SolrMailConstants {
         queryBuilder.append('(').append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
         queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
         // Query parameters
-        final Map<String, Object> params = new HashMap<String, Object>(2);
-        params.put("sort", FIELD_RECEIVED_DATE);
-        params.put("order", "desc");
         final QueryParameters queryParameters =
-            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setParameters(
-                params).build();
+            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).build();
         final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
         return result.getNumFound() > 0;
     }
@@ -422,8 +457,10 @@ public final class Processor implements SolrMailConstants {
         return retval;
     }
 
-    private void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        submitAsJob(folderInfo, mailAccess, null, null);
+    private void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException {
+        final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+        final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
+        submitAsJob(folderInfo, mailAccess, storageMails, indexMails);
     }
 
     private void submitAsJob(final MailFolderInfo folderInfo, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException {
@@ -441,6 +478,11 @@ public final class Processor implements SolrMailConstants {
         folderJob.setIndexMails(new ArrayList<MailMessage>(indexMails));
         folderJob.setStorageMails(new ArrayList<MailMessage>(storageMails));
         indexingService.addJob(folderJob);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> V getParameter(final String name, final Map<String, Object> params) {
+        return (V) ((null == name) || (null == params) ? null : params.get(name));
     }
 
 }

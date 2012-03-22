@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
+
 /**
  * {@link ProcessingResult} - The result of a processed folder.
  * 
@@ -60,6 +63,8 @@ public final class ProcessingResult {
      * The empty processing result.
      */
     public static final ProcessingResult EMPTY_RESULT = new ProcessingResult(ProcessType.NONE, false, false);
+
+    private static final MailFields FIELDS_BODY_OR_FULL = new MailFields(MailField.FULL, MailField.BODY);
 
     private final boolean firstTime;
 
@@ -75,6 +80,32 @@ public final class ProcessingResult {
         this.firstTime = firstTime;
         this.processType = processType;
         this.hasHighAttention = hasHighAttention;
+    }
+
+    /**
+     * Checks if specified fields are covered by this processing result.
+     * 
+     * @param fields The fields to check against
+     * @return <code>true</code> if specified fields are covered by this processing result; otherwise <code>false</code>
+     */
+    public boolean covers(final MailField[] fields) {
+        if (ProcessType.FULL.equals(processType)) {
+            return true;
+        }
+        if (ProcessType.HEADERS_AND_CONTENT.equals(processType)) {
+            return true;
+        }
+        // If requested fields contains one of FULL or BODY, request cannot be served by index.
+        return !new MailFields(fields).containsAny(FIELDS_BODY_OR_FULL);
+    }
+
+    /**
+     * Checks if this processing result was yielded from submitting a job.
+     * 
+     * @return <code>true</code> if associated with a job; otherwise <code>false</code> if immediate processing was performed
+     */
+    public boolean asJob() {
+        return ProcessType.JOB.equals(processType);
     }
 
     /**

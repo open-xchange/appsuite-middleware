@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.mail.job;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -106,6 +107,23 @@ public final class AddByIDsJob extends AbstractMailJob {
         super(info);
         this.fullName = fullName;
         this.insertType = null == insertType ? InsertType.ATTACHMENTS : insertType;
+    }
+
+    /**
+     * Sets the mails
+     * 
+     * @param mails The mails to set
+     * @return This folder job
+     */
+    public AddByIDsJob setMails(final List<MailMessage> mails) {
+        this.mailIds = new ArrayList<String>(mails.size());
+        for (final MailMessage mailMessage : mails) {
+            final String mailId = mailMessage.getMailId();
+            if (null != mailId) {
+                mailIds.add(mailId);
+            }
+        }
+        return this;
     }
 
     /**

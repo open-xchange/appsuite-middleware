@@ -50,6 +50,8 @@
 package com.openexchange.mail.smal.impl;
 
 import static java.util.Arrays.asList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -73,12 +75,13 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
-import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.AddByIDsJob;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.ChangeByIDsJob;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.FlagsObserverJob;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.FolderJob;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.RemoveByIDsJob;
+import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
+import com.openexchange.mail.smal.impl.processor.ProcessingResult;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.mail.job.AddByIDsJob;
+import com.openexchange.service.indexing.mail.job.ChangeByIDsJob;
+import com.openexchange.service.indexing.mail.job.ChangeByMessagesJob;
+import com.openexchange.service.indexing.mail.job.RemoveByIDsJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPools;
@@ -86,7 +89,7 @@ import com.openexchange.threadpool.ThreadPools;
 /**
  * {@link SmalMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
  * index storage.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
@@ -99,6 +102,16 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     private static final class MailResult<V> {
+
+        /**
+         * The empty result.
+         */
+        protected static final MailResult<Object> EMPTY_RESULT = new MailResult<Object>(null, null);
+
+        @SuppressWarnings("unchecked")
+        protected static <V> MailResult<V> emptyResult() {
+            return (MailResult<V>) EMPTY_RESULT;
+        }
 
         protected static <V> MailResult<V> newStorageResult(final V result) {
             return new MailResult<V>(MailResultType.STORAGE, result);
@@ -122,7 +135,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Takes the next completed task from specified completion service.
-     *
+     * 
      * @param completionService The completion service to take from
      * @return The next completed task
      * @throws OXException If taking next completed task failsF
@@ -140,7 +153,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Polls the next completed task from specified completion service.
-     *
+     * 
      * @param completionService The completion service to take from
      * @return The next completed task or <code>null</code>
      * @throws OXException If taking next completed task failsF
@@ -162,7 +175,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Cancels all tasks of passed completion service.
-     *
+     * 
      * @param completionService The completion service to cancel
      */
     protected static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
@@ -191,20 +204,25 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
     }
 
+    private static final MailFields MAIL_FIELDS_FLAGS = new MailFields(MailField.FLAGS, MailField.COLOR_LABEL);
+
     /*-
      * --------------------------------------------- Member stuff -----------------------------------------------
      */
 
     private final IMailMessageStorage messageStorage;
 
+    private final IMailFolderStorage folderStorage;
+
     /**
      * Initializes a new {@link SmalMessageStorage}.
-     *
+     * 
      * @throws OXException If initialization fails
      */
     public SmalMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
         super(session, accountId, delegateMailAccess);
         messageStorage = delegateMailAccess.getMessageStorage();
+        folderStorage = delegateMailAccess.getFolderStorage();
     }
 
     @Override
@@ -213,8 +231,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
+        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
+        adderJob.setMails(Arrays.asList(msgs));
+        adderJob.setPriority(9);
+        submitJob(adderJob);
         return newIds;
     }
 
@@ -224,8 +244,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
+        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
+        adderJob.setMailIds(Arrays.asList(mailIds));
+        adderJob.setPriority(9);
+        submitJob(adderJob);
         return fast ? new String[0] : newIds;
     }
 
@@ -235,8 +257,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue remover job
          */
-        final RemoveByIDsJob removerJob = new RemoveByIDsJob(folder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
+        final RemoveByIDsJob removerJob = new RemoveByIDsJob(folder, createJobInfo());
+        removerJob.setMailIds(Arrays.asList(mailIds));
+        removerJob.setPriority(9);
+        submitJob(removerJob);
     }
 
     @Override
@@ -272,9 +296,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             final MailResult<List<MailMessage>> result = takeNextFrom(completionService);
             switch (result.resultType) {
             case INDEX:
-                if (mfs.contains(MailField.FLAGS)) {
+                if (mfs.containsAny(MAIL_FIELDS_FLAGS)) {
                     // Index result came first
-                    awaitStorageGetResult(folder, completionService);
+                    await4Change(folder, completionService);
                 }
                 break;
             case STORAGE:
@@ -286,28 +310,6 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
-    }
-
-    /**
-     * Await the completion of the task which returns storage's content. Trigger an appropriate {@link FlagsObserverJob}.
-     */
-    private void awaitStorageGetResult(final String folder, final CompletionService<MailResult<List<MailMessage>>> completionService) {
-        final Runnable task = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    final List<MailMessage> mails = takeNextFrom(completionService).result;
-                    final FlagsObserverJob job = new FlagsObserverJob(folder, accountId, userId, contextId);
-                    JobQueue.getInstance().addJob(job.setRanking(1).setStorageMails(mails));
-                } catch (final OXException oxe) {
-                    LOG.warn("Retrieving mails from mail storage failed.", oxe);
-                } catch (final RuntimeException rte) {
-                    LOG.warn("Retrieving mails from mail storage failed.", rte);
-                }
-            }
-        };
-        ThreadPools.getThreadPool().submit(ThreadPools.task(task));
     }
 
     @Override
@@ -324,6 +326,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         final long st = System.currentTimeMillis();
         try {
             /*
+             * Process folder
+             */
+            final ProcessingResult processingResult = processor.processFolder(folderStorage.getFolder(folder), delegateMailAccess, Collections.<String, Object>emptyMap());
+            if (ProcessingResult.EMPTY_RESULT.equals(processingResult)) {
+                // Folder has no messages
+                return EMPTY_RETVAL;
+            }
+            /*
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
             final IMailMessageStorage ms = this.messageStorage;
@@ -333,14 +343,20 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
                     try {
-                        return MailResult.newIndexResult(indexAdapter.search(
+                        return MailResult.newIndexResult(IndexAccessAdapter.getInstance().search(
+                            accountId,
                             folder,
                             searchTerm,
                             sortField,
                             order,
                             fields,
                             indexRange,
-                            accountId, session, null));
+                            session));
+                    } catch (final OXException e) {
+                        if (!MailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
+                        return MailResult.emptyResult();
                     } catch (final InterruptedException e) {
                         LOG.debug("Index search request interrupted: " + e.getMessage());
 
@@ -357,26 +373,42 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     return MailResult.newStorageResult(asList(ms.searchMessages(folder, indexRange, sortField, order, searchTerm, fields)));
                 }
             });
-            final MailResult<List<MailMessage>> result = takeNextFrom(completionService);
+            MailResult<List<MailMessage>> result = takeNextFrom(completionService);
             switch (result.resultType) {
             case INDEX:
-                // Index result came first: Await storage task completion separately & schedule sync job
-                // Ignore deleted if results are filtered by a search term
-
-                System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaiting storage result separately & schedule sync job");
-
-                awaitStorageSearchResult(folder, completionService, (null != searchTerm));
+                /*
+                 * Index result came first
+                 */
+                if (processingResult.asJob()) {
+                    /*
+                     * Processed as job: indexed results not immediately available
+                     */
+                    if (processingResult.isFirstTime()) {
+                        // Actively await result from storage
+                        result = takeNextFrom(completionService);
+                    }
+                } else {
+                    if (new MailFields(fields).containsAny(MAIL_FIELDS_FLAGS)) {
+                        // Submit change job
+                        await4Change(folder, completionService);
+                    }
+                }
                 break;
             case STORAGE:
-                // Storage result came first: Cancel remaining index task and schedule sync job
-
-                System.out.println(">>>STORAGE<<< request completed first for " + folder + "...");
-
-                awaitIndexSearchResult(folder, completionService, result, (null != searchTerm));
+                /*
+                 * Storage result came first: Cancel remaining index task
+                 */
+                cancelRemaining(completionService);
+                if (!processingResult.asJob() && new MailFields(fields).containsAny(MAIL_FIELDS_FLAGS)) {
+                    scheduleChangeJob(folder, result);
+                }
                 break;
             }
             final List<MailMessage> mails = result.result;
             return mails.toArray(new MailMessage[mails.size()]);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -386,9 +418,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     /**
-     * Await the completion of the task which returns storage's content. Trigger an appropriate {@link FolderJob}.
+     * Await the completion of the task which returns storage's content. Trigger an appropriate change job
      */
-    private void awaitIndexSearchResult(final String folder, final CancelableCompletionService<MailResult<List<MailMessage>>> completionService, final MailResult<List<MailMessage>> result, final boolean ignoreDeleted) {
+    private void await4Change(final String folder, final CancelableCompletionService<MailResult<List<MailMessage>>> completionService) {
         final Runnable task = new Runnable() {
 
             @Override
@@ -396,13 +428,15 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 try {
                     final MailResult<List<MailMessage>> delayedResult = pollNextFrom(completionService, 1000);
                     if (delayedResult == null) {
-                        System.out.println("... Canceling remaining index request & schedule sync job.");
                         cancelRemaining(completionService);
-                        scheduleFolderJob(folder, result.result, null, ignoreDeleted);
                     } else {
-                        System.out.println("... Delayed result available & schedule sync job.");
                         // Delayed result available
-                        scheduleFolderJob(folder, result.result, delayedResult.result, ignoreDeleted);
+                        final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+                        if (null != indexingService) {
+                            final ChangeByMessagesJob changeJob = new ChangeByMessagesJob(folder, createJobInfo());
+                            changeJob.setMailIds(delayedResult.result);
+                            indexingService.addJob(changeJob);
+                        }
                     }
                 } catch (final OXException oxe) {
                     LOG.warn("Retrieving mails from mail storage failed.", oxe);
@@ -415,16 +449,24 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     /**
-     * Await the completion of the task which returns storage's content. Trigger an appropriate {@link FolderJob}.
+     * Schedule a change job
      */
-    private void awaitStorageSearchResult(final String folder, final CompletionService<MailResult<List<MailMessage>>> completionService, final boolean ignoreDeleted) {
+    private void scheduleChangeJob(final String folder, final MailResult<List<MailMessage>> result) {
+        if (null == result) {
+            return;
+        }
         final Runnable task = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    final List<MailMessage> mails = takeNextFrom(completionService).result;
-                    scheduleFolderJob(folder, mails, null, ignoreDeleted);
+                    // Delayed result available
+                    final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+                    if (null != indexingService) {
+                        final ChangeByMessagesJob changeJob = new ChangeByMessagesJob(folder, createJobInfo());
+                        changeJob.setMailIds(result.result);
+                        indexingService.addJob(changeJob);
+                    } 
                 } catch (final OXException oxe) {
                     LOG.warn("Retrieving mails from mail storage failed.", oxe);
                 } catch (final RuntimeException rte) {
@@ -435,36 +477,16 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         ThreadPools.getThreadPool().submit(ThreadPools.task(task));
     }
 
-    /**
-     * Schedules a new folder job.
-     *
-     * @param fullName The folder full name
-     * @param optStorageMails The optional storage mails
-     * @param optIndexMails The optional index mails
-     * @param ignoreDeleted Whether to ignore deleted mails during sync operation
-     */
-    protected void scheduleFolderJob(final String fullName, final List<MailMessage> optStorageMails, final List<MailMessage> optIndexMails, final boolean ignoreDeleted) {
-        final FolderJob folderJob = new FolderJob(fullName, accountId, userId, contextId);
-        if (null != optStorageMails) {
-            folderJob.setStorageMails(optStorageMails); // Assign storage's mail
-        }
-        if (null != optIndexMails) {
-            folderJob.setIndexMails(optIndexMails); // Assign index' mail
-        }
-        folderJob.setSpan(-1); // Immediate run
-        folderJob.setRanking(10); // Replace this job with similar jobs possibly contained in queue
-        folderJob.setIgnoreDeleted(ignoreDeleted); // Whether to delete (may only be done if all mails requested)
-        JobQueue.getInstance().addJob(folderJob);
-    }
-
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         messageStorage.updateMessageFlags(folder, mailIds, flags, set);
         /*
          * Enqueue change job
          */
-        final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
+        final ChangeByIDsJob job = new ChangeByIDsJob(folder, createJobInfo());
+        job.setMailIds(Arrays.asList(mailIds));
+        job.setPriority(9);
+        submitJob(job);
     }
 
     @Override
@@ -510,13 +532,17 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Adder job
          */
-        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
+        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
+        adderJob.setMailIds(asList(newIds));
+        adderJob.setPriority(9);
+        submitJob(adderJob);
         /*
          * Remover job
          */
-        final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
+        final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
+        adderJob.setMailIds(asList(mailIds));
+        adderJob.setPriority(9);
+        submitJob(removerJob);
         /*
          * Return depending on "fast" parameter
          */
@@ -534,8 +560,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue change job.
          */
-        final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
-        JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
+        final ChangeByIDsJob job = new ChangeByIDsJob(folder, createJobInfo());
+        job.setMailIds(asList(mailIds));
+        job.setPriority(9);
+        submitJob(job);
     }
 
     @Override

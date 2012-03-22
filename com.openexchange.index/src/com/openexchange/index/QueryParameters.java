@@ -71,13 +71,23 @@ public final class QueryParameters {
         String handler;
         Type type;
 
+        /**
+         * Initializes a new builder.
+         */
         public Builder(final String queryString) {
             super();
+            off = 0;
+            len = Integer.MAX_VALUE;
             this.queryString = queryString;
         }
 
+        /**
+         * Initializes a new builder.
+         */
         public Builder(final Map<String, Object> parameters) {
             super();
+            off = 0;
+            len = Integer.MAX_VALUE;
             this.parameters = parameters;
         }
 
@@ -143,7 +153,7 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the offset
+     * Gets the offset.
      * 
      * @return The offset
      */
@@ -152,7 +162,7 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the length
+     * Gets the length.
      * 
      * @return The length
      */
@@ -161,7 +171,7 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the query string
+     * Gets the query string.
      * 
      * @return The query string
      */
@@ -170,7 +180,7 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the parameters
+     * Gets the parameters.
      * 
      * @return The parameters
      */
@@ -179,7 +189,7 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the handler
+     * Gets the handler.
      * 
      * @return The handler
      */
@@ -188,7 +198,7 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the type
+     * Gets the type.
      * 
      * @return The type
      */
