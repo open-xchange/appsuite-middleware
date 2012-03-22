@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Mq
+Bundle-Name: Open-Xchange push.mq bundle
 Bundle-SymbolicName: com.openexchange.push.mq
 Bundle-Version: 7.0.0
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.context,
  com.openexchange.event,
