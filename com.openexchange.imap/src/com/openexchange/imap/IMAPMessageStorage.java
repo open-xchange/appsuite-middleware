@@ -1123,6 +1123,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 threadList = ThreadSortUtil.parseThreadResponse(threadResp);
                 seqnums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
             }
+            if (null == threadList) {
+                // No threads found
+                return getAllMessages(fullName, indexRange, sortField, order, mailFields);
+            }
             /*
              * Fetch messages
              */
