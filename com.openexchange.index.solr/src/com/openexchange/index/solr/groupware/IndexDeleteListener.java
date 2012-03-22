@@ -105,7 +105,7 @@ public class IndexDeleteListener implements DeleteListener {
     
     private void deleteAllCores(final int cid, final int uid) throws OXException {
         for (final int type : coreTypes) {
-            indexService.deleteCore(cid, uid, type); 
+            indexService.removeCoreEnvironment(cid, uid, type); 
         }
     }
 

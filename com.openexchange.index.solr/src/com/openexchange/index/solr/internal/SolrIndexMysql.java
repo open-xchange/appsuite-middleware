@@ -106,8 +106,7 @@ public class SolrIndexMysql {
             if (rs.next()) {
                 return rs.getBoolean(1);
             } else {
-                createCoreEntry(con, cid, uid, module);
-                return false;
+                throw SolrIndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -188,6 +187,67 @@ public class SolrIndexMysql {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+    
+    public void removeCoreEntry(final int cid, final int uid, final int module) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getWritable(cid);
+        try {
+            removeCoreEntry(con, cid, uid, module);
+        } finally {
+            dbService.backWritable(cid, con);
+        } 
+    }
+    
+    public void removeCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM solrCores WHERE cid = ? AND uid = ? AND module = ?");
+            int i = 1;
+            stmt.setInt(i++, cid);
+            stmt.setInt(i++, uid);
+            stmt.setInt(i, module);
+            
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+    
+    public boolean coreEntryExists(final int cid, final int uid, final int module) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getReadOnly(cid);
+        try {
+            return coreEntryExists(con, cid, uid, module);
+        } finally {
+            dbService.backReadOnly(cid, con);
+        } 
+    }
+    
+    public boolean coreEntryExists(final Connection con, final int cid, final int uid, final int module) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT COUNT(*) AS count FROM solrCores WHERE cid = ? AND uid = ? AND module = ?");
+            int i = 1;
+            stmt.setInt(i++, cid);
+            stmt.setInt(i++, uid);
+            stmt.setInt(i, module);
+            
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count == 0 ? false : true;
+            }
+            
+            return false;
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
     

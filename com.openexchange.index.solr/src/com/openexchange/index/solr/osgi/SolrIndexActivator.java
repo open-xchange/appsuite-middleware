@@ -60,6 +60,7 @@ import com.openexchange.index.solr.internal.SolrCoreConfigServiceImpl;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.solr.SolrManagementService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -78,7 +79,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            LanguageDetectionService.class };
+            LanguageDetectionService.class, SolrManagementService.class };
     }
 
     @Override

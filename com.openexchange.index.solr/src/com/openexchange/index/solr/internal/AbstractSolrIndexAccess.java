@@ -56,7 +56,9 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
+import com.openexchange.solr.SolrManagementService;
 
 /**
  * {@link AbstractSolrIndexAccess}
@@ -108,13 +110,6 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     @Override
     public void release() {
         try {
-            {
-                final CommonsHttpSolrServerManagement solrServerManagement = this.solrServerManagement;
-                if (null != solrServerManagement) {
-                    solrServerManagement.shutDown();
-                    this.solrServerManagement = null;
-                }
-            }
             releaseIndexUrl();
         } catch (final OXException e) {
             LOG.warn(e.getLogMessage(), e);
@@ -170,6 +165,12 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
     protected void releaseIndexUrl() throws OXException {
         if (isPrimary) {
+            final CommonsHttpSolrServerManagement solrServerManagement = this.solrServerManagement;
+            if (null != solrServerManagement) {
+                solrServerManagement.shutDown();
+                this.solrServerManagement = null;
+            }
+            
             try {
                 if (indexMysql.hasActiveCore(contextId, userId, module)) {
                     final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
@@ -231,19 +232,30 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         indexServer.setUrl(solrHost);
         fillIndexServer(indexServer);
 
-        final SolrCore core = new SolrCore(new SolrIndexIdentifier(contextId, userId, module));
+        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
+        final SolrCore core = new SolrCore(identifier);
         core.setStore(coreStore);
         core.setServer(indexServer);
         /*
          * TODO: Start up Solr core on this machine using underlying kippdata management service. Return the cores name.
          */
+        {
+            final SolrManagementService solrService = Services.getService(SolrManagementService.class);
+            final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
+            if (coreService.coreEnvironmentExists(contextId, userId, module)) {
+                coreService.createCoreEnvironment(contextId, userId, module);
+            }
+            
+            final SolrCoreConfiguration coreConfig = new SolrCoreConfiguration(coreStore.getUri(), identifier);
+            solrService.createAndStartCore(coreConfig.getCoreName(), coreConfig.getInstanceDir(), coreConfig.getDataDir(), coreConfig.getSchemaPath(), coreConfig.getConfigPath());
+        }
+        
         return core;
     }
 
     private void shutDownSolrCore(final SolrCore core) throws OXException {
-        /*
-         * TODO: Shut down Solr core on this machine using underlying kippdata management service.
-         */
+        final SolrManagementService solrService = Services.getService(SolrManagementService.class);
+        solrService.shutdownCore(core.getIdentifier().toString());
     }
 
 }

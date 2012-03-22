@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Solr
+Bundle-SymbolicName: com.openexchange.solr
+Bundle-Version: 7.0.0.0
+Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.osgi.framework
+Bundle-ClassPath: .,
+ lib/apache-solr-core-3.3.0.jar,
+ lib/apache-solr-solrj-3.3.0.jar
+Export-Package: com.openexchange.solr
