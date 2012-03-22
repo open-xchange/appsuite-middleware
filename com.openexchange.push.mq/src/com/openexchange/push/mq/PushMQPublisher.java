@@ -69,6 +69,8 @@ import com.openexchange.mq.topic.impl.MQTopicPublisherImpl;
  */
 public class PushMQPublisher extends MQTopicPublisherImpl {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQPublisher.class));
+
     /**
      * Initializes a new {@link PushMQPublisher}.
      * @param topicName
@@ -95,11 +97,13 @@ public class PushMQPublisher extends MQTopicPublisherImpl {
 
     @Override
     public void publishTextMessage(final String text, final int priority) throws OXException {
+        LOG.warn("Text messages not supported by topic: " + topicName);
         throw new UnsupportedOperationException("Text messages not supported by topic: " + topicName);
     }
 
     @Override
     public void publishObjectMessage(final Serializable object) throws OXException {
+        LOG.warn("Object messages not supported by topic: " + topicName);
         publishMQObject((PushMQObject) object);
     }
     
