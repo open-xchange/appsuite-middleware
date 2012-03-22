@@ -68,6 +68,7 @@ import com.openexchange.user.UserService;
  * {@link FastSecretInconsistencyDetector}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator {
 
