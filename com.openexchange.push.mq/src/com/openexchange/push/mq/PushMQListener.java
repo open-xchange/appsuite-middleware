@@ -147,7 +147,7 @@ public class PushMQListener implements MQTopicListener {
         String hostname = "";
         try {
             InetAddress addr = InetAddress.getLocalHost();
-            hostname = addr.getCanonicalHostName();
+            hostname = addr.getHostName();
         } catch (UnknownHostException e) {
             LOG.error(e.getMessage(), e);
         }
