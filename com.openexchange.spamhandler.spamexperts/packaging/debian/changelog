@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (6.20.3.0-0) unstable; urgency=low
+
+  * reset to 6.20.3.0-0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 22 Mar 2012 12:16:01 +0000
+
 open-xchange-spamhandler-spamexperts (6.20.3.0-1) unstable; urgency=low
 
   * build for public ptf 2012-03-22
