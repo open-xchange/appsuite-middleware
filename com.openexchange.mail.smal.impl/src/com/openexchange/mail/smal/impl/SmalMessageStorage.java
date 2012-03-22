@@ -51,7 +51,6 @@ package com.openexchange.mail.smal.impl;
 
 import static java.util.Arrays.asList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -352,7 +351,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Process folder
              */
-            final ProcessingProgress processingProgress = processor.processFolder(mailFolder, accountId, session, Collections.<String, Object> emptyMap());
+            final ProcessingProgress processingProgress = processFolder(mailFolder);
             /*
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
