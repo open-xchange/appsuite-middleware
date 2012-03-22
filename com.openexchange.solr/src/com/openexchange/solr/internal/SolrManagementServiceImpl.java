@@ -63,19 +63,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrManagementService;
 import com.openexchange.solr.SolrProperties;
 
-
 /**
  * {@link SolrManagementServiceImpl}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrManagementServiceImpl implements SolrManagementService {
-    
+
     private SolrServer solrServer;
 
     private final CoreContainer coreContainer;
-    
-    
+
     public SolrManagementServiceImpl() throws OXException {
         super();
         final ConfigurationService config = Services.getService(ConfigurationService.class);
@@ -85,24 +83,20 @@ public class SolrManagementServiceImpl implements SolrManagementService {
         coreContainer = new CoreContainer();
         try {
             coreContainer.load(solrHome, solrXml);
-        } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }        
-        
+        } catch (final ParserConfigurationException e) {
+            throw new OXException(e);
+        } catch (final IOException e) {
+            throw new OXException(e);
+        } catch (final SAXException e) {
+            throw new OXException(e);
+        }
     }
-    
+
     public void startUp() {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         solrServer = new EmbeddedSolrServer(coreContainer, config.getProperty(SolrProperties.PROP_DEFAULT_CORE_NAME));
     }
-    
+
     @Override
     public void createAndStartCore(final String coreName, final String instanceDir, final String dataDir, final String schemaPath, final String configPath) throws OXException {
         final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, instanceDir);
@@ -113,19 +107,19 @@ public class SolrManagementServiceImpl implements SolrManagementService {
         try {
             solrCore = coreContainer.create(coreDescriptor);
             coreContainer.register(coreName, solrCore, false);
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
     }
-    
+
     @Override
     public void shutdownCore(final String coreName) {
         final SolrCore solrCore = coreContainer.remove(coreName);
@@ -133,28 +127,26 @@ public class SolrManagementServiceImpl implements SolrManagementService {
             solrCore.close();
         }
     }
-    
+
     public void shutdown() {
-        coreContainer.shutdown();        
+        coreContainer.shutdown();
         solrServer = null;
     }
-    
+
     @Override
     public void reloadCore(final String coreName) throws OXException {
         try {
             coreContainer.reload(coreName);
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
-    
-    
 
 }
