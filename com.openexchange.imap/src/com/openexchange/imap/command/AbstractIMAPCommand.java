@@ -53,6 +53,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.mime.QuotaExceededException;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -99,6 +100,8 @@ public abstract class AbstractIMAPCommand<T> {
 
         private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractIMAPProtocolCommand.class));
 
+        private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
         private final AbstractIMAPCommand<?> abstractIMAPCommand;
 
         public AbstractIMAPProtocolCommand(final AbstractIMAPCommand<?> abstractIMAPCommand) {
@@ -122,7 +125,7 @@ public abstract class AbstractIMAPCommand<T> {
                     imapCmd = abstractIMAPCommand.getCommand(argsIndex);
                     final long start = System.currentTimeMillis();
                     r = protocol.command(imapCmd, null);
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG_ENABLED) {
                         final String debugInfo = abstractIMAPCommand.getDebugInfo(argsIndex);
                         LOG.debug(new StringBuilder(imapCmd.length() + 32).append("Fired IMAP command in ").append(
                             System.currentTimeMillis() - start).append("msec:\n").append(debugInfo == null ? imapCmd : debugInfo).toString());
@@ -154,6 +157,9 @@ public abstract class AbstractIMAPCommand<T> {
                         throw pe;
                     }
                 } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return abstractIMAPCommand.getDefaultValue();
+                    }
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,

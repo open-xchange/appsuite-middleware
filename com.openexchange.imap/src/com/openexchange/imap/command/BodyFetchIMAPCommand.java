@@ -99,7 +99,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
             throw new IllegalArgumentException("IMAP4rev1 is required!");
         }
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         this.sequenceId = sequenceId;
@@ -123,7 +123,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
             throw new IllegalArgumentException("IMAP4rev1 is required!");
         }
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         this.sequenceId = sequenceId;

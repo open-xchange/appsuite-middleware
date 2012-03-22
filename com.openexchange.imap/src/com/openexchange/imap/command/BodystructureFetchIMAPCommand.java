@@ -106,7 +106,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
             posMap.put(seqNums[i], i);
         }
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         uid = false;
@@ -135,7 +135,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
             posMap.put(uids[i], i);
         }
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         length = uids.length;

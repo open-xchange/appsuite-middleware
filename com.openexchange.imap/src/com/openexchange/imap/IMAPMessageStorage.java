@@ -108,6 +108,7 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
@@ -518,6 +519,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             return messages;
         } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return new MailMessage[0];
+            }
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
@@ -681,7 +685,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         try {
             final int desiredMode = markSeen ? Folder.READ_WRITE : Folder.READ_ONLY;
             imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
-            if (0 == imapFolder.getMessageCount()) {
+            if (0 >= imapFolder.getMessageCount()) {
                 return null;
             }
             final IMAPMessage msg;
@@ -755,6 +759,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             return setAccountInfo(mail);
         } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return null;
+            }
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
@@ -783,7 +790,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
-            if (imapFolder.getMessageCount() == 0) {
+            if (imapFolder.getMessageCount() <= 0) {
                 return EMPTY_RETVAL;
             }
             final MailFields usedFields = new MailFields();
@@ -940,6 +947,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             return mails;
         } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return new MailMessage[0];
+            }
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
@@ -955,7 +965,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
-            if (0 == imapFolder.getMessageCount()) {
+            if (0 >= imapFolder.getMessageCount()) {
                 return Collections.emptyList();
             }
             final TIntList seqNums;
@@ -1074,7 +1084,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
-            if (0 == imapFolder.getMessageCount()) {
+            if (0 >= imapFolder.getMessageCount()) {
                 return EMPTY_RETVAL;
             }
             /*
