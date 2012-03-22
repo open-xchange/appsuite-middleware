@@ -1,3 +1,7 @@
+* 2012-03-21 - jan.bauerdick@open-xchange.com
+
+ - Added bundle com.openexchange.push.mq for mq-based event distribution
+
 * 2012-03-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 21802: Added support for individually marked reserved folder names
