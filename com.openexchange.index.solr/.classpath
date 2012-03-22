@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="com/openexchange/index/solr/internal/IndexUrl.java|com/openexchange/index/solr/internal/IndexServer.java" kind="src" path="src"/>
+	<classpathentry excluding="com/openexchange/index/solr/internal/IndexUrl.java|com/openexchange/index/solr/internal/IndexServer.java|com/openexchange/index/solr/internal/management/CommonsHttpSolrServerManagement.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-solr-solrj-3.3.0.jar" sourcepath="sources/apache-solr-solrj-3.3.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/apache-solr-core-3.3.0.jar" sourcepath="sources/embedded/apache-solr-3.3.0/solr/src"/>
