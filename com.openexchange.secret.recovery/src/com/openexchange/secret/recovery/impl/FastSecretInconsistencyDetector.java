@@ -92,7 +92,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         this.detector = detector;
     }
 
-    private static final String testString = "supercalifragilisticexplialidocious";
+    private static final String TEST_STRING = "supercalifragilisticexplialidocious";
 
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
@@ -116,10 +116,10 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
 
     private boolean canDecrypt(final String next, final String secret) {
         try {
-            return cryptoService.decrypt(next, secret).equals(testString);
+            return cryptoService.decrypt(next, secret).equals(TEST_STRING);
         } catch (final OXException e) {
             try {
-                return OldStyleDecrypt.decrypt(next, secret).equals(testString);
+                return OldStyleDecrypt.decrypt(next, secret).equals(TEST_STRING);
             } catch (final GeneralSecurityException inner) {
                 // Ignore
             }
@@ -134,7 +134,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
 
     private void saveNewToken(final User user, final String secret, final Context context) {
         try {
-            final String encrypted = cryptoService.encrypt(testString, secret);
+            final String encrypted = cryptoService.encrypt(TEST_STRING, secret);
             userService.setAttribute(PROPERTY, encrypted, user.getId(), context);
             if (DEBUG) {
                 final String message = "Saved fast-crypt token in user's attributes: " + encrypted;
