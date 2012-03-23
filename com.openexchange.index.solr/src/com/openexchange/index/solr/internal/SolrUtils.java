@@ -49,16 +49,10 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.Locale;
 import java.util.Set;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexConstants;
-import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -108,84 +102,6 @@ public final class SolrUtils {
             // Missing service
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
         }
-    }
-
-    /**
-     * Performs a commit on specified Solr server.
-     *
-     * @param solrServer The Solr server
-     * @throws SolrServerException If an index error occurs
-     * @throws IOException If an I/O error occurs
-     * @throws OXException If an OX error occurs
-     */
-    public static void commitSane(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException, OXException {
-        try {
-            commit(solrServer, false);
-        } catch (final SolrServerException e) {
-            if (!(e.getCause() instanceof SocketTimeoutException)) {
-                throw e;
-            }
-            commit(solrServer, true);
-        }
-    }
-
-    /**
-     * Performs a commit on specified Solr server.
-     *
-     * @param solrServer The Solr server
-     * @throws SolrServerException If an index error occurs
-     * @throws IOException If an I/O error occurs
-     * @throws OXException If an OX error occurs
-     */
-    public static void commitWithTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException, OXException {
-        commit(solrServer, false);
-    }
-
-    /**
-     * Performs a commit on specified Solr server.
-     * <p>
-     * Set <tt>noTimeout</tt> to temporarily disable possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set) and to restore it
-     * afterwards.
-     *
-     * @param solrServer The Solr server
-     * @param noTimeout <code>true</code> for no timeout; otherwise <code>false</code>
-     * @throws SolrServerException If an index error occurs
-     * @throws IOException If an I/O error occurs
-     * @throws OXException If an OX error occurs
-     */
-    public static void commit(final CommonsHttpSolrServer solrServer, final boolean noTimeout) throws SolrServerException, IOException, OXException {
-        if (null != solrServer) {
-            if (!noTimeout || solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout() <= 0) {
-                solrServer.commit();
-                return;
-            }
-            noTimeoutServer(solrServer).commit();
-        }
-    }
-
-    /**
-     * Performs a safe roll-back for specified Solr server.
-     *
-     * @param solrServer The Solr server
-     */
-    public static void rollback(final CommonsHttpSolrServer solrServer) {
-        if (null != solrServer) {
-            try {
-                if (solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout() <= 0) {
-                    solrServer.rollback();
-                    return;
-                }
-                noTimeoutServer(solrServer).rollback();
-            } catch (final Throwable t) {
-                handleThrowable(t);
-                LOG.warn("Rollback of Solr server failed.", t);
-            }
-        }
-    }
-
-    private static CommonsHttpSolrServer noTimeoutServer(final CommonsHttpSolrServer solrServer) throws OXException {
-        final HttpClientParams params = solrServer.getHttpClient().getParams();
-        return ((CommonsHttpSolrServerManagement) params.getParameter("solr.server-management")).getNoTimeoutSolrServerFor(solrServer);
     }
 
     private static final String MARKER = " ---=== /!\\ ===--- ";

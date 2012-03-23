@@ -90,6 +90,7 @@ import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
@@ -1285,7 +1286,7 @@ public final class IMAPCommandsCollection {
      */
     public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
@@ -1344,7 +1345,7 @@ public final class IMAPCommandsCollection {
      */
     public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
@@ -1704,6 +1705,9 @@ public final class IMAPCommandsCollection {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return new int[0];
+                    }
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_SEARCH_UNSEEN,
@@ -1736,7 +1740,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException - if an error occurs in underlying protocol
      */
     public static boolean fastExpunge(final IMAPFolder imapFolder) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
@@ -1979,7 +1983,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a protocol error occurs
      */
     private static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
@@ -2100,7 +2104,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static long[] seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
@@ -2139,6 +2143,9 @@ public final class IMAPCommandsCollection {
                         }
                         p.notifyResponseHandlers(r);
                     } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            return new long[0];
+                        }
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
@@ -2172,7 +2179,7 @@ public final class IMAPCommandsCollection {
      */
     public static long[] getUIDs(final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
@@ -2209,6 +2216,9 @@ public final class IMAPCommandsCollection {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return new long[0];
+                    }
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
@@ -2239,7 +2249,7 @@ public final class IMAPCommandsCollection {
      */
     public static int[] uids2SeqNums(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
@@ -2289,6 +2299,9 @@ public final class IMAPCommandsCollection {
                         }
                         p.notifyResponseHandlers(r);
                     } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            return new int[0];
+                        }
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
@@ -2327,7 +2340,7 @@ public final class IMAPCommandsCollection {
      */
     public static TLongIntMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
@@ -2367,6 +2380,9 @@ public final class IMAPCommandsCollection {
                         }
                         p.notifyResponseHandlers(r);
                     } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            return new TLongIntHashMap(0);
+                        }
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
@@ -2399,7 +2415,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a messaging error occurs
      */
     public static TIntLongHashMap seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
@@ -2468,7 +2484,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static IMAPUpdateableData[] fetchUIDAndFlags(final IMAPFolder imapFolder) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
@@ -2506,6 +2522,9 @@ public final class IMAPCommandsCollection {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return new IMAPUpdateableData[0];
+                    }
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_FETCH_UID_FLAGS,
@@ -2610,7 +2629,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException - if an error occurs in underlying protocol
      */
     public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
@@ -2776,7 +2795,7 @@ public final class IMAPCommandsCollection {
         if ((marker == null) || (marker.length() == 0)) {
             return new long[0];
         }
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             return new long[0];
         }
         return ((long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -2868,7 +2887,7 @@ public final class IMAPCommandsCollection {
         if (0 == messageIds.length) {
             return new long[0];
         }
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             final long[] uids = new long[messageIds.length];
             Arrays.fill(uids, -1);
             return uids;
@@ -2902,6 +2921,9 @@ public final class IMAPCommandsCollection {
                     p.notifyResponseHandlers(r);
                     return uids;
                 } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return new long[0];
+                    }
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_FETCH_ENV_UID,

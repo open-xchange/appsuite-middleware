@@ -49,6 +49,8 @@
 
 package com.openexchange.solr;
 
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrResponse;
 import com.openexchange.exception.OXException;
 
 
@@ -86,5 +88,14 @@ public interface SolrManagementService {
      * @throws OXException If an error occurrs during reloading the core.
      */
     void reloadCore(String coreName) throws OXException;
+
+    /**
+     * Delegates a request to the embedded solr server.
+     * 
+     * @param request The request.
+     * @param coreName The core name.
+     * @return The response.
+     */
+    SolrResponse request(SolrRequest request, String coreName, boolean commit) throws OXException;
     
 }

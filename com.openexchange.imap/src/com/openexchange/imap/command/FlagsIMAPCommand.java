@@ -87,7 +87,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      */
     public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable, final boolean silent, final boolean isSequential) throws MessagingException {
         super(imapFolder);
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
         }
         if ((uids == null) || (uids.length == 0)) {
@@ -156,7 +156,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
@@ -193,7 +193,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      */
     public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
         super(imapFolder);
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
         }
         args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };

@@ -133,7 +133,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         super(imapFolder);
         uids = nums == null ? DEFAULT_RETVAL : nums;
         this.uid = uid;
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
         } else {
             returnDefaultValue = (uids.length == 0);
@@ -166,7 +166,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
     public CopyIMAPCommand(final IMAPFolder imapFolder, final String destFolderName) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         fast = true;

@@ -51,7 +51,6 @@ package com.openexchange.index.solr.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import com.openexchange.exception.OXException;
 
 
 /**
@@ -61,16 +60,6 @@ import com.openexchange.exception.OXException;
  */
 public class IndexTestTool {
 
-    
-    public static IndexServer createIndexServer() throws OXException {
-        final IndexServer indexServer = new IndexServer();
-        indexServer.setUrl("http://1.2.3.4:8005");
-        indexServer.setConnectionTimeout(23);
-        indexServer.setMaxConnectionsPerHost(54);
-        indexServer.setSoTimeout(46);
-
-        return indexServer;
-    }
     
     public static void createInactiveCoreEntry(final Connection con, final int cid, final int uid, final int module) throws Exception {
         PreparedStatement stmt = null;
