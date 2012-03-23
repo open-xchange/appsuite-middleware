@@ -92,16 +92,35 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
             return true;
         }
-        return folderStorage.exists(fullName);
+        final boolean exists = folderStorage.exists(fullName);
+        if (exists) {
+            try {
+                processFolder(fullName);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        return exists;
     }
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        return folderStorage.getFolder(fullName);
+        final MailFolder folder = folderStorage.getFolder(fullName);
+        try {
+            processFolder(folder);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return folder;
     }
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
+        try {
+            processFolder(parentFullName);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         return folderStorage.getSubfolders(parentFullName, all);
     }
 
@@ -112,12 +131,27 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
-        return folderStorage.createFolder(toCreate);
+        final String fullName = folderStorage.createFolder(toCreate);
+        try {
+            processFolder(fullName);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return fullName;
     }
 
     @Override
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws OXException {
-        return folderStorage.updateFolder(fullName, toUpdate);
+        final String fn = folderStorage.updateFolder(fullName, toUpdate);
+        try {
+            processFolder(fn);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return fn;
+        
+        
+        // TODO: Continue......
     }
 
     @Override

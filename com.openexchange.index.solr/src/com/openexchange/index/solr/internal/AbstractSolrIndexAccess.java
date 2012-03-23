@@ -49,14 +49,29 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrResponse;
+import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
+import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.solr.internal.management.CommonsHttpSolrServerManagement;
+import com.openexchange.index.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrManagementService;
+import com.openexchange.solr.rmi.SolrServerRMI;
 
 /**
  * {@link AbstractSolrIndexAccess}
@@ -67,13 +82,13 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSolrIndexAccess.class));
 
-    private final SolrIndexMysql indexMysql;
-
     protected final int contextId;
 
     protected final int userId;
 
-    private final int module;
+    protected final int module;
+    
+    private final SolrIndexMysql indexMysql;
 
     private final SolrIndexIdentifier identifier;
 
@@ -81,11 +96,10 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
     private boolean isPrimary;
 
-    private IndexUrl cachedIndexUrl;
-
     private long lastAccess;
 
-    protected volatile CommonsHttpSolrServerManagement solrServerManagement;
+    private String serverAddress = null;
+    
 
     /**
      * Initializes a new {@link AbstractSolrIndexAccess}.
@@ -99,93 +113,29 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         this.userId = identifier.getUserId();
         this.module = identifier.getModule();
         isPrimary = false;
-        cachedIndexUrl = null;
         indexMysql = SolrIndexMysql.getInstance();
         lastAccess = System.currentTimeMillis();
         retainCount = new AtomicInteger(0);
     }
-
-    @Override
-    public void release() {
-        try {
-            {
-                final CommonsHttpSolrServerManagement solrServerManagement = this.solrServerManagement;
-                if (null != solrServerManagement) {
-                    solrServerManagement.shutDown();
-                    this.solrServerManagement = null;
-                }
-            }
-            releaseIndexUrl();
-        } catch (final OXException e) {
-            LOG.warn(e.getLogMessage(), e);
-        }
-    }
-
-    /**
-     * Gets the proper Solr server for this access.
-     * 
-     * @return The proper Solr server
-     * @throws OXException If returning proper Solr server fails
-     */
-    protected CommonsHttpSolrServer solrServerFor() throws OXException {
-        CommonsHttpSolrServerManagement solrServerManagement = this.solrServerManagement;
-        if (null == solrServerManagement) {
-            synchronized (this) {
-                solrServerManagement = this.solrServerManagement;
-                if (null == solrServerManagement) {
-                    this.solrServerManagement = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
-                }
-            }
-        }
-        return solrServerManagement.getSolrServer(getIndexUrl());
-    }
-
-    private IndexUrl getIndexUrl() throws OXException {
-        lastAccess = System.currentTimeMillis();
-        if (isPrimary && cachedIndexUrl != null) {
-            return cachedIndexUrl;
-        }
-
-        final boolean hasActiveCore = indexMysql.hasActiveCore(contextId, userId, module);
-        if (!hasActiveCore) {
-            final SolrCoreStore coreStore = indexMysql.getCoreStore(contextId, userId, module);
-            final SolrCore core = startUpSolrCore(coreStore);
-            final ConfigurationService config = Services.getService(ConfigurationService.class);
-            final String server = config.getProperty("com.openexchange.index.solrHost");
-            if (indexMysql.activateCoreEntry(contextId, userId, module, server)) {
-                isPrimary = true;
-                cachedIndexUrl = fetchIndexUrl();
-
-                return cachedIndexUrl;
-            } else {
-                /*
-                 * Somebody else tried to start up a core for this index and was faster.
-                 */
-                shutDownSolrCore(core);
-            }
-        }
-
-        return fetchIndexUrl();
-    }
-
-    protected void releaseIndexUrl() throws OXException {
-        if (isPrimary) {
-            try {
-                if (indexMysql.hasActiveCore(contextId, userId, module)) {
-                    final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
-                    indexMysql.deactivateCoreEntry(contextId, userId, module);
-                    shutDownSolrCore(core);
-                }
-            } finally {
-                isPrimary = false;
-                cachedIndexUrl = null;
-            }
-        }
-    }
-
+    
     /*
      * Public methods
      */
+    @Override
+    public void release() {
+        try {
+            if (indexMysql.hasActiveCore(contextId, userId, module)) {
+                final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
+                indexMysql.deactivateCoreEntry(contextId, userId, module);
+                shutDownSolrCore(core);
+            }
+        } catch (final OXException e) {
+            LOG.warn(e.getLogMessage(), e);
+        } finally {
+            isPrimary = false;
+        }
+    }
+
     public SolrIndexIdentifier getIdentifier() {
         return identifier;
     }
@@ -205,45 +155,155 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     public long getLastAccess() {
         return lastAccess;
     }
+    
+    /*
+     * Protected methods
+     */
+    protected SolrResponse addDocument(final SolrInputDocument document, final boolean commit) throws OXException {
+        final UpdateRequest request = new UpdateRequest();
+        request.add(document);
+        
+        return request(request, commit);
+    }
+    
+    protected SolrResponse addDocuments(final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
+        final UpdateRequest request = new UpdateRequest();
+        request.add(documents);
+        
+        return request(request, commit);
+    }
+    
+    protected SolrResponse commit() throws OXException {
+        final UpdateRequest request = new UpdateRequest();
+        request.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+        
+        return request(request, false);
+    }
+    
+    protected SolrResponse optimize() throws OXException {
+        final UpdateRequest request = new UpdateRequest();
+        request.setAction(AbstractUpdateRequest.ACTION.OPTIMIZE, true, true, 1);
+        
+        return request(request, false);
+    }
+    
+    protected SolrResponse deleteDocumentById(final String id) throws OXException {
+        final UpdateRequest request = new UpdateRequest();
+        request.deleteById(id);
+        
+        return request(request, true);
+    }
+    
+    protected SolrResponse deleteDocumentsByQuery(final String query) throws OXException {
+        final UpdateRequest request = new UpdateRequest();
+        request.deleteByQuery(query);
+        
+        return request(request, true);
+    }
+    
+    protected QueryResponse query(final String query) throws OXException {
+        final QueryRequest request = new QueryRequest();     
+        final SolrResponse solrResponse = request(request, false);
+        final QueryResponse queryResponse = new QueryResponse();
+        queryResponse.setResponse(solrResponse.getResponse());
+        queryResponse.setElapsedTime(solrResponse.getElapsedTime());
+        
+        return queryResponse;
+    }
 
     /*
      * Private methods
      */
-    private IndexUrl fetchIndexUrl() throws OXException {
-        final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
-        fillIndexServer(core.getServer());
-        final IndexUrl indexUrl = new IndexUrl(core);
+    private SolrResponse request(final SolrRequest request, final boolean commit) throws OXException {
+        lastAccess = System.currentTimeMillis();
+        if (isPrimary) {
+            return requestLocally(request, commit);
+        }
 
-        return indexUrl;
+        final boolean hasActiveCore = indexMysql.hasActiveCore(contextId, userId, module);
+        if (!hasActiveCore) {
+            final SolrCoreStore coreStore = indexMysql.getCoreStore(contextId, userId, module);
+            final SolrCore core = startUpSolrCore(coreStore);
+            final String server = getServerAddress();
+            if (indexMysql.activateCoreEntry(contextId, userId, module, server)) {
+                isPrimary = true;
+                return requestLocally(request, commit);
+            } else {
+                /*
+                 * Somebody else tried to start up a core for this index and was faster.
+                 */
+                shutDownSolrCore(core);
+            }
+        }
+        
+        return requestRemote(request, commit);
+    }
+    
+    private SolrResponse requestLocally(final SolrRequest request, final boolean commit) throws OXException {
+        final SolrManagementService solrService = Services.getService(SolrManagementService.class);
+        return solrService.request(request, identifier.toString(), commit);
+    }
+    
+    private SolrResponse requestRemote(final SolrRequest request, final boolean commit) throws OXException {
+        final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
+        final String coreServer = core.getServer();
+        try {
+            final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            final Registry registry = LocateRegistry.getRegistry(coreServer, rmiPort);
+            final SolrServerRMI solrRMI = (SolrServerRMI) registry.lookup(SolrServerRMI.RMI_NAME);
+            
+            return solrRMI.request(request, identifier.toString(), commit);
+        } catch (RemoteException e) {
+            throw new OXException(e);
+        } catch (NotBoundException e) {
+            throw new OXException(e);
+        }
     }
 
-    private void fillIndexServer(final IndexServer server) {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        server.setConnectionTimeout(config.getIntProperty("com.openexchange.index.connectionTimeout", 100));
-        server.setSoTimeout(config.getIntProperty("com.openexchange.index.socketTimeout", 1000));
-        server.setMaxConnectionsPerHost(config.getIntProperty("com.openexchange.index.maxConnections", 100));
+    private String getServerAddress() throws OXException {
+        if (serverAddress != null) {
+            return serverAddress;
+        }
+
+        try {
+            final InetAddress addr = InetAddress.getLocalHost();
+            return serverAddress = addr.getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new OXException(e);
+        }
     }
 
     private SolrCore startUpSolrCore(final SolrCoreStore coreStore) throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String solrHost = config.getProperty("com.openexchange.index.solrHost");
-        final IndexServer indexServer = new IndexServer();
-        indexServer.setUrl(solrHost);
-        fillIndexServer(indexServer);
-
-        final SolrCore core = new SolrCore(new SolrIndexIdentifier(contextId, userId, module));
+        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
+        final SolrCore core = new SolrCore(identifier);
         core.setStore(coreStore);
-        core.setServer(indexServer);
+        core.setServer(getServerAddress());
         /*
          * TODO: Start up Solr core on this machine using underlying kippdata management service. Return the cores name.
          */
+        {
+            final SolrManagementService solrService = Services.getService(SolrManagementService.class);
+            final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
+            if (coreService.coreEnvironmentExists(contextId, userId, module)) {
+                coreService.createCoreEnvironment(contextId, userId, module);
+            }
+
+            final SolrCoreConfiguration coreConfig = new SolrCoreConfiguration(coreStore.getUri(), identifier);
+            solrService.createAndStartCore(
+                coreConfig.getCoreName(),
+                coreConfig.getInstanceDir(),
+                coreConfig.getDataDir(),
+                coreConfig.getSchemaPath(),
+                coreConfig.getConfigPath());
+        }
+
         return core;
     }
 
     private void shutDownSolrCore(final SolrCore core) throws OXException {
-        /*
-         * TODO: Shut down Solr core on this machine using underlying kippdata management service.
-         */
+        final SolrManagementService solrService = Services.getService(SolrManagementService.class);
+        solrService.shutdownCore(core.getIdentifier().toString());
     }
 
 }

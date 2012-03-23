@@ -1,3 +1,16 @@
+* 2012-03-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21046: Explicitly checking message count with "<= 0" operator and added sanitizing handling trying to detect that special
+   error (assuming it hints to an empty folder as stated by several reports/articles found during web research)
+
+* 2012-03-21 - jan.bauerdick@open-xchange.com
+
+ - Added bundle com.openexchange.push.mq for mq-based event distribution
+
+* 2012-03-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21802: Added support for individually marked reserved folder names
+
 * 2012-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 21785: Added needed javax.xml imports

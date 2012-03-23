@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.internal.mail;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -138,6 +139,16 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
         final int accountId = mail.getAccountId();
         final MailUUID uuid = new MailUUID(contextId, userId, accountId, mail.getFolder(), mail.getMailId());
         return createDocument(uuid.getUUID(), mail, accountId, userId, contextId, System.currentTimeMillis());
+    }
+    
+    public List<SolrInputDocument> inputDocumentsFor(final List<IndexDocument<MailMessage>> messages, final int userId, final int contextId) {
+        final List<SolrInputDocument> documents = new ArrayList<SolrInputDocument>();
+        for (final IndexDocument<MailMessage> message : messages) {
+            final MailMessage mail = message.getObject();
+            documents.add(inputDocumentFor(mail, userId, contextId));
+        }
+        
+        return documents;
     }
 
     private static SolrInputDocument createDocument(final String uuid, final MailMessage mail, final int accountId, final int userId, final int contextId, final long stamp) {

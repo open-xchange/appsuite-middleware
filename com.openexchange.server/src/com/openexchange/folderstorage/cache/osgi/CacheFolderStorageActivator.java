@@ -242,7 +242,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     if (FolderEventConstants.TOPIC_IDENTIFIERS.equals(event.getTopic())) {
                         final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                         final String oldFolder = (String) event.getProperty(FolderEventConstants.PROPERTY_OLD_IDENTIFIER);
-                        tmp.removeSingleFromCache(sanitizeFolderId(oldFolder), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true);
+                        tmp.removeSingleFromCache(sanitizeFolderId(oldFolder), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true, session);
                         return;
                     }
                     final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
@@ -252,7 +252,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
                         if (null == session) {
-                            tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true);
+                            tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
                         } else {
                             tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         }

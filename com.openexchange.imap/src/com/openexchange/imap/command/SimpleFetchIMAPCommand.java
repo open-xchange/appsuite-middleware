@@ -149,7 +149,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     public SimpleFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         this.separator = separator;
@@ -178,7 +178,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     public SimpleFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         this.separator = separator;

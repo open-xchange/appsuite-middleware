@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange push.mq bundle
+Bundle-SymbolicName: com.openexchange.push.mq
+Bundle-Version: 7.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.context,
+ com.openexchange.event,
+ com.openexchange.exception,
+ com.openexchange.folder,
+ com.openexchange.groupware,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.infostore,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.mq,
+ com.openexchange.mq.topic,
+ com.openexchange.mq.topic.impl,
+ com.openexchange.osgi,
+ com.openexchange.timer,
+ com.openexchange.tools,
+ javax.jms,
+ org.apache.commons.logging;version="1.0.4",
+ org.osgi.service.event;version="1.3.0",
+ org.osgi.service.framework;version="1.0.0"
+Bundle-Activator: com.openexchange.push.mq.osgi.PushMQActivator

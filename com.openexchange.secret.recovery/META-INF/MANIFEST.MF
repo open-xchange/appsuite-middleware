@@ -18,7 +18,13 @@ Import-Package: com.openexchange.crypto,
  com.openexchange.session,
  com.openexchange.tools.session,
  com.openexchange.user,
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker
 Export-Package: com.openexchange.secret.recovery

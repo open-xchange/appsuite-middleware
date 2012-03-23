@@ -57,7 +57,7 @@ package com.openexchange.index.solr.internal;
  */
 public class SolrCore {
 
-    private IndexServer server;
+    private String server;
     
     private SolrCoreStore store;
 
@@ -74,7 +74,7 @@ public class SolrCore {
      * 
      * @return The server
      */
-    public IndexServer getServer() {
+    public String getServer() {
         return server;
     }
 
@@ -83,7 +83,7 @@ public class SolrCore {
      * 
      * @param server The server to set
      */
-    public void setServer(final IndexServer server) {
+    public void setServer(final String server) {
         this.server = server;
     }
     

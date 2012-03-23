@@ -96,7 +96,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         assertFalse("There was an active core although it should not.", indexMysql.hasActiveCore(con, cid, uid, module));        
         final SolrCore core = indexMysql.getSolrCore(con, cid, uid, module);
         assertNotNull(core);
-        assertNull(core.getServer().getUrl());
+        assertNull(core.getServer());
     }
     
     public void testGetSolrCore() throws Exception {
@@ -107,12 +107,12 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         
         SolrCore core = indexMysql.getSolrCore(con, cid, uid, module);
         assertNotNull(core);
-        assertEquals(server, core.getServer().getUrl());       
+        assertEquals(server, core.getServer());       
         
         assertTrue("Could not deactivate core.", indexMysql.deactivateCoreEntry(con, cid, uid, module));
         core = indexMysql.getSolrCore(con, cid, uid, module);
         assertNotNull(core);
-        assertNull(core.getServer().getUrl());
+        assertNull(core.getServer());
     }
     
     public void testCoreStoreRoundtrip() throws Exception {

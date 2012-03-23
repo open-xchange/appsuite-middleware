@@ -1927,7 +1927,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 f.open(Folder.READ_WRITE);
                 try {
                     int msgCount = f.getMessageCount();
-                    if (msgCount == 0) {
+                    if (msgCount <= 0) {
                         /*
                          * Empty folder
                          */
@@ -2599,7 +2599,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             final long[] uids;
             try {
                 final int messageCount = toMove.getMessageCount();
-                uids = IMAPCommandsCollection.seqNums2UID(toMove, (1 == messageCount ? new String[] { "1" } : ARGS_ALL), messageCount);
+                if (messageCount <= 0) {
+                    uids = new long[0];
+                } else {
+                    uids = IMAPCommandsCollection.seqNums2UID(toMove, (1 == messageCount ? new String[] { "1" } : ARGS_ALL), messageCount);
+                }
             } finally {
                 toMove.close(false);
             }
