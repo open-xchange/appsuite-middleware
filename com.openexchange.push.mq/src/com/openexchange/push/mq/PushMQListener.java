@@ -76,8 +76,8 @@ public class PushMQListener implements MQTopicListener {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQListener.class));
 
-    private final EventAdmin eventAdmin;
-    private final EventFactoryService eventFactoryService;
+    private EventAdmin eventAdmin;
+    private EventFactoryService eventFactoryService;
 
     /**
      * Initializes a new {@link PushMQListener}.
@@ -91,7 +91,8 @@ public class PushMQListener implements MQTopicListener {
 
     @Override
     public void close() {
-        
+        eventAdmin = null;
+        eventFactoryService = null;
     }
 
     @Override
