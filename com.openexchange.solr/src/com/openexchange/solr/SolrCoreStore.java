@@ -47,24 +47,79 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.solr;
+
 
 
 /**
- * {@link SolrIndexProperties}
+ * {@link SolrCoreStore}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrIndexProperties {
+public class SolrCoreStore {
     
-    public static final String PROP_SCHEMA_MAIL = "com.openexchange.index.solr.schemaMail";
+    private int id;
     
-    public static final String PROP_SCHEMA_APPOINTMENTS = "com.openexchange.index.solr.schemaAppointments";
+    private String uri;
     
-    public static final String PROP_DATA_DIR_NAME = "com.openexchange.index.solr.dataDirName";
+    private int maxCores;
     
-    public static final String PROP_CONFIG_MAIL_NAME = "com.openexchange.index.solr.configMailName";
     
-    public static final String PROP_CONFIG_DIR_NAME = "com.openexchange.index.solr.configDirName";
+    public SolrCoreStore() {
+        super();
+    }    
+    
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
+    
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(final int id) {
+        this.id = id;
+    }
 
+    /**
+     * Gets the uri
+     *
+     * @return The uri
+     */
+    public String getUri() {
+        return uri;
+    }
+    
+    /**
+     * Sets the uri
+     *
+     * @param uri The uri to set
+     */
+    public void setUri(final String uri) {
+        this.uri = uri;
+    }
+    
+    /**
+     * Gets the maxCores
+     *
+     * @return The maxCores
+     */
+    public int getMaxCores() {
+        return maxCores;
+    }
+    
+    /**
+     * Sets the maxCores
+     *
+     * @param maxCores The maxCores to set
+     */
+    public void setMaxCores(final int maxCores) {
+        this.maxCores = maxCores;
+    }
 }

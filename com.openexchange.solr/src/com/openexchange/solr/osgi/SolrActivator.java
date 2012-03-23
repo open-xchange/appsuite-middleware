@@ -16,9 +16,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.solr.SolrManagementService;
+import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.internal.DelegationSolrAccessService;
 import com.openexchange.solr.internal.Services;
-import com.openexchange.solr.internal.SolrManagementServiceImpl;
+import com.openexchange.solr.internal.EmbeddedSolrAccessService;
 import com.openexchange.solr.internal.SolrServerRMIImpl;
 import com.openexchange.solr.rmi.SolrServerRMI;
 
@@ -31,7 +32,7 @@ public class SolrActivator extends HousekeepingActivator {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 
-    private volatile SolrManagementServiceImpl managementService;
+    private volatile EmbeddedSolrAccessService managementService;
     
     private static SolrServerRMI solrRMI;
     
@@ -44,9 +45,10 @@ public class SolrActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        final SolrManagementServiceImpl managementService = this.managementService = new SolrManagementServiceImpl();
-        managementService.startUp();        
-        registerService(SolrManagementService.class, managementService);
+        final EmbeddedSolrAccessService managementService = this.managementService = new EmbeddedSolrAccessService();
+        managementService.startUp();
+        final DelegationSolrAccessService delegationService = new DelegationSolrAccessService(managementService);
+        registerService(SolrAccessService.class, delegationService);
         registerRMIInterface();
     }
     
@@ -55,9 +57,9 @@ public class SolrActivator extends HousekeepingActivator {
         super.stopBundle();
         
         unregisterRMIInterface();
-        final SolrManagementServiceImpl managementService = this.managementService;
+        final EmbeddedSolrAccessService managementService = this.managementService;
         if (managementService != null) {
-            managementService.shutdown();
+            managementService.shutDown();
             this.managementService = null;
         }
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,47 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.solr;
+
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link SolrIndexIdentifier}
- * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link SolrExceptionMessages}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SolrIndexIdentifier {
-
-    private final int contextId;
-
-    private final int userId;
-
-    private final int module;
+public final class SolrExceptionMessages implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link SolrIndexIdentifier}.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
+     * Initializes a new {@link SolrExceptionMessages}.
      */
-    public SolrIndexIdentifier(int contextId, int userId, int module) {
+    public SolrExceptionMessages() {
         super();
-        this.contextId = contextId;
-        this.userId = userId;
-        this.module = module;
     }
 
-    /**
-     * Gets the contextId
-     * 
-     * @return The contextId
-     */
-    public int getContextId() {
-        return contextId;
-    }
+    // Could not find solr core entry for user %1$s and module %2$s in context %3$s.
+    public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
 
-    /**
-     * Gets the userId
-     * 
-     * @return The userId
-     */
-    public int getUserId() {
-        return userId;
-    }
+    // Could not find solr core store for given attributes. %1$s.
+    public static final String CORE_STORE_ENTRY_NOT_FOUND_MSG = "Could not find solr core store for given attributes. %1$s.";
 
-    /**
-     * Gets the module
-     * 
-     * @return The module
-     */
-    public int getModule() {
-        return module;
-    }
+    // All core stores seem to be full.
+    public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
+    
+    // This cores instance directory (%1$s) already exists. It cannot be created.
+    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + module;
-        result = prime * result + userId;
-        return result;
-    }
+    // An index fault occurred: %1$s
+    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SolrIndexIdentifier other = (SolrIndexIdentifier) obj;
-        if (contextId != other.contextId)
-            return false;
-        if (module != other.module)
-            return false;
-        if (userId != other.userId)
-            return false;
-        return true;
-    }
+    // No IndexAccess implementation was found for module $1%s.
+    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
 
-    @Override
-    public String toString() {
-        return "sc_c" + contextId + "_u" + userId + "_m" + module;
-    }
+    // Could neither delegate solr request to a local nor to a remote server instance.
+    public static final String DELEGATION_ERROR_MSG = "Could neither delegate solr request to a local nor to a remote server instance.";
 
+    // Could not parse URI: %1$s.
+    public static final String URI_PARSE_ERROR_MSG = "Could not parse URI: %1$s.";
+    
 }

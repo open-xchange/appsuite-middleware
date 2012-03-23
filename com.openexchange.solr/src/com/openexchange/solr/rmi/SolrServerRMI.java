@@ -50,10 +50,7 @@
 package com.openexchange.solr.rmi;
 
 import java.rmi.Remote;
-import java.rmi.RemoteException;
-import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrResponse;
-import com.openexchange.exception.OXException;
+import com.openexchange.solr.SolrAccessService;
 
 
 /**
@@ -61,10 +58,8 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface SolrServerRMI extends Remote {
+public interface SolrServerRMI extends Remote, SolrAccessService {
     
     public static final String RMI_NAME = "OXSolrRMI";   
-    
-    SolrResponse request(SolrRequest request, String coreName, boolean commit) throws RemoteException, OXException;
 
 }

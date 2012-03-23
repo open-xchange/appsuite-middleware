@@ -49,30 +49,19 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrResponse;
-import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
-import org.apache.solr.client.solrj.request.QueryRequest;
-import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.solr.SolrCoreConfigService;
-import com.openexchange.solr.SolrManagementService;
-import com.openexchange.solr.rmi.SolrServerRMI;
+import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link AbstractSolrIndexAccess}
@@ -89,32 +78,24 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
     protected final int module;
     
-    private final SolrIndexMysql indexMysql;
-
-    private final SolrIndexIdentifier identifier;
+    private final SolrCoreIdentifier identifier;
 
     private final AtomicInteger retainCount;
 
-    private boolean isPrimary;
-
     private long lastAccess;
-
-    private String serverAddress = null;
-    
+        
 
     /**
      * Initializes a new {@link AbstractSolrIndexAccess}.
      * 
      * @param identifier The Solr index identifier
      */
-    public AbstractSolrIndexAccess(final SolrIndexIdentifier identifier) {
+    public AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {
         super();
         this.identifier = identifier;
         this.contextId = identifier.getContextId();
         this.userId = identifier.getUserId();
         this.module = identifier.getModule();
-        isPrimary = false;
-        indexMysql = SolrIndexMysql.getInstance();
         lastAccess = System.currentTimeMillis();
         retainCount = new AtomicInteger(0);
     }
@@ -123,21 +104,16 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
      * Public methods
      */
     @Override
-    public void release() {
+    public void release() {        
         try {
-            if (indexMysql.hasActiveCore(contextId, userId, module)) {
-                final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
-                indexMysql.deactivateCoreEntry(contextId, userId, module);
-                shutDownSolrCore(core);
-            }
+            final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+            accessService.stopCore(identifier);
         } catch (final OXException e) {
             LOG.warn(e.getLogMessage(), e);
-        } finally {
-            isPrimary = false;
         }
     }
 
-    public SolrIndexIdentifier getIdentifier() {
+    public SolrCoreIdentifier getIdentifier() {
         return identifier;
     }
 
@@ -149,10 +125,6 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         return retainCount.decrementAndGet();
     }
 
-    public boolean isPrimary() {
-        return isPrimary;
-    }
-
     public long getLastAccess() {
         return lastAccess;
     }
@@ -160,151 +132,61 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     /*
      * Protected methods
      */
-    protected SolrResponse addDocument(final SolrInputDocument document, final boolean commit) throws OXException {
-        final UpdateRequest request = new UpdateRequest();
-        request.add(document);
-        
-        return request(request, commit);
+    protected UpdateResponse addDocument(final SolrInputDocument document) throws OXException {
+        return addDocument(document, true);
     }
     
-    protected SolrResponse addDocuments(final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
-        final UpdateRequest request = new UpdateRequest();
-        request.add(documents);
-        
-        return request(request, commit);
+    protected UpdateResponse addDocuments(final Collection<SolrInputDocument> documents) throws OXException {
+        return addDocuments(documents, true);
     }
     
-    protected SolrResponse commit() throws OXException {
-        final UpdateRequest request = new UpdateRequest();
-        request.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+    protected UpdateResponse addDocument(final SolrInputDocument document, final boolean commit) throws OXException {
+        lastAccess = System.currentTimeMillis();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         
-        return request(request, false);
+        return accessService.add(identifier, document, commit);
     }
     
-    protected SolrResponse optimize() throws OXException {
-        final UpdateRequest request = new UpdateRequest();
-        request.setAction(AbstractUpdateRequest.ACTION.OPTIMIZE, true, true, 1);
+    protected UpdateResponse addDocuments(final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
+        lastAccess = System.currentTimeMillis();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         
-        return request(request, false);
+        return accessService.add(identifier, documents, commit);
+    }
+    
+    protected UpdateResponse commit() throws OXException {
+        lastAccess = System.currentTimeMillis();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        
+        return accessService.commit(identifier);
+    }
+    
+    protected UpdateResponse optimize() throws OXException {
+        lastAccess = System.currentTimeMillis();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        
+        return accessService.optimize(identifier);
     }
     
     protected SolrResponse deleteDocumentById(final String id) throws OXException {
-        final UpdateRequest request = new UpdateRequest();
-        request.deleteById(id);
+        lastAccess = System.currentTimeMillis();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         
-        return request(request, true);
+        return accessService.deleteById(identifier, id, true);
     }
     
     protected SolrResponse deleteDocumentsByQuery(final String query) throws OXException {
-        final UpdateRequest request = new UpdateRequest();
-        request.deleteByQuery(query);
+        lastAccess = System.currentTimeMillis();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         
-        return request(request, true);
+        return accessService.deleteByQuery(identifier, query, true);
     }
     
     protected QueryResponse query(final SolrParams query) throws OXException {
-        final QueryRequest request = new QueryRequest(query);     
-        final SolrResponse solrResponse = request(request, false);
-        final QueryResponse queryResponse = new QueryResponse();
-        queryResponse.setResponse(solrResponse.getResponse());
-        queryResponse.setElapsedTime(solrResponse.getElapsedTime());
-        
-        return queryResponse;
-    }
-
-    /*
-     * Private methods
-     */
-    private SolrResponse request(final SolrRequest request, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
-        if (isPrimary) {
-            return requestLocally(request, commit);
-        }
-
-        final boolean hasActiveCore = indexMysql.hasActiveCore(contextId, userId, module);
-        if (!hasActiveCore) {
-            final SolrCoreStore coreStore = indexMysql.getCoreStore(contextId, userId, module);
-            final SolrCore core = startUpSolrCore(coreStore);
-            final String server = getServerAddress();
-            if (indexMysql.activateCoreEntry(contextId, userId, module, server)) {
-                isPrimary = true;
-                return requestLocally(request, commit);
-            } else {
-                /*
-                 * Somebody else tried to start up a core for this index and was faster.
-                 */
-                shutDownSolrCore(core);
-            }
-        }
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         
-        return requestRemote(request, commit);
-    }
-    
-    private SolrResponse requestLocally(final SolrRequest request, final boolean commit) throws OXException {
-        final SolrManagementService solrService = Services.getService(SolrManagementService.class);
-        return solrService.request(request, identifier.toString(), commit);
-    }
-    
-    private SolrResponse requestRemote(final SolrRequest request, final boolean commit) throws OXException {
-        final SolrCore core = indexMysql.getSolrCore(contextId, userId, module);
-        final String coreServer = core.getServer();
-        try {
-            final ConfigurationService config = Services.getService(ConfigurationService.class);
-            final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-            final Registry registry = LocateRegistry.getRegistry(coreServer, rmiPort);
-            final SolrServerRMI solrRMI = (SolrServerRMI) registry.lookup(SolrServerRMI.RMI_NAME);
-            
-            return solrRMI.request(request, identifier.toString(), commit);
-        } catch (RemoteException e) {
-            throw new OXException(e);
-        } catch (NotBoundException e) {
-            throw new OXException(e);
-        }
-    }
-
-    private String getServerAddress() throws OXException {
-        if (serverAddress != null) {
-            return serverAddress;
-        }
-
-        try {
-            final InetAddress addr = InetAddress.getLocalHost();
-            return serverAddress = addr.getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new OXException(e);
-        }
-    }
-
-    private SolrCore startUpSolrCore(final SolrCoreStore coreStore) throws OXException {
-        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
-        final SolrCore core = new SolrCore(identifier);
-        core.setStore(coreStore);
-        core.setServer(getServerAddress());
-        /*
-         * TODO: Start up Solr core on this machine using underlying kippdata management service. Return the cores name.
-         */
-        {
-            final SolrManagementService solrService = Services.getService(SolrManagementService.class);
-            final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
-            if (coreService.coreEnvironmentExists(contextId, userId, module)) {
-                coreService.createCoreEnvironment(contextId, userId, module);
-            }
-
-            final SolrCoreConfiguration coreConfig = new SolrCoreConfiguration(coreStore.getUri(), identifier);
-            solrService.createAndStartCore(
-                coreConfig.getCoreName(),
-                coreConfig.getInstanceDir(),
-                coreConfig.getDataDir(),
-                coreConfig.getSchemaPath(),
-                coreConfig.getConfigPath());
-        }
-
-        return core;
-    }
-
-    private void shutDownSolrCore(final SolrCore core) throws OXException {
-        final SolrManagementService solrService = Services.getService(SolrManagementService.class);
-        solrService.shutdownCore(core.getIdentifier().toString());
+        return accessService.query(identifier, query);
     }
 
 }

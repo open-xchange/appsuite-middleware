@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.session.Session;
+import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link SolrIndexFacadeService} - The Solr {@link IndexFacadeService} implementation.
@@ -73,7 +74,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
 	
     @Override
     public <V> IndexAccess<V> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
-        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(contextId, userId, module);
+        final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
         return (IndexAccess<V>) solrIndexAccessManager.acquireIndexAccess(identifier);
     }
 

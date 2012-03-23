@@ -47,69 +47,75 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.solr;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SolrCore}
- * 
+ * {@link SolrCoreConfigService} - The configuration interface for index module.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SolrCore {
-
-    private String server;
-    
-    private SolrCoreStore store;
-
-    private SolrIndexIdentifier identifier;
-    
-
-    public SolrCore(final SolrIndexIdentifier identifier) {
-        super();
-        this.identifier = identifier;
-    }
+public interface SolrCoreConfigService { 
 
     /**
-     * Gets the server
+     * Gets a list of all available core stores.
      * 
-     * @return The server
+     * @return The store list.
+     * @throws OXException
      */
-    public String getServer() {
-        return server;
-    }
-
+    List<SolrCoreStore> getAllStores() throws OXException;
+    
     /**
-     * Sets the server
+     * Registers a new solr core store.
      * 
-     * @param server The server to set
+     * @param store The store.
+     * @return The stores id.
+     * @throws OXException
      */
-    public void setServer(final String server) {
-        this.server = server;
-    }
+    int registerCoreStore(SolrCoreStore store) throws OXException;
     
     /**
-     * Gets the store
-     *
-     * @return The store
+     * Modifies an existing core.
+     * 
+     * @param store The store to modify. Must contain id!
+     * @throws OXException
      */
-    public SolrCoreStore getStore() {
-        return store;
-    }
+    void modifyCoreStore(SolrCoreStore store) throws OXException;
     
     /**
-     * Sets the store
-     *
-     * @param store The store to set
+     * Unregisters a core store.
+     * 
+     * @param storeId The id of the store to unregister.
+     * @throws OXException
      */
-    public void setStore(final SolrCoreStore store) {
-        this.store = store;
-    }
+    void unregisterCoreStore(int storeId) throws OXException;
     
     /**
-     * Returns the cores name.
-     * @return The name.
+     * Returns if a core environment already exists.
      */
-    public SolrIndexIdentifier getIdentifier() {
-        return identifier;
-    }
+    boolean coreEnvironmentExists(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Creates a new solr core. The core will be inactive after creation.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void createCoreEnvironment(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Deletes a core. If the core is running, it will be stopped first.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     * @throws OXException
+     */
+    void removeCoreEnvironment(int contextId, int userId, int module) throws OXException;
+    
 }

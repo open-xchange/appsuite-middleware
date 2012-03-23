@@ -47,16 +47,18 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.solr.internal;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.SolrCoreConfigService;
-import com.openexchange.index.solr.SolrIndexExceptionCodes;
+import com.openexchange.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrCoreConfiguration;
+import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrCoreStore;
+import com.openexchange.solr.SolrExceptionCodes;
 
 
 /**
@@ -100,7 +102,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
         
         final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
         final String baseUri = store.getUri();
-        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(cid, uid, module);
+        final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
         final SolrCoreConfiguration config = new SolrCoreConfiguration(baseUri, identifier);
         
         URI instanceUri = null;
@@ -110,7 +112,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
             dataUri = new URI(config.getDataDir());
             final File instanceDir = new File(instanceUri);            
             if (instanceDir.exists()) {
-                throw SolrIndexExceptionCodes.INSTANCE_DIR_EXISTS.create(instanceDir.toString());
+                throw SolrExceptionCodes.INSTANCE_DIR_EXISTS.create(instanceDir.toString());
             }
             
             if (instanceDir.mkdir()) {                
@@ -124,7 +126,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
             } else {
                 uri = config.getDataDir();
             }
-            throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, uri);
+            throw SolrExceptionCodes.URI_PARSE_ERROR.create(e, uri);
         }
     }
     
@@ -132,7 +134,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     public void removeCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
         final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
         final String baseUri = store.getUri();
-        final SolrIndexIdentifier identifier = new SolrIndexIdentifier(cid, uid, module);
+        final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
         final SolrCoreConfiguration config = new SolrCoreConfiguration(baseUri, identifier);
          
         try {
@@ -142,7 +144,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
                 deleteDir(instanceDir);
             }
         } catch (final URISyntaxException e) {
-            throw IndexExceptionCodes.URI_PARSE_ERROR.create(e, config.getInstanceDir());
+            throw SolrExceptionCodes.URI_PARSE_ERROR.create(e, config.getInstanceDir());
         }        
         
         indexMysql.removeCoreEntry(cid, uid, module);

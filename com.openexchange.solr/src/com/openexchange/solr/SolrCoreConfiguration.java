@@ -47,76 +47,77 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.solr;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.solr.internal.SolrCoreStore;
+import java.io.File;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.Types;
+import com.openexchange.solr.internal.Services;
+
 
 /**
- * {@link SolrCoreConfigService} - The configuration interface for index module.
+ * {@link SolrCoreConfiguration}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SolrCoreConfigService { 
+public class SolrCoreConfiguration {
 
-    /**
-     * Gets a list of all available core stores.
-     * 
-     * @return The store list.
-     * @throws OXException
-     */
-    List<SolrCoreStore> getAllStores() throws OXException;
+    private final SolrCoreIdentifier identifier;
+
+    private final String baseUri;
     
-    /**
-     * Registers a new solr core store.
-     * 
-     * @param store The store.
-     * @return The stores id.
-     * @throws OXException
-     */
-    int registerCoreStore(SolrCoreStore store) throws OXException;
     
-    /**
-     * Modifies an existing core.
-     * 
-     * @param store The store to modify. Must contain id!
-     * @throws OXException
-     */
-    void modifyCoreStore(SolrCoreStore store) throws OXException;
+    public SolrCoreConfiguration(final String baseUri, final SolrCoreIdentifier identifier) {
+        super();
+        this.baseUri = baseUri;
+        this.identifier = identifier;
+    }
     
-    /**
-     * Unregisters a core store.
-     * 
-     * @param storeId The id of the store to unregister.
-     * @throws OXException
-     */
-    void unregisterCoreStore(int storeId) throws OXException;
+    public String getCoreName() {
+        return getIdentifier().toString();
+    }
     
-    /**
-     * Returns if a core environment already exists.
-     */
-    boolean coreEnvironmentExists(int contextId, int userId, int module) throws OXException;
+    public String getInstanceDir() {
+        return baseUri + File.pathSeparator + getIdentifier().toString();
+    }
     
-    /**
-     * Creates a new solr core. The core will be inactive after creation.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void createCoreEnvironment(int contextId, int userId, int module) throws OXException;
+    public String getDataDir() {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);        
+        return getInstanceDir() + File.pathSeparator + config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
+    }
     
-    /**
-     * Deletes a core. If the core is running, it will be stopped first.
-     * 
-     * @param contextId
-     * @param userId
-     * @param module
-     * @throws OXException
-     */
-    void removeCoreEnvironment(int contextId, int userId, int module) throws OXException;
+    public String getSchemaPath() {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        switch (getIdentifier().getModule()) {
+        
+            case Types.EMAIL:
+                return config.getProperty(SolrProperties.PROP_SCHEMA_MAIL);
+                
+            default:
+                return null;
+            
+        }
+    }
     
+    public String getConfigPath() {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        String configFile;
+        switch (getIdentifier().getModule()) {
+        
+            case Types.EMAIL:
+                configFile = config.getProperty(SolrProperties.PROP_CONFIG_MAIL_NAME);
+                break;
+                
+            default:
+                return null;
+        
+        }
+        
+        return getInstanceDir() + File.pathSeparator + config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME) + File.pathSeparator + configFile;
+    }
+
+    public SolrCoreIdentifier getIdentifier() {
+        return identifier;
+    }
+
 }

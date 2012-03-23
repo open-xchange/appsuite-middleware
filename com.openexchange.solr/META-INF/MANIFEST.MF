@@ -6,11 +6,18 @@ Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.concurrent,
+ com.openexchange.config,
+ com.openexchange.database,
+ com.openexchange.database.provider,
  com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.impl,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.tools.sql,
  javax.servlet;version="2.5.0",
  javax.xml,
  javax.xml.namespace,
