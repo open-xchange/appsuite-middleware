@@ -389,7 +389,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     /*
                      * Processed as job: indexed results not immediately available
                      */
-                    if (processingProgress.isFirstTime()) {
+                    if (processingProgress.isFirstTime()/* && processingProgress.isHasHighAttention()*/) {
                         // Actively await result from storage
                         result = takeNextFrom(completionService);
                     }
