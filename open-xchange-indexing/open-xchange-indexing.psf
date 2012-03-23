@@ -6,5 +6,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.index.solr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.indexedSearch.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.solr"/>
 </provider>
 </psf>
