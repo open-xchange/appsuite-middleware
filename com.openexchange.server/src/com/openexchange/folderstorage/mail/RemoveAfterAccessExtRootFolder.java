@@ -94,4 +94,14 @@ public final class RemoveAfterAccessExtRootFolder extends ExternalMailAccountRoo
         return true;
     }
 
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contexctId;
+    }
+
 }

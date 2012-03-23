@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
@@ -137,8 +138,8 @@ public final class FolderMap {
      * @param folder the folder
      * @return The folder
      */
-    public Folder putIfAbsent(final String treeId, final Folder folder) {
-        return putIfAbsent(folder.getID(), treeId, folder);
+    public Folder putIfAbsent(final String treeId, final Folder folder, final Session session) {
+        return putIfAbsent(folder.getID(), treeId, folder, session);
     }
 
     /**
@@ -149,8 +150,8 @@ public final class FolderMap {
      * @param folder the folder
      * @return The folder
      */
-    public Folder putIfAbsent(final String folderId, final String treeId, final Folder folder) {
-        final Wrapper wrapper = wrapperOf(folder);
+    public Folder putIfAbsent(final String folderId, final String treeId, final Folder folder, final Session session) {
+        final Wrapper wrapper = wrapperOf(folder, session);
         final Key key = keyOf(folderId, treeId);
         Wrapper prev = map.putIfAbsent(key, wrapper);
         if (null == prev) {
@@ -206,7 +207,7 @@ public final class FolderMap {
      * @param treeId the tree id
      * @return The folder
      */
-    public Folder get(final String folderId, final String treeId) {
+    public Folder get(final String folderId, final String treeId, final Session session) {
         final Key key = keyOf(folderId, treeId);
         final Wrapper wrapper = map.get(key);
         if (null == wrapper) {
@@ -219,19 +220,19 @@ public final class FolderMap {
                 return null;
             }
             final Folder folder = wrapper.getValue();
-            reloadFolder(folderId, treeId, wrapper.loadSubfolders);
+            reloadFolder(folderId, treeId, wrapper.loadSubfolders, session);
             return folder;
         }
         return wrapper.getValue();
     }
 
-    private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
+    private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders, final Session ses) {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (null == sessiondService) {
                 return;
             }
-            final ServerSession session = ServerSessionAdapter.valueOf(sessiondService.getAnyActiveSessionForUser(userId, contextId));
+            final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? sessiondService.getAnyActiveSessionForUser(userId, contextId) : ses);
             if (null == session) {
                 return;
             }
@@ -241,13 +242,13 @@ public final class FolderMap {
         }
     }
 
-    private void loadSubolders(final Folder folder, final String treeId) {
+    private void loadSubolders(final Folder folder, final String treeId, final Session ses) {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (null == sessiondService) {
                 return;
             }
-            final ServerSession session = ServerSessionAdapter.valueOf(sessiondService.getAnyActiveSessionForUser(userId, contextId));
+            final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? sessiondService.getAnyActiveSessionForUser(userId, contextId) : ses);
             if (null == session) {
                 return;
             }
@@ -265,8 +266,8 @@ public final class FolderMap {
      * @param folder the folder
      * @return The folder
      */
-    public Folder put(final String treeId, final Folder folder) {
-        return put(folder.getID(), treeId, folder);
+    public Folder put(final String treeId, final Folder folder, final Session session) {
+        return put(folder.getID(), treeId, folder, session);
     }
 
     /**
@@ -277,9 +278,9 @@ public final class FolderMap {
      * @param folder the folder
      * @return The folder
      */
-    public Folder put(final String folderId, final String treeId, final Folder folder) {
+    public Folder put(final String folderId, final String treeId, final Folder folder, final Session session) {
         final Key key = keyOf(folderId, treeId);
-        final Wrapper wrapper = map.put(key, wrapperOf(folder));
+        final Wrapper wrapper = map.put(key, wrapperOf(folder, session));
         if (null == wrapper) {
             return null;
         }
@@ -298,7 +299,7 @@ public final class FolderMap {
      * @param treeId the tree id
      * @return The folder
      */
-    public Folder remove(final String folderId, final String treeId) {
+    public Folder remove(final String folderId, final String treeId, final Session session) {
         final Wrapper wrapper = map.remove(keyOf(folderId, treeId));
         if (null == wrapper) {
             return null;
@@ -309,7 +310,7 @@ public final class FolderMap {
          */
         if (wrapper.removeAfterAccess) {
             // Reload actively removed folder
-            reloadFolder(folderId, treeId, wrapper.loadSubfolders);
+            reloadFolder(folderId, treeId, wrapper.loadSubfolders, session);
         }
         return ret;
     }
@@ -330,10 +331,10 @@ public final class FolderMap {
         return new Key(folderId, treeId);
     }
 
-    private Wrapper wrapperOf(final Folder folder) {
+    private Wrapper wrapperOf(final Folder folder, final Session session) {
         final Wrapper wrapper = new Wrapper(folder);
         if (wrapper.loadSubfolders && null == folder.getSubfolderIDs()) {
-            loadSubolders(folder, folder.getTreeID());
+            loadSubolders(folder, folder.getTreeID(), session);
         }
         return wrapper;
     }
@@ -478,7 +479,7 @@ public final class FolderMap {
                         // Eh... No global folder here.
                         return;
                     }
-                    folderMap.put(treeId, loaded);
+                    folderMap.put(treeId, loaded, session);
                     // Check for subfolders
                     if (loadSubfolders) {
                         final String[] subfolderIDs = loaded.getSubfolderIDs();
@@ -488,7 +489,7 @@ public final class FolderMap {
                                 if (loaded.isGlobalID()) {
                                     folderStorage.putFolder(loaded, treeId, params);
                                 } else {
-                                    folderMap.put(treeId, loaded);
+                                    folderMap.put(treeId, loaded, session);
                                 }
                             }
                         }
@@ -539,7 +540,7 @@ public final class FolderMap {
                         if (loaded.isGlobalID()) {
                             folderStorage.putFolder(loaded, treeId, params);
                         } else {
-                            folderMap.put(treeId, loaded);
+                            folderMap.put(treeId, loaded, session);
                         }
                     }
                 } finally {
