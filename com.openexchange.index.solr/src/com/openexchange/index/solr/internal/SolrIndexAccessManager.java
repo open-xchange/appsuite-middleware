@@ -54,7 +54,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.TriggerType;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
+import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -119,6 +123,16 @@ public class SolrIndexAccessManager {
     }
 
     private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrIndexIdentifier identifier) throws OXException {
-        return null;
+        // FIXME: Use right trigger type
+        final int module = identifier.getModule();
+        switch(module) {
+        
+        case Types.EMAIL:
+            return new MailSolrIndexAccess(identifier, TriggerType.USER_INTERACTION);
+            
+        default:
+            throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
+        
+        }
     }
 }

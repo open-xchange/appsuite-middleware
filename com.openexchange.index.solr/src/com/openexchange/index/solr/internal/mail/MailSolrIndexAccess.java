@@ -260,7 +260,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             queryBuilder = null;
             solrQuery.setStart(Integer.valueOf(0));
             solrQuery.setRows(Integer.valueOf(1));            
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final long numFound = results.getNumFound();
             if (numFound <= 0) {
@@ -337,7 +337,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             queryBuilder = null;
             solrQuery.setStart(Integer.valueOf(0));
             solrQuery.setRows(Integer.valueOf(1));
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final long numFound = results.getNumFound();
             if (numFound <= 0) {
@@ -566,7 +566,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final Set<String> set = allFields;
             fieldArray = set.toArray(new String[set.size()]);
             solrQuery.setFields(fieldArray);
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final long numFound = results.getNumFound();
             if (numFound <= 0) {
@@ -599,7 +599,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 solrQuery.setSortField(sortField, order);
             }
             solrQuery.setFields(fieldArray);
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final int size = results.size();
             if (size <= 0) {

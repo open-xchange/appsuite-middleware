@@ -82,7 +82,11 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
     /**
      * An index fault occurred: %1$s
      */
-    INDEX_FAULT(SolrIndexExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005)
+    INDEX_FAULT(SolrIndexExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
+    /**
+     * No IndexAccess implementation was found for module $1%s.
+     */
+    MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006)
     
     ;
 

@@ -66,6 +66,7 @@ import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
@@ -201,8 +202,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         return request(request, true);
     }
     
-    protected QueryResponse query(final String query) throws OXException {
-        final QueryRequest request = new QueryRequest();     
+    protected QueryResponse query(final SolrParams query) throws OXException {
+        final QueryRequest request = new QueryRequest(query);     
         final SolrResponse solrResponse = request(request, false);
         final QueryResponse queryResponse = new QueryResponse();
         queryResponse.setResponse(solrResponse.getResponse());

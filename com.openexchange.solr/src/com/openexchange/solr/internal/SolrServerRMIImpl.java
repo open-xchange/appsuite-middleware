@@ -52,7 +52,6 @@ package com.openexchange.solr.internal;
 import java.rmi.RemoteException;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrResponse;
-import org.apache.solr.common.util.NamedList;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrManagementService;
 import com.openexchange.solr.rmi.SolrServerRMI;

@@ -80,5 +80,8 @@ public final class SolrIndexExceptionMessages implements LocalizableStrings {
 
     // An index fault occurred: %1$s
     public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
+
+    // No IndexAccess implementation was found for module $1%s.
+    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
     
 }
