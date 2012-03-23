@@ -160,6 +160,7 @@ public final class ConfigJSlobService implements JSlobService {
         JSlob jsonJSlob = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
         if (null == jsonJSlob) {
             jsonJSlob = new JSlob(new JSONObject());
+            jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
         }
         /*
          * Fill with config cascade settings

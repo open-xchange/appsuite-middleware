@@ -98,7 +98,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -749,7 +748,7 @@ public final class MailFolderStorage implements FolderStorage {
                 if (MailAccount.DEFAULT_ID == accountId || IGNORABLES.contains(mailAccount.getMailProtocol())) {
                     retval = mailFolderImpl;
                 } else {
-                    retval = new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
+                    retval = new RemoveAfterAccessFolderWrapper(mailFolderImpl, false, session.getUserId(), session.getContextId());
                 }
             }
             hasSubfolders = mailFolder.hasSubfolders();

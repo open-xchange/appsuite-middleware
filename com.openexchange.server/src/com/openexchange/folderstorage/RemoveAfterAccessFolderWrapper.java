@@ -65,13 +65,29 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
 
     private final boolean loadSubfolders;
 
+    private final int userId;
+
+    private final int contextId;
+
     /**
      * Initializes a new {@link RemoveAfterAccessFolderWrapper}.
      */
-    public RemoveAfterAccessFolderWrapper(final Folder folder, final boolean loadSubfolders) {
+    public RemoveAfterAccessFolderWrapper(final Folder folder, final boolean loadSubfolders, final int userId, final int contextId) {
         super();
         this.folder = folder;
         this.loadSubfolders = loadSubfolders;
+        this.userId = userId;
+        this.contextId = contextId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+    
+    @Override
+    public int getUserId() {
+        return userId;
     }
 
     @Override

@@ -77,4 +77,18 @@ public interface RemoveAfterAccessFolder extends Folder {
      */
     boolean loadSubfolders();
 
+    /**
+     * Gets the user identifier.
+     * 
+     * @return The user identifier or <code>-1</code>
+     */
+    int getUserId();
+
+    /**
+     * Gets the context identifier.
+     * 
+     * @return The context identifier or <code>-1</code>
+     */
+    int getContextId();
+
 }
