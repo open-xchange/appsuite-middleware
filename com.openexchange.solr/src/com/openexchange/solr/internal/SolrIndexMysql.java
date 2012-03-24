@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.solr.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,8 +59,11 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.solr.SolrCore;
+import com.openexchange.solr.SolrCoreStore;
+import com.openexchange.solr.SolrExceptionCodes;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -106,7 +109,7 @@ public class SolrIndexMysql {
             if (rs.next()) {
                 return rs.getBoolean(1);
             } else {
-                throw SolrIndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+                throw SolrExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -130,8 +133,9 @@ public class SolrIndexMysql {
         ResultSet rs = null;
         final int storeId;
         final String server;
+        final boolean active;
         try {
-            stmt = con.prepareStatement("SELECT store, server FROM solrCores WHERE cid = ? AND uid = ? AND module = ?");
+            stmt = con.prepareStatement("SELECT store, active, server FROM solrCores WHERE cid = ? AND uid = ? AND module = ?");
             int i = 1;
             stmt.setInt(i++, cid);
             stmt.setInt(i++, uid);
@@ -140,9 +144,10 @@ public class SolrIndexMysql {
             rs = stmt.executeQuery();            
             if (rs.next()) {
                 storeId = rs.getInt(1);
-                server = rs.getString(2);
+                active = rs.getBoolean(2);
+                server = rs.getString(3);
             } else {
-                throw SolrIndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+                throw SolrExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -150,8 +155,9 @@ public class SolrIndexMysql {
             DBUtils.closeSQLStuff(rs, stmt);
         }
         
-        final SolrCore core = new SolrCore(new SolrIndexIdentifier(cid, uid, module));
+        final SolrCore core = new SolrCore(new SolrCoreIdentifier(cid, uid, module));
         core.setStore(getCoreStore(con, storeId));
+        core.setActive(active);
         core.setServer(server);
         
         return core;
@@ -314,7 +320,7 @@ public class SolrIndexMysql {
                     return true;
                 }
             } else {
-                throw SolrIndexExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
+                throw SolrExceptionCodes.CORE_ENTRY_NOT_FOUND.create(uid, module, cid);
             }
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -389,7 +395,7 @@ public class SolrIndexMysql {
                 
                 return store;
             } else {
-                throw SolrIndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("StoreId: " + storeId);
+                throw SolrExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("StoreId: " + storeId);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -428,7 +434,7 @@ public class SolrIndexMysql {
                 
                 return store;
             } else {
-                throw SolrIndexExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("Context: " + cid + ", User: " + uid + ", Module: " + module);
+                throw SolrExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("Context: " + cid + ", User: " + uid + ", Module: " + module);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -553,7 +559,7 @@ public class SolrIndexMysql {
             }
             
             if (storeId == -1) {
-                throw SolrIndexExceptionCodes.NO_FREE_CORE_STORE.create();
+                throw SolrExceptionCodes.NO_FREE_CORE_STORE.create();
             }
             
             return storeId;

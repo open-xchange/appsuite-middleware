@@ -47,112 +47,89 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
-
+package com.openexchange.solr;
 
 
 /**
- * {@link IndexServerImpl}
- *
+ * {@link SolrCore}
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexServer {
+public class SolrCore {
 
-    private String url;
+    private String server;
+    
+    private SolrCoreStore store;
 
-    private int soTimeout;
+    private SolrCoreIdentifier identifier;
+    
+    private boolean active;
+    
 
-    private int connectionTimeout;
-
-    private int maxConnectionsPerHost;
-
-
-    public IndexServer() {
-      super();
-      soTimeout = 1000;
-      connectionTimeout = 100;
-      maxConnectionsPerHost = 100;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public int getSoTimeout() {
-        return soTimeout;
-    }
-
-    public int getConnectionTimeout() {
-        return connectionTimeout;
-    }
-
-    public int getMaxConnectionsPerHost() {
-        return maxConnectionsPerHost;
+    public SolrCore(final SolrCoreIdentifier identifier) {
+        super();
+        this.identifier = identifier;
     }
 
     /**
-     * Sets the url
-     *
-     * @param url The url to set
+     * Gets the server
+     * 
+     * @return The server
      */
-    public void setUrl(final String url) {
-        this.url = url;
+    public String getServer() {
+        return server;
     }
 
     /**
-     * Sets the soTimeout
-     *
-     * @param soTimeout The soTimeout to set
+     * Sets the server
+     * 
+     * @param server The server to set
      */
-    public void setSoTimeout(final int soTimeout) {
-        this.soTimeout = soTimeout;
+    public void setServer(final String server) {
+        this.server = server;
+    }
+    
+    /**
+     * Gets the store
+     *
+     * @return The store
+     */
+    public SolrCoreStore getStore() {
+        return store;
+    }
+    
+    /**
+     * Sets the store
+     *
+     * @param store The store to set
+     */
+    public void setStore(final SolrCoreStore store) {
+        this.store = store;
+    }
+    
+    /**
+     * Returns the cores name.
+     * @return The name.
+     */
+    public SolrCoreIdentifier getIdentifier() {
+        return identifier;
     }
 
     /**
-     * Sets the connectionTimeout
+     * Gets the active
      *
-     * @param connectionTimeout The connectionTimeout to set
+     * @return The active
      */
-    public void setConnectionTimeout(final int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
+    public boolean isActive() {
+        return active;
     }
 
     /**
-     * Sets the maxConnectionsPerHost
+     * Sets the active
      *
-     * @param maxConnectionsPerHost The maxConnectionsPerHost to set
+     * @param active The active to set
      */
-    public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
-        this.maxConnectionsPerHost = maxConnectionsPerHost;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((url == null) ? 0 : url.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final IndexServer other = (IndexServer) obj;
-        if (url == null) {
-            if (other.url != null) {
-                return false;
-            }
-        } else if (!url.equals(other.url)) {
-            return false;
-        }
-        return true;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

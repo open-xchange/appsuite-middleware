@@ -49,12 +49,15 @@
 
 package com.openexchange.solr.internal;
 
-import java.rmi.RemoteException;
-import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrResponse;
-import org.apache.solr.common.util.NamedList;
+import java.util.Collection;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
-import com.openexchange.solr.SolrManagementService;
+import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.SolrCoreConfiguration;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.rmi.SolrServerRMI;
 
 /**
@@ -62,18 +65,83 @@ import com.openexchange.solr.rmi.SolrServerRMI;
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrServerRMIImpl implements SolrServerRMI {
+public class SolrServerRMIImpl implements SolrServerRMI  {
 
-    private SolrManagementService solrService;
+    private SolrAccessService solrService;
+    
 
-    public SolrServerRMIImpl(final SolrManagementService solrService) {
+    public SolrServerRMIImpl(final SolrAccessService solrService) {
         super();
         this.solrService = solrService;
     }
 
     @Override
-    public SolrResponse request(final SolrRequest request, final String coreName, final boolean commit) throws RemoteException, OXException {
-        return solrService.request(request, coreName, commit);
+    public boolean startCore(SolrCoreConfiguration configuration) throws OXException {
+        return solrService.startCore(configuration);
     }
 
+    @Override
+    public boolean stopCore(SolrCoreIdentifier identifier) throws OXException {
+        return solrService.stopCore(identifier);
+    }
+
+    @Override
+    public void reloadCore(SolrCoreIdentifier identifier) throws OXException {
+        solrService.reloadCore(identifier);
+    }
+
+    @Override
+    public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException {
+        return solrService.add(identifier, document, commit);
+    }
+
+    @Override
+    public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws OXException {
+        return solrService.add(identifier, documents, commit);
+    }
+
+    @Override
+    public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws OXException {
+        return solrService.deleteById(identifier, id, commit);
+    }
+
+    @Override
+    public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws OXException {
+        return solrService.deleteByQuery(identifier, query, commit);
+    }
+
+    @Override
+    public UpdateResponse commit(SolrCoreIdentifier identifier) throws OXException {
+        return solrService.commit(identifier);
+    }
+
+    @Override
+    public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
+        return solrService.commit(identifier, waitFlush, waitSearcher);
+    }
+
+    @Override
+    public UpdateResponse rollback(SolrCoreIdentifier identifier) throws OXException {
+        return solrService.rollback(identifier);
+    }
+
+    @Override
+    public UpdateResponse optimize(SolrCoreIdentifier identifier) throws OXException {
+        return solrService.optimize(identifier);
+    }
+
+    @Override
+    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
+        return solrService.optimize(identifier, waitFlush, waitSearcher);
+    }
+
+    @Override
+    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws OXException {
+        return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+    }
+
+    @Override
+    public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException {
+        return solrService.query(identifier, params);
+    }
 }

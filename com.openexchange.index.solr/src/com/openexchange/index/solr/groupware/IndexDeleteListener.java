@@ -58,7 +58,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.index.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;

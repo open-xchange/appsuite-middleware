@@ -64,7 +64,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -78,13 +77,13 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.TriggerType;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.SolrIndexIdentifier;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.text.TextFinder;
+import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link MailSolrIndexAccess}
@@ -202,7 +201,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
      * @param identifier The Solr server identifier
      * @param triggerType The trigger type
      */
-    public MailSolrIndexAccess(final SolrIndexIdentifier identifier, final TriggerType triggerType) {
+    public MailSolrIndexAccess(final SolrCoreIdentifier identifier, final TriggerType triggerType) {
         super(identifier);
         this.triggerType = triggerType;
         helper = SolrInputDocumentHelper.getInstance();
@@ -211,7 +210,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     @Override
     public void addEnvelopeData(final IndexDocument<MailMessage> document) throws OXException {
         final SolrInputDocument solrDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
-        addDocument(solrDocument, true);
+        addDocument(solrDocument);
     }
 
     @Override
@@ -239,68 +238,97 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             }
             final List<IndexDocument<MailMessage>> subList = documents.subList(off, endIndex);
             final List<SolrInputDocument> solrDocuments = helper.inputDocumentsFor(subList, userId, contextId);
-            addDocuments(solrDocuments, true);
+            addDocuments(solrDocuments);
             off = endIndex;
         }
+    }
+    
+    private SolrDocument getIndexedDocument(final IndexDocument<MailMessage> document) throws OXException {
+        final MailMessage mailMessage = document.getObject();
+        final int accountId = mailMessage.getAccountId();
+        final MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());
+        
+        final StringBuilder queryBuilder = new StringBuilder(128);
+        queryBuilder.append('(').append(FIELD_UUID).append(":\"").append(uuid.getUUID()).append("\")");
+        final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
+        solrQuery.setStart(Integer.valueOf(0));
+        solrQuery.setRows(Integer.valueOf(1));            
+        final QueryResponse queryResponse = query(solrQuery);
+        final SolrDocumentList results = queryResponse.getResults();
+        final long numFound = results.getNumFound();
+        if (numFound > 0) {
+            return results.get(0);
+        }
+        
+        return null;
     }
 
     @Override
     public void addContent(final IndexDocument<MailMessage> document) throws OXException {
-        final MailMessage mailMessage = document.getObject();
-        final int accountId = mailMessage.getAccountId();
-        final MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());
-        /*
-         * Check if envelope data already present
-         */
-        SolrDocument solrDocument = null;
-        while (null == solrDocument) {
-            StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_UUID).append(":\"").append(uuid.getUUID()).append("\")");
-            final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            queryBuilder = null;
-            solrQuery.setStart(Integer.valueOf(0));
-            solrQuery.setRows(Integer.valueOf(1));            
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
-            final SolrDocumentList results = queryResponse.getResults();
-            final long numFound = results.getNumFound();
-            if (numFound <= 0) {
-                addEnvelopeData(document);
+        final MailMessage message = document.getObject();
+        final SolrInputDocument inputDocument;
+        {
+            final SolrDocument solrDocument = getIndexedDocument(document);
+            if (null == solrDocument) {
+                inputDocument = helper.inputDocumentFor(message, userId, contextId);
             } else {
-                solrDocument = results.get(0);
+                inputDocument = new SolrInputDocument();
+                for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                    final String name = entry.getKey();
+                    final SolrInputField field = new SolrInputField(name);
+                    field.setValue(entry.getValue(), 1.0f);
+                    inputDocument.put(name, field);
+                }
             }
         }
-        /*
-         * Create input document
-         */
-        final SolrInputDocument inputDocument = new SolrInputDocument();
-        for (final Entry<String, Object> entry : solrDocument.entrySet()) {
-            final String name = entry.getKey();
-            final SolrInputField field = new SolrInputField(name);
-            field.setValue(entry.getValue(), 1.0f);
-            inputDocument.put(name, field);
-        }
-        /*
-         * Add content
-         */
+
         final TextFinder textFinder = new TextFinder();
-        final String text = textFinder.getText(mailMessage);
+        final String text = textFinder.getText(message);
         if (null != text) {
             final Locale locale = detectLocale(text);
             inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
         }
         inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);        
-        addDocument(inputDocument, true);
+        addDocument(inputDocument);     
     }
 
     @Override
     public void addContent(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
+        final Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (final IndexDocument<MailMessage> document : documents) {
             if (Thread.interrupted()) {
                 // Clears the thread's interrupted flag
                 throw new InterruptedException("Thread interrupted while adding mail contents.");
             }
-            addContent(document);
+
+            final MailMessage message = document.getObject();
+            final SolrInputDocument inputDocument;
+            {
+                final SolrDocument solrDocument = getIndexedDocument(document);
+                if (null == solrDocument) {
+                    inputDocument = helper.inputDocumentFor(message, userId, contextId);
+                } else {
+                    inputDocument = new SolrInputDocument();
+                    for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                        final String name = entry.getKey();
+                        final SolrInputField field = new SolrInputField(name);
+                        field.setValue(entry.getValue(), 1.0f);
+                        inputDocument.put(name, field);
+                    }
+                }
+            }
+
+            final TextFinder textFinder = new TextFinder();
+            final String text = textFinder.getText(message);
+            if (null != text) {
+                final Locale locale = detectLocale(text);
+                inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+            }
+            inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);  
+            inputDocuments.add(inputDocument);  
         }
+        
+        addDocuments(inputDocuments);
     }
 
     @Override
@@ -337,7 +365,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             queryBuilder = null;
             solrQuery.setStart(Integer.valueOf(0));
             solrQuery.setRows(Integer.valueOf(1));
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final long numFound = results.getNumFound();
             if (numFound <= 0) {
@@ -463,38 +491,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     @Override
     public void deleteById(final String id) throws OXException {
-        final SolrResponse response = deleteDocumentById(id);
-        // TODO: Check response?
-//        CommonsHttpSolrServer solrServer = null;
-//        final String query = null;
-//        boolean ran = false;
-//        try {
-//            solrServer = solrServerFor();
-//            solrServer.deleteById(id);
-//            ran = true;
-//            /*
-//             * Commit sane
-//             */
-//            commitSane(solrServer);
-//        } catch (final SolrServerException e) {
-//            if (!ran) {
-//                LOG.debug("MailSolrIndexAccess.deleteById() failed for query:\n" + query);
-//            }
-//            rollback(solrServer);
-//            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-//        } catch (final IOException e) {
-//            if (!ran) {
-//                LOG.debug("MailSolrIndexAccess.deleteById() failed for query:\n" + query);
-//            }
-//            rollback(solrServer);
-//            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
-//        } catch (final RuntimeException e) {
-//            if (!ran) {
-//                LOG.debug("MailSolrIndexAccess.deleteById() failed for query:\n" + query);
-//            }
-//            rollback(solrServer);
-//            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-//        }
+        deleteDocumentById(id);
     }
 
     @Override
@@ -503,37 +500,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             return;
         }
         
-        final SolrResponse response = deleteDocumentsByQuery(query);
-        // TODO: Check response?
-//        CommonsHttpSolrServer solrServer = null;
-//        boolean ran = false;
-//        try {
-//            solrServer = solrServerFor();
-//            solrServer.deleteByQuery(query);
-//            ran = true;
-//            /*
-//             * Commit sane
-//             */
-//            commitSane(solrServer);
-//        } catch (final SolrServerException e) {
-//            if (!ran) {
-//                LOG.debug("MailSolrIndexAccess.deleteByQuery() failed for query:\n" + query);
-//            }
-//            rollback(solrServer);
-//            throw SolrIndexExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-//        } catch (final IOException e) {
-//            if (!ran) {
-//                LOG.debug("MailSolrIndexAccess.deleteByQuery() failed for query:\n" + query);
-//            }
-//            rollback(solrServer);
-//            throw IndexExceptionCodes.IO_ERROR.create(e, e.getMessage());
-//        } catch (final RuntimeException e) {
-//            if (!ran) {
-//                LOG.debug("MailSolrIndexAccess.deleteByQuery() failed for query:\n" + query);
-//            }
-//            rollback(solrServer);
-//            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-//        }
+        deleteDocumentsByQuery(query);
     }
 
     @Override
@@ -566,7 +533,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final Set<String> set = allFields;
             fieldArray = set.toArray(new String[set.size()]);
             solrQuery.setFields(fieldArray);
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final long numFound = results.getNumFound();
             if (numFound <= 0) {
@@ -599,7 +566,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 solrQuery.setSortField(sortField, order);
             }
             solrQuery.setFields(fieldArray);
-            final QueryResponse queryResponse = query(solrQuery.getQuery());
+            final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final int size = results.size();
             if (size <= 0) {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.solr;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -56,37 +56,45 @@ import com.openexchange.exception.OXExceptionFactory;
 
 
 /**
- * {@link SolrIndexExceptionCodes}
+ * {@link SolrExceptionCodes}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SolrIndexExceptionCodes implements OXExceptionCode {
+public enum SolrExceptionCodes implements OXExceptionCode {
 
     /**
      * Could not find solr core entry for user %1$s and module %2$s in context %3$s. 
      */
-    CORE_ENTRY_NOT_FOUND(SolrIndexExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1001),
+    CORE_ENTRY_NOT_FOUND(SolrExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1001),
     /**
      * Could not find solr core store for given attributes. %1$s.
      */
-    CORE_STORE_ENTRY_NOT_FOUND(SolrIndexExceptionMessages.CORE_STORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1002),
+    CORE_STORE_ENTRY_NOT_FOUND(SolrExceptionMessages.CORE_STORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1002),
     /**
      * All core stores seem to be full.
      */
-    NO_FREE_CORE_STORE(SolrIndexExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 1003),
+    NO_FREE_CORE_STORE(SolrExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 1003),
     /**
      * This cores instance directory (%1$s) already exists. It cannot be created. 
      */
-    INSTANCE_DIR_EXISTS(SolrIndexExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
+    INSTANCE_DIR_EXISTS(SolrExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
     /**
      * An index fault occurred: %1$s
      */
-    INDEX_FAULT(SolrIndexExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
+    INDEX_FAULT(SolrExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
     /**
      * No IndexAccess implementation was found for module $1%s.
      */
-    MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006)
+    MISSING_ACCESS_FOR_MODULE(SolrExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006),
+    /**
+     * Could neither delegate solr request to a local nor to a remote server instance.
+     */
+    DELEGATION_ERROR(SolrExceptionMessages.DELEGATION_ERROR_MSG, CATEGORY_ERROR, 1007),
+    /**
+     * Could not parse URI: %1$s.
+     */
+    URI_PARSE_ERROR(SolrExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1008),
     
     ;
 
@@ -96,7 +104,7 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
 
     private final Category category;
 
-    private SolrIndexExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SolrExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         number = detailNumber;
         this.category = category;
@@ -149,7 +157,7 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SEA";
+        return "SOL";
     }
 
     @Override

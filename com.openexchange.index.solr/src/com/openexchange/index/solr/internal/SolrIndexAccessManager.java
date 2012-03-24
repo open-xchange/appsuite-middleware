@@ -54,7 +54,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.TriggerType;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
+import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -64,11 +69,11 @@ import com.openexchange.timer.TimerService;
  */
 public class SolrIndexAccessManager {
 
-    private final ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess<?>> accessMap;
+    private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
 
     public SolrIndexAccessManager() {
         super();
-        accessMap = new ConcurrentHashMap<SolrIndexIdentifier, AbstractSolrIndexAccess<?>>();
+        accessMap = new ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>>();
         final TimerService timerService = Services.getService(TimerService.class);
         timerService.scheduleAtFixedRate(
             new SolrCoreShutdownTask(this),
@@ -77,7 +82,7 @@ public class SolrIndexAccessManager {
             TimeUnit.MINUTES);
     }
 
-    public IndexAccess<?> acquireIndexAccess(final SolrIndexIdentifier identifier) throws OXException {
+    public IndexAccess<?> acquireIndexAccess(final SolrCoreIdentifier identifier) throws OXException {
         AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(identifier);
         if (null == cachedIndexAccess) {
             final AbstractSolrIndexAccess<?> newAccess = createIndexAccessByType(identifier);
@@ -101,24 +106,32 @@ public class SolrIndexAccessManager {
         }
     }
 
-    public List<AbstractSolrIndexAccess<?>> getActivePrimaryAccesses() {
+    public List<AbstractSolrIndexAccess<?>> getCachedAccesses() {
         final List<AbstractSolrIndexAccess<?>> accessList = new ArrayList<AbstractSolrIndexAccess<?>>();
         for (final AbstractSolrIndexAccess<?> access : accessMap.values()) {
-            if (access.isPrimary()) {
-                accessList.add(access);
-            }
+            accessList.add(access);
         }
 
         return accessList;
     }
 
-    public void removeFromCache(final List<SolrIndexIdentifier> identifiers) {
-        for (final SolrIndexIdentifier identifier : identifiers) {
+    public void removeFromCache(final List<SolrCoreIdentifier> identifiers) {
+        for (final SolrCoreIdentifier identifier : identifiers) {
             accessMap.remove(identifier);
         }
     }
 
-    private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrIndexIdentifier identifier) throws OXException {
-        return null;
+    private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrCoreIdentifier identifier) throws OXException {
+        // FIXME: Use right trigger type
+        final int module = identifier.getModule();
+        switch(module) {
+        
+        case Types.EMAIL:
+            return new MailSolrIndexAccess(identifier, TriggerType.USER_INTERACTION);
+            
+        default:
+            throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
+        
+        }
     }
 }

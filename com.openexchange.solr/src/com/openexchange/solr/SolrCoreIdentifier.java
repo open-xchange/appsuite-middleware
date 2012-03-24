@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,93 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
-
-import java.io.File;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.Types;
-import com.openexchange.index.solr.SolrIndexProperties;
-
+package com.openexchange.solr;
 
 /**
- * {@link SolrCoreConfiguration}
- *
+ * {@link SolrCoreIdentifier}
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreConfiguration {
+public class SolrCoreIdentifier {
 
-    private final SolrIndexIdentifier identifier;
+    private final int contextId;
 
-    private final String baseUri;
-    
-    
-    public SolrCoreConfiguration(final String baseUri, final SolrIndexIdentifier identifier) {
+    private final int userId;
+
+    private final int module;
+
+    /**
+     * Initializes a new {@link SolrCoreIdentifier}.
+     * 
+     * @param contextId
+     * @param userId
+     * @param module
+     */
+    public SolrCoreIdentifier(int contextId, int userId, int module) {
         super();
-        this.baseUri = baseUri;
-        this.identifier = identifier;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.module = module;
     }
-    
-    public String getCoreName() {
-        return identifier.toString();
+
+    /**
+     * Gets the contextId
+     * 
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
     }
-    
-    public String getInstanceDir() {
-        return baseUri + File.pathSeparator + identifier.toString();
+
+    /**
+     * Gets the userId
+     * 
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
     }
-    
-    public String getDataDir() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);        
-        return getInstanceDir() + File.pathSeparator + config.getProperty(SolrIndexProperties.PROP_DATA_DIR_NAME);
+
+    /**
+     * Gets the module
+     * 
+     * @return The module
+     */
+    public int getModule() {
+        return module;
     }
-    
-    public String getSchemaPath() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        switch (identifier.getModule()) {
-        
-            case Types.EMAIL:
-                return config.getProperty(SolrIndexProperties.PROP_SCHEMA_MAIL);
-                
-            default:
-                return null;
-            
-        }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + module;
+        result = prime * result + userId;
+        return result;
     }
-    
-    public String getConfigPath() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        String configFile;
-        switch (identifier.getModule()) {
-        
-            case Types.EMAIL:
-                configFile = config.getProperty(SolrIndexProperties.PROP_CONFIG_MAIL_NAME);
-                break;
-                
-            default:
-                return null;
-        
-        }
-        
-        return getInstanceDir() + File.pathSeparator + config.getProperty(SolrIndexProperties.PROP_CONFIG_DIR_NAME) + File.pathSeparator + configFile;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SolrCoreIdentifier other = (SolrCoreIdentifier) obj;
+        if (contextId != other.contextId)
+            return false;
+        if (module != other.module)
+            return false;
+        if (userId != other.userId)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "sc_c" + contextId + "_u" + userId + "_m" + module;
     }
 
 }

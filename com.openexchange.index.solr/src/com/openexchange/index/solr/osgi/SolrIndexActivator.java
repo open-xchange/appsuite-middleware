@@ -54,13 +54,11 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.index.solr.internal.SolrCoreConfigServiceImpl;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.solr.SolrManagementService;
+import com.openexchange.solr.SolrAccessService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -79,7 +77,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            LanguageDetectionService.class, SolrManagementService.class };
+            LanguageDetectionService.class, SolrAccessService.class };
     }
 
     @Override
@@ -88,8 +86,8 @@ public class SolrIndexActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         registerService(IndexFacadeService.class, new SolrIndexFacadeService());
-        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
-        registerService(SolrCoreConfigService.class, indexService);
+//        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
+//        registerService(SolrCoreConfigService.class, indexService);
 
         /*
          * Register UpdateTasks and DeleteListener. Uncomment for production. final DatabaseService dbService =

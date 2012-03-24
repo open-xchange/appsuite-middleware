@@ -78,6 +78,10 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
 
     protected final com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType mailFolderType;
 
+    protected final int userId;
+
+    protected final int contexctId;
+
     /**
      * Initializes a new {@link ExternalMailAccountRootFolder} from given mail account.
      * <p>
@@ -90,6 +94,8 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
      */
     public ExternalMailAccountRootFolder(final MailAccount mailAccount, final MailConfig mailConfig, final ServerSession session) throws OXException {
         super();
+        userId = session.getUserId();
+        contexctId = session.getContextId();
         final String fullname = MailFolder.DEFAULT_FOLDER_ID;
         id = MailFolderUtility.prepareFullname(mailAccount.getId(), fullname);
         /*
@@ -102,7 +108,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         }
         parent = FolderStorage.PRIVATE_ID;
         final MailPermissionImpl mp = new MailPermissionImpl();
-        mp.setEntity(session.getUserId());
+        mp.setEntity(userId);
         mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         mp.setAdmin(false);
         permissions = new Permission[] { mp };
