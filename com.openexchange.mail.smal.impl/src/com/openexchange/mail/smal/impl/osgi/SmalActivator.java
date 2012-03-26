@@ -104,7 +104,7 @@ public class SmalActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class, IndexingService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class, IndexingService.class, UserService.class, ContextService.class };
     }
 
     @Override

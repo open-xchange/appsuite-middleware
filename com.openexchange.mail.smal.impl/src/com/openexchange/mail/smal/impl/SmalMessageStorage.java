@@ -58,6 +58,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -74,7 +76,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
 import com.openexchange.service.indexing.IndexingService;
@@ -93,9 +94,6 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
-
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMessageStorage.class));
 
     private static enum MailResultType {
         STORAGE, INDEX;
@@ -280,12 +278,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null == indexAdapter) {
+        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         final MailFields mfs = new MailFields(fields);
-        if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         try {
@@ -298,7 +295,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
-                    return MailResult.newIndexResult(indexAdapter.getMessages(mailIds, folder, null, null, fields, accountId, session));
+                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, mailIds, null, null, fields, session));
                 }
             });
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
@@ -330,12 +327,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         System.out.println("SMALMessageStorage.searchMessages()...");
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null == indexAdapter) {
+        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final MailFields mfs = new MailFields(fields);
-        if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final long st = System.currentTimeMillis();
@@ -512,13 +508,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null == indexAdapter) {
+        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.getMessage(folder, mailId, markSeen);
         }
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
         mail.setAccountId(accountId);
-        indexAdapter.addContent(mail, session);
+        IndexAccessAdapter.getInstance().addContent(mail, session);
         return mail;
     }
 

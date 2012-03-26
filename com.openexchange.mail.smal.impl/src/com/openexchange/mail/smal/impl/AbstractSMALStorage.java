@@ -235,7 +235,9 @@ public abstract class AbstractSMALStorage {
      * Gets the available index adapter.
      * 
      * @return The index adapter
+     * @deprecated Use SmalServiceLookup.getServiceStatic(IndexFacadeService.class)
      */
+    @Deprecated
     protected static IndexAdapter getIndexAdapter() {
         final IndexService indexService = getServiceStatic(IndexService.class);
         return null == indexService ? null : indexService.getAdapter();
