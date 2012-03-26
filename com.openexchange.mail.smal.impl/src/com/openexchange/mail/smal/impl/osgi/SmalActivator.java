@@ -64,11 +64,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.mail.smal.impl.SmalProvider;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
-import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
-import com.openexchange.mail.smal.impl.adapter.IndexService;
-import com.openexchange.mail.smal.impl.adapter.internal.IndexEventHandler;
-import com.openexchange.mail.smal.impl.adapter.internal.IndexServiceImpl;
-import com.openexchange.mail.smal.impl.adapter.solrj.SolrAdapter;
+import com.openexchange.mail.smal.impl.index.IndexEventHandler;
 import com.openexchange.mail.smal.impl.internal.SmalDeleteListenerImpl;
 import com.openexchange.mail.smal.impl.internal.SmalUpdateTaskProviderServiceImpl;
 import com.openexchange.mail.smal.impl.internal.tasks.CreateMailSyncTable;
@@ -85,12 +81,11 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link SmalActivator} - The activator for Super-MAL bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SmalActivator extends HousekeepingActivator {
 
-    private volatile IndexService indexService;
     private volatile com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler;
 
     /**
@@ -102,7 +97,9 @@ public class SmalActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class, IndexingService.class, UserService.class, ContextService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class, IndexingService.class,
+            UserService.class, ContextService.class };
     }
 
     @Override
@@ -127,32 +124,12 @@ public class SmalActivator extends HousekeepingActivator {
             registerService(SmalAccessService.class, new SmalAccessServiceImpl());
         }
         /*
-         * Register index service
-         */
-        {
-            final ConfigurationService cs = getService(ConfigurationService.class);
-            final String className = cs.getProperty("com.openexchange.mail.smal.adapter", SolrAdapter.class.getName());
-            final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
-            final IndexService indexService = this.indexService = new IndexServiceImpl(clazz.newInstance());
-
-            registerService(IndexService.class, indexService);
-            if (!addService(IndexService.class, indexService)) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalActivator.class)).error(
-                    "IndexService could not be added.");
-            }
-        }
-        /*
          * Register event handlers
          */
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new IndexEventHandler(), serviceProperties);
-        }
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            final com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler = this.eventHandler = new com.openexchange.mail.smal.impl.index.IndexEventHandler();
+            final IndexEventHandler eventHandler = this.eventHandler = new IndexEventHandler();
             registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
@@ -160,7 +137,9 @@ public class SmalActivator extends HousekeepingActivator {
          */
         {
             registerService(CreateTableService.class, new CreateMailSyncTable());
-            registerService(UpdateTaskProviderService.class, new SmalUpdateTaskProviderServiceImpl(new SMALCreateTableTask(), new SMALCheckTableTask()));
+            registerService(UpdateTaskProviderService.class, new SmalUpdateTaskProviderServiceImpl(
+                new SMALCreateTableTask(),
+                new SMALCheckTableTask()));
             registerService(DeleteListener.class, new SmalDeleteListenerImpl());
         }
     }
@@ -173,11 +152,6 @@ public class SmalActivator extends HousekeepingActivator {
             this.eventHandler = null;
         }
         cleanUp();
-        final IndexService indexService = this.indexService;
-        if (null != indexService) {
-            indexService.getAdapter().stop();
-            this.indexService = null;
-        }
         SmalServiceLookup.getInstance().setServiceLookup(null);
     }
 

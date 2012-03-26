@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.impl;
 
-import static com.openexchange.mail.smal.impl.SmalServiceLookup.getServiceStatic;
 import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,8 +60,6 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
-import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.IProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
@@ -229,18 +226,6 @@ public abstract class AbstractSMALStorage {
             }
         }
         return jobInfo;
-    }
-
-    /**
-     * Gets the available index adapter.
-     * 
-     * @return The index adapter
-     * @deprecated Use SmalServiceLookup.getServiceStatic(IndexFacadeService.class)
-     */
-    @Deprecated
-    protected static IndexAdapter getIndexAdapter() {
-        final IndexService indexService = getServiceStatic(IndexService.class);
-        return null == indexService ? null : indexService.getAdapter();
     }
 
     /**
