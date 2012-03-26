@@ -58,6 +58,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -74,7 +76,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
 import com.openexchange.service.indexing.IndexingService;
@@ -93,9 +94,6 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
-
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMessageStorage.class));
 
     private static enum MailResultType {
         STORAGE, INDEX;
@@ -134,7 +132,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     /**
-     * Takes the next completed task from specified completion service.
+     * Takes the next completed task from specified completion service (waiting if none are yet present).
      * 
      * @param completionService The completion service to take from
      * @return The next completed task
@@ -170,6 +168,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      * Polls the next completed task from specified completion service.
      * 
      * @param completionService The completion service to take from
+     * @param millis The max. number of milliseconds to wait
      * @return The next completed task or <code>null</code>
      * @throws OXException If taking next completed task failsF
      */
@@ -280,15 +279,26 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null == indexAdapter) {
+        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         final MailFields mfs = new MailFields(fields);
-        if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         try {
+            /*
+             * Obtain folder
+             */
+            final MailFolder mailFolder = folderStorage.getFolder(folder);
+            if (!mailFolder.isHoldsMessages() || 0 == mailFolder.getMessageCount()) {
+                // Folder has no messages
+                return EMPTY_RETVAL;
+            }
+            /*
+             * Process folder
+             */
+            /*final ProcessingProgress processingProgress = */processFolder(mailFolder);
             /*
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
@@ -298,7 +308,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
-                    return MailResult.newIndexResult(indexAdapter.getMessages(mailIds, folder, null, null, fields, accountId, session));
+                    // No need to await completion because getMessages() is called immediately after searchMessages()
+                    // processingProgress.awaitCompletion();
+                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, mailIds, null, null, fields, session));
                 }
             });
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
@@ -313,7 +325,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             case INDEX:
                 if (mfs.containsAny(MAIL_FIELDS_FLAGS)) {
                     // Index result came first
-                    await4Change(folder, completionService);
+                    asyncScheduleChangeJob(folder, completionService);
                 }
                 break;
             case STORAGE:
@@ -322,6 +334,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             }
             final List<MailMessage> mails = result.result;
             return mails.toArray(new MailMessage[mails.size()]);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -329,16 +344,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        System.out.println("SMALMessageStorage.searchMessages()...");
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null == indexAdapter) {
+        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final MailFields mfs = new MailFields(fields);
-        if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
-        final long st = System.currentTimeMillis();
         try {
             /*
              * Obtain folder
@@ -389,14 +401,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     /*
                      * Processed as job: indexed results not immediately available
                      */
-                    if (processingProgress.isFirstTime()) {
+                    if (processingProgress.isFirstTime()/* && processingProgress.isHasHighAttention()*/) {
                         // Actively await result from storage
                         result = takeNextFrom(completionService);
                     }
                 } else {
                     if (new MailFields(fields).containsAny(MAIL_FIELDS_FLAGS)) {
                         // Submit change job
-                        await4Change(folder, completionService);
+                        asyncScheduleChangeJob(folder, completionService);
                     }
                 }
                 break;
@@ -417,16 +429,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
-        } finally {
-            final long dur = System.currentTimeMillis() - st;
-            System.out.println("\tSMALMessageStorage.searchMessages() took " + dur + "msec.");
         }
     }
 
     /**
-     * Await the completion of the task which returns storage's content. Trigger an appropriate change job
+     * Asynchronously await the completion of the task which returns storage's content. Trigger an appropriate change job
      */
-    private void await4Change(final String folder, final CancelableCompletionService<MailResult<List<MailMessage>>> completionService) {
+    private void asyncScheduleChangeJob(final String folder, final CancelableCompletionService<MailResult<List<MailMessage>>> completionService) {
         final Runnable task = new Runnable() {
 
             @Override
@@ -512,13 +521,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null == indexAdapter) {
+        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.getMessage(folder, mailId, markSeen);
         }
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
         mail.setAccountId(accountId);
-        indexAdapter.addContent(mail, session);
+        IndexAccessAdapter.getInstance().addContent(mail, session);
         return mail;
     }
 

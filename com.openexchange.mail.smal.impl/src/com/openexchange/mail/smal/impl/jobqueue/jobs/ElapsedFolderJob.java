@@ -59,7 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
-import com.openexchange.mail.smal.impl.jobqueue.Constants;
+import com.openexchange.mail.smal.impl.index.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 import com.openexchange.tools.sql.DBUtils;
 

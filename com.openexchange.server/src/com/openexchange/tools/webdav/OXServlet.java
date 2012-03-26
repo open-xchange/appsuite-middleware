@@ -383,7 +383,7 @@ public abstract class OXServlet extends WebDavServlet {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Authentication header missing.");
+                LOG.debug("Authorization header missing.");
             }
             throw WebdavExceptionCode.MISSING_HEADER_FIELD.create("Authorization");
         }

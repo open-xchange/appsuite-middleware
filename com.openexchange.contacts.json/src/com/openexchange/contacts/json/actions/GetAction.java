@@ -51,13 +51,13 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -86,8 +86,9 @@ public class GetAction extends ContactAction {
         final TimeZone timeZone = req.getTimeZone();
         final ServerSession session = req.getSession();
 
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final Contact contact = contactInterface.getObjectById(id, folder);
+        final Contact contact = getContactService().getContact(session, Integer.toString(folder), Integer.toString(id));
+//        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+//        final Contact contact = contactInterface.getObjectById(id, folder);
         final Date lastModified = contact.getLastModified();
 
         // Correct last modified and creation date with users timezone

@@ -265,11 +265,25 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     @Override
     public void addContent(final IndexDocument<MailMessage> document) throws OXException {
-        final MailMessage mailMessage = document.getObject();
-        final SolrInputDocument inputDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
+        final MailMessage message = document.getObject();
+        final SolrInputDocument inputDocument;
+        {
+            final SolrDocument solrDocument = getIndexedDocument(document);
+            if (null == solrDocument) {
+                inputDocument = helper.inputDocumentFor(message, userId, contextId);
+            } else {
+                inputDocument = new SolrInputDocument();
+                for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                    final String name = entry.getKey();
+                    final SolrInputField field = new SolrInputField(name);
+                    field.setValue(entry.getValue(), 1.0f);
+                    inputDocument.put(name, field);
+                }
+            }
+        }
 
         final TextFinder textFinder = new TextFinder();
-        final String text = textFinder.getText(mailMessage);
+        final String text = textFinder.getText(message);
         if (null != text) {
             final Locale locale = detectLocale(text);
             inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
@@ -286,11 +300,26 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 // Clears the thread's interrupted flag
                 throw new InterruptedException("Thread interrupted while adding mail contents.");
             }
-            
-            final MailMessage mailMessage = document.getObject();
+
+            final MailMessage message = document.getObject();
+            final SolrInputDocument inputDocument;
+            {
+                final SolrDocument solrDocument = getIndexedDocument(document);
+                if (null == solrDocument) {
+                    inputDocument = helper.inputDocumentFor(message, userId, contextId);
+                } else {
+                    inputDocument = new SolrInputDocument();
+                    for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                        final String name = entry.getKey();
+                        final SolrInputField field = new SolrInputField(name);
+                        field.setValue(entry.getValue(), 1.0f);
+                        inputDocument.put(name, field);
+                    }
+                }
+            }
+
             final TextFinder textFinder = new TextFinder();
-            final String text = textFinder.getText(mailMessage);
-            final SolrInputDocument inputDocument = helper.inputDocumentFor(document.getObject(), userId, contextId);
+            final String text = textFinder.getText(message);
             if (null != text) {
                 final Locale locale = detectLocale(text);
                 inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);

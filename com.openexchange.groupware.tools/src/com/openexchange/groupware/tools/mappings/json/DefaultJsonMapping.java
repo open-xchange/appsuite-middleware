@@ -47,32 +47,46 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.groupware.tools.mappings.json;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.search.Operand;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.groupware.tools.mappings.DefaultMapping;
 
 /**
- * {@link ContactColumnOperand} - 'Column' type search term operand for contact fields. 
+ * {@link DefaultJsonMapping} - Default JSON specific mapping implementation.
  *
+ * @param <T> the type of the property
+ * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactColumnOperand implements Operand<ContactField>{
+public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> implements JsonMapping<T, O> {
 
-	private final ContactField value;
+	private final String ajaxName;
+	private final int columnID;
 	
-	public ContactColumnOperand(final ContactField value) {
-		super();
-		this.value = value;
-	}
-	
-	@Override
-	public com.openexchange.search.Operand.Type getType() {
-		return Type.COLUMN;
+	public DefaultJsonMapping(final String ajaxName, final int columnID) {
+		this.ajaxName = ajaxName;
+		this.columnID = columnID;
 	}
 
 	@Override
-	public ContactField getValue() {
-		return this.value;
+	public String getAjaxName() {
+		return this.ajaxName;
 	}
+
+	@Override
+	public int getColumnID() {
+		return this.columnID;
+	}
+	
+	@Override
+	public void serialize(O from, JSONObject to) throws JSONException {
+		final T value = this.get(from);
+		if (null != value && 0 < String.valueOf(value).length()) {
+			to.put(getAjaxName(), value);
+        }
+	}
+
 }

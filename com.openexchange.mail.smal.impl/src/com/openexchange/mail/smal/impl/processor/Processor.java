@@ -183,7 +183,7 @@ public final class Processor implements SolrMailConstants {
             // Index service missing
             return ProcessingProgress.EMPTY_RESULT;
         }
-        final ProcessingProgress processingResult = new ProcessingProgress();
+        final ProcessingProgress processingProgress = new ProcessingProgress();
         final CountDownLatch latch = new CountDownLatch(1);
         /*
          * Create task
@@ -198,7 +198,7 @@ public final class Processor implements SolrMailConstants {
                 try {
                     indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
                     final String fullName = folderInfo.getFullName();
-                    final boolean initial = !containsFolder(accountId, fullName, indexAccess);
+                    final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
                     mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
                     if (initial) {
                         /*-
@@ -206,9 +206,9 @@ public final class Processor implements SolrMailConstants {
                          * Denoted folder has not been added to index before
                          * 
                          */
-                        processingResult.setFirstTime(true).setHasHighAttention(strategy.hasHighAttention(folderInfo));
+                        processingProgress.setFirstTime(true).setHasHighAttention(strategy.hasHighAttention(folderInfo));
                         if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
-                            processingResult.setProcessType(ProcessType.FULL);
+                            processingProgress.setProcessType(ProcessType.FULL);
                             latch.countDown();
                             countDown = false;
                             final MailMessage[] messages =
@@ -224,7 +224,7 @@ public final class Processor implements SolrMailConstants {
                             }
                             indexAccess.addAttachments(documents);
                         } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
-                            processingResult.setProcessType(ProcessType.HEADERS_AND_CONTENT);
+                            processingProgress.setProcessType(ProcessType.HEADERS_AND_CONTENT);
                             latch.countDown();
                             countDown = false;
                             final MailMessage[] messages =
@@ -240,7 +240,7 @@ public final class Processor implements SolrMailConstants {
                             }
                             indexAccess.addContent(documents);
                         } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
-                            processingResult.setProcessType(ProcessType.HEADERS_ONLY);
+                            processingProgress.setProcessType(ProcessType.HEADERS_ONLY);
                             latch.countDown();
                             countDown = false;
                             final MailMessage[] messages =
@@ -256,7 +256,7 @@ public final class Processor implements SolrMailConstants {
                             }
                             indexAccess.addEnvelopeData(documents);
                         } else {
-                            processingResult.setProcessType(ProcessType.JOB);
+                            processingProgress.setProcessType(ProcessType.JOB);
                             latch.countDown();
                             countDown = false;
                             submitAsJob(folderInfo, mailAccess, params);
@@ -267,7 +267,7 @@ public final class Processor implements SolrMailConstants {
                          * Denoted folder has already been added to index before
                          * 
                          */
-                        processingResult.setFirstTime(false).setHasHighAttention(strategy.hasHighAttention(folderInfo));
+                        processingProgress.setFirstTime(false).setHasHighAttention(strategy.hasHighAttention(folderInfo));
                         final Map<String, MailMessage> storageMap;
                         final Map<String, MailMessage> indexMap;
                         {
@@ -303,13 +303,13 @@ public final class Processor implements SolrMailConstants {
                         }
                         if (newIds.isEmpty()) {
                             // No new detected
-                            processingResult.setProcessType(ProcessType.NONE);
+                            processingProgress.setProcessType(ProcessType.NONE);
                             latch.countDown();
                             countDown = false;
                         } else {
                             final int size = newIds.size();
                             if (strategy.addFull(size, folderInfo)) { // headers, content + attachments
-                                processingResult.setProcessType(ProcessType.FULL);
+                                processingProgress.setProcessType(ProcessType.FULL);
                                 latch.countDown();
                                 countDown = false;
                                 final MailMessage[] messages =
@@ -326,7 +326,7 @@ public final class Processor implements SolrMailConstants {
                                 }
                                 indexAccess.addAttachments(documents);
                             } else if (strategy.addHeadersAndContent(size, folderInfo)) { // headers + content
-                                processingResult.setProcessType(ProcessType.HEADERS_AND_CONTENT);
+                                processingProgress.setProcessType(ProcessType.HEADERS_AND_CONTENT);
                                 latch.countDown();
                                 countDown = false;
                                 final MailMessage[] messages =
@@ -343,7 +343,7 @@ public final class Processor implements SolrMailConstants {
                                 }
                                 indexAccess.addContent(documents);
                             } else if (strategy.addHeadersOnly(size, folderInfo)) { // headers only
-                                processingResult.setProcessType(ProcessType.HEADERS_ONLY);
+                                processingProgress.setProcessType(ProcessType.HEADERS_ONLY);
                                 latch.countDown();
                                 countDown = false;
                                 final MailMessage[] messages =
@@ -360,7 +360,7 @@ public final class Processor implements SolrMailConstants {
                                 }
                                 indexAccess.addEnvelopeData(documents);
                             } else {
-                                processingResult.setProcessType(ProcessType.JOB);
+                                processingProgress.setProcessType(ProcessType.JOB);
                                 latch.countDown();
                                 countDown = false;
                                 submitAsJob(folderInfo, mailAccess, storageMap.values(), indexMap.values());
@@ -382,21 +382,23 @@ public final class Processor implements SolrMailConstants {
         /*
          * Submit task & assign future
          */
-        processingResult.setFuture(ThreadPools.getThreadPool().submit(ThreadPools.task(task), CallerRunsBehavior.getInstance()));
+        processingProgress.setFuture(ThreadPools.getThreadPool().submit(ThreadPools.task(task), CallerRunsBehavior.getInstance()));
         /*
          * Return when result is initialized appropriately
          */
         latch.await();
-        return processingResult;
+        return processingProgress;
     }
 
-    protected boolean containsFolder(final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
+    protected boolean containsFolder(final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess, final Session session) throws OXException, InterruptedException {
         if (null == fullName || accountId < 0) {
             return false;
         }
         // Compose query string
         final StringBuilder queryBuilder = new StringBuilder(128);
-        queryBuilder.append('(').append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+        queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+        queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+        queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
         queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
         // Query parameters
         final QueryParameters queryParameters =

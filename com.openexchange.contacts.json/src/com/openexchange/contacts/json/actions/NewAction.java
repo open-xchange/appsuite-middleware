@@ -51,15 +51,15 @@ package com.openexchange.contacts.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
-import com.openexchange.contacts.json.converters.ContactParser;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -99,9 +99,10 @@ public class NewAction extends ContactAction {
 
         try {
             final int folder = json.getInt("folder_id");
-            final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-            final ContactParser parser = new ContactParser();
-            final Contact contact = parser.parse(json);
+            final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+//            final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+//            final ContactParser parser = new ContactParser();
+//            final Contact contact = parser.parse(json);
             if (containsImage) {
                 UploadEvent uploadEvent = null;
                 try {
@@ -117,10 +118,10 @@ public class NewAction extends ContactAction {
                         uploadEvent.cleanUp();
                     }
                 }
-
             }
-
-            contactInterface.insertContactObject(contact);
+            
+            getContactService().createContact(session, Integer.toString(folder), contact);
+//            contactInterface.insertContactObject(contact);
             final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
             return new AJAXRequestResult(object, contact.getLastModified(), "json");
         } catch (final JSONException e) {

@@ -95,6 +95,8 @@ public class FileResponseRenderer implements ResponseRenderer {
     private final String DELIVERY = "delivery";
     
     private final String DOWNLOAD = "download";
+    
+    private final String VIEW = "view";
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -142,21 +144,22 @@ public class FileResponseRenderer implements ResponseRenderer {
                 Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload =
-                    DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
-                if (contentDisposition == null) {
-                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
-                } else {
-                    if (contentDisposition.indexOf(';') < 0) {
-                        final String disposition = checkedDownload.getContentDisposition();
-                        final int pos = disposition.indexOf(';');
-                        if (pos >= 0) {
-                            resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
+                if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
+                    if (contentDisposition == null) {
+                        resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+                    } else {
+                        if (contentDisposition.indexOf(';') < 0) {
+                            final String disposition = checkedDownload.getContentDisposition();
+                            final int pos = disposition.indexOf(';');
+                            if (pos >= 0) {
+                                resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                            } else {
+                                resp.setHeader("Content-Disposition", contentDisposition);
+                            }
                         } else {
                             resp.setHeader("Content-Disposition", contentDisposition);
                         }
-                    } else {
-                        resp.setHeader("Content-Disposition", contentDisposition);
                     }
                 }
                 if (contentType == null) {
