@@ -58,19 +58,19 @@ import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
-import com.openexchange.solr.rmi.SolrServerRMI;
+import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
- * {@link SolrServerRMIImpl}
+ * {@link RMISolrAccessImpl}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrServerRMIImpl implements SolrServerRMI  {
+public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessService {
 
     private SolrAccessService solrService;
     
 
-    public SolrServerRMIImpl(final SolrAccessService solrService) {
+    public RMISolrAccessImpl(final SolrAccessService solrService) {
         super();
         this.solrService = solrService;
     }

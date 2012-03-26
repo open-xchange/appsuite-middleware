@@ -15,13 +15,14 @@ import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.internal.DelegationSolrAccessService;
+import com.openexchange.solr.internal.DelegationSolrAccessImpl;
 import com.openexchange.solr.internal.Services;
-import com.openexchange.solr.internal.EmbeddedSolrAccessService;
-import com.openexchange.solr.internal.SolrServerRMIImpl;
-import com.openexchange.solr.rmi.SolrServerRMI;
+import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
+import com.openexchange.solr.internal.RMISolrAccessImpl;
+import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
 * {@link SolrActivator}
@@ -32,23 +33,22 @@ public class SolrActivator extends HousekeepingActivator {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 
-    private volatile EmbeddedSolrAccessService managementService;
+    private volatile DelegationSolrAccessImpl managementService;
     
-    private static SolrServerRMI solrRMI;
+    private static RMISolrAccessService solrRMI;
     
 
     @Override
     protected Class<?>[] getNeededServices() {        
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        final EmbeddedSolrAccessService managementService = this.managementService = new EmbeddedSolrAccessService();
-        managementService.startUp();
-        final DelegationSolrAccessService delegationService = new DelegationSolrAccessService(managementService);
-        registerService(SolrAccessService.class, delegationService);
+        final DelegationSolrAccessImpl accessService = this.managementService = new DelegationSolrAccessImpl(new EmbeddedSolrAccessImpl());
+        accessService.startUp();
+        registerService(SolrAccessService.class, accessService);
         registerRMIInterface();
     }
     
@@ -57,9 +57,9 @@ public class SolrActivator extends HousekeepingActivator {
         super.stopBundle();
         
         unregisterRMIInterface();
-        final EmbeddedSolrAccessService managementService = this.managementService;
-        if (managementService != null) {
-            managementService.shutDown();
+        final DelegationSolrAccessImpl accessService = this.managementService;
+        if (accessService != null) {
+            accessService.shutDown();
             this.managementService = null;
         }
     }
@@ -67,8 +67,8 @@ public class SolrActivator extends HousekeepingActivator {
     private void registerRMIInterface() throws UnknownHostException, RemoteException, AlreadyBoundException {
         LOG.info("Registering Solr RMI Interface.");
         final ConfigurationService config = getService(ConfigurationService.class);
-        solrRMI = new SolrServerRMIImpl(managementService);
-        final SolrServerRMI stub = (SolrServerRMI) UnicastRemoteObject.exportObject(solrRMI, 0);
+        solrRMI = new RMISolrAccessImpl(managementService);
+        final RMISolrAccessService stub = (RMISolrAccessService) UnicastRemoteObject.exportObject(solrRMI, 0);
         final InetAddress addr = InetAddress.getLocalHost();   
         final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
         Registry registry = null;
@@ -93,7 +93,7 @@ public class SolrActivator extends HousekeepingActivator {
         }    
         
         if (registry != null) {
-            registry.bind(SolrServerRMI.RMI_NAME, stub);
+            registry.bind(RMISolrAccessService.RMI_NAME, stub);
         }
     }
     
@@ -105,7 +105,7 @@ public class SolrActivator extends HousekeepingActivator {
             final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
             final Registry registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
             
-            registry.unbind(SolrServerRMI.RMI_NAME);
+            registry.unbind(RMISolrAccessService.RMI_NAME);
         } catch (RemoteException r) {
             LOG.error("Could not get RMI registry.", r);
         }

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-spellchecker-3.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-spatial-3.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/velocity-1.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-3.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core-3.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-highlighter-3.3.0.jar"/>

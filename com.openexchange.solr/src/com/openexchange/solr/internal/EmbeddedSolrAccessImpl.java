@@ -52,6 +52,7 @@ package com.openexchange.solr.internal;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Properties;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,18 +75,18 @@ import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 
 /**
- * {@link EmbeddedSolrAccessService}
+ * {@link EmbeddedSolrAccessImpl}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class EmbeddedSolrAccessService implements SolrAccessService {
+public class EmbeddedSolrAccessImpl implements SolrAccessService {
     
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmbeddedSolrAccessService.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmbeddedSolrAccessImpl.class));
 
     private CoreContainer coreContainer;
     
 
-    public EmbeddedSolrAccessService() {
+    public EmbeddedSolrAccessImpl() {
         super();
     }
 
@@ -116,6 +117,10 @@ public class EmbeddedSolrAccessService implements SolrAccessService {
         coreDescriptor.setDataDir(configuration.getDataDir());
         coreDescriptor.setSchemaName(configuration.getSchemaPath());
         coreDescriptor.setConfigName(configuration.getConfigPath());
+        final Properties properties = new Properties();
+        properties.put("data.dir", configuration.getDataDir());
+        properties.put("logDir", "/var/log/open-xchange");
+        coreDescriptor.setCoreProperties(properties);
         SolrCore solrCore;
         try {
             solrCore = coreContainer.create(coreDescriptor);
@@ -169,6 +174,14 @@ public class EmbeddedSolrAccessService implements SolrAccessService {
         }
     }
     
+    public boolean hasActiveCore(final SolrCoreIdentifier identifier) throws OXException {
+        if (coreContainer != null) {
+            // TODO: throw exception
+        }
+        
+        return coreContainer.getCoreNames().contains(identifier.toString());
+    }
+        
     @Override
     public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException {
         final SolrServer solrServer = getSolrServer(identifier);

@@ -49,6 +49,8 @@
 
 package com.openexchange.solr;
 
+import java.net.URI;
+
 
 
 /**
@@ -60,7 +62,7 @@ public class SolrCoreStore {
     
     private int id;
     
-    private String uri;
+    private URI uri;
     
     private int maxCores;
     
@@ -92,7 +94,7 @@ public class SolrCoreStore {
      *
      * @return The uri
      */
-    public String getUri() {
+    public URI getUri() {
         return uri;
     }
     
@@ -101,7 +103,7 @@ public class SolrCoreStore {
      *
      * @param uri The uri to set
      */
-    public void setUri(final String uri) {
+    public void setUri(final URI uri) {
         this.uri = uri;
     }
     

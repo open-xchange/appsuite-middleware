@@ -6,13 +6,14 @@ CREATE TABLE `solrCores` (
   `active` tinyint(1) unsigned NOT NULL,  
   `server` varchar(32) DEFAULT NULL,  
   PRIMARY KEY  (`cid`,`uid`,`module`),
+  KEY `cidserver` (`cid`, `server`),
   KEY `server` (`server`),
   KEY `store` (`store`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
 CREATE TABLE `solrCoreStores` (
   `id` int(10) unsigned NOT NULL,
-  `uri` varchar(32) NOT NULL,
+  `uri` varchar(255) NOT NULL,
   `maxCores` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8

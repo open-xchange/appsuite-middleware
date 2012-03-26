@@ -40,6 +40,13 @@ Bundle-ClassPath: .,
  lib/lucene-core-3.3.0.jar,
  lib/lucene-highlighter-3.3.0.jar,
  lib/lucene-memory-3.3.0.jar,
- lib/lucene-queries-3.3.0.jar
+ lib/lucene-queries-3.3.0.jar,
+ lib/velocity-1.7.jar,
+ lib/lucene-spatial-3.3.0.jar,
+ lib/lucene-spellchecker-3.3.0.jar
 Export-Package: com.openexchange.solr,
- com.openexchange.solr.rmi
+ com.openexchange.solr.rmi,
+ org.apache.solr.client.solrj,
+ org.apache.solr.client.solrj.response,
+ org.apache.solr.common,
+ org.apache.solr.common.params

@@ -54,6 +54,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -98,10 +99,10 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     
     @Override
     public void createCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
-        indexMysql.createCoreEntry(cid, uid, module);
+        final SolrCore solrCore = indexMysql.createCoreEntry(cid, uid, module);
         
-        final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
-        final String baseUri = store.getUri();
+        final SolrCoreStore store = indexMysql.getCoreStore(solrCore.getStore());
+        final URI baseUri = store.getUri();
         final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
         final SolrCoreConfiguration config = new SolrCoreConfiguration(baseUri, identifier);
         
@@ -132,8 +133,9 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     
     @Override
     public void removeCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
-        final SolrCoreStore store = indexMysql.getCoreStore(cid, uid, module);
-        final String baseUri = store.getUri();
+        final SolrCore solrCore = indexMysql.getSolrCore(cid, uid, module);
+        final SolrCoreStore store = indexMysql.getCoreStore(solrCore.getStore());
+        final URI baseUri = store.getUri();
         final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
         final SolrCoreConfiguration config = new SolrCoreConfiguration(baseUri, identifier);
          
