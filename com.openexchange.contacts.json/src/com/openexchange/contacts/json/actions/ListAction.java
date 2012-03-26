@@ -51,15 +51,21 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -91,16 +97,25 @@ public class ListAction extends ContactAction {
         final int[][] objectIdsAndFolderIds = req.getListRequestData();
         final TimeZone timeZone = req.getTimeZone();
 
-        boolean allInSameFolder = true;
-        int lastFolder = -1;
+//        boolean allInSameFolder = true;
+//        int lastFolder = -1;
+//        for (final int[] objectIdAndFolderId : objectIdsAndFolderIds) {
+//            final int folder = objectIdAndFolderId[1];
+//            if (lastFolder != -1 && folder != lastFolder) {
+//                allInSameFolder = false;
+//            }
+//            lastFolder = folder;
+//        }
+        final ContactField[] fields = ContactMapper.getInstance().getFields(columns);
+        final Map<String, List<String>> ids = new HashMap<String, List<String>>();
         for (final int[] objectIdAndFolderId : objectIdsAndFolderIds) {
-            final int folder = objectIdAndFolderId[1];
-            if (lastFolder != -1 && folder != lastFolder) {
-                allInSameFolder = false;
+            final String folderID = Integer.toString(objectIdAndFolderId[1]);
+            if (false == ids.containsKey(folderID)) {
+            	ids.put(folderID, new ArrayList<String>());
             }
-            lastFolder = folder;
+            ids.get(folderID).add(Integer.toString(objectIdAndFolderId[0]));
         }
-
+        
         Date timestamp = new Date(0);
         Date lastModified = null;
         SearchIterator<Contact> it = null;
@@ -108,10 +123,11 @@ public class ListAction extends ContactAction {
         final List<Contact> sortedContacts;
         try {
             final List<Contact> contacts = new ArrayList<Contact>();
-            if (allInSameFolder) {
-                final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(lastFolder, session);
-                it = contactInterface.getObjectsById(objectIdsAndFolderIds, columns);
-
+            final ContactService contactService = getContactService();
+            for (final Entry<String, List<String>> entry : ids.entrySet()) {
+            	final String folderID = entry.getKey();
+            	final String[] objectIDs = entry.getValue().toArray(new String[entry.getValue().size()]);
+                it = contactService.getContacts(session, folderID, objectIDs, fields);
                 while (it.hasNext()) {
                     final Contact contact = it.next();
                     contacts.add(contact);
@@ -125,27 +141,45 @@ public class ListAction extends ContactAction {
                         timestamp = lastModified;
                     }
                 }
-            } else {
-                for (final int[] objectIdAndFolderId : objectIdsAndFolderIds) {
-                    final int folder = objectIdAndFolderId[1];
-                    final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-                    it = contactInterface.getObjectsById(new int[][] { objectIdAndFolderId }, columns);
-
-                    while (it.hasNext()) {
-                        final Contact contact = it.next();
-                        lastModified = contact.getLastModified();
-
-                        // Correct last modified and creation date with users timezone
-                        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                        contacts.add(contact);
-                    }
-
-                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
-                        timestamp = lastModified;
-                    }
-                }
-            }
+    		}            
+//            if (allInSameFolder) {
+//                final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(lastFolder, session);
+//                it = contactInterface.getObjectsById(objectIdsAndFolderIds, columns);
+//
+//                while (it.hasNext()) {
+//                    final Contact contact = it.next();
+//                    contacts.add(contact);
+//
+//                    lastModified = contact.getLastModified();
+//                    // Correct last modified and creation date with users timezone
+//                    contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+//                    contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+//
+//                    if (lastModified != null && timestamp.before(lastModified)) {
+//                        timestamp = lastModified;
+//                    }
+//                }
+//            } else {
+//                for (final int[] objectIdAndFolderId : objectIdsAndFolderIds) {
+//                    final int folder = objectIdAndFolderId[1];
+//                    final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+//                    it = contactInterface.getObjectsById(new int[][] { objectIdAndFolderId }, columns);
+//
+//                    while (it.hasNext()) {
+//                        final Contact contact = it.next();
+//                        lastModified = contact.getLastModified();
+//
+//                        // Correct last modified and creation date with users timezone
+//                        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+//                        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+//                        contacts.add(contact);
+//                    }
+//
+//                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+//                        timestamp = lastModified;
+//                    }
+//                }
+//            }
 
             // Sort loaded contacts in the order they were requested
             sortedContacts = new ArrayList<Contact>(contacts.size());

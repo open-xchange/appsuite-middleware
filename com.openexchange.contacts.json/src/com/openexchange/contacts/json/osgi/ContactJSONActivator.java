@@ -51,6 +51,7 @@ package com.openexchange.contacts.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -62,7 +63,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
  */
 public class ContactJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class };
+    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class, ContactService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
