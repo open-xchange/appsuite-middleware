@@ -79,7 +79,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
-import com.openexchange.mail.smal.impl.jobqueue.Constants;
+import com.openexchange.mail.smal.impl.index.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.Job;
 import com.openexchange.mail.smal.impl.jobqueue.JobCompletionService;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
@@ -541,7 +541,7 @@ public final class FolderJob extends AbstractMailSyncJob {
     private int chunkedAddWithoutJobs(final List<String> ids, final IndexAdapter indexAdapter) throws OXException {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final JobQueue queue = JobQueue.getInstance();
-        final int configuredBlockSize = Constants.CHUNK_SIZE;
+        final int configuredBlockSize = 0;
         if (configuredBlockSize <= 0) {
             add2Index(ids, fullName, indexAdapter);
             if (DEBUG) {
@@ -592,7 +592,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         final int resetlen = idBuilder.length();
         int numScheduled = 0;
         final JobCompletionService completionService = mayScheduleJobs ? new UnboundedJobCompletionService() : null;
-        final int configuredBlockSize = Constants.CHUNK_SIZE;
+        final int configuredBlockSize = 0;
         if (configuredBlockSize <= 0) {
             final String subId = idBuilder.append(numScheduled + 1).toString();
             if (scheduleJob(ids, indexAdapter, completionService, subId)) {
