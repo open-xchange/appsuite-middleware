@@ -132,7 +132,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     /**
-     * Takes the next completed task from specified completion service.
+     * Takes the next completed task from specified completion service (waiting if none are yet present).
      * 
      * @param completionService The completion service to take from
      * @return The next completed task
@@ -168,6 +168,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      * Polls the next completed task from specified completion service.
      * 
      * @param completionService The completion service to take from
+     * @param millis The max. number of milliseconds to wait
      * @return The next completed task or <code>null</code>
      * @throws OXException If taking next completed task failsF
      */
@@ -297,7 +298,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Process folder
              */
-            final ProcessingProgress processingProgress = processFolder(mailFolder);
+            /*final ProcessingProgress processingProgress = */processFolder(mailFolder);
             /*
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
@@ -432,7 +433,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     /**
-     * Await the completion of the task which returns storage's content. Trigger an appropriate change job
+     * Asynchronously await the completion of the task which returns storage's content. Trigger an appropriate change job
      */
     private void asyncScheduleChangeJob(final String folder, final CancelableCompletionService<MailResult<List<MailMessage>>> completionService) {
         final Runnable task = new Runnable() {

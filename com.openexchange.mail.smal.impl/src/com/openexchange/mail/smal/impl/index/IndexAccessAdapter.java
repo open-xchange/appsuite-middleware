@@ -145,6 +145,63 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         }
     }
 
+    public void delete(final int accountId, final String fullName, final String[] optMailIds, final Session session) throws OXException, InterruptedException {
+        final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        if (null == facade) {
+            // Index service missing
+            return;
+        }
+        IndexAccess<MailMessage> indexAccess = null;
+        try {
+            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+            final StringBuilder queryBuilder = new StringBuilder(128);
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+            if (accountId >= 0) {
+                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            }
+            if (null != fullName) {
+                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+            }
+            /*
+             * Delete whole folder?
+             */
+            if (null == optMailIds || 0 == optMailIds.length) {
+                indexAccess.deleteByQuery(queryBuilder.toString());
+                return;
+            }
+            /*
+             * Delete by identifier
+             */
+            final int resetLen = queryBuilder.length();
+            final int size = optMailIds.length;
+            final String fieldId = FIELD_ID;
+            int off = 0;
+            while (off < size) {
+                if (Thread.interrupted()) {
+                    throw new InterruptedException("Thread interrupted while deleting documents.");
+                }
+                int endIndex = off + GET_ROWS;
+                if (endIndex >= size) {
+                    endIndex = size;
+                }
+                final int len = endIndex - off;
+                final String[] ids = new String[len];
+                System.arraycopy(optMailIds, off, ids, 0, len);
+                queryBuilder.setLength(resetLen);
+                queryBuilder.append(" AND (").append(fieldId).append(':').append(ids[0]);
+                for (int i = 1; i < len; i++) {
+                    queryBuilder.append(" OR ").append(fieldId).append(':').append(ids[i]);
+                }
+                queryBuilder.append(')');
+                indexAccess.deleteByQuery(queryBuilder.toString());
+                off = endIndex;
+            }
+        } finally {
+            releaseAccess(facade, indexAccess);
+        }
+    }
+
     /**
      * Performs the query derived from given search term.
      * 
@@ -340,7 +397,7 @@ public final class IndexAccessAdapter implements SolrMailConstants {
             int off = 0;
             while (off < size) {
                 if (Thread.interrupted()) {
-                    throw new InterruptedException("Thread interrupted while getting Solr documents.");
+                    throw new InterruptedException("Thread interrupted while getting documents.");
                 }
                 int endIndex = off + GET_ROWS;
                 if (endIndex >= size) {
