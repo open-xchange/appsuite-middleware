@@ -55,13 +55,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -112,13 +115,16 @@ public class UpdatesAction extends ContactAction {
             bIgnoreDelete = true;
         }
 
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+//        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final ContactService contactService = getContactService();
+        final ContactField[] fields = ContactMapper.getInstance().getFields(columns);        		
         final List<Contact> modifiedList = new ArrayList<Contact>();
         final List<Contact> deletedList = new ArrayList<Contact>();
         final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         SearchIterator<Contact> it = null;
         try {
-            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
+            it = contactService.getModifiedContacts(session, Integer.toString(folder), timestamp, fields);
+//            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
@@ -134,7 +140,8 @@ public class UpdatesAction extends ContactAction {
             }
 
             if (!bIgnoreDelete) {
-                it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
+                it = contactService.getDeletedContacts(session, Integer.toString(folder), timestamp, fields);
+//                it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
                 while (it.hasNext()) {
                     final Contact contact = it.next();
                     lastModified = contact.getLastModified();

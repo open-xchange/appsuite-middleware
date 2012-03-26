@@ -54,7 +54,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.openexchange.contact.storage.ContactColumnOperand;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
@@ -100,7 +100,7 @@ public final class Tools {
 			 * check if display name is already in use
 			 */
 			final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-			term.addOperand(new ContactColumnOperand(ContactField.DISPLAY_NAME));
+			term.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
 			term.addOperand(new Operand<String>() {
 
 				@Override

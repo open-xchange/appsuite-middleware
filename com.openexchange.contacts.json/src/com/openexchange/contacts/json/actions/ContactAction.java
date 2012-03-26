@@ -53,9 +53,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -97,6 +99,14 @@ public abstract class ContactAction implements AJAXActionService {
             return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
         } catch (final IllegalStateException e) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
+        }
+    }
+
+    protected ContactService getContactService() throws OXException {
+        try {
+            return serviceLookup.getService(ContactService.class);
+        } catch (final IllegalStateException e) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
         }
     }
 
