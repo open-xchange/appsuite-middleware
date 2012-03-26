@@ -74,8 +74,6 @@ import com.openexchange.mail.smal.impl.internal.SmalUpdateTaskProviderServiceImp
 import com.openexchange.mail.smal.impl.internal.tasks.CreateMailSyncTable;
 import com.openexchange.mail.smal.impl.internal.tasks.SMALCheckTableTask;
 import com.openexchange.mail.smal.impl.internal.tasks.SMALCreateTableTask;
-import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
-import com.openexchange.mail.smal.impl.jobqueue.internal.JobQueueEventHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.service.indexing.IndexingService;
@@ -92,8 +90,8 @@ import com.openexchange.user.UserService;
  */
 public class SmalActivator extends HousekeepingActivator {
 
-    private IndexService indexService;
-    private JobQueueEventHandler eventHandler;
+    private volatile IndexService indexService;
+    private volatile com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler;
 
     /**
      * Initializes a new {@link SmalActivator}.
@@ -118,7 +116,6 @@ public class SmalActivator extends HousekeepingActivator {
         trackService(UserService.class);
         trackService(ContextService.class);
         openTrackers();
-        JobQueue.getInstance();
         /*
          * Register SMAL provider
          */
@@ -136,7 +133,7 @@ public class SmalActivator extends HousekeepingActivator {
             final ConfigurationService cs = getService(ConfigurationService.class);
             final String className = cs.getProperty("com.openexchange.mail.smal.adapter", SolrAdapter.class.getName());
             final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
-            indexService = new IndexServiceImpl(clazz.newInstance());
+            final IndexService indexService = this.indexService = new IndexServiceImpl(clazz.newInstance());
 
             registerService(IndexService.class, indexService);
             if (!addService(IndexService.class, indexService)) {
@@ -155,7 +152,7 @@ public class SmalActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            eventHandler = new JobQueueEventHandler();
+            final com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler = this.eventHandler = new com.openexchange.mail.smal.impl.index.IndexEventHandler();
             registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
@@ -170,15 +167,16 @@ public class SmalActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        JobQueue.dropInstance();
+        final com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler = this.eventHandler;
         if (null != eventHandler) {
             eventHandler.close();
-            eventHandler = null;
+            this.eventHandler = null;
         }
         cleanUp();
+        final IndexService indexService = this.indexService;
         if (null != indexService) {
             indexService.getAdapter().stop();
-            indexService = null;
+            this.indexService = null;
         }
         SmalServiceLookup.getInstance().setServiceLookup(null);
     }

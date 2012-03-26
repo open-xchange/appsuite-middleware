@@ -556,7 +556,7 @@ public abstract class MailConfig {
                 mailConfig.password = "";
             } else {
                 // Mail account's password
-                mailConfig.password = mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
+                mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
             }
         }
     }

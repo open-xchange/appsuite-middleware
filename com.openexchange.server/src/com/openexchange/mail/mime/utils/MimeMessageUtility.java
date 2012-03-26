@@ -84,6 +84,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -334,6 +335,30 @@ public final class MimeMessageUtility {
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
         "(<img[^>]*?)(src=\")([^\"]+?)(?:\\?|&amp;|&)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final String IMAGE_ALIAS = ImageServlet.ALIAS;
+
+    private static final String FILE_ALIAS = "ajax/file";
+
+    /**
+     * Checks if specified &lt;image&gt; tag's <code>src</code> attribute seems to point to OX image Servlet.
+     * 
+     * @param imageTag The &lt;image&gt; tag
+     * @return <code>true</code> if image Servlet is addressed; otherwise <code>false</code>
+     */
+    public static boolean isValidImageUri(final String imageTag) {
+        if (isEmpty(imageTag)) {
+            return false;
+        }
+        final String tmp = imageTag.toLowerCase(Locale.US);
+        final String srcStart = "src=\"";
+        final int pos = tmp.indexOf(srcStart);
+        int fromIndex = pos + srcStart.length();
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        return tmp.indexOf(IMAGE_ALIAS, fromIndex) >= 0 || tmp.indexOf(FILE_ALIAS, fromIndex) >= 0;
+    }
 
     /**
      * Detects if given HTML content contains references to local image files

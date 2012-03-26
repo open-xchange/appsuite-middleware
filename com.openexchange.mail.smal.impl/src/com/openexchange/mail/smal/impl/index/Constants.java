@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.jobqueue;
+package com.openexchange.mail.smal.impl.index;
 
 /**
  * {@link Constants} - Constants for job queue.
@@ -72,15 +72,5 @@ public final class Constants {
      * Default (5 minutes) milliseconds.
      */
     public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
-
-    /**
-     * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
-     */
-    public static final int CHUNK_SIZE = 0;
-
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
 
 }

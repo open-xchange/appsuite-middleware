@@ -90,6 +90,7 @@ public final class ImageUtility {
      *
      * @param imageUri The image URI
      * @return The parsed image location
+     * @throws IllegalArgumentException If no such registration name can be found
      */
     public static ImageLocation parseImageLocationFrom(final String imageUri) {
         if (null == imageUri) {
