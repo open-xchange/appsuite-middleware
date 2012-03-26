@@ -61,7 +61,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
-import com.openexchange.mail.smal.impl.processor.IProcessorStrategy;
+import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
 import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
 import com.openexchange.mail.smal.impl.processor.Processor;
@@ -125,7 +125,7 @@ public abstract class AbstractSMALStorage {
     /**
      * The processor strategy to use.
      */
-    protected final IProcessorStrategy processorStrategy;
+    protected final ProcessorStrategy processorStrategy;
 
     /**
      * The processor parameterized with <code>processorStrategy</code>.

@@ -110,7 +110,7 @@ public final class Processor implements SolrMailConstants {
         return INSTANCE;
     }
 
-    protected final IProcessorStrategy strategy;
+    protected final ProcessorStrategy strategy;
 
     /**
      * Initializes a new {@link Processor}.
@@ -124,7 +124,7 @@ public final class Processor implements SolrMailConstants {
      * 
      * @param strategy The strategy to lookup high attention folders
      */
-    public Processor(final IProcessorStrategy strategy) {
+    public Processor(final ProcessorStrategy strategy) {
         super();
         assert null != strategy;
         this.strategy = strategy;
@@ -200,13 +200,14 @@ public final class Processor implements SolrMailConstants {
                     final String fullName = folderInfo.getFullName();
                     final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
                     mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
+                    processingProgress.setHasHighAttention(strategy.hasHighAttention(folderInfo));
                     if (initial) {
                         /*-
                          * 
                          * Denoted folder has not been added to index before
                          * 
                          */
-                        processingProgress.setFirstTime(true).setHasHighAttention(strategy.hasHighAttention(folderInfo));
+                        processingProgress.setFirstTime(true);
                         if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
                             processingProgress.setProcessType(ProcessType.FULL);
                             latch.countDown();
@@ -267,7 +268,7 @@ public final class Processor implements SolrMailConstants {
                          * Denoted folder has already been added to index before
                          * 
                          */
-                        processingProgress.setFirstTime(false).setHasHighAttention(strategy.hasHighAttention(folderInfo));
+                        processingProgress.setFirstTime(false);
                         final Map<String, MailMessage> storageMap;
                         final Map<String, MailMessage> indexMap;
                         {
@@ -505,8 +506,8 @@ public final class Processor implements SolrMailConstants {
                 mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
                 mailConfig.isSecure()).primaryPassword(session.getPassword());
         final FolderJob folderJob = new FolderJob(folderInfo.getFullName(), jobInfoBuilder.build());
-        folderJob.setIndexMails(new ArrayList<MailMessage>(indexMails));
-        folderJob.setStorageMails(new ArrayList<MailMessage>(storageMails));
+        folderJob.setIndexMails(null == indexMails ? null : new ArrayList<MailMessage>(indexMails));
+        folderJob.setStorageMails(null == storageMails ? null : new ArrayList<MailMessage>(storageMails));
         indexingService.addJob(folderJob);
     }
 

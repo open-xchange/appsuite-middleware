@@ -52,11 +52,11 @@ package com.openexchange.mail.smal.impl.processor;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IProcessorStrategy} - The strategy for the {@link Processor processor}.
+ * {@link ProcessorStrategy} - The strategy for the {@link Processor processor}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IProcessorStrategy {
+public interface ProcessorStrategy {
 
     /**
      * Determines if specified folder is considered as a folder with high attention; e.g. INBOX folder

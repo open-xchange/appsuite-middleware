@@ -58,7 +58,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link ProcessingProgress} - The state of an in-progress folder.
+ * {@link ProcessingProgress} - The status of an in-progress folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
