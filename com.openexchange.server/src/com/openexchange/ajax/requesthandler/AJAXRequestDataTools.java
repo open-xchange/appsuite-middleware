@@ -196,7 +196,7 @@ public class AJAXRequestDataTools {
         return retval;
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes")));
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "on")));
 
     private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
         final String parameter = req.getParameter(name);
@@ -248,7 +248,14 @@ public class AJAXRequestDataTools {
         return startingChar == toCheck.charAt(i);
     }
 
-	public String getModule(String prefix, HttpServletRequest req) {
+	/**
+	 * Gets the module from specified HTTP request.
+	 * 
+	 * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
+	 * @param req The HTTP request
+	 * @return The determined module
+	 */
+	public String getModule(final String prefix, final HttpServletRequest req) {
 		 String pathInfo = req.getRequestURI();
          final int lastIndex = pathInfo.lastIndexOf(';');
          if (lastIndex > 0) {
@@ -257,14 +264,18 @@ public class AJAXRequestDataTools {
          return pathInfo.substring(prefix.length());
 	}
 
-	public String getAction(HttpServletRequest req) {
-		 
+	/**
+	 * Gets the action from specified HTTP request.
+	 * 
+	 * @param req The HTTP request
+	 * @return The determined action
+	 */
+	public String getAction(final HttpServletRequest req) {
 		final String action = req.getParameter("action");
 		if (null == action) {
 			return req.getMethod().toUpperCase(Locale.US);
-		} else {
-			return action;
 		}
+        return action;
         
 	}
 }
