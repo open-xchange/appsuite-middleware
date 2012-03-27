@@ -75,12 +75,12 @@ public class OXExceptionFactory {
     }
 
     /**
-     * Checks if attributes of specified {@link OXException} instance or the ones from any of its causes (recursive check) matches this
+     * Checks if attributes of specified {@link OXException} instance or the ones from any of its causes (recursive check) matches given
      * code's ones.
      *
      * @param code The code to check against
      * @param e The exception to check
-     * @return <code>true</code> if specified {@link OXException}'s attributes matches this code's ones; otherwise <code>false</code>
+     * @return <code>true</code> if specified {@link OXException}'s attributes matches given code's ones; otherwise <code>false</code>
      */
     public boolean equals(final OXExceptionCode code, final OXException e) {
         return recEquals(code.getPrefix(), code.getNumber(), e);
