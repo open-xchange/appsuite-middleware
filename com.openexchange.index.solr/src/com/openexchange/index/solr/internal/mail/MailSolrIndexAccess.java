@@ -340,14 +340,36 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     public void addAttachments(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
         addContent(documents);
     }
-
+    
     @Override
     public void change(final IndexDocument<MailMessage> document, final String... fields) throws OXException {
         if (null == fields || 0 == fields.length) {
             return;
         }
 
-        change(document, new HashSet<String>(Arrays.asList(fields)));
+        final Set<String> fieldSet = new HashSet<String>(Arrays.asList(fields));
+        final SolrInputDocument inputDocument = calculateAndSetChanges(document, fieldSet);        
+        addDocument(inputDocument, true);
+    }
+
+    @Override
+    public void change(final Collection<IndexDocument<MailMessage>> documents, final String... fields) throws OXException, InterruptedException {
+        if (null == fields || 0 == fields.length) {
+            return;
+        }
+
+        final Set<String> fieldSet = new HashSet<String>(Arrays.asList(fields));
+        final List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+        for (final IndexDocument<MailMessage> document : documents) {
+            if (Thread.interrupted()) {
+                // Clears the thread's interrupted flag
+                throw new InterruptedException("Thread interrupted while changing mail contents.");
+            }
+            final SolrInputDocument inputDocument = calculateAndSetChanges(document, fieldSet); 
+            inputDocuments.add(inputDocument);
+        }
+        
+        addDocuments(inputDocuments);
     }
     
     private SolrInputDocument calculateAndSetChanges(final IndexDocument<MailMessage> document, final Set<String> fields) throws OXException {
@@ -454,31 +476,6 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         }
         
         return inputDocument;
-    }
-
-    private void change(final IndexDocument<MailMessage> document, final Set<String> fields) throws OXException {
-        final SolrInputDocument inputDocument = calculateAndSetChanges(document, fields);        
-        addDocument(inputDocument, true);
-    }
-
-    @Override
-    public void change(final Collection<IndexDocument<MailMessage>> documents, final String... fields) throws OXException, InterruptedException {
-        if (null == fields || 0 == fields.length) {
-            return;
-        }
-
-        final Set<String> fieldSet = new HashSet<String>(Arrays.asList(fields));
-        final List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (final IndexDocument<MailMessage> document : documents) {
-            if (Thread.interrupted()) {
-                // Clears the thread's interrupted flag
-                throw new InterruptedException("Thread interrupted while changing mail contents.");
-            }
-            final SolrInputDocument inputDocument = calculateAndSetChanges(document, fieldSet); 
-            inputDocuments.add(inputDocument);
-        }
-        
-        addDocuments(inputDocuments);
     }
 
     @Override
