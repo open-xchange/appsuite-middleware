@@ -52,6 +52,10 @@ package com.openexchange.jslob.json.action;
 import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlob;
@@ -63,7 +67,17 @@ import com.openexchange.server.ServiceLookup;
  * {@link GetAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Action(
+    name = "get"
+    , description = "Get a specific JSlob associated with the current user and context." 
+    , method = RequestMethod.GET
+    , parameters = {
+        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        , @Parameter(name = "id", description = "The identifier of the JSlob.")
+    }
+)
 public final class GetAction extends JSlobAction {
 
     /**

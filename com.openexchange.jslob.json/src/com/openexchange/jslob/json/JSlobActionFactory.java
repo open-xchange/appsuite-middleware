@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.json.action.JSlobAction;
 import com.openexchange.server.ServiceLookup;
@@ -62,7 +63,9 @@ import com.openexchange.server.ServiceLookup;
  * {@link JSlobActionFactory}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Module(name = "jslob", description = "Provides access to JSlob data associated with the current user and context.")
 public class JSlobActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, JSlobAction> actions;
