@@ -1486,20 +1486,17 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(
-                                sb,
-                                m.group().replaceFirst(
-                                    "(?i)src=\"[^\"]*\"",
-                                    "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                            mr.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
                     } else {
                         final ImageLocation imageLocation;
                         {
-                            final String match = m.group();
+                            final String match = imageTag;
                             final Matcher srcMatcher = PATTERN_SRC.matcher(match);
                             if (srcMatcher.find()) {
-                                imageLocation = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                imageLocation =
+                                    ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
                             } else {
                                 imageLocation = ImageUtility.parseImageLocationFrom(match);
                             }
@@ -1513,40 +1510,30 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(
-                                sb,
-                                m.group().replaceFirst(
-                                    "(?i)src=\"[^\"]*\"",
-                                    "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                            mr.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
-                        final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
+                        final ImageDataSource dataSource =
+                            (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
                         if (null == dataSource) {
                             if (LOG.isWarnEnabled()) {
                                 tmp.setLength(0);
-                                LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append("\". Referenced image is skipped.").toString());
+                                LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append(
+                                    "\". Referenced image is skipped.").toString());
                             }
                             /*
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(
-                                sb,
-                                m.group().replaceFirst(
-                                    "(?i)src=\"[^\"]*\"",
-                                    "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                            mr.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (e.isPrefix("MSG") && MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getCode()) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
                                 tmp.setLength(0);
-                                mr.appendLiteralReplacement(
-                                    sb,
-                                    m.group().replaceFirst(
-                                        "(?i)src=\"[^\"]*\"",
-                                        "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                                mr.appendLiteralReplacement(sb, imageTag);
                                 continue;
                             }
                             throw e;
@@ -1564,7 +1551,7 @@ public class MimeMessageFiller {
                     }
                     mr.appendLiteralReplacement(
                         sb,
-                        m.group().replaceFirst(
+                        imageTag.replaceFirst(
                             "(?i)src=\"[^\"]*\"",
                             "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
                     // mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp,

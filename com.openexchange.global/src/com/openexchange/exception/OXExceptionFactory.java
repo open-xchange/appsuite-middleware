@@ -91,10 +91,10 @@ public class OXExceptionFactory {
             return true;
         }
         final Throwable cause = e.getCause();
-        if (cause instanceof OXException) {
-            return recEquals(prefix, code, (OXException) cause);
+        if (!(cause instanceof OXException)) {
+            return false;
         }
-        return false;
+        return recEquals(prefix, code, (OXException) cause);
     }
 
     /**
