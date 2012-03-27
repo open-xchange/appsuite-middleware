@@ -89,7 +89,8 @@ public abstract class ContactAction implements AJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(requestData, session);
 
-        return perform(contactRequest);
+        return perform2(contactRequest);
+//        return perform(contactRequest);
     }
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;

@@ -54,12 +54,14 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.GregorianCalendar;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -2268,15 +2270,50 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
 			@Override
 			public void deserialize(JSONObject from, Contact to) throws JSONException, OXException {
-				// TODO Auto-generated method stub
-				
+				final JSONArray jsonArray = from.getJSONArray(this.getAjaxName());
+		        final DistributionListEntryObject[] distributionList = new DistributionListEntryObject[jsonArray.length()];
+		        for (int i = 0; i < jsonArray.length(); i++) {
+		            final JSONObject entry = jsonArray.getJSONObject(i);
+	                distributionList[i] = new DistributionListEntryObject();
+	                if (entry.hasAndNotNull(DistributionListFields.ID)) {
+	                	distributionList[i].setEntryID(entry.getInt(DistributionListFields.ID));
+	                }
+	                if (entry.hasAndNotNull(DistributionListFields.FIRST_NAME)) {
+	                    distributionList[i].setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
+	                }
+	                if (entry.hasAndNotNull(DistributionListFields.LAST_NAME)) {
+	                    distributionList[i].setFirstname(entry.getString(DistributionListFields.LAST_NAME));
+	                }
+	                if (entry.hasAndNotNull(DistributionListFields.DISPLAY_NAME)) {
+	                    distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+	                }
+	                if (entry.hasAndNotNull(DistributionListFields.MAIL)) {
+	                    distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
+	                }
+	                if (entry.hasAndNotNull(DistributionListFields.MAIL_FIELD)) {
+	                    distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
+	                }
+		        }		        
+		        this.set(to, distributionList);
 			}
 			
 			@Override
 			public void serialize(Contact from, JSONObject to) throws JSONException {
-				final DistributionListEntryObject[] value = this.get(from);
-				if (null != value && 0 < value.length) {
-					//TODO
+				final DistributionListEntryObject[] distributionList = this.get(from);
+				if (null != distributionList) {
+			        final JSONArray jsonArray = new JSONArray();
+			        for (int i = 0; i < distributionList.length; i++) {
+			            final JSONObject entry = new JSONObject();
+			            final int emailField = distributionList[i].getEmailfield();
+			            if (DistributionListEntryObject.INDEPENDENT != emailField) {
+			                entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
+			            }
+			            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
+			            entry.put(DistributionListFields.DISPLAY_NAME, distributionList[i].getDisplayname());
+			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
+			            jsonArray.put(entry);
+			        }
+			        to.put(getAjaxName(), jsonArray);
 		        }
 			}
         });
