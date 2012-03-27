@@ -375,29 +375,24 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                  */
                 final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
                 final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);                
-                if (embeddedAccess.startCore(configuration)) {                
-                    return embeddedAccess;
+                if (!embeddedAccess.startCore(configuration)) {
+                    throw SolrExceptionCodes.DELEGATION_ERROR.create();
                 }
-                
-                throw SolrExceptionCodes.DELEGATION_ERROR.create();
-            } else {
-                return getRMIAccess(solrCore.getServer());
-            }
-        } else {
-            final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
-            final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);    
-            if (tryToStart(configuration)) {
                 return embeddedAccess;
-            } else {
-                solrCore = indexMysql.getSolrCore(contextId, userId, module);
-                final String coreServer = solrCore.getServer();
-                if (solrCore.isActive() && !coreServer.equals(getLocalServerAddress())) {
-                    return getRMIAccess(coreServer);
-                }
-                
-                throw SolrExceptionCodes.DELEGATION_ERROR.create();
             }
+            return getRMIAccess(solrCore.getServer());
         }
+        final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
+        final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);    
+        if (tryToStart(configuration)) {
+            return embeddedAccess;
+        }
+        solrCore = indexMysql.getSolrCore(contextId, userId, module);
+        final String coreServer = solrCore.getServer();
+        if (!solrCore.isActive() || coreServer.equals(getLocalServerAddress())) {
+            throw SolrExceptionCodes.DELEGATION_ERROR.create();
+        }
+        return getRMIAccess(coreServer);
     }
     
     private SolrAccessService getRMIAccess(final String server) throws OXException {
