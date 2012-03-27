@@ -57,7 +57,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +64,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-import com.openexchange.concurrent.ConcurrentHashSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
@@ -90,15 +88,12 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     private String serverAddress = null;
 
     private final SolrIndexMysql indexMysql;
-    
-    private final Set<SolrCoreIdentifier> startedCores;
-    
+        
 
     public DelegationSolrAccessImpl(final EmbeddedSolrAccessImpl localDelegate) {
         super();
         this.embeddedAccess = localDelegate;
         indexMysql = SolrIndexMysql.getInstance();
-        startedCores = new ConcurrentHashSet<SolrCoreIdentifier>();
     }
     
     public void startUp() throws OXException {
@@ -107,16 +102,21 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     
     public void shutDown() throws OXException {
         final String server = getLocalServerAddress();
-        final Set<Integer> contextIds = new HashSet<Integer>();
-        final Iterator<SolrCoreIdentifier> it = startedCores.iterator();
-        while (it.hasNext()) {
-            final SolrCoreIdentifier identifier = it.next();
-            contextIds.add(identifier.getContextId());
+        final Set<Integer> contextIds = new HashSet<Integer>();        
+        final Collection<String> activeCores = embeddedAccess.getActiveCores();        
+        for (final String core : activeCores) {
+            try {
+                final SolrCoreIdentifier identifier = new SolrCoreIdentifier(core);
+                contextIds.add(identifier.getContextId());
+            } catch (final OXException e) {
+                // Parsing error. Ignore this core.
+            }
         }
         
         for (final Integer contextId : contextIds) {
             indexMysql.deactivateCoresForServer(server, contextId);
         }
+        
         embeddedAccess.shutDown();
     }
 
@@ -169,7 +169,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                 return false;
             }
         
-            startedCores.add(identifier);
             return true;
         }
         
@@ -186,14 +185,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         final int contextId = identifier.getContextId();
         final int userId = identifier.getUserId();
         final int module = identifier.getModule();
-        if (startedCores.remove(identifier)) {
+        if (embeddedAccess.hasActiveCore(identifier)) {
             indexMysql.deactivateCoreEntry(contextId, userId, module);
             embeddedAccess.stopCore(identifier);
             
             return true;       
         }
         
-        LOG.info("User " + userId + " in context " + contextId + " tried to stop a solr core for module " + module + " that was not started by this instance.");
+        LOG.info("User " + userId + " in context " + contextId + " tried to stop a solr core for module " + module + " that was not started by this instance or is already closed.");
         return false;
     }
 
@@ -378,6 +377,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                 if (!embeddedAccess.startCore(configuration)) {
                     throw SolrExceptionCodes.DELEGATION_ERROR.create();
                 }
+                
                 return embeddedAccess;
             }
             return getRMIAccess(solrCore.getServer());

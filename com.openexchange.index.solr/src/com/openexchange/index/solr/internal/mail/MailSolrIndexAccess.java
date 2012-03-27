@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -292,9 +293,19 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);        
         addDocument(inputDocument);     
     }
-
+    
+    private static final boolean SINGLE_LOADING = true;
+    
     @Override
     public void addContent(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
+        if (SINGLE_LOADING) {
+            addContentWithSingleLoading(documents);
+        } else {
+            addContentWithoutSingleLoading(documents);
+        }
+    }
+    
+    private void addContentWithSingleLoading(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
         final Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (final IndexDocument<MailMessage> document : documents) {
             if (Thread.interrupted()) {
@@ -325,6 +336,74 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 final Locale locale = detectLocale(text);
                 inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
             }
+            inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);  
+            inputDocuments.add(inputDocument);  
+        }
+        
+        addDocuments(inputDocuments);
+    }
+
+    private void addContentWithoutSingleLoading(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
+        final Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>(documents.size());
+        final Map<String, IndexDocument<MailMessage>> toAdd = new HashMap<String, IndexDocument<MailMessage>>(documents.size());
+        final Map<String, SolrDocument> loadedDocuments = new HashMap<String, SolrDocument>(documents.size());
+        
+        final StringBuilder queryBuilder = new StringBuilder(128);
+        boolean first = true;
+        for (final IndexDocument<MailMessage> document : documents) {
+            final MailMessage mailMessage = document.getObject();
+            final int accountId = mailMessage.getAccountId();
+            final MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());
+            if (first) {
+                queryBuilder.append('(').append(FIELD_UUID).append(":\"").append(uuid.getUUID()).append("\")");
+                first = false;
+            } else {
+                queryBuilder.append(" OR ");
+                queryBuilder.append('(').append(FIELD_UUID).append(":\"").append(uuid.getUUID()).append("\")");
+            }
+            
+            toAdd.put(uuid.getUUID(), document);
+        }
+        
+        final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
+        solrQuery.setStart(Integer.valueOf(0));
+        solrQuery.setRows(Integer.valueOf(documents.size()));   
+        final QueryResponse queryResponse = query(solrQuery);
+        final SolrDocumentList results = queryResponse.getResults();
+        for (final SolrDocument solrDocument : results) {
+            final String uuid = (String) solrDocument.getFieldValue(FIELD_UUID);
+            loadedDocuments.put(uuid, solrDocument);
+        }
+        
+        for (final String uuid : toAdd.keySet()) {
+            if (Thread.interrupted()) {
+                // Clears the thread's interrupted flag
+                throw new InterruptedException("Thread interrupted while adding mail contents.");
+            }
+            
+            final IndexDocument<MailMessage> document = toAdd.get(uuid);
+            final MailMessage message = document.getObject();
+            final SolrDocument solrDocument = loadedDocuments.get(uuid);
+            final SolrInputDocument inputDocument;
+            if (solrDocument == null) {
+                inputDocument = helper.inputDocumentFor(message, userId, contextId);
+            } else {
+                inputDocument = new SolrInputDocument();
+                for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                    final String name = entry.getKey();
+                    final SolrInputField field = new SolrInputField(name);
+                    field.setValue(entry.getValue(), 1.0f);
+                    inputDocument.put(name, field);
+                }
+            }
+            
+            final TextFinder textFinder = new TextFinder();
+            final String text = textFinder.getText(message);
+            if (null != text) {
+                final Locale locale = detectLocale(text);
+                inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+            }
+            
             inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);  
             inputDocuments.add(inputDocument);  
         }
