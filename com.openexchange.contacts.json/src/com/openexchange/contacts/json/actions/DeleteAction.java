@@ -50,9 +50,7 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -72,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted contacts.")
-}, requestBody = "An object with the fields \"id\" and \"folder\".",
+}, requestBody = "An object with the fields \"id\" or \"ids\" and \"folder\". \"id\" contains an integer value for deleting a single contact while \"ids\" must not be set. Use the array \"ids\" to delete multiple contacts.",
 responseDescription = "")
 public class DeleteAction extends ContactAction {
 
@@ -105,7 +103,17 @@ public class DeleteAction extends ContactAction {
         final int[] deleteRequestData = req.getDeleteRequestData();
         final Date date = new Date(timestamp);
 
-        getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), date);
+        if (deleteRequestData.length > 2) {
+            for (int i = 0; i < deleteRequestData.length - 1; i++) {
+                getContactService().deleteContact(
+                    session,
+                    Integer.toString(deleteRequestData[deleteRequestData.length - 1]),
+                    Integer.toString(deleteRequestData[i]),
+                    date);
+            }
+        } else {
+            getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), date);
+        }
 //        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
 //        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
 

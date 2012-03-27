@@ -89,5 +89,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // Could not parse URI: %1$s.
     public static final String URI_PARSE_ERROR_MSG = "Could not parse URI: %1$s.";
+
+    // Remote error: %1$s.
+    public static final String REMOTE_ERROR_MSG = "Remote error: %1$s.";
     
 }
