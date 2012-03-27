@@ -1462,111 +1462,106 @@ public class MimeMessageFiller {
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
         if (m.find()) {
-            msgFiller.uploadFileIDs = new HashSet<String>();
+            final Set<String> uploadFileIDs = msgFiller.uploadFileIDs = new HashSet<String>();
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
             final StringBuilder tmp = new StringBuilder(128);
             do {
-                final String id = m.group(5);
-                final ImageProvider imageProvider;
-                if (mfm.contains(id)) {
-                    try {
-                        imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
-                    } catch (final OXException e) {
-                        if (LOG.isWarnEnabled()) {
+                final String imageTag = m.group();
+                if (MimeMessageUtility.isValidImageUri(imageTag)) {
+                    final String id = m.group(5);
+                    final ImageProvider imageProvider;
+                    if (mfm.contains(id)) {
+                        try {
+                            imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
+                        } catch (final OXException e) {
+                            if (LOG.isWarnEnabled()) {
+                                tmp.setLength(0);
+                                LOG.warn(
+                                    tmp.append("Image with id \"").append(id).append("\" could not be loaded. Referenced image is skipped.").toString(),
+                                    e);
+                            }
+                            /*
+                             * Anyway, replace image tag
+                             */
                             tmp.setLength(0);
-                            LOG.warn(
-                                tmp.append("Image with id \"").append(id).append("\" could not be loaded. Referenced image is skipped.").toString(),
-                                e);
-                        }
-                        /*
-                         * Anyway, replace image tag
-                         */
-                        tmp.setLength(0);
-                        mr.appendLiteralReplacement(
-                            sb,
-                            m.group().replaceFirst(
-                                "(?i)src=\"[^\"]*\"",
-                                "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
-                        continue;
-                    }
-                } else {
-                    final ImageLocation imageLocation;
-                    {
-                        final String match = m.group();
-                        final Matcher srcMatcher = PATTERN_SRC.matcher(match);
-                        if (srcMatcher.find()) {
-                            imageLocation = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
-                        } else {
-                            imageLocation = ImageUtility.parseImageLocationFrom(match);
-                        }
-                    }
-                    if (null == imageLocation) {
-                        if (LOG.isWarnEnabled()) {
-                            tmp.setLength(0);
-                            LOG.warn(tmp.append("No image found with id \"").append(id).append("\". Referenced image is skipped.").toString());
-                        }
-                        /*
-                         * Anyway, replace image tag
-                         */
-                        tmp.setLength(0);
-                        mr.appendLiteralReplacement(
-                            sb,
-                            m.group().replaceFirst(
-                                "(?i)src=\"[^\"]*\"",
-                                "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
-                        continue;
-                    }
-                    final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
-                    if (null == dataSource) {
-                        if (LOG.isWarnEnabled()) {
-                            tmp.setLength(0);
-                            LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append("\". Referenced image is skipped.").toString());
-                        }
-                        /*
-                         * Anyway, replace image tag
-                         */
-                        tmp.setLength(0);
-                        mr.appendLiteralReplacement(
-                            sb,
-                            m.group().replaceFirst(
-                                "(?i)src=\"[^\"]*\"",
-                                "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
-                        continue;
-                    }
-                    try {
-                        imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
-                    } catch (final OXException e) {
-                        if (e.isPrefix("MSG") && MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getCode()) {
-                            tmp.setLength(0);
-                            mr.appendLiteralReplacement(
-                                sb,
-                                m.group().replaceFirst(
-                                    "(?i)src=\"[^\"]*\"",
-                                    "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                            mr.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
-                        throw e;
+                    } else {
+                        final ImageLocation imageLocation;
+                        {
+                            final String match = imageTag;
+                            final Matcher srcMatcher = PATTERN_SRC.matcher(match);
+                            if (srcMatcher.find()) {
+                                imageLocation =
+                                    ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                            } else {
+                                imageLocation = ImageUtility.parseImageLocationFrom(match);
+                            }
+                        }
+                        if (null == imageLocation) {
+                            if (LOG.isWarnEnabled()) {
+                                tmp.setLength(0);
+                                LOG.warn(tmp.append("No image found with id \"").append(id).append("\". Referenced image is skipped.").toString());
+                            }
+                            /*
+                             * Anyway, replace image tag
+                             */
+                            tmp.setLength(0);
+                            mr.appendLiteralReplacement(sb, imageTag);
+                            continue;
+                        }
+                        final ImageDataSource dataSource =
+                            (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
+                        if (null == dataSource) {
+                            if (LOG.isWarnEnabled()) {
+                                tmp.setLength(0);
+                                LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append(
+                                    "\". Referenced image is skipped.").toString());
+                            }
+                            /*
+                             * Anyway, replace image tag
+                             */
+                            tmp.setLength(0);
+                            mr.appendLiteralReplacement(sb, imageTag);
+                            continue;
+                        }
+                        try {
+                            imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
+                        } catch (final OXException e) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
+                                tmp.setLength(0);
+                                mr.appendLiteralReplacement(sb, imageTag);
+                                continue;
+                            }
+                            throw e;
+                        }
                     }
-                }
-                final boolean appendBodyPart;
-                if (msgFiller.uploadFileIDs.contains(id)) {
-                    appendBodyPart = false;
+                    final boolean appendBodyPart;
+                    if (uploadFileIDs.contains(id)) {
+                        appendBodyPart = false;
+                    } else {
+                        /*
+                         * Remember id to avoid duplicate attachment and for later cleanup
+                         */
+                        uploadFileIDs.add(id);
+                        appendBodyPart = true;
+                    }
+                    mr.appendLiteralReplacement(
+                        sb,
+                        imageTag.replaceFirst(
+                            "(?i)src=\"[^\"]*\"",
+                            "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
+                    // mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp,
+                    // mp)));
                 } else {
                     /*
-                     * Remember id to avoid duplicate attachment and for later cleanup
+                     * Re-append as-is
                      */
-                    msgFiller.uploadFileIDs.add(id);
-                    appendBodyPart = true;
+                    mr.appendLiteralReplacement(sb, imageTag);
                 }
-                mr.appendLiteralReplacement(
-                    sb,
-                    m.group().replaceFirst(
-                        "(?i)src=\"[^\"]*\"",
-                        "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
-                // mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp,
-                // mp)));
             } while (m.find());
         }
         mr.appendTail(sb);

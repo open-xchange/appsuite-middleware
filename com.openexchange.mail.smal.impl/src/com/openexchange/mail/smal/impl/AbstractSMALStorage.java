@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.impl;
 
-import static com.openexchange.mail.smal.impl.SmalServiceLookup.getServiceStatic;
 import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,13 +60,11 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
-import com.openexchange.mail.smal.impl.adapter.IndexService;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
-import com.openexchange.mail.smal.impl.processor.IProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
 import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
 import com.openexchange.mail.smal.impl.processor.Processor;
+import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
@@ -128,7 +125,7 @@ public abstract class AbstractSMALStorage {
     /**
      * The processor strategy to use.
      */
-    protected final IProcessorStrategy processorStrategy;
+    protected final ProcessorStrategy processorStrategy;
 
     /**
      * The processor parameterized with <code>processorStrategy</code>.
@@ -171,9 +168,10 @@ public abstract class AbstractSMALStorage {
      * 
      * @param mailFolder The folder to process
      * @return The processing progress
+     * @throws OXException If processing fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final MailFolder mailFolder) throws InterruptedException {
+    protected ProcessingProgress processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
         return processor.processFolder(mailFolder, accountId, session, Collections.<String, Object> emptyMap());
     }
 
@@ -182,9 +180,10 @@ public abstract class AbstractSMALStorage {
      * 
      * @param mailFolderInfo The information of the folder to process
      * @return The processing progress
+     * @throws OXException If processing fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final MailFolderInfo mailFolderInfo) throws InterruptedException {
+    protected ProcessingProgress processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
         return processor.processFolder(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
     }
 
@@ -229,18 +228,6 @@ public abstract class AbstractSMALStorage {
             }
         }
         return jobInfo;
-    }
-
-    /**
-     * Gets the available index adapter.
-     * 
-     * @return The index adapter
-     * @deprecated Use SmalServiceLookup.getServiceStatic(IndexFacadeService.class)
-     */
-    @Deprecated
-    protected static IndexAdapter getIndexAdapter() {
-        final IndexService indexService = getServiceStatic(IndexService.class);
-        return null == indexService ? null : indexService.getAdapter();
     }
 
     /**

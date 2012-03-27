@@ -59,7 +59,7 @@ public class SolrCore {
 
     private String server;
     
-    private SolrCoreStore store;
+    private int store;
 
     private SolrCoreIdentifier identifier;
     
@@ -94,7 +94,7 @@ public class SolrCore {
      *
      * @return The store
      */
-    public SolrCoreStore getStore() {
+    public int getStore() {
         return store;
     }
     
@@ -103,7 +103,7 @@ public class SolrCore {
      *
      * @param store The store to set
      */
-    public void setStore(final SolrCoreStore store) {
+    public void setStore(final int store) {
         this.store = store;
     }
     

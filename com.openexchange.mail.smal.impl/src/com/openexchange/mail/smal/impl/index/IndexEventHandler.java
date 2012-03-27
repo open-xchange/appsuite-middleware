@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.jobqueue.internal;
+package com.openexchange.mail.smal.impl.index;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,15 +63,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
-import com.openexchange.mail.smal.impl.jobqueue.Constants;
-import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.ElapsedFolderJob;
-import com.openexchange.mail.smal.impl.jobqueue.jobs.MailAccountJob;
+import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
+import com.openexchange.service.indexing.mail.job.ElapsedFolderJob;
+import com.openexchange.service.indexing.mail.job.MailAccountJob;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -79,23 +82,23 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link JobQueueEventHandler} - Starts/drops periodic jobs for a user by tracking added/removed sessions.
+ * {@link IndexEventHandler} - Starts/drops periodic jobs for a user by tracking added/removed sessions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JobQueueEventHandler implements EventHandler {
+public final class IndexEventHandler implements EventHandler {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JobQueueEventHandler.class));
+    protected static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IndexEventHandler.class));
 
     private final ConcurrentMap<Key, ConcurrentMap<String, ElapsedFolderJob>> periodicJobs;
 
     private final ScheduledTimerTask timerTask;
 
     /**
-     * Initializes a new {@link JobQueueEventHandler}.
+     * Initializes a new {@link IndexEventHandler}.
      */
-    public JobQueueEventHandler() {
+    public IndexEventHandler() {
         super();
         periodicJobs = new ConcurrentHashMap<Key, ConcurrentMap<String,ElapsedFolderJob>>();
         final TimerService timerService = SmalServiceLookup.getServiceStatic(TimerService.class);
@@ -110,9 +113,7 @@ public final class JobQueueEventHandler implements EventHandler {
             final ConcurrentMap<String, ElapsedFolderJob> jobs = iter.next();
             iter.remove();
             for (final ElapsedFolderJob job : jobs.values()) {
-                if (!job.isDone()) {
-                    job.cancel();
-                }
+                job.cancel();
             }
         }
         periodicJobs.clear();
@@ -138,9 +139,7 @@ public final class JobQueueEventHandler implements EventHandler {
             return;
         }
         for (final ElapsedFolderJob job : jobs.values()) {
-            if (!job.isDone()) {
-                job.cancel();
-            }
+            job.cancel();
         }
     }
 
@@ -192,7 +191,6 @@ public final class JobQueueEventHandler implements EventHandler {
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
             final long start = System.currentTimeMillis() + Constants.HOUR_MILLIS;
-            final JobQueue jobQueue = JobQueue.getInstance();
             final Set<String> filter = new HashSet<String>(8);
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final int accountId = account.getId();
@@ -201,12 +199,16 @@ public final class JobQueueEventHandler implements EventHandler {
                 if (accountId != MailAccount.DEFAULT_ID) {
                     continue;
                 }
-
+                final MailJobInfo.Builder jobInfoBuilder = new MailJobInfo.Builder(userId, contextId);
                 filter.add("INBOX");
                 if (MailAccount.DEFAULT_ID == accountId) {
-                    filter.addAll(getPrimaryFullNames(session));
+                    filter.addAll(getPrimaryFullNames(session, jobInfoBuilder));
                 } else {
                     MailAccount acc = account;
+                    final String decryptedPW = MailPasswordUtil.decrypt(acc.getPassword(), session, accountId, acc.getLogin(), acc.getMailServer());
+                    jobInfoBuilder.accountId(accountId).login(acc.getLogin()).password(decryptedPW).primaryPassword(session.getPassword());
+                    jobInfoBuilder.port(acc.getMailPort()).server(acc.getMailServer()).secure(acc.isMailSecure());
+
                     String fn = acc.getDraftsFullname();
                     if (null == fn) {
                         acc = Tools.checkFullNames(acc, storageService, session, null);
@@ -235,13 +237,17 @@ public final class JobQueueEventHandler implements EventHandler {
                 /*
                  * Create job
                  */
-                final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, filter);
+                final MailJobInfo jobInfo = jobInfoBuilder.build();
+                final MailAccountJob maj = new MailAccountJob(jobInfo, filter);
                 filter.clear();
-                jobQueue.addJob(maj);
+                final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+                if (null != indexingService) {
+                    indexingService.addJob(maj);
+                }
                 /*
                  * Add periodic job
                  */
-                addPeriodicJob(new ElapsedFolderJob(accountId, userId, contextId, start), session);
+                addPeriodicJob(new ElapsedFolderJob(jobInfo, start), session);
             }
         } catch (final Exception e) {
             // Failed handling session
@@ -249,11 +255,17 @@ public final class JobQueueEventHandler implements EventHandler {
         }
     }
 
-    private List<String> getPrimaryFullNames(final Session session) throws OXException {
+    private List<String> getPrimaryFullNames(final Session session, final Builder jobInfoBuilder) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = SmalMailAccess.getUnwrappedInstance(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(true);
+            // Fill builder
+            final MailConfig config = mailAccess.getMailConfig();
+            jobInfoBuilder.accountId(mailAccess.getAccountId()).login(config.getLogin()).password(
+                config.getPassword()).port(config.getPort()).server(config.getServer()).secure(config.isSecure()).primaryPassword(
+                session.getPassword());
+            // Add folders
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             final List<String> fullNames = new ArrayList<String>(3);
             fullNames.add(folderStorage.getDraftsFolder());
@@ -277,12 +289,17 @@ public final class JobQueueEventHandler implements EventHandler {
         @Override
         public void run() {
             final long now = System.currentTimeMillis();
-            final JobQueue jobQueue = JobQueue.getInstance();
             for (final ConcurrentMap<String, ElapsedFolderJob> jobs : periodicJobs.values()) {
                 for (final ElapsedFolderJob job : jobs.values()) {
                     if (job.mayStart(now)) {
-                        job.reset();
-                        jobQueue.addJob(job);
+                        final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+                        if (null != indexingService) {
+                            try {
+                                indexingService.addJob(job);
+                            } catch (final OXException e) {
+                                LOG.warn("Job could not be scheduled.", e);
+                            }
+                        }
                     }
                 }
             }

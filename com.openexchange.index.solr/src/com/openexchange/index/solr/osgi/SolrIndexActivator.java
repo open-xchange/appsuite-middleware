@@ -51,9 +51,14 @@ package com.openexchange.index.solr.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import org.junit.runner.JUnitCore;
+import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.SolrIndexFacadeTest;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.langdetect.LanguageDetectionService;
@@ -72,6 +77,7 @@ import com.openexchange.user.UserService;
 public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
+    
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -86,6 +92,8 @@ public class SolrIndexActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         registerService(IndexFacadeService.class, new SolrIndexFacadeService());
+        addService(IndexFacadeService.class, new SolrIndexFacadeService());
+        registerService(CommandProvider.class, new UtilCommandProvider(context));
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
 
@@ -96,5 +104,27 @@ public class SolrIndexActivator extends HousekeepingActivator {
          * IndexUpdateTaskProviderService( new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService), new
          * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
          */
+    }
+    
+    public class UtilCommandProvider implements CommandProvider {
+
+        private final BundleContext context;
+
+
+        public UtilCommandProvider(final BundleContext context) {
+            super();
+            this.context = context;
+        }
+
+        public String getHelp() {
+            final StringBuilder help = new StringBuilder();
+            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
+            return help.toString();
+        }
+
+        public void _startTest(final CommandInterpreter commandInterpreter) {
+            final JUnitCore jUnit = new JUnitCore();
+            jUnit.run(SolrIndexFacadeTest.class);
+        }
     }
 }

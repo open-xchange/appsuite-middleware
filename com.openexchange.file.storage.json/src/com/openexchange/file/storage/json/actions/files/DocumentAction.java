@@ -99,11 +99,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     }
 
 	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
-		if (request.isForSpecificVersion()) {
-			setETag(null, -1, result);
-		} else {
-			setETag(getETag(fileMetadata), 0, result);
-		}
+		setETag(getETag(fileMetadata), 0, result);
 	}
 
 	private String getETag(File fileMetadata) {

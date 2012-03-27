@@ -141,7 +141,7 @@ public final class TextFinder {
                         }
                     }
                     textIsHtml = false;
-                } if (ct.startsWith("text/htm")) {
+                } else if (ct.startsWith("text/htm")) {
                     textIsHtml = true;
                     //content = htmlService.getConformHTML(content, "UTF-8");
                     // content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");

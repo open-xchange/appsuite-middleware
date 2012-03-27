@@ -55,6 +55,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import com.openexchange.index.IndexConstants;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;
@@ -74,8 +76,6 @@ import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
-import com.openexchange.mail.smal.impl.adapter.IndexAdapters;
-import com.openexchange.mail.smal.impl.adapter.solrj.SolrConstants;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
@@ -83,10 +83,15 @@ import com.openexchange.mail.smal.impl.adapter.solrj.SolrConstants;
  * @see http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SearchTerm2Query implements SolrConstants {
+public final class SearchTerm2Query implements SolrMailConstants {
 
     private static final class SearchTerm2QueryVisitor implements SearchTermVisitor {
 
+        private static final Set<Locale> KNOWN_LOCALES = IndexConstants.KNOWN_LOCALES;
+
+        /**
+         * The query builder.
+         */
         protected final StringBuilder queryBuilder;
 
         protected SearchTerm2QueryVisitor() {
@@ -118,7 +123,7 @@ public final class SearchTerm2Query implements SolrConstants {
 
         @Override
         public void visit(final BodyTerm term) {
-            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            final Set<Locale> knownLocales = KNOWN_LOCALES;
             final List<String> names = new ArrayList<String>(knownLocales.size());
             final StringBuilder tmp = new StringBuilder(FIELD_CONTENT_PREFIX); // 8
             for (final Locale loc : knownLocales) {
@@ -278,7 +283,7 @@ public final class SearchTerm2Query implements SolrConstants {
 
         @Override
         public void visit(final SubjectTerm term) {
-            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            final Set<Locale> knownLocales = KNOWN_LOCALES;
             final List<String> names = new ArrayList<String>(knownLocales.size());
             final StringBuilder tmp = new StringBuilder(FIELD_SUBJECT_PREFIX); // 8
             for (final Locale loc : knownLocales) {

@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultProcessorStrategy implements IProcessorStrategy {
+public class DefaultProcessorStrategy implements ProcessorStrategy {
 
     /**
      * The max. number of messages that may be indexed with headers only.

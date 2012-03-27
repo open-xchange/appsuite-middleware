@@ -62,7 +62,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
-import com.openexchange.mail.smal.impl.jobqueue.Constants;
+import com.openexchange.mail.smal.impl.index.Constants;
 import com.openexchange.mail.smal.impl.jobqueue.JobQueue;
 
 /**

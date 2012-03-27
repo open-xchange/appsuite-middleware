@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.util.List;
 import com.openexchange.database.provider.DBProvider;
@@ -128,7 +129,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         
         final SolrCoreStore store = stores.get(0);
         store.setMaxCores(99);
-        store.setUri("file:/sonstwo");
+        store.setUri(new URI("file:/sonstwo"));
         indexMysql.updateCoreStoreEntry(con, store);
         final SolrCoreStore reloaded = indexMysql.getCoreStore(con, store.getId());
         assertEquals("MaxCores not equal", store.getMaxCores(), reloaded.getMaxCores());
@@ -146,18 +147,18 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         
     }
     
-    public void testChooseOfCoreStore() throws OXException {
+    public void testChooseOfCoreStore() throws Exception {
         final SolrCoreStore store1 = new SolrCoreStore();
         final int places = 10;
         
         store1.setMaxCores(places);
-        store1.setUri("file:/tmp/nowhere");
+        store1.setUri(new URI("file:/tmp/nowhere"));
         final int sid1 = indexMysql.createCoreStoreEntry(con, store1);
         store1.setId(sid1);
         
         final SolrCoreStore store2 = new SolrCoreStore();
         store2.setMaxCores(places);
-        store2.setUri("file:/tmp/nowhere/else");
+        store2.setUri(new URI("file:/tmp/nowhere/else"));
         final int sid2 = indexMysql.createCoreStoreEntry(con, store2);
         store2.setId(sid2);
 
@@ -167,14 +168,14 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
             final SolrCore core = indexMysql.getSolrCore(con, cid, uid, i);
             
             if (i == 0) {
-                if (core.getStore().getId() == sid1) {
+                if (core.getStore() == sid1) {
                     otherId = sid2;
                 } else {
                     otherId = sid1;
                 }
             }
             
-            final int coreId = core.getStore().getId();
+            final int coreId = core.getStore();
             if ((i % 2) != 0)  {
                 assertEquals("Wrong store.", coreId, otherId);
             }            
@@ -184,7 +185,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
     private int createStore() throws Exception {
         final SolrCoreStore store = new SolrCoreStore();
         store.setMaxCores(10);
-        store.setUri("file:/tmp/nowhere");
+        store.setUri(new URI("file:/tmp/nowhere"));
         return indexMysql.createCoreStoreEntry(con, store);
     }
     

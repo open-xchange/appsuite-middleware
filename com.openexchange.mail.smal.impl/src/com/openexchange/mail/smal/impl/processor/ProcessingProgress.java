@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
@@ -58,7 +59,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link ProcessingProgress} - The state of an in-progress folder.
+ * {@link ProcessingProgress} - The status of an in-progress folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,11 +81,23 @@ public final class ProcessingProgress {
     private volatile Future<Object> future;
 
     /**
+     * The count-down latch indicating proper initialization of this process.
+     */
+    final CountDownLatch latch;
+
+    /**
+     * Whether associated latch has already been counted-down.
+     */
+    volatile boolean countDown;
+
+    /**
      * Initializes a new {@link ProcessingProgress}.
      */
     public ProcessingProgress() {
         super();
         processType = ProcessType.NONE;
+        latch = new CountDownLatch(1);
+        countDown = true;
     }
 
     /**
@@ -128,6 +141,8 @@ public final class ProcessingProgress {
      */
     public ProcessingProgress setProcessType(final ProcessType processType) {
         this.processType = processType;
+        latch.countDown();
+        countDown = false;
         return this;
     }
 
