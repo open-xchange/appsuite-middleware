@@ -274,9 +274,7 @@ public final class Processor implements SolrMailConstants {
                     if (processingProgress.countDown) {
                         processingProgress.latch.countDown();
                     }
-                    if (null != mailAccess) {
-                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
-                    }
+                    SmalMailAccess.closeUnwrappedInstance(mailAccess);
                     releaseAccess(facade, indexAccess);
                 }
             }
