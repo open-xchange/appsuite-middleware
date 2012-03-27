@@ -2350,6 +2350,29 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 //            }
 //        });
 
+        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(ContactFields.PRIVATE_FLAG, 101) {
+
+            @Override
+            public void set(Contact contact, Boolean value) { 
+                contact.setPrivateFlag(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsPrivateFlag();
+            }
+
+            @Override
+            public Boolean get(Contact contact) { 
+                return contact.getPrivateFlag();
+            }
+
+            @Override
+            public void remove(Contact contact) { 
+                contact.removePrivateFlag();
+            }
+        });
+        
         mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>(ContactFields.CREATED_BY, 2) {
 
             @Override

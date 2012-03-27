@@ -53,17 +53,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.search.SearchTerm;
@@ -117,6 +123,56 @@ public class AdvancedSearchAction extends ContactAction {
 
             final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
             it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
+            while (it.hasNext()) {
+                final Contact contact = it.next();
+                lastModified = contact.getLastModified();
+
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                contacts.add(contact);
+
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
+                }
+            }
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
+
+        return new AJAXRequestResult(contacts, lastModified, "contact");
+    }
+
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
+        Date lastModified = null;
+        Date timestamp = new Date(0);
+        final JSONObject json = (JSONObject) req.getData();
+        final TimeZone timeZone = req.getTimeZone();
+
+        JSONArray filterContent;
+        SearchIterator<Contact> it = null;
+        final List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            filterContent = json.getJSONArray("filter");
+            final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
+
+            final ContactService contactService = getContactService();
+            final SortOptions sortOptions = new SortOptions(collation, ContactMapper.getInstance().getMappedField(sort), order);            
+            final ContactField[] fields = ContactMapper.getInstance().getFields(columns);
+            it = contactService.searchContacts(session, searchTerm, fields, sortOptions);
+
+//            final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
+//            it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();

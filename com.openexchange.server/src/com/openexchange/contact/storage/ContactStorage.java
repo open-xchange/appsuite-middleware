@@ -189,26 +189,24 @@ public interface ContactStorage {
      * Searches for contacts.
      * 
      * @param contextID the context ID
-     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> search(int contextID, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException;
+    <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param contextID the context ID
-     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> search(int contextID, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.

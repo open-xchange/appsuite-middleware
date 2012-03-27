@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -60,9 +61,13 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
@@ -94,6 +99,24 @@ public class GetUserAction extends ContactAction {
         final ServerSession session = req.getSession();
         final TimeZone timeZone = req.getTimeZone();
         final int uid = req.getId();
+        final Context ctx = session.getContext();
+
+        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
+        final Contact contact = contactInterface.getUserById(uid);
+        final Date lastModified = contact.getLastModified();
+
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+
+        return new AJAXRequestResult(contact, lastModified, "contact");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int uid = req.getId();
 //        final Context ctx = session.getContext();
 
 //        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
@@ -110,19 +133,25 @@ public class GetUserAction extends ContactAction {
     
     private Contact getUserById(final ServerSession session, final int userID) throws OXException {
         final SearchIterator<Contact> contacts = getContactService().searchContacts(
-        		session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), getSearchTermForUser(userID));
+        		session, getSearchTermForUser(userID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
     	if (null != contacts && contacts.hasNext()) {
     		return contacts.next();
     	} else {
     		throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, session.getContextId());
     	}
     }
-    
-    private static SingleSearchTerm getSearchTermForUser(final int userID) {
-		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-		term.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID)); 
-		term.addOperand(new ConstantOperand<Integer>(userID));
-		return term;
+  
+    private static CompositeSearchTerm getSearchTermForUser(final int userID, final String folderID) {
+    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
+		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+		andTerm.addSearchTerm(folderIDTerm);
+    	final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID)); 
+		userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
+    	andTerm.addSearchTerm(userIDTerm);
+		return andTerm;
     }
 
 }

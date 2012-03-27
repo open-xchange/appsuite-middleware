@@ -82,7 +82,7 @@ public interface RMISolrAccessService extends Remote {
      * @return If starting the core was successfull or not.
      * @throws OXException If the core could not be created or started.
      */
-    boolean startCore(SolrCoreConfiguration configuration) throws RemoteException, OXException;
+    boolean startCoreRmi(SolrCoreConfiguration configuration) throws RemoteException, OXException;
 
     /**
      * Shuts down a running core.
@@ -92,7 +92,7 @@ public interface RMISolrAccessService extends Remote {
      * @return If stopping the core was successfull or not.
      * @throws OXException If the core could not be stopped.
      */
-    boolean stopCore(SolrCoreIdentifier identifier) throws RemoteException, OXException;
+    boolean stopCoreRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
 
     /**
      * Reloads a running core.
@@ -100,7 +100,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException If an error occurrs during reloading the core.
      */
-    void reloadCore(SolrCoreIdentifier identifier) throws RemoteException, OXException;
+    void reloadCoreRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
         
     /**
      * See {@link SolrServer#add(SolrInputDocument)} for details.
@@ -109,7 +109,7 @@ public interface RMISolrAccessService extends Remote {
      * @param commit <code>true</code> If the document should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws RemoteException, OXException;
+    public UpdateResponse addRmi(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#add(Collection)} for details.
@@ -118,7 +118,7 @@ public interface RMISolrAccessService extends Remote {
      * @param commit <code>true</code> If the documents should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws RemoteException, OXException;
+    public UpdateResponse addRmi(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws RemoteException, OXException;
         
     /**
      * See {@link SolrServer#deleteById(String)} for details.
@@ -127,7 +127,7 @@ public interface RMISolrAccessService extends Remote {
      * @param commit <code>true</code> If the deletion should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws RemoteException, OXException;
+    public UpdateResponse deleteByIdRmi(SolrCoreIdentifier identifier, String id, boolean commit) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#deleteByQuery(String)} for details.
@@ -136,7 +136,7 @@ public interface RMISolrAccessService extends Remote {
      * @param commit <code>true</code> If the deletion should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws RemoteException, OXException;
+    public UpdateResponse deleteByQueryRmi(SolrCoreIdentifier identifier, String query, boolean commit) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#commit()} for details.
@@ -144,7 +144,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse commit(SolrCoreIdentifier identifier) throws RemoteException, OXException;
+    public UpdateResponse commitRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#commit(boolean, boolean)} for details.
@@ -152,7 +152,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws RemoteException, OXException;
+    public UpdateResponse commitRmi(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#rollback()} for details.
@@ -160,7 +160,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse rollback(SolrCoreIdentifier identifier) throws RemoteException, OXException;
+    public UpdateResponse rollbackRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#optimize()} for details.
@@ -168,7 +168,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse optimize(SolrCoreIdentifier identifier) throws RemoteException, OXException;
+    public UpdateResponse optimizeRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#optimize(boolean, boolean)} for details.
@@ -176,7 +176,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws RemoteException, OXException;
+    public UpdateResponse optimizeRmi(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#optimize(boolean, boolean, int)} for details.
@@ -184,7 +184,7 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws RemoteException, OXException;
+    public UpdateResponse optimizeRmi(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws RemoteException, OXException;
     
     /**
      * See {@link SolrServer#query(SolrParams)} for details.
@@ -192,6 +192,6 @@ public interface RMISolrAccessService extends Remote {
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
-    public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws RemoteException, OXException;
+    public QueryResponse queryRmi(SolrCoreIdentifier identifier, SolrParams params) throws RemoteException, OXException;
 
 }

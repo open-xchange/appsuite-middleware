@@ -64,6 +64,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
@@ -112,9 +113,53 @@ public class AllAction extends ContactAction {
         if (rightHandLimit == 0) {
             rightHandLimit = 50000;
         }
+
+        Date timestamp = new Date(0);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        SearchIterator<Contact> it = null;
+        final List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
+
+            while (it.hasNext()) {
+                final Contact contact = it.next();
+                final Date lastModified = contact.getLastModified();
+
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                contacts.add(contact);
+
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
+                }
+            }
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
+
+        return new AJAXRequestResult(contacts, timestamp, "contact");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int folder = req.getFolder();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
+        final int leftHandLimit = req.getLeftHandLimit();
+        int rightHandLimit = req.getRightHandLimit();
+        if (rightHandLimit == 0) {
+            rightHandLimit = 50000;
+        }
         
         final ContactField[] fields;
-        final SortOptions sortOptions = new SortOptions(leftHandLimit, leftHandLimit - rightHandLimit);
+        final SortOptions sortOptions = new SortOptions(leftHandLimit,  rightHandLimit - leftHandLimit);
         if (Contact.SPECIAL_SORTING == sort || Contact.USE_COUNT_GLOBAL_FIRST == sort) {
         	// results are sorted afterwards using additional fields
         	fields = ContactMapper.getInstance().getFields(Arrays.addUniquely(columns, Contact.YOMI_LAST_NAME, Contact.SUR_NAME, 
@@ -122,8 +167,16 @@ public class AllAction extends ContactAction {
         			Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT));
         } else {
         	fields = ContactMapper.getInstance().getFields(columns);
-        	sortOptions.setCollation(collation);
-        	sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(ContactMapper.getInstance().getMappedField(sort), order) });
+        	if (null != collation) {
+        		sortOptions.setCollation(collation);
+        	}
+        	if (0 < sort) {
+        		final ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
+        		if (null == sortField) {
+        			throw new IllegalArgumentException("no mapped field for sort order '" + sort + "'.");
+        		}
+        		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, order) });
+        	}
         }
         
         Date timestamp = new Date(0);
@@ -153,10 +206,7 @@ public class AllAction extends ContactAction {
             }
         }
         
-        if (null != collation) {
-        	
-        	
-        } else if (Contact.SPECIAL_SORTING == sort) {
+        if (Contact.SPECIAL_SORTING == sort) {
             Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
         } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
             Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale())); 

@@ -64,6 +64,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
@@ -97,6 +98,75 @@ public class UpdatesAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int folder = req.getFolder();
+        final int[] columns = req.getColumns();
+        final long timestampLong = req.getTimestamp();
+        Date timestamp = new Date(timestampLong);
+        Date lastModified = null;
+        final TimeZone timeZone = req.getTimeZone();
+
+        String ignore = req.getIgnore();
+        if (ignore == null) {
+            ignore = "deleted";
+        }
+
+        boolean bIgnoreDelete = false;
+        if (ignore.indexOf("deleted") != -1) {
+            bIgnoreDelete = true;
+        }
+
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final List<Contact> modifiedList = new ArrayList<Contact>();
+        final List<Contact> deletedList = new ArrayList<Contact>();
+        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        SearchIterator<Contact> it = null;
+        try {
+            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
+            while (it.hasNext()) {
+                final Contact contact = it.next();
+                lastModified = contact.getLastModified();
+
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                modifiedList.add(contact);
+
+                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                    timestamp = lastModified;
+                }
+            }
+
+            if (!bIgnoreDelete) {
+                it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
+                while (it.hasNext()) {
+                    final Contact contact = it.next();
+                    lastModified = contact.getLastModified();
+
+                    // Correct last modified and creation date with users timezone
+                    contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                    contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                    deletedList.add(contact);
+
+                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                        timestamp = lastModified;
+                    }
+                }
+            }
+            responseMap.put("modified", modifiedList);
+            responseMap.put("deleted", deletedList);
+
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
+
+        return new AJAXRequestResult(responseMap, timestamp, "contact");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
         final int folder = req.getFolder();
         final int[] columns = req.getColumns();

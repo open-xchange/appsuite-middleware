@@ -49,63 +49,74 @@
 
 package com.openexchange.contact.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.tools.iterator.FilteringSearchIterator;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
 
 /**
- * {@link PermissionFilter} - Filters a search iterator based on a user's 
- * permission.
+ * {@link SearchTermAnalyzer} - Extracts related information from search terms.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PermissionFilter {
+public class SearchTermAnalyzer {
 	
-	/**
-	 * Creates a new permission based filtering search iterator. 
-	 * 
-	 * @param delegate 
-	 * @param userID
-	 * @param canReadAll
-	 * @return
-	 * @throws OXException
-	 */
-	public static FilteringSearchIterator<Contact> create(final SearchIterator<Contact> delegate, final int userID, 
-			final boolean canReadAll) throws OXException {
-		return new FilteringSearchIterator<Contact>(delegate) {
-
-			@Override
-			public boolean accept(final Contact contact) throws OXException {
-				return contact.getCreatedBy() == userID || canReadAll && false == contact.getPrivateFlag();			
-			}
-		};
+    private final List<String> folderIDs = new ArrayList<String>();
+    
+    public SearchTermAnalyzer(final SearchTerm<?> term) {
+    	super();    
+    	this.analyzeTerm(term);
+    }
+    
+    public List<String> getFolderIDs() {
+    	return this.folderIDs;
+    }
+    
+    public boolean hasFolderIDs() {
+    	return null != this.folderIDs && 0 < this.folderIDs.size();
+    }
+    
+	private void analyzeTerm(final SearchTerm<?> term) {
+		if (SingleSearchTerm.class.isInstance(term)) {
+			this.analyzeTerm((SingleSearchTerm)term);
+		} else if (CompositeSearchTerm.class.isInstance(term)) {
+			this.analyzeTerm((CompositeSearchTerm)term);
+		} else {
+			throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+		}
 	}
-	
-	public static FilteringSearchIterator<Contact> create(final SearchIterator<Contact> delegate, final int userID) throws OXException {
-		final Map<String, Boolean> canReadAllMap = new HashMap<String, Boolean>();
-		return new FilteringSearchIterator<Contact>(delegate) {
 
-			@Override
-			public boolean accept(final Contact contact) throws OXException {
-				if (contact.getCreatedBy() == userID) {
-					return true;
-				} else if (contact.containsPrivateFlag()) {
-					return false;
+	private void analyzeTerm(final SingleSearchTerm term) {
+		final Operand<?>[] operands = term.getOperands();
+		for (int i = 0; i < operands.length; i++) {
+			if (Operand.Type.COLUMN == operands[i].getType()) {
+				ContactField field = null;
+				final Object value = operands[i].getValue();
+				if (null == value) {
+					throw new IllegalArgumentException("column operand without value: " + operands[i]);
+				} else if (ContactField.class.isInstance(value)) {
+					field = (ContactField)value;
 				} else {
-					final String folderID = Integer.toString(contact.getParentFolderID());
-					if (false == canReadAllMap.containsKey(folderID)) {
-						final EffectivePermission permission = Tools.getPermission(contact.getContextId(), folderID, userID);
-						canReadAllMap.put(folderID, permission.canReadAllObjects());
-					}
-					return canReadAllMap.get(folderID).booleanValue();
+					//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
+					field = ContactField.getByAjaxName(value.toString());
+				}
+				if (null != field && ContactField.FOLDER_ID.equals(field) && i + 1 < operands.length && 
+						null != operands[i + 1] && null != operands[i + 1].getValue()) {
+					this.folderIDs.add((String)operands[i + 1].getValue());
+					i++;
 				}
 			}
-		};
+		}
 	}
-	
+
+	private void analyzeTerm(final CompositeSearchTerm term) {
+		for (final SearchTerm<?> operand : term.getOperands()) {
+			analyzeTerm(operand);
+		}
+	}
+
 }

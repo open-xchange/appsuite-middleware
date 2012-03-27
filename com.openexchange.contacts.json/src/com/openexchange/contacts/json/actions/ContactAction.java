@@ -94,6 +94,8 @@ public abstract class ContactAction implements AJAXActionService {
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
 
+    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException;
+
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
         try {
             return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
