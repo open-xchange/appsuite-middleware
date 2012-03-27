@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.processor;
+package com.openexchange.mail.smal.impl;
 
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;

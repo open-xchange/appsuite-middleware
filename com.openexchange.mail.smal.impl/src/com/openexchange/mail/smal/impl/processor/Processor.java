@@ -90,6 +90,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalExceptionCodes;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
@@ -339,6 +340,9 @@ public final class Processor implements SolrMailConstants {
                             if (newIds.isEmpty()) {
                                 // No new detected
                                 processingProgress.setProcessType(ProcessType.NONE);
+                                if (DEBUG) {
+                                    LOG.debug("Nothing to do for follow-up processing of \"" + fullName + "\" " + new DebugInfo(mailAccess));
+                                }
                             } else {
                                 process(
                                     new MailFolderInfo(fullName, newIds.size()),
