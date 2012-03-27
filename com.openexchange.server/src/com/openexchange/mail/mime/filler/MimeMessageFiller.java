@@ -1462,7 +1462,7 @@ public class MimeMessageFiller {
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
         if (m.find()) {
-            msgFiller.uploadFileIDs = new HashSet<String>();
+            final Set<String> uploadFileIDs = msgFiller.uploadFileIDs = new HashSet<String>();
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
@@ -1540,13 +1540,13 @@ public class MimeMessageFiller {
                         }
                     }
                     final boolean appendBodyPart;
-                    if (msgFiller.uploadFileIDs.contains(id)) {
+                    if (uploadFileIDs.contains(id)) {
                         appendBodyPart = false;
                     } else {
                         /*
                          * Remember id to avoid duplicate attachment and for later cleanup
                          */
-                        msgFiller.uploadFileIDs.add(id);
+                        uploadFileIDs.add(id);
                         appendBodyPart = true;
                     }
                     mr.appendLiteralReplacement(
