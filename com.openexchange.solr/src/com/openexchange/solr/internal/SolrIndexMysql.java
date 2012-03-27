@@ -63,9 +63,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.solr.SolrCore;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrCoreStore;
 import com.openexchange.solr.SolrExceptionCodes;
-import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -89,11 +89,11 @@ public class SolrIndexMysql {
     
     public boolean hasActiveCore(final int cid, final int uid, final int module) throws OXException {
         final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable(cid);
+        final Connection con = dbService.getReadOnly(cid);
         try {
             return hasActiveCore(con, cid, uid, module);
         } finally {
-            dbService.backWritable(cid, con);
+            dbService.backReadOnly(cid, con);
         }
     }
     
@@ -221,7 +221,7 @@ public class SolrIndexMysql {
             stmt.setInt(i, module);
             
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -250,12 +250,12 @@ public class SolrIndexMysql {
             
             rs = stmt.executeQuery();
             if (rs.next()) {
-                int count = rs.getInt(1);
+                final int count = rs.getInt(1);
                 return count == 0 ? false : true;
             }
             
             return false;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -360,7 +360,7 @@ public class SolrIndexMysql {
             stmt.setInt(i, contextId);
             
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -398,7 +398,7 @@ public class SolrIndexMysql {
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw SolrExceptionCodes.URI_PARSE_ERROR.create(uri);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -440,7 +440,7 @@ public class SolrIndexMysql {
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw SolrExceptionCodes.URI_PARSE_ERROR.create(uri);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
