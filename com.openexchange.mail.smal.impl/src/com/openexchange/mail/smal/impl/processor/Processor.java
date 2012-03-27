@@ -336,7 +336,8 @@ public final class Processor implements SolrMailConstants {
      */
     protected void process(final MailFolderInfo folderInfo, final ProcessingProgress processingProgress, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> indexAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException, InterruptedException {
         final int accountId = mailAccess.getAccountId();
-        if (strategy.addFull(folderInfo.getMessageCount(), folderInfo)) { // headers, content + attachments
+        final int messageCount = folderInfo.getMessageCount();
+        if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
             processingProgress.setProcessType(ProcessType.FULL);
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().getAllMessages(
@@ -350,7 +351,7 @@ public final class Processor implements SolrMailConstants {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
             indexAccess.addAttachments(documents);
-        } else if (strategy.addHeadersAndContent(folderInfo.getMessageCount(), folderInfo)) { // headers + content
+        } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
             processingProgress.setProcessType(ProcessType.HEADERS_AND_CONTENT);
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().getAllMessages(
@@ -364,7 +365,7 @@ public final class Processor implements SolrMailConstants {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
             indexAccess.addContent(documents);
-        } else if (strategy.addHeadersOnly(folderInfo.getMessageCount(), folderInfo)) { // headers only
+        } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
             processingProgress.setProcessType(ProcessType.HEADERS_ONLY);
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().getAllMessages(
