@@ -58,6 +58,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -138,17 +139,17 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             map.put(MailField.SENT_DATE, singletonList(FIELD_SENT_DATE));
             map.put(MailField.COLOR_LABEL, singletonList(FIELD_COLOR_LABEL));
             map.put(MailField.CONTENT_TYPE, singletonList(FIELD_ATTACHMENT));
-            // {
-            // final Set<Locale> knownLocales = IndexConstants.KNOWN_LOCALES;
-            // final List<String> names = new ArrayList<String>(knownLocales.size());
-            // final StringBuilder tmp = new StringBuilder("content_"); //8
-            // for (final Locale loc : knownLocales) {
-            // tmp.setLength(8);
-            // tmp.append(loc.getLanguage());
-            // names.add(tmp.toString());
-            // }
-            // map.put(MailField.BODY, names);
-            // }
+            {
+                final Set<Locale> knownLocales = IndexConstants.KNOWN_LOCALES;
+                final List<String> names = new ArrayList<String>(knownLocales.size());
+                final StringBuilder tmp = new StringBuilder(FIELD_CONTENT_PREFIX); // 8
+                for (final Locale loc : knownLocales) {
+                    tmp.setLength(8);
+                    tmp.append(loc.getLanguage());
+                    names.add(tmp.toString());
+                }
+                map.put(MailField.BODY, names);
+            }
             field2Name = map;
         }
         {
@@ -515,8 +516,10 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
          * Page-wise retrieval
          */
         final int maxRows = QUERY_ROWS;
-        final String sortField = (String) parameters.getParameters().get("sort");
-        final ORDER order = "desc".equalsIgnoreCase((String) parameters.getParameters().get("order")) ? ORDER.desc : ORDER.asc;
+        Map<String, Object> params = parameters.getParameters();
+        final String sortField = null == params ? null : (String) params.get("sort");
+        final ORDER order = null == params ? ORDER.asc : "desc".equalsIgnoreCase((String) params.get("order")) ? ORDER.desc : ORDER.asc;
+        params = null;
         final String[] fieldArray;
         int off = parameters.getOff();
         int end;

@@ -494,7 +494,7 @@ public final class FolderJob extends AbstractMailJob {
              * Specify fields
              */
             final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-            fields.removeMailField(MailField.BODY);
+            //fields.removeMailField(MailField.BODY);  <--- Allow body!
             fields.removeMailField(MailField.FULL);
             return Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
         } finally {
