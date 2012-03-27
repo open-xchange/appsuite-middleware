@@ -75,6 +75,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -138,6 +139,34 @@ public final class Processor implements SolrMailConstants {
      * <li>Deletes removed documents from index</li>
      * </ul>
      * 
+     * @param mailFolder The mail folder
+     * @param mailAccess The (opened) mail access
+     * @param params The optional parameters
+     * @return The processing result or {@link ProcessingProgress#EMPTY_RESULT an empty result} if processing has been aborted
+     * @throws OXException If an error occurs
+     * @throws InterruptedException If processing is interrupted
+     */
+    public ProcessingProgress processFolder(final MailFolder mailFolder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException, InterruptedException {
+        if (mailFolder.isHoldsMessages() && mailFolder.getMessageCount() < 0) {
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+                final String fullName = mailFolder.getFullname();
+                return processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), mailAccess.getAccountId(), mailAccess.getSession(), params);
+            }
+        }
+        return processFolder(mailFolder, mailAccess.getAccountId(), mailAccess.getSession(), params);
+    }
+
+    /**
+     * (Asynchronously) Processes specified mail folder for its content being indexed.
+     * <p>
+     * In case of immediate processing, the following steps were performed:
+     * <ul>
+     * <li>Adds missing documents to index</li>
+     * <li>Deletes removed documents from index</li>
+     * </ul>
+     * 
      * @param folder The mail folder
      * @param accountId The account identifier
      * @param session The associated session
@@ -173,7 +202,7 @@ public final class Processor implements SolrMailConstants {
      */
     public ProcessingProgress processFolder(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params) throws OXException, InterruptedException {
         final int messageCount = folderInfo.getMessageCount();
-        if (0 <= messageCount) {
+        if (messageCount <= 0) {
             return ProcessingProgress.EMPTY_RESULT;
         }
         /*
@@ -200,6 +229,7 @@ public final class Processor implements SolrMailConstants {
                     final String fullName = folderInfo.getFullName();
                     final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
                     mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
+                    mailAccess.connect(false);
                     if (initial) {
                         /*-
                          * 
@@ -306,7 +336,8 @@ public final class Processor implements SolrMailConstants {
      */
     protected void process(final MailFolderInfo folderInfo, final ProcessingProgress processingProgress, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> indexAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException, InterruptedException {
         final int accountId = mailAccess.getAccountId();
-        if (strategy.addFull(folderInfo.getMessageCount(), folderInfo)) { // headers, content + attachments
+        final int messageCount = folderInfo.getMessageCount();
+        if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
             processingProgress.setProcessType(ProcessType.FULL);
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().getAllMessages(
@@ -320,7 +351,7 @@ public final class Processor implements SolrMailConstants {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
             indexAccess.addAttachments(documents);
-        } else if (strategy.addHeadersAndContent(folderInfo.getMessageCount(), folderInfo)) { // headers + content
+        } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
             processingProgress.setProcessType(ProcessType.HEADERS_AND_CONTENT);
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().getAllMessages(
@@ -334,7 +365,7 @@ public final class Processor implements SolrMailConstants {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
             indexAccess.addContent(documents);
-        } else if (strategy.addHeadersOnly(folderInfo.getMessageCount(), folderInfo)) { // headers only
+        } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
             processingProgress.setProcessType(ProcessType.HEADERS_ONLY);
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().getAllMessages(

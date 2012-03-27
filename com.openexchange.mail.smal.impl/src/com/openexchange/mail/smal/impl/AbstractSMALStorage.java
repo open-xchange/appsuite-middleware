@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -160,7 +161,12 @@ public abstract class AbstractSMALStorage {
      * @throws InterruptedException If interrupted
      */
     protected ProcessingProgress processFolder(final String fullName) throws OXException, InterruptedException {
-        return processFolder(delegateMailAccess.getFolderStorage().getFolder(fullName));
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+            return processor.processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), accountId, session, Collections.<String, Object> emptyMap());
+        }
+        return processFolder(folderStorage.getFolder(fullName));
     }
 
     /**
@@ -172,7 +178,7 @@ public abstract class AbstractSMALStorage {
      * @throws InterruptedException If interrupted
      */
     protected ProcessingProgress processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
-        return processor.processFolder(mailFolder, accountId, session, Collections.<String, Object> emptyMap());
+        return processor.processFolder(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
     }
 
     /**

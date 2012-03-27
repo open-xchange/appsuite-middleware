@@ -59,6 +59,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SmalAccessService;
@@ -98,8 +99,7 @@ public class SmalActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class, IndexingService.class,
-            UserService.class, ContextService.class };
+            ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class };
     }
 
     @Override
@@ -112,6 +112,8 @@ public class SmalActivator extends HousekeepingActivator {
         // trackService(LanguageDetectionService.class);
         trackService(UserService.class);
         trackService(ContextService.class);
+        trackService(IndexingService.class);
+        trackService(IndexFacadeService.class);
         openTrackers();
         /*
          * Register SMAL provider

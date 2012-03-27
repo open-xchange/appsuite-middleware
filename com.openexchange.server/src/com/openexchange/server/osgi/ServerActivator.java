@@ -56,6 +56,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -346,6 +348,7 @@ public final class ServerActivator extends HousekeepingActivator {
         
         CONTEXT = context;
         JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 1000));
+        Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
         Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
