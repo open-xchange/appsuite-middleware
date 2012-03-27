@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="com/openexchange/index/solr/internal/IndexUrl.java|com/openexchange/index/solr/internal/IndexServer.java|com/openexchange/index/solr/internal/management/CommonsHttpSolrServerManagement.java|com/openexchange/index/solr/internal/SolrCore.java|com/openexchange/index/solr/internal/SolrCoreStore.java|com/openexchange/index/solr/internal/SolrIndexMysql.java|com/openexchange/index/solr/internal/SolrCoreConfigServiceImpl.java|com/openexchange/index/solr/SolrCoreConfigService.java|com/openexchange/index/solr/internal/SolrIndexIdentifier.java|com/openexchange/index/solr/internal/SolrCoreConfiguration.java|com/openexchange/index/solr/SolrIndexProperties.java" kind="src" path="src"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-4.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
