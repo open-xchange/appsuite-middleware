@@ -66,6 +66,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -106,6 +109,11 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Processor implements SolrMailConstants {
+
+    /**
+     * The logger constant.
+     */
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
 
     private static final Processor INSTANCE = new Processor();
 
@@ -224,11 +232,15 @@ public final class Processor implements SolrMailConstants {
         final String fullName = folderInfo.getFullName();
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
+        /*
+         * Acquire exclusive flag
+         */
+        if (!acquire(fullName, accountId, userId, contextId)) {
+            // Another thread already running
+            return ProcessingProgress.EMPTY_RESULT;
+        }
+        final CountDownLatch done = new CountDownLatch(1);
         try {
-            /*
-             * CAS
-             */
-            acquire(fullName, accountId, userId, contextId, 3);
             /*
              * Proceed
              */
@@ -263,7 +275,8 @@ public final class Processor implements SolrMailConstants {
                                 mailAccess,
                                 indexAccess,
                                 storageMails,
-                                indexMails);
+                                indexMails,
+                                done);
                         } else {
                             /*-
                              * 
@@ -311,7 +324,8 @@ public final class Processor implements SolrMailConstants {
                                     mailAccess,
                                     indexAccess,
                                     storageMap.values(),
-                                    indexMap.values());
+                                    indexMap.values(),
+                                    done);
                             }
                         }
                         return null;
@@ -337,6 +351,7 @@ public final class Processor implements SolrMailConstants {
             return processingProgress;
         } finally {
             release(fullName, accountId, userId, contextId);
+            done.countDown();
         }
     }
 
@@ -352,7 +367,7 @@ public final class Processor implements SolrMailConstants {
      * @throws OXException If processing fails
      * @throws InterruptedException If processing is interrupted
      */
-    protected void process(final MailFolderInfo folderInfo, final ProcessingProgress processingProgress, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> indexAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails) throws OXException, InterruptedException {
+    protected void process(final MailFolderInfo folderInfo, final ProcessingProgress processingProgress, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> indexAccess, final Collection<MailMessage> storageMails, final Collection<MailMessage> indexMails, final CountDownLatch done) throws OXException, InterruptedException {
         final int accountId = mailAccess.getAccountId();
         final int messageCount = folderInfo.getMessageCount();
         if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
@@ -399,6 +414,8 @@ public final class Processor implements SolrMailConstants {
             indexAccess.addEnvelopeData(documents);
         } else {
             processingProgress.setProcessType(ProcessType.JOB);
+            // Await trigger thread performed release()
+            done.await();
             submitAsJob(folderInfo, mailAccess, storageMails, indexMails);
         }
     }
@@ -528,12 +545,23 @@ public final class Processor implements SolrMailConstants {
         return (V) ((null == name) || (null == params) ? null : params.get(name));
     }
 
-    private void acquire(final String fullName, final int accountId, final int userId, final int contextId, final int retryCount) throws OXException {
+    private boolean acquire(final String fullName, final int accountId, final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         final Connection con = databaseService.getWritable(contextId);
+        boolean rollback = true;
         try {
-            update(fullName, accountId, userId, contextId, 1, retryCount, con);
+            DBUtils.startTransaction(con);
+            final boolean b = update(fullName, accountId, userId, contextId, 1, con);
+            con.commit();
+            rollback = false;
+            return b;
+        } catch (final SQLException e) {
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e);
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);                
+            }
+            DBUtils.autocommit(con);
             databaseService.backWritable(contextId, con);
         }
     }
@@ -566,30 +594,16 @@ public final class Processor implements SolrMailConstants {
         }
     }
 
-    private void update(final String fullName, final int accountId, final int userId, final int contextId, final int update, final int retryCount, final Connection con) throws OXException {
+    private boolean update(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws OXException {
         try {
-            // Start
-            int retry = 0;
-            boolean tryInsert = true;
             // Try to perform a compare-and-set UPDATE
-            int cur;
-            do {
-                cur = performSelect(fullName, accountId, userId, contextId, con);
-                if (cur < 0) {
-                    if (tryInsert) {
-                        if (performInsert(fullName, accountId, userId, contextId, update, con)) {
-                            return;
-                        }
-                        tryInsert = false;
-                    }
-                    cur = performSelect(fullName, accountId, userId, contextId, con);
+            final int cur = performSelect(fullName, accountId, userId, contextId, con);
+            if (cur < 0) {
+                if (performInsert(fullName, accountId, userId, contextId, update, con)) {
+                    return true;
                 }
-                if (retry++ > retryCount) {
-                    throw SmalExceptionCodes.UNEXPECTED_ERROR.create("Couldn't update sync flag to: " + update);
-                }
-            } while (!compareAndSet(fullName, accountId, userId, contextId, update, con));
-            // Return value
-            return;
+            }
+            return compareAndSet(fullName, accountId, userId, contextId, update, con);
         } catch (final SQLException e) {
             throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
@@ -616,13 +630,14 @@ public final class Processor implements SolrMailConstants {
     private boolean performInsert(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, sync) VALUES (?,?,?,?,?)");
+            stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, sync, timestamp) VALUES (?,?,?,?,?,?)");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, fullName);
-            stmt.setInt(pos, update);
+            stmt.setInt(pos++, update);
+            stmt.setLong(pos, System.currentTimeMillis());
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);
