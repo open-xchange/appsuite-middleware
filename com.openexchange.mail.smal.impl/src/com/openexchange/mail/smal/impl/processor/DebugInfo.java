@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,63 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.mail.smal.impl.processor;
 
-import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailUUID} - Represents a mail's UUID in index storage.
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link DebugInfo} - Simple class for debugging purpose.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailUUID {
+public final class DebugInfo {
 
-    private final String mailUUID;
+    private final int accountId;
+
+    private final int userId;
+
+    private final int contextId;
 
     /**
-     * Initializes a new {@link MailUUID}.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param accountId The account identifier
-     * @param fullName The folder full name
-     * @param mailId The mail identifier
+     * Initializes a new {@link DebugInfo}.
      */
-    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
+    public DebugInfo(final int accountId, final int userId, final int contextId) {
         super();
-        final StringBuilder tmp = new StringBuilder(64);
-        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
-        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
-        mailUUID = tmp.toString();
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
-    public String getUUID() {
-        return mailUUID;
+    /**
+     * Initializes a new {@link DebugInfo}.
+     */
+    public DebugInfo(final int accountId, final Session session) {
+        super();
+        this.accountId = accountId;
+        this.userId = session.getUserId();
+        this.contextId = session.getContextId();
+    }
+
+    /**
+     * Initializes a new {@link DebugInfo}.
+     */
+    public DebugInfo(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        super();
+        this.accountId = mailAccess.getAccountId();
+        final Session session = mailAccess.getSession();
+        this.userId = session.getUserId();
+        this.contextId = session.getContextId();
     }
 
     @Override
     public String toString() {
-        return mailUUID;
+        final StringBuilder builder = new StringBuilder(32);
+        builder.append("(accountId=").append(accountId).append(", userId=").append(userId);
+        builder.append(", contextId=").append(contextId).append(')');
+        return builder.toString();
     }
 
 }

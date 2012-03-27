@@ -116,6 +116,11 @@ public final class Processor implements SolrMailConstants {
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
 
     /**
+     * Whether debug logging is enabled ofr this class.
+     */
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /**
      * The singleton instance.
      */
     private static final Processor INSTANCE = new Processor();
@@ -174,7 +179,11 @@ public final class Processor implements SolrMailConstants {
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
                 final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
                 final String fullName = mailFolder.getFullname();
-                return processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), mailAccess.getAccountId(), mailAccess.getSession(), params);
+                return processFolder(
+                    new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)),
+                    mailAccess.getAccountId(),
+                    mailAccess.getSession(),
+                    params);
             }
         }
         return processFolder(mailFolder, mailAccess.getAccountId(), mailAccess.getSession(), params);
@@ -201,8 +210,15 @@ public final class Processor implements SolrMailConstants {
         return processFolder(new MailFolderInfo(folder), accountId, session, params);
     }
 
+    /**
+     * FULL
+     */
     protected static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
 
+    /**
+     * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
+     * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL
+     */
     protected static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
 
     /**
@@ -256,7 +272,7 @@ public final class Processor implements SolrMailConstants {
              * Create task
              */
             final Callable<Object> task = new Callable<Object>() {
-                
+
                 @Override
                 public Object call() throws Exception {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
@@ -344,7 +360,7 @@ public final class Processor implements SolrMailConstants {
                         releaseAccess(facade, indexAccess);
                     }
                 }
-                
+
             };
             /*
              * Submit task & assign future
@@ -389,7 +405,16 @@ public final class Processor implements SolrMailConstants {
             for (final MailMessage message : messages) {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
-            indexAccess.addAttachments(documents);
+            if (DEBUG) {
+                LOG.debug("Starting addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                final long st = System.currentTimeMillis();
+                indexAccess.addAttachments(documents);
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("Performed addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
+                    mailAccess));
+            } else {
+                indexAccess.addAttachments(documents);
+            }
         } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
             processingProgress.setProcessType(ProcessType.HEADERS_AND_CONTENT);
             final MailMessage[] messages =
@@ -403,7 +428,16 @@ public final class Processor implements SolrMailConstants {
             for (final MailMessage message : messages) {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
-            indexAccess.addContent(documents);
+            if (DEBUG) {
+                LOG.debug("Starting addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                final long st = System.currentTimeMillis();
+                indexAccess.addContent(documents);
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("Performed addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
+                    mailAccess));
+            } else {
+                indexAccess.addContent(documents);
+            }
         } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
             processingProgress.setProcessType(ProcessType.HEADERS_ONLY);
             final MailMessage[] messages =
@@ -417,12 +451,24 @@ public final class Processor implements SolrMailConstants {
             for (final MailMessage message : messages) {
                 documents.add(IndexDocumentHelper.documentFor(message, accountId));
             }
-            indexAccess.addEnvelopeData(documents);
+            if (DEBUG) {
+                LOG.debug("Starting addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                final long st = System.currentTimeMillis();
+                indexAccess.addEnvelopeData(documents);
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("Performed addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
+                    mailAccess));
+            } else {
+                indexAccess.addEnvelopeData(documents);
+            }
         } else {
             processingProgress.setProcessType(ProcessType.JOB);
             // Await trigger thread performed release()
             done.await();
             submitAsJob(folderInfo, mailAccess, storageMails, indexMails);
+            if (DEBUG) {
+                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+            }
         }
     }
 
@@ -565,7 +611,7 @@ public final class Processor implements SolrMailConstants {
             throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);                
+                DBUtils.rollback(con);
             }
             DBUtils.autocommit(con);
             databaseService.backWritable(contextId, con);
