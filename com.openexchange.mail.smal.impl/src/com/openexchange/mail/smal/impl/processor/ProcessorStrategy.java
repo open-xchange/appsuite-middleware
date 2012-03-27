@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,53 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.jobqueue;
+package com.openexchange.mail.smal.impl.processor;
+
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Constants} - Constants for job queue.
- *
+ * {@link ProcessorStrategy} - The strategy for the {@link Processor processor}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public interface ProcessorStrategy {
 
     /**
-     * Initializes a new {@link Constants}.
+     * Determines if specified folder is considered as a folder with high attention; e.g. INBOX folder
+     * 
+     * @param folderInfo The information about the folder to check
+     * @return <code>true</code> for high attention folder; otherwise <code>false</code>
+     * @throws OXException If an error occurs
      */
-    private Constants() {
-        super();
-    }
+    boolean hasHighAttention(MailFolderInfo folderInfo) throws OXException;
 
     /**
-     * Hour milliseconds.
+     * Signals whether contained messages shall be completely added to index immediately.
+     * 
+     * @param messageCount The message count or <code>-1</code> to consider folder's message count
+     * @param folderInfo The information about the folder
+     * @return <code>true</code> to fully add messages to index; otherwise <code>false</code>
+     * @throws OXException If checking condition fails
      */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+    boolean addFull(int messageCount, MailFolderInfo folderInfo) throws OXException;
 
     /**
-     * Default (5 minutes) milliseconds.
+     * Signals whether contained messages shall be added with its contents to index immediately.
+     * 
+     * @param messageCount The message count or <code>-1</code> to consider folder's message count
+     * @param folderInfo The information about the folder
+     * @return <code>true</code> to add messages with contents to index; otherwise <code>false</code>
+     * @throws OXException If checking condition fails
      */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+    boolean addHeadersAndContent(int messageCount, MailFolderInfo folderInfo) throws OXException;
 
     /**
-     * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
+     * Signals whether contained messages shall be added to index immediately only considering headers.
+     * 
+     * @param messageCount The message count or <code>-1</code> to consider folder's message count
+     * @param folderInfo The information about the folder
+     * @return <code>true</code> to perform a header-only add to index; otherwise <code>false</code>
+     * @throws OXException If checking condition fails
      */
-    public static final int CHUNK_SIZE = 0;
-
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
-
+    boolean addHeadersOnly(int messageCount, MailFolderInfo folderInfo) throws OXException;
 }

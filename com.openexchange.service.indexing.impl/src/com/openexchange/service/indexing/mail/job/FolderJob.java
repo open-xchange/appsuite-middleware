@@ -452,9 +452,19 @@ public final class FolderJob extends AbstractMailJob {
     }
 
     protected void add2Index(final List<String> ids, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException {
-        final List<MailMessage> mails = loadMessages(ids, fullName);
-        final List<IndexDocument<MailMessage>> documents = toDocuments(mails);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        List<IndexDocument<MailMessage>> documents = null;
         try {
+            mailAccess = mailAccessFor();
+            mailAccess.connect(true);
+            /*
+             * Specify fields
+             */
+            final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
+            //fields.removeMailField(MailField.BODY);  <--- Allow body!
+            fields.removeMailField(MailField.FULL);
+            final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
+            documents = toDocuments(mails);
             switch (insertType) {
             case ENVELOPE:
                 indexAccess.addEnvelopeData(documents);
@@ -467,36 +477,23 @@ public final class FolderJob extends AbstractMailJob {
                 break;
             }
         } catch (final OXException e) {
-            // Batch add failed; retry one-by-one
-            for (final IndexDocument<MailMessage> document : documents) {
-                try {
-                    indexAccess.addAttachments(document);
-                } catch (final Exception inner) {
-                    final MailMessage mail = document.getObject();
-                    LOG.warn(
-                        "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
-                        inner);
+            if (null != documents) {
+                // Batch add failed; retry one-by-one
+                for (final IndexDocument<MailMessage> document : documents) {
+                    try {
+                        indexAccess.addAttachments(document);
+                    } catch (final Exception inner) {
+                        final MailMessage mail = document.getObject();
+                        LOG.warn(
+                            "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
+                            inner);
+                    }
                 }
             }
         } catch (final InterruptedException e) {
             // Keep interrupted state
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private List<MailMessage> loadMessages(final List<String> ids, final String fullName) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = mailAccessFor();
-            mailAccess.connect(true);
-            /*
-             * Specify fields
-             */
-            final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-            fields.removeMailField(MailField.BODY);
-            fields.removeMailField(MailField.FULL);
-            return Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
         } finally {
             getSmalAccessService().closeUnwrappedInstance(mailAccess);
         }

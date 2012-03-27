@@ -49,12 +49,22 @@
 
 package com.openexchange.contact.internal;
 
+import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
+import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
@@ -65,8 +75,14 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.search.Operand;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.l10n.SuperCollator;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -76,6 +92,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Tools {
+	
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
 	
 	/**
 	 * Performs validation checks prior performing write operations on the 
@@ -99,22 +117,16 @@ public final class Tools {
 			/*
 			 * check if display name is already in use
 			 */
-			final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-			term.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
-			term.addOperand(new Operand<String>() {
-
-				@Override
-				public com.openexchange.search.Operand.Type getType() {
-					return Type.CONSTANT;
-				}
-
-				@Override
-				public String getValue() {
-					return update.getDisplayName();
-				}
-				
-			});
-			final SearchIterator<Contact> contacts = storage.search(contextID, folderID, term, new ContactField[] { 
+	    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+			final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+			folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
+			folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+			andTerm.addSearchTerm(folderIDTerm);
+			final SingleSearchTerm displayNameTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+			displayNameTerm.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME)); 
+			displayNameTerm.addOperand(new ConstantOperand<String>(update.getDisplayName()));
+			andTerm.addSearchTerm(displayNameTerm);
+			final SearchIterator<Contact> contacts = storage.search(contextID, andTerm, new ContactField[] { 
 					ContactField.OBJECT_ID });
 			if (null != contacts && 0 < contacts.size()) {
 				throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(contextID, update.getObjectID());
@@ -161,6 +173,36 @@ public final class Tools {
 	}	
 	
 	/**
+	 * Gets a comparator for contacts based on the supplied sort options. 
+	 * 
+	 * @param sortOptions the sort options 
+	 * @return the comparator
+	 */
+	public static Comparator<Contact> getComparator(final SortOptions sortOptions) {
+		final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
+			Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
+		return new Comparator<Contact>() {
+			
+			@Override
+			public int compare(final Contact o1, final Contact o2) {
+				for (final SortOrder order : sortOptions.getOrder()) {
+					int comparison = 0;
+					try {
+						comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
+					} catch (final OXException e) {
+						LOG.error("error comparing objects", e);
+					}
+					if (0 != comparison) {
+						return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;							
+					}
+				}
+				return 0;
+			}
+		};
+	}
+
+	
+	/**
 	 * Gets the contact storage. 
 	 * 
 	 * @param contextID the current context ID
@@ -168,9 +210,31 @@ public final class Tools {
 	 * @return the contact storage
 	 * @throws OXException
 	 */
-	public static ContactStorage getStorage(final int contextID, final String folderId) throws OXException {
-		final ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(contextID, folderId);
-		return storage;
+	public static ContactStorage getStorage(final int contextID, final String folderID) throws OXException {
+		final ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(contextID, folderID);
+        if (null == storage) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage available for folder '" + folderID + "'");
+        }
+        return storage;
+	}
+	
+	/**
+	 * Gets a list of contact storages for the supplied folders.
+	 * 
+	 * @param contextID the current context ID
+	 * @param folderIDs the folder IDs to get the storages for
+	 * @return the contact storages
+	 * @throws OXException
+	 */
+	public static List<ContactStorage> getStorages(final int contextID, final List<String> folderIDs) throws OXException {
+		final List<ContactStorage> storages = new ArrayList<ContactStorage>();
+		for (final String folderID : folderIDs) {
+			final ContactStorage storage = getStorage(contextID, folderID);
+			if (false == storages.contains(storage)) {
+				storages.add(storage);
+			}
+		}
+		return storages;
 	}
 	
 	public static Context getContext(final int contextID) throws OXException {
@@ -231,6 +295,17 @@ public final class Tools {
         return extendedFields.toArray(new ContactField[extendedFields.size()]);
     }
 	
+	public static boolean needsAttachmentInfo(final ContactField[] fields) {
+		if (null != fields) {
+			for (final ContactField field : fields) {
+				if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Checks whether the supplied string is empty, that is it is either 
 	 * <code>null</code>, or consists of whitespace characters exclusively.
@@ -251,6 +326,16 @@ public final class Tools {
         return true;
     }
 
+	/**
+	 * Extracts all folder IDs that are present in the supplied search term.
+	 * 
+	 * @param term the search term to analyze
+	 * @return the search term
+	 */
+	public static List<String> extractFolderIDs(final SearchTerm<?> term) {
+		return new SearchTermAnalyzer(term).getFolderIDs();
+	}
+	
 	private Tools() {
 		// prevent instantiation
 	}

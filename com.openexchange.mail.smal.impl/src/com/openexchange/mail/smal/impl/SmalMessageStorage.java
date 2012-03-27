@@ -57,6 +57,8 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.mail.SolrMailUtility;
@@ -71,6 +73,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -94,6 +97,10 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static enum MailResultType {
         STORAGE, INDEX;
@@ -320,17 +327,28 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     return MailResult.newStorageResult(asList(messageStorage.getMessages(folder, mailIds, fields)));
                 }
             });
-            final MailResult<List<MailMessage>> result = takeNextFrom(completionService);
+            MailResult<List<MailMessage>> result = takeNextFrom(completionService);
+            if (MailResult.EMPTY_RESULT.equals(result)) {
+                result = takeNextFrom(completionService);
+            }
             switch (result.resultType) {
             case INDEX:
                 if (mfs.containsAny(MAIL_FIELDS_FLAGS)) {
                     // Index result came first
                     asyncScheduleChangeJob(folder, completionService);
                 }
+                if (DEBUG) {
+                    LOG.debug("SmalMessageStorage.getMessages(): Index result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
+                }
                 break;
             case STORAGE:
                 // Storage result came first
+                if (DEBUG) {
+                    final MailProvider provider = delegateMailAccess.getProvider();
+                    LOG.debug("SmalMessageStorage.getMessages(): "+(null == provider ? "Storage" : provider.getProtocol().getName())+" result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
+                }
                 cancelRemaining(completionService);
+                break;
             }
             final List<MailMessage> mails = result.result;
             return mails.toArray(new MailMessage[mails.size()]);
@@ -392,11 +410,17 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 }
             });
             MailResult<List<MailMessage>> result = takeNextFrom(completionService);
+            if (MailResult.EMPTY_RESULT.equals(result)) {
+                result = takeNextFrom(completionService);
+            }
             switch (result.resultType) {
             case INDEX:
                 /*
                  * Index result came first
                  */
+                if (DEBUG) {
+                    LOG.debug("SmalMessageStorage.searchMessages(): Index result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
+                }
                 if (processingProgress.asJob()) {
                     /*
                      * Processed as job: indexed results not immediately available
@@ -416,6 +440,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 /*
                  * Storage result came first: Cancel remaining index task
                  */
+                if (DEBUG) {
+                    final MailProvider provider = delegateMailAccess.getProvider();
+                    LOG.debug("SmalMessageStorage.searchMessages(): "+(null == provider ? "Storage" : provider.getProtocol().getName())+" result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
+                }
                 cancelRemaining(completionService);
                 if (!processingProgress.asJob() && new MailFields(fields).containsAny(MAIL_FIELDS_FLAGS)) {
                     scheduleChangeJob(folder, result);

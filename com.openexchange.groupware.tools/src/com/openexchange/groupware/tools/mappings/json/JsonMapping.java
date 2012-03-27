@@ -80,7 +80,7 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	int getColumnID();
 	
 	/**
-	 * Removes the value of the mapped property´in the supplied object.
+	 * Removes the value of the mapped property in the supplied object.
 	 * 
 	 * @param object
 	 */

@@ -51,11 +51,14 @@ package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.databaseold.Database;
 import com.openexchange.documentation.RequestMethod;
@@ -129,6 +132,59 @@ public class CopyAction extends ContactAction {
 
         contact.setNumberOfAttachments(0);
         contactInterface.insertContactObject(contact);
+
+        final User user = session.getUser();
+        final UserConfiguration uc = session.getUserConfiguration();
+        /*
+         * Check attachments
+         */
+        copyAttachments(folderId, session, ctx, contact, origObjectId, origFolderId, user, uc);
+        /*
+         * Check links
+         */
+        copyLinks(folderId, session, ctx, contact, origObjectId, origFolderId, user);
+
+        timestamp = contact.getLastModified();
+
+        final JSONObject response = new JSONObject();
+        try {
+            response.put("id", contact.getObjectID());
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+
+        return new AJAXRequestResult(response, timestamp, "json");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int id = req.getId();
+        final int inFolder = req.getFolder();
+        Date timestamp = new Date(0);
+        final int folderId = req.getFolderFromJSON();
+        final Context ctx = session.getContext();
+
+//        final ContactInterfaceDiscoveryService discoveryService = getContactInterfaceDiscoveryService();
+//        final ContactInterface srcContactInterface = discoveryService.newContactInterface(inFolder, session);
+//
+//        final ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
+        final ContactService contactService = getContactService();
+        
+//        final Contact contact = srcContactInterface.getObjectById(id, inFolder);
+        final Contact contact = contactService.getContact(session, Integer.toString(inFolder), Integer.toString(id));
+        final int origObjectId = contact.getObjectID();
+        contact.removeObjectID();
+        final int origFolderId = contact.getParentFolderID();
+        contact.setParentFolderID(folderId);
+
+        if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+            contact.removeInternalUserId();
+        }
+
+        contact.setNumberOfAttachments(0);
+        contactService.createContact(session, Integer.toString(folderId), contact);
+//        contactInterface.insertContactObject(contact);
 
         final User user = session.getUser();
         final UserConfiguration uc = session.getUserConfiguration();

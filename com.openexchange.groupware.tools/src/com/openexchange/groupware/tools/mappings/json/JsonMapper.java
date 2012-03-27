@@ -142,4 +142,15 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	E[] getFields(int[] columnIDs) throws OXException;
 
+	/**
+	 * Gets the fields whose mappings denotes the supplied column IDs and 
+	 * optionally adds mandatory fields to the result if not yet present.
+	 * 
+	 * @param columnIDs the column IDs
+	 * @param mandatoryFields the mandatory fields
+	 * @return the fields
+	 * @throws OXException
+	 */
+    E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException;
+
 }

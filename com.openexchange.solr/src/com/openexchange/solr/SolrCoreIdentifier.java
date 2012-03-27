@@ -49,12 +49,16 @@
 
 package com.openexchange.solr;
 
+import java.io.Serializable;
+
 /**
  * {@link SolrCoreIdentifier}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreIdentifier {
+public class SolrCoreIdentifier implements Serializable {
+
+    private static final long serialVersionUID = 562216889747741399L;
 
     private final int contextId;
 
@@ -69,7 +73,7 @@ public class SolrCoreIdentifier {
      * @param userId
      * @param module
      */
-    public SolrCoreIdentifier(int contextId, int userId, int module) {
+    public SolrCoreIdentifier(final int contextId, final int userId, final int module) {
         super();
         this.contextId = contextId;
         this.userId = userId;
@@ -114,20 +118,26 @@ public class SolrCoreIdentifier {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        SolrCoreIdentifier other = (SolrCoreIdentifier) obj;
-        if (contextId != other.contextId)
+        }
+        final SolrCoreIdentifier other = (SolrCoreIdentifier) obj;
+        if (contextId != other.contextId) {
             return false;
-        if (module != other.module)
+        }
+        if (module != other.module) {
             return false;
-        if (userId != other.userId)
+        }
+        if (userId != other.userId) {
             return false;
+        }
         return true;
     }
 

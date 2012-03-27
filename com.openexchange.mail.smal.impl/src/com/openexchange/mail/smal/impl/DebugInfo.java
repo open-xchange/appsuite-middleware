@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,63 @@
  *
  */
 
-package com.openexchange.solr.rmi;
+package com.openexchange.mail.smal.impl;
 
-import java.rmi.Remote;
-import com.openexchange.solr.SolrAccessService;
-
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 
 /**
- * {@link SolrServerRMI}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link DebugInfo} - Simple class for debugging purpose.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SolrServerRMI extends Remote, SolrAccessService {
-    
-    public static final String RMI_NAME = "OXSolrRMI";   
+public final class DebugInfo {
+
+    private final int accountId;
+
+    private final int userId;
+
+    private final int contextId;
+
+    /**
+     * Initializes a new {@link DebugInfo}.
+     */
+    public DebugInfo(final int accountId, final int userId, final int contextId) {
+        super();
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
+    }
+
+    /**
+     * Initializes a new {@link DebugInfo}.
+     */
+    public DebugInfo(final int accountId, final Session session) {
+        super();
+        this.accountId = accountId;
+        this.userId = session.getUserId();
+        this.contextId = session.getContextId();
+    }
+
+    /**
+     * Initializes a new {@link DebugInfo}.
+     */
+    public DebugInfo(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        super();
+        this.accountId = mailAccess.getAccountId();
+        final Session session = mailAccess.getSession();
+        this.userId = session.getUserId();
+        this.contextId = session.getContextId();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(32);
+        builder.append("(accountId=").append(accountId).append(", userId=").append(userId);
+        builder.append(", contextId=").append(contextId).append(')');
+        return builder.toString();
+    }
 
 }

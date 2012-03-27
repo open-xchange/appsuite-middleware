@@ -68,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ElapsedFolderJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElapsedFolderJob extends AbstractMailJob {
@@ -79,21 +79,50 @@ public final class ElapsedFolderJob extends AbstractMailJob {
 
     private static final String SIMPLE_NAME = ElapsedFolderJob.class.getSimpleName();
 
+    private volatile Thread runner;
+
     private final long start;
+
+    private final String identifier;
 
     /**
      * Initializes a new {@link ElapsedFolderJob}.
-     *
+     * 
      * @param info The job information
      */
     public ElapsedFolderJob(final MailJobInfo info, final long start) {
         super(info);
         this.start = start;
+        identifier =
+            new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(accountId).toString();
+    }
+
+    /**
+     * Gets the identifier
+     * 
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    /**
+     * Cancels this job.
+     */
+    public void cancel() {
+        final Thread runner = this.runner;
+        if (runner != null) {
+            try {
+                runner.interrupt();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
     }
 
     /**
      * Checks if this job may already start.
-     *
+     * 
      * @param now The current time millis
      * @return <code>true</code> if job may start; otherwise <code>false</code>
      */
@@ -103,6 +132,7 @@ public final class ElapsedFolderJob extends AbstractMailJob {
 
     @Override
     public void performJob() throws OXException, InterruptedException {
+        runner = Thread.currentThread();
         try {
             final List<String> exceededFolders = getElapsedFolders(System.currentTimeMillis());
             if (exceededFolders.isEmpty()) {
@@ -115,6 +145,8 @@ public final class ElapsedFolderJob extends AbstractMailJob {
             }
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
+        } finally {
+            runner = null;
         }
     }
 

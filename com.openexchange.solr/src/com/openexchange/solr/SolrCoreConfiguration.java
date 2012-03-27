@@ -50,6 +50,7 @@
 package com.openexchange.solr;
 
 import java.io.File;
+import java.net.URI;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.Types;
 import com.openexchange.solr.internal.Services;
@@ -64,10 +65,10 @@ public class SolrCoreConfiguration {
 
     private final SolrCoreIdentifier identifier;
 
-    private final String baseUri;
+    private final URI baseUri;
     
     
-    public SolrCoreConfiguration(final String baseUri, final SolrCoreIdentifier identifier) {
+    public SolrCoreConfiguration(final URI baseUri, final SolrCoreIdentifier identifier) {
         super();
         this.baseUri = baseUri;
         this.identifier = identifier;
@@ -78,12 +79,12 @@ public class SolrCoreConfiguration {
     }
     
     public String getInstanceDir() {
-        return baseUri + File.pathSeparator + getIdentifier().toString();
+        return baseUri.getPath() + File.separator + getIdentifier().toString();
     }
     
     public String getDataDir() {
         final ConfigurationService config = Services.getService(ConfigurationService.class);        
-        return getInstanceDir() + File.pathSeparator + config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
+        return getInstanceDir() + File.separator + config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
     }
     
     public String getSchemaPath() {
@@ -113,7 +114,7 @@ public class SolrCoreConfiguration {
         
         }
         
-        return getInstanceDir() + File.pathSeparator + config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME) + File.pathSeparator + configFile;
+        return getInstanceDir() + File.separator + config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME) + File.separator + configFile;
     }
 
     public SolrCoreIdentifier getIdentifier() {

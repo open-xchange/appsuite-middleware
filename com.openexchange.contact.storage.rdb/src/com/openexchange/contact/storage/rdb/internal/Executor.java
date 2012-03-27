@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -122,6 +124,60 @@ public class Executor {
         }
     }
 
+    /**
+     * 
+     * @param connection
+     * @param contextID
+     * @param objectID
+     * @return
+     * @throws SQLException
+     */
+    public Date selectNewestAttachmentDate(final Connection connection, final int contextID, final int objectID) throws SQLException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached=?;");
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, Types.CONTACT);
+            stmt.setInt(3, objectID);
+            resultSet = logExecuteQuery(stmt);
+            return resultSet.next() ? new Date(resultSet.getLong(1)) : null; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+    
+    /**
+     * 
+     * @param connection
+     * @param contextID
+     * @param objectID
+     * @return
+     * @throws SQLException
+     */
+    public Map<Integer, Date> selectNewestAttachmentDates(final Connection connection, final int contextID, final int objectIDs[]) throws SQLException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT attached,MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached IN (")
+        		.append(Tools.toCSV(objectIDs)).append(") GROUP BY attached;");
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        final Map<Integer, Date> dates = new HashMap<Integer, Date>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, Types.CONTACT);
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                dates.put(Integer.valueOf(resultSet.getInt(1)), new Date(resultSet.getLong(2)));
+            }            
+            return dates; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+    
     /**
      * Selects contacts from the database.
      * 
@@ -450,7 +506,7 @@ public class Executor {
     	if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
     		stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
     	} else {
-			stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy())).append(" USING '")
+			stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
 				.append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
     	}
 		if (Order.ASCENDING.equals(order.getOrder())) {

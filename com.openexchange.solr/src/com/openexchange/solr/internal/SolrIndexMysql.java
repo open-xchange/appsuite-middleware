@@ -49,6 +49,8 @@
 
 package com.openexchange.solr.internal;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,9 +63,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.solr.SolrCore;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrCoreStore;
 import com.openexchange.solr.SolrExceptionCodes;
-import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -87,11 +89,11 @@ public class SolrIndexMysql {
     
     public boolean hasActiveCore(final int cid, final int uid, final int module) throws OXException {
         final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable(cid);
+        final Connection con = dbService.getReadOnly(cid);
         try {
             return hasActiveCore(con, cid, uid, module);
         } finally {
-            dbService.backWritable(cid, con);
+            dbService.backReadOnly(cid, con);
         }
     }
     
@@ -156,26 +158,27 @@ public class SolrIndexMysql {
         }
         
         final SolrCore core = new SolrCore(new SolrCoreIdentifier(cid, uid, module));
-        core.setStore(getCoreStore(con, storeId));
+        core.setStore(storeId);
         core.setActive(active);
         core.setServer(server);
         
         return core;
     }
     
-    public void createCoreEntry(final int cid, final int uid, final int module) throws OXException {
+    public SolrCore createCoreEntry(final int cid, final int uid, final int module) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable(cid);
         try {
-            createCoreEntry(con, cid, uid, module);
+            return createCoreEntry(con, cid, uid, module);
         } finally {
             dbService.backWritable(cid, con);
         }
     }
     
-    public void createCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {        
+    public SolrCore createCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {        
         PreparedStatement stmt = null;
         final int storeId = getFreeCoreStore(con);
+        final SolrCore solrCore = new SolrCore(new SolrCoreIdentifier(cid, uid, module));
         try {
             stmt = con.prepareStatement("INSERT INTO solrCores (cid, uid, module, store, active, server) VALUES (?, ?, ?, ?, ?, ?)");
             int i = 1;
@@ -187,6 +190,10 @@ public class SolrIndexMysql {
             stmt.setNull(i, java.sql.Types.VARCHAR);
             
             stmt.executeUpdate();
+            
+            solrCore.setActive(false);
+            solrCore.setStore(storeId);
+            return solrCore;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -214,7 +221,7 @@ public class SolrIndexMysql {
             stmt.setInt(i, module);
             
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -243,12 +250,12 @@ public class SolrIndexMysql {
             
             rs = stmt.executeQuery();
             if (rs.next()) {
-                int count = rs.getInt(1);
+                final int count = rs.getInt(1);
                 return count == 0 ? false : true;
             }
             
             return false;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -332,6 +339,34 @@ public class SolrIndexMysql {
         }
     }
     
+    public void deactivateCoresForServer(final String server, final int contextId) throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getWritable(contextId);
+        try {
+            deactivateCoresForServer(con, server, contextId);
+        } finally {
+            dbService.backWritable(contextId, con);
+        }
+    }
+    
+    public void deactivateCoresForServer(final Connection con, final String server, final int contextId) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE solrCores SET active = ?, server = ? WHERE server = ? AND cid = ?");
+            int i = 1;
+            stmt.setBoolean(i++, false);
+            stmt.setNull(i++, java.sql.Types.VARCHAR);
+            stmt.setString(i++, server);
+            stmt.setInt(i, contextId);
+            
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+    
     public List<SolrCoreStore> getCoreStores() throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getReadOnly();
@@ -346,6 +381,7 @@ public class SolrIndexMysql {
         final List<SolrCoreStore> stores = new ArrayList<SolrCoreStore>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        String uri = null;
         try {
             stmt = con.prepareStatement("SELECT id, uri, maxCores FROM solrCoreStores");
             rs = stmt.executeQuery();
@@ -354,13 +390,16 @@ public class SolrIndexMysql {
                 final SolrCoreStore store = new SolrCoreStore();
                 int i = 1;
                 store.setId(rs.getInt(i++));
-                store.setUri(rs.getString(i++));
+                uri = rs.getString(i++);
+                store.setUri(new URI(uri));
                 store.setMaxCores(rs.getInt(i++));
                 
                 stores.add(store);
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final URISyntaxException e) {
+            throw SolrExceptionCodes.URI_PARSE_ERROR.create(uri);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -381,16 +420,18 @@ public class SolrIndexMysql {
     public SolrCoreStore getCoreStore(final Connection con, final int storeId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        String uri = null;
         try {
             stmt = con.prepareStatement("SELECT id, uri, maxCores FROM solrCoreStores WHERE id = ?");
             stmt.setInt(1, storeId);
-            rs = stmt.executeQuery();
+            rs = stmt.executeQuery();            
             
             if (rs.next()) {
                 final SolrCoreStore store = new SolrCoreStore();
                 int i = 1;
                 store.setId(rs.getInt(i++));
-                store.setUri(rs.getString(i++));
+                uri = rs.getString(i++);
+                store.setUri(new URI(uri));
                 store.setMaxCores(rs.getInt(i++));
                 
                 return store;
@@ -399,45 +440,8 @@ public class SolrIndexMysql {
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
-    }
-    
-    public SolrCoreStore getCoreStore(final int cid, final int uid, final int module) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getReadOnly();
-        try {
-            return getCoreStore(con, cid, uid, module);
-        } finally {
-            dbService.backReadOnly(con);
-        }
-    }
-    
-    public SolrCoreStore getCoreStore(final Connection con, final int cid, final int uid, final int module) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT s.id, s.uri, s.maxCores FROM solrCoreStores AS s JOIN solrCores AS c ON s.id = c.store WHERE c.cid = ? AND c.uid = ? AND c.module = ?");
-            int i = 1;
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i, module);
-            rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                final SolrCoreStore store = new SolrCoreStore();
-                i = 1;
-                store.setId(rs.getInt(i++));
-                store.setUri(rs.getString(i++));
-                store.setMaxCores(rs.getInt(i++));
-                
-                return store;
-            } else {
-                throw SolrExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND.create("Context: " + cid + ", User: " + uid + ", Module: " + module);
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final URISyntaxException e) {
+            throw SolrExceptionCodes.URI_PARSE_ERROR.create(uri);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -461,7 +465,7 @@ public class SolrIndexMysql {
             stmt = con.prepareStatement("INSERT INTO solrCoreStores (id, uri, maxCores) VALUES (?, ?, ?)");            
             int i = 1;
             stmt.setInt(i++, id);
-            stmt.setString(i++, store.getUri());
+            stmt.setString(i++, store.getUri().toString());
             stmt.setInt(i, store.getMaxCores());
             
             stmt.executeUpdate();
@@ -490,7 +494,7 @@ public class SolrIndexMysql {
         try {
             stmt = con.prepareStatement("UPDATE solrCoreStores SET uri = ?, maxCores = ? WHERE id = ?");            
             int i = 1;
-            stmt.setString(i++, store.getUri());
+            stmt.setString(i++, store.getUri().toString());
             stmt.setInt(i++, store.getMaxCores());
             stmt.setInt(i, store.getId());
             
