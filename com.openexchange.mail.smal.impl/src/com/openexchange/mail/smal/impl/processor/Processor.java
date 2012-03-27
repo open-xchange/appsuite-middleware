@@ -115,6 +115,9 @@ public final class Processor implements SolrMailConstants {
      */
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
 
+    /**
+     * The singleton instance.
+     */
     private static final Processor INSTANCE = new Processor();
 
     /**
@@ -126,6 +129,9 @@ public final class Processor implements SolrMailConstants {
         return INSTANCE;
     }
 
+    /**
+     * The strategy to follow.
+     */
     private final ProcessorStrategy strategy;
 
     /**
