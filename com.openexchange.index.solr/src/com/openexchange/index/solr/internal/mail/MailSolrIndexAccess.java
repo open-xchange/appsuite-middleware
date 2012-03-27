@@ -341,50 +341,54 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     public void addAttachments(final Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
         addContent(documents);
     }
-
+    
     @Override
     public void change(final IndexDocument<MailMessage> document, final String... fields) throws OXException {
         if (null == fields || 0 == fields.length) {
             return;
         }
 
-        change(document, new HashSet<String>(Arrays.asList(fields)));
+        final Set<String> fieldSet = new HashSet<String>(Arrays.asList(fields));
+        final SolrInputDocument inputDocument = calculateAndSetChanges(document, fieldSet);        
+        addDocument(inputDocument, true);
     }
 
-    private void change(final IndexDocument<MailMessage> document, final Set<String> fields) throws OXException {
-        final MailMessage mailMessage = document.getObject();
-        final int accountId = mailMessage.getAccountId();
-        final MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());
-        /*
-         * Check if envelope data already present
-         */
-        SolrDocument solrDocument = null;
-        {
-            StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_UUID).append(":\"").append(uuid.getUUID()).append("\")");
-            final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            queryBuilder = null;
-            solrQuery.setStart(Integer.valueOf(0));
-            solrQuery.setRows(Integer.valueOf(1));
-            final QueryResponse queryResponse = query(solrQuery);
-            final SolrDocumentList results = queryResponse.getResults();
-            final long numFound = results.getNumFound();
-            if (numFound <= 0) {
-                // Nothing to change
-                return;
+    @Override
+    public void change(final Collection<IndexDocument<MailMessage>> documents, final String... fields) throws OXException, InterruptedException {
+        if (null == fields || 0 == fields.length) {
+            return;
+        }
+
+        final Set<String> fieldSet = new HashSet<String>(Arrays.asList(fields));
+        final List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+        for (final IndexDocument<MailMessage> document : documents) {
+            if (Thread.interrupted()) {
+                // Clears the thread's interrupted flag
+                throw new InterruptedException("Thread interrupted while changing mail contents.");
             }
-            solrDocument = results.get(0);
+            final SolrInputDocument inputDocument = calculateAndSetChanges(document, fieldSet); 
+            inputDocuments.add(inputDocument);
         }
-        /*
-         * Create input document
-         */
-        final SolrInputDocument inputDocument = new SolrInputDocument();
-        for (final Entry<String, Object> entry : solrDocument.entrySet()) {
-            final String name = entry.getKey();
-            final SolrInputField field = new SolrInputField(name);
-            field.setValue(entry.getValue(), 1.0f);
-            inputDocument.put(name, field);
+        
+        addDocuments(inputDocuments);
+    }
+    
+    private SolrInputDocument calculateAndSetChanges(final IndexDocument<MailMessage> document, final Set<String> fields) throws OXException {
+        final SolrDocument solrDocument = getIndexedDocument(document);
+        final MailMessage mailMessage = document.getObject();
+        final SolrInputDocument inputDocument;
+        if (null == solrDocument) {
+            inputDocument = helper.inputDocumentFor(mailMessage, userId, contextId);
+        } else {
+            inputDocument = new SolrInputDocument();
+            for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                final String name = entry.getKey();
+                final SolrInputField field = new SolrInputField(name);
+                field.setValue(entry.getValue(), 1.0f);
+                inputDocument.put(name, field);
+            }
         }
+
         /*
          * Write color label
          */
@@ -472,22 +476,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             }
         }
         
-        addDocument(inputDocument, true);
-    }
-
-    @Override
-    public void change(final Collection<IndexDocument<MailMessage>> documents, final String... fields) throws OXException, InterruptedException {
-        if (null == fields || 0 == fields.length) {
-            return;
-        }
-
-        for (final IndexDocument<MailMessage> document : documents) {
-            if (Thread.interrupted()) {
-                // Clears the thread's interrupted flag
-                throw new InterruptedException("Thread interrupted while changing mail contents.");
-            }
-            change(document, new HashSet<String>(Arrays.asList(fields)));
-        }
+        return inputDocument;
     }
 
     @Override
