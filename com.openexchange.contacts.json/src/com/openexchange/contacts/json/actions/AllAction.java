@@ -160,7 +160,7 @@ public class AllAction extends ContactAction {
         
         final ContactField[] fields;
         final SortOptions sortOptions = new SortOptions(leftHandLimit,  rightHandLimit - leftHandLimit);
-        if (Contact.SPECIAL_SORTING == sort || Contact.USE_COUNT_GLOBAL_FIRST == sort) {
+        if (0 == sort || Contact.SPECIAL_SORTING == sort || Contact.USE_COUNT_GLOBAL_FIRST == sort) {
         	// results are sorted afterwards using additional fields
         	fields = ContactMapper.getInstance().getFields(Arrays.addUniquely(columns, Contact.YOMI_LAST_NAME, Contact.SUR_NAME, 
         			Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME, Contact.YOMI_COMPANY, Contact.COMPANY, 
@@ -206,7 +206,7 @@ public class AllAction extends ContactAction {
             }
         }
         
-        if (Contact.SPECIAL_SORTING == sort) {
+        if (0 == sort || Contact.SPECIAL_SORTING == sort) {
             Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
         } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
             Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale())); 

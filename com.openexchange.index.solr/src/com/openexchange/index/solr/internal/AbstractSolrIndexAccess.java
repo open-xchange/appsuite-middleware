@@ -90,7 +90,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
      * 
      * @param identifier The Solr index identifier
      */
-    public AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {
+    protected AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {
         super();
         this.identifier = identifier;
         this.contextId = identifier.getContextId();
