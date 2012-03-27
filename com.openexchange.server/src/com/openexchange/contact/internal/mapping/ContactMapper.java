@@ -2010,6 +2010,24 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getImageLastModified();
             }
         });
+  
+        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new StringMapping() {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setImageContentType(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsImageContentType();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getImageContentType();
+            }
+        });
 
         mappings.put(ContactField.INTERNAL_USERID, new ContactMapping<Integer>() {
 

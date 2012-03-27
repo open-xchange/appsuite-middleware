@@ -52,9 +52,11 @@ package com.openexchange.groupware.tools.mappings.json;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -166,15 +168,28 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
 	@Override
 	public E[] getFields(final int[] columnIDs) throws OXException {
+		return this.getFields(columnIDs, (E[])null);
+	}
+	
+	@Override
+    public E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
 		}
-		final E[] fields = newArray(columnIDs.length);
-		for (int i = 0; i < fields.length; i++) {
-			fields[i] = this.getMappedField(columnIDs[i]);
+		final Set<E> fields = new HashSet<E>();
+		for (final int columnID : columnIDs) {
+			final E field = this.getMappedField(columnID);
+			if (null != field) {
+				fields.add(field);
+			}
 		}
-		return fields;
-	}
+        if (null != mandatoryFields) {
+            for (final E field : mandatoryFields) {
+				fields.add(field);
+            }
+        }
+        return fields.toArray(newArray(fields.size()));
+    }
 
 	@Override
 	protected EnumMap<E, ? extends JsonMapping<? extends Object, O>> getMappings() {

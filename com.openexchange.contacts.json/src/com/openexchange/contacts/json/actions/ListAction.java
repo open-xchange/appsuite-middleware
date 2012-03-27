@@ -217,6 +217,7 @@ public class ListAction extends ContactAction {
                 it = contactService.getContacts(session, folderID, objectIDs, fields);
                 while (it.hasNext()) {
                     final Contact contact = it.next();
+                    contact.setParentFolderID(Integer.parseInt(folderID));
                     contacts.add(contact);
 
                     lastModified = contact.getLastModified();

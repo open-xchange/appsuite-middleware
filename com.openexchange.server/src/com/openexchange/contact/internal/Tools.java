@@ -295,6 +295,17 @@ public final class Tools {
         return extendedFields.toArray(new ContactField[extendedFields.size()]);
     }
 	
+	public static boolean needsAttachmentInfo(final ContactField[] fields) {
+		if (null != fields) {
+			for (final ContactField field : fields) {
+				if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Checks whether the supplied string is empty, that is it is either 
 	 * <code>null</code>, or consists of whitespace characters exclusively.

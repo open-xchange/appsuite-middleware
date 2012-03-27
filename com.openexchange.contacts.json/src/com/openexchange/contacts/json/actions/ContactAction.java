@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -88,7 +89,7 @@ public abstract class ContactAction implements AJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(requestData, session);
 
-        return perform2(contactRequest);
+        return perform(contactRequest);
     }
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
