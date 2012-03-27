@@ -50,6 +50,11 @@
 package com.openexchange.mail.smal.impl.processor;
 
 import static com.openexchange.index.solr.mail.SolrMailUtility.releaseAccess;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
@@ -81,6 +87,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.impl.SmalExceptionCodes;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
@@ -91,6 +98,7 @@ import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Processor} - Processes a given mail folder for its content being indexed.
@@ -213,113 +221,123 @@ public final class Processor implements SolrMailConstants {
             // Index service missing
             return ProcessingProgress.EMPTY_RESULT;
         }
-        final ProcessingProgress processingProgress = new ProcessingProgress();
-        processingProgress.setHasHighAttention(strategy.hasHighAttention(folderInfo));
-        /*
-         * Create task
-         */
-        final Callable<Object> task = new Callable<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                IndexAccess<MailMessage> indexAccess = null;
-                try {
-                    indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-                    final String fullName = folderInfo.getFullName();
-                    final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
-                    mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
-                    mailAccess.connect(false);
-                    if (initial) {
-                        /*-
-                         * 
-                         * Denoted folder has not been added to index before
-                         * 
-                         */
-                        processingProgress.setFirstTime(true);
-                        final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
-                        final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
-                        process(
-                            new MailFolderInfo(fullName, messageCount),
-                            processingProgress,
-                            mailAccess,
-                            indexAccess,
-                            storageMails,
-                            indexMails);
-                    } else {
-                        /*-
-                         * 
-                         * Denoted folder has already been added to index before
-                         * 
-                         */
-                        processingProgress.setFirstTime(false);
-                        final Map<String, MailMessage> storageMap;
-                        final Map<String, MailMessage> indexMap;
-                        {
-                            final List<Map<String, MailMessage>> tmp = getNewIds(fullName, indexAccess, mailAccess);
-                            storageMap = tmp.get(0);
-                            indexMap = tmp.get(1);
-                        }
-                        /*
-                         * New ones
-                         */
-                        final Set<String> newIds = new HashSet<String>(storageMap.keySet());
-                        newIds.removeAll(indexMap.keySet());
-                        /*
-                         * Removed ones
-                         */
-                        final Set<String> deletedIds = new HashSet<String>(indexMap.keySet());
-                        deletedIds.removeAll(storageMap.keySet());
-                        if (!deletedIds.isEmpty()) {
-                            final int contextId = session.getContextId();
-                            final int userId = session.getUserId();
-
-                            final Iterator<String> iterator = deletedIds.iterator();
-                            final StringBuilder tmp = new StringBuilder(64);
-                            tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
-                            tmp.append(MailPath.getMailPath(accountId, fullName, iterator.next()));
-                            final int resetLen = tmp.lastIndexOf(Character.toString(MailPath.SEPERATOR));
-                            indexAccess.deleteById(tmp.toString());
-                            while (iterator.hasNext()) {
-                                tmp.setLength(resetLen);
-                                tmp.append(iterator.next());
-                                indexAccess.deleteById(tmp.toString());
-                            }
-                        }
-                        if (newIds.isEmpty()) {
-                            // No new detected
-                            processingProgress.setProcessType(ProcessType.NONE);
-                        } else {
+        final String fullName = folderInfo.getFullName();
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        try {
+            /*
+             * CAS
+             */
+            acquire(fullName, accountId, userId, contextId, 3);
+            /*
+             * Proceed
+             */
+            final ProcessingProgress processingProgress = new ProcessingProgress();
+            processingProgress.setHasHighAttention(strategy.hasHighAttention(folderInfo));
+            /*
+             * Create task
+             */
+            final Callable<Object> task = new Callable<Object>() {
+                
+                @Override
+                public Object call() throws Exception {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    IndexAccess<MailMessage> indexAccess = null;
+                    try {
+                        indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+                        final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
+                        mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
+                        mailAccess.connect(false);
+                        if (initial) {
+                            /*-
+                             * 
+                             * Denoted folder has not been added to index before
+                             * 
+                             */
+                            processingProgress.setFirstTime(true);
+                            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+                            final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
                             process(
-                                new MailFolderInfo(fullName, newIds.size()),
+                                new MailFolderInfo(fullName, messageCount),
                                 processingProgress,
                                 mailAccess,
                                 indexAccess,
-                                storageMap.values(),
-                                indexMap.values());
+                                storageMails,
+                                indexMails);
+                        } else {
+                            /*-
+                             * 
+                             * Denoted folder has already been added to index before
+                             * 
+                             */
+                            processingProgress.setFirstTime(false);
+                            final Map<String, MailMessage> storageMap;
+                            final Map<String, MailMessage> indexMap;
+                            {
+                                final List<Map<String, MailMessage>> tmp = getNewIds(fullName, indexAccess, mailAccess);
+                                storageMap = tmp.get(0);
+                                indexMap = tmp.get(1);
+                            }
+                            /*
+                             * New ones
+                             */
+                            final Set<String> newIds = new HashSet<String>(storageMap.keySet());
+                            newIds.removeAll(indexMap.keySet());
+                            /*
+                             * Removed ones
+                             */
+                            final Set<String> deletedIds = new HashSet<String>(indexMap.keySet());
+                            deletedIds.removeAll(storageMap.keySet());
+                            if (!deletedIds.isEmpty()) {
+                                final Iterator<String> iterator = deletedIds.iterator();
+                                final StringBuilder tmp = new StringBuilder(64);
+                                tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+                                tmp.append(MailPath.getMailPath(accountId, fullName, iterator.next()));
+                                final int resetLen = tmp.lastIndexOf(Character.toString(MailPath.SEPERATOR));
+                                indexAccess.deleteById(tmp.toString());
+                                while (iterator.hasNext()) {
+                                    tmp.setLength(resetLen);
+                                    tmp.append(iterator.next());
+                                    indexAccess.deleteById(tmp.toString());
+                                }
+                            }
+                            if (newIds.isEmpty()) {
+                                // No new detected
+                                processingProgress.setProcessType(ProcessType.NONE);
+                            } else {
+                                process(
+                                    new MailFolderInfo(fullName, newIds.size()),
+                                    processingProgress,
+                                    mailAccess,
+                                    indexAccess,
+                                    storageMap.values(),
+                                    indexMap.values());
+                            }
                         }
+                        return null;
+                    } finally {
+                        if (processingProgress.countDown) {
+                            processingProgress.latch.countDown();
+                            processingProgress.countDown = false;
+                        }
+                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
+                        releaseAccess(facade, indexAccess);
                     }
-                    return null;
-                } finally {
-                    if (processingProgress.countDown) {
-                        processingProgress.latch.countDown();
-                        processingProgress.countDown = false;
-                    }
-                    SmalMailAccess.closeUnwrappedInstance(mailAccess);
-                    releaseAccess(facade, indexAccess);
                 }
-            }
-
-        };
-        /*
-         * Submit task & assign future
-         */
-        processingProgress.setFuture(ThreadPools.getThreadPool().submit(ThreadPools.task(task), CallerRunsBehavior.getInstance()));
-        /*
-         * Return when result is initialized appropriately
-         */
-        processingProgress.latch.await();
-        return processingProgress;
+                
+            };
+            /*
+             * Submit task & assign future
+             */
+            processingProgress.setFuture(ThreadPools.getThreadPool().submit(ThreadPools.task(task), CallerRunsBehavior.getInstance()));
+            /*
+             * Return when result is initialized appropriately
+             */
+            processingProgress.latch.await();
+            return processingProgress;
+        } finally {
+            release(fullName, accountId, userId, contextId);
+        }
     }
 
     /**
@@ -508,6 +526,134 @@ public final class Processor implements SolrMailConstants {
     @SuppressWarnings("unchecked")
     protected static <V> V getParameter(final String name, final Map<String, Object> params) {
         return (V) ((null == name) || (null == params) ? null : params.get(name));
+    }
+
+    private void acquire(final String fullName, final int accountId, final int userId, final int contextId, final int retryCount) throws OXException {
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            update(fullName, accountId, userId, contextId, 1, retryCount, con);
+        } finally {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void release(final String fullName, final int accountId, final int userId, final int contextId) throws OXException {
+        final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            forceUpdate(fullName, accountId, userId, contextId, 0, con);
+        } finally {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void forceUpdate(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE mailSync SET sync=? WHERE cid=? AND user=? AND accountId=? AND fullName=?");
+            int pos = 1;
+            stmt.setInt(pos++, update);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos, fullName);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private void update(final String fullName, final int accountId, final int userId, final int contextId, final int update, final int retryCount, final Connection con) throws OXException {
+        try {
+            // Start
+            int retry = 0;
+            boolean tryInsert = true;
+            // Try to perform a compare-and-set UPDATE
+            int cur;
+            do {
+                cur = performSelect(fullName, accountId, userId, contextId, con);
+                if (cur < 0) {
+                    if (tryInsert) {
+                        if (performInsert(fullName, accountId, userId, contextId, update, con)) {
+                            return;
+                        }
+                        tryInsert = false;
+                    }
+                    cur = performSelect(fullName, accountId, userId, contextId, con);
+                }
+                if (retry++ > retryCount) {
+                    throw SmalExceptionCodes.UNEXPECTED_ERROR.create("Couldn't update sync flag to: " + update);
+                }
+            } while (!compareAndSet(fullName, accountId, userId, contextId, update, con));
+            // Return value
+            return;
+        } catch (final SQLException e) {
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e);
+        }
+    }
+
+    private boolean compareAndSet(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE mailSync SET sync=? WHERE cid=? AND user=? AND accountId=? AND fullName=? AND sync=?");
+            int pos = 1;
+            stmt.setInt(pos++, update);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, fullName);
+            stmt.setInt(pos, update > 0 ? 0 : 1); // Opposite value
+            final int result = stmt.executeUpdate();
+            return (result > 0);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private boolean performInsert(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, sync) VALUES (?,?,?,?,?)");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, fullName);
+            stmt.setInt(pos, update);
+            try {
+                final int result = stmt.executeUpdate();
+                return (result > 0);
+            } catch (final SQLException e) {
+                return false;
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private int performSelect(final String fullName, final int accountId, final int userId, final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT sync FROM mailSync WHERE cid=? AND user=? AND accountId=? AND fullName=? FOR UPDATE");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos, fullName);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getInt(1);
+            }
+            return -1;
+        } catch (final SQLException e) {
+            throw SmalExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
     }
 
 }
