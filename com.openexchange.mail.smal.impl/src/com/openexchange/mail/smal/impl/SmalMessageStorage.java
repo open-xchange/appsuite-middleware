@@ -554,7 +554,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
         mail.setAccountId(accountId);
-        IndexAccessAdapter.getInstance().addContent(mail, session);
+        try {
+            IndexAccessAdapter.getInstance().addContent(mail, session);
+        } catch (final Exception e) {
+            // Ignore failed adding to index
+            LOG.warn("Adding message's content to index failed.", e);
+        }
         return mail;
     }
 
