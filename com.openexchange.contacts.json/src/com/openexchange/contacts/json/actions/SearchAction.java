@@ -53,9 +53,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
@@ -100,6 +102,46 @@ public class SearchAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
+        Date lastModified = null;
+        Date timestamp = new Date(0);
+        final TimeZone timeZone = req.getTimeZone();
+
+        final ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
+        final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
+        SearchIterator<Contact> it = null;
+        final List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            it = multiplexer.extendedSearch(session, searchObject, sort, order, collation, columns);
+            while (it.hasNext()) {
+                final Contact contact = it.next();
+                lastModified = contact.getLastModified();
+
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                contacts.add(contact);
+
+
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
+                }
+            }
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
+
+        return new AJAXRequestResult(contacts, lastModified, "contact");
+    }
+
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
         final int[] columns = req.getColumns();
         final int sort = req.getSort();

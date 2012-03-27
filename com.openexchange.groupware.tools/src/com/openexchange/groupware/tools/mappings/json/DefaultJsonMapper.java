@@ -118,10 +118,11 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		final O object = newInstance();
         for (final E field : fields) {
         	final JsonMapping<? extends Object, O> mapping = this.get(field);
-        	if (jsonObject.has(mapping.getAjaxName())) {
-        		mapping.deserialize(jsonObject, object);	
-        	}        	
-        }		
+        	final String ajaxName = mapping.getAjaxName();
+        	if (null != ajaxName && 0 < ajaxName.length() && jsonObject.hasAndNotNull(ajaxName)) {
+        		mapping.deserialize(jsonObject, object);
+        	}
+        }
 		return object;
 	}
 
