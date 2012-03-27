@@ -226,6 +226,9 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     private DispatcherNotes getActionMetadata(final AJAXActionService action) {
+        if (null == action) {
+            return null;
+        }
         return action.getClass().getAnnotation(DispatcherNotes.class);
     }
 
@@ -286,12 +289,12 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
 	@Override
-	public boolean mayUseFallbackSession(String module, String action) throws OXException {
+	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
 		final AJAXActionServiceFactory factory = lookupFactory(module);
         if (factory == null) {
             return false;
         }
-        DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
         if (actionMetadata == null) {
         	return false;
         }
