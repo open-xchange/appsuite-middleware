@@ -49,8 +49,10 @@
 
 package com.openexchange.groupware.tools.mappings.database;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 
@@ -63,12 +65,26 @@ import java.util.Date;
 public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 
 	public DateMapping(final String columnName, final String readableName) {
-		super(columnName, readableName, Types.DATE);
+		super(columnName, readableName, Types.TIMESTAMP);
 	}
 	
 	@Override
 	public Date get(final ResultSet resultSet) throws SQLException {
-		return resultSet.getDate(this.getColumnLabel());
+        return resultSet.getTimestamp(this.getColumnLabel());
 	}
 	
+	@Override
+	public void set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
+		if (this.isSet(object)) {
+			final Date value = this.get(object);
+			if (null != value) {
+				statement.setTimestamp(parameterIndex, new Timestamp(value.getTime()));
+			} else {
+				statement.setNull(parameterIndex, this.getSqlType());
+			}
+		} else {
+			statement.setNull(parameterIndex, this.getSqlType());
+		}
+	}
+
 }

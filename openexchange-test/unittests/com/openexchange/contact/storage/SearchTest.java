@@ -88,7 +88,7 @@ public class SearchTest extends ContactStorageTest {
 		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		term.addOperand(new ColumnOperand("uid"));
 		term.addOperand(new ConstantOperand<String>(contact.getUid()));
-		final SearchIterator<Contact> result = getStorage().search(getContextID(), folderId, term, ContactField.values());
+		final SearchIterator<Contact> result = getStorage().search(getContextID(), term, ContactField.values());
 		/*
 		 * verify search result
 		 */

@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.internal.mapping;
 
+import java.util.Comparator;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
@@ -57,7 +59,7 @@ import com.openexchange.groupware.container.Contact;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class ContactMapping<T> extends com.openexchange.groupware.tools.mappings.DefaultMapping<T, Contact> {
+public abstract class ContactMapping<T> extends com.openexchange.groupware.tools.mappings.DefaultMapping<T, Contact> implements Comparator<Contact> {
 
 	/**
 	 * Validates the property in a contact, throwing exceptions if validation
@@ -66,8 +68,31 @@ public abstract class ContactMapping<T> extends com.openexchange.groupware.tools
 	 * @param contact the contact to validate the property for
 	 * @throws OXException 
 	 */
-	public void validate(Contact contact) throws OXException {
+	public void validate(final Contact contact) throws OXException {
 		
+	}
+	
+	@Override
+	public int compare(final Contact object1, final Contact object2) {
+		return this.compare(object1, object2, null);
+	}
+
+	public int compare(final Contact object1, final Contact object2, final Comparator<Object> collator) {
+		final T value1 = this.get(object1);
+		final T value2 = this.get(object2);
+		if (value1 == value2) {
+			return 0;
+		} else if (null == value1 && null != value2) {
+			return -1;
+		} else if (null == value2) {
+			return 1;
+		} else if (null != collator && String.class.isInstance(value1)) {
+			return collator.compare(value1, value2);
+		} else if (Comparable.class.isInstance(value1)) {
+			return ((Comparable)value1).compareTo(value2);
+		} else {
+	        throw new UnsupportedOperationException("Don't know how to compare two values of class " + value1.getClass().getName());
+		}
 	}
 
 }
