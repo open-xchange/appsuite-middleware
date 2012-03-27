@@ -66,7 +66,7 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessService {
+public class RMISolrAccessImpl implements RMISolrAccessService {
 
     private final SolrAccessService solrService;
 
@@ -78,168 +78,98 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
     // ---------------------------------------------------------------------------
 
     @Override
-    public boolean startCore(final SolrCoreConfiguration configuration) throws OXException {
+    public boolean startCoreRmi(final SolrCoreConfiguration configuration) throws RemoteException, OXException {
         return solrService.startCore(configuration);
     }
 
-    @Override
-    public boolean startCoreRmi(final SolrCoreConfiguration configuration) throws RemoteException, OXException {
-        return startCore(configuration);
-    }
-
     // ---------------------------------------------------------------------------
-
-    @Override
-    public boolean stopCore(final SolrCoreIdentifier identifier) throws OXException {
-        return solrService.stopCore(identifier);
-    }
 
     @Override
     public boolean stopCoreRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return stopCore(identifier);
+        return solrService.stopCore(identifier);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public void reloadCore(final SolrCoreIdentifier identifier) throws OXException {
-        solrService.reloadCore(identifier);
-    }
 
     @Override
     public void reloadCoreRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        reloadCore(identifier);
+        solrService.reloadCore(identifier);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse add(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws OXException {
-        return solrService.add(identifier, document, commit);
-    }
 
     @Override
     public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws RemoteException, OXException {
-        return add(identifier, documents, commit);
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse add(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
         return solrService.add(identifier, documents, commit);
     }
 
-    @Override
-    public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws RemoteException, OXException {
-        return add(identifier, document, commit);
-    }
-
     // ---------------------------------------------------------------------------
 
     @Override
-    public UpdateResponse deleteById(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws OXException {
-        return solrService.deleteById(identifier, id, commit);
+    public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws RemoteException, OXException {
+        return solrService.add(identifier, document, commit);
     }
+
+    // ---------------------------------------------------------------------------
 
     @Override
     public UpdateResponse deleteByIdRmi(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws RemoteException, OXException {
-        return deleteById(identifier, id, commit);
+        return solrService.deleteById(identifier, id, commit);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse deleteByQuery(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws OXException {
-        return solrService.deleteByQuery(identifier, query, commit);
-    }
 
     @Override
     public UpdateResponse deleteByQueryRmi(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws RemoteException, OXException {
-        return deleteByQuery(identifier, query, commit);
+        return solrService.deleteByQuery(identifier, query, commit);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse commit(final SolrCoreIdentifier identifier) throws OXException {
-        return solrService.commit(identifier);
-    }
 
     @Override
     public UpdateResponse commitRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return commit(identifier);
+        return solrService.commit(identifier);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse commit(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
-        return solrService.commit(identifier, waitFlush, waitSearcher);
-    }
 
     @Override
     public UpdateResponse commitRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, OXException {
-        return commit(identifier, waitFlush, waitSearcher);
+        return solrService.commit(identifier, waitFlush, waitSearcher);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse rollback(final SolrCoreIdentifier identifier) throws OXException {
-        return solrService.rollback(identifier);
-    }
 
     @Override
     public UpdateResponse rollbackRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return rollback(identifier);
+        return solrService.rollback(identifier);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse optimize(final SolrCoreIdentifier identifier) throws OXException {
-        return solrService.optimize(identifier);
-    }
 
     @Override
     public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return optimize(identifier);
+        return solrService.optimize(identifier);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
-        return solrService.optimize(identifier, waitFlush, waitSearcher);
-    }
 
     @Override
     public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, OXException {
-        return optimize(identifier, waitFlush, waitSearcher);
+        return solrService.optimize(identifier, waitFlush, waitSearcher);
     }
 
     // ---------------------------------------------------------------------------
-
-    @Override
-    public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws OXException {
-        return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
-    }
 
     @Override
     public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws RemoteException, OXException {
-        return optimize(identifier, waitFlush, waitSearcher, maxSegments);
+        return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
     }
 
     // ---------------------------------------------------------------------------
 
     @Override
-    public QueryResponse query(final SolrCoreIdentifier identifier, final SolrParams params) throws OXException {
-        return solrService.query(identifier, params);
-    }
-
-    @Override
     public QueryResponse queryRmi(final SolrCoreIdentifier identifier, final SolrParams params) throws RemoteException, OXException {
-        return query(identifier, params);
+        return solrService.query(identifier, params);
     }
 }

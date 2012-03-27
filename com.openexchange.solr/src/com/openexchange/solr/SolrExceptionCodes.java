@@ -95,6 +95,10 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      * Could not parse URI: %1$s.
      */
     URI_PARSE_ERROR(SolrExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1008),
+    /**
+     * Remote error: %1$s.
+     */
+    REMOTE_ERROR(SolrExceptionMessages.REMOTE_ERROR_MSG, Category.CATEGORY_ERROR, 1009),
     
     ;
 
