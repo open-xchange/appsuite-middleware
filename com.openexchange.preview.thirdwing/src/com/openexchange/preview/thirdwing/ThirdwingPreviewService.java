@@ -210,7 +210,6 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
 
         final ThreadPoolService poolService = ThreadPools.getThreadPool();
-        final Future<String> future = poolService.submit(observationTask);
         IOUnit unit;
         FileInputStream fis = null;
         IContentIterator contentIterator = null;
@@ -225,6 +224,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             int pageCount = 1;
             while (contentIterator.hasNext() && (pages == -1 || pageCount <= pages)) {
                 contentIterator.writeNextContent();
+                Future<String> future = poolService.submit(observationTask);
                 content.add(future.get());
                 pageCount++;
             }
