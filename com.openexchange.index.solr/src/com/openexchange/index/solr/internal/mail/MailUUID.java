@@ -83,28 +83,8 @@ public class MailUUID {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mailUUID == null) ? 0 : mailUUID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        MailUUID other = (MailUUID) obj;
-        if (mailUUID == null) {
-            if (other.mailUUID != null)
-                return false;
-        } else if (!mailUUID.equals(other.mailUUID))
-            return false;
-        return true;
+    public String toString() {
+        return mailUUID;
     }
 
 }

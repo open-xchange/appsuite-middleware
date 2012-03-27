@@ -274,6 +274,10 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             if (null == solrDocument) {
                 inputDocument = helper.inputDocumentFor(message, userId, contextId);
             } else {
+                final Boolean contentFlag = (Boolean) solrDocument.getFieldValue(FIELD_CONTENT_FLAG);
+                if (null != contentFlag && contentFlag.booleanValue()) {
+                    return;
+                }
                 inputDocument = new SolrInputDocument();
                 for (final Entry<String, Object> entry : solrDocument.entrySet()) {
                     final String name = entry.getKey();
