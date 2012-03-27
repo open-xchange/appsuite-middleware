@@ -69,24 +69,26 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
 public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessService {
 
     private final SolrAccessService solrService;
-    
 
     public RMISolrAccessImpl(final SolrAccessService solrService) {
         super();
         this.solrService = solrService;
     }
 
+    // ---------------------------------------------------------------------------
+
     @Override
     public boolean startCore(final SolrCoreConfiguration configuration) throws OXException {
         return solrService.startCore(configuration);
     }
-    
+
     @Override
     public boolean startCoreRmi(final SolrCoreConfiguration configuration) throws RemoteException, OXException {
         return startCore(configuration);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public boolean stopCore(final SolrCoreIdentifier identifier) throws OXException {
         return solrService.stopCore(identifier);
@@ -97,7 +99,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return stopCore(identifier);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public void reloadCore(final SolrCoreIdentifier identifier) throws OXException {
         solrService.reloadCore(identifier);
@@ -108,7 +111,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         reloadCore(identifier);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse add(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws OXException {
         return solrService.add(identifier, document, commit);
@@ -119,7 +123,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return add(identifier, documents, commit);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse add(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
         return solrService.add(identifier, documents, commit);
@@ -130,7 +135,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return add(identifier, document, commit);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse deleteById(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws OXException {
         return solrService.deleteById(identifier, id, commit);
@@ -141,7 +147,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return deleteById(identifier, id, commit);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse deleteByQuery(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws OXException {
         return solrService.deleteByQuery(identifier, query, commit);
@@ -152,7 +159,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return deleteByQuery(identifier, query, commit);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse commit(final SolrCoreIdentifier identifier) throws OXException {
         return solrService.commit(identifier);
@@ -161,8 +169,9 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
     @Override
     public UpdateResponse commitRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
         return commit(identifier);
-    }    
-    
+    }
+
+    // ---------------------------------------------------------------------------
 
     @Override
     public UpdateResponse commit(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
@@ -174,7 +183,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return commit(identifier, waitFlush, waitSearcher);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse rollback(final SolrCoreIdentifier identifier) throws OXException {
         return solrService.rollback(identifier);
@@ -185,7 +195,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return rollback(identifier);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse optimize(final SolrCoreIdentifier identifier) throws OXException {
         return solrService.optimize(identifier);
@@ -196,7 +207,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return optimize(identifier);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
         return solrService.optimize(identifier, waitFlush, waitSearcher);
@@ -207,7 +219,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return optimize(identifier, waitFlush, waitSearcher);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws OXException {
         return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
@@ -218,7 +231,8 @@ public class RMISolrAccessImpl implements RMISolrAccessService, SolrAccessServic
         return optimize(identifier, waitFlush, waitSearcher, maxSegments);
     }
 
-    
+    // ---------------------------------------------------------------------------
+
     @Override
     public QueryResponse query(final SolrCoreIdentifier identifier, final SolrParams params) throws OXException {
         return solrService.query(identifier, params);
