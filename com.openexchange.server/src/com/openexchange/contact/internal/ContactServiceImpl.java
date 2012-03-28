@@ -283,13 +283,13 @@ public class ContactServiceImpl implements ContactService {
 			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
 		}
 		/*
-		 * prepare get
+		 * prepare fields
 		 */
-		final ContactField[] queriedFields = Tools.prepare(fields, ContactField.PRIVATE_FLAG, ContactField.CREATED_BY);
+		final QueryFields queryFields = new QueryFields(fields);		
 		/*
 		 * get contact from storage
 		 */		
-		final Contact contact = storage.get(contextID, folderID, id, queriedFields);
+		final Contact contact = storage.get(contextID, folderID, id, queryFields.getFields());
 		if (null == contact) {
 			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), contextID);
 		}		
@@ -300,6 +300,12 @@ public class ContactServiceImpl implements ContactService {
 			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
 		} else if (contact.getPrivateFlag() && contact.getCreatedBy() != userID) {
 			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
+		}
+		/*
+		 * Add attachment info if needed
+		 */
+		if (queryFields.needsAttachmentInfo()) {
+			Tools.addAttachmentInformation(contact, contextID);
 		}
 		/*
 		 * deliver contact
@@ -630,29 +636,29 @@ public class ContactServiceImpl implements ContactService {
 			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
 		}
 		/*
-		 * prepare get
+		 * prepare fields
 		 */
-		final ContactField[] queriedFields = Tools.prepare(fields, ContactField.PRIVATE_FLAG, ContactField.CREATED_BY);
+		final QueryFields queryFields = new QueryFields(fields);		
 		/*
 		 * get contacts from storage
 		 */		
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		SearchIterator<Contact> contacts = null;
 		if (null != since) {
-			contacts = deleted ? storage.deleted(contextID, folderID, since, queriedFields) : 
-				storage.modified(contextID, folderID, since, queriedFields, sortOptions);
+			contacts = deleted ? storage.deleted(contextID, folderID, since, queryFields.getFields()) : 
+				storage.modified(contextID, folderID, since, queryFields.getFields(), sortOptions);
 		} else if (null != ids) {
-			contacts = storage.list(contextID, folderID, ids, queriedFields, sortOptions);
+			contacts = storage.list(contextID, folderID, ids, queryFields.getFields(), sortOptions);
 		} else {
-			contacts = storage.all(contextID, folderID, queriedFields, sortOptions);
+			contacts = storage.all(contextID, folderID, queryFields.getFields(), sortOptions);
 		} 
 		if (null == contacts) {
 			throw ContactExceptionCodes.UNEXPECTED_ERROR.create("got no results from storage");
 		}
 		/*
-		 * filter results respecting object permission restrictions
+		 * filter results respecting object permission restrictions, adding attachment info as needed
 		 */
-		return PermissionFilter.create(contacts, userID, permission.canReadAllObjects());	
+		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), contextID, userID, permission.canReadAllObjects());	
 	}
 	
 	protected <O> SearchIterator<Contact> searchContacts(final int contextID, final int userID, final SearchTerm<O> term, 
@@ -686,11 +692,19 @@ public class ContactServiceImpl implements ContactService {
 			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
 		}
 		/*
+		 * prepare fields
+		 */
+		final QueryFields queryFields = new QueryFields(fields);		
+		/*
 		 * perform searches
 		 */
 		final List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
 		for (final ContactStorage storage : queriedStorages) {
-			searchIterators.add(PermissionFilter.create(storage.search(contextID, term, fields, sortOptions), userID));					
+			/*
+			 * filter results respecting object permission restrictions, adding attachment info as needed
+			 */
+			searchIterators.add(new ResultIterator(storage.search(contextID, term, queryFields.getFields(), sortOptions), 
+					queryFields.needsAttachmentInfo(), contextID, userID));
 		}
 		return 2 > searchIterators.size() ? searchIterators.get(0) : 
 			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				

@@ -53,10 +53,8 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +68,8 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -200,7 +200,6 @@ public final class Tools {
 			}
 		};
 	}
-
 	
 	/**
 	 * Gets the contact storage. 
@@ -239,6 +238,9 @@ public final class Tools {
 	
 	public static Context getContext(final int contextID) throws OXException {
 		final Context context = ContactServiceLookup.getService(ContextService.class, true).getContext(contextID);
+		if (null == context) {
+			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("Unable to get context '" + contextID + "'.");
+		}
 		return context;
 	}
 
@@ -268,33 +270,19 @@ public final class Tools {
 	}
 	
 	/**
-	 * Prepares a contact field array by ensuring that all necessary fields 
-	 * are included.
+	 * Adds the date of the last modification to attachments of the given 
+	 * contact when needed. 
 	 * 
-	 * @param fields the contact fields to prepare, or <code>null</code> if 
-	 * all fields should be used 
-	 * @param necessaryFields the fields to extend the result if necessary 
-	 * @return the prepared fields
+	 * @param contact the contact to add the attachment information for
+	 * @throws OXException
 	 */
-	public static ContactField[] prepare(final ContactField[] fields, final ContactField... necessaryFields) {
-        final Set<ContactField> extendedFields = new HashSet<ContactField>();
-        if (null != fields) {
-            for (final ContactField field : fields) {
-                extendedFields.add(field);
-            }
-        } else {
-            for (final ContactField field : ContactField.values()) {
-          		extendedFields.add(field);
-            }
-        }
-        if (null != necessaryFields) {
-            for (final ContactField field : necessaryFields) {
-                extendedFields.add(field);
-            }
-        }
-        return extendedFields.toArray(new ContactField[extendedFields.size()]);
-    }
-	
+	public static void addAttachmentInformation(final Contact contact, final int contextID) throws OXException {
+		if (false == contact.containsLastModifiedOfNewestAttachment() && 0 < contact.getNumberOfAttachments()) {
+			contact.setLastModifiedOfNewestAttachment(Attachments.getInstance().getNewestCreationDate(
+					Tools.getContext(contextID), Types.CONTACT, contact.getObjectID()));
+		}
+	}
+
 	public static boolean needsAttachmentInfo(final ContactField[] fields) {
 		if (null != fields) {
 			for (final ContactField field : fields) {

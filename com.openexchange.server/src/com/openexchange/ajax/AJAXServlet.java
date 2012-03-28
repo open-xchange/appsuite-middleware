@@ -100,6 +100,7 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -423,7 +424,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
              */
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            super.service(req, resp);
+            super.service(new CountingHttpServletRequest(req), resp);
         } catch (final ServletException x) {
             throw x;
         } catch (final Exception e) {

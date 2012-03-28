@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.mapping;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -1824,6 +1825,16 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getPrivateFlag() ? Integer.valueOf(1) : Integer.valueOf(0);
             }
+            
+        	@Override
+        	public void set(final PreparedStatement statement, final int parameterIndex, final Contact contact) throws SQLException {
+        		// special handling, since previous contact database implementation expected 'null', when the private flag is 'false'
+        		if (contact.containsPrivateFlag() && contact.getPrivateFlag()) {
+    				statement.setInt(parameterIndex, 1);
+        		} else {
+        			statement.setNull(parameterIndex, this.getSqlType());
+        		}
+        	}
         });
 
         mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>("created_from", "Created by") {

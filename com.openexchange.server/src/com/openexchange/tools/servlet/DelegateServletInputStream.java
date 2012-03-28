@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,89 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.tools.servlet;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.servlet.ServletInputStream;
 
-public class AppointmentAJAXSuite extends TestSuite{
+/**
+ * {@link DelegateServletInputStream} - The delegating {@link ServletInputStream}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class DelegateServletInputStream extends ServletInputStream {
 
-    private AppointmentAJAXSuite() {
+    private final InputStream in;
+
+    /**
+     * Initializes a new {@link DelegateServletInputStream}.
+     * 
+     * @param in The input stream to delegate to
+     */
+    public DelegateServletInputStream(final InputStream in) {
         super();
+        this.in = in;
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(UserStory2173Test.class);
-        tests.addTestSuite(CalendarTestManagerTest.class);
-        tests.addTestSuite(UserStory1085Test.class);
-        tests.addTestSuite(AppointmentAttachmentTests.class);
-        tests.addTestSuite(ConfirmationsTest.class);
-        tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
-        tests.addTestSuite(CreatedByTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleAppointmentTest.class);
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        tests.addTest(NewAppointmentHttpApiTestSuite.suite());
-        return tests;
+    @Override
+    public int read() throws IOException {
+        return in.read();
     }
+
+    @Override
+    public int hashCode() {
+        return in.hashCode();
+    }
+
+    @Override
+    public int read(final byte[] b) throws IOException {
+        return in.read(b);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return in.equals(obj);
+    }
+
+    @Override
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        return in.read(b, off, len);
+    }
+
+    @Override
+    public long skip(final long n) throws IOException {
+        return in.skip(n);
+    }
+
+    @Override
+    public int available() throws IOException {
+        return in.available();
+    }
+
+    @Override
+    public String toString() {
+        return in.toString();
+    }
+
+    @Override
+    public void close() throws IOException {
+        in.close();
+    }
+
+    @Override
+    public void mark(final int readlimit) {
+        in.mark(readlimit);
+    }
+
+    @Override
+    public void reset() throws IOException {
+        in.reset();
+    }
+
+    @Override
+    public boolean markSupported() {
+        return in.markSupported();
+    }
+
 }

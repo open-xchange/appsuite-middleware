@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,6 +80,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,6 +116,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private IDBasedFileAccess files;
 
     private List<String> folders = null;
+
+	private byte[] contentData;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         this.data = requestData;
@@ -444,6 +448,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             file.setId(getId());
             fields.add(File.Field.ID);
         }
+        
+        if (object.has("content")) {
+        	try {
+				contentData = object.opt("content").toString().getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// IGNORE;
+			}
+        }
     }
 
     @Override
@@ -460,7 +472,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public boolean hasUploads() throws OXException {
-        return data.hasUploads();
+        return data.hasUploads() || contentData != null;
     }
 
     @Override
@@ -482,6 +494,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             } catch (final FileNotFoundException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
+        }
+        if (contentData != null) {
+        	return new UnsynchronizedByteArrayInputStream(contentData);
         }
         return null;
     }
