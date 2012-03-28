@@ -67,7 +67,7 @@ public interface SessionThreadCounter {
     public static final AtomicReference<SessionThreadCounter> REFERENCE = new AtomicReference<SessionThreadCounter>();
 
     /**
-     * Gets the available those sessions' threads whose total number is equal to or greater than specified threshold at invocation time.
+     * Gets the those sessions' available threads whose total number is equal to or greater than specified threshold at invocation time.
      * 
      * @param threshold The threshold
      * @return The available sessions' threads exceeding respectively equal to given threshold
