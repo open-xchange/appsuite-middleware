@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactRequest}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactRequest {
@@ -84,10 +84,10 @@ public class ContactRequest {
     }
 
     public int getId() throws OXException {
-    	if (request.isSet("id")) {
+        if (request.isSet("id")) {
             return request.getParameter("id", int.class);
-    	}
-    	return session.getUser().getContactId();
+        }
+        return session.getUser().getContactId();
     }
 
     public int getFolder() throws OXException {
@@ -163,15 +163,30 @@ public class ContactRequest {
 
     public int[] getDeleteRequestData() throws OXException {
         final JSONObject json = (JSONObject) request.getData();
-        final int[] data = new int[2];
-        try {
-            data[0] = json.getInt("id");
-            data[1] = json.getInt("folder");
-        } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+        if (json.hasAndNotNull("id")) {
+            final int[] data = new int[2];
+            try {
+                data[0] = json.getInt("id");
+                data[1] = json.getInt("folder");
+            } catch (final JSONException e) {
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+            }
+            return data;
+        } else if (json.hasAndNotNull("ids")) {
+            try {
+                JSONArray ids = (JSONArray) json.get("ids");
+                final int[] data = new int[ids.length() + 1];
+                for (int i = 0; i < ids.length(); i++) {
+                    data[i] = ids.getInt(i);
+                }
+                data[data.length - 1] = json.getInt("folder");
+                return data;
+            } catch (JSONException e) {
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+            }
+        } else {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
         }
-
-        return data;
     }
 
     public long getTimestamp() throws OXException {

@@ -1,3 +1,7 @@
+* 2012-03-08 - jan.bauerdick@open-xchange.com
+
+ - Improved DeleteRequest to delete multiple object with one request
+
 * 2012-03-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 21843: Restored with previous class version

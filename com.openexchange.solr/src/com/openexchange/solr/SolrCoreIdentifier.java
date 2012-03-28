@@ -50,6 +50,7 @@
 package com.openexchange.solr;
 
 import java.io.Serializable;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SolrCoreIdentifier}
@@ -78,6 +79,24 @@ public class SolrCoreIdentifier implements Serializable {
         this.contextId = contextId;
         this.userId = userId;
         this.module = module;
+    }
+    
+    public SolrCoreIdentifier(final String identifier) throws OXException {
+        super();
+        final int i1 = identifier.indexOf("sc_c");
+        final int i2 = identifier.indexOf("_u");
+        final int i3 = identifier.indexOf("_m");
+        if (i1 == -1 || i2 == -1 || i3 == -1) {
+            throw SolrExceptionCodes.IDENTIFIER_PARSE_ERROR.create(identifier);
+        }
+            
+        try {
+            contextId = Integer.parseInt(identifier.substring(i1 + 3, i2));
+            userId = Integer.parseInt(identifier.substring(i2 + 2, i3));
+            module = Integer.parseInt(identifier.substring(i3 + 2, identifier.length()));
+        } catch (final NumberFormatException e) {
+            throw SolrExceptionCodes.IDENTIFIER_PARSE_ERROR.create(identifier);
+        }
     }
 
     /**

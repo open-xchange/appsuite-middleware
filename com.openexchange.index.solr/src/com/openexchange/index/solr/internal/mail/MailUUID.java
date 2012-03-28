@@ -82,4 +82,9 @@ public class MailUUID {
         return mailUUID;
     }
 
+    @Override
+    public String toString() {
+        return mailUUID;
+    }
+
 }

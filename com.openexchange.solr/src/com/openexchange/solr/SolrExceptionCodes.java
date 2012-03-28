@@ -99,6 +99,10 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      * Remote error: %1$s.
      */
     REMOTE_ERROR(SolrExceptionMessages.REMOTE_ERROR_MSG, Category.CATEGORY_ERROR, 1009),
+    /**
+     * Could not parse solr core identifier %1$s.
+     */
+    IDENTIFIER_PARSE_ERROR(SolrExceptionMessages.IDENTIFIER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1010)
     
     ;
 

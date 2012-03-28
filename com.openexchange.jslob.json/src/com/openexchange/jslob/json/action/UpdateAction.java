@@ -53,6 +53,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONUpdate;
 import com.openexchange.jslob.JSlob;
@@ -64,7 +67,19 @@ import com.openexchange.server.ServiceLookup;
  * {@link UpdateAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Action(
+    name = "update"
+    , description = "Updates or sets the JSlob associated with the current user and context." 
+    , method = RequestMethod.PUT
+    , parameters = {
+        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        , @Parameter(name = "id", description = "The path of the JSlob.", optional=true)
+    }
+    , requestBody = "A JSON object to perform update or set. If the object contains a path key-value pair update is performed, set otherwise."
+    , responseDescription = "The updated JSlob."
+)
 public final class UpdateAction extends JSlobAction {
 
     /**

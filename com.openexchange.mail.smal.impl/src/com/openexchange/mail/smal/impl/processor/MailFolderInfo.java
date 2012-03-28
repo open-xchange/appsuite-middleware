@@ -103,4 +103,15 @@ public final class MailFolderInfo {
         return messageCount;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(32);
+        builder.append('(');
+        if (fullName != null) {
+            builder.append("fullName=").append(fullName).append(", ");
+        }
+        builder.append("messageCount=").append(messageCount).append(')');
+        return builder.toString();
+    }
+
 }

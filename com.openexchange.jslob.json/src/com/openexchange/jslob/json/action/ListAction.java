@@ -54,6 +54,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
@@ -64,7 +67,18 @@ import com.openexchange.server.ServiceLookup;
  * {@link ListAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Action(
+    name = "list"
+    , description = "Get a list of JSlobs associated with the current user and context." 
+    , method = RequestMethod.PUT
+    , parameters = {
+        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+    }
+    , requestBody = "An array containing JSlob identifiers."
+    , responseDescription = "An array containing JSlobs."
+)
 public final class ListAction extends JSlobAction {
 
     /**

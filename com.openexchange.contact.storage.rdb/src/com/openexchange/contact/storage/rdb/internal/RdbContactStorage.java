@@ -137,7 +137,14 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             if (queryFields.hasDistListData() && 0 < contact.getNumberOfDistributionLists()) {
                 contact.setDistributionList(executor.select(connection, Table.DISTLIST, contextID, objectID, Fields.DISTLIST_DATABASE_ARRAY));
-            }            
+            }
+            /*
+             * add attachment information in advance if needed
+             */
+            //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+            if (queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
+            	contact.setLastModifiedOfNewestAttachment(executor.selectNewestAttachmentDate(connection, contextID, objectID));            	
+            }
             return contact;
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
@@ -297,7 +304,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                         }
                     } else {
                         // create new image
-                        this.executor.insert(connection, Table.IMAGES, contact, Fields.IMAGE_DATABASE_ARRAY);                        
+                    	final Contact imageData = new Contact();
+                    	imageData.setObjectID(objectID);
+                    	imageData.setContextId(contextID);
+                    	imageData.setImage1(contact.getImage1());
+                    	imageData.setImageContentType(contact.getImageContentType());
+                    	imageData.setImageLastModified(contact.getImageLastModified());                    	
+                        this.executor.insert(connection, Table.IMAGES, imageData, Fields.IMAGE_DATABASE_ARRAY);                        
                     }                    
                 }
             }
@@ -426,6 +439,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                 if (queryFields.hasDistListData()) {
                     contacts = mergeDistListData(connection, deleted ? Table.DELETED_DISTLIST : Table.DISTLIST, contextID, contacts);
                 }
+                /*
+                 * merge attachment information in advance if needed
+                 */
+                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                if (queryFields.hasAttachmentData()) {
+                	contacts = mergeAttachmentData(connection, contextID, contacts);            	
+                }
             }
             return getSearchIterator(contacts);
         } catch (final SQLException e) {
@@ -443,6 +463,20 @@ public class RdbContactStorage extends DefaultContactStorage {
                 final List<DistListMember> distList = distListData.get(Integer.valueOf(contact.getObjectID()));
                 if (null != distList) {
                     contact.setDistributionList(distList.toArray(new DistListMember[distList.size()]));
+                }
+            }
+        }
+        return contacts;
+    }
+
+    private List<Contact> mergeAttachmentData(final Connection connection, final int contextID, final List<Contact> contacts) throws SQLException, OXException {
+        final int[] objectIDs = getObjectIDsWithAttachments(contacts);
+        if (null != objectIDs && 0 < objectIDs.length) {
+            final Map<Integer, Date> attachmentData = executor.selectNewestAttachmentDates(connection, contextID, objectIDs);
+            for (final Contact contact : contacts) {
+                final Date attachmentLastModified = attachmentData.get(Integer.valueOf(contact.getObjectID()));
+                if (null != attachmentLastModified) {
+                    contact.setLastModifiedOfNewestAttachment(attachmentLastModified);
                 }
             }
         }
@@ -496,6 +530,17 @@ public class RdbContactStorage extends DefaultContactStorage {
         final int[] objectIDs = new int[contacts.size()];
         for (final Contact contact : contacts) {
             if (0 < contact.getNumberOfDistributionLists()) {
+                objectIDs[i++] = contact.getObjectID();
+            }
+        }
+        return Arrays.copyOf(objectIDs, i);
+    }
+    
+    private int[] getObjectIDsWithAttachments(final List<Contact> contacts) {
+        int i = 0;
+        final int[] objectIDs = new int[contacts.size()];
+        for (final Contact contact : contacts) {
+            if (0 < contact.getNumberOfAttachments()) {
                 objectIDs[i++] = contact.getObjectID();
             }
         }

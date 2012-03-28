@@ -90,7 +90,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
      * 
      * @param identifier The Solr index identifier
      */
-    public AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {
+    protected AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {
         super();
         this.identifier = identifier;
         this.contextId = identifier.getContextId();
@@ -132,7 +132,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     /*
      * Protected methods
      */
-    protected UpdateResponse addDocument(final SolrInputDocument document) throws OXException {
+    protected UpdateResponse addDocument(final SolrInputDocument document) throws OXException {        
         return addDocument(document, true);
     }
     
@@ -142,51 +142,79 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     
     protected UpdateResponse addDocument(final SolrInputDocument document, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
+        final UpdateResponse response = accessService.add(identifier, document, commit);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
+        }
         
-        return accessService.add(identifier, document, commit);
+        return response;
     }
     
     protected UpdateResponse addDocuments(final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final UpdateResponse response = accessService.add(identifier, documents, commit);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
+        }
         
-        return accessService.add(identifier, documents, commit);
+        return response;
     }
     
     protected UpdateResponse commit() throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
+        final UpdateResponse response = accessService.commit(identifier);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        }
         
-        return accessService.commit(identifier);
+        return response;
     }
     
     protected UpdateResponse optimize() throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
+        final UpdateResponse response = accessService.optimize(identifier);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        }
         
-        return accessService.optimize(identifier);
+        return response;
     }
     
     protected SolrResponse deleteDocumentById(final String id) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
+        final UpdateResponse response = accessService.deleteById(identifier, id, true);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Delete by id took " + response.getElapsedTime() + "ms.");
+        }
         
-        return accessService.deleteById(identifier, id, true);
+        return response;
     }
     
     protected SolrResponse deleteDocumentsByQuery(final String query) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
+        final UpdateResponse response = accessService.deleteByQuery(identifier, query, true);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Delete by query took " + response.getElapsedTime() + "ms.");
+        }
         
-        return accessService.deleteByQuery(identifier, query, true);
+        return response;
     }
     
     protected QueryResponse query(final SolrParams query) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
+        final QueryResponse response = accessService.query(identifier, query);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Query took " + response.getElapsedTime() + "ms.");
+        }
         
-        return accessService.query(identifier, query);
+        return response;
     }
 
 }

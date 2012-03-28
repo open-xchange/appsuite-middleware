@@ -341,6 +341,10 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
     }
     
+    public Collection<String> getActiveCores() {
+        return coreContainer.getCoreNames();
+    }
+    
     private SolrServer getSolrServer(final SolrCoreIdentifier identifier) throws OXException {
         final EmbeddedSolrServer solrServer = new EmbeddedSolrServer(coreContainer, identifier.toString());
         return solrServer;

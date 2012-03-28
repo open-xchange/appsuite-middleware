@@ -92,5 +92,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // Remote error: %1$s.
     public static final String REMOTE_ERROR_MSG = "Remote error: %1$s.";
+
+    // Could not parse solr core identifier %1$s.
+    public static final String IDENTIFIER_PARSE_ERROR_MSG = "Could not parse solr core identifier %1$s.";
     
 }
