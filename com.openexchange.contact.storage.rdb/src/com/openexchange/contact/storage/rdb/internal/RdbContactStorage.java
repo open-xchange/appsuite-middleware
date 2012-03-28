@@ -56,10 +56,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -117,9 +115,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */        
-            Contact contact = executor.selectSingle(connection, Table.CONTACTS, contextID, objectID, queryFields.getContactDataFields());
+            final Contact contact = executor.selectSingle(connection, Table.CONTACTS, contextID, objectID, queryFields.getContactDataFields());
             if (null == contact) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(objectID), Integer.valueOf(contextID));
             }
             contact.setObjectID(objectID);
             contact.setContextId(contextID);
@@ -370,6 +368,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     	return this.getContacts(false, contextID, folderId, null, since, fields, null, null);
     }
 
+    @Override
     public SearchIterator<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, contextID, folderId, null, since, fields, null, sortOptions);
     }
