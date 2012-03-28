@@ -100,13 +100,14 @@ public interface SolrCoreConfigService {
     
     /**
      * Creates a new solr core. The core will be inactive after creation.
+     * Returns if the creation was successful or not.
      * 
      * @param contextId
      * @param userId
      * @param module
      * @throws OXException
      */
-    void createCoreEnvironment(int contextId, int userId, int module) throws OXException;
+    boolean createCoreEnvironment(int contextId, int userId, int module) throws OXException;
     
     /**
      * Deletes a core. If the core is running, it will be stopped first.

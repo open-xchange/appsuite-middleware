@@ -18,10 +18,12 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.internal.DelegationSolrAccessImpl;
-import com.openexchange.solr.internal.Services;
 import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
+import com.openexchange.solr.internal.Services;
+import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
@@ -49,6 +51,9 @@ public class SolrActivator extends HousekeepingActivator {
         final DelegationSolrAccessImpl accessService = this.managementService = new DelegationSolrAccessImpl(new EmbeddedSolrAccessImpl());
         accessService.startUp();
         registerService(SolrAccessService.class, accessService);
+        final SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
+        registerService(SolrCoreConfigService.class, coreService);
+        addService(SolrCoreConfigService.class, coreService);
         registerRMIInterface();
     }
     

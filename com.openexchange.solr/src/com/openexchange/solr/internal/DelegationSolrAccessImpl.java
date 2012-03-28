@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCore;
+import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrCoreStore;
@@ -136,8 +137,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         final int contextId = identifier.getContextId();
         final int userId = identifier.getUserId();
         final int module = identifier.getModule();
-        if (!embeddedAccess.hasActiveCore(identifier)) {
-            final SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);
+        if (!embeddedAccess.hasActiveCore(identifier)) {                           
+            final SolrCore solrCore = getCoreOrCreateEnvironment(contextId, userId, module);
             if (solrCore.isActive()) {
                 if (solrCore.getServer().equals(getLocalServerAddress())) {
                     /*
@@ -151,6 +152,20 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         
         LOG.warn("Could not start solr core. There already seems to be an active one for user " + userId + " and module " + module + " in context " + contextId + ".");
         return false;
+    }
+    
+    private SolrCore getCoreOrCreateEnvironment(final int contextId, final int userId, final int module) throws OXException {
+        try {
+            return indexMysql.getSolrCore(contextId, userId, module);
+        } catch (final OXException e) {
+            if (e.similarTo(SolrExceptionCodes.CORE_ENTRY_NOT_FOUND)) {
+                final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
+                coreService.createCoreEnvironment(contextId, userId, module);
+                return indexMysql.getSolrCore(contextId, userId, module);
+            } else {
+                throw e;
+            }
+        }
     }
     
     private boolean tryToStart(final SolrCoreConfiguration configuration) throws OXException {
@@ -365,7 +380,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         final int contextId = identifier.getContextId();
         final int userId = identifier.getUserId();
         final int module = identifier.getModule();
-        SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);     
+        SolrCore solrCore = getCoreOrCreateEnvironment(contextId, userId, module);
         if (solrCore.isActive()) {
             if (solrCore.getServer().equals(getLocalServerAddress())) {
                 /*

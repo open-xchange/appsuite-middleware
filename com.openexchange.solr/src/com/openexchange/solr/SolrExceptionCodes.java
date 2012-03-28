@@ -84,9 +84,9 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      */
     INDEX_FAULT(SolrExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
     /**
-     * No IndexAccess implementation was found for module $1%s.
+     * The file or directory %1$s does not exist.
      */
-    MISSING_ACCESS_FOR_MODULE(SolrExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006),
+    FILE_NOT_EXISTS_ERROR(SolrExceptionMessages.FILE_EXISTS_ERROR_MSG, CATEGORY_ERROR, 1006),
     /**
      * Could neither delegate solr request to a local nor to a remote server instance.
      */
@@ -102,7 +102,15 @@ public enum SolrExceptionCodes implements OXExceptionCode {
     /**
      * Could not parse solr core identifier %1$s.
      */
-    IDENTIFIER_PARSE_ERROR(SolrExceptionMessages.IDENTIFIER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1010)
+    IDENTIFIER_PARSE_ERROR(SolrExceptionMessages.IDENTIFIER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1010),
+    /**
+     * Unknown module: %1$s.
+     */
+    UNKNOWN_MODULE(SolrExceptionMessages.UNKNOWN_MODULE_MSG, Category.CATEGORY_ERROR, 1011),
+    /**
+     * Can not reach solr core store. URI %1$s does not lead to an existing directory.
+     */
+    CORE_STORE_NOT_EXISTS_ERROR(SolrExceptionMessages.CORE_STORE_NOT_EXISTS_ERROR_MSG, Category.CATEGORY_ERROR, 1012),
     
     ;
 

@@ -52,6 +52,7 @@ package com.openexchange.solr;
 import java.io.File;
 import java.net.URI;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.solr.internal.Services;
 
@@ -64,61 +65,88 @@ import com.openexchange.solr.internal.Services;
 public class SolrCoreConfiguration {
 
     private final SolrCoreIdentifier identifier;
+    
+    private final String coreDirPath;
+    
+    private final String coreName;
+    
+    private final String dataDirPath;
+    
+    private final String configDirPath;
+    
+    private final String schemaFileName;
+    
+    private final String configFileName;
 
-    private final URI baseUri;
+    private final String configFilePath;
     
     
-    public SolrCoreConfiguration(final URI baseUri, final SolrCoreIdentifier identifier) {
+    public SolrCoreConfiguration(final URI coreStoreUri, final SolrCoreIdentifier identifier) throws OXException {
         super();
-        this.baseUri = baseUri;
+        final ConfigurationService config = Services.getService(ConfigurationService.class);        
         this.identifier = identifier;
+        coreName = identifier.toString();
+        coreDirPath = coreStoreUri.getPath() + File.separator + coreName;
+        dataDirPath = coreDirPath + File.separator + config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
+        configDirPath = coreDirPath + File.separator + config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME);
+        schemaFileName = config.getProperty(getPropertyForSchemaFileName(identifier.getModule()));
+        configFileName = config.getProperty(getPropertyForConfigFileName(identifier.getModule()));
+        configFilePath = configDirPath + File.separator + configFileName;
     }
     
     public String getCoreName() {
-        return getIdentifier().toString();
+        return coreName;
     }
     
-    public String getInstanceDir() {
-        return baseUri.getPath() + File.separator + getIdentifier().toString();
+    public String getCoreDirPath() {
+        return coreDirPath;
     }
     
-    public String getDataDir() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);        
-        return getInstanceDir() + File.separator + config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
+    public String getDataDirPath() {
+        return dataDirPath;
     }
     
-    public String getSchemaPath() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        switch (getIdentifier().getModule()) {
-        
-            case Types.EMAIL:
-                return config.getProperty(SolrProperties.PROP_SCHEMA_MAIL);
-                
-            default:
-                return null;
-            
-        }
+    public String getConfigDirPath() {
+        return configDirPath;
     }
     
-    public String getConfigPath() {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        String configFile;
-        switch (getIdentifier().getModule()) {
-        
-            case Types.EMAIL:
-                configFile = config.getProperty(SolrProperties.PROP_CONFIG_MAIL_NAME);
-                break;
-                
-            default:
-                return null;
-        
-        }
-        
-        return getInstanceDir() + File.separator + config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME) + File.separator + configFile;
+    public String getSchemaFileName() {
+        return schemaFileName;
+    }
+    
+    public String getConfigFileName() {
+        return configFileName;
+    }
+    
+    public String getConfigFilePath() {
+        return configFilePath;
     }
 
     public SolrCoreIdentifier getIdentifier() {
         return identifier;
     }
-
+    
+    private static String getPropertyForSchemaFileName(final int module) throws OXException {
+        switch (module) {
+        
+        case Types.EMAIL:
+            return SolrProperties.PROP_SCHEMA_MAIL;
+                
+        default:
+            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
+            
+        }
+    }
+    
+    private static String getPropertyForConfigFileName(final int module) throws OXException {
+        switch (module) {
+        
+        case Types.EMAIL:
+            return SolrProperties.PROP_CONFIG_MAIL_NAME;
+                
+        default:
+            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
+            
+        }
+    }
 }

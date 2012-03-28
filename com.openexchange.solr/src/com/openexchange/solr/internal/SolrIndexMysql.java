@@ -165,7 +165,7 @@ public class SolrIndexMysql {
         return core;
     }
     
-    public SolrCore createCoreEntry(final int cid, final int uid, final int module) throws OXException {
+    public boolean createCoreEntry(final int cid, final int uid, final int module) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable(cid);
         try {
@@ -175,25 +175,24 @@ public class SolrIndexMysql {
         }
     }
     
-    public SolrCore createCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {        
+    public boolean createCoreEntry(final Connection con, final int cid, final int uid, final int module) throws OXException {        
         PreparedStatement stmt = null;
-        final int storeId = getFreeCoreStore(con);
-        final SolrCore solrCore = new SolrCore(new SolrCoreIdentifier(cid, uid, module));
+        final int storeId = getFreeCoreStore();
         try {
-            stmt = con.prepareStatement("INSERT INTO solrCores (cid, uid, module, store, active, server) VALUES (?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO solrCores (cid, uid, module, store, active, server) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE cid = cid");
             int i = 1;
             stmt.setInt(i++, cid);
             stmt.setInt(i++, uid);
             stmt.setInt(i++, module);
             stmt.setInt(i++, storeId);
             stmt.setBoolean(i++, false);
-            stmt.setNull(i, java.sql.Types.VARCHAR);
+            stmt.setNull(i, java.sql.Types.VARCHAR);            
+            final int rows = stmt.executeUpdate();
+            if (rows == 1) {
+                return true;
+            }
             
-            stmt.executeUpdate();
-            
-            solrCore.setActive(false);
-            solrCore.setStore(storeId);
-            return solrCore;
+            return false;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -540,7 +539,9 @@ public class SolrIndexMysql {
         return dbService;
     }
     
-    private int getFreeCoreStore(final Connection con) throws OXException {
+    private int getFreeCoreStore() throws OXException {
+        final DatabaseService dbService = getDbService();
+        final Connection con = dbService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -571,6 +572,7 @@ public class SolrIndexMysql {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+            dbService.backReadOnly(con);
         }
     }
 }
