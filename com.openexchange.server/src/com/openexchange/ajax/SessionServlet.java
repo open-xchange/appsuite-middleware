@@ -92,6 +92,7 @@ import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -267,6 +268,8 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
+        final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
+        String sessionId = null;
         try {
             initializeSession(req);
             final ServerSession session = getSessionObject(req);
@@ -284,6 +287,10 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
             ThreadLocalSessionHolder.getInstance().setSession(session);
+            if (null != threadCounter) {
+                sessionId = session.getSessionID();
+                threadCounter.increment(sessionId);
+            }
             super.service(new CountingHttpServletRequest(req), resp);
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
@@ -318,6 +325,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         } finally {
+            if (null != sessionId && null != threadCounter) {
+                threadCounter.decrement(sessionId);
+            }
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();
