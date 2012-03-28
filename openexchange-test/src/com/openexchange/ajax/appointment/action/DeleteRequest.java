@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,6 +66,8 @@ import com.openexchange.webdav.xml.fields.CalendarFields;
 public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteResponse> {
 
     private final int objectId;
+    
+    private final int[] objectIds;
 
     private final int inFolder;
 
@@ -77,6 +80,10 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
 
     public DeleteRequest(final int objectId, final int inFolder, final Date lastModified, final boolean failOnError) {
         this(objectId, inFolder, 0, lastModified, failOnError);
+    }
+    
+    public DeleteRequest(final int[] objectIds, final int inFolder, final Date lastModified, final boolean failOnError) {
+        this(objectIds, inFolder, 0, lastModified, failOnError);
     }
 
     /**
@@ -108,11 +115,22 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     public DeleteRequest(final int objectId, final int inFolder, final int recurrencePosition, final Date lastModified, final boolean failOnError) {
         	super();
         this.objectId = objectId;
+        this.objectIds = null;
         this.inFolder = inFolder;
         this.recurrencePosition = recurrencePosition;
         this.lastModified = lastModified;
         this.failOnError = failOnError;
 	}
+    
+    public DeleteRequest(final int[] objectIds, final int inFolder, final int recurrencePosition, final Date lastModified, final boolean failOnError) {
+        super();
+    this.objectId = 0;
+    this.objectIds = objectIds;
+    this.inFolder = inFolder;
+    this.recurrencePosition = recurrencePosition;
+    this.lastModified = lastModified;
+    this.failOnError = failOnError;
+}
 
     /**
      * Deletes an occurrence of a series appointment by date.
@@ -127,12 +145,24 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     public DeleteRequest(final int objectId, final int inFolder, final Date recurrenceDatePosition, final Date lastModified, final boolean failOnError) {
         	super();
         this.objectId = objectId;
+        this.objectIds = null;
         this.inFolder = inFolder;
         this.recurrencePosition = -1;
         this.recurrenceDatePosition = recurrenceDatePosition;
         this.lastModified = lastModified;
         this.failOnError = failOnError;
 	}
+    
+    public DeleteRequest(final int[] objectIds, final int inFolder, final Date recurrenceDatePosition, final Date lastModified, final boolean failOnError) {
+        super();
+    this.objectId = 0;
+    this.objectIds = objectIds;
+    this.inFolder = inFolder;
+    this.recurrencePosition = -1;
+    this.recurrenceDatePosition = recurrenceDatePosition;
+    this.lastModified = lastModified;
+    this.failOnError = failOnError;
+}
 
     public void setFailOnError(final boolean failOnError) {
 		this.failOnError = failOnError;
@@ -143,15 +173,31 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
      */
     @Override
     public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		if(recurrencePosition > 0) {
-            json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
-        } else if (recurrenceDatePosition != null) {
-            json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
+        if (objectIds == null) {
+            final JSONObject json = new JSONObject();
+            json.put(DataFields.ID, objectId);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+            if (recurrencePosition > 0) {
+                json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+            } else if (recurrenceDatePosition != null) {
+                json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
+            }
+            return json;
+        } else {
+            final JSONArray jsonArray = new JSONArray();
+            for (final int id : objectIds) {
+                final JSONObject json = new JSONObject();
+                json.put(DataFields.ID, id);
+                json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+                if (recurrencePosition > 0) {
+                    json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+                } else if (recurrenceDatePosition != null) {
+                    json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
+                }
+                jsonArray.put(json);
+            }
+            return jsonArray;
         }
-        return json;
     }
 
     /**

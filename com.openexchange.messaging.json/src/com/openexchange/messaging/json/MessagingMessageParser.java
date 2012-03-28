@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,12 +60,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.messaging.ByteArrayContent;
 import com.openexchange.messaging.CaptchaParams;
 import com.openexchange.messaging.ContentDisposition;
@@ -114,8 +114,8 @@ public class MessagingMessageParser {
      */
     public MessagingMessageParser() {
         super();
-        headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
-        contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
+        headerParsers = new Java7ConcurrentLinkedQueue<MessagingHeaderParser>();
+        contentParsers = new Java7ConcurrentLinkedQueue<MessagingContentParser>();
         // Header parsers
         headerParsers.add(new AddressHeaderParser());
         headerParsers.add(new ContentTypeParser());

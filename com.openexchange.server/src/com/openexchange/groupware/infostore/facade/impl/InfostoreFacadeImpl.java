@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -676,7 +676,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 if (count == -1) {
                     throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "");
                 }
-                return reserve(enhance(filename, ++count), folderId, id, ctx, count);
+                InfostoreFilenameReservation r = reserve(enhance(filename, ++count), folderId, id, ctx, count);
+                r.setWasAdjusted(true);
+                return r;
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
@@ -786,14 +788,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             try {
                 if (updatedCols.contains(Metadata.VERSION_LITERAL)) {
                     final String fname = load(document.getId(), document.getVersion(), sessionObj.getContext()).getFileName();
-                    if (fname != null && !fname.equals(oldDocument.getFileName())) {
-
-                        reservations.add(reserve(fname, oldDocument.getFolderId(), oldDocument.getId(), sessionObj.getContext(), false));
-
+                    if (!updatedCols.contains(Metadata.FILENAME_LITERAL)) {
+                    	updatedCols.add(Metadata.FILENAME_LITERAL);
+                    	document.setFileName(fname);
                     }
                 }
 
-                modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
 
                 if (document.getFileName() != null && !document.getFileName().equals(oldDocument.getFileName())) {
                     final InfostoreFilenameReservation reservation = reserve(
@@ -803,7 +803,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         sessionObj.getContext(), true);
                     reservations.add(reservation);
                     document.setFileName(reservation.getFilename());
+                	updatedCols.add(Metadata.FILENAME_LITERAL);
                 }
+                
+                if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldDocument.getFileName() != null && oldDocument.getTitle() != null && oldDocument.getFileName().equals(oldDocument.getTitle())) {
+                	document.setTitle(document.getFileName());
+                	updatedCols.add(Metadata.TITLE_LITERAL);
+                }
+
+                modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
 
                 if (data != null) {
 
@@ -1202,6 +1210,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             updatedFields.add(Metadata.VERSION_LITERAL);
         }
 
+
+        if (removeCurrent) {
+            metadata = load(metadata.getId(), update.getVersion(), sessionObj.getContext());
+            InfostoreFilenameReservation reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext(), true);
+            if (reservation.wasAdjusted()) {
+            	update.setFileName(reservation.getFilename());
+            	updatedFields.add(Metadata.FILENAME_LITERAL);
+            }
+            if (metadata.getTitle().equals(metadata.getFileName())) {
+            	update.setTitle(update.getFileName());
+            	updatedFields.add(Metadata.TITLE_LITERAL);
+            }
+        }
         final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
         updateDocument.setContext(sessionObj.getContext());
         updateDocument.setDocuments(Arrays.asList(update));
@@ -1210,11 +1231,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         updateDocument.setProvider(this);
         updateDocument.setQueryCatalog(QUERIES);
         updateDocument.setTimestamp(Long.MAX_VALUE);
-
-        if (removeCurrent) {
-            metadata = load(metadata.getId(), update.getVersion(), sessionObj.getContext());
-            reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext(), false);
-        }
 
         try {
             perform(updateDocument, true);
