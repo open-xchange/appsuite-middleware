@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,13 +58,13 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.Log;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
@@ -348,12 +348,12 @@ public class MessagingMessageWriter {
     public MessagingMessageWriter() {
         super();
         // Header writers
-        headerWriters = new Java7ConcurrentLinkedQueue<MessagingHeaderWriter>();
+        headerWriters = new ConcurrentLinkedQueue<MessagingHeaderWriter>();
         headerWriters.add(new ContentTypeWriter());
         headerWriters.add(new ContentDispositionWriter());
         headerWriters.add(new AddressHeaderWriter());
         // Content writers
-        contentWriters = new Java7ConcurrentLinkedQueue<MessagingContentWriter>();
+        contentWriters = new ConcurrentLinkedQueue<MessagingContentWriter>();
         contentWriters.add(new StringContentRenderer());
         contentWriters.add(new BinaryContentRenderer());
         contentWriters.add(new ReferenceContentRenderer());

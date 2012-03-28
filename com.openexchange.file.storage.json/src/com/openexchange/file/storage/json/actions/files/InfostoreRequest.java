@@ -140,6 +140,4 @@ public interface InfostoreRequest {
     String getFolderAt(int i);
 
     List<String> getFolders();
-
-	boolean isForSpecificVersion();
 }

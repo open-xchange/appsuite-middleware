@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "all", description = "Get all appointments.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "folder", optional=true, description = "Object ID of the folder, whose contents are queried. If not specified, defaults to all calendar folders."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2]."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses a predefined columnset."),
     @Parameter(name = "start", description = "Lower inclusive limit of the queried range as a Date. Only appointments which start on or after this date are returned."),
     @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which end before this date are returned."),
     @Parameter(name = "recurrence_master", description = "Extract the recurrence to several appointments. The default value is false so every appointment of the recurrence will be calculated."),

@@ -226,6 +226,15 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                 } catch (final OXException e) {
                     LOG.warn("User Configuration could not be removed from cache", e);
                 }
+                try {
+                    final UserConfiguration userConfiguration = new UserConfiguration(permissionBits, userId, new int[0], ctx);
+                    final DowngradeEvent event = new DowngradeEvent(userConfiguration, writeCon, ctx);
+                    DowngradeRegistry.getInstance().fireDowngradeEvent(event);
+                } catch (final OXException e) {
+                    LOG.warn("New user configuration could not be propagated through system.", e);
+                } catch (final RuntimeException e) {
+                    LOG.warn("New user configuration could not be propagated through system.", e);
+                }
             }
         } finally {
             closeResources(null, stmt, closeConnection ? writeCon : null, false, ctx);
