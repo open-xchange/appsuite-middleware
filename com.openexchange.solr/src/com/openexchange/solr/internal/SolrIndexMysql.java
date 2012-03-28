@@ -540,39 +540,41 @@ public class SolrIndexMysql {
     }
     
     private int getFreeCoreStore() throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getReadOnly();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT s.id, s.maxCores, COUNT(c.store) AS count FROM solrCores AS c RIGHT OUTER JOIN solrCoreStores AS s ON c.store = s.id GROUP BY c.store");      
-            rs = stmt.executeQuery();      
-            
-            int storeId = -1;
-            int maxFree = 0;
-            while (rs.next()) {
-                int i = 1;
-                final int id = rs.getInt(i++);
-                final int maxCores = rs.getInt(i++);
-                final int count = rs.getInt(i);
-                
-                final int newFree = maxCores - count;
-                if (newFree > maxFree) {
-                    maxFree = newFree;
-                    storeId = id;
-                }
-            }
-            
-            if (storeId == -1) {
-                throw SolrExceptionCodes.NO_FREE_CORE_STORE.create();
-            }
-            
-            return storeId;
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            dbService.backReadOnly(con);
-        }
+        // FIXME: implemet correctly
+        return 1;
+//        final DatabaseService dbService = getDbService();
+//        final Connection con = dbService.getReadOnly();
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        try {
+//            stmt = con.prepareStatement("SELECT s.id, s.maxCores, COUNT(c.store) AS count FROM solrCores AS c RIGHT OUTER JOIN solrCoreStores AS s ON c.store = s.id GROUP BY c.store");      
+//            rs = stmt.executeQuery();      
+//            
+//            int storeId = -1;
+//            int maxFree = 0;
+//            while (rs.next()) {
+//                int i = 1;
+//                final int id = rs.getInt(i++);
+//                final int maxCores = rs.getInt(i++);
+//                final int count = rs.getInt(i);
+//                
+//                final int newFree = maxCores - count;
+//                if (newFree > maxFree) {
+//                    maxFree = newFree;
+//                    storeId = id;
+//                }
+//            }
+//            
+//            if (storeId == -1) {
+//                throw SolrExceptionCodes.NO_FREE_CORE_STORE.create();
+//            }
+//            
+//            return storeId;
+//        } catch (final SQLException e) {
+//            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(rs, stmt);
+//            dbService.backReadOnly(con);
+//        }
     }
 }
