@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,6 +86,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -126,7 +127,7 @@ public final class SMTPTransport extends MailTransport {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPTransport.class));
 
-    private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
+    // private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 
     private static volatile String staticHostName;
 
@@ -162,7 +163,7 @@ public final class SMTPTransport extends MailTransport {
         session = null;
         ctx = null;
         usm = null;
-        pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
+        pendingInvocations = new Java7ConcurrentLinkedQueue<Runnable>();
     }
 
     /**

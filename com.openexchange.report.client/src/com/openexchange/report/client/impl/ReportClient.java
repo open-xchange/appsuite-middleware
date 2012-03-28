@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,12 @@
 package com.openexchange.report.client.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -66,6 +69,7 @@ import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.MacDetail;
@@ -97,6 +101,10 @@ public class ReportClient extends AbstractJMXTools {
     private static final String OPT_SAVEREPORT_LONG = "savereport";
     
     private static final char OPT_SAVEREPORT_SHORT = 'f';
+    
+    private static final String OPT_SHOWCOMBINATION_LONG = "showaccesscombination";
+    
+    private static final char OPT_SHOWCOMBINATION_SHORT = 'b';
 
     private CLIOption displayonly = null;
 
@@ -108,11 +116,11 @@ public class ReportClient extends AbstractJMXTools {
 
     private CLIOption savereport = null;
     
+    private CLIOption showcombi = null;
+    
     public enum ReportMode { SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, NONE };
 
     public static void main(final String args[]) {
-        System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
-
         final AbstractJMXTools t = new ReportClient();
         t.start(args, "report");
     }
@@ -120,12 +128,11 @@ public class ReportClient extends AbstractJMXTools {
     @Override
     protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
         try {
-            final MBeanServerConnection initConnection = initConnection(false, env);
-            final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
-            List<ContextDetail> contextDetails = null;
-            if( null != parser.getOptionValue(this.advancedreport) ) {
-                contextDetails = ObjectHandler.getDetailObjects(initConnection);
+            final String combi = (String)parser.getOptionValue(this.showcombi); 
+            if( null != combi ) {
+                displayCombinationAndExit(combi);
             }
+
             ReportMode mode = ReportMode.NONE;
             boolean savereport = false;
 
@@ -150,8 +157,14 @@ public class ReportClient extends AbstractJMXTools {
                 }
             }
 
+            System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
+            final MBeanServerConnection initConnection = initConnection(false, env);
+            final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
+            List<ContextDetail> contextDetails = null;
+            if( null != parser.getOptionValue(this.advancedreport) ) {
+                contextDetails = ObjectHandler.getDetailObjects(initConnection);
+            }
             List<MacDetail> macDetails = ObjectHandler.getMacObjects(initConnection);
-            
             final String[] versions = VersionHandler.getServerVersion();
             final ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
 
@@ -223,6 +236,11 @@ public class ReportClient extends AbstractJMXTools {
             "Save the report as JSON String instead of sending it",
             false,
             NeededQuadState.notneeded);
+        this.showcombi = setShortLongOpt(parser, OPT_SHOWCOMBINATION_SHORT,
+            OPT_SHOWCOMBINATION_LONG,
+            "Show access combination for bitmask",
+            true,
+            NeededQuadState.notneeded);
     }
 
     private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, final String[] versions, final AdminParser parser, final ClientLoginCount clc) {
@@ -271,4 +289,72 @@ public class ReportClient extends AbstractJMXTools {
         }
     }
 
+    /*
+     * FIXME: This should be read from the admin api somewhere later
+     */
+    private static final Map<String, String> ADMIN_COMBI_MAP = 
+        Collections.unmodifiableMap(new HashMap<String, String>() {
+            private static final long serialVersionUID = 8762945373815023607L;
+            { 
+                put("CALENDAR","access-calendar");
+                put("CONTACTS","access-contacts");
+                put("DELEGATE_TASKS","access-delegate-tasks");
+                put("EDIT_PUBLIC_FOLDERS","access-edit-public-folder");
+                put("FORUM","access-forum");
+                put("ICAL","access-ical");
+                put("INFOSTORE","access-infostore");
+                put("PINBOARD_WRITE_ACCESS","access-pinboard-write");
+                put("PROJECTS","access-projects");
+                put("READ_CREATE_SHARED_FOLDERS","access-read-create-shared-Folders");
+                put("RSS_BOOKMARKS","access-rss-bookmarks");
+                put("RSS_PORTAL","access-rss-portal");
+                put("SYNCML","access-syncml");
+                put("TASKS","access-tasks");
+                put("VCARD","access-vcard");
+                put("WEBDAV","access-webdav");
+                put("WEBDAV_XML","access-webdav-xml");
+                put("WEBMAIL","access-webmail");
+                put("EDIT_GROUP","access-edit-group");
+                put("EDIT_RESOURCE","access-edit-resource");
+                put("EDIT_PASSWORD","access-edit-password");
+                put("COLLECT_EMAIL_ADDRESSES","access-collect-email-addresses");
+                put("MULTIPLE_MAIL_ACCOUNTS","access-multiple-mail-accounts");
+                put("SUBSCRIPTION","access-subscription");
+                put("PUBLICATION","access-publication");
+                put("ACTIVE_SYNC","access-active-sync");
+                put("USM","access-usm");
+                put("OLOX20","access-olox20");
+                put("DENIED_PORTAL","access-denied-portal");
+            }});
+    
+    private void displayCombinationAndExit(final String combi) {
+        int accCombi;
+        try {
+            accCombi = Integer.parseInt(combi);
+            final Class<UserConfiguration> clazz = UserConfiguration.class; 
+            for(final Field f : clazz.getFields() ) {
+                if( f.getType().getName().equals("int") ) {
+                    String shortName = ADMIN_COMBI_MAP.get(f.getName());
+                    if( null != shortName ) {
+                        final int bit = f.getInt(clazz);
+                        if( (bit & accCombi) == bit ) {
+                            System.out.printf("%c[32m%35s: on%c[0m\n", 27,shortName,27);
+                        } else {
+                            System.out.printf("%c[31m%35s: off%c[0m\n", 27,shortName,27);
+                        }
+                    }
+                }
+            }
+        } catch( NumberFormatException e ) {
+            System.err.println(combi + " is not a number");
+            System.exit(1);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.exit(0);
+    }
 }
