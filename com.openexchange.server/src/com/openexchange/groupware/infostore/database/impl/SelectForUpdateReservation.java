@@ -92,8 +92,6 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private boolean reserved;
 
-	private boolean wasAdjusted;
-
     public SelectForUpdateReservation(final String fileName, final long folderId, final int id, final Context context, final DBProvider provider) {
         super();
         this.fileName = fileName;
@@ -258,16 +256,5 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     public String getFilename() {
         return fileName;
     }
-
-	@Override
-	public boolean wasAdjusted() {
-		return wasAdjusted;
-	}
-	
-	public void setWasAdjusted(boolean wasAdjusted) {
-		this.wasAdjusted = wasAdjusted;
-	}
-	
-	
 
 }

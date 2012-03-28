@@ -61,8 +61,4 @@ public interface InfostoreFilenameReservation {
 
     public String getFilename();
 
-	public boolean wasAdjusted();
-
-	public void setWasAdjusted(boolean b);
-
 }

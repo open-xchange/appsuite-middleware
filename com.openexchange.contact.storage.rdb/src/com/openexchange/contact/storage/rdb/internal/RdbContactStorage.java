@@ -375,8 +375,8 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public <O> SearchIterator<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
-    	return this.getContacts(false, contextID, null, null, null, fields, term, sortOptions);
+    public <O> SearchIterator<Contact> search(final int contextID, final String folderId, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, contextID, folderId, null, null, fields, term, sortOptions);
     }  
     
     @Override

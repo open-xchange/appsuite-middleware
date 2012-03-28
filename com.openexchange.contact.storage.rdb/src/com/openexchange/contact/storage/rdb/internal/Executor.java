@@ -506,7 +506,7 @@ public class Executor {
     	if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
     		stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
     	} else {
-			stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
+			stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy())).append(" USING '")
 				.append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
     	}
 		if (Order.ASCENDING.equals(order.getOrder())) {
