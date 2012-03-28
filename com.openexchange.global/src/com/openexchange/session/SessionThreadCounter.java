@@ -72,7 +72,7 @@ public interface SessionThreadCounter {
      * @param threshold The threshold
      * @return The available sessions' threads exceeding respectively equal to given threshold
      */
-    Map<String, Set<Thread>> getThreads(final int threshold);
+    Map<String, Set<Thread>> getThreads(int threshold);
 
     /**
      * (Atomically) Increments the tracked thread count for denoted session.
