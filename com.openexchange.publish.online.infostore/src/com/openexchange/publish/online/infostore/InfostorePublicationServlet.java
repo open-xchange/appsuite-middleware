@@ -75,6 +75,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -129,6 +130,10 @@ public class InfostorePublicationServlet extends HttpServlet {
         contexts  = service;
     }
 
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        super.service(new CountingHttpServletRequest(req), resp);
+    }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {

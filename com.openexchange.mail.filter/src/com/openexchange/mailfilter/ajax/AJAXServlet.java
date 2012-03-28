@@ -73,6 +73,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -97,6 +98,11 @@ public abstract class AJAXServlet extends HttpServlet {
 
     protected AJAXServlet() {
         super();
+    }
+
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        super.service(new CountingHttpServletRequest(req), resp);
     }
 
     @Override

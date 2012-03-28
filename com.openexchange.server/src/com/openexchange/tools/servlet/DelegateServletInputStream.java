@@ -47,114 +47,89 @@
  *
  */
 
-package com.openexchange.tools.stream;
+package com.openexchange.tools.servlet;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicLong;
+import javax.servlet.ServletInputStream;
 
 /**
- * {@link CountingInputStream} - An {@link InputStream} that counts the number of bytes read.
+ * {@link DelegateServletInputStream} - The delegating {@link ServletInputStream}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CountingInputStream extends FilterInputStream {
+public final class DelegateServletInputStream extends ServletInputStream {
 
-    private final AtomicLong count;
-
-    private volatile long mark;
-
-    private volatile long max;
+    private final InputStream in;
 
     /**
-     * Wraps another input stream, counting the number of bytes read.
+     * Initializes a new {@link DelegateServletInputStream}.
      * 
-     * @param in the input stream to be wrapped
+     * @param in The input stream to delegate to
      */
-    public CountingInputStream(final InputStream in, final long max) {
-        super(in);
-        this.max = max;
-        count = new AtomicLong(0L);
-        mark = -1L;
-    }
-
-    /**
-     * Set the byte count back to 0L.
-     * 
-     * @return The count previous to resetting
-     */
-    public long resetByteCount() {
-        final long tmp = count.get();
-        count.set(0L);
-        return tmp;
-    }
-
-    /**
-     * Returns the number of bytes read.
-     */
-    public long getCount() {
-        return count.get();
+    public DelegateServletInputStream(final InputStream in) {
+        super();
+        this.in = in;
     }
 
     @Override
     public int read() throws IOException {
-        final int result = in.read();
-        final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-            throw new IOException("Max. byte count of " + max + " exceeded.");
-        }
-        return result;
+        return in.read();
+    }
+
+    @Override
+    public int hashCode() {
+        return in.hashCode();
     }
 
     @Override
     public int read(final byte[] b) throws IOException {
-        final int result = super.read(b);
-        final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-            throw new IOException("Max. byte count of " + max + " exceeded.");
-        }
-        return result;
+        return in.read(b);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return in.equals(obj);
     }
 
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
-        final int result = in.read(b, off, len);
-        final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-            throw new IOException("Max. byte count of " + max + " exceeded.");
-        }
-        return result;
+        return in.read(b, off, len);
     }
 
     @Override
     public long skip(final long n) throws IOException {
-        final long result = in.skip(n);
-        max += n;
-        count.addAndGet(result);
-        return result;
+        return in.skip(n);
+    }
+
+    @Override
+    public int available() throws IOException {
+        return in.available();
+    }
+
+    @Override
+    public String toString() {
+        return in.toString();
+    }
+
+    @Override
+    public void close() throws IOException {
+        in.close();
     }
 
     @Override
     public void mark(final int readlimit) {
-        /*
-         * It's okay to mark even if mark isn't supported, as reset won't work
-         */
         in.mark(readlimit);
-        mark = count.get();
     }
 
     @Override
     public void reset() throws IOException {
-        if (!in.markSupported()) {
-            throw new IOException("Mark not supported");
-        }
-        final long mark = this.mark;
-        if (mark == -1) {
-            throw new IOException("Mark not set");
-        }
-
         in.reset();
-        count.set(mark);
     }
+
+    @Override
+    public boolean markSupported() {
+        return in.markSupported();
+    }
+
 }
