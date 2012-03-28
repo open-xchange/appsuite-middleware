@@ -186,7 +186,9 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
         final Lock writeLock = readWriteLock.writeLock();
         writeLock.lock();
         try {
-            threads.put(Thread.currentThread(), PRESENT);
+            if (null != threads.put(Thread.currentThread(), PRESENT)) {
+                return count;
+            }
             return ++count;
         } finally {
             writeLock.unlock();
@@ -202,9 +204,9 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
         final Lock writeLock = readWriteLock.writeLock();
         writeLock.lock();
         try {
-            threads.remove(Thread.currentThread());
-            if (count <= 0) {
-                return 0;
+            final Object removed = threads.remove(Thread.currentThread());
+            if (null == removed || count <= 0) {
+                return count;
             }
             return --count;
         } finally {
