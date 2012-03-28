@@ -83,6 +83,7 @@ import com.openexchange.tools.sql.DBUtils;
 public class RdbContactStorage extends DefaultContactStorage {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorage.class));
+    private static final boolean PREFETCH_ATTACHMENT_INFO = true;
 
     private final Executor executor;
     
@@ -142,7 +143,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              * add attachment information in advance if needed
              */
             //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
-            if (queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
+            if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
             	contact.setLastModifiedOfNewestAttachment(executor.selectNewestAttachmentDate(connection, contextID, objectID));            	
             }
             return contact;
@@ -443,7 +444,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                  * merge attachment information in advance if needed
                  */
                 //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
-                if (queryFields.hasAttachmentData()) {
+                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                 	contacts = mergeAttachmentData(connection, contextID, contacts);            	
                 }
             }
@@ -571,15 +572,4 @@ public class RdbContactStorage extends DefaultContactStorage {
         }
     }
 
-//    private static DistListMember[] getMembers(final DistributionListEntryObject[] distList, final int contextID, final int parentContactID) throws OXException {
-//    	if (null != distList) {
-//    		final DistListMember[] members = new DistListMember[distList.length];
-//    		for (int i = 0; i < members.length; i++) {
-//				members[i] = DistListMember.create(distList[i], contextID, parentContactID);
-//			}
-//        	return members;
-//    	}
-//    	return null;
-//    }
-    
 }
