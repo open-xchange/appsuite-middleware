@@ -88,6 +88,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(AllAliasTest.class);
         tests.addTestSuite(ListAliasTest.class);
         tests.addTestSuite(TaskDurationAndCostsTest.class);
+        tests.addTestSuite(DeleteMultipleTaskTest.class);
 
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);
