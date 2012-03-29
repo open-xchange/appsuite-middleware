@@ -66,7 +66,6 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -94,12 +93,12 @@ public abstract class ContactAction implements AJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(requestData, session);
 
-//		return perform(contactRequest);
-        try {
-			return perform2(contactRequest);
-		} catch (final JSONException e) {
-			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
-		}
+		return perform(contactRequest);
+//        try {
+//			return perform2(contactRequest);
+//		} catch (final JSONException e) {
+//			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+//		}
     }
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
