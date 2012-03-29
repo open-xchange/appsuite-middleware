@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jcharset
+Bundle-SymbolicName: net.freeutils.jcharset
+Bundle-Version: 7.0.0.0
+Bundle-Vendor: freeutils.net
+Bundle-Activator: net.freeutils.charset.osgi.JCharsetActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: net.freeutils.jcharset.osgi.jar,
+ lib/jcharset-1.3.jar
+Export-Package: net.freeutils.charset
+Import-Package: org.apache.commons.logging,
+ org.osgi.framework
