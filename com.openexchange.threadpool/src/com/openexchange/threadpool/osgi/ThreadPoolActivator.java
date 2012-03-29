@@ -52,9 +52,15 @@ package com.openexchange.threadpool.osgi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
@@ -64,6 +70,10 @@ import com.openexchange.log.LogService;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.session.SessionThreadCounter;
+import com.openexchange.sessionCount.SessionThreadCounterImpl;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
@@ -116,10 +126,46 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Register
              */
-            registerService(ThreadPoolService.class, threadPool, null);
+            registerService(ThreadPoolService.class, threadPool);
             REF.set(threadPool);
-            registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()), null);
-            registerService(LogService.class, logService, null);
+            registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()));
+            registerService(LogService.class, logService);
+            final SessionThreadCounterImpl counterImpl = new SessionThreadCounterImpl();
+            registerService(SessionThreadCounter.class, counterImpl);
+            SessionThreadCounter.REFERENCE.set(counterImpl);
+            {
+                final EventHandler sessionEventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : container.values()) {
+                                removeFor(session);
+                            }
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            removeFor((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : container.values()) {
+                                removeFor(session);
+                            }
+                        }
+                    }
+
+                    private void removeFor(final Session session) {
+                        final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
+                        if (null != threadCounter) {
+                            threadCounter.remove(session.getSessionID());
+                        }
+                    }
+
+                };
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                registerService(EventHandler.class, sessionEventHandler, dict);
+            }
         } catch (final Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
@@ -179,6 +225,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             }
             cleanUp();
             REF.set(null);
+            SessionThreadCounter.REFERENCE.set(null);
             /*
              * Stop thread pool
              */

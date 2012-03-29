@@ -167,7 +167,9 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             /*
              * ... and remove from services
              */
-            services.remove(clazz);
+            if (services != null) {
+                services.remove(clazz);
+            }
             updateServiceState();
             super.removedService(reference, service);
         }
