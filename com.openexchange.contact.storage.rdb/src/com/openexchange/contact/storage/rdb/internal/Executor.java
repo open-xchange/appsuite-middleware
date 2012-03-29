@@ -217,7 +217,7 @@ public class Executor {
         if (null != adapter) {
         	stringBuilder.append(" AND ").append(adapter.getClause());	
         }
-        if (null != sortOptions && SortOptions.EMPTY != sortOptions) {
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
         	stringBuilder.append(' ').append(getOrderClause(sortOptions));
         	if (0 < sortOptions.getLimit()) {
             	stringBuilder.append(' ').append(getLimitClause(sortOptions));

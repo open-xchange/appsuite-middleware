@@ -53,16 +53,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -129,6 +132,22 @@ public class RequestTools {
         return objectIdAndFolderId;
     }
 
+	public static void setImageData(final ContactRequest request, final Contact contact) throws OXException {
+		UploadEvent uploadEvent = null;
+		try {
+		    uploadEvent = request.getUploadEvent();
+		    final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
+		    if (null == file) {
+		        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+		    }
+		    RequestTools.setImageData(contact, file);
+		} finally {
+		    if (null != uploadEvent) {
+		        uploadEvent.cleanUp();
+		    }
+		}
+	}
+    
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         FileInputStream fis = null;
         try {

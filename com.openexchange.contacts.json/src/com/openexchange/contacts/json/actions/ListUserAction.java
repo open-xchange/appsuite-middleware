@@ -80,6 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ListUserAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "listuser", description = "Get a list of users.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -125,61 +126,32 @@ public class ListUserAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int[] uids = req.getUserIds();
-//        final Context ctx = session.getContext();
-        Date timestamp = new Date(0);
-        Date lastModified = null;
-        final TimeZone timeZone = req.getTimeZone();
-
-//        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        final int[] userIDs = request.getUserIds();
         final List<Contact> contacts = new ArrayList<Contact>();
-        
-    	final SearchIterator<Contact> iter = getContactService().searchContacts(session, 
-    			getSearchTermForUsers(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), uids));
-    	try {
-    		while (iter.hasNext()) {
-                final Contact contact = iter.next();
-                lastModified = contact.getLastModified();
-
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+        Date lastModified = new Date(0);
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = getContactService().searchContacts(request.getSession(), getSearchTermForUsers(userIDs));
+            while (searchIterator.hasNext()) {
+                final Contact contact = searchIterator.next();
+                lastModified = getLatestModified(lastModified, contact);
+                applyTimezoneOffset(contact, request.getTimeZone());
                 contacts.add(contact);
-
-                if (lastModified != null && timestamp.before(lastModified)) {
-                    timestamp = lastModified;
-                }
-                contacts.add(contact);
-    		}
-    	} finally {
-    		if (null != iter) {
-    			iter.close();
-    		}
-    	}
-//        for (final int uid : uids) {
-//            final Contact contact = contactInterface.getUserById(uid);
-//            lastModified = contact.getLastModified();
-//
-//            // Correct last modified and creation date with users timezone
-//            contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-//            contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-//            contacts.add(contact);
-//
-//            if (lastModified != null && timestamp.before(lastModified)) {
-//                timestamp = lastModified;
-//            }
-//        }
-
-        return new AJAXRequestResult(contacts, timestamp, "contact");
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+        }
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
-    private static CompositeSearchTerm getSearchTermForUsers(final String folderID, final int[] userIDs) {
+    private static CompositeSearchTerm getSearchTermForUsers(final int[] userIDs) {
     	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
 		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
-		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+		folderIDTerm.addOperand(new ConstantOperand<String>(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
 		andTerm.addSearchTerm(folderIDTerm);
     	final CompositeSearchTerm userIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
     	for (int i = 0; i < userIDs.length; i++) {

@@ -50,7 +50,9 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
+
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -66,7 +68,8 @@ import com.openexchange.tools.session.ServerSession;
  * {@link DeleteAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+*/
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted contacts.")
