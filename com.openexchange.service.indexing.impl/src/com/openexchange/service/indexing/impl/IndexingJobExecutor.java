@@ -221,7 +221,7 @@ public final class IndexingJobExecutor implements Callable<Void> {
      * Starts this executor orderly.
      */
     public IndexingJobExecutor start() {
-        future = threadPool.submit(ThreadPools.task(this), AbortBehavior.<Void> getInstance());
+        future = threadPool.submit(ThreadPools.task(this, IndexingJobExecutor.class.getSimpleName()), AbortBehavior.<Void> getInstance());
         return this;
     }
 
