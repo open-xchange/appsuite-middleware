@@ -79,6 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link GetUserAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "getuser", description = "Get contact by user ID.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -113,39 +114,25 @@ public class GetUserAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();
-//        final Context ctx = session.getContext();
-
-//        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-//        final Contact contact = contactInterface.getUserById(uid);
-        final Contact contact = this.getUserById(session, uid);
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+    	final int userID = Integer.parseInt(request.getObjectID());    	
+        final SearchIterator<Contact> contacts = getContactService().searchContacts(request.getSession(), getSearchTermForUser(userID));
+    	final Contact contact;
+        if (null != contacts && contacts.hasNext()) {
+    		contact = contacts.next();
+    	} else {
+    		throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, request.getSession().getContextId());
+    	}
         final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-
+        applyTimezoneOffset(contact, request.getTimeZone());
         return new AJAXRequestResult(contact, lastModified, "contact");
     }
     
-    private Contact getUserById(final ServerSession session, final int userID) throws OXException {
-        final SearchIterator<Contact> contacts = getContactService().searchContacts(
-        		session, getSearchTermForUser(userID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
-    	if (null != contacts && contacts.hasNext()) {
-    		return contacts.next();
-    	} else {
-    		throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, session.getContextId());
-    	}
-    }
-  
-    private static CompositeSearchTerm getSearchTermForUser(final int userID, final String folderID) {
+    private static CompositeSearchTerm getSearchTermForUser(final int userID) {
     	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
 		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
-		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+		folderIDTerm.addOperand(new ConstantOperand<String>(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
 		andTerm.addSearchTerm(folderIDTerm);
     	final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID)); 

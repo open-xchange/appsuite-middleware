@@ -186,7 +186,14 @@ public class SearchTermAdapter {
 			} else {
 				//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
 				field = ContactField.getByAjaxName(value.toString());
-			}			
+				if (null == field) {
+					// try column name
+					field = Mappers.CONTACT.getMappedField(value.toString());					
+				}				
+			}
+			if (null == field) {
+				throw new IllegalArgumentException("unable to determine contact field for column operand: " + operand);
+			}
 			final String columnLabel = Mappers.CONTACT.get(field).getColumnLabel();
 			if (null != this.charset) {
 				stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(this.charset).append(')');
@@ -199,8 +206,8 @@ public class SearchTermAdapter {
 				throw new IllegalArgumentException("got no value for contact operand");
 			} else if (String.class.isInstance(value)) {
 				final String stringValue = (String)value;
-				if (stringValue.contains("*")) {
-					value = stringValue.replaceAll("\\*", "%");
+				if (stringValue.contains("*") || stringValue.contains("?")) {
+					value = stringValue.replaceAll("\\*", "%").replaceAll("\\?", "_");
 					final int index = stringBuilder.lastIndexOf("=");
 					stringBuilder.replace(index, index + 1, "LIKE");		
 				}

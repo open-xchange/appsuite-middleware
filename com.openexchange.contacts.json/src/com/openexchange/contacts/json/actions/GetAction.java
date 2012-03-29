@@ -68,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link GetAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a contact.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -99,22 +100,10 @@ public class GetAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final int id = req.getId();
-        final int folder = req.getFolder();
-        final TimeZone timeZone = req.getTimeZone();
-        final ServerSession session = req.getSession();
-
-        final Contact contact = getContactService().getContact(session, Integer.toString(folder), Integer.toString(id));
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        final Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID());
         final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-        
-//        Attachments.getInstance().getNewestCreationDate(ctx, moduleId, attachedId)
-
-
+        applyTimezoneOffset(contact, request.getTimeZone());
         return new AJAXRequestResult(contact, lastModified, "contact");
     }
 }
