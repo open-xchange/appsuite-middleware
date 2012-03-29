@@ -693,7 +693,7 @@ public final class Processor implements SolrMailConstants {
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, fullName);
             stmt.setInt(pos++, update ? 1 : 0);
-            stmt.setLong(pos, System.currentTimeMillis());
+            stmt.setLong(pos, 0L);
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);
