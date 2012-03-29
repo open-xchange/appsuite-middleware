@@ -77,7 +77,9 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.mail.Constants;
@@ -506,6 +508,42 @@ public final class FolderJob extends AbstractMailJob {
             //fields.removeMailField(MailField.BODY);  <--- Allow body!
             fields.removeMailField(MailField.FULL);
             final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
+            // Read primary content
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                // Message storage overrides getPrimaryContents()
+                final int chunk = 0;
+                final int size = mails.size();
+                if (chunk > 0) {
+                    int start = 0;
+                    while (start < size) {
+                        int end = start + chunk;
+                        if (end > size) {
+                            end = size;
+                        }
+                        final String[] mailIds = new String[end-start];
+                        int index = 0;
+                        for (int i = start; i < end; i++) {
+                            mailIds[index++] = mails.get(i).getMailId();
+                        }
+                        final String[] primaryContents = messageStorage.getPrimaryContents(fullName, mailIds);
+                        index = 0;
+                        for (int i = start; i < end; i++) {
+                            mails.set(i, new ContentAwareMailMessage(primaryContents[index++], mails.get(i)));
+                        }
+                        start = end;
+                    }
+                } else {
+                    final String[] mailIds = new String[1];
+                    for (int i = 0; i < size; i++) {
+                        final MailMessage message = mails.get(i);
+                        mailIds[0] = message.getMailId();
+                        final String[] primaryContents = messageStorage.getPrimaryContents(fullName, mailIds);
+                        mails.set(i, new ContentAwareMailMessage(primaryContents[0], message));
+                    }
+                }
+            }
+            // Convert to IndexDocument
             documents = toDocuments(mails);
             switch (insertType) {
             case ENVELOPE:
