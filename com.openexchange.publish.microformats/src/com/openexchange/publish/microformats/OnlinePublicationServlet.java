@@ -57,6 +57,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -67,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.Publication;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -91,13 +93,18 @@ public class OnlinePublicationServlet extends HttpServlet {
 
     protected static ContextService contexts = null;
 
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        super.service(new CountingHttpServletRequest(req), resp);
+    }
+
     public static void setContextService(final ContextService service) {
         contexts = service;
     }
 
     protected static UserConfigurationService userConfigs = null;
 
-    public static void setUserConfigurationService(UserConfigurationService userConfigurationService) {
+    public static void setUserConfigurationService(final UserConfigurationService userConfigurationService) {
         userConfigs = userConfigurationService;
     }
 
@@ -116,15 +123,15 @@ public class OnlinePublicationServlet extends HttpServlet {
 
     protected boolean checkPublicationPermission(final Publication publication, final HttpServletResponse resp) throws IOException {
 
-        Context ctx = publication.getContext();
-        int userId = publication.getUserId();
+        final Context ctx = publication.getContext();
+        final int userId = publication.getUserId();
 
         try {
-            UserConfiguration userConfiguration = userConfigs.getUserConfiguration(userId, ctx);
+            final UserConfiguration userConfiguration = userConfigs.getUserConfiguration(userId, ctx);
             if (userConfiguration.isPublication()) {
                 return true;
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         resp.setStatus(HttpServletResponse.SC_FORBIDDEN);

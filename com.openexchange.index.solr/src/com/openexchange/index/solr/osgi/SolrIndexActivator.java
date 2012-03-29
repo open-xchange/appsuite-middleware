@@ -94,6 +94,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
         registerService(IndexFacadeService.class, new SolrIndexFacadeService());
         addService(IndexFacadeService.class, new SolrIndexFacadeService());
         registerService(CommandProvider.class, new UtilCommandProvider(context));
+        
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
 

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,6 +66,8 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
     private final int folderId;
 
     private final int taskId;
+    
+    private final int[] taskIds;
 
     private final Date lastModified;
 
@@ -94,7 +97,7 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
     public DeleteRequest(final InsertResponse insert) {
         this(insert.getFolderId(), insert.getId(), insert.getTimestamp(), true);
     }
-
+    
     /**
      * Default constructor.
      */
@@ -103,6 +106,17 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
         super();
         this.folderId = folderId;
         this.taskId = taskId;
+        this.taskIds = null;
+        this.lastModified = lastModified;
+        this.failOnError = failOnError;
+    }
+
+    public DeleteRequest(final int folderId, final int[] taskIds,
+        final Date lastModified, boolean failOnError) {
+        super();
+        this.folderId = folderId;
+        this.taskId = 0;
+        this.taskIds = taskIds;
         this.lastModified = lastModified;
         this.failOnError = failOnError;
     }
@@ -129,10 +143,21 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
      */
     @Override
     public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(AJAXServlet.PARAMETER_ID, taskId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+        if (taskIds == null) {
+            final JSONObject json = new JSONObject();
+            json.put(AJAXServlet.PARAMETER_ID, taskId);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+            return json;
+        } else {
+            JSONArray jsonArray = new JSONArray();
+            for (final int id : taskIds) {
+                final JSONObject json = new JSONObject();
+                json.put(AJAXServlet.PARAMETER_ID, id);
+                json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+                jsonArray.put(json);
+            }
+            return jsonArray;
+        }
     }
 
     /**

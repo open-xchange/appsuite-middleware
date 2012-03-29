@@ -643,6 +643,7 @@ fi
 
 if [ -d ${CONFDIR} ]; then
     setup_groupware
+    setup_admin
     echo
     echo "open-xchange daemon must now be restarted if already running"
 else

@@ -92,6 +92,9 @@ public final class ThreadSortUtil {
      * @return A newly allocated array of <code>int</code> filled with message's sequence number
      */
     public static TIntList getSeqNumsFromThreadResponse(final String threadResponse) {
+        if (null == threadResponse) {
+            return new TIntArrayList(0);
+        }
         final char[] chars = threadResponse.toCharArray();
         final TIntList list = new TIntArrayList(256);
         final StringBuilder sb = new StringBuilder(8);

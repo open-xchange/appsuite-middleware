@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,14 +91,23 @@ public class DeleteAction extends TaskAction {
      */
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
-        final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
-        final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
-        final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
         final Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-
-        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
-        sqlinterface.deleteTaskObject(id, inFolder, timestamp);
-
+        if (req.getRequest().getData() instanceof JSONObject) {
+            final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
+            final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
+            final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
+            final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
+            sqlinterface.deleteTaskObject(id, inFolder, timestamp);
+        } else if (req.getRequest().getData() instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) req.getRequest().getData();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject json = jsonArray.getJSONObject(i);
+                final int id = DataParser.checkInt(json, AJAXServlet.PARAMETER_ID);
+                final int inFolder = DataParser.checkInt(json, AJAXServlet.PARAMETER_INFOLDER);
+                final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
+                sqlinterface.deleteTaskObject(id, inFolder, timestamp);
+            }
+        }
         return new AJAXRequestResult(new JSONArray(), timestamp, "json");
     }
 

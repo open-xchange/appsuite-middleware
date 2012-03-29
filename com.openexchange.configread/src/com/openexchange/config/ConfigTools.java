@@ -112,4 +112,31 @@ public class ConfigTools {
         return TimeSpanParser.parseTimespan(span).longValue();
     }
 
+    /**
+     * Searches for the property with the specified name. If the name is found, it is supposed to be a <code>long</code> value. If parsing
+     * to <code>long</code> fails or name is not found, the default value is returned.
+     * <p>
+     * Parses the property as a signed decimal <code>long</code>. The characters in the property must all be decimal digits, except that the
+     * first character may be an ASCII minus sign <code>'-'</code> (<code>'&#92;u002D'</code>) to indicate a negative value.
+     * 
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @param service The configuration service reference
+     * @return The <code>long</code> value or given default value argument.
+     */
+    public static long getLongProperty(final String name, final long defaultValue, final ConfigurationService service) {
+        if (null == service) {
+            return defaultValue;
+        }
+        final String property = service.getProperty(name);
+        if (null == property) {
+            return defaultValue;
+        }
+        try {
+            return Long.parseLong(property.trim());
+        } catch (final NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
 }

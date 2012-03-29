@@ -184,6 +184,24 @@ public final class Tools {
             resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
         }
     }
+    
+
+	public static void setExpires(Date expires, HttpServletResponse resp) {
+       if (null != expires) {
+            synchronized (HEADER_DATEFORMAT) {
+                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
+            }
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+        }
+	}
+	
+	public static void setExpiresInOneYear(HttpServletResponse resp) {
+		synchronized (HEADER_DATEFORMAT) {
+            resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
+        }
+		resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+	}
+
 
     /**
      * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
@@ -197,27 +215,6 @@ public final class Tools {
         resp.setHeader(NAME_CACHE_CONTROL, CACHE_VALUE);
         resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
-    
-	public static void setExpires(Date expires, HttpServletResponse resp) {
-		if (null != expires) {
-			synchronized (HEADER_DATEFORMAT) {
-				resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
-			}
-			resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1
-																				// year
-		}
-	}
-
-	public static void setExpiresInOneYear(HttpServletResponse resp) {
-		synchronized (HEADER_DATEFORMAT) {
-			resp.setHeader(
-					NAME_EXPIRES,
-					HEADER_DATEFORMAT.format(new Date(System
-							.currentTimeMillis() + MILLIS_YEAR)));
-		}
-		resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1
-																			// year
-	}
 
     /**
      * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
