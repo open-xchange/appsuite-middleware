@@ -147,6 +147,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                      */
                     return tryToStart(configuration);
                 }
+            } else {
+            	return tryToStart(configuration);
             }
         }
         
