@@ -50,6 +50,7 @@
 package com.openexchange.sessionCount;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -58,6 +59,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.session.ThreadCountEntry;
 
@@ -71,11 +75,17 @@ public final class SessionThreadCounterImpl implements SessionThreadCounter {
 
     private final ConcurrentMap<String, ThreadCountEntry> map;
 
+    private final int notifyThreashold;
+
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link SessionThreadCounterImpl}.
      */
-    public SessionThreadCounterImpl() {
+    public SessionThreadCounterImpl(final int notifyThreashold, final ServiceLookup services) {
         super();
+        this.services = services;
+        this.notifyThreashold = notifyThreashold;
         map = new ConcurrentHashMap<String, ThreadCountEntry>(1024);
     }
 
@@ -111,7 +121,23 @@ public final class SessionThreadCounterImpl implements SessionThreadCounter {
 
     @Override
     public int increment(final String sessionId) {
-        return getCount(sessionId).incrementAndGet();
+        if (notifyThreashold <= 0) {
+            return getCount(sessionId).incrementAndGet();
+        }
+        final ThreadCountEntry entry = getCount(sessionId);
+        final int updated = entry.incrementAndGet();
+        if (updated == notifyThreashold) {
+            // Count reached threshold
+            final EventAdmin eventAdmin = services.getOptionalService(EventAdmin.class);
+            if (null != eventAdmin) {
+                final Map<String, Object> props = new HashMap<String, Object>(2);
+                props.put(EVENT_PROP_SESSION_ID, sessionId);
+                props.put(EVENT_PROP_ENTRY, entry);
+                final Event event = new Event(EVENT_TOPIC, props);
+                eventAdmin.postEvent(event);
+            }
+        }
+        return updated;
     }
 
     @Override

@@ -50,7 +50,6 @@
 package com.openexchange.charset.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.charset.CollectionCharsetProvider;

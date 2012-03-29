@@ -113,7 +113,7 @@ public class SolrIndexFacadeTest extends TestCase {
         assertEquals("Message-ID were not equal.", message.getMailId(), foundMessage.getMailId());
         assertEquals("Subject were not equal.", message.getSubject(), foundMessage.getSubject());
         assertEquals("Mail size were not equal.", message.getSize(), foundMessage.getSize());
-        facade.releaseIndexAccess(indexAccess);
+//        facade.releaseIndexAccess(indexAccess);
     }
 
 }

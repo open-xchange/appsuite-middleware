@@ -67,6 +67,21 @@ public interface SessionThreadCounter {
     public static final AtomicReference<SessionThreadCounter> REFERENCE = new AtomicReference<SessionThreadCounter>();
 
     /**
+     * The event topic for sessions exceeding configured threshold: <code>"com/openexchange/session/exceededThreshold"</code>.
+     */
+    public static final String EVENT_TOPIC = "com/openexchange/session/exceededThreshold".intern();
+
+    /**
+     * The event property providing session identifier. <code>java.lang.String</code>
+     */
+    public static final String EVENT_PROP_SESSION_ID = "__sessionId".intern();
+
+    /**
+     * The event property providing thread count entry. <code>com.openexchange.session.ThreadCountEntry</code>
+     */
+    public static final String EVENT_PROP_ENTRY = "__entry".intern();
+
+    /**
      * Gets those sessions' available threads whose total number is equal to or greater than specified threshold at invocation time.
      * 
      * @param threshold The threshold
