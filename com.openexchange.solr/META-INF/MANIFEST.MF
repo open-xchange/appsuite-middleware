@@ -30,6 +30,7 @@ Import-Package: com.openexchange.concurrent,
  org.apache.commons.fileupload.servlet,
  org.apache.commons.httpclient,
  org.apache.commons.io,
+ org.apache.commons.lang;version="2.4.0",
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-ClassPath: .,

@@ -92,11 +92,13 @@ import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -218,7 +220,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         
         // Try public session
-        Cookie[] cookies = req.getCookies();
+        final Cookie[] cookies = req.getCookies();
         
         if (cookies != null) {
             Session simpleSession = null;
@@ -230,7 +232,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         	
         	if (simpleSession != null) {
-        		ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
+        		final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
         		verifySession(req, sessiondService, session.getSessionID(), session);
         		rememberPublicSession(req, session);
         	}
@@ -266,9 +268,11 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
+        final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
+        String sessionId = null;
         try {
             initializeSession(req);
-            final ServerSession session = getSessionObject(req);
+            final ServerSession session = getSessionObject(req, true);
             /*
              * Check max. concurrent AJAX requests
              */
@@ -282,7 +286,12 @@ public abstract class SessionServlet extends AJAXServlet {
                     throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                 }
             }
-            super.service(req, resp);
+            ThreadLocalSessionHolder.getInstance().setSession(session);
+            if (null != threadCounter) {
+                sessionId = session.getSessionID();
+                threadCounter.increment(sessionId);
+            }
+            super.service(new CountingHttpServletRequest(req), resp);
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
                 LOG.debug(e.getMessage(), e);
@@ -316,6 +325,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         } finally {
+            if (null != sessionId && null != threadCounter) {
+                threadCounter.decrement(sessionId);
+            }
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();
@@ -715,9 +727,9 @@ public abstract class SessionServlet extends AJAXServlet {
     	return getSessionObject(req, false);
     }
     
-    protected static ServerSession getSessionObject(ServletRequest req,
-			boolean mayUseFallbackSession) {
-    	Object attribute = req.getAttribute(SESSION_KEY);
+    protected static ServerSession getSessionObject(final ServletRequest req,
+			final boolean mayUseFallbackSession) {
+    	final Object attribute = req.getAttribute(SESSION_KEY);
     	if (attribute != null) {
         	return (ServerSession) req.getAttribute(SESSION_KEY);
     	}

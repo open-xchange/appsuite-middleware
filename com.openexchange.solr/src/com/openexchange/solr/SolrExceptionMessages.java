@@ -75,14 +75,14 @@ public final class SolrExceptionMessages implements LocalizableStrings {
     // All core stores seem to be full.
     public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
     
-    // This cores instance directory (%1$s) already exists. It cannot be created.
-    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
+    // This cores instance directory (%1$s) already exists and its structure is inconsistent.
+    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists and its structure is inconsistent.";
 
     // An index fault occurred: %1$s
     public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
+    // The file or directory %1$s does not exist.
+    public static final String FILE_EXISTS_ERROR_MSG = "The file or directory %1$s does not exist.";
 
     // Could neither delegate solr request to a local nor to a remote server instance.
     public static final String DELEGATION_ERROR_MSG = "Could neither delegate solr request to a local nor to a remote server instance.";
@@ -95,5 +95,11 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // Could not parse solr core identifier %1$s.
     public static final String IDENTIFIER_PARSE_ERROR_MSG = "Could not parse solr core identifier %1$s.";
+
+    // Unknown module: %1$s.
+    public static final String UNKNOWN_MODULE_MSG = "Unknown module: %1$s.";
+
+    // Can not reach solr core store. URI %1$s does not lead to an existing directory.
+    public static final String CORE_STORE_NOT_EXISTS_ERROR_MSG = "Can not reach solr core store. URI %1$s does not lead to an existing directory.";
     
 }

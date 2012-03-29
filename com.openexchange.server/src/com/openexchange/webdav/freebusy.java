@@ -56,6 +56,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,6 +80,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.user.UserService;
 
 /**
@@ -97,6 +99,11 @@ public class freebusy extends HttpServlet {
 
     static {
         outputFormat.setTimeZone(TimeZones.UTC);
+    }
+
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        super.service(new CountingHttpServletRequest(req), resp);
     }
 
     @Override

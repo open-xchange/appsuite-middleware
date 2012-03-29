@@ -11,7 +11,7 @@
     <property name="javaccDir" value="javacc"/>
 	<property name="libDir" value="lib"/>
 
-	<import file="build-project.xml" as="main" optional="true"/>
+	<import file="build-project.xml" optional="true"/>
 
     <!-- Third party libs -->
     <fileset dir="${libDir}" id="javaCCJars">

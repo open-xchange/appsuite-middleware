@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,7 @@ import java.util.Iterator;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.JMException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
@@ -161,6 +162,30 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
 
         return retval;
+    }
+
+    protected String getStats(final MBeanServerConnection mbc, final String domain, final String key, final String name) throws JMException, NullPointerException, IOException {
+        final ObjectName objectName = new ObjectName(domain, key, name);
+        final MBeanInfo info = mbc.getMBeanInfo(objectName);
+        final MBeanAttributeInfo[] attrs = info.getAttributes();
+        final StringBuilder retval = new StringBuilder();
+        if (attrs.length > 0) {
+            for (final MBeanAttributeInfo element : attrs) {
+                try {
+                    final Object o = mbc.getAttribute(objectName, element.getName());
+                    if (o != null) {
+                        retval.append(objectName.getCanonicalName()).append(",").append(element.getName()).append(" = ");
+                        if (o instanceof int[]) {
+                            final int[] i = (int[]) o;
+                            retval.append(Arrays.toString(i)).append(CRLF);
+                        }
+                    }
+                } catch (final RuntimeMBeanException e) {
+                    // If there was an error getting the attribute we just omit that attribute
+                }
+            }
+        }
+        return retval.toString();
     }
 
     protected MBeanServerConnection initConnection(final boolean adminstats, final HashMap<String, String[]> env) throws InterruptedException, IOException {
@@ -331,11 +356,14 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         } catch (final InvalidDataException e) {
             printServerException(e, parser);
             sysexit(1);
+        } catch (JMException e) {
+            printServerException(e, parser);
+            sysexit(1);
         } finally {
     		closeConnection();
     	}
     }
 
-    protected abstract void furtherOptionsHandling(AdminParser parser, HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException;
+    protected abstract void furtherOptionsHandling(AdminParser parser, HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException, JMException;
 
 }

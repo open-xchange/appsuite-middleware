@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+<<<<<<< HEAD
+	<classpathentry exported="true" kind="lib" path="lib/jcharset-1.3.jar" sourcepath="lib/jcharset-1_3-sources.jar"/>
+=======
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/jcharset-1.3.jar" sourcepath="source/jcharset-1_3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcharset-1.3.jar"/>
+>>>>>>> 4f5a073... fixed some bundle classpaths
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

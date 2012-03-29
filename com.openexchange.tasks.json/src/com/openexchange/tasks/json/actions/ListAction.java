@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,7 +78,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of tasks.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data. The alias \"list\" uses a predefined columnset.")
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data. The alias \"list\" uses the predefined columnset [20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102].")
 }, requestBody = "An array of with object IDs of requested tasks. ",
 responseDescription = "Response with timestamp: An object containing all data of the requested task. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed task data. The field id is not included. ")
 public class ListAction extends TaskAction {

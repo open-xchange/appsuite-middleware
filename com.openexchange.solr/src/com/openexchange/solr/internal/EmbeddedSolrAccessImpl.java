@@ -113,12 +113,12 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             // TODO: throw exception
         }
         
-        final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, configuration.getIdentifier().toString(), configuration.getInstanceDir());
-        coreDescriptor.setDataDir(configuration.getDataDir());
-        coreDescriptor.setSchemaName(configuration.getSchemaPath());
-        coreDescriptor.setConfigName(configuration.getConfigPath());
+        final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, configuration.getIdentifier().toString(), configuration.getCoreDirPath());
+        coreDescriptor.setDataDir(configuration.getDataDirPath());
+        coreDescriptor.setSchemaName(configuration.getSchemaFileName());
+        coreDescriptor.setConfigName(configuration.getConfigFileName());
         final Properties properties = new Properties();
-        properties.put("data.dir", configuration.getDataDir());
+        properties.put("data.dir", configuration.getDataDirPath());
         properties.put("logDir", "/var/log/open-xchange");
         coreDescriptor.setCoreProperties(properties);
         SolrCore solrCore;

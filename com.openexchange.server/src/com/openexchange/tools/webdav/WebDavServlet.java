@@ -55,6 +55,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 
 /**
  * {@link WebDavServlet} - An abstract class for servlets serving WebDAV requests
@@ -158,9 +159,10 @@ public abstract class WebDavServlet extends HttpServlet {
      * {@inheritDoc}
      */
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(final HttpServletRequest request, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         try {
+            final HttpServletRequest req = new CountingHttpServletRequest(request);
             final String method = req.getMethod();
             if ("PROPFIND".equals(method)) {
                 doPropFind(req, resp);

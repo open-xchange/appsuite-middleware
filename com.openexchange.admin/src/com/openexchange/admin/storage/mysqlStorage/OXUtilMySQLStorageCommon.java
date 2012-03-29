@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -116,7 +116,7 @@ public class OXUtilMySQLStorageCommon {
             con.setCatalog(db.getScheme());
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
-            initUpdateTaskTable(con, db.getMasterId().intValue(), db.getScheme());
+            initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
             con.commit();
         } catch (final SQLException e) {
             rollback(con);

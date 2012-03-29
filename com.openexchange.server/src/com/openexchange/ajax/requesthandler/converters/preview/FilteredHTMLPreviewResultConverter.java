@@ -109,6 +109,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             // Already sanitized
             return;
         }
+        boolean asDiv = requestData.getParameter("previewForceDiv", boolean.class);
         final Map<String, String> metaData = previewDocument.getMetaData();
         final List<String> sanitizedHtml = new ArrayList<String>();
         {
@@ -128,6 +129,9 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                  * Replace CSS classes
                  */
                 content = HTMLProcessing.saneCss(content, htmlService);
+                if (asDiv) {
+                	content = toDiv(content);
+                }
                 sanitizedHtml.add(content);
             }
         }
@@ -135,7 +139,16 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail(), previewDocument.isMoreAvailable()), FORMAT);
     }
 
-    /**
+    private String toDiv(String content) {
+    	// Let's try and turn this into an appendable DIV
+    	content = content.replaceAll("<body[^>]*?>", "<div>");
+    	content = content.substring(content.indexOf("<div>"));
+    	content = content.replaceAll("</body[^>]*?>", "</div>"); 
+    	content = content.substring(0, content.lastIndexOf("</div>") + 6);
+    	return content;
+	}
+
+	/**
      * {@link SanitizedPreviewDocument}
      *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
