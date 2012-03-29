@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -152,5 +153,18 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
     E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException;
+
+	/**
+	 * Gets the fields whose mappings denotes the supplied column IDs, 
+	 * optionally removes illegal fields and adds mandatory fields to the 
+	 * result if not yet present.
+	 * 
+	 * @param columnIDs the column IDs
+	 * @param illegalFields the illegal fields
+	 * @param mandatoryFields the mandatory fields
+	 * @return the fields
+	 * @throws OXException
+	 */
+    E[] getFields(final int[] columnIDs, final EnumSet<E> illegalFields, final E... mandatoryFields) throws OXException;
 
 }

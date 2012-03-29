@@ -116,7 +116,7 @@ public class OXUtilMySQLStorageCommon {
             con.setCatalog(db.getScheme());
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
-            initUpdateTaskTable(con, db.getMasterId().intValue(), db.getScheme());
+            initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
             con.commit();
         } catch (final SQLException e) {
             rollback(con);

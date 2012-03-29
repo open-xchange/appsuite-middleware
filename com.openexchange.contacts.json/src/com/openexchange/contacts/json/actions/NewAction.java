@@ -75,6 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link NewAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "new", description = "Create a contact.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
@@ -131,45 +132,23 @@ public class NewAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final boolean containsImage = req.containsImage();
-        final JSONObject json = req.getContactJSON(containsImage);
-        if (!json.has("folder_id")) {
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        final boolean containsImage = request.containsImage();
+        final JSONObject json = request.getContactJSON(containsImage);
+        if (false == json.has("folder_id")) {
             throw OXException.mandatoryField("missing folder");
         }
-
+        final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+        if (containsImage) {
+        	RequestTools.setImageData(request, contact);
+        }
+        getContactService().createContact(request.getSession(), json.getString("folder_id"), contact);
         try {
-            final int folder = json.getInt("folder_id");
-            final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
-//            final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-//            final ContactParser parser = new ContactParser();
-//            final Contact contact = parser.parse(json);
-            if (containsImage) {
-                UploadEvent uploadEvent = null;
-                try {
-                    uploadEvent = req.getUploadEvent();
-                    final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
-                    if (file == null) {
-                        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-                    }
-
-                    RequestTools.setImageData(contact, file);
-                } finally {
-                    if (uploadEvent != null) {
-                        uploadEvent.cleanUp();
-                    }
-                }
-            }
-            
-            getContactService().createContact(session, Integer.toString(folder), contact);
-//            contactInterface.insertContactObject(contact);
             final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
             return new AJAXRequestResult(object, contact.getLastModified(), "json");
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
-
 
 }

@@ -114,7 +114,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link Contacts}
- *
+ * 
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public final class Contacts {
@@ -146,7 +146,7 @@ public final class Contacts {
 
     /**
      * Gets the SQL statement from specified {@link Statement} instance.
-     *
+     * 
      * @param statement The statement
      * @return The extracted SQL string
      */
@@ -160,13 +160,13 @@ public final class Contacts {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
             try {
-                if (co.containsEmail1() && ((email = co.getEmail1()) != null)) {
+                if (co.containsEmail1() && ((email = co.getEmail1()) != null) && (email.length() > 0)) {
                     new QuotedInternetAddress(email).validate();
                 }
-                if (co.containsEmail2() && ((email = co.getEmail2()) != null)) {
+                if (co.containsEmail2() && ((email = co.getEmail2()) != null) && (email.length() > 0)) {
                     new QuotedInternetAddress(email).validate();
                 }
-                if (co.containsEmail3() && ((email = co.getEmail3()) != null)) {
+                if (co.containsEmail3() && ((email = co.getEmail3()) != null) && (email.length() > 0)) {
                     new QuotedInternetAddress(email).validate();
                 }
             } catch (final AddressException e) {
@@ -228,8 +228,9 @@ public final class Contacts {
         int origType = bi.getType();
 
         if (DEBUG) {
-            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(myMime).append(" / type=").append(origType).append(
-                " / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
+            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(myMime).append(" / type=").append(
+                origType).append(" / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(
+                img.length);
             LOG.debug(logi.toString());
         }
         if ((origHeigh > scaledHeight) || (origWidth > scaledWidth)) {
@@ -474,7 +475,7 @@ public final class Contacts {
             final long lmd = System.currentTimeMillis();
 
             StringBuilder insert = contactSql.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, contextId, id);
-            if(override) {
+            if (override) {
                 insert = contactSql.iFperformOverridingContactStorageInsert(insert_fields, insert_values, user, lmd, contextId, id);
             }
 
@@ -512,7 +513,9 @@ public final class Contacts {
                         throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                     }
                 } else {
-                    checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
+                    checkImageSize(
+                        contact.getImage1().length,
+                        Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                 }
 
                 writeContactImage(contact.getObjectID(), contact.getImage1(), contextId, contact.getImageContentType(), lmd, writecon);
@@ -566,27 +569,18 @@ public final class Contacts {
             try {
                 original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
             } catch (final OXException e) {
-                throw ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(
-                    e,
-                    I(ctx.getContextId()),
-                    I(co.getObjectID()));
+                throw ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(e, I(ctx.getContextId()), I(co.getObjectID()));
             }
 
             // Check if contact really exists in specified folder
             if (fid != original.getParentFolderID()) {
-                throw ContactExceptionCodes.NOT_IN_FOLDER.create(
-                    I(co.getObjectID()),
-                    I(fid),
-                    I(ctx.getContextId()));
+                throw ContactExceptionCodes.NOT_IN_FOLDER.create(I(co.getObjectID()), I(fid), I(ctx.getContextId()));
             }
 
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user && original.getInternalUserId() == user) {
                 // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
                 // various places throughout the system. Therefore it is denied.
-                throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
-                    I(ctx.getContextId()),
-                    I(co.getObjectID()),
-                    I(user));
+                throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(I(ctx.getContextId()), I(co.getObjectID()), I(user));
             }
 
             // Check Rights for Source Folder
@@ -595,10 +589,7 @@ public final class Contacts {
 
             final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folder_comesfrom);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(
-                    I(folder_comesfrom),
-                    I(ctx.getContextId()),
-                    I(user));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folder_comesfrom), I(ctx.getContextId()), I(user));
             }
             final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
             final EffectivePermission oclPerm = oxfs.getFolderPermission(folder_comesfrom, user, uc);
@@ -924,8 +915,7 @@ public final class Contacts {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = writecon.prepareStatement("SELECT field01, field02, field03, field04, intfield01 FROM prg_dlist WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> " +
-                            DistributionListEntryObject.INDEPENDENT + " AND intfield02 IS NOT NULL AND intfield02 = ?");
+                    stmt = writecon.prepareStatement("SELECT field01, field02, field03, field04, intfield01 FROM prg_dlist WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> " + DistributionListEntryObject.INDEPENDENT + " AND intfield02 IS NOT NULL AND intfield02 = ?");
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos, co.getObjectID());
@@ -980,7 +970,8 @@ public final class Contacts {
                             }
                             if (!values.isEmpty()) {
                                 sb.deleteCharAt(sb.length() - 1);
-                                sb.append(" WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> ").append(DistributionListEntryObject.INDEPENDENT);
+                                sb.append(" WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> ").append(
+                                    DistributionListEntryObject.INDEPENDENT);
                                 sb.append(" AND intfield02 IS NOT NULL AND intfield02 = ? AND intfield01 = ").append(dleo.getEmailfield());
                                 stmt = writecon.prepareStatement(sb.toString());
                                 pos = 1;
@@ -1024,7 +1015,7 @@ public final class Contacts {
         }
     }
 
-    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException  {
+    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException {
         validateEmailAddress(contact);
         if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
             contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -1052,19 +1043,29 @@ public final class Contacts {
 
             // user address operation
             if (contact.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(
+                    I(FolderObject.SYSTEM_LDAP_FOLDER_ID),
+                    I(ctx.getContextId()),
+                    I(userId));
             }
             // ALL RIGHTS CHECK SO FAR, CHECK FOR MODIFY ONLY OWN
             {
                 final int createdBy = original.getCreatedBy();
                 if (createdBy != userId) {
                     if (createdBy != ctx.getMailadmin()) {
-                        throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
+                        throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(
+                            I(FolderObject.SYSTEM_LDAP_FOLDER_ID),
+                            I(ctx.getContextId()),
+                            I(userId));
                     }
                     /*
                      * Unfortunately still set to context admin. Honor this condition, too.
                      */
-                    final StringBuilder stmtBuilder = cs.iFperformContactStorageUpdate(new StringBuilder(1), System.currentTimeMillis(), original.getObjectID(), ctx.getContextId());
+                    final StringBuilder stmtBuilder = cs.iFperformContactStorageUpdate(
+                        new StringBuilder(1),
+                        System.currentTimeMillis(),
+                        original.getObjectID(),
+                        ctx.getContextId());
                     final Connection wc = DBPool.pickupWriteable(ctx);
                     PreparedStatement stmt = null;
                     try {
@@ -1259,13 +1260,26 @@ public final class Contacts {
                             throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                         }
                     } else {
-                        checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(
-                            PROP_MAX_IMAGE_SIZE)));
+                        checkImageSize(
+                            contact.getImage1().length,
+                            Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                     }
                     if (original.containsImage1()) {
-                        updateContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), lmd, writecon);
+                        updateContactImage(
+                            contact.getObjectID(),
+                            contact.getImage1(),
+                            ctx.getContextId(),
+                            contact.getImageContentType(),
+                            lmd,
+                            writecon);
                     } else {
-                        writeContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), lmd, writecon);
+                        writeContactImage(
+                            contact.getObjectID(),
+                            contact.getImage1(),
+                            ctx.getContextId(),
+                            contact.getImageContentType(),
+                            lmd,
+                            writecon);
                     }
                 } else if (original.containsImage1()) {
                     try {
@@ -1415,7 +1429,7 @@ public final class Contacts {
                     }
                 }
             } else {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create( I(objectId), I(ctx.getContextId()));
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId()));
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1582,7 +1596,7 @@ public final class Contacts {
                     ps.setString(4, dleo.getLastname());
                 } else {
                     ps.setNull(4, java.sql.Types.VARCHAR);
-//                    ps.setString(4, "unknown");
+                    // ps.setString(4, "unknown");
                 }
                 if (dleo.containsLastname() && (dleo.getLastname() != null)) {
                     ps.setString(5, dleo.getLastname());
@@ -2398,10 +2412,7 @@ public final class Contacts {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
-                    throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(
-                        I(fid),
-                        I(so.getContextId()),
-                        I(so.getUserId()));
+                    throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(so.getContextId()), I(so.getUserId()));
                 }
                 if (contactFolder.getType() == FolderObject.PRIVATE) {
                     deleteIt = true;
@@ -2528,7 +2539,8 @@ public final class Contacts {
             FolderObject contactFolder = null;
 
             /*
-             * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the creator.
+             * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the
+             * creator.
              */
             rs = stmt.executeQuery(cs.iFgetRightsSelectString(uid, contextId));
 
@@ -2713,7 +2725,7 @@ public final class Contacts {
 
     /**
      * Checks if specified strings are equal
-     *
+     * 
      * @param string The first string
      * @param other The second string
      * @return <code>true</code> if both strings are considered equal; otherwise <code>false</code>

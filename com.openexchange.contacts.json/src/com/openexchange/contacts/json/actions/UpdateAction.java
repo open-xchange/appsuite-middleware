@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.converters.ContactParser;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -83,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link UpdateAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a contact.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -186,96 +185,16 @@ public class UpdateAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int folder = req.getFolder();
-        final int id = req.getId();
-        final long timestamp = req.getTimestamp();
-        final Date date = new Date(timestamp);
-        final boolean containsImage = req.containsImage();
-        final JSONObject json = req.getContactJSON(containsImage);
-
-        Contact contact = null;
-        try {
-			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
-		} catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
-		}
-//        final ContactParser parser = new ContactParser();
-//        final Contact contact = parser.parse(json);
-        contact.setObjectID(id);
-        
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        final boolean containsImage = request.containsImage();
+        final JSONObject json = request.getContactJSON(containsImage);
+        final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
         if (containsImage) {
-            UploadEvent uploadEvent = null;
-            try {
-                uploadEvent = req.getUploadEvent();
-                final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
-                if (file == null) {
-                    throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-                }
-
-                RequestTools.setImageData(contact, file);
-            } finally {
-                if (uploadEvent != null) {
-                    uploadEvent.cleanUp();
-                }
-            }
+        	RequestTools.setImageData(request, contact);
         }
-        
-        final ContactService contactService = getContactService();
-        contactService.updateContact(session, Integer.toString(folder), Integer.toString(id), contact, date);
-
-//        final ContactInterfaceDiscoveryService discoveryService = getContactInterfaceDiscoveryService();
-//
-//        final ContactInterface contactIface = discoveryService.newContactInterface(folder, session);
-//
-//        if (contact.containsParentFolderID() && contact.getParentFolderID() > 0) {
-//            /*
-//             * A move to another folder
-//             */
-//            final int folderId = contact.getParentFolderID();
-//            final ContactInterface targetContactIface = discoveryService.newContactInterface(folderId, session);
-//            if (!contactIface.getClass().equals(targetContactIface.getClass())) {
-//                /*
-//                 * A move to another contact service
-//                 */
-//                final Contact toMove = contactIface.getObjectById(id, folder);
-//                for (int i = 1; i < Contacts.mapping.length; i++) {
-//                    if (null != Contacts.mapping[i]) {
-//                        if (contact.contains(i)) {
-//                            toMove.set(i, contact.get(i));
-//                        }
-//                    }
-//                }
-//                if (folder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-//                    toMove.removeInternalUserId();
-//                }
-//                toMove.setNumberOfAttachments(0);
-//                targetContactIface.insertContactObject(toMove);
-//
-//                final User user = session.getUser();
-//                final UserConfiguration uc = session.getUserConfiguration();
-//                /*
-//                 * Check attachments
-//                 */
-//                CopyAction.copyAttachments(folderId, session, session.getContext(), toMove, id, folder, user, uc);
-//                /*
-//                 * Check links
-//                 */
-//                CopyAction.copyLinks(folderId, session, session.getContext(), toMove, id, folder, user);
-//                /*
-//                 * Delete original
-//                 */
-//                contactIface.deleteContactObject(id, folder, date);
-//                final JSONObject response = new JSONObject();
-//                return new AJAXRequestResult(response, toMove.getLastModified(), "json");
-//            }
-//        }
-//
-//        contactIface.updateContactObject(contact, folder, date);
-
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, contact.getLastModified(), "json");
+        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact, 
+        		new Date(request.getTimestamp()));
+        return new AJAXRequestResult(new JSONObject(), contact.getLastModified(), "json");
     }
 
 }

@@ -90,6 +90,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link CopyAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {},
 requestBody = "",
@@ -157,48 +158,32 @@ public class CopyAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int id = req.getId();
-        final int inFolder = req.getFolder();
-        Date timestamp = new Date(0);
-        final int folderId = req.getFolderFromJSON();
-        final Context ctx = session.getContext();
-
-//        final ContactInterfaceDiscoveryService discoveryService = getContactInterfaceDiscoveryService();
-//        final ContactInterface srcContactInterface = discoveryService.newContactInterface(inFolder, session);
-//
-//        final ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        /*
+         * prepare original contact
+         */
         final ContactService contactService = getContactService();
-        
-//        final Contact contact = srcContactInterface.getObjectById(id, inFolder);
-        final Contact contact = contactService.getContact(session, Integer.toString(inFolder), Integer.toString(id));
-        final int origObjectId = contact.getObjectID();
+        final Contact contact = contactService.getContact(request.getSession(), request.getFolderID(), request.getObjectID());
+        final int originalFolderID = contact.getParentFolderID();
+        final int originalObjectID = contact.getObjectID();
         contact.removeObjectID();
-        final int origFolderId = contact.getParentFolderID();
-        contact.setParentFolderID(folderId);
-
-        if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-            contact.removeInternalUserId();
+        contact.removeParentFolderID();
+        contact.removeInternalUserId();
+        boolean hasAttachments = 0 < contact.getNumberOfAttachments();
+        /*
+         * create copy
+         */
+        if (false == hasAttachments) {
+            contact.removeNumberOfAttachments();
+	        contactService.createContact(request.getSession(), request.getFolderIDFromData(), contact);
+	        copyAttachments(Integer.parseInt(request.getFolderIDFromData()), request.getSession(), request.getSession().getContext(), 
+	        		contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
+        } else {
+	        contactService.createContact(request.getSession(), request.getFolderIDFromData(), contact);
         }
-
-        contact.setNumberOfAttachments(0);
-        contactService.createContact(session, Integer.toString(folderId), contact);
-//        contactInterface.insertContactObject(contact);
-
-        final User user = session.getUser();
-        final UserConfiguration uc = session.getUserConfiguration();
         /*
-         * Check attachments
+         * respond with new object ID
          */
-        copyAttachments(folderId, session, ctx, contact, origObjectId, origFolderId, user, uc);
-        /*
-         * Check links
-         */
-        copyLinks(folderId, session, ctx, contact, origObjectId, origFolderId, user);
-
-        timestamp = contact.getLastModified();
-
         final JSONObject response = new JSONObject();
         try {
             response.put("id", contact.getObjectID());
@@ -206,7 +191,7 @@ public class CopyAction extends ContactAction {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
 
-        return new AJAXRequestResult(response, timestamp, "json");
+        return new AJAXRequestResult(response, contact.getLastModified(), "json");
     }
 
     public static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {

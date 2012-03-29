@@ -64,6 +64,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
@@ -221,7 +222,7 @@ public final class IndexingJobExecutor implements Callable<Void> {
      * Starts this executor orderly.
      */
     public IndexingJobExecutor start() {
-        future = threadPool.submit(ThreadPools.task(this), AbortBehavior.<Void> getInstance());
+        future = threadPool.submit(ThreadPools.task(this, IndexingJobExecutor.class.getSimpleName()), AbortBehavior.<Void> getInstance());
         return this;
     }
 
@@ -295,6 +296,8 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
     private static final class IndexingJobTask extends AbstractTask<Void> {
 
+        private static final String SIMPLE_NAME = IndexingJobTask.class.getSimpleName();
+
         private final IndexingJob job;
 
         public IndexingJobTask(final IndexingJob job) {
@@ -306,6 +309,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public Void call() throws Exception {
             performJob(job);
             return null;
+        }
+
+        @Override
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            threadRenamer.renamePrefix(SIMPLE_NAME);
         }
 
     }

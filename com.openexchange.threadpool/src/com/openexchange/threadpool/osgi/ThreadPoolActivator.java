@@ -130,7 +130,9 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             REF.set(threadPool);
             registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()));
             registerService(LogService.class, logService);
-            final SessionThreadCounterImpl counterImpl = new SessionThreadCounterImpl();
+            // Register SessionThreadCounter service
+            final int notifyThreashold = getService(ConfigurationService.class).getIntProperty("com.openexchange.session.maxThreadNotifyThreshold", -1);
+            final SessionThreadCounterImpl counterImpl = new SessionThreadCounterImpl(notifyThreashold, this);
             registerService(SessionThreadCounter.class, counterImpl);
             SessionThreadCounter.REFERENCE.set(counterImpl);
             {

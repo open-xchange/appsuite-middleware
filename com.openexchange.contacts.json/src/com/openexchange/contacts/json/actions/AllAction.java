@@ -50,28 +50,22 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.json.JSONException;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
 import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
-import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,6 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link AllAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -144,75 +139,26 @@ public class AllAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int folder = req.getFolder();
-        final int[] columns = req.getColumns();
-        final int sort = req.getSort();
-        final Order order = req.getOrder();
-        final String collation = req.getCollation();
-        final int leftHandLimit = req.getLeftHandLimit();
-        int rightHandLimit = req.getRightHandLimit();
-        if (rightHandLimit == 0) {
-            rightHandLimit = 50000;
-        }
-        
-        final ContactField[] fields;
-        final SortOptions sortOptions = new SortOptions(leftHandLimit,  rightHandLimit - leftHandLimit);
-        if (0 == sort || Contact.SPECIAL_SORTING == sort || Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-        	// results are sorted afterwards using additional fields
-        	fields = ContactMapper.getInstance().getFields(Arrays.addUniquely(columns, Contact.YOMI_LAST_NAME, Contact.SUR_NAME, 
-        			Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME, Contact.YOMI_COMPANY, Contact.COMPANY, 
-        			Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT));
-        } else {
-        	fields = ContactMapper.getInstance().getFields(columns);
-        	if (null != collation) {
-        		sortOptions.setCollation(collation);
-        	}
-        	if (0 < sort) {
-        		final ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
-        		if (null == sortField) {
-        			throw new IllegalArgumentException("no mapped field for sort order '" + sort + "'.");
-        		}
-        		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, order) });
-        	}
-        }
-        
-        Date timestamp = new Date(0);
-//        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        SearchIterator<Contact> it = null;
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
         final List<Contact> contacts = new ArrayList<Contact>();
+        Date lastModified = new Date(0);
+        SearchIterator<Contact> searchIterator = null;
         try {
-        	it = getContactService().getAllContacts(session, Integer.toString(folder), fields, sortOptions);
-//            it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
-
-            while (it.hasNext()) {
-                final Contact contact = it.next();
-                final Date lastModified = contact.getLastModified();
-
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), 
+            		request.getFields(), request.getSortOptions());
+            while (searchIterator.hasNext()) {
+                final Contact contact = searchIterator.next();
+                lastModified = getLatestModified(lastModified, contact);
+                applyTimezoneOffset(contact, request.getTimeZone());
                 contacts.add(contact);
-
-                if (lastModified != null && timestamp.before(lastModified)) {
-                    timestamp = lastModified;
-                }
             }
         } finally {
-            if (it != null) {
-                it.close();
-            }
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
         }
-        
-        if (0 == sort || Contact.SPECIAL_SORTING == sort) {
-            Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
-        } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-            Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale())); 
-        }
-        
-        return new AJAXRequestResult(contacts, timestamp, "contact");
+        request.sortInternalIfNeeded(contacts);
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
  
 }

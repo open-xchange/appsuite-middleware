@@ -117,7 +117,7 @@ public final class Processor implements SolrMailConstants {
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
 
     /**
-     * Whether debug logging is enabled ofr this class.
+     * Whether debug logging is enabled for this class.
      */
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -607,7 +607,7 @@ public final class Processor implements SolrMailConstants {
         boolean rollback = true;
         try {
             DBUtils.startTransaction(con);
-            final boolean b = update(fullName, accountId, userId, contextId, 1, con);
+            final boolean b = update(fullName, accountId, userId, contextId, true, con);
             con.commit();
             rollback = false;
             return b;
@@ -626,18 +626,18 @@ public final class Processor implements SolrMailConstants {
         final DatabaseService databaseService = SmalServiceLookup.getServiceStatic(DatabaseService.class);
         final Connection con = databaseService.getWritable(contextId);
         try {
-            forceUpdate(fullName, accountId, userId, contextId, 0, con);
+            forceUpdate(fullName, accountId, userId, contextId, false, con);
         } finally {
             databaseService.backWritable(contextId, con);
         }
     }
 
-    private void forceUpdate(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws OXException {
+    private void forceUpdate(final String fullName, final int accountId, final int userId, final int contextId, final boolean update, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE mailSync SET sync=? WHERE cid=? AND user=? AND accountId=? AND fullName=?");
             int pos = 1;
-            stmt.setInt(pos++, update);
+            stmt.setInt(pos++, update ? 1 : 0);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, accountId);
@@ -650,7 +650,7 @@ public final class Processor implements SolrMailConstants {
         }
     }
 
-    private boolean update(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws OXException {
+    private boolean update(final String fullName, final int accountId, final int userId, final int contextId, final boolean update, final Connection con) throws OXException {
         try {
             // Try to perform a compare-and-set UPDATE
             final int cur = performSelect(fullName, accountId, userId, contextId, con);
@@ -665,17 +665,17 @@ public final class Processor implements SolrMailConstants {
         }
     }
 
-    private boolean compareAndSet(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws SQLException {
+    private boolean compareAndSet(final String fullName, final int accountId, final int userId, final int contextId, final boolean update, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE mailSync SET sync=? WHERE cid=? AND user=? AND accountId=? AND fullName=? AND sync=?");
             int pos = 1;
-            stmt.setInt(pos++, update);
+            stmt.setInt(pos++, update ? 1 : 0);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, fullName);
-            stmt.setInt(pos, update > 0 ? 0 : 1); // Opposite value
+            stmt.setInt(pos, update ? 0 : 1); // Opposite value
             final int result = stmt.executeUpdate();
             return (result > 0);
         } finally {
@@ -683,7 +683,7 @@ public final class Processor implements SolrMailConstants {
         }
     }
 
-    private boolean performInsert(final String fullName, final int accountId, final int userId, final int contextId, final int update, final Connection con) throws SQLException {
+    private boolean performInsert(final String fullName, final int accountId, final int userId, final int contextId, final boolean update, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, sync, timestamp) VALUES (?,?,?,?,?,?)");
@@ -692,8 +692,8 @@ public final class Processor implements SolrMailConstants {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, fullName);
-            stmt.setInt(pos++, update);
-            stmt.setLong(pos, System.currentTimeMillis());
+            stmt.setInt(pos++, update ? 1 : 0);
+            stmt.setLong(pos, 0L);
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);

@@ -51,6 +51,7 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -168,20 +169,25 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
 	@Override
 	public E[] getFields(final int[] columnIDs) throws OXException {
-		return this.getFields(columnIDs, (E[])null);
+		return this.getFields(columnIDs, null, (E[])null);
 	}
 	
 	@Override
     public E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException {
+		return this.getFields(columnIDs, null, mandatoryFields);
+    }
+
+	@Override
+    public E[] getFields(final int[] columnIDs, final EnumSet<E> illegalFields, final E... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
 		}
 		final Set<E> fields = new HashSet<E>();
 		for (final int columnID : columnIDs) {
 			final E field = this.getMappedField(columnID);
-			if (null != field) {
-				fields.add(field);
-			}
+			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {
+                fields.add(field);
+            }
 		}
         if (null != mandatoryFields) {
             for (final E field : mandatoryFields) {

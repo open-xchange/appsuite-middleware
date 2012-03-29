@@ -75,4 +75,10 @@ public class ContactFieldOperand implements Operand<ContactField>{
 	public ContactField getValue() {
 		return this.value;
 	}
+	
+    @Override
+    public String toString() {
+        return new StringBuilder(Type.COLUMN.getType()).append(':').append(value).toString();
+    }
+
 }

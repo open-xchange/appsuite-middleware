@@ -69,7 +69,7 @@ public abstract class EMailMapping extends StringMapping {
 		super.validate(contact);
 		if (this.isSet(contact)) {
 			final String value = this.get(contact);
-			if (null != value) {
+			if (null != value && !value.isEmpty()) {
 				try {
 					new QuotedInternetAddress(value).validate();
 				} catch (final AddressException e) {
