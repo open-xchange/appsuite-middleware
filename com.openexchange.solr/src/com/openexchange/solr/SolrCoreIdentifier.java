@@ -91,7 +91,7 @@ public class SolrCoreIdentifier implements Serializable {
         }
             
         try {
-            contextId = Integer.parseInt(identifier.substring(i1 + 3, i2));
+            contextId = Integer.parseInt(identifier.substring(i1 + 4, i2));
             userId = Integer.parseInt(identifier.substring(i2 + 2, i3));
             module = Integer.parseInt(identifier.substring(i3 + 2, identifier.length()));
         } catch (final NumberFormatException e) {

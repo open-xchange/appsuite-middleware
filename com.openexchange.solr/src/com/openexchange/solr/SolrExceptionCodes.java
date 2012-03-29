@@ -76,7 +76,7 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      */
     NO_FREE_CORE_STORE(SolrExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 1003),
     /**
-     * This cores instance directory (%1$s) already exists. It cannot be created. 
+     * This cores instance directory (%1$s) already exists and its structure is inconsistent. 
      */
     INSTANCE_DIR_EXISTS(SolrExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
     /**
