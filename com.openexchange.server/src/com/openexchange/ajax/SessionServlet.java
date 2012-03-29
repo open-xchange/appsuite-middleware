@@ -272,7 +272,7 @@ public abstract class SessionServlet extends AJAXServlet {
         String sessionId = null;
         try {
             initializeSession(req);
-            final ServerSession session = getSessionObject(req);
+            final ServerSession session = getSessionObject(req, true);
             /*
              * Check max. concurrent AJAX requests
              */
