@@ -134,7 +134,10 @@ public final class ProcessingProgress {
     }
 
     /**
-     * Sets the process type
+     * Sets the process type.
+     * <p>
+     * <b><small>NOTE</small></b>: When process type is set, this progress may be returned to caller. Therefore a count-down of associated
+     * latch is performed to release waiting caller's thread.
      * 
      * @param processType The process type to set
      * @return This progress with argument applied
