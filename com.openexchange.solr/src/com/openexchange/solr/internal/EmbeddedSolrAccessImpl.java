@@ -142,6 +142,8 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             // TODO: throw exception
         }
         
+        // FIXME : remove
+        optimize(identifier);
         final SolrCore solrCore = coreContainer.remove(identifier.toString());
         if (solrCore != null) {
             solrCore.close();
