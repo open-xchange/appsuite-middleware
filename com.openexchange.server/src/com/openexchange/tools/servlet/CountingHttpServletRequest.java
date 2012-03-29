@@ -84,7 +84,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest {
      * Initializes a new {@link CountingHttpServletRequest}.
      */
     public CountingHttpServletRequest(final HttpServletRequest servletRequest) {
-        this(servletRequest, ConfigTools.getLongProperty("com.openexchange.servlet.maxBodySize", -1L, ServerServiceRegistry.getInstance().getService(ConfigurationService.class)));
+        this(servletRequest, ConfigTools.getLongProperty("com.openexchange.servlet.maxBodySize", 104857600L, ServerServiceRegistry.getInstance().getService(ConfigurationService.class)));
     }
 
     /**
