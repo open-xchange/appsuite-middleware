@@ -481,7 +481,17 @@ public final class FolderJob extends AbstractMailJob {
                 // Batch add failed; retry one-by-one
                 for (final IndexDocument<MailMessage> document : documents) {
                     try {
-                        indexAccess.addAttachments(document);
+                        switch (insertType) {
+                        case ENVELOPE:
+                            indexAccess.addEnvelopeData(document);
+                            break;
+                        case BODY:
+                            indexAccess.addContent(document);
+                            break;
+                        default:
+                            indexAccess.addAttachments(document);
+                            break;
+                        }
                     } catch (final Exception inner) {
                         final MailMessage mail = document.getObject();
                         LOG.warn(
