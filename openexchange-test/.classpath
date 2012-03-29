@@ -24,7 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.freeutils.jcharset"/>
 	<classpathentry kind="src" path="/com.openexchange.publish"/>
 	<classpathentry kind="src" path="/com.openexchange.publish.json"/>
 	<classpathentry kind="src" path="/com.openexchange.datatypes.genericonf"/>
@@ -97,5 +96,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.linkedin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.msn"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.unifiedinbox"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jcharset"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

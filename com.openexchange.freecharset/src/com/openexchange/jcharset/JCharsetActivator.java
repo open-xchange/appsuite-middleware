@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,29 @@
  *
  */
 
-package net.freeutils.charset.osgi;
+package com.openexchange.jcharset;
 
 import java.nio.charset.spi.CharsetProvider;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+
 /**
- * {@link JCharsetActivator} - Activator for <a href="http://www.freeutils.net/source/jcharset/">JCharset</a>'s charset provider
+ * {@link JCharsetActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCharsetActivator implements BundleActivator {
 
+    private volatile ServiceRegistration<CharsetProvider> serviceRegistration;
+
     private final CharsetProvider charsetProvider;
 
-    private volatile ServiceRegistration<CharsetProvider> registration;
-
     /**
-     * Default constructor
+     * Initializes a new {@link JCharsetActivator}.
      */
     public JCharsetActivator() {
         super();
@@ -76,43 +78,32 @@ public final class JCharsetActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        LogFactory.getLog(JCharsetActivator.class).info("starting bundle: net.freeutils.jcharset");
-
+        final Log log = LogFactory.getLog(JCharsetActivator.class);
+        log.info("Starting bundle: com.openexchange.freecharset");
         try {
             /*
              * Register jcharset's charset provider
              */
-            registration = context.registerService(CharsetProvider.class, charsetProvider, null);
-            if (LogFactory.getLog(JCharsetActivator.class).isInfoEnabled()) {
-                LogFactory.getLog(JCharsetActivator.class).info("JCharset charset providers registered");
-            }
-        } catch (final Throwable t) {
-            LogFactory.getLog(JCharsetActivator.class).error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+            serviceRegistration = context.registerService(CharsetProvider.class, charsetProvider, null);
+            log.info("JCharset charset providers registered");
+        } catch (final Exception e) {
+            log.error("Error while starting bundle: com.openexchange.freecharset", e);
         }
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        LogFactory.getLog(JCharsetActivator.class).info("stopping bundle: net.freeutils.jcharset");
-
+        final Log log = LogFactory.getLog(JCharsetActivator.class);
         try {
             /*
              * Unregister jcharset's charset provider
              */
-            final ServiceRegistration<CharsetProvider> registration = this.registration;
-            if (null != registration) {
-                registration.unregister();
-                this.registration = null;
-            }
-            if (LogFactory.getLog(JCharsetActivator.class).isInfoEnabled()) {
-                LogFactory.getLog(JCharsetActivator.class).info("JCharset charset providers unregistered");
-            }
-        } catch (final Throwable t) {
-            LogFactory.getLog(JCharsetActivator.class).error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+            serviceRegistration.unregister();
+            log.info("JCharset charset providers unregistered");
+            log.info("Stopped bundle: com.openexchange.freecharset");
+        } catch (final Exception e) {
+            log.error("Error while stopping bundle: com.openexchange.freecharset", e);
         }
     }
-
 
 }
