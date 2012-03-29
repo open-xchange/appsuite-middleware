@@ -75,8 +75,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
     // All core stores seem to be full.
     public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
     
-    // This cores instance directory (%1$s) already exists. It cannot be created.
-    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
+    // This cores instance directory (%1$s) already exists and its structure is inconsistent.
+    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists and its structure is inconsistent.";
 
     // An index fault occurred: %1$s
     public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";

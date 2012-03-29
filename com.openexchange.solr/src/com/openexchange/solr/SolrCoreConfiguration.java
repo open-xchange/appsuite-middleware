@@ -80,6 +80,10 @@ public class SolrCoreConfiguration {
 
     private final String configFilePath;
     
+    private final String configDirName;
+    
+    private final String dataDirName;
+    
     
     public SolrCoreConfiguration(final URI coreStoreUri, final SolrCoreIdentifier identifier) throws OXException {
         super();
@@ -92,6 +96,8 @@ public class SolrCoreConfiguration {
         schemaFileName = config.getProperty(getPropertyForSchemaFileName(identifier.getModule()));
         configFileName = config.getProperty(getPropertyForConfigFileName(identifier.getModule()));
         configFilePath = configDirPath + File.separator + configFileName;
+        configDirName = config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME);;
+        dataDirName = config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
     }
     
     public String getCoreName() {
@@ -120,6 +126,14 @@ public class SolrCoreConfiguration {
     
     public String getConfigFilePath() {
         return configFilePath;
+    }
+    
+    public String getConfigDirName() {
+        return configDirName;
+    }
+
+    public String getDataDirName() {
+        return dataDirName;
     }
 
     public SolrCoreIdentifier getIdentifier() {

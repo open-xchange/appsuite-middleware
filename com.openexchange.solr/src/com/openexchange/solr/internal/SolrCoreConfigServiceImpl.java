@@ -50,11 +50,13 @@
 package com.openexchange.solr.internal;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -119,21 +121,26 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
                 throw SolrExceptionCodes.CORE_STORE_NOT_EXISTS_ERROR.create(storeDir.getPath());
             }
             
+            final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);      
             final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
             final SolrCoreConfiguration coreConfig = new SolrCoreConfiguration(storeUri, identifier);
             final String coreDirPath = coreConfig.getCoreDirPath();
             final File coreDir = new File(coreDirPath);     
             if (coreDir.exists()) {
+                LOG.warn("Core directory " + coreDir.getPath() + " already exists. Checking consistency...");
+                if (structureIsConsistent(solrHome, coreConfig, module)) {
+                    LOG.warn("Core directory " + coreDir.getPath() + " seems to be consistent.");
+                    return true;
+                }
                 /*
                  * If we got here, database and file system seem to be inconsistent.
                  */
                 throw SolrExceptionCodes.INSTANCE_DIR_EXISTS.create(coreDirPath);
             }
             
-            if (coreDir.mkdir()) {
-                final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);                
+            if (coreDir.mkdir()) {                          
                 final File skelDir = getSkelDir(solrHome, module);
-                final File confDir = new File(coreConfig.getConfigFilePath());
+                final File confDir = new File(coreConfig.getConfigDirPath());
                 final File dataDir = new File(coreConfig.getDataDirPath());
                 if (confDir.mkdir() && dataDir.mkdir()) {
                     /*
@@ -158,6 +165,60 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
         }
         
         return false;
+    }
+    
+    private boolean structureIsConsistent(final String solrHome, final SolrCoreConfiguration coreConfig, final int module) throws OXException {
+        final File coreDir = new File(coreConfig.getCoreDirPath());
+        if (isReadableAndWritableDirectory(coreDir)) {
+            final File[] files = coreDir.listFiles(new FilenameFilter() {
+                
+                @Override
+                public boolean accept(final File dir, final String name) {
+                    if (dir.equals(coreDir)) {
+                        if (name.equals(coreConfig.getConfigDirName()) || name.equals(coreConfig.getDataDirName())) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            });
+            
+            if (files.length == 2) {
+                for (final File file : files) {
+                    if (!isReadableAndWritableDirectory(file)) {
+                        return false;
+                    }
+                }
+            }
+            
+            final File skelDir = getSkelDir(solrHome, module);
+            final File confDir = new File(coreDir, coreConfig.getConfigDirName());
+            final String[] confFileNames = confDir.list();
+            for (final String fileName : skelDir.list()) {
+                if (!ArrayUtils.contains(confFileNames, fileName)) {
+                    return false;
+                }
+                
+                try {
+                    final long skelChecksum = FileUtils.checksumCRC32(new File(skelDir, fileName));
+                    final long confChecksum = FileUtils.checksumCRC32(new File(confDir, fileName));
+                    if (skelChecksum != confChecksum) {
+                        return false;
+                    }
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean isReadableAndWritableDirectory(final File file) {
+        return file.exists() && file.isDirectory() && file.canRead() && file.canWrite();
     }
     
     private File getSkelDir(final String solrHome, int module) throws OXException {
