@@ -81,6 +81,11 @@ public class ContactParser {
         map.put(Contact.BIRTHDAY, "date");
         map.put(Contact.DISTRIBUTIONLIST, "distributionlist");
         map.put(Contact.LINKS, "links");
+        //Specials from Contact.JSON.COLUMNS
+        map.put(Contact.CREATION_DATE, "date");
+        map.put(Contact.LAST_MODIFIED, "date");
+        map.put(Contact.IMAGE_LAST_MODIFIED, "date");
+        map.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
         specialColumns = map;
     }
 
@@ -98,9 +103,15 @@ public class ContactParser {
     public Contact parse(final JSONObject json) throws OXException {
         final ContactSetter cs = new ContactSetter();
         final Contact contact = new Contact();
+        //test for every known JSON_COLUMN if 
         for (final int column : Contact.JSON_COLUMNS) {
+            //it is part of the constants defined in ContactField (used by ContactSetter/Switcher)
             final ContactField field = ContactField.getByValue(column);
             if (field != null) {
+                /*
+                 * Get the name of the constant used as ajax name.
+                 * This is used to set the field of a contact object based on the field name.
+                 */
                 final String key = field.getAjaxName();
                 if (key != null && !key.isEmpty() && json.hasAndNotNull(key)) {
                     try {
@@ -120,6 +131,14 @@ public class ContactParser {
         return contact;
     }
 
+    /**
+     * Parse special ContactFields like Date from type Object before setting them in contact objects.
+     * @param field The Contactfield to parse.
+     * @param cs The ContactSetter implementation of the ContactSwitcher interface that is able to properly set the parsed contact fields.
+     * @param contact The contact we want to modify.
+     * @param value The Object value that has to be parsed and set.
+     * @throws OXException
+     */
     private void parseSpecial(final ContactField field, final ContactSetter cs, final Contact contact, final Object value) throws OXException {
         final String type = specialColumns.get(field.getNumber());
         if (type.equals("date")) {
