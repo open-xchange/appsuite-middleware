@@ -83,6 +83,7 @@ import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -334,14 +335,28 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 }
             }
 
-            final TextFinder textFinder = new TextFinder();
-            final String text = textFinder.getText(message);
-            if (null != text) {
-                final Locale locale = detectLocale(text);
-                inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+            if (message instanceof ContentAwareMailMessage) {
+                final ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
+                String text = contentAwareMessage.getPrimaryContent();
+                if (null == text) {
+                    final TextFinder textFinder = new TextFinder();
+                    text = textFinder.getText(message);
+                }
+                if (null != text) {
+                    final Locale locale = detectLocale(text);
+                    inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+                }
+            } else {
+                final TextFinder textFinder = new TextFinder();
+                final String text = textFinder.getText(message);
+                if (null != text) {
+                    final Locale locale = detectLocale(text);
+                    inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+                }
             }
-            inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);  
-            inputDocuments.add(inputDocument);  
+            inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);
+
+            inputDocuments.add(inputDocument);
         }
         
         addDocuments(inputDocuments);
@@ -400,16 +415,29 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                     inputDocument.put(name, field);
                 }
             }
-            
-            final TextFinder textFinder = new TextFinder();
-            final String text = textFinder.getText(message);
-            if (null != text) {
-                final Locale locale = detectLocale(text);
-                inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+
+            if (message instanceof ContentAwareMailMessage) {
+                final ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
+                String text = contentAwareMessage.getPrimaryContent();
+                if (null == text) {
+                    final TextFinder textFinder = new TextFinder();
+                    text = textFinder.getText(message);
+                }
+                if (null != text) {
+                    final Locale locale = detectLocale(text);
+                    inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+                }
+            } else {
+                final TextFinder textFinder = new TextFinder();
+                final String text = textFinder.getText(message);
+                if (null != text) {
+                    final Locale locale = detectLocale(text);
+                    inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
+                }
             }
-            
-            inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);  
-            inputDocuments.add(inputDocument);  
+            inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);
+
+            inputDocuments.add(inputDocument);
         }
         
         addDocuments(inputDocuments);
