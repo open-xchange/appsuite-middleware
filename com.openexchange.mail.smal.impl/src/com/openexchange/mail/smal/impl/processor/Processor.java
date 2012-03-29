@@ -117,7 +117,7 @@ public final class Processor implements SolrMailConstants {
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
 
     /**
-     * Whether debug logging is enabled ofr this class.
+     * Whether debug logging is enabled for this class.
      */
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
