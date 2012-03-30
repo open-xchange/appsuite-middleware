@@ -1,3 +1,7 @@
+* 2012-03-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21880: Dealing with skipped content within HTML's <head> tag
+
 * 2012-03-30 - jan.bauerdick@open-xchange.com
 
  - Improved all DeleteRequests + documentation

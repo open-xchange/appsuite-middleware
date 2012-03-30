@@ -361,8 +361,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         } else {
             if (skipLevel > 0) {
-                skipLevel++;
-                return;
+                if (HTMLElementName.BODY != tagName) {
+                    skipLevel++;
+                    return;
+                }
+                skipLevel = 0;
             }
             if (htmlMap.containsKey(tagName)) {
                 if (depth > 0) {
@@ -392,7 +395,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private boolean isRemoveWholeTag(final Tag tag) {
         final String check = tag.getName();
-        return (HTMLElementName.SCRIPT == check || check.startsWith("w:worddocument") || check.startsWith("o:officedocumentsettings"));
+        return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
     }
 
     private static final String CID = "cid:";
