@@ -116,7 +116,7 @@ public final class MessagingConfig {
             {
                 final String property =
                     getProperty("com.openexchange.service.message.numOfServerThreads", "1", configurationService).trim();
-                config.setListenerPort(Integer.parseInt(property));
+                config.setNumberOfServerThreads(Integer.parseInt(property));
             }
             {
                 final String property =
