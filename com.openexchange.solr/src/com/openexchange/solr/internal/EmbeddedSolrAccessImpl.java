@@ -53,7 +53,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServer;
@@ -67,6 +71,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.xml.sax.SAXException;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
@@ -82,6 +87,8 @@ import com.openexchange.solr.SolrProperties;
 public class EmbeddedSolrAccessImpl implements SolrAccessService {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmbeddedSolrAccessImpl.class));
+    
+    private final Lock mutex = new ReentrantLock();
 
     private CoreContainer coreContainer;
     
@@ -123,16 +130,22 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         coreDescriptor.setCoreProperties(properties);
         SolrCore solrCore;
         try {
-            solrCore = coreContainer.create(coreDescriptor);
-            coreContainer.register(configuration.getIdentifier().toString(), solrCore, false);
+        	mutex.lock();
+        	if (!hasActiveCore(configuration.getIdentifier())) {
+        		solrCore = coreContainer.create(coreDescriptor);
+                coreContainer.register(configuration.getIdentifier().toString(), solrCore, false);                
+                return true;
+        	}
             
-            return true;
+        	return false;
         } catch (final ParserConfigurationException e) {
             throw new OXException(e);
         } catch (final IOException e) {
             throw new OXException(e);
         } catch (final SAXException e) {
             throw new OXException(e);
+        } finally {
+        	mutex.unlock();
         }
     }
 
@@ -143,14 +156,19 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
         
         // FIXME : remove
-        optimize(identifier);
-        final SolrCore solrCore = coreContainer.remove(identifier.toString());
-        if (solrCore != null) {
-            solrCore.close();
-            return true;
-        }
+        optimize(identifier);        
+        try {
+        	mutex.lock();
+			final SolrCore solrCore = coreContainer.remove(identifier.toString());
+			if (solrCore != null) {
+				solrCore.close();
+				return true;
+			}
+		} finally {
+			mutex.unlock();
+		}
         
-        return false;
+		return false;
     }
 
     public void shutDown() {
@@ -166,6 +184,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
         
         try {
+        	mutex.lock();
             coreContainer.reload(identifier.toString());
         } catch (final ParserConfigurationException e) {
             throw new OXException(e);
@@ -173,6 +192,8 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } catch (final SAXException e) {
             throw new OXException(e);
+        } finally {
+        	mutex.unlock();
         }
     }
     

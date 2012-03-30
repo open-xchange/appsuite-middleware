@@ -62,16 +62,23 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMergerator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link ContactServiceImpl} - {@link ContactService} implementation.
@@ -666,24 +673,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * extract folders
 		 */
-		final List<String> folderIDs = Tools.extractFolderIDs(term);
-		if (null == folderIDs || 0 == folderIDs.size()) {
-			//TODO: query all storages instead?
-			throw new UnsupportedOperationException("Need at least one folder in search term");
-		}
-		/*
-		 * check folders
-		 */
-		for (final String folderID : folderIDs) {
-			final FolderObject folder = Tools.getFolder(contextID, folderID);
-			if (FolderObject.CONTACT != folder.getModule()) {
-				throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-			}
-			final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-			if (false == permission.canReadOwnObjects()) {
-				throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
-			}
-		}
+		final List<String> folderIDs = getFoldersForSearch(contextID, userID, term);
 		/*
 		 * determine storages
 		 */
@@ -708,6 +698,68 @@ public class ContactServiceImpl implements ContactService {
 		}
 		return 2 > searchIterators.size() ? searchIterators.get(0) : 
 			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
+	}
+
+	private <O> List<String> getFoldersForSearch(final int contextID, final int userID, final SearchTerm<O> term) throws OXException {
+		final List<String> folderIDs = Tools.extractFolderIDs(term);
+		if (0 == folderIDs.size()) {
+	        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(
+	        		userID, Tools.getContext(contextID));
+			if (ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
+				/*
+				 * use all visible folders for search
+				 */
+		        SearchIterator<FolderObject> searchIterator = null;
+		        try {
+		        	searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userID, userConfig.getGroups(), 
+		        			userConfig.getAccessibleModules(), FolderObject.CONTACT, Tools.getContext(contextID));
+		            while (searchIterator.hasNext()) {
+		                final FolderObject folder = searchIterator.next();
+		    			if (FolderObject.CONTACT != folder.getModule()) {
+		    				continue;
+		    			}
+		    			final EffectivePermission permission = Tools.getPermission(
+		    					contextID, Integer.toString(folder.getObjectID()), userID);
+		    			if (null != permission && false == permission.canReadOwnObjects()) {
+		    				continue;
+		    			}
+		    			folderIDs.add(Integer.toString(folder.getObjectID()));
+		            }
+		        } finally {
+		        	if (null != searchIterator) {
+		        		searchIterator.close();
+		        	}
+		        }
+			} else {
+				/*
+				 * use default set of folders for search
+				 */
+				folderIDs.add(Integer.toString(
+						new OXFolderAccess(Tools.getContext(contextID)).getDefaultFolder(userID, FolderObject.CONTACT).getObjectID()));
+				if (Tools.getPermission(contextID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), userID).canReadAllObjects()) {
+					folderIDs.add(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+				}
+				final Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
+				if (null != collectedContactFolderID) {
+					folderIDs.add(Integer.toString(collectedContactFolderID));
+				}
+			}
+		} else {
+			/*
+			 * check folders
+			 */
+			for (final String folderID : folderIDs) {
+				final FolderObject folder = Tools.getFolder(contextID, folderID);
+				if (FolderObject.CONTACT != folder.getModule()) {
+					throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
+				}
+				final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+				if (false == permission.canReadOwnObjects()) {
+					throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
+				}
+			}
+		}
+		return folderIDs;
 	}
 
 	/*

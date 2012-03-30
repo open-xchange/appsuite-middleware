@@ -51,7 +51,6 @@ package com.openexchange.contacts.json;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -59,11 +58,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -152,7 +149,7 @@ public class ContactRequest {
      * @throws OXException
      */
     public void sortInternalIfNeeded(final List<Contact> contacts) throws OXException {
-    	if (this.isInternalSort() && null != contacts && 0 < contacts.size()) {
+    	if (this.isInternalSort() && null != contacts && 1 < contacts.size()) {
     		final int sort = this.getSort();
             if (0 == sort || Contact.SPECIAL_SORTING == sort) {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
@@ -358,7 +355,6 @@ public class ContactRequest {
 
     public int[] getDeleteRequestData() throws OXException {
         final JSONObject json = (JSONObject) request.getData();
-        if (json.hasAndNotNull("id")) {
             final int[] data = new int[2];
             try {
                 data[0] = json.getInt("id");
@@ -367,21 +363,6 @@ public class ContactRequest {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
             }
             return data;
-        } else if (json.hasAndNotNull("ids")) {
-            try {
-                JSONArray ids = (JSONArray) json.get("ids");
-                final int[] data = new int[ids.length() + 1];
-                for (int i = 0; i < ids.length(); i++) {
-                    data[i] = ids.getInt(i);
-                }
-                data[data.length - 1] = json.getInt("folder");
-                return data;
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
-            }
-        } else {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
-        }
     }
 
     public long getTimestamp() throws OXException {

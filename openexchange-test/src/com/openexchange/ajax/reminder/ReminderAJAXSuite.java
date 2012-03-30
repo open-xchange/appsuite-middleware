@@ -61,6 +61,7 @@ public class ReminderAJAXSuite extends TestSuite{
         tests.addTestSuite(DeleteTest.class);
         tests.addTestSuite(RemindAgainTest.class);
         tests.addTestSuite(SharedFolderTest.class);
+        tests.addTestSuite(DeleteMultipleReminderTest.class);
 
         tests.addTest(ReminderBugTestSuite.suite());
         return tests;
