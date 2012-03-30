@@ -79,6 +79,8 @@ public class QueryFields {
 	        // always add permission specific fields
 	        preparedFields.add(ContactField.CREATED_BY);
 	        preparedFields.add(ContactField.PRIVATE_FLAG);
+	        preparedFields.add(ContactField.FOLDER_ID);
+	        preparedFields.add(ContactField.CONTEXTID);
 	        // add requested fields
 	        for (final ContactField field : fields) {
 	            preparedFields.add(field);

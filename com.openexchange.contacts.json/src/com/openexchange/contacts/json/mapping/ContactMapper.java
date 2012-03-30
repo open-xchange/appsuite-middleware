@@ -52,7 +52,10 @@ package com.openexchange.contacts.json.mapping;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -102,6 +105,28 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         
     }
     
+    public ContactField[] getFields(final int[] columnIDs, final EnumSet<ContactField> illegalFields, final ContactField... mandatoryFields) throws OXException {
+		if (null == columnIDs) {
+			throw new IllegalArgumentException("columnIDs");
+		}
+		final Set<ContactField> fields = new HashSet<ContactField>();
+		for (final int columnID : columnIDs) {
+			final ContactField field = this.getMappedField(columnID);
+			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {
+                fields.add(field);
+            } else if (Contact.IMAGE1_URL == columnID) {
+            	// query IMAGE1 to set image URL afterwards
+            	fields.add(ContactField.IMAGE1);
+            }
+		}
+        if (null != mandatoryFields) {
+            for (final ContactField field : mandatoryFields) {
+				fields.add(field);
+            }
+        }
+        return fields.toArray(newArray(fields.size()));
+    }
+
     @Override
 	public Contact newInstance() {
 		return new Contact();

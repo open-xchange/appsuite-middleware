@@ -73,6 +73,17 @@ public class ResultIterator implements SearchIterator<Contact> {
 	private final Map<String, Boolean> canReadAllMap;
 	private Boolean canReadAll;
 
+	/**
+	 * Initializes a new {@link ResultIterator} where the 'can read all' 
+	 * information is evaluated dynamically based on the contact's parent 
+	 * folders.
+	 * 
+	 * @param delegate
+	 * @param needsAttachmentInfo
+	 * @param contextID
+	 * @param userID
+	 * @throws OXException
+	 */
 	public ResultIterator(final SearchIterator<Contact> delegate, final boolean needsAttachmentInfo, final int contextID, final int userID) throws OXException {
 		super();
 		this.delegate = delegate;
@@ -85,6 +96,17 @@ public class ResultIterator implements SearchIterator<Contact> {
 		initNext();
 	}
 	
+	/**
+	 * Initializes a new {@link ResultIterator} where the supplied 'can read 
+	 * all' information is used statically. 
+	 * 
+	 * @param delegate
+	 * @param needsAttachmentInfo
+	 * @param contextID
+	 * @param userID
+	 * @param canReadAll
+	 * @throws OXException
+	 */
 	public ResultIterator(final SearchIterator<Contact> delegate, final boolean needsAttachmentInfo, final int contextID, final int userID, final boolean canReadAll) throws OXException {
 		super();
 		this.delegate = delegate;
@@ -128,7 +150,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 		} else {
 			final String folderID = Integer.toString(contact.getParentFolderID());
 			if (false == canReadAllMap.containsKey(folderID)) {
-				final EffectivePermission permission = Tools.getPermission(contact.getContextId(), folderID, userID);
+				final EffectivePermission permission = Tools.getPermission(this.contextID, folderID, this.userID);
 				canReadAllMap.put(folderID, Boolean.valueOf(permission.canReadAllObjects()));
 			}
 			return canReadAllMap.get(folderID).booleanValue();
