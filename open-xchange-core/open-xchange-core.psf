@@ -39,6 +39,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
@@ -74,7 +75,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.tx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,net.freeutils.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,oxscripts"/>
 </provider>

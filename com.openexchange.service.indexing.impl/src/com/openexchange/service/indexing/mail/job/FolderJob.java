@@ -77,7 +77,9 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.mail.Constants;
@@ -216,6 +218,7 @@ public final class FolderJob extends AbstractMailJob {
                 if (debug) {
                     LOG.debug("Starting folder job: " + info);
                 }
+                indexAccess = getIndexAccess();
                 /*
                  * Get the mails from storage
                  */
@@ -234,6 +237,12 @@ public final class FolderJob extends AbstractMailJob {
                              * Drop entry from database and return
                              */
                             deleteDBEntry();
+                            final StringBuilder queryBuilder = new StringBuilder(128);
+                            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
+                            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
+                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+                            indexAccess.deleteByQuery(queryBuilder.toString());
                             unset = false;
                             return;
                         }
@@ -271,7 +280,6 @@ public final class FolderJob extends AbstractMailJob {
                 /*
                  * Get the mails from index
                  */
-                indexAccess = getIndexAccess();
                 final Map<String, MailMessage> indexMap;
                 {
                     List<MailMessage> indexedMails = this.indexMails;
@@ -365,6 +373,7 @@ public final class FolderJob extends AbstractMailJob {
                         queryBuilder.append(" AND (").append(FIELD_ID).append(":\"").append(id).append("\")");
                         indexAccess.deleteByQuery(queryBuilder.toString());
                     }
+                    setTimestamp(fullName, System.currentTimeMillis());
                     if (debug) {
                         LOG.debug(deletedIds.size() + " mails deleted from index; folder job: " + info);
                     }
@@ -374,7 +383,26 @@ public final class FolderJob extends AbstractMailJob {
                  * Change flags
                  */
                 if (!changedMails.isEmpty()) {
-                    indexAccess.change(toDocuments(changedMails), IndexAccess.ALL_FIELDS);
+                    final int configuredBlockSize = getBlockSize();
+                    if (configuredBlockSize <= 0) {
+                        indexAccess.change(toDocuments(changedMails), IndexAccess.ALL_FIELDS);
+                        setTimestamp(fullName, System.currentTimeMillis());
+                    } else {
+                        final int size = changedMails.size();
+                        int start = 0;
+                        while (start < size) {
+                            int end = start + configuredBlockSize;
+                            if (end > size) {
+                                end = size;
+                            }
+                            /*
+                             * Change chunk
+                             */
+                            indexAccess.change(toDocuments(changedMails.subList(start, end)), IndexAccess.ALL_FIELDS);
+                            start = end;
+                            setTimestamp(fullName, System.currentTimeMillis());
+                        }
+                    }
                     if (debug) {
                         LOG.debug(changedMails.size() + " mails changed (flags) in index; folder job: " + info);
                     }
@@ -386,21 +414,60 @@ public final class FolderJob extends AbstractMailJob {
                 if (!newIds.isEmpty()) {
                     final List<String> ids = new ArrayList<String>(newIds);
                     newIds = null;
-                    try {
-                        chunkedAdd(ids, indexAccess);
-                    } finally {
+                    final long st1 = DEBUG ? System.currentTimeMillis() : 0l;
+                    final int configuredBlockSize = getBlockSize();
+                    if (configuredBlockSize <= 0) {
+                        add2Index(ids, fullName, indexAccess);
                         if (DEBUG) {
-                            LOG.debug("Folder job \"" + info + "\" triggers to add messages' content.");
+                            final long dur = System.currentTimeMillis() - st1;
+                            LOG.debug("Folder job \"" + info + "\" inserted " + ids.size() + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                        }
+                    } else {
+                        // Positive chunk size configured
+                        final int size = ids.size();
+                        int start = 0;
+                        while (start < size) {
+                            int end = start + configuredBlockSize;
+                            if (end > size) {
+                                end = size;
+                            }
+                            /*
+                             * Add chunk
+                             */
+                            final boolean exists = add2Index(ids.subList(start, end), fullName, indexAccess);
+                            if (exists) {
+                                if (DEBUG) {
+                                    final long dur = System.currentTimeMillis() - st1;
+                                    LOG.debug("Folder job \"" + info + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                                }
+                                start = end;
+                            } else {
+                                // Abort...
+                                deleteDBEntry();
+                                final StringBuilder queryBuilder = new StringBuilder(128);
+                                queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
+                                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
+                                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+                                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+                                indexAccess.deleteByQuery(queryBuilder.toString());
+                                start = size;
+                            }
+                        }
+                        if (DEBUG) {
+                            LOG.debug("Folder job \"" + info + "\" added " + size + " messages.");
                         }
                     }
                 } else if (DEBUG) {
                     LOG.debug("Folder job \"" + info + "\" detected no NEW messages in folder " + fullName + " in account " + accountId);
                 }
+                /*
+                 * Terminate this folder job: Update time stamp and unset 'sync' flag
+                 */
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;
             } finally {
                 if (unset) {
-                    // Unset sync flag
+                    // Unset 'sync' flag
                     unsetSyncFlag(fullName);
                 }
                 if (DEBUG) {
@@ -417,46 +484,23 @@ public final class FolderJob extends AbstractMailJob {
         }
     }
 
-    private void chunkedAdd(final List<String> ids, final IndexAccess<MailMessage> indexAccess) throws OXException {
-        final long st = DEBUG ? System.currentTimeMillis() : 0l;
-        final int configuredBlockSize = Constants.CHUNK_SIZE;
-        if (configuredBlockSize <= 0) {
-            add2Index(ids, fullName, indexAccess);
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("Folder job \"" + info + "\" inserted " + ids.size() + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
-            }
-            return;
-        }
-        // Positive chunk size configured
-        final int size = ids.size();
-        int start = 0;
-        while (start < size) {
-            int end = start + configuredBlockSize;
-            if (end > size) {
-                end = size;
-            }
-            /*
-             * Add chunk
-             */
-            add2Index(ids.subList(start, end), fullName, indexAccess);
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("Folder job \"" + info + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
-            }
-            start = end;
-        }
-        if (DEBUG) {
-            LOG.debug("Folder job \"" + info + "\" added " + size + " messages.");
-        }
+    private static int getBlockSize() {
+        return Constants.CHUNK_SIZE;
     }
 
-    protected void add2Index(final List<String> ids, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException {
+    private boolean add2Index(final List<String> ids, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         List<IndexDocument<MailMessage>> documents = null;
         try {
             mailAccess = mailAccessFor();
             mailAccess.connect(true);
+            if (!mailAccess.getFolderStorage().exists(fullName)) {
+                /*
+                 * Drop entry from database and return
+                 */
+                deleteDBEntry();
+                return false;
+            }
             /*
              * Specify fields
              */
@@ -464,6 +508,42 @@ public final class FolderJob extends AbstractMailJob {
             //fields.removeMailField(MailField.BODY);  <--- Allow body!
             fields.removeMailField(MailField.FULL);
             final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
+            // Read primary content
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                // Message storage overrides getPrimaryContents()
+                final int chunk = 0;
+                final int size = mails.size();
+                if (chunk > 0) {
+                    int start = 0;
+                    while (start < size) {
+                        int end = start + chunk;
+                        if (end > size) {
+                            end = size;
+                        }
+                        final String[] mailIds = new String[end-start];
+                        int index = 0;
+                        for (int i = start; i < end; i++) {
+                            mailIds[index++] = mails.get(i).getMailId();
+                        }
+                        final String[] primaryContents = messageStorage.getPrimaryContents(fullName, mailIds);
+                        index = 0;
+                        for (int i = start; i < end; i++) {
+                            mails.set(i, new ContentAwareMailMessage(primaryContents[index++], mails.get(i)));
+                        }
+                        start = end;
+                    }
+                } else {
+                    final String[] mailIds = new String[1];
+                    for (int i = 0; i < size; i++) {
+                        final MailMessage message = mails.get(i);
+                        mailIds[0] = message.getMailId();
+                        final String[] primaryContents = messageStorage.getPrimaryContents(fullName, mailIds);
+                        mails.set(i, new ContentAwareMailMessage(primaryContents[0], message));
+                    }
+                }
+            }
+            // Convert to IndexDocument
             documents = toDocuments(mails);
             switch (insertType) {
             case ENVELOPE:
@@ -476,12 +556,27 @@ public final class FolderJob extends AbstractMailJob {
                 indexAccess.addAttachments(documents);
                 break;
             }
+            setTimestamp(fullName, System.currentTimeMillis());
         } catch (final OXException e) {
             if (null != documents) {
                 // Batch add failed; retry one-by-one
+                int count = 0;
                 for (final IndexDocument<MailMessage> document : documents) {
                     try {
-                        indexAccess.addAttachments(document);
+                        switch (insertType) {
+                        case ENVELOPE:
+                            indexAccess.addEnvelopeData(document);
+                            break;
+                        case BODY:
+                            indexAccess.addContent(document);
+                            break;
+                        default:
+                            indexAccess.addAttachments(document);
+                            break;
+                        }
+                        if ((++count % 100) == 0) {
+                            setTimestamp(fullName, System.currentTimeMillis());
+                        }
                     } catch (final Exception inner) {
                         final MailMessage mail = document.getObject();
                         LOG.warn(
@@ -497,6 +592,7 @@ public final class FolderJob extends AbstractMailJob {
         } finally {
             getSmalAccessService().closeUnwrappedInstance(mailAccess);
         }
+        return true;
     }
 
     private boolean deleteDBEntry() throws OXException {
