@@ -166,7 +166,6 @@ public class UpdatesAction extends ContactAction {
     
     @Override
     protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
-        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         Date lastModified = new Date(0);
         final ContactService contactService = getContactService();
         final Date since = new Date(request.getTimestamp());
@@ -174,16 +173,15 @@ public class UpdatesAction extends ContactAction {
         /*
          * add modified contacts
          */
+        final List<Contact> modifiedContacts = new ArrayList<Contact>(); 
         try {
             searchIterator = contactService.getModifiedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
-            final List<Contact> contacts = new ArrayList<Contact>(); 
             while (searchIterator.hasNext()) {
                 final Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
                 applyTimezoneOffset(contact, request.getTimeZone());
-                contacts.add(contact);
+                modifiedContacts.add(contact);
             }
-            responseMap.put("modified", contacts);
         } finally {
         	if (null != searchIterator) {
         		searchIterator.close();
@@ -192,24 +190,25 @@ public class UpdatesAction extends ContactAction {
         /*
          * add deleted contacts
          */
-        final String ignore = request.getIgnore(); 
-        if (null == ignore || "deleted".equals(ignore)) {
+        final List<Contact> deletedContacts = new ArrayList<Contact>(); 
+        if (false == "deleted".equals(request.getIgnore())) {
 	        try {
 	            searchIterator = contactService.getDeletedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
-	            final List<Contact> contacts = new ArrayList<Contact>(); 
 	            while (searchIterator.hasNext()) {
 	                final Contact contact = searchIterator.next();
 	                lastModified = getLatestModified(lastModified, contact);
 	                applyTimezoneOffset(contact, request.getTimeZone());
-	                contacts.add(contact);
+	                deletedContacts.add(contact);
 	            }
-	            responseMap.put("deleted", contacts);
 	        } finally {
 	        	if (null != searchIterator) {
 	        		searchIterator.close();
 	        	}
 	        }
         }
+        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        responseMap.put("modified", modifiedContacts);
+        responseMap.put("deleted", deletedContacts);
         return new AJAXRequestResult(responseMap, lastModified, "contact");
     }
 }

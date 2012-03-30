@@ -1,3 +1,7 @@
+* 2012-03-30 - jan.bauerdick@open-xchange.com
+
+ - Improved all DeleteRequests + documentation
+
 * 2012-03-29 - thorben.betten@open-xchange.com
 
  - Fix fir bug 21866: Performing MIME decode when writing subject to JSON client

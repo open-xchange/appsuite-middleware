@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -114,16 +115,20 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
      */
     @Override
     public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
         if (objectIds == null) {
+            JSONObject json = new JSONObject();
             json.put(DataFields.ID, objectId);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+            return json;
         } else {
-            for (int i : objectIds) {
-                json.append("ids", i);
+            JSONArray jsonArray = new JSONArray();
+            for (final int id : objectIds) {
+                JSONObject json = new JSONObject();
+                json.put(DataFields.ID, id);
+                json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
             }
+            return jsonArray;
         }
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
     }
 
     /**

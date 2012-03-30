@@ -198,8 +198,10 @@ public class ListAction extends ContactAction {
             try {
                 searchIterator = getContactService().getContacts(request.getSession(), entry.getKey(), 
                 		entry.getValue().toArray(new String[entry.getValue().size()]), request.getFields());
+                final int parentFolderID = Integer.parseInt(entry.getKey());
                 while (searchIterator.hasNext()) {
                     final Contact contact = searchIterator.next();
+                    contact.setParentFolderID(parentFolderID);
                     lastModified = getLatestModified(lastModified, contact);
                     applyTimezoneOffset(contact, request.getTimeZone());
                     contacts.add(contact);
@@ -210,19 +212,23 @@ public class ListAction extends ContactAction {
             	}
             }
         }
-        /*
-         * sort loaded contacts in the order they were requested
-         */
-        final List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
-        for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
-            final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
-            for (final Contact contact : contacts) {
-                if (contact.getObjectID() == objectIdsAndFolderId[0] && contact.getParentFolderID() == objectIdsAndFolderId[1]) {
-                    sortedContacts.add(contact);
-                    break;
+        if (null != contacts && 1 < contacts.size()) {
+            /*
+             * sort loaded contacts in the order they were requested
+             */
+            final List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
+            for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
+                final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
+                for (final Contact contact : contacts) {
+                    if (contact.getObjectID() == objectIdsAndFolderId[0] && contact.getParentFolderID() == objectIdsAndFolderId[1]) {
+                        sortedContacts.add(contact);
+                        break;
+                    }
                 }
             }
+            return new AJAXRequestResult(sortedContacts, lastModified, "contact");
+        } else {
+        	return new AJAXRequestResult(contacts, lastModified, "contact");
         }
-        return new AJAXRequestResult(sortedContacts, lastModified, "contact");
     }
 }

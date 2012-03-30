@@ -236,10 +236,13 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
      * @return The checked priority
      */
     protected static int checkPriority(final int priority) {
-        if (priority >= 0 && priority <= 9) {
-            return priority;
+        if (priority < 0) {
+            return 0;
         }
-        return Message.DEFAULT_PRIORITY;
+        if (priority > 9) {
+            return 9;
+        }
+        return priority;
     }
 
 }

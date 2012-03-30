@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import java.util.Random;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -62,7 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class Bug15315Test extends AbstractAJAXSession {
 
-    private static final int RANGE = 1000;
+    private static final int RANGE = 100;
     private TimeZone tz;
 
     public Bug15315Test(String name) {

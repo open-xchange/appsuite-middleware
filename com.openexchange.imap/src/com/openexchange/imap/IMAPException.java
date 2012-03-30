@@ -896,7 +896,7 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = extend.detailNumber;
             category = extend.category;
-            prefix = extend.prefix;
+            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         private IMAPCode(final MailExceptionCode code, final IMAPCode extend) {
@@ -904,7 +904,7 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = code.getNumber();
             category = code.getCategory();
-            prefix = code.getPrefix();
+            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         private IMAPCode(final MimeMailExceptionCode code, final IMAPCode extend) {
@@ -912,7 +912,7 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = code.getNumber();
             category = code.getCategory();
-            prefix = code.getPrefix();
+            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         public Category getCategory() {

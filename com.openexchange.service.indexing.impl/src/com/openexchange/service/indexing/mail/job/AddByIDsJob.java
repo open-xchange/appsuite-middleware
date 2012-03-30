@@ -65,7 +65,6 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
 
 /**
  * {@link AddByIDsJob} - Adds mails to index by specified identifiers.
@@ -150,12 +149,10 @@ public final class AddByIDsJob extends AbstractMailJob {
              */
             indexAccess = getIndexAccess();
             final List<MailMessage> mails;
-            final Session session;
             {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
                     mailAccess = mailAccessFor();
-                    session = mailAccess.getSession();
                     /*
                      * Get the mails from mail storage
                      */
@@ -164,7 +161,7 @@ public final class AddByIDsJob extends AbstractMailJob {
                      * Fetch mails
                      */
                     final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-                    fields.removeMailField(MailField.BODY);
+                    // fields.removeMailField(MailField.BODY);  <--- Allow body!
                     fields.removeMailField(MailField.FULL);
                     mails =
                         Arrays.asList(mailAccess.getMessageStorage().getMessages(
@@ -196,7 +193,17 @@ public final class AddByIDsJob extends AbstractMailJob {
                 // Batch add failed; retry one-by-one
                 for (final IndexDocument<MailMessage> document : documents) {
                     try {
-                        indexAccess.addAttachments(document);
+                        switch (insertType) {
+                        case ENVELOPE:
+                            indexAccess.addEnvelopeData(document);
+                            break;
+                        case BODY:
+                            indexAccess.addContent(document);
+                            break;
+                        default:
+                            indexAccess.addAttachments(document);
+                            break;
+                        }
                     } catch (final Exception inner) {
                         final MailMessage mail = document.getObject();
                         LOG.warn(

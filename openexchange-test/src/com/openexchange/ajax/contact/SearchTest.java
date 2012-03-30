@@ -4,9 +4,11 @@ package com.openexchange.ajax.contact;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -18,7 +20,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.test.AjaxInit;
 
 public class SearchTest extends AbstractContactTest {
 
@@ -32,9 +33,14 @@ public class SearchTest extends AbstractContactTest {
     }
 
     public void testSearchLoginUser() throws Exception {
-        String username = AjaxInit.getAJAXProperty("user_participant1");
-
-        final Contact[] contactArray = searchContact(username, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID });
+        final Contact user = loadUser(userId);
+        final String displayName = user.getDisplayName();
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setDisplayName(displayName);
+        cso.setFolders(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+//        String username = AjaxInit.getAJAXProperty("user_participant1");
+//      final Contact[] contactArray = searchContact(username, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID });
+        final Contact[] contactArray = searchContactAdvanced(cso, new int[] { Contact.INTERNAL_USERID });
         assertTrue("contact array size is 0", contactArray.length > 0);
         assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
     }
@@ -85,7 +91,6 @@ public class SearchTest extends AbstractContactTest {
 
         final Contact[] contactArray = searchContactAdvanced(
             cso,
-            contactFolderId,
             new int[] { Contact.INTERNAL_USERID });
         assertTrue("contact array size >= 2", contactArray.length >= 2);
 
@@ -95,7 +100,6 @@ public class SearchTest extends AbstractContactTest {
 
         final Contact[] contactArray2 = searchContactAdvanced(
             cso,
-            contactFolderId,
             new int[] { Contact.INTERNAL_USERID });
         assertTrue("contact array size >= 3", contactArray2.length >= 3);
 
