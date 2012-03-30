@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted contacts.")
-}, requestBody = "An object with the fields \"id\" or \"ids\" and \"folder\". \"id\" contains an integer value for deleting a single contact while \"ids\" must not be set. Use the array \"ids\" to delete multiple contacts.",
+}, requestBody = "An object with the fields \"id\" and \"folder\". Use an array of this objects to delete multiple contacts.",
 responseDescription = "")
 public class DeleteAction extends ContactAction {
 
