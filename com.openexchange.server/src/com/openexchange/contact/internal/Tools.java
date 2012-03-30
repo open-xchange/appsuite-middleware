@@ -269,6 +269,10 @@ public final class Tools {
 		return ContactServiceLookup.getService(FolderService.class, true).getFolderPermission(Integer.parseInt(folderId), userID, contextID);
 	}
 	
+	public static FolderService getFolderService() throws OXException {
+		return ContactServiceLookup.getService(FolderService.class, true); 
+	}	
+	
 	/**
 	 * Adds the date of the last modification to attachments of the given 
 	 * contact when needed. 
@@ -318,10 +322,11 @@ public final class Tools {
 	 * Extracts all folder IDs that are present in the supplied search term.
 	 * 
 	 * @param term the search term to analyze
-	 * @return the search term
+	 * @return the folder IDs, or an empty list if none were found
 	 */
 	public static List<String> extractFolderIDs(final SearchTerm<?> term) {
-		return new SearchTermAnalyzer(term).getFolderIDs();
+		final List<String> folders = new SearchTermAnalyzer(term).getFolderIDs();
+		return null != folders ? folders : new ArrayList<String>();
 	}
 	
 	private Tools() {

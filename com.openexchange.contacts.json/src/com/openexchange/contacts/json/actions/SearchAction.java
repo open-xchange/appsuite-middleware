@@ -406,8 +406,8 @@ public class SearchAction extends ContactAction {
 	}
    
     private static final ContactField[] ALTERNATIVE_SEARCH_FIELDS = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
-    	ContactField.GIVEN_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, 
-    	ContactField.CATEGORIES
+    	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, 
+    	ContactField.CATEGORIES, ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_COMPANY    	
     };
     
     private static final CompositeSearchTerm HAS_EMAIL_TERM;

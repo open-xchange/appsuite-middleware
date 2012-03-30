@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
+
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
@@ -88,6 +89,9 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         //create a contact in the private folder
         contact1 = new Contact();
         contact1.setDisplayName("Herbert Meier");
+        contact1.setSurName("Meier");
+        contact1.setGivenName("Herbert");
+        contact1.setDisplayName("Herbert Meier");
         contact1.setEmail1("herbert.meier@example.com");
         contact1.setParentFolderID(client.getValues().getPrivateContactFolder());
         InsertRequest insertContact1 = new InsertRequest(contact1);
@@ -96,6 +100,8 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         //create a contact in the new folder
         contact2 = new Contact();
         contact2.setDisplayName("Herbert M\u00fcller");
+        contact2.setSurName("M\u00fcller");
+        contact2.setGivenName("Herbert");
         contact2.setEmail1("herbert.mueller@example.com");
         contact2.setParentFolderID(newFolder.getObjectID());
         InsertRequest insertContact2 = new InsertRequest(contact2);
@@ -119,7 +125,11 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
     public void testAllContactFoldersSearch() throws Throwable {
         //execute a search over first name and last name in all folders (folder id -1) that matches both contacts
         int [] columns = new int [] {Contact.OBJECT_ID};
-        SearchRequest searchRequest = new SearchRequest("Herbert", -1, columns, true);
+        
+//        SearchRequest searchRequest = new SearchRequest("Herbert", -1, columns, true);
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setGivenName("Herbert");
+        SearchRequest searchRequest = new SearchRequest(cso, columns, true);
 
         SearchResponse searchResponse = client.execute(searchRequest);
         assertFoundContacts(searchResponse);

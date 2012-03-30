@@ -152,7 +152,7 @@ public class ContactRequest {
      * @throws OXException
      */
     public void sortInternalIfNeeded(final List<Contact> contacts) throws OXException {
-    	if (this.isInternalSort() && null != contacts && 0 < contacts.size()) {
+    	if (this.isInternalSort() && null != contacts && 1 < contacts.size()) {
     		final int sort = this.getSort();
             if (0 == sort || Contact.SPECIAL_SORTING == sort) {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
