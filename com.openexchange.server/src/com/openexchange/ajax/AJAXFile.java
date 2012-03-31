@@ -259,19 +259,19 @@ public final class AJAXFile extends PermissionServlet {
 					e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             Tools.disableCaching(resp);
-            JSONObject responseObj = null;
+            final Response response = new Response();
+            response.setException(e);
             try {
-                final Response response = new Response(session);
-                response.setException(e);
-                responseObj = ResponseWriter.getJSON(response);
+                ResponseWriter.write(response, resp.getWriter());
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
+                final ServletException se = new ServletException(e1.getMessage(), e1);
+                se.initCause(e1);
+                throw se;
             }
-			throw new UploadServletException(resp, substituteJS(
-					responseObj == null ? STR_NULL : responseObj.toString(),
-					ACTION_GET), e.getMessage(), e);
         }
     }
 

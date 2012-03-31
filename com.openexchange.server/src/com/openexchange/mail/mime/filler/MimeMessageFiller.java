@@ -1495,8 +1495,13 @@ public class MimeMessageFiller {
                             final String match = imageTag;
                             final Matcher srcMatcher = PATTERN_SRC.matcher(match);
                             if (srcMatcher.find()) {
-                                imageLocation =
-                                    ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                ImageLocation il;
+                                try {
+                                    il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                } catch (final IllegalArgumentException e) {
+                                    il = null;
+                                }
+                                imageLocation = il;
                             } else {
                                 imageLocation = ImageUtility.parseImageLocationFrom(match);
                             }
