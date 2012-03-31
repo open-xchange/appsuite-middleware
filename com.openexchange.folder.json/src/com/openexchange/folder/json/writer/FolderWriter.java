@@ -197,6 +197,14 @@ public final class FolderWriter {
 
     private static interface FolderFieldWriter {
 
+        /**
+         * Writes associated field's value to given JSON value.
+         * 
+         * @param jsonValue The JSON value
+         * @param folder The folder
+         * @throws JSONException If a JSON error occurs
+         * @throws NecessaryValueMissingException If a necessary value is missing; such as identifier
+         */
         void writeField(JSONValuePutter jsonValue, UserizedFolder folder) throws JSONException;
     }
 
@@ -219,6 +227,9 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String id = folder.getID();
+                if (null == id) {
+                    throw new NecessaryValueMissingException("Missing folder identifier.");
+                }
                 jsonPutter.put(FolderField.ID.getName(), id);
             }
         });
@@ -494,6 +505,8 @@ public final class FolderWriter {
             return jsonArray;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        } catch (final NecessaryValueMissingException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -527,12 +540,16 @@ public final class FolderWriter {
             final JSONArray jsonArray = new JSONArray();
             final JSONArrayPutter jsonPutter = new JSONArrayPutter();
             for (final UserizedFolder folder : folders) {
-                final JSONArray folderArray = new JSONArray();
-                jsonPutter.setJSONArray(folderArray);
-                for (final FolderFieldWriter ffw : ffws) {
-                    ffw.writeField(jsonPutter, folder);
+                try {
+                    final JSONArray folderArray = new JSONArray();
+                    jsonPutter.setJSONArray(folderArray);
+                    for (final FolderFieldWriter ffw : ffws) {
+                        ffw.writeField(jsonPutter, folder);
+                    }
+                    jsonArray.put(folderArray);
+                } catch (final NecessaryValueMissingException e) {
+                    LOG.warn(e.getMessage());
                 }
-                jsonArray.put(folderArray);
             }
             return jsonArray;
         } catch (final JSONException e) {
@@ -563,12 +580,16 @@ public final class FolderWriter {
             final JSONArray jsonArray = new JSONArray();
             final JSONArrayPutter jsonPutter = new JSONArrayPutter();
             for (final UserizedFolder folder : folders) {
-                final JSONArray folderArray = new JSONArray();
-                jsonPutter.setJSONArray(folderArray);
-                for (final FolderFieldWriter ffw : ffws) {
-                    ffw.writeField(jsonPutter, folder);
+                try {
+                    final JSONArray folderArray = new JSONArray();
+                    jsonPutter.setJSONArray(folderArray);
+                    for (final FolderFieldWriter ffw : ffws) {
+                        ffw.writeField(jsonPutter, folder);
+                    }
+                    jsonArray.put(folderArray);
+                } catch (final NecessaryValueMissingException e) {
+                    LOG.warn(e.getMessage());
                 }
-                jsonArray.put(folderArray);
             }
             return jsonArray;
         } catch (final JSONException e) {
@@ -610,6 +631,8 @@ public final class FolderWriter {
             return jsonObject;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        } catch (final NecessaryValueMissingException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -643,12 +666,16 @@ public final class FolderWriter {
             final JSONArray jsonArray = new JSONArray();
             final JSONObjectPutter jsonPutter = new JSONObjectPutter();
             for (final UserizedFolder folder : folders) {
-                final JSONObject folderObject = new JSONObject();
-                jsonPutter.setJSONObject(folderObject);
-                for (final FolderFieldWriter ffw : ffws) {
-                    ffw.writeField(jsonPutter, folder);
+                try {
+                    final JSONObject folderObject = new JSONObject();
+                    jsonPutter.setJSONObject(folderObject);
+                    for (final FolderFieldWriter ffw : ffws) {
+                        ffw.writeField(jsonPutter, folder);
+                    }
+                    jsonArray.put(folderObject);
+                } catch (final NecessaryValueMissingException e) {
+                    LOG.warn(e.getMessage());
                 }
-                jsonArray.put(folderObject);
             }
             return jsonArray;
         } catch (final JSONException e) {
