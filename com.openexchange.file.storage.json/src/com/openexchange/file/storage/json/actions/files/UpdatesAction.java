@@ -55,9 +55,13 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.Delta;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdatesAction}
@@ -82,14 +86,53 @@ public class UpdatesAction extends AbstractFileAction {
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final long timestamp = request.getTimestamp();
-        final Delta<File> delta = fileAccess.getDelta(
+        final Field sortingField = request.getSortingField();
+        final SortDirection sortingOrder = request.getSortingOrder();
+        Delta<File> delta = fileAccess.getDelta(
             request.getFolderId(),
             timestamp == FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER ? FileStorageFileAccess.DISTANT_PAST : timestamp,
             request.getColumns(),
-            request.getSortingField(),
-            request.getSortingOrder(),
+            sortingField,
+            sortingOrder,
             request.getIgnore().contains("deleted"));
 
+        if (Field.CREATED_BY.equals(sortingField)) {
+            final ServerSession serverSession = request.getSession();
+            final CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
+            final SearchIterator<File> iter = CreatedByComparator.resort(delta.results(), comparator);
+            final SearchIterator<File> niter = CreatedByComparator.resort(delta.getNew(), comparator);
+            final SearchIterator<File> miter = CreatedByComparator.resort(delta.getModified(), comparator);
+            final SearchIterator<File> diter = CreatedByComparator.resort(delta.getDeleted(), comparator);
+            final Delta<File> delegate = delta;
+            delta = new Delta<File>() {
+
+                @Override
+                public SearchIterator<File> results() throws OXException {
+                    return iter;
+                }
+
+                @Override
+                public long sequenceNumber() throws OXException {
+                    return delegate.sequenceNumber();
+                }
+
+                @Override
+                public SearchIterator<File> getNew() {
+                    return niter;
+                }
+
+                @Override
+                public SearchIterator<File> getModified() {
+                    return miter;
+                }
+
+                @Override
+                public SearchIterator<File> getDeleted() {
+                    return diter;
+                }
+                
+            };
+        }
 
         return result(delta, request);
     }
