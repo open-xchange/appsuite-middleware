@@ -1,6 +1,7 @@
 * 2012-04-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 21796: Delivering MIME type's base type only (suppressing irrelevant parameters bound to it)
+ - Fix for bug 21187: Dealing with "null" value when trying to parse as a number
 
 * 2012-03-31 - thorben.betten@open-xchange.com
 
