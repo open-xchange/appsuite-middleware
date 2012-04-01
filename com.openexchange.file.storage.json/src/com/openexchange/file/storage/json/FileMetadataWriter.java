@@ -71,9 +71,16 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileMetadataWriter {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
 
-    private static final JSONHandler JSON = new JSONHandler();
+    /**
+     * The logger constant.
+     */
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
+
+    /**
+     * The {@link JSONHandler} constant.
+     */
+    protected static final JSONHandler JSON = new JSONHandler();
 
     public JSONArray write(final SearchIterator<File> files, final List<File.Field> columns, final TimeZone timeZone) throws OXException {
         final JSONArray array = new JSONArray();
