@@ -1,3 +1,7 @@
+* 2012-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21796: Delivering MIME type's base type only (suppressing irrelevant parameters bound to it)
+
 * 2012-03-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 21623: Introduced safety checks to omit folders with empty identifiers
