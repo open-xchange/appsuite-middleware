@@ -201,9 +201,6 @@ public class NotificationMail {
 		if (isAboutActorsStateChangeOnly()) {
 			return actor;
 		}
-		if (principal != null) {
-			return principal;
-		}
 		
 		if (sharedCalendarOwner != null) {
 			return sharedCalendarOwner;
