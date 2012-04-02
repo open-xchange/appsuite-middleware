@@ -150,7 +150,7 @@ public final class FolderJob extends AbstractMailJob {
     }
 
     private static boolean scheduleJobs() {
-        return true;
+        return false;
     }
 
     /**
