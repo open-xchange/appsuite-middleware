@@ -2300,7 +2300,10 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		        for (int i = 0; i < jsonArray.length(); i++) {
 		            final JSONObject entry = jsonArray.getJSONObject(i);
 	                distributionList[i] = new DistributionListEntryObject();
-	                if (entry.hasAndNotNull(DistributionListFields.ID)) {
+	                //FIXME: ui sends wrong values for "id":
+	                // "distribution_list":[{"id":"","mail_field":0,"mail":"otto@example.com","display_name":"otto"},
+	                //                      {"id":1,"mail_field":1,"mail":"horst@example.com","display_name":"horst"}] 
+	                if (entry.hasAndNotNull(DistributionListFields.ID) && 0 < entry.getString(DistributionListFields.ID).length()) {
 	                	distributionList[i].setEntryID(entry.getInt(DistributionListFields.ID));
 	                }
 	                if (entry.hasAndNotNull(DistributionListFields.FIRST_NAME)) {

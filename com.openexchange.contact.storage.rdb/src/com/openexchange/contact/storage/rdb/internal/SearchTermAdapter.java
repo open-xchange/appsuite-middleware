@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
@@ -70,6 +71,11 @@ import com.openexchange.search.SingleSearchTerm;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTermAdapter {
+	
+	/*
+	 * Pattern to check whether a string contains SQL wildcards or not
+	 */
+	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
 	
 	private final StringBuilder stringBuilder;
 	private final List<Object> parameters;
@@ -206,8 +212,8 @@ public class SearchTermAdapter {
 				throw new IllegalArgumentException("got no value for contact operand");
 			} else if (String.class.isInstance(value)) {
 				final String stringValue = (String)value;
-				if (stringValue.contains("*") || stringValue.contains("?")) {
-					value = stringValue.replaceAll("\\*", "%").replaceAll("\\?", "_");
+				if (WILDCARD_PATTERN.matcher(stringValue).find()) {
+					// use "LIKE" search 
 					final int index = stringBuilder.lastIndexOf("=");
 					stringBuilder.replace(index, index + 1, "LIKE");		
 				}
