@@ -51,6 +51,8 @@ package com.openexchange.calendar.itip.generators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -104,6 +106,8 @@ public class NotificationMail {
 	private Type stateType;
 	
 	private boolean attachmentUpdate;
+
+	private boolean sortedParticipants;
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -236,13 +240,24 @@ public class NotificationMail {
 	}
 
 	public void setParticipants(List<NotificationParticipant> recipients) {
+		sortedParticipants = false;
         this.participants = recipients;
     }
     
     public List<NotificationParticipant> getParticipants() {
-        return participants;
+    	if (!sortedParticipants) {
+    		Collections.sort(participants, new Comparator<NotificationParticipant>() {
+
+				public int compare(NotificationParticipant p1,
+						NotificationParticipant p2) {
+					return p1.getDisplayName().compareTo(p2.getDisplayName());
+				}
+    			
+    		});
+    	}
+    	return participants;
     }
-    
+        
     public void setResources(List<NotificationParticipant> resources) {
         this.resources = resources;
     }
