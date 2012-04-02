@@ -213,11 +213,15 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(getAjaxRequestDataTools().getModule(PREFIX.get(), httpRequest), getAjaxRequestDataTools().getAction(httpRequest)));
+            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(requestDataTools.getModule(PREFIX.get(), httpRequest), requestDataTools.getAction(httpRequest)));
+            if (null == session) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData requestData = getAjaxRequestDataTools().parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
+            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
             requestData.setSession(session);
             /*
              * Start dispatcher processing

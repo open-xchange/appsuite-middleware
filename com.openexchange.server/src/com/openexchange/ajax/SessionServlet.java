@@ -720,13 +720,20 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Returns the remembered session.
      *
-     * @param req The servlet request.
-     * @return the The remembered session.
+     * @param req The Servlet request
+     * @return The remembered session
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
     	return getSessionObject(req, false);
     }
     
+    /**
+     * Returns the remembered session.
+     * 
+     * @param req The Servlet request.
+     * @param mayUseFallbackSession <code>true</code> to look-up fall-back session; otherwise <code>false</code>
+     * @return The remembered session
+     */
     protected static ServerSession getSessionObject(final ServletRequest req,
 			final boolean mayUseFallbackSession) {
     	final Object attribute = req.getAttribute(SESSION_KEY);
