@@ -126,6 +126,7 @@ import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -1222,7 +1223,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Add ZIP entry to output stream
                                  */
-                                final String name = parts[i].getFileName();
+                                String name = parts[i].getFileName();
+                                if (null == name) {
+                                    final List<String> extensions = MimeType2ExtMap.getFileExtensions(parts[i].getContentType().getBaseType());
+                                    name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
+                                }
                                 int num = 1;
                                 ZipArchiveEntry entry;
                                 while (true) {
