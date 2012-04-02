@@ -691,7 +691,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Sort root elements
              */
             final boolean descending = OrderDirection.DESC.equals(OrderDirection.getOrderDirection(order));
-            final MailSortField effectiveSortField = sortCol <= 0 ? MailSortField.RECEIVED_DATE :  MailSortField.getField(sortCol);
+            MailSortField effectiveSortField = sortCol <= 0 ? MailSortField.RECEIVED_DATE :  MailSortField.getField(sortCol);
+            if (null == effectiveSortField) {
+                effectiveSortField = MailSortField.RECEIVED_DATE;
+            }
             final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
             final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
                 
