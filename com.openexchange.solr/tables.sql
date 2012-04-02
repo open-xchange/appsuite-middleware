@@ -4,7 +4,7 @@ CREATE TABLE `solrCores` (
   `module` int(10) unsigned NOT NULL,
   `store` int(10) unsigned NOT NULL,
   `active` tinyint(1) unsigned NOT NULL,  
-  `server` varchar(32) DEFAULT NULL,  
+  `server` varchar(255) DEFAULT NULL,  
   PRIMARY KEY  (`cid`,`uid`,`module`),
   KEY `cidserver` (`cid`, `server`),
   KEY `server` (`server`),
@@ -15,6 +15,7 @@ CREATE TABLE `solrCoreStores` (
   `id` int(10) unsigned NOT NULL,
   `uri` varchar(255) NOT NULL,
   `maxCores` int(10) unsigned NOT NULL,
+  `numCores` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

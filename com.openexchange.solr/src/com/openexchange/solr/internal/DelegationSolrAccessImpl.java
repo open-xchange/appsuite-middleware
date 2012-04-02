@@ -56,7 +56,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -412,13 +414,20 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         return getRMIAccess(coreServer);
     }
     
+    private static final Map<String, RMISolrAccessService> rmiCache = new HashMap<String, RMISolrAccessService>();
+    
     private SolrAccessService getRMIAccess(final String server) throws OXException {
         try {
-            // TODO: cache stubs
-            final ConfigurationService config = Services.getService(ConfigurationService.class);
-            final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-            final Registry registry = LocateRegistry.getRegistry(server, rmiPort);
-            final RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+        	RMISolrAccessService rmiAccess = rmiCache.get(server);
+        	if (rmiAccess == null) {
+                final ConfigurationService config = Services.getService(ConfigurationService.class);
+                final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+                final Registry registry = LocateRegistry.getRegistry(server, rmiPort);
+                rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+        	} else {
+//        		rmiAccess.
+        	}
+            
             return new SolrAccessServiceRmiWrapper(rmiAccess);
         } catch (final RemoteException e) {
             throw new OXException(e);
