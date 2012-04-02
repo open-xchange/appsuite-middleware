@@ -77,33 +77,12 @@ public class Details implements ChangeDescriptionGenerator {
 
     private static final String[] FIELDS = {TITLE, LOCATION, NOTE};
     
-    private static final Map<String, Map<Style, String>> MESSAGE_MAP = new HashMap<String, Map<Style, String>>(){{
-        put(TITLE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_CHANGE_TITLE);
-            put(Style.INTENTION, Messages.INTENTION_CHANGE_TITLE);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_CHANGED_TITLE);
-        }});
-        
-        put(LOCATION, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_CHANGE_LOCATION);
-            put(Style.INTENTION, Messages.INTENTION_CHANGE_LOCATION);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_CHANGED_LOCATION);
-        }});
-
-        put(NOTE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_CHANGE_NOTE);
-            put(Style.INTENTION, Messages.INTENTION_CHANGE_NOTE);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_CHANGED_NOTE);
-        }});
-        
+    private static final Map<String, String> MESSAGE_MAP = new HashMap<String, String>(){{
+        put(TITLE, Messages.HAS_CHANGED_TITLE);
+        put(LOCATION, Messages.HAS_CHANGED_LOCATION);
+        put(NOTE, Messages.HAS_CHANGED_NOTE);
     }};
-    
-    private Style style;
-    
-    public Details(Style style) {
-        this.style = style;
-    }
-    
+        
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         List<Sentence> changes = new ArrayList<Sentence>();
         add(TITLE, diff, changes, true);
@@ -114,7 +93,7 @@ public class Details implements ChangeDescriptionGenerator {
     }
 
     private void add(String field, AppointmentDiff diff, List<Sentence> changes, boolean includeNewValue) {
-        String message = MESSAGE_MAP.get(field).get(style);
+        String message = MESSAGE_MAP.get(field);
         FieldUpdate update = diff.getUpdateFor(field);
         if (update == null) {
             return;

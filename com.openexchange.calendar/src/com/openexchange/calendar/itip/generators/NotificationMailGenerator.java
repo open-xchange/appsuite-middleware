@@ -67,7 +67,6 @@ import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
-import com.openexchange.calendar.itip.generators.changes.generators.Style;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -638,17 +637,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName()+".txt.tmpl", mail.getTemplateName()+".txt.tmpl", session, false);
         final OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName()+".html.tmpl", mail.getTemplateName()+".html.tmpl", session, false);
         
-        Style style = null;
-        if (mail.getRecipient().hasRole(ITipRole.ORGANIZER)) {
-            style = Style.ASK;
-        }
-        if (mail.getSender().hasRole(ITipRole.ORGANIZER)) {
-            style = Style.FAIT_ACCOMPLI;
-        }
-        if (mail.getOrganizer().isExternal() && mail.getRecipient().hasRole(ITipRole.ATTENDEE)) {
-            style = Style.INTENTION;
-        }
-        
+       
         final Map<String,Object> env = new HashMap<String, Object>();
         PassthroughWrapper wrapper = new PassthroughWrapper();
         
@@ -657,7 +646,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("labels",getLabelHelper(mail, wrapper, participant));
 		if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services, style).getChanges());
+            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
         } else {
             env.put("changes", new ArrayList<String>());
         }
@@ -670,7 +659,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         wrapper = new HTMLWrapper();
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services, style).getChanges());
+            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
         }
         writer = new StringWriter();
         htmlTemplate.process(env, writer);
