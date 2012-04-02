@@ -88,6 +88,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -645,7 +647,23 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
@@ -836,7 +854,23 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
@@ -918,7 +952,23 @@ public final class OXFolderIteratorSQL {
                 return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
             } catch (final Exception e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
@@ -993,7 +1043,23 @@ public final class OXFolderIteratorSQL {
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
             } catch (final Exception e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
@@ -1090,7 +1156,23 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
@@ -1772,7 +1854,23 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
@@ -1860,7 +1958,23 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
                 // Retry from storage...
             }
         }
