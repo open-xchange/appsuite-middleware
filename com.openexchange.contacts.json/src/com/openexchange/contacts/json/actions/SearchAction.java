@@ -263,7 +263,7 @@ public class SearchAction extends ContactAction {
     private static CompositeSearchTerm getCompositeTerm(final SearchTerm<?> term1, final SearchTerm<?> term2) {
 		final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);    		
 		andTerm.addSearchTerm(term1);
-		andTerm.addSearchTerm(term1);
+		andTerm.addSearchTerm(term2);
 		return andTerm;
     }
 
@@ -355,14 +355,14 @@ public class SearchAction extends ContactAction {
 			return andTerm;
 		} else if (false == "all".equals(pattern)) {
 			/*
-			 * ( NOT ( <field> IS NULL ) AND <field> LIKE '<pattern>%' ) OR ( <field> IS NULL AND <fallbackField> LIKE '<pattern>%' )
+			 * ( ! ( <field> IS NULL ) AND <field> LIKE '<pattern>%' ) OR ( <field> IS NULL AND <fallbackField> LIKE '<pattern>%' )
 			 */
 			final ContactField fallbackField = ContactField.DISPLAY_NAME;
 			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
 			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
 			final CompositeSearchTerm andTerm2 = new CompositeSearchTerm(CompositeOperation.AND);
 			/*
-			 * NOT ( <field> IS NULL )
+			 * ! ( <field> IS NULL )
 			 */
 			final CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
 			final SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
@@ -377,7 +377,6 @@ public class SearchAction extends ContactAction {
 			equalsTerm.addOperand(new ColumnOperand(field));
 			equalsTerm.addOperand(new ConstantOperand<String>(preparedPattern));
 			andTerm.addSearchTerm(equalsTerm);
-			orTerm.addSearchTerm(andTerm);
 			/*
 			 * <field> IS NULL
 			 */
@@ -422,7 +421,9 @@ public class SearchAction extends ContactAction {
     	distributionListTerm.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
     	distributionListTerm.addOperand(new ConstantOperand<Integer>(0));
     	HAS_EMAIL_TERM = new CompositeSearchTerm(CompositeOperation.OR);
-    	HAS_EMAIL_TERM.addSearchTerm(andTerm);
+    	HAS_EMAIL_TERM.addSearchTerm(notTerm);
+    	HAS_EMAIL_TERM.addSearchTerm(distributionListTerm);
+    	
     }
     
     private static SingleSearchTerm getSearchTerm(final ContactField field, final String pattern, final boolean prependWildcard, 
