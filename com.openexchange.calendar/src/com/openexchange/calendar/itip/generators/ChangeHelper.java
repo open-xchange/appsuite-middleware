@@ -58,6 +58,7 @@ import com.openexchange.calendar.itip.generators.changes.generators.Attachments;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
+import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Appointment;
@@ -104,8 +105,9 @@ public class ChangeHelper {
         final Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), interested);
         final Details details = new Details();
         final Attachments attachments = new Attachments(attachmentMemory);
+        ShownAs shownAs = new ShownAs();
     	
-    	describer = new ChangeDescriber(rescheduling, details, participants, attachments);
+    	describer = new ChangeDescriber(rescheduling, details, participants, shownAs, attachments);
         
     }
     

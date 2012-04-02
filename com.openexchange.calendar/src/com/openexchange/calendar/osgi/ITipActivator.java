@@ -114,7 +114,6 @@ public class ITipActivator extends HousekeepingActivator {
 		
         final int interval = config.getIntProperty("com.openexchange.calendar.notify.interval", 120000);
         final AttachmentMemory attachmentMemory = new AttachmentMemory(interval * 3, timers);
-
         MailSenderService sender = new DefaultMailSenderService(emitter, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
 
         final AppointmentSqlFactory sqlFactory = new AppointmentSqlFactory();

@@ -406,20 +406,29 @@ public class NotificationMail {
 	}
 
 
-	private static final Set<String> FIELDS_TO_IGNORE = new HashSet<String>(Arrays.asList(
-            AppointmentFields.ID,
-            AppointmentFields.CREATED_BY,
-            AppointmentFields.MODIFIED_BY,
-            AppointmentFields.CREATION_DATE,
-            AppointmentFields.LAST_MODIFIED,
-            AppointmentFields.LAST_MODIFIED_UTC,
-            AppointmentFields.ALARM,
-            AppointmentFields.NOTIFICATION,
-            AppointmentFields.RECURRENCE_TYPE,
-            AppointmentFields.CATEGORIES,
-            AppointmentFields.SEQUENCE,
-            AppointmentFields.SHOW_AS)
-        );
+	private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
+			AppointmentFields.LOCATION,
+			AppointmentFields.FULL_TIME,
+			AppointmentFields.SHOW_AS,
+			AppointmentFields.TIMEZONE,
+			AppointmentFields.RECURRENCE_START,
+			AppointmentFields.TITLE,
+			AppointmentFields.START_DATE,
+			AppointmentFields.END_DATE,
+			AppointmentFields.NOTE,
+			AppointmentFields.RECURRENCE_DATE_POSITION,
+			AppointmentFields.RECURRENCE_POSITION,
+			AppointmentFields.RECURRENCE_TYPE,
+			AppointmentFields.DAYS,
+			AppointmentFields.DAY_IN_MONTH,
+			AppointmentFields.MONTH,
+			AppointmentFields.INTERVAL,
+			AppointmentFields.UNTIL,
+			AppointmentFields.RECURRENCE_CALCULATOR,
+			AppointmentFields.PARTICIPANTS,
+			AppointmentFields.USERS,
+			AppointmentFields.CONFIRMATIONS
+		));
     
     private boolean anInterestingFieldChanged() {
     	if (getDiff() == null) {
@@ -428,11 +437,8 @@ public class NotificationMail {
     	if (isAttachmentUpdate()) {
     		return true;
     	}
-    	Set<String> changedFields = new HashSet<String>(getDiff().getDifferingFieldNames());
     	
-    	changedFields.removeAll(FIELDS_TO_IGNORE);
-    
-    	return !changedFields.isEmpty();
+    	return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
     }
 
 	public boolean isAboutStateChangesOnly() {

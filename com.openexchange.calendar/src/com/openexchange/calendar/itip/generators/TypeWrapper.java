@@ -65,4 +65,5 @@ public interface TypeWrapper {
     public String none(Object argument);
 	public String emphasiszed(Object argument);
 	public String reference(Object argument);
+	public String shownAs(Object argument, int shownAs);
 }

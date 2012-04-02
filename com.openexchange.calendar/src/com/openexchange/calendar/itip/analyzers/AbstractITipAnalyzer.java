@@ -79,6 +79,7 @@ import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
+import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.exception.OXException;
@@ -206,7 +207,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		
 		final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
 				new Details(), new Participants(users, groups, resources,
-						true));
+						true), new ShownAs());
 
 		final List<String> descriptions = cd.getChanges(ctx, currentAppointment,
 				newAppointment, change.getDiff(), wrapper, user.getLocale(),

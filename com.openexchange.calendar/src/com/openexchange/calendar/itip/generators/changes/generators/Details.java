@@ -81,12 +81,14 @@ public class Details implements ChangeDescriptionGenerator {
         put(TITLE, Messages.HAS_CHANGED_TITLE);
         put(LOCATION, Messages.HAS_CHANGED_LOCATION);
         put(NOTE, Messages.HAS_CHANGED_NOTE);
+        put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
     }};
         
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         List<Sentence> changes = new ArrayList<Sentence>();
         add(TITLE, diff, changes, true);
         add(LOCATION, diff, changes, true);
+        add(TIMEZONE, diff, changes, true);
         add(NOTE, diff, changes, false);
         
         return changes;
