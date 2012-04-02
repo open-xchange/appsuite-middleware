@@ -236,10 +236,13 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
      * @return The checked priority
      */
     protected static int checkPriority(final int priority) {
-        if (priority >= 0 && priority <= 9) {
-            return priority;
+        if (priority < 0) {
+            return 0;
         }
-        return DEFAULT_PRIORITY;
+        if (priority > 9) {
+            return 9;
+        }
+        return priority;
     }
 
 }

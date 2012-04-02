@@ -138,7 +138,7 @@ public abstract class DataParser {
             return NO_INT;
         }
         final String tmp = json.getString(name);
-        if (tmp == null || json.isNull(name) || tmp.length() == 0) {
+        if (isEmpty(tmp)|| json.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return 0;
         }
         try {
@@ -161,7 +161,7 @@ public abstract class DataParser {
             return null;
         }
         final String tmp = jsonObj.getString(name);
-        if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
+        if (isEmpty(tmp)|| jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return null;
         }
         try {
@@ -180,7 +180,7 @@ public abstract class DataParser {
         } catch (final JSONException e) {
             return null;
         }
-        if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
+        if (isEmpty(tmp)|| jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return null;
         }
         final Parsing parsing = new Parsing() {
@@ -441,4 +441,17 @@ public abstract class DataParser {
     protected TimeZone getTimeZone() {
         return timeZone;
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

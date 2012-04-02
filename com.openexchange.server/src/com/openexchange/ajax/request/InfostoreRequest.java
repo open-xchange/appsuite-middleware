@@ -81,6 +81,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.CreatedByComparator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -613,6 +614,9 @@ public class InfostoreRequest extends CommonRequest {
             }
 
             iter = result.results();
+            if (Metadata.CREATED_BY_LITERAL.equals(sortedBy)) {
+                iter = CreatedByComparator.resort(iter, new CreatedByComparator(user.getLocale(), ctx).setDescending(dir < 0));
+            }
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
@@ -644,6 +648,9 @@ public class InfostoreRequest extends CommonRequest {
                         userConfiguration);
             }
             iter = result.results();
+            if (Metadata.CREATED_BY_LITERAL.equals(sortedBy)) {
+                iter = CreatedByComparator.resort(iter, new CreatedByComparator(user.getLocale(), ctx).setDescending(dir < 0));
+            }
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
             iWriter.writeMetadata(skipVersion0(iter), cols, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
@@ -764,6 +771,11 @@ public class InfostoreRequest extends CommonRequest {
 
             iter = delta.results();
             iter2 = delta.getDeleted();
+            if (Metadata.CREATED_BY_LITERAL.equals(sortedBy)) {
+                final CreatedByComparator comparator = new CreatedByComparator(user.getLocale(), ctx).setDescending(dir < 0);
+                iter = CreatedByComparator.resort(iter, comparator);
+                iter2 = CreatedByComparator.resort(iter2, comparator);
+            }
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(delta.sequenceNumber());
@@ -1229,8 +1241,12 @@ public class InfostoreRequest extends CommonRequest {
         try {
             searchEngine.startTransaction();
 
-            final SearchIterator<DocumentMetadata> results = searchEngine.search(query, cols, folderId, sortedBy, dir, start, end,
+            SearchIterator<DocumentMetadata> results = searchEngine.search(query, cols, folderId, sortedBy, dir, start, end,
                     ctx, user, userConfiguration);
+
+            if (Metadata.CREATED_BY_LITERAL.equals(sortedBy)) {
+                results = CreatedByComparator.resort(results, new CreatedByComparator(user.getLocale(), ctx).setDescending(dir < 0));
+            }
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(System.currentTimeMillis());

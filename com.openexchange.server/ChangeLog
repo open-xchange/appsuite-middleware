@@ -1,3 +1,21 @@
+* 2012-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21796: Delivering MIME type's base type only (suppressing irrelevant parameters bound to it)
+ - Fix for bug 21187: Dealing with "null" value when trying to parse as a number
+
+* 2012-03-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21623: Introduced safety checks to omit folders with empty identifiers
+ - Fix for bug 21725: Properly sorting by creator's display name not by its numeric identifier
+
+* 2012-03-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21880: Dealing with skipped content within HTML's <head> tag
+
+* 2012-03-30 - jan.bauerdick@open-xchange.com
+
+ - Improved all DeleteRequests + documentation
+
 * 2012-03-29 - thorben.betten@open-xchange.com
 
  - Fix fir bug 21866: Performing MIME decode when writing subject to JSON client

@@ -133,15 +133,15 @@ class QualityEventHandler
 end
 
 
-class DocumentationEventHandler
+class UserManualEventHandler
   def is_responsible_for(activity)
-    activity.search("//story/current_state").any?{|elem| elem.inner_html == 'accepted'}
+    activity.search("//story/current_state").any?{|elem| elem.inner_html == 'accepted'} && activity.search("//project_id").any?{|elem| elem.inner_html == '452209'} # GUI projects only
   end
 
   def action(activity, piv_con, mail_con)
     stories = activity.search("//story")
     stories.each do |story|
-      next unless story.at("current_state") != nil && story.at("current_state").inner_html == 'accepted' # Condition: Must have been changed to "accepted""
+      next unless story.at("current_state") != nil && story.at("current_state").inner_html == 'accepted' # Condition: Must have been changed to "accepted"
       id = story.at("id").inner_html.chomp
       description = activity.at("description").inner_html.chomp
       clickable_url = "https://www.pivotaltracker.com/story/show/#{id}"
@@ -162,7 +162,7 @@ set(:port, 80)
 post '/pivotal' do
   piv_con = PivotalConnection.new( PIVOTAL_USERNAME, PIVOTAL_PASSWORD )
   mail_con = MailConnection.new( MAIL_USERNAME, MAIL_PASSWORD )
-  handlers = [ QualityEventHandler.new , DocumentationEventHandler.new ]
+  handlers = [ QualityEventHandler.new , UserManualEventHandler.new ]
 
   doc = Hpricot(request.body)
   debug "Got a post request"

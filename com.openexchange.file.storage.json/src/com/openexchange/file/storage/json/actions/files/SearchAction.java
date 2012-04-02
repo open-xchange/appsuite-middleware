@@ -55,8 +55,11 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -81,7 +84,15 @@ public class SearchAction extends AbstractFileAction {
 
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), request.getColumns(), request.getSearchFolderId(), request.getSortingField(), request.getSortingOrder(), request.getStart(), request.getEnd());
+        final Field sortingField = request.getSortingField();
+        final SortDirection sortingOrder = request.getSortingOrder();
+        SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), request.getColumns(), request.getSearchFolderId(), sortingField, sortingOrder, request.getStart(), request.getEnd());
+
+        if (Field.CREATED_BY.equals(sortingField)) {
+            final ServerSession serverSession = request.getSession();
+            final CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
+            results = CreatedByComparator.resort(results, comparator);
+        }
 
         return results(results, 0L, request);
     }

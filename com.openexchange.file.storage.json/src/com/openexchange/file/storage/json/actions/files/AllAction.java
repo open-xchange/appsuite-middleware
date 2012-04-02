@@ -56,10 +56,14 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -86,7 +90,28 @@ public class AllAction extends AbstractFileAction {
         if (folderId == FileStorageFileAccess.ALL_FOLDERS) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
         }
-        final TimedResult<File> documents = fileAccess.getDocuments(folderId, request.getColumns(), request.getSortingField(), request.getSortingOrder());
+        final Field sortingField = request.getSortingField();
+        final SortDirection sortingOrder = request.getSortingOrder();
+        TimedResult<File> documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
+
+        if (Field.CREATED_BY.equals(sortingField)) {
+            final ServerSession serverSession = request.getSession();
+            final CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
+            final SearchIterator<File> iter = CreatedByComparator.resort(documents.results(), comparator);
+            final TimedResult<File> delegate = documents;
+            documents = new TimedResult<File>() {
+                
+                @Override
+                public long sequenceNumber() throws OXException {
+                    return delegate.sequenceNumber();
+                }
+                
+                @Override
+                public SearchIterator<File> results() throws OXException {
+                    return iter;
+                }
+            };
+        }
 
         return result( documents, request );
     }

@@ -49,6 +49,9 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -63,14 +66,12 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete an OAuth account", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The account identifier.")
-}, requestBody = "A JSON object providing the OAuth account fields to update. See OAuth account data. Currently the only values which make sende being updated are \"displayName\" and the \"token\"-\"secret\"-pair.",
-responseDescription = "The boolean value \"true\" if successful.")
+    @Parameter(name = "id", description = "The account identifier.") }, requestBody = "A JSON object providing the OAuth account fields to update. See OAuth account data. Currently the only values which make sende being updated are \"displayName\" and the \"token\"-\"secret\"-pair.", responseDescription = "The boolean value \"true\" if successful.")
 public final class DeleteAction extends AbstractOAuthAJAXActionService {
 
     /**
@@ -82,18 +83,38 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        /*
-         * Parse parameters
-         */
-        final String accountId = request.getParameter("id");
-        if (null == accountId) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
+        if (request.getData() instanceof JSONObject) {
+            /*
+             * Parse parameters
+             */
+            final String accountId = request.getParameter("id");
+            if (null == accountId) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+            }
+            /*
+             * Delete account
+             */
+            final OAuthService oAuthService = getOAuthService();
+            oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+        } else {
+            JSONArray jsonArray = (JSONArray) request.getData();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                try {
+                JSONObject json = jsonArray.getJSONObject(i);
+                final String accountId = json.getString("id");
+                if (null == accountId) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+                }
+                /*
+                 * Delete account
+                 */
+                final OAuthService oAuthService = getOAuthService();
+                oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
+                }
+            }
         }
-        /*
-         * Delete account
-         */
-        final OAuthService oAuthService = getOAuthService();
-        oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
         /*
          * Return appropriate result
          */

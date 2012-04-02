@@ -90,12 +90,12 @@ public class FileMetadataParser implements FileMetadataParserService{
     }
 
     @Override
-    public File parse(JSONObject object) throws OXException {
-        DefaultFile file = new DefaultFile();
+    public File parse(final JSONObject object) throws OXException {
+        final DefaultFile file = new DefaultFile();
 
         try {
             File.Field.inject(jsonHandler, file, object);
-        } catch (RuntimeException x) {
+        } catch (final RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
             }
@@ -107,12 +107,17 @@ public class FileMetadataParser implements FileMetadataParserService{
 
     private static final class JSONParserHandler extends AbstractFileFieldHandler {
 
-        private final FileFieldSet set = new FileFieldSet();
+        private final FileFieldSet set;
+
+        protected JSONParserHandler() {
+            super();
+            set = new FileFieldSet();
+        }
 
         @Override
-        public Object handle(Field field, Object... args) {
-            File md = md(args);
-            JSONObject object = get(1, JSONObject.class, args);
+        public Object handle(final Field field, final Object... args) {
+            final File md = md(args);
+            final JSONObject object = get(1, JSONObject.class, args);
             if(!object.has(field.getName())) {
                 return md;
             }
@@ -123,7 +128,7 @@ public class FileMetadataParser implements FileMetadataParserService{
                 value = process(field, value);
 
                 field.doSwitch(set, md, value);
-            } catch (JSONException x) {
+            } catch (final JSONException x) {
                 throw new RuntimeException(x);
             }
 
@@ -131,26 +136,27 @@ public class FileMetadataParser implements FileMetadataParserService{
             return md;
         }
 
-        private Object process(Field field, Object value) throws JSONException {
-            if (value == JSONObject.NULL) {
-                value = null;
+        private Object process(final Field field, final Object value) throws JSONException {
+            Object val = value;
+            if (val == JSONObject.NULL) {
+                val = null;
             }
             switch(field) {
             case CATEGORIES: {
-                if(String.class.isInstance(value)) {
-                    return value;
+                if(String.class.isInstance(val)) {
+                    return val;
                 }
-                return categories((JSONArray) value);
+                return categories((JSONArray) val);
             }
-            default: return value;
+            default: return val;
             }
         }
 
-        private Object categories(JSONArray value) throws JSONException {
+        private Object categories(final JSONArray value) throws JSONException {
             if(value.length() == 0) {
                 return "";
             }
-            StringBuilder b = new StringBuilder();
+            final StringBuilder b = new StringBuilder();
             for(int i = 0, size = value.length(); i < size; i++) {
                 b.append(value.getString(i)).append(", ");
             }
@@ -164,8 +170,8 @@ public class FileMetadataParser implements FileMetadataParserService{
         return File.Field.inject(new AbstractFileFieldHandler() {
 
             @Override
-            public Object handle(Field field, Object... args) {
-                List<File.Field> fields = (List<File.Field>) args[0];
+            public Object handle(final Field field, final Object... args) {
+                final List<File.Field> fields = (List<File.Field>) args[0];
                 if(object.has(field.getName())) {
                     fields.add(field);
                 }

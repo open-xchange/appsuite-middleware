@@ -47,23 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.reminder;
+package com.openexchange.folder.json.writer;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
-public class ReminderAJAXSuite extends TestSuite{
+/**
+ * {@link NecessaryValueMissingException} - Thrown to indicate that a necessary value is missing in a
+ * {@link com.openexchange.folderstorage.UserizedFolder UserizedFolder} instance.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+final class NecessaryValueMissingException extends RuntimeException {
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(RangeTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(RemindAgainTest.class);
-        tests.addTestSuite(SharedFolderTest.class);
-        tests.addTestSuite(DeleteMultipleReminderTest.class);
+    private static final long serialVersionUID = 8640260673982028781L;
 
-        tests.addTest(ReminderBugTestSuite.suite());
-        return tests;
+    /**
+     * Initializes a new {@link NecessaryValueMissingException}.
+     */
+    protected NecessaryValueMissingException() {
+        super();
     }
+
+    /**
+     * Initializes a new {@link NecessaryValueMissingException}.
+     * 
+     * @param message
+     */
+    protected NecessaryValueMissingException(final String message) {
+        super(message);
+    }
+
+    /**
+     * Initializes a new {@link NecessaryValueMissingException}.
+     * 
+     * @param cause
+     */
+    protected NecessaryValueMissingException(final Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Initializes a new {@link NecessaryValueMissingException}.
+     * 
+     * @param message
+     * @param cause
+     */
+    protected NecessaryValueMissingException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
 }
