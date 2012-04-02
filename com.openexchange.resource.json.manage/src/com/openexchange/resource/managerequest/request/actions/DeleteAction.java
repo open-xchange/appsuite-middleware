@@ -67,19 +67,17 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete a resource", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Time stamp of the resource to update. If the resource was modified after the specified time stamp, then the update must fail.")
-}, requestBody = "An object with the field \"id\" containing the unique identifier of the resource.",
-responseDescription = "An empty json array if the resource was deleted successfully.")
+    @Parameter(name = "timestamp", description = "Time stamp of the resource to update. If the resource was modified after the specified time stamp, then the update must fail.") }, requestBody = "An object with the field \"id\" containing the unique identifier of the resource.", responseDescription = "An empty json array if the resource was deleted successfully.")
 public final class DeleteAction extends AbstractResourceAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     *
+     * 
      * @param services
      */
     public DeleteAction(final ServiceLookup services) {
@@ -92,17 +90,35 @@ public final class DeleteAction extends AbstractResourceAction {
         if (null == resourceService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ResourceService.class.getName());
         }
-        /*
-         * Check for "data"
-         */
-        final JSONObject jData = req.getData();
-        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
         final Date clientLastModified = req.getDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        /*
-         * Delete resource
-         */
-        final ServerSession session = req.getSession();
-        resourceService.delete(session.getUser(), session.getContext(), resource, clientLastModified);
+        if (req.getData() instanceof JSONObject) {
+            /*
+             * Check for "data"
+             */
+            final JSONObject jData = req.getData();
+            final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+
+            /*
+             * Delete resource
+             */
+            final ServerSession session = req.getSession();
+            resourceService.delete(session.getUser(), session.getContext(), resource, clientLastModified);
+        } else {
+            JSONArray jsonArray = req.getData();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                /*
+                 * Check for "data"
+                 */
+                final JSONObject jData = jsonArray.getJSONObject(i);
+                final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+
+                /*
+                 * Delete resource
+                 */
+                final ServerSession session = req.getSession();
+                resourceService.delete(session.getUser(), session.getContext(), resource, clientLastModified);
+            }
+        }
         /*
          * Write empty JSON array
          */

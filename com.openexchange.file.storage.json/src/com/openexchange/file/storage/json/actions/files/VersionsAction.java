@@ -58,10 +58,12 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link VersionsAction}
@@ -87,7 +89,28 @@ public class VersionsAction extends AbstractFileAction {
         if(!columns.contains(File.Field.VERSION)) {
             columns.add(File.Field.VERSION);
         }
-        final TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, request.getSortingField(), request.getSortingOrder());
+        final Field sortingField = request.getSortingField();
+        final SortDirection sortingOrder = request.getSortingOrder();
+        TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, sortingField, sortingOrder);
+
+        if (Field.CREATED_BY.equals(sortingField)) {
+            final ServerSession serverSession = request.getSession();
+            final CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
+            final SearchIterator<File> iter = CreatedByComparator.resort(versions.results(), comparator);
+            final TimedResult<File> delegate = versions;
+            versions = new TimedResult<File>() {
+                
+                @Override
+                public long sequenceNumber() throws OXException {
+                    return delegate.sequenceNumber();
+                }
+                
+                @Override
+                public SearchIterator<File> results() throws OXException {
+                    return iter;
+                }
+            };
+        }
 
         return result( skipVersion0( versions ), request);
     }

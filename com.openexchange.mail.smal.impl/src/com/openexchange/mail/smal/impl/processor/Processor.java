@@ -272,9 +272,9 @@ public final class Processor implements SolrMailConstants {
                      */
                     if (!acquire(fullName, accountId, userId, contextId)) {
                         // Another thread already running
-                        processingProgress.setProcessType(ProcessType.NONE);
+                        processingProgress.setFirstTime(false).setProcessType(ProcessType.NONE);
                         if (DEBUG) {
-                            LOG.debug("Another thread processes \"" + fullName + "\" " + new DebugInfo(accountId, userId, contextId));
+                            LOG.debug("\tAnother thread processes \"" + fullName + "\" " + new DebugInfo(accountId, userId, contextId));
                         }
                         return null;
                     }
@@ -643,6 +643,9 @@ public final class Processor implements SolrMailConstants {
                 if (performInsert(fullName, accountId, userId, contextId, update, con)) {
                     return true;
                 }
+            } else if (update && (cur > 0)) {
+                // Another thread holds 'sync' flag
+                return false;
             }
             return compareAndSet(fullName, accountId, userId, contextId, update, con);
         } catch (final SQLException e) {

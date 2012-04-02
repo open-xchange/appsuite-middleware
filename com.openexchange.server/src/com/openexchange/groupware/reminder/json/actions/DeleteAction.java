@@ -73,10 +73,10 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete Reminder.", parameters = {
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete Reminders", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "An object with the field \"id\".",
-responseDescription = "An JSON array with the id that was not deleted.")
+}, requestBody = "An object with the field \"id\" or an array of objects with the field \"id\".",
+responseDescription = "An JSON array with the ids that was not deleted.")
 public final class DeleteAction extends AbstractReminderAction {
 
     private static final org.apache.commons.logging.Log LOG =
@@ -92,34 +92,66 @@ public final class DeleteAction extends AbstractReminderAction {
 
     @Override
     protected AJAXRequestResult perform(final ReminderAJAXRequest req) throws OXException, JSONException {
-        final JSONObject jData = req.getData();
-        final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
-        final TimeZone tz = req.getTimeZone();
-        final JSONArray jsonArray = new JSONArray();
-        try {
-            final ReminderService reminderSql = new ReminderHandler(req.getSession().getContext());
-            final ReminderObject reminder = reminderSql.loadReminder(id);
+        final JSONArray response = new JSONArray();
+        if (req.getData() instanceof JSONObject) {
+            final JSONObject jData = req.getData();
+            final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
+            final TimeZone tz = req.getTimeZone();
+            try {
+                final ReminderService reminderSql = new ReminderHandler(req.getSession().getContext());
+                final ReminderObject reminder = reminderSql.loadReminder(id);
 
-            if (reminder.isRecurrenceAppointment()) {
-                final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
-                if (nextReminder != null) {
-                    reminderSql.updateReminder(nextReminder);
-                    jsonArray.put(nextReminder.getObjectId());
+                if (reminder.isRecurrenceAppointment()) {
+                    final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
+                    if (nextReminder != null) {
+                        reminderSql.updateReminder(nextReminder);
+                        response.put(nextReminder.getObjectId());
+                    } else {
+                        reminderSql.deleteReminder(reminder);
+                    }
                 } else {
                     reminderSql.deleteReminder(reminder);
                 }
-            } else {
-                reminderSql.deleteReminder(reminder);
+            } catch (final OXException oxe) {
+                LOG.debug(oxe.getMessage(), oxe);
+                if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
+                    response.put(id);
+                    return new AJAXRequestResult(response, "json");
+                }
+                throw oxe;
             }
-        } catch (final OXException oxe) {
-            LOG.debug(oxe.getMessage(), oxe);
-            if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
-                jsonArray.put(id);
-                return new AJAXRequestResult(jsonArray, "json");
+        } else {
+            JSONArray jsonArray = req.getData();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                final JSONObject jData = jsonArray.getJSONObject(i);
+                final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
+                final TimeZone tz = req.getTimeZone();
+                try {
+                    final ReminderService reminderSql = new ReminderHandler(req.getSession().getContext());
+                    final ReminderObject reminder = reminderSql.loadReminder(id);
+
+                    if (reminder.isRecurrenceAppointment()) {
+                        final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
+                        if (nextReminder != null) {
+                            reminderSql.updateReminder(nextReminder);
+                            response.put(nextReminder.getObjectId());
+                        } else {
+                            reminderSql.deleteReminder(reminder);
+                        }
+                    } else {
+                        reminderSql.deleteReminder(reminder);
+                    }
+                } catch (final OXException oxe) {
+                    LOG.debug(oxe.getMessage(), oxe);
+                    if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
+                        response.put(id);
+                        return new AJAXRequestResult(response, "json");
+                    }
+                    throw oxe;
+                }
             }
-            throw oxe;
         }
-        return new AJAXRequestResult(jsonArray, "json");
+        return new AJAXRequestResult(response, "json");
     }
 
 }

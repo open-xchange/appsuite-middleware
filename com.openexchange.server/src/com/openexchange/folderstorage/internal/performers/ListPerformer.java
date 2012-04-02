@@ -717,7 +717,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         }
         final List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
         for (final UserizedFolder uf : userizedFolders) {
-            if (null != uf) {
+            if ((null != uf) && (null != uf.getID())) {
                 l.add(uf);
             }
         }
