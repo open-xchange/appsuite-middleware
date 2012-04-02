@@ -647,11 +647,11 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
@@ -854,11 +854,11 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
@@ -952,11 +952,11 @@ public final class OXFolderIteratorSQL {
                 return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
             } catch (final Exception e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
@@ -1043,11 +1043,11 @@ public final class OXFolderIteratorSQL {
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
             } catch (final Exception e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
@@ -1156,11 +1156,11 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
@@ -1854,11 +1854,11 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
@@ -1958,11 +1958,11 @@ public final class OXFolderIteratorSQL {
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
                     @Override
                     public void run() {
-                        ConditionTreeMapManagement.dropFor(ctx.getContextId());
                         try {
                             ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
                         } catch (final Exception e) {
