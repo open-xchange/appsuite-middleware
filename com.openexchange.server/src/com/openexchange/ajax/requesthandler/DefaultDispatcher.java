@@ -298,7 +298,6 @@ public class DefaultDispatcher implements Dispatcher {
         if (actionMetadata == null) {
         	return false;
         }
-        
 		return actionMetadata.allowPublicSession();
 	}
 

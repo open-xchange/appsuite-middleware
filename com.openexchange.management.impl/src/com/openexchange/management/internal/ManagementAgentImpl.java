@@ -83,6 +83,8 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
      */
     private int jmxPort;
 
+    private int jmxServerPort;
+
     private String jmxBindAddr;
 
     private String jmxLogin;
@@ -97,6 +99,8 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     private ManagementAgentImpl() {
         super();
+        jmxPort = 9999;
+        jmxServerPort = 3000;
     }
 
     @Override
@@ -120,9 +124,31 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
              * Create a JMX connector and start it
              */
             final String ip = getHostName(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
-            final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(ip == null ? "localhost" : ip).append(
-                ':').append(jmxPort).append("/server").toString();
-            jmxURL = addConnectorServer(jmxURLStr, jmxLogin, jmxPassword);
+            /*-
+             * Start JMX URL
+             * service:jmx:rmi://<TARGET_MACHINE>:<JMX_RMI_SERVER_PORT>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
+             * The RMI registry tells the JMX clients where to find the JMX RMI port, specified via the jmxrmi key
+             * The RMI port is generally known and can be set via properties.
+             * The JMX RMI server port is normally chosen by the jvm at random
+             * 
+             * To obtain the target machine connect to service:jmx:rmi:///jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
+             * To obtain the JMX RMI server port connect to service:jmx:rmi/<TARGET_MACHINE>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
+             *  
+             *  Our URL service:jmx:rmi:///jndi/rmi://localhost:9999/server
+             */
+            final StringBuilder jmxURLBuilder = new StringBuilder(128).append("service:jmx:rmi://");
+            /*
+             * Set RMIServer and RMIConnection host & port
+             */
+            jmxURLBuilder.append(ip == null ? "localhost" : ip).append(':').append(jmxServerPort);
+            /*-
+             * Set RMI Registry host & port
+             * 
+             * In the URL, jmxServerPort is the port number on which the RMIServer and RMIConnection remote objects are exported and
+             * jmxPort is the port number of the RMI Registry.
+             */
+            jmxURLBuilder.append("/jndi/rmi://").append(ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server");
+            jmxURL = addConnectorServer(jmxURLBuilder.toString(), jmxLogin, jmxPassword);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(128).append("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(
                     jmxURL).append('\n').toString());
@@ -212,6 +238,15 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         }
         super.unregisterMBean(objectName);
         objectNames.remove(objectName);
+    }
+
+    /**
+     * Sets the JMX server port.
+     *
+     * @param jmxServerPort The JMX server port to set
+     */
+    public void setJmxServerPort(final int jmxServerPort) {
+        this.jmxServerPort = jmxServerPort;
     }
 
     /**

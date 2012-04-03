@@ -420,8 +420,10 @@ public final class FolderJob extends AbstractMailJob {
                     }
                 }
                 changedMails = null;
-                /*
+                /*-
                  * Add
+                 * 
+                 * http://www.mozgoweb.com/posts/how-to-parse-mime-message-using-mime4j-library/
                  */
                 if (!newIds.isEmpty()) {
                     final List<String> ids = new ArrayList<String>(newIds);
