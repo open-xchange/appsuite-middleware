@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,87 +47,44 @@
  *
  */
 
-package com.openexchange.push.mq;
+package com.openexchange.push.mq.mbean;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQService;
-import com.openexchange.mq.topic.MQTopicAsyncSubscriber;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.push.mq.registry.PushMQServiceRegistry;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import com.openexchange.push.mq.PushMQInit;
+
 
 /**
- * {@link PushMQInit}
- * 
+ * {@link PushMQMBeanImpl}
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PushMQInit {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQInit.class));
-
-    private Topic topic;
-
-    private PushMQPublisher publisher;
-
-    private MQTopicAsyncSubscriber subscriber;
-
-    private final MQService mqService;
-
-    private static PushMQInit init;
+public class PushMQMBeanImpl extends StandardMBean implements PushMQMBean {
 
     /**
-     * Initializes a new {@link PushMQInit}.
+     * Initializes a new {@link PushMQMBeanImpl}.
      */
-    public PushMQInit() {
-        ServiceRegistry registry = PushMQServiceRegistry.getServiceRegistry();
-        mqService = registry.getService(MQService.class);
-        init = this;
+    public PushMQMBeanImpl() throws NotCompliantMBeanException {
+        super(PushMQMBean.class);
+
     }
 
-    public PushMQPublisher getPublisher() {
-        return publisher;
-    }
-
-    public MQTopicAsyncSubscriber getSubscriber() {
-        return subscriber;
-    }
-
-    public void init() throws OXException, JMSException {
-        topic = mqService.lookupTopic("oxEventTopic");
-        publisher = new PushMQPublisher(topic.getTopicName());
-        PushMQListener listener = new PushMQListener();
-        subscriber = new MQTopicAsyncSubscriber(topic.getTopicName(), listener);
-    }
-
-    public void close() {
-        subscriber.close();
-        publisher.close();
-    }
-
-    public static PushMQInit getInit() {
-        return init;
-    }
-
-    public void stopListening() {
-        if (subscriber != null) {
-            subscriber.close();
-            subscriber = null;
-            LOG.info("PushMQ listener closed.");
-        }
-    }
-
+    /* (non-Javadoc)
+     * @see com.openexchange.push.mq.mbean.PushMQMBean#startListening()
+     */
+    @Override
     public void startListening() {
-        try {
-            PushMQListener listener = new PushMQListener();
-            subscriber = new MQTopicAsyncSubscriber(topic.getTopicName(), listener);
-            LOG.info("PushMQ listener started.");
-        } catch (OXException e) {
-            LOG.error("Start of PushMQ listener failed.", e);
-        } catch (JMSException e) {
-            LOG.error("Start of PushMQ listener failed.", e);
-        }
+        PushMQInit init = PushMQInit.getInit();
+        init.startListening();
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.push.mq.mbean.PushMQMBean#stopListening()
+     */
+    @Override
+    public void stopListening() {
+        PushMQInit init = PushMQInit.getInit();
+        init.stopListening();
+    }
+
 }

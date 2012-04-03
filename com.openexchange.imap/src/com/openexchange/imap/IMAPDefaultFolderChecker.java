@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -95,7 +96,7 @@ import com.sun.mail.imap.IMAPFolder;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPDefaultFolderChecker {
+public class IMAPDefaultFolderChecker {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPDefaultFolderChecker.class));
 
@@ -105,17 +106,17 @@ public final class IMAPDefaultFolderChecker {
 
     private static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
 
-    private final Session session;
+    protected final Session session;
 
-    private final int accountId;
+    protected final int accountId;
 
-    private final AccessedIMAPStore imapStore;
+    protected final AccessedIMAPStore imapStore;
 
-    private final Context ctx;
+    protected final Context ctx;
 
-    private final IMAPConfig imapConfig;
+    protected final IMAPConfig imapConfig;
 
-    private boolean retry;
+    protected boolean retry;
 
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
@@ -146,10 +147,10 @@ public final class IMAPDefaultFolderChecker {
     }
 
     /**
-     * Checks if given fullname denotes a default folder.
+     * Checks if given full name denotes a default folder.
      *
-     * @param folderFullName The fullname to check
-     * @return <code>true</code> if given fullname denotes a default folder; otherwise <code>false</code>
+     * @param folderFullName The full name to check
+     * @return <code>true</code> if given full name denotes a default folder; otherwise <code>false</code>
      * @throws OXException If check for default folder fails
      */
     public boolean isDefaultFolder(final String folderFullName) throws OXException {
@@ -202,12 +203,24 @@ public final class IMAPDefaultFolderChecker {
         checkDefaultFolders(MailSessionParameterNames.getParamDefaultFolderChecked(), MailSessionCache.getInstance(session));
     }
 
-    private Object getLockObject() {
+    /**
+     * Gets the appropriate lock object for associated session.
+     * 
+     * @return The lock object
+     */
+    protected Object getLockObject() {
         final Object lock = session.getParameter(Session.PARAM_LOCK);
         return null == lock ? session : lock;
     }
 
-    private void checkDefaultFolders(final String key, final MailSessionCache mailSessionCache) throws OXException {
+    /**
+     * Check presence of default folders.
+     * 
+     * @param key The key for cache look-up
+     * @param mailSessionCache The cache
+     * @throws MailException If checking default folders' presence fails for any reason
+     */
+    protected void checkDefaultFolders(final String key, final MailSessionCache mailSessionCache) throws OXException {
         if (!isDefaultFoldersChecked(key, mailSessionCache)) {
             synchronized (getLockObject()) {
                 if (isDefaultFoldersChecked(key, mailSessionCache)) {
@@ -256,16 +269,11 @@ public final class IMAPDefaultFolderChecker {
                         ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session);
                         inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
                     }
+                    final char sep = inboxFolder.getSeparator();
                     /*
-                     * Get prefix for default folder names, NOT fullnames!
+                     * Get prefix for default folder names, NOT full names!
                      */
-                    String prefix;
-                    final char sep;
-                    {
-                        final String[] sa = getDefaultFolderPrefix(inboxFolder, inboxListEntry, mailSessionCache);
-                        prefix = sa[0];
-                        sep = sa[1].charAt(0);
-                    }
+                    String prefix = imapStore.getImapAccess().getFolderStorage().getDefaultFolderPrefix();
                     /*
                      * Check for mbox
                      */
@@ -439,6 +447,12 @@ public final class IMAPDefaultFolderChecker {
                 names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, false);
                 spamHandler = NoSpamHandler.getInstance();
             }
+        }
+        if (MailAccount.DEFAULT_ID == accountId) {
+            /*
+             * No full names for primary account
+             */
+            Arrays.fill(fullNames, null);
         }
         /*
          * Sequentially check folders
@@ -637,7 +651,8 @@ public final class IMAPDefaultFolderChecker {
          */
         final StringBuilder tmp = new StringBuilder(32);
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        final String fullName = prefix.length() == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
+        final int prefixLen = prefix.length();
+        final String fullName = prefixLen == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
         {
             final ListLsubEntry entry =
                 modified.get() ? ListLsubCache.getActualLISTEntry(fullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(
@@ -730,14 +745,13 @@ public final class IMAPDefaultFolderChecker {
              * name equals ignore-case to an existing folder.
              */
             final IMAPFolder parent;
-            final int len = prefix.length();
-            if (0 == len) {
+            if (0 == prefixLen) {
                 parent = (IMAPFolder) imapStore.getDefaultFolder();
             } else {
                 /*
                  * Cut off trailing separator character
                  */
-                final String parentFullName = prefix.substring(0, len - 1);
+                final String parentFullName = prefix.substring(0, prefixLen - 1);
                 parent = (IMAPFolder) imapStore.getFolder(parentFullName);
             }
             final Folder[] folders = parent.list();
@@ -762,7 +776,7 @@ public final class IMAPDefaultFolderChecker {
                     }
                     modified.set(true);
                 } catch (final MessagingException e) {
-                    final String prfx = prefix.length() == 0 ? "INBOX" + sep : "";
+                    final String prfx = prefixLen == 0 ? "INBOX" + sep : "";
                     LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
                     ListLsubCache.clearCache(accountId, session);
                     modified.set(true);

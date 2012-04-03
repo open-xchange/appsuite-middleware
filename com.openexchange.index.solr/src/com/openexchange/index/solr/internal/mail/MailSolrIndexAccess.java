@@ -99,8 +99,6 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     private static final EnumMap<MailField, List<String>> field2Name;
 
-//    private static final Set<String> allFields;
-
     private static final MailFields mailFields;
     
     private static final Set<String> storedFields;
@@ -655,6 +653,10 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         Map<String, Object> params = parameters.getParameters();
         final String sortField = null == params ? null : (String) params.get("sort");
         final ORDER order = null == params ? ORDER.asc : "desc".equalsIgnoreCase((String) params.get("order")) ? ORDER.desc : ORDER.asc;
+        Set<String> fields = null == params ? null : new HashSet<String>(Arrays.asList(((String) params.get("fields")).split(" *, *")));
+        if (null == fields) {
+            fields = storedFields;
+        }
         params = null;
         final String[] fieldArray;
         int off = parameters.getOff();
@@ -669,8 +671,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             if (null != sortField) {
                 solrQuery.setSortField(sortField, order);
             }
-            final Set<String> set = storedFields;
-            fieldArray = set.toArray(new String[set.size()]);
+
+            fieldArray = fields.toArray(new String[fields.size()]);
             solrQuery.setFields(fieldArray);
             final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();

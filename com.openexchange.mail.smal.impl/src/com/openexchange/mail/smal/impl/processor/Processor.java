@@ -60,11 +60,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,7 +76,6 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -307,51 +303,10 @@ public final class Processor implements SolrMailConstants {
                              * Denoted folder has already been added to index before
                              * 
                              */
-                            processingProgress.setFirstTime(false);
-                            final Map<String, MailMessage> storageMap;
-                            final Map<String, MailMessage> indexMap;
-                            {
-                                final List<Map<String, MailMessage>> tmp = getNewIds(fullName, indexAccess, mailAccess);
-                                storageMap = tmp.get(0);
-                                indexMap = tmp.get(1);
-                            }
-                            /*
-                             * New ones
-                             */
-                            final Set<String> newIds = new HashSet<String>(storageMap.keySet());
-                            newIds.removeAll(indexMap.keySet());
-                            /*
-                             * Removed ones
-                             */
-                            final Set<String> deletedIds = new HashSet<String>(indexMap.keySet());
-                            deletedIds.removeAll(storageMap.keySet());
-                            if (!deletedIds.isEmpty()) {
-                                final Iterator<String> iterator = deletedIds.iterator();
-                                final StringBuilder tmp = new StringBuilder(64);
-                                tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
-                                tmp.append(MailPath.getMailPath(accountId, fullName, iterator.next()));
-                                final int resetLen = tmp.lastIndexOf(Character.toString(MailPath.SEPERATOR));
-                                indexAccess.deleteById(tmp.toString());
-                                while (iterator.hasNext()) {
-                                    tmp.setLength(resetLen);
-                                    tmp.append(iterator.next());
-                                    indexAccess.deleteById(tmp.toString());
-                                }
-                            }
-                            if (newIds.isEmpty()) {
-                                // No new detected
-                                processingProgress.setProcessType(ProcessType.NONE);
-                                if (DEBUG) {
-                                    LOG.debug("Nothing to do for follow-up processing of \"" + fullName + "\" " + new DebugInfo(mailAccess));
-                                }
-                            } else {
-                                process(
-                                    new MailFolderInfo(fullName, newIds.size()),
-                                    processingProgress,
-                                    mailAccess,
-                                    indexAccess,
-                                    storageMap.values(),
-                                    indexMap.values());
+                            processingProgress.setProcessType(ProcessType.JOB);
+                            submitAsJob(folderInfo, mailAccess, Collections.<String, Object>emptyMap());
+                            if (DEBUG) {
+                                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
                             }
                         }
                         return null;
@@ -536,6 +491,7 @@ public final class Processor implements SolrMailConstants {
             // TODO: params.put("fields", mailFields);
             params.put("sort", FIELD_RECEIVED_DATE);
             params.put("order", "desc");
+            params.put("fields", FIELD_ID);
             final QueryParameters queryParameter =
                 new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
                     params).build();
