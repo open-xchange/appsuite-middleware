@@ -112,7 +112,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
             serviceInit.init();
             /*
-             * Start receiving jobs?
+             * Start receiving jobs? --> indexing-service.properties
              */
             {
                 final ConfigurationService service = getService(ConfigurationService.class);
