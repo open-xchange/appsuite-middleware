@@ -149,21 +149,25 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 // RMI Connector server, we must also use them in the RMI Registry.
                 // Otherwise, we wouldn't be able to use a single port.
                 //
-                Registry registry = null;
-                try {
-                    /*
-                     * If following calls succeed, a RMI registry has already been created that listens on this port
-                     */
-                    registry = LocateRegistry.getRegistry(jmxPort);
-                    registry.list();
-                } catch (final RemoteException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("No responsive RMI registry found that listens on port " + jmxPort + ". A new one is going to be created", e);
+                final Registry registry;
+                {
+                    Registry registry0 = null;
+                    try {
+                        /*
+                         * If following calls succeed, a RMI registry has already been created that listens on this port
+                         */
+                        registry0 = LocateRegistry.getRegistry(jmxPort);
+                        registry0.list();
+                    } catch (final RemoteException e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("No responsive RMI registry found that listens on port " + jmxPort + ". A new one is going to be created", e);
+                        }
+                        /*
+                         * Create a new one
+                         */
+                        registry0 = LocateRegistry.createRegistry(jmxPort, csf, ssf);
                     }
-                    /*
-                     * Create a new one
-                     */
-                    registry = LocateRegistry.createRegistry(jmxPort, csf, ssf);
+                    registry = registry0;
                 }
                 registries.put(Integer.valueOf(jmxPort), registry);
                 if (LOG.isInfoEnabled()) {
