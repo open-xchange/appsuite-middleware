@@ -63,29 +63,39 @@ public class SolrCoreShutdownTask implements Runnable {
     
     /**
      * Timeout in minutes.
+     * An index access will be released after being unused for this time and if it isn't referenced anymore.
      */
-    public static final long TIMEOUT = 60;
+    public static final long SOFT_TIMEOUT = 2;
     
-    private final SolrIndexAccessManager indexAccessManager;
+    /**
+     * Timeout in minutes.
+     * An index access will be released after being unused for this time whether it's still referenced or not.
+     */
+    public static final long HARD_TIMEOUT = 60;
+    
+    private final SolrIndexFacadeService solrFacade;
     
     
-    public SolrCoreShutdownTask(final SolrIndexAccessManager indexFacade) {
+    public SolrCoreShutdownTask(final SolrIndexFacadeService indexFacade) {
         super();
-        this.indexAccessManager = indexFacade;
+        this.solrFacade = indexFacade;
     }
 
     @Override
     public void run() {
-        final List<AbstractSolrIndexAccess<?>> accessList = indexAccessManager.getCachedAccesses();
+        final List<AbstractSolrIndexAccess<?>> accessList = solrFacade.getCachedAccesses();
         final List<SolrCoreIdentifier> indentifers = new ArrayList<SolrCoreIdentifier>();
-        final long barrier = System.currentTimeMillis() - (TIMEOUT * 60000);
+        final long now = System.currentTimeMillis();
+        final long softBarrier = now - (SOFT_TIMEOUT * 60000);
+        final long hardBarrier = now - (HARD_TIMEOUT * 60000);
         for (final AbstractSolrIndexAccess<?> access : accessList) {
-            if (access.getLastAccess() <= barrier) {
+        	final long lastAccess = access.getLastAccess();
+            if ((lastAccess < softBarrier && !access.isRetained()) || lastAccess < hardBarrier) {
                 indentifers.add(access.getIdentifier());
                 access.release();                
             }
         }
         
-        indexAccessManager.removeFromCache(indentifers);
+        solrFacade.removeFromCache(indentifers);
     }
 }

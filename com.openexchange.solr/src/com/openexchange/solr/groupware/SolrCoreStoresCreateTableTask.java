@@ -47,51 +47,74 @@
  *
  */
 
-package com.openexchange.solr;
+package com.openexchange.solr.groupware;
 
-import java.io.File;
-import java.net.URI;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.solr.internal.Services;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@link SolrCoreConfiguration}
+ * {@link SolrCoreStoresCreateTableTask}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreConfiguration {
+public class SolrCoreStoresCreateTableTask extends UpdateTaskAdapter {
+    
+    private static final String CT_CORE_STORES = 
+        "CREATE TABLE solrCoreStores (" +
+            "id int(10) unsigned NOT NULL," +
+            "uri varchar(255) NOT NULL," +
+            "maxCores int(10) unsigned NOT NULL," +
+            "numCores int(10) unsigned NOT NULL," +
+            "PRIMARY KEY (id)" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        
 
-    private final SolrCoreIdentifier identifier;
-    
-    private final String coreDirPath;
-    
-    private final String coreName;
-    
-    private final String dataDirPath;
-    
-    
-    public SolrCoreConfiguration(final URI coreStoreUri, final SolrCoreIdentifier identifier) throws OXException {
+    public SolrCoreStoresCreateTableTask() {
         super();
-        this.identifier = identifier;
-        coreName = identifier.toString();
-        coreDirPath = coreStoreUri.getPath() + File.separator + coreName;
-        dataDirPath = coreDirPath + File.separator + "data";
-    }
-    
-    public String getCoreName() {
-        return coreName;
-    }
-    
-    public String getCoreDirPath() {
-        return coreDirPath;
-    }
-    
-    public String getDataDirPath() {
-        return dataDirPath;
     }
 
-    public SolrCoreIdentifier getIdentifier() {
-        return identifier;
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+    	final DatabaseService dbService = Services.getService(DatabaseService.class);
+        updateConfigDB(dbService);
     }
+    
+    private void updateConfigDB(final DatabaseService dbService) throws OXException {
+        final Connection writeCon = dbService.getWritable();        
+        PreparedStatement stmt = null;
+        /*
+         * Create table solrServers in configDb
+         */
+        try {
+            if (DBUtils.tableExists(writeCon, "solrCoreStores")) {
+                return;
+            }
+            DBUtils.startTransaction(writeCon);
+            stmt = writeCon.prepareStatement(CT_CORE_STORES);
+            stmt.executeUpdate();
+            writeCon.commit();
+        } catch (final SQLException e) {
+        	DBUtils.rollback(writeCon);
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            DBUtils.autocommit(writeCon);
+            dbService.backWritable(writeCon);
+        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
+    }
+
 }

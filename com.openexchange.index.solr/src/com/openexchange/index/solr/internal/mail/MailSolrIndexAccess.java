@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.mail;
 
 import static com.openexchange.index.solr.internal.SolrUtils.detectLocale;
 import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,6 +63,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -71,6 +73,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -99,9 +102,43 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
 
     private static final EnumMap<MailField, List<String>> field2Name;
 
-    private static final Set<String> allFields;
-
     private static final MailFields mailFields;
+    
+    private static final Set<String> storedFields;
+    
+    static {
+    	storedFields = new HashSet<String>(Arrays.asList(
+    			FIELD_UUID,
+    			FIELD_TIMESTAMP,
+    			FIELD_CONTEXT,
+    			FIELD_USER,
+    			FIELD_ACCOUNT,
+    			FIELD_FULL_NAME,
+    			FIELD_ID,
+    			FIELD_COLOR_LABEL,
+    			FIELD_ATTACHMENT,
+    			FIELD_RECEIVED_DATE,
+    			FIELD_SENT_DATE,
+    			FIELD_SIZE,
+    			FIELD_FLAG_ANSWERED,
+                FIELD_FLAG_DELETED,
+                FIELD_FLAG_DRAFT,
+                FIELD_FLAG_FLAGGED,
+                FIELD_FLAG_FORWARDED,
+                FIELD_FLAG_READ_ACK,
+                FIELD_FLAG_RECENT,
+                FIELD_FLAG_SEEN,
+                FIELD_FLAG_SPAM,
+                FIELD_FLAG_USER,
+                FIELD_USER_FLAGS,
+                FIELD_FROM_PLAIN,
+                FIELD_SENDER_PLAIN,
+                FIELD_TO_PLAIN,
+                FIELD_CC_PLAIN,
+                FIELD_BCC_PLAIN,
+                FIELD_SUBJECT_PLAIN   			
+    			));
+    }
 
     static {
         {
@@ -161,7 +198,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                     set.add(field);
                 }
             }
-            allFields = set;
+//            allFields = set;
         }
         mailFields = new MailFields(field2Name.keySet());
     }
@@ -619,9 +656,11 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         Map<String, Object> params = parameters.getParameters();
         final String sortField = null == params ? null : (String) params.get("sort");
         final ORDER order = null == params ? ORDER.asc : "desc".equalsIgnoreCase((String) params.get("order")) ? ORDER.desc : ORDER.asc;
-        Set<String> fields = null == params ? null : new HashSet<String>(Arrays.asList(((String) params.get("fields")).split(" *, *")));
-        if (null == fields) {
-            fields = allFields;
+        final Set<String> fields;
+        if (params == null || !params.containsKey("fields")) {
+        	fields = storedFields;
+        } else {
+        	fields = new HashSet<String>(Arrays.asList(((String) params.get("fields")).split(" *, *")));
         }
         params = null;
         final String[] fieldArray;
@@ -637,6 +676,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             if (null != sortField) {
                 solrQuery.setSortField(sortField, order);
             }
+
             fieldArray = fields.toArray(new String[fields.size()]);
             solrQuery.setFields(fieldArray);
             final QueryResponse queryResponse = query(solrQuery);

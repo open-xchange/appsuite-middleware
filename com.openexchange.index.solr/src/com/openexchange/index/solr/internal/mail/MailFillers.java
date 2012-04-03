@@ -391,14 +391,9 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final StringBuilder pre = new StringBuilder(FIELD_SUBJECT_PREFIX);
-            for (final Locale l : KNOWN_LOCALES) {
-                pre.setLength(8);
-                final String subject = getFieldValue(pre.append(l.getLanguage()).toString(), doc);
-                if (null != subject) {
-                    mail.setSubject(subject);
-                    break;
-                }
+            final String subject = getFieldValue(FIELD_SUBJECT_PLAIN, doc);
+            if (null != subject) {
+                mail.setSubject(subject);
             }
         }
     };

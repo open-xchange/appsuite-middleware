@@ -359,10 +359,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             throw handleRuntimeException(e);
         }
     }
-
+    
+    
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+    	if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final MailFields mfs = new MailFields(fields);

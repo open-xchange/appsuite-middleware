@@ -47,51 +47,46 @@
  *
  */
 
-package com.openexchange.solr;
+package com.openexchange.solr.groupware;
 
-import java.io.File;
-import java.net.URI;
-
-import com.openexchange.exception.OXException;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link SolrCoreConfiguration}
+ * {@link SolrCoresCreateTableService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreConfiguration {
+public class SolrCoresCreateTableService extends AbstractCreateTableImpl {
+    
+    private static final String CT_CORES =
+        "CREATE TABLE solrCores (" +
+            "cid int(10) unsigned NOT NULL," +
+            "uid int(10) unsigned NOT NULL," +
+            "module int(10) unsigned NOT NULL," +
+            "store int(10) unsigned NOT NULL," +
+            "active tinyint(1) unsigned NOT NULL," +
+            "server varchar(255) DEFAULT NULL,  " +
+            "PRIMARY KEY  (cid,uid,module)," +
+            "KEY cidserver (cid, server)," +
+            "KEY server (server)," +
+            "KEY store (store)" +
+         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    
 
-    private final SolrCoreIdentifier identifier;
-    
-    private final String coreDirPath;
-    
-    private final String coreName;
-    
-    private final String dataDirPath;
-    
-    
-    public SolrCoreConfiguration(final URI coreStoreUri, final SolrCoreIdentifier identifier) throws OXException {
-        super();
-        this.identifier = identifier;
-        coreName = identifier.toString();
-        coreDirPath = coreStoreUri.getPath() + File.separator + coreName;
-        dataDirPath = coreDirPath + File.separator + "data";
-    }
-    
-    public String getCoreName() {
-        return coreName;
-    }
-    
-    public String getCoreDirPath() {
-        return coreDirPath;
-    }
-    
-    public String getDataDirPath() {
-        return dataDirPath;
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
-    public SolrCoreIdentifier getIdentifier() {
-        return identifier;
+    @Override
+    public String[] tablesToCreate() {
+    	// These table names must(!) be returned in the same order as their create statements.
+        return new String[] { "solrCores" };
+    }
+
+    @Override
+    protected String[] getCreateStatements() {        
+        return new String[] { CT_CORES };
     }
 }

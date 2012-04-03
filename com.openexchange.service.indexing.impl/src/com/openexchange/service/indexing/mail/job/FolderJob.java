@@ -465,6 +465,10 @@ public final class FolderJob extends AbstractMailJob {
                                 LOG.debug("\tFolder job \"" + info + "\" awaits completion of scheduled Add-Jobs...");
                             }
                             latch.await();
+                            if (DEBUG) {
+                            	final long dur = System.currentTimeMillis() - st1;
+                                LOG.debug("\tFolder job \"" + info + "\" completed after " + dur + " ms.");
+                            }
                         } else {
                             while (start < size) {
                                 int end = start + configuredBlockSize;

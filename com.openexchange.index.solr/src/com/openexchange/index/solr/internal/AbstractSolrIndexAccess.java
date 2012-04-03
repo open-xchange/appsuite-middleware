@@ -124,6 +124,10 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     public int decrementRetainCount() {
         return retainCount.decrementAndGet();
     }
+    
+    public boolean isRetained() {
+    	return retainCount.get() != 0;
+    }
 
     public long getLastAccess() {
         return lastAccess;

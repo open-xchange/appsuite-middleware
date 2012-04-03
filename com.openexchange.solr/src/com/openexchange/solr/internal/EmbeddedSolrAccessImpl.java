@@ -49,10 +49,9 @@
 
 package com.openexchange.solr.internal;
 
-import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -69,7 +68,10 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
+import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.schema.IndexSchema;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.openexchange.config.ConfigurationService;
@@ -100,18 +102,15 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
     public void startUp() throws OXException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);
-        final String solrXmlPath = config.getProperty(SolrProperties.PROP_SOLR_XML);
-        final File solrXml = new File(solrXmlPath);
-        coreContainer = new CoreContainer();
-        try {
-            coreContainer.load(solrHome, solrXml);
-        } catch (final ParserConfigurationException e) {
-            throw new OXException(e);
-        } catch (final IOException e) {
-            throw new OXException(e);
-        } catch (final SAXException e) {
-            throw new OXException(e);
-        }
+
+        /*
+         * Set some properties without the server would not start.
+         */
+        System.setProperty("solr.core.name", "");
+        System.setProperty("solr.core.dataDir", "");
+        System.setProperty("solr.core.instanceDir", "");
+        System.setProperty("logDir", "");
+        coreContainer = new CoreContainer(solrHome);
     }
 
     @Override
@@ -119,23 +118,24 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         if (coreContainer == null) {
             // TODO: throw exception
         }
-        
-        final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, configuration.getIdentifier().toString(), configuration.getCoreDirPath());
-        coreDescriptor.setDataDir(configuration.getDataDirPath());
-        coreDescriptor.setSchemaName(configuration.getSchemaFileName());
-        coreDescriptor.setConfigName(configuration.getConfigFileName());
-        final Properties properties = new Properties();
-        properties.put("data.dir", configuration.getDataDirPath());
-        properties.put("logDir", "/var/log/open-xchange");
-        coreDescriptor.setCoreProperties(properties);
-        SolrCore solrCore;
+
+        final String coreName = configuration.getIdentifier().toString();
+        final String dataDir = configuration.getDataDirPath();
+        final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, configuration.getCoreDirPath());
+        coreDescriptor.setDataDir(dataDir);
         try {
         	mutex.lock();
-        	if (!hasActiveCore(configuration.getIdentifier())) {
-        		solrCore = coreContainer.create(coreDescriptor);
-                coreContainer.register(configuration.getIdentifier().toString(), solrCore, false);                
-                return true;
-        	}
+	        if (!hasActiveCore(configuration.getIdentifier())) {
+	        	final ConfigurationService config = Services.getService(ConfigurationService.class);
+	        	final String schemaPath = config.getProperty(SolrProperties.PROP_SCHEMA_MAIL);
+	        	final String configPath = config.getProperty(SolrProperties.PROP_CONFIG_MAIL);
+	    		final SolrConfig solrConfig = new SolrConfig(null, new InputSource(new FileReader(configPath)));		
+	    		final IndexSchema schema = new IndexSchema(solrConfig, null, new InputSource(new FileReader(schemaPath)));
+	    		
+	    		final SolrCore solrCore = new SolrCore(coreName, dataDir, solrConfig, schema, coreDescriptor);
+	    		coreContainer.register(configuration.getIdentifier().toString(), solrCore, false);
+	        	return true;
+	        }
             
         	return false;
         } catch (final ParserConfigurationException e) {
@@ -154,13 +154,13 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         if (coreContainer != null) {
             // TODO: throw exception
         }
-        
-        // FIXME : remove
-        optimize(identifier);        
+            
         try {
         	mutex.lock();
 			final SolrCore solrCore = coreContainer.remove(identifier.toString());
 			if (solrCore != null) {
+				// FIXME : remove optimize and implement a suitable optimize-strategy
+				optimize(identifier);   
 				solrCore.close();
 				return true;
 			}
