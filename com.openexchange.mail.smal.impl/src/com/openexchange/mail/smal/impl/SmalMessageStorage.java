@@ -392,7 +392,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
                     try {
-                        processingProgress.awaitCompletion();
+                        if (processingProgress.isFirstTime()) {
+                            processingProgress.awaitCompletion();
+                        }
                         return MailResult.newIndexResult(IndexAccessAdapter.getInstance().search(accountId, folder, searchTerm, sortField, order, fields, indexRange, session));
                     } catch (final OXException e) {
                         if (!MailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
