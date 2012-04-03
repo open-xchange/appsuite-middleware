@@ -57,6 +57,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -116,6 +117,7 @@ public class PushMQActivator extends HousekeepingActivator {
             /*
              * Service trackers
              */
+            track(ManagementService.class, new ManagementRegisterer(context));
             track(EventFactoryService.class);
             track(TimerService.class);
             openTrackers();
