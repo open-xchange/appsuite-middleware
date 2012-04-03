@@ -536,6 +536,7 @@ public final class Processor implements SolrMailConstants {
             // TODO: params.put("fields", mailFields);
             params.put("sort", FIELD_RECEIVED_DATE);
             params.put("order", "desc");
+            params.put("fields", FIELD_ID);
             final QueryParameters queryParameter =
                 new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
                     params).build();
