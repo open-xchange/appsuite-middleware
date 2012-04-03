@@ -49,11 +49,21 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.TriggerType;
+import com.openexchange.index.solr.SolrIndexExceptionCodes;
+import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SolrIndexFacadeService} - The Solr {@link IndexFacadeService} implementation.
@@ -62,20 +72,38 @@ import com.openexchange.solr.SolrCoreIdentifier;
  */
 public class SolrIndexFacadeService implements IndexFacadeService {	
 	
-	private final SolrIndexAccessManager solrIndexAccessManager;
+	private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
+	
 
     /**
      * Initializes a new {@link SolrIndexFacadeService}.
      */
     public SolrIndexFacadeService() {
 		super();
-		solrIndexAccessManager = new SolrIndexAccessManager();	
+		accessMap = new ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>>();
+        final TimerService timerService = Services.getService(TimerService.class);
+        timerService.scheduleAtFixedRate(
+            new SolrCoreShutdownTask(this),
+            SolrCoreShutdownTask.SOFT_TIMEOUT,
+            SolrCoreShutdownTask.SOFT_TIMEOUT,
+            TimeUnit.MINUTES);
     }
 	
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <V> IndexAccess<V> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
         final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
-        return (IndexAccess<V>) solrIndexAccessManager.acquireIndexAccess(identifier);
+        AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(identifier);
+        if (null == cachedIndexAccess) {
+            final AbstractSolrIndexAccess<?> newAccess = createIndexAccessByType(identifier);
+            cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
+            if (null == cachedIndexAccess) {
+                cachedIndexAccess = newAccess;
+            }
+        }
+
+        cachedIndexAccess.incrementRetainCount();
+        return (IndexAccess<V>) cachedIndexAccess;
     }
 
     @Override
@@ -85,6 +113,38 @@ public class SolrIndexFacadeService implements IndexFacadeService {
 
 	@Override
 	public void releaseIndexAccess(final IndexAccess<?> indexAccess) throws OXException {
-	    solrIndexAccessManager.releaseIndexAccess(indexAccess);
+		final AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess<?>) indexAccess).getIdentifier());
+        if (null != cachedIndexAccess) {
+            cachedIndexAccess.decrementRetainCount();
+        }
 	}
+	
+	public List<AbstractSolrIndexAccess<?>> getCachedAccesses() {
+        final List<AbstractSolrIndexAccess<?>> accessList = new ArrayList<AbstractSolrIndexAccess<?>>();
+        for (final AbstractSolrIndexAccess<?> access : accessMap.values()) {
+            accessList.add(access);
+        }
+
+        return accessList;
+    }
+
+    public void removeFromCache(final List<SolrCoreIdentifier> identifiers) {
+        for (final SolrCoreIdentifier identifier : identifiers) {
+            accessMap.remove(identifier);
+        }
+    }
+
+    private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrCoreIdentifier identifier) throws OXException {
+        // FIXME: Use right trigger type
+        final int module = identifier.getModule();
+        switch(module) {
+        
+        case Types.EMAIL:
+            return new MailSolrIndexAccess(identifier, TriggerType.USER_INTERACTION);
+            
+        default:
+            throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
+        
+        }
+    }
 }

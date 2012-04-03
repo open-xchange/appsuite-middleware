@@ -73,17 +73,17 @@ public class SolrCoreShutdownTask implements Runnable {
      */
     public static final long HARD_TIMEOUT = 60;
     
-    private final SolrIndexAccessManager indexAccessManager;
+    private final SolrIndexFacadeService solrFacade;
     
     
-    public SolrCoreShutdownTask(final SolrIndexAccessManager indexFacade) {
+    public SolrCoreShutdownTask(final SolrIndexFacadeService indexFacade) {
         super();
-        this.indexAccessManager = indexFacade;
+        this.solrFacade = indexFacade;
     }
 
     @Override
     public void run() {
-        final List<AbstractSolrIndexAccess<?>> accessList = indexAccessManager.getCachedAccesses();
+        final List<AbstractSolrIndexAccess<?>> accessList = solrFacade.getCachedAccesses();
         final List<SolrCoreIdentifier> indentifers = new ArrayList<SolrCoreIdentifier>();
         final long now = System.currentTimeMillis();
         final long softBarrier = now - (SOFT_TIMEOUT * 60000);
@@ -96,6 +96,6 @@ public class SolrCoreShutdownTask implements Runnable {
             }
         }
         
-        indexAccessManager.removeFromCache(indentifers);
+        solrFacade.removeFromCache(indentifers);
     }
 }
