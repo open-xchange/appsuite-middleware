@@ -1,3 +1,7 @@
+* 2012-04-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21901: Enforce by-name lookup - not by-full-name - for primary mail account
+
 * 2012-04-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 21893: Dealing with outdated cache entry (invalidate & retry from storage)
