@@ -50,18 +50,16 @@
 package com.openexchange.solr.internal;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
@@ -139,20 +137,9 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
             }
             
             if (coreDir.mkdir()) {                          
-                final File skelDir = getSkelDir(solrHome, module);
-                final File confDir = new File(coreConfig.getConfigDirPath());
                 final File dataDir = new File(coreConfig.getDataDirPath());
-                if (confDir.mkdir() && dataDir.mkdir()) {
-                    /*
-                     * We successfully created the cores directory structure.
-                     * Now we have to copy the necessary configuration files.
-                     */
-                    try {
-                        FileUtils.copyDirectory(skelDir, confDir, false);
-                        return true;
-                    } catch (IOException e) {
-                        LOG.error("Could not initialize core configuration directory with contents from skel. Trying to roll back.");
-                    }
+                if (dataDir.mkdir()) {
+                	return true;
                 }
             }            
 
@@ -169,94 +156,12 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     
     private boolean structureIsConsistent(final String solrHome, final SolrCoreConfiguration coreConfig, final int module) throws OXException {
         final File coreDir = new File(coreConfig.getCoreDirPath());
-        if (isReadableAndWritableDirectory(coreDir)) {
-            final File[] files = coreDir.listFiles(new FilenameFilter() {
-                
-                @Override
-                public boolean accept(final File dir, final String name) {
-                    if (dir.equals(coreDir)) {
-                        if (name.equals(coreConfig.getConfigDirName()) || name.equals(coreConfig.getDataDirName())) {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
-            });
-            
-            if (files.length == 2) {
-                for (final File file : files) {
-                    if (!isReadableAndWritableDirectory(file)) {
-                        return false;
-                    }
-                }
-            }
-            
-            final File skelDir = getSkelDir(solrHome, module);
-            final File confDir = new File(coreDir, coreConfig.getConfigDirName());
-            final String[] confFileNames = confDir.list();
-            for (final String fileName : skelDir.list()) {
-                if (!ArrayUtils.contains(confFileNames, fileName)) {
-                    return false;
-                }
-                
-                try {
-                    final long skelChecksum = FileUtils.checksumCRC32(new File(skelDir, fileName));
-                    final long confChecksum = FileUtils.checksumCRC32(new File(confDir, fileName));
-                    if (skelChecksum != confChecksum) {
-                        return false;
-                    }
-                } catch (IOException e) {
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-        
-        return false;
+        final File dataDir = new File(coreConfig.getDataDirPath());
+        return isReadableAndWritableDirectory(coreDir) && isReadableAndWritableDirectory(dataDir);
     }
     
     private boolean isReadableAndWritableDirectory(final File file) {
         return file.exists() && file.isDirectory() && file.canRead() && file.canWrite();
-    }
-    
-    private File getSkelDir(final String solrHome, int module) throws OXException {
-        final String moduleDir;
-        switch (module) {
-        
-        case Types.EMAIL:
-            moduleDir = "mail";
-            break;
-            
-        case Types.APPOINTMENT:
-            moduleDir = "calendar";
-            break;
-            
-        case Types.CONTACT:
-            moduleDir = "contacts";
-            break;
-            
-        case Types.TASK:
-            moduleDir = "tasks";
-            break;
-            
-        case Types.INFOSTORE:
-            moduleDir = "infostore";
-            break;
-            
-        default:
-            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
-        
-        }
-        
-        final String skelPath = solrHome + IOUtils.DIR_SEPARATOR + "skel" + IOUtils.DIR_SEPARATOR + moduleDir;
-        final File skelDir = new File(skelPath);
-        if (skelDir.exists()) {
-            return skelDir;
-        }
-        
-        throw SolrExceptionCodes.FILE_NOT_EXISTS_ERROR.create(skelPath);
     }
     
     @Override

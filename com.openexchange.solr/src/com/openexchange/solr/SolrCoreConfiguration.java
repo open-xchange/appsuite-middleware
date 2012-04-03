@@ -51,10 +51,8 @@ package com.openexchange.solr;
 
 import java.io.File;
 import java.net.URI;
-import com.openexchange.config.ConfigurationService;
+
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
-import com.openexchange.solr.internal.Services;
 
 
 /**
@@ -72,32 +70,13 @@ public class SolrCoreConfiguration {
     
     private final String dataDirPath;
     
-    private final String configDirPath;
-    
-    private final String schemaFileName;
-    
-    private final String configFileName;
-
-    private final String configFilePath;
-    
-    private final String configDirName;
-    
-    private final String dataDirName;
-    
     
     public SolrCoreConfiguration(final URI coreStoreUri, final SolrCoreIdentifier identifier) throws OXException {
         super();
-        final ConfigurationService config = Services.getService(ConfigurationService.class);        
         this.identifier = identifier;
         coreName = identifier.toString();
         coreDirPath = coreStoreUri.getPath() + File.separator + coreName;
-        dataDirPath = coreDirPath + File.separator + config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
-        configDirPath = coreDirPath + File.separator + config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME);
-        schemaFileName = config.getProperty(getPropertyForSchemaFileName(identifier.getModule()));
-        configFileName = config.getProperty(getPropertyForConfigFileName(identifier.getModule()));
-        configFilePath = configDirPath + File.separator + configFileName;
-        configDirName = config.getProperty(SolrProperties.PROP_CONFIG_DIR_NAME);;
-        dataDirName = config.getProperty(SolrProperties.PROP_DATA_DIR_NAME);
+        dataDirPath = coreDirPath + File.separator + "data";
     }
     
     public String getCoreName() {
@@ -111,56 +90,8 @@ public class SolrCoreConfiguration {
     public String getDataDirPath() {
         return dataDirPath;
     }
-    
-    public String getConfigDirPath() {
-        return configDirPath;
-    }
-    
-    public String getSchemaFileName() {
-        return schemaFileName;
-    }
-    
-    public String getConfigFileName() {
-        return configFileName;
-    }
-    
-    public String getConfigFilePath() {
-        return configFilePath;
-    }
-    
-    public String getConfigDirName() {
-        return configDirName;
-    }
-
-    public String getDataDirName() {
-        return dataDirName;
-    }
 
     public SolrCoreIdentifier getIdentifier() {
         return identifier;
-    }
-    
-    private static String getPropertyForSchemaFileName(final int module) throws OXException {
-        switch (module) {
-        
-        case Types.EMAIL:
-            return SolrProperties.PROP_SCHEMA_MAIL;
-                
-        default:
-            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
-            
-        }
-    }
-    
-    private static String getPropertyForConfigFileName(final int module) throws OXException {
-        switch (module) {
-        
-        case Types.EMAIL:
-            return SolrProperties.PROP_CONFIG_MAIL_NAME;
-                
-        default:
-            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
-            
-        }
     }
 }
