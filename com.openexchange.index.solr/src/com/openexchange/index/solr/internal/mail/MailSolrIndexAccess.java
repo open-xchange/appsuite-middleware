@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.mail;
 
 import static com.openexchange.index.solr.internal.SolrUtils.detectLocale;
 import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,6 +63,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -71,6 +73,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -653,9 +656,11 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         Map<String, Object> params = parameters.getParameters();
         final String sortField = null == params ? null : (String) params.get("sort");
         final ORDER order = null == params ? ORDER.asc : "desc".equalsIgnoreCase((String) params.get("order")) ? ORDER.desc : ORDER.asc;
-        Set<String> fields = null == params ? null : new HashSet<String>(Arrays.asList(((String) params.get("fields")).split(" *, *")));
-        if (null == fields) {
-            fields = storedFields;
+        final Set<String> fields;
+        if (params == null || !params.containsKey("fields")) {
+        	fields = storedFields;
+        } else {
+        	fields = new HashSet<String>(Arrays.asList(((String) params.get("fields")).split(" *, *")));
         }
         params = null;
         final String[] fieldArray;
