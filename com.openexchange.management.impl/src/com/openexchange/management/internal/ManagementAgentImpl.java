@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -65,9 +66,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
+import javax.management.remote.rmi.RMIJRMPServerImpl;
+import javax.management.remote.rmi.RMIServerImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementExceptionCode;
 import com.openexchange.management.ManagementService;
@@ -132,19 +134,19 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         }
         try {
             if (jmxSinglePort) {
-                // We create a couple of SslRMIClientSocketFactory and 
+                // We create a couple of SslRMIClientSocketFactory and
                 // SslRMIServerSocketFactory. We will use the same factories to export
-                // the RMI Registry and the JMX RMI Connector Server objects. This 
+                // the RMI Registry and the JMX RMI Connector Server objects. This
                 // will allow us to use the same port for all the exported objects.
                 // If we didn't use the same factories everywhere, we would have to
                 // use at least two ports, because two different RMI Socket Factories
                 // cannot share the same port.
                 //
-                final CustomRMISocketFactory sf = new CustomRMISocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
-                final RMIClientSocketFactory csf = sf; //new CustomSslRMIClientSocketFactory();
-                final RMIServerSocketFactory ssf = sf; //new CustomSslRmiServerSocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
+                //// final CustomRMISocketFactory sf = new CustomRMISocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
+                final RMIClientSocketFactory csf = new CustomSslRMIClientSocketFactory();
+                final RMIServerSocketFactory ssf = new CustomSslRmiServerSocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 // Create the RMI Registry using the SSL socket factories above.
-                // In order to use a single port, we must use these factories 
+                // In order to use a single port, we must use these factories
                 // everywhere, or nowhere. Since we want to use them in the JMX
                 // RMI Connector server, we must also use them in the RMI Registry.
                 // Otherwise, we wouldn't be able to use a single port.
@@ -160,7 +162,9 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         registry0.list();
                     } catch (final RemoteException e) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("No responsive RMI registry found that listens on port " + jmxPort + ". A new one is going to be created", e);
+                            LOG.debug(
+                                "No responsive RMI registry found that listens on port " + jmxPort + ". A new one is going to be created",
+                                e);
                         }
                         /*
                          * Create a new one
@@ -176,19 +180,30 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 }
                 // Environment map.
                 //
-                final Map<String,Object> env = new HashMap<String,Object>();
+                final Map<String, Object> env = new HashMap<String, Object>();
+                // Manually creates and binds a JMX RMI Connector Server stub with the
+                // registry created above: the port we pass here is the port that can
+                // be specified in "service:jmx:rmi://"+hostname+":"+port - where the
+                // RMI server stub and connection objects will be exported.
+                // Here we choose to use the same port as was specified for the
+                // RMI Registry. We can do so because we're using \*the same\* client
+                // and server socket factories, for the registry itself \*and\* for this
+                // object.
+                //
+                final RMIServerImpl stub = new RMIJRMPServerImpl(jmxPort, csf, ssf, env);
+
                 // Now specify the SSL Socket Factories:
                 //
                 // For the client side (remote)
                 //
-                env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,csf);
+                //// env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,csf);
                 // For the server side (local)
                 //
-                env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,ssf);
-                // For binding the JMX RMI Connector Server with the registry 
+                ////env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,ssf);
+                // For binding the JMX RMI Connector Server with the registry
                 // created above:
                 //
-                env.put("com.sun.jndi.rmi.factory.socket", csf);
+                // //env.put("com.sun.jndi.rmi.factory.socket", csf);
                 // Create an RMI connector server.
                 //
                 // As specified in the JMXServiceURL the RMIServer stub will be
@@ -199,15 +214,41 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 //
                 // The port specified in "service:jmx:rmi://"+hostname+":"+port
                 // is the second port, where RMI connection objects will be exported.
-                // Here we use the same port as that we choose for the RMI registry. 
+                // Here we use the same port as that we choose for the RMI registry.
                 // The port for the RMI registry is specified in the second part
                 // of the URL, in "rmi://"+hostname+":"+port
                 //
                 final String hostname = InetAddress.getLocalHost().getHostName();
-                final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi://"+hostname+":"+jmxPort+"/jndi/rmi://"+hostname+":"+jmxPort+"/jmxrmi");
+                final JMXServiceURL url =
+                    new JMXServiceURL(
+                        "service:jmx:rmi://" + hostname + ":" + jmxPort + "/jndi/rmi://" + hostname + ":" + jmxPort + "/jmxrmi");
                 // Now create the server from the JMXServiceURL
                 //
-                final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, env, mbs);
+                //// final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, env, mbs)
+                // Now create the server manually....
+                // We can't use the JMXConnectorServerFactory because of
+                // http://bugs.sun.com/view_bug.do?bug_id=5107423
+                //
+                final JMXConnectorServer cs = new RMIConnectorServer(new JMXServiceURL("rmi", hostname, jmxPort), env, stub, mbs) {
+
+                    @Override
+                    public JMXServiceURL getAddress() {
+                        return url;
+                    }
+
+                    @Override
+                    public synchronized void start() throws IOException {
+                        try {
+                            registry.bind("jmxrmi", stub);
+                        } catch (final AlreadyBoundException x) {
+                            final IOException io = new IOException(x.getMessage());
+                            io.initCause(x);
+                            throw io;
+                        }
+                        super.start();
+                    }
+                };
+
                 // Start the RMI connector server.
                 //
                 cs.start();
