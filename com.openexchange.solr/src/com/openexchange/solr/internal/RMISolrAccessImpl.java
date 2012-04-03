@@ -172,4 +172,9 @@ public class RMISolrAccessImpl implements RMISolrAccessService {
     public QueryResponse queryRmi(final SolrCoreIdentifier identifier, final SolrParams params) throws RemoteException, OXException {
         return solrService.query(identifier, params);
     }
+
+	@Override
+	public void pingRmi() throws RemoteException {
+		return;		
+	}
 }

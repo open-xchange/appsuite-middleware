@@ -154,13 +154,13 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         if (coreContainer != null) {
             // TODO: throw exception
         }
-        
-        // FIXME : remove
-        optimize(identifier);        
+            
         try {
         	mutex.lock();
 			final SolrCore solrCore = coreContainer.remove(identifier.toString());
 			if (solrCore != null) {
+				// FIXME : remove optimize and implement a suitable optimize-strategy
+				optimize(identifier);   
 				solrCore.close();
 				return true;
 			}

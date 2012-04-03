@@ -56,16 +56,18 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
@@ -204,10 +206,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         final int contextId = identifier.getContextId();
         final int userId = identifier.getUserId();
         final int module = identifier.getModule();
-        if (embeddedAccess.hasActiveCore(identifier)) {
-            indexMysql.deactivateCoreEntry(contextId, userId, module);
-            embeddedAccess.stopCore(identifier);
-            
+        if (embeddedAccess.hasActiveCore(identifier) && indexMysql.deactivateCoreEntry(contextId, userId, module)) {
+            embeddedAccess.stopCore(identifier);            
             return true;       
         }
         
@@ -393,17 +393,23 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                  */
                 final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
                 final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);                
-                if (!embeddedAccess.startCore(configuration)) {
+                if (!embeddedAccess.startCore(configuration) && !embeddedAccess.hasActiveCore(identifier)) {
                     throw SolrExceptionCodes.DELEGATION_ERROR.create();
                 }
                 
                 return embeddedAccess;
             }
+            
             return getRMIAccess(solrCore.getServer());
         }
+        
         final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
         final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);    
         if (tryToStart(configuration)) {
+            return embeddedAccess;
+        }
+        
+        if (embeddedAccess.hasActiveCore(identifier)) {
             return embeddedAccess;
         }
         solrCore = indexMysql.getSolrCore(contextId, userId, module);
@@ -414,26 +420,43 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         return getRMIAccess(coreServer);
     }
     
-    private static final Map<String, RMISolrAccessService> rmiCache = new HashMap<String, RMISolrAccessService>();
+    
+    private static final ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
     
     private SolrAccessService getRMIAccess(final String server) throws OXException {
-        try {
-        	RMISolrAccessService rmiAccess = rmiCache.get(server);
-        	if (rmiAccess == null) {
-                final ConfigurationService config = Services.getService(ConfigurationService.class);
-                final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-                final Registry registry = LocateRegistry.getRegistry(server, rmiPort);
-                rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
-        	} else {
-//        		rmiAccess.
-        	}
-            
-            return new SolrAccessServiceRmiWrapper(rmiAccess);
-        } catch (final RemoteException e) {
+    	RMISolrAccessService rmiAccess = rmiCache.get(server);
+    	if (rmiAccess == null) {
+    		rmiAccess = updateRmiCache(server);
+    	} else {
+    		try {
+				rmiAccess.pingRmi();
+			} catch (final RemoteException e) {
+				rmiAccess = updateRmiCache(server);
+			}    		
+    	}
+        
+        return new SolrAccessServiceRmiWrapper(rmiAccess);
+    }
+    
+    private RMISolrAccessService updateRmiCache(final String server) throws OXException {
+    	try {
+    		rmiCache.remove(server);
+	    	final ConfigurationService config = Services.getService(ConfigurationService.class);
+	        final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+	        final Registry registry = LocateRegistry.getRegistry(server, rmiPort);
+	        final RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+
+	        final RMISolrAccessService cachedRmiAccess = rmiCache.putIfAbsent(server, rmiAccess);
+	        if (cachedRmiAccess == null) {
+	        	return rmiAccess;
+	        }
+	        
+	        return cachedRmiAccess;
+    	} catch (final RemoteException e) {
             throw new OXException(e);
         } catch (final NotBoundException e) {
             throw new OXException(e);
-        }
+        }        
     }
 
     private String getLocalServerAddress() throws OXException {

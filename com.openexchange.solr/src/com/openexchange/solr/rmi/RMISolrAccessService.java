@@ -193,5 +193,13 @@ public interface RMISolrAccessService extends Remote {
      * @throws OXException in case of solr errors.
      */
     public QueryResponse queryRmi(SolrCoreIdentifier identifier, SolrParams params) throws RemoteException, OXException;
+    
+    /**
+     * This method can be used to check if the registry object for a cached RMI stub is still accessible.
+     * If a RemoteException is thrown, the remote object was removed from the RMI registry.
+     * 
+     * @throws RemoteException
+     */
+    public void pingRmi() throws RemoteException;
 
 }

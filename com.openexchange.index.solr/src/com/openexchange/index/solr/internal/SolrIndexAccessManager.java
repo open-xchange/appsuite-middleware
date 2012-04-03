@@ -77,8 +77,8 @@ public class SolrIndexAccessManager {
         final TimerService timerService = Services.getService(TimerService.class);
         timerService.scheduleAtFixedRate(
             new SolrCoreShutdownTask(this),
-            SolrCoreShutdownTask.TIMEOUT,
-            SolrCoreShutdownTask.TIMEOUT,
+            SolrCoreShutdownTask.SOFT_TIMEOUT,
+            SolrCoreShutdownTask.SOFT_TIMEOUT,
             TimeUnit.MINUTES);
     }
 
@@ -100,9 +100,6 @@ public class SolrIndexAccessManager {
         final AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess<?>) indexAccess).getIdentifier());
         if (null != cachedIndexAccess) {
             final int retainCount = cachedIndexAccess.decrementRetainCount();
-            if (retainCount == 0) {
-                cachedIndexAccess.release();
-            }
         }
     }
 

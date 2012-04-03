@@ -94,7 +94,7 @@ public class SolrIndexFacadeTest extends TestCase {
     
     public void testAddAndGetMessage() throws Exception {
         final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
-        final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 84, 424242669);
+        final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 4, 1);
 //        final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
 //        final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
 //        indexAccess.addContent(document);
@@ -102,7 +102,7 @@ public class SolrIndexFacadeTest extends TestCase {
         final Map<String, Object> params = new HashMap<String, Object>(4);
         params.put("sort", "received_date");
         params.put("order", "desc");
-        final QueryParameters queryParameter = new QueryParameters.Builder("(user:84) AND (context:424242669) AND (content_flag:true)").setType(IndexDocument.Type.MAIL).setParameters(params).build();
+        final QueryParameters queryParameter = new QueryParameters.Builder("(user:4) AND (context:1) AND (content_flag:true)").setType(IndexDocument.Type.MAIL).setParameters(params).build();
         final IndexResult<MailMessage> result = indexAccess.query(queryParameter);
 //        assertEquals("Found wrong number of mails.", 1, result.getNumFound());        
 //        final MailMessage foundMessage = result.getResults().get(0).getObject();

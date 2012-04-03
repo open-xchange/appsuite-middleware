@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.junit.runner.JUnitCore;
-import org.osgi.framework.BundleContext;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
@@ -91,9 +91,10 @@ public class SolrIndexActivator extends HousekeepingActivator {
         LOG.info("Starting Bundle com.openexchange.index.solr");
         Services.setServiceLookup(this);
 
-        registerService(IndexFacadeService.class, new SolrIndexFacadeService());
-        addService(IndexFacadeService.class, new SolrIndexFacadeService());
-        registerService(CommandProvider.class, new UtilCommandProvider(context));
+        final SolrIndexFacadeService solrFacadeService = new SolrIndexFacadeService();
+        registerService(IndexFacadeService.class, solrFacadeService);
+        addService(IndexFacadeService.class, solrFacadeService);
+        registerService(CommandProvider.class, new UtilCommandProvider());
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
@@ -109,12 +110,8 @@ public class SolrIndexActivator extends HousekeepingActivator {
     
     public class UtilCommandProvider implements CommandProvider {
 
-        private final BundleContext context;
-
-
-        public UtilCommandProvider(final BundleContext context) {
+        public UtilCommandProvider() {
             super();
-            this.context = context;
         }
 
         public String getHelp() {

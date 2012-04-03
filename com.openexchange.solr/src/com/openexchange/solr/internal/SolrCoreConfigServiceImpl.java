@@ -109,7 +109,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     }
     
     @Override
-    public boolean createCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
+    public synchronized boolean createCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
         if (indexMysql.createCoreEntry(cid, uid, module)) {
             final SolrCore solrCore = indexMysql.getSolrCore(cid, uid, module);
             final SolrCoreStore store = indexMysql.getCoreStore(solrCore.getStore());
@@ -260,7 +260,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     }
     
     @Override
-    public void removeCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
+    public synchronized void removeCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
         final SolrCore solrCore = indexMysql.getSolrCore(cid, uid, module);
         final SolrCoreStore store = indexMysql.getCoreStore(solrCore.getStore());
         final URI storeUri = store.getUri();
