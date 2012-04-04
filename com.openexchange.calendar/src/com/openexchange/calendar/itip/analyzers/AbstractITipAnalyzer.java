@@ -79,7 +79,7 @@ import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.calendar.itip.generators.changes.generators.Style;
+import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.exception.OXException;
@@ -197,26 +197,17 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			return;
 		}
 
-		Style style = Style.ASK;
+		
 
 		String organizer = currentAppointment.getOrganizer();
 		if (organizer == null) {
 			organizer = newAppointment.getOrganizer();
 		}
 
-		if (organizer != null) {
-			if (!organizer.equalsIgnoreCase(user.getMail())) {
-				style = Style.FAIT_ACCOMPLI;
-			}
-		} else {
-			if (user.getId() == currentAppointment.getCreatedBy()) {
-				style = Style.FAIT_ACCOMPLI;
-			}
-		}
-
-		final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
-				new Details(style), new Participants(users, groups, resources,
-						style, true));
+		
+		final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
+				new Details(), new Participants(users, groups, resources,
+						true), new ShownAs());
 
 		final List<String> descriptions = cd.getChanges(ctx, currentAppointment,
 				newAppointment, change.getDiff(), wrapper, user.getLocale(),

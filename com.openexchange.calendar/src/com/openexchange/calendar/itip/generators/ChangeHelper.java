@@ -58,7 +58,7 @@ import com.openexchange.calendar.itip.generators.changes.generators.Attachments;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.calendar.itip.generators.changes.generators.Style;
+import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Appointment;
@@ -88,7 +88,7 @@ public class ChangeHelper {
 
 	private final TimeZone timezone;
 
-    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Appointment original, final Appointment update, final AppointmentDiff diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, final AttachmentMemory attachmentMemory, final ServiceLookup services, final Style style) {
+    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Appointment original, final Appointment update, final AppointmentDiff diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, final AttachmentMemory attachmentMemory, final ServiceLookup services) {
         super();
         this.original = original;
         this.update = update;
@@ -97,16 +97,17 @@ public class ChangeHelper {
         this.timezone = tz;
         this.wrapper = wrapper;
         this.ctx = ctx;
-        final Rescheduling rescheduling = new Rescheduling(style);
+        final Rescheduling rescheduling = new Rescheduling();
         boolean interested = true;
         if (participant.getConfiguration() != null) {
         	interested = participant.getConfiguration().interestedInStateChanges();
         }
-        final Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), style, interested);
-        final Details details = new Details(style);
+        final Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), interested);
+        final Details details = new Details();
         final Attachments attachments = new Attachments(attachmentMemory);
+        ShownAs shownAs = new ShownAs();
     	
-    	describer = new ChangeDescriber(rescheduling, details, participants, attachments);
+    	describer = new ChangeDescriber(rescheduling, details, participants, shownAs, attachments);
         
     }
     

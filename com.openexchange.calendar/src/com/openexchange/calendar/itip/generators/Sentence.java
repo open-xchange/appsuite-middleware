@@ -94,7 +94,7 @@ public class Sentence {
             Object[] extraInfo = extra.get(i);
             if (argument instanceof String) {
 				String str = (String) argument;
-				if (type == ArgumentType.STATUS && str != null && str.trim().length() != 0) {
+				if (type == ArgumentType.STATUS || type == ArgumentType.SHOWN_AS && str != null && str.trim().length() != 0) {
 					argument = sh.getString(str);
 				}
 			}
@@ -106,6 +106,7 @@ public class Sentence {
             case STATUS: wrapped.add(wrapper.state(argument, (ConfirmStatus) extraInfo[0])); break;
             case EMPHASIZED: wrapped.add(wrapper.emphasiszed(argument)); break;
             case REFERENCE: wrapped.add(wrapper.reference(argument)); break;
+            case SHOWN_AS: wrapped.add(wrapper.shownAs(argument,  (Integer) extraInfo[0])); break;
             }
         }
 
