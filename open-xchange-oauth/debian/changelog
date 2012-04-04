@@ -1,3 +1,9 @@
+open-xchange-oauth (7.0.0-2) unstable; urgency=low
+
+  * Internal release build for EDP drop #0
+
+ -- Steffen Templin <jenkins@hudson-slave-1.netline.de>  Wed, 04 Apr 2012 15:21:15 +0200
+
 open-xchange-oauth (7.0.0-1) unstable; urgency=low
 
   * Initial release
