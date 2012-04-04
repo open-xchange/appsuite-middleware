@@ -445,60 +445,35 @@ public class NotificationMail {
         if (getDiff() == null) {
             return false;
         }
+
         if (isAttachmentUpdate()) {
         	return false;
         }
-        
-        // First, let's see if any fields besides the state tracking fields have changed
-        HashSet<String> differing = new HashSet<String>(getDiff().getDifferingFieldNames());
-        
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
-            differing.remove(field);
-        }
-        if (!differing.isEmpty()) {
-            return false;
-        }
-        
-        // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
-            FieldUpdate update = getDiff().getUpdateFor(field);
-            if (update == null) {
-                continue;
-            }
-            Difference extraInfo = (Difference) update.getExtraInfo();
-            if (!extraInfo.getAdded().isEmpty()) {
-                return false;
-            }
-            if (!extraInfo.getRemoved().isEmpty()) {
-                return false;
-            }
 
-        }
-        
-        return true;
+        return diff.isAboutStateChangesOnly();
     }
-	
+
 	public boolean isAboutActorsStateChangeOnly() {
-		if (!isAboutStateChangesOnly()) {
-			return false;
-		}
-		
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
-            FieldUpdate update = getDiff().getUpdateFor(field);
-            if (update == null) {
-                continue;
-            }
-            Difference extraInfo = (Difference) update.getExtraInfo();
-            List<Change> changed = extraInfo.getChanged();
-            for (Change change : changed) {
-				if (!change.getIdentifier().equals(actor.getIdentifier()+"")) {
-					return false;
-				}
-			}
-        }
-        return true;		
+    	if (!isAboutStateChangesOnly()) {
+    		return false;
+    	}
+		return diff.isAboutCertainParticipantsStateChangeOnly(actor.getIdentifier()+"");
 	}
 
+	public boolean someoneElseChangedPrincipalsState() {
+		if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
+			return false;
+		}
+		return diff.isAboutCertainParticipantsStateChangeOnly(getPrincipal().getIdentifier()+"");
+	}
+
+    private boolean isAboutRecipientsStateChangeOnly() {
+    	if (!isAboutStateChangesOnly()) {
+    		return false;
+    	}
+		return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
+	}
+    	
     public void setActor(NotificationParticipant actor) {
         this.actor = actor;
     }
