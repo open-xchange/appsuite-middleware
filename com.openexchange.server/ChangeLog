@@ -17,7 +17,7 @@
 
 * 2012-03-31 - thorben.betten@open-xchange.com
 
- - Fix for bug 21623: Introduced safety checks to omit folders with empty identifiers
+ - Fix for bug 21623/21824: Introduced safety checks to omit folders with empty identifiers
  - Fix for bug 21725: Properly sorting by creator's display name not by its numeric identifier
 
 * 2012-03-30 - thorben.betten@open-xchange.com
