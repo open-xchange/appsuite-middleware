@@ -1,6 +1,7 @@
 * 2012-04-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 21903/21904: Ensure IDN presentation of obtained E-Mail address
+ - Fix for bug 21755: Fixed possible NPE on messaging bundle shut-down
 
 * 2012-04-03 - thorben.betten@open-xchange.com
 
