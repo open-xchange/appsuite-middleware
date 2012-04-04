@@ -298,8 +298,6 @@ public class Messages implements LocalizableStrings {
 	public static final String ORGANIZER_JUSTIFICATION = "You have received this mail because your are the organizer of this appointment.";
 
 	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this mail because this appointment contains the resource %1$s, that you manage.";
-
-
     
 }
 

@@ -202,7 +202,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     protected void initializeSession(final HttpServletRequest req) throws OXException {
-        if (null != getSessionObject(req)) {
+        if (null != getSessionObject(req, true)) {
             return;
         }
         /*
