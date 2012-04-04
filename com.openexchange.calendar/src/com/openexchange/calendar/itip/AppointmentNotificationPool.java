@@ -64,7 +64,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.generators.ITipMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -72,7 +71,7 @@ import com.openexchange.calendar.itip.generators.NotificationMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.MailSenderService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -171,7 +170,7 @@ public class AppointmentNotificationPool implements
 			if (handlingSuggestion == HandlingSuggestion.DONE) {
 				drop(contextId, objectID);
 			}
-		} catch (AbstractOXException e) {
+		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 			drop(contextId, objectID);
 		}
@@ -310,7 +309,7 @@ public class AppointmentNotificationPool implements
 		}
 		
 		
-		public HandlingSuggestion tick(boolean force) throws AbstractOXException {
+		public HandlingSuggestion tick(boolean force) throws OXException {
 			if (original == null) {
 				return HandlingSuggestion.DONE;
 			}
@@ -342,7 +341,7 @@ public class AppointmentNotificationPool implements
 		}
 
 
-		private void notifyAllParticipantsAboutOverallChanges() throws AbstractOXException {
+		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
 			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
 					session, -1);
 			if (moreThanOneUserActed()) {
@@ -370,7 +369,7 @@ public class AppointmentNotificationPool implements
 		}
 
 		// TODO: What about combined state changes and detail changes? The user should send a mail about both and the state change should be omitted in the state change summary.
-		private void notifyInternalParticipantsAboutDetailChangesAsIndividualUsers() throws AbstractOXException {
+		private void notifyInternalParticipantsAboutDetailChangesAsIndividualUsers() throws OXException {
 			if (!moreThanOneUserActed()) {
 				notifyAllParticipantsAboutOverallChanges();
 				return;
@@ -494,7 +493,7 @@ public class AppointmentNotificationPool implements
 			}
 		}
 
-		private void notifyInternalParticipantsAboutStateChanges() throws AbstractOXException {
+		private void notifyInternalParticipantsAboutStateChanges() throws OXException {
 			// We have to construct a pair of appointments in which only the participant status is changed
 			// For that we clone the new appointment
 			// And set the participant states to the values in the old appointment
@@ -521,7 +520,7 @@ public class AppointmentNotificationPool implements
 		}
 
 
-		private void notifyExternalParticipantsAboutOverallChangesAsOrganizer() throws AbstractOXException {
+		private void notifyExternalParticipantsAboutOverallChangesAsOrganizer() throws OXException {
 			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
 					session, -1);
 			if (moreThanOneUserActed()) {
