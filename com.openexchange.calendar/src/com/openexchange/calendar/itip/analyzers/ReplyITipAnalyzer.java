@@ -74,7 +74,7 @@ import com.openexchange.calendar.itip.generators.TypeWrapper;
 import com.openexchange.calendar.itip.generators.changes.ChangeDescriber;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.calendar.itip.generators.changes.generators.Style;
+import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
@@ -254,9 +254,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				.add(stateChange, ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
 			}
 			
-			final Style style = Style.ASK;
-			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
-					new Details(style));
+			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
+					new Details(), new ShownAs());
 			
 			change.setDiffDescription(cd.getChanges(ctx, change.getCurrentAppointment(), change.getNewAppointment(), diff, wrapper, locale, tz));
 			

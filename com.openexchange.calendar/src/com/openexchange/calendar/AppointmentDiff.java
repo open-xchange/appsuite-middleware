@@ -50,6 +50,7 @@
 package com.openexchange.calendar;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -141,6 +142,16 @@ public class AppointmentDiff {
         }
         return false;
     }
+    
+	public boolean anyFieldChangedOf(Collection<String> fields) {
+        for (String field : fields) {
+            if (differingFieldNames.contains(field)) {
+                return true;
+            }
+        }
+        return false;
+	}
+
     
 
 	public boolean anyFieldChangedOf(final int...fields) {
@@ -234,6 +245,9 @@ public class AppointmentDiff {
         
 
     }
+
+
+
 
 
 

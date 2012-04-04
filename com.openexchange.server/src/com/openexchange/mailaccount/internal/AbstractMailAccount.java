@@ -281,7 +281,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      * @param primaryAddress The primary email address
      */
     public void setPrimaryAddress(final String primaryAddress) {
-        this.primaryAddress = primaryAddress;
+        this.primaryAddress = primaryAddress == null ? primaryAddress : IDNA.toIDN(primaryAddress);;
     }
 
     /**

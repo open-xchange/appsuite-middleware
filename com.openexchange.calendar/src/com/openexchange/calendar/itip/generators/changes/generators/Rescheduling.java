@@ -80,20 +80,10 @@ public class Rescheduling implements ChangeDescriptionGenerator {
     }
 
     private String[] FIELDS = new String[] { "start_date", "end_date" };
-    private Style style;
-
-    public Rescheduling(Style style) {
-        this.style = style;
-    }
     
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
-        String msg = null;
-        switch (style) {
-        case FAIT_ACCOMPLI: msg = Messages.HAS_RESCHEDULED; break;
-        case ASK: msg = Messages.ASK_RESCHEDULE; break;
-        case INTENTION: msg = Messages.INTENTION_RESCHEDULE; break;
-        }
-
+        String msg = Messages.HAS_RESCHEDULED;
+      
         return Arrays.asList(
             new Sentence(msg)
             .add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL)

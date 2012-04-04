@@ -1,3 +1,7 @@
+* 2012-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21903: Ensure IDN presentation of obtained E-Mail address
+
 * 2012-04-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 21901: Enforce by-name lookup - not by-full-name - for primary mail account

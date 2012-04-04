@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import javax.mail.internet.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1140,6 +1141,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (useraliases == null) {
                 useraliases = dbuser.getAliases();
             }
+            if (null != useraliases) {
+                final HashSet<String> tmp = new HashSet<String>(useraliases.size());
+                for (final String email : useraliases) {
+                    tmp.add(IDNA.toIDN(email));
+                }
+                useraliases = tmp;
+            } else {
+                useraliases = new HashSet<String>(1);
+            }
 
             final String defaultSenderAddress = newuser.getDefaultSenderAddress();
             final String primaryEmail = newuser.getPrimaryEmail();
@@ -1153,23 +1163,26 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             String check_email1;
             String check_default_sender_address;
             if (primaryEmail != null) {
-                check_primary_mail = primaryEmail;
+                check_primary_mail = IDNA.toIDN(primaryEmail);
                 if (!primaryEmail.equals(dbuser.getPrimaryEmail())) {
                     tool.primaryMailExists(ctx, primaryEmail);
                 }
             } else {
-                check_primary_mail = dbuser.getPrimaryEmail();
+                final String email = dbuser.getPrimaryEmail();
+                check_primary_mail = email == null ? email : IDNA.toIDN(email);
             }
 
             if (email1 != null) {
-                check_email1 = email1;
+                check_email1 = IDNA.toIDN(email1);
             } else {
-                check_email1 = dbuser.getEmail1();
+                final String s = dbuser.getEmail1();
+                check_email1 = s == null ? s : IDNA.toIDN(s);
             }
             if (defaultSenderAddress != null) {
-                check_default_sender_address = defaultSenderAddress;
+                check_default_sender_address = IDNA.toIDN(defaultSenderAddress);
             } else {
-                check_default_sender_address = dbuser.getDefaultSenderAddress();
+                final String s = dbuser.getDefaultSenderAddress();
+                check_default_sender_address = s == null ? s : IDNA.toIDN(s);
             }
 
             final boolean found_primary_mail = useraliases.contains(check_primary_mail);
