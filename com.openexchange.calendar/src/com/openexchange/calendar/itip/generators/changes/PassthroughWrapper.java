@@ -91,4 +91,9 @@ public class PassthroughWrapper implements TypeWrapper {
 		return none(argument);
 	}
 
+	@Override
+	public String shownAs(Object argument, int shownAs) {
+		return none(argument);
+	}
+
 }

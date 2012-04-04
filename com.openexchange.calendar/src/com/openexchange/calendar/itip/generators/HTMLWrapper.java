@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip.generators;
 
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 
 
@@ -96,6 +97,21 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<em>"+argument.toString()+"</em>";
     }
+    
+    @Override
+    public String shownAs(Object argument, int shownAs) {
+        return wrap("shown_as_label "+shownAsCssClass(shownAs), argument);
+    }
+    
+    private String shownAsCssClass(int shownAs) {
+    	switch(shownAs) {
+        case Appointment.RESERVED: return "reserved";
+        case Appointment.TEMPORARY: return "temporary";
+        case Appointment.ABSENT: return "absent";
+        case Appointment.FREE: return "free";
+        }
+        return "unknown";
+	}
     
     private String wrap(String string, Object argument) {
         if (argument == null) {
