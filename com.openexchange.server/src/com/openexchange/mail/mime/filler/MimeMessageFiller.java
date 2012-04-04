@@ -1503,7 +1503,13 @@ public class MimeMessageFiller {
                                 }
                                 imageLocation = il;
                             } else {
-                                imageLocation = ImageUtility.parseImageLocationFrom(match);
+                                ImageLocation il;
+                                try {
+                                    il = ImageUtility.parseImageLocationFrom(match);
+                                } catch (final IllegalArgumentException e) {
+                                    il = null;
+                                }
+                                imageLocation = il;
                             }
                         }
                         if (null == imageLocation) {
