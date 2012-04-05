@@ -276,13 +276,22 @@ public final class ResponseWriter {
         // Write exception
         final JSONArray jsonStack = new JSONArray();
         jsonStack.put(exception.getSoleMessage());
-        final StackTraceElement[] traceElements = exception.getStackTrace();
-        if (null != traceElements && traceElements.length > 0) {            
-            final StringBuilder tmp = new StringBuilder(64);
+        StackTraceElement[] traceElements = exception.getStackTrace();
+        Throwable cause = exception;
+        final StringBuilder tmp = new StringBuilder(64);
+        while (null != traceElements && traceElements.length > 0) {            
             for (final StackTraceElement stackTraceElement : traceElements) {
                 tmp.setLength(0);
                 writeElementTo(stackTraceElement, tmp);
                 jsonStack.put(tmp.toString());
+            }
+            cause = cause.getCause();
+            if (null == cause) {
+                traceElements = null;
+            } else {
+                tmp.setLength(0);
+                jsonStack.put(tmp.append("Caused by: ").append(cause.getClass().getName()).append(": ").append(cause.getMessage()).toString());
+                traceElements = cause.getStackTrace();
             }
         }
         json.put(ERROR_STACK, jsonStack);

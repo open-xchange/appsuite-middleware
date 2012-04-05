@@ -56,14 +56,13 @@ import java.lang.management.ThreadMXBean;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMISocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -101,7 +100,7 @@ public abstract class AbstractAgent {
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractAgent.class));
 
-    private static final class AbstractAgentSocketFactory extends RMISocketFactory implements Serializable {
+    private static final class AbstractAgentSocketFactory implements RMIServerSocketFactory, Serializable {
 
         /**
          * serialVersionUID
@@ -113,7 +112,7 @@ public abstract class AbstractAgent {
         private final InetAddress bindAddress;
 
         public AbstractAgentSocketFactory(final int backlog, final String bindAddr) throws UnknownHostException {
-            this.backlog = backlog < 1 ? 50 : backlog;
+            this.backlog = backlog < 1 ? 0 : backlog;
             bindAddress = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
         }
 
@@ -123,8 +122,20 @@ public abstract class AbstractAgent {
         }
 
         @Override
-        public Socket createSocket(final String host, final int port) throws IOException {
-            return new Socket(bindAddress == null ? InetAddress.getByName(host) : bindAddress, port);
+        public boolean equals(final Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (obj == this) {
+                return true;
+            }
+
+            return obj.getClass().equals(getClass());
+        }
+
+        @Override
+        public int hashCode() {
+            return AbstractAgentSocketFactory.class.hashCode();
         }
 
     }
@@ -198,17 +209,17 @@ public abstract class AbstractAgent {
 
     }
 
-    private final AtomicBoolean initialized;
+    protected final AtomicBoolean initialized;
 
-    private final Map<Integer, Registry> registries;
+    protected final Map<Integer, Registry> registries;
 
-    private final Map<JMXServiceURL, JMXConnectorServer> connectors;
+    protected final Map<JMXServiceURL, JMXConnectorServer> connectors;
 
     protected final ThreadMXBean threadMXBean;
 
     protected final AtomicReference<GaugeMonitor> gaugeMonitorRef;
 
-    protected RMISocketFactory rmiSocketFactory;
+    protected RMIServerSocketFactory rmiSocketFactory;
 
     protected MBeanServer mbs;
 
@@ -369,11 +380,11 @@ public abstract class AbstractAgent {
      * @throws OXException If RMI registry cannot be created
      */
     protected final void addRMIRegistry(final int port, final String bindAddr) throws OXException {
-        Registry registry = null;
         try {
             if (initialized.compareAndSet(false, true)) {
                 rmiSocketFactory = new AbstractAgentSocketFactory(0, bindAddr);
             }
+            Registry registry = null;
             try {
                 /*
                  * If following calls succeed, a RMI registry has already been created that listens on this port
@@ -387,7 +398,7 @@ public abstract class AbstractAgent {
                 /*
                  * Create a new one
                  */
-                registry = LocateRegistry.createRegistry(port, rmiSocketFactory, rmiSocketFactory);
+                registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
             }
             registries.put(Integer.valueOf(port), registry);
             if (LOG.isInfoEnabled()) {

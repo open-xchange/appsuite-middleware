@@ -162,7 +162,9 @@ public final class AttachAction extends AbstractAttachmentAction {
                 return attach(attachments, uploadFiles, session, session.getContext(), session.getUser(), session.getUserConfiguration());
             }
             final JSONObject object = (JSONObject) requestData.getData();
-
+            if (object == null) {
+            	return new AJAXRequestResult(Integer.valueOf(0), new Date(System.currentTimeMillis()), "int");
+            }
             for (final AttachmentField required : Attachment.REQUIRED) {
                 if (!object.has(required.getName())) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(required.getName());

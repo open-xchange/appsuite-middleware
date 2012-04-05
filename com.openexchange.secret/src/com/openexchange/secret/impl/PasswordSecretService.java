@@ -67,6 +67,7 @@ public final class PasswordSecretService implements SecretService {
         super();
     }
 
+    @Override
     public String getSecret(final Session session) {
         return session.getPassword();
     }

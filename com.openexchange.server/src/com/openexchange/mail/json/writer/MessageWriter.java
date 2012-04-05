@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.writer;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -401,13 +402,19 @@ public final class MessageWriter {
             @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
-                    final String subject = mail.getSubject();
+                    String subject = mail.getSubject();
                     if (withKey) {
                         if (subject != null) {
-                            ((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(),subject.trim());
+                            subject = decodeMultiEncodedHeader(subject);
+                            ((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), subject.trim());
                         }
                     } else {
-                        ((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : subject.trim());
+                        if (subject == null) {
+                            ((JSONArray) jsonContainer).put(JSONObject.NULL);
+                        } else {
+                            subject = decodeMultiEncodedHeader(subject);
+                            ((JSONArray) jsonContainer).put(subject.trim());
+                        }
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

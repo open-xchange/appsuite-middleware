@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -90,25 +91,25 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     @Override
     public AJAXRequestData parseRequest(final HttpServletRequest req, final ServerSession session, final DispatcherServlet servlet) throws IOException, OXException {
-        final AJAXRequestData retval = new AJAXRequestData();
-        servlet.parseHostName(retval, req, session);
+        final AJAXRequestData requestData = new AJAXRequestData();
+        AJAXRequestDataTools.parseHostName(requestData, req, session);
         /*
          * Set the module
          */
-        retval.setModule(getModule());
+        requestData.setModule(getModule());
         /*
          * Set request URI
          */
-        retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
+        requestData.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
         /*
          * Determine action by path information (extra path information follows the Servlet path but precedes the query string and
          * will start with a "/" character)
          */
-        parseByPathInfo(retval, req.getPathInfo(), req);
+        parseByPathInfo(requestData, req.getPathInfo(), req);
         /*
          * Set the format
          */
-        retval.setFormat(req.getParameter("format"));
+        requestData.setFormat(req.getParameter("format"));
         /*
          * Pass all parameters to AJAX request object
          */
@@ -116,8 +117,8 @@ public abstract class AbstractMethodHandler implements MethodHandler {
             @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
             for (final Entry<String, String[]> entry : entrySet) {
                 final String name = entry.getKey();
-                if (!retval.containsParameter(name)) {
-                    retval.putParameter(name, entry.getValue()[0]);
+                if (!requestData.containsParameter(name)) {
+                    requestData.putParameter(name, entry.getValue()[0]);
                 }
             }
         }
@@ -127,19 +128,19 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag) {
-                retval.setETag(eTag);
+                requestData.setETag(eTag);
             }
         }
         /*
          * Body data
          */
         if (shouldApplyBody()) {
-            applyBodyObject(retval, req);
+            applyBodyObject(requestData, req);
         }
         /*
          * Return parsed AJAX request data
          */
-        return retval;
+        return requestData;
     }
 
     /**
@@ -152,11 +153,11 @@ public abstract class AbstractMethodHandler implements MethodHandler {
     /**
      * Parses by path info (extra path information follows the Servlet path but precedes the query string and will start with a "/" character)
      *
-     * @param retval The AJAX request data
+     * @param requestData The AJAX request data
      * @param pathInfo The path info
      * @param req The HTTP request
      */
-    protected abstract void parseByPathInfo(AJAXRequestData retval, String pathInfo, HttpServletRequest req) throws IOException, OXException;
+    protected abstract void parseByPathInfo(AJAXRequestData requestData, String pathInfo, HttpServletRequest req) throws IOException, OXException;
 
     /**
      * Whether to apply body data.

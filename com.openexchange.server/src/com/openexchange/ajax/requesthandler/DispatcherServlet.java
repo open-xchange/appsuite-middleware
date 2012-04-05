@@ -51,15 +51,8 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
@@ -69,18 +62,11 @@ import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -97,20 +83,6 @@ public class DispatcherServlet extends SessionServlet {
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
-
-    private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
-
-        private final HttpServletRequest req;
-
-        protected HTTPRequestInputStreamProvider(final HttpServletRequest req) {
-            this.req = req;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return req.getInputStream();
-        }
-    }
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -136,7 +108,10 @@ public class DispatcherServlet extends SessionServlet {
         return DISPATCHER.get();
     }
 
-    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();
+    /**
+     * The prefix reference.
+     */
+    protected static final AtomicReference<String> PREFIX = new AtomicReference<String>();
 
     /**
      * Sets the prefix.
@@ -159,10 +134,25 @@ public class DispatcherServlet extends SessionServlet {
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
     /**
+     * The default <code>AJAXRequestDataTools</code>.
+     */
+    protected final AJAXRequestDataTools defaultRequestDataTools;
+
+    /**
      * Initializes a new {@link DispatcherServlet}.
      */
     public DispatcherServlet() {
         super();
+        defaultRequestDataTools = AJAXRequestDataTools.getInstance();
+    }
+
+    /**
+     * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
+     * 
+     * @return The <code>AJAXRequestDataTools</code> instance
+     */
+    protected AJAXRequestDataTools getAjaxRequestDataTools() {
+        return defaultRequestDataTools;
     }
 
     /**
@@ -223,11 +213,15 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final ServerSession session = getSessionObject(httpRequest);
+            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(requestDataTools.getModule(PREFIX.get(), httpRequest), requestDataTools.getAction(httpRequest)));
+            if (null == session) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData requestData = parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session);
+            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
             requestData.setSession(session);
             /*
              * Start dispatcher processing
@@ -264,7 +258,9 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    /**
+  
+
+	/**
      * Sends a proper response to requesting client after request has been orderly dispatched.
      *
      * @param requestData The AJAX request data
@@ -287,168 +283,8 @@ public class DispatcherServlet extends SessionServlet {
         candidate.write(requestData, result, httpRequest, httpResponse);
     }
 
-    /**
-     * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     *
-     * @param req The HTTP Servlet request
-     * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
-     * @param isFileUpload Whether passed request is considered as a file upload
-     * @param session The associated session
-     * @return An appropriate {@link AJAXRequestData} instance
-     * @throws IOException If an I/O error occurs
-     * @throws OXException If an OX error occurs
-     */
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
-        final AJAXRequestData retval = new AJAXRequestData();
-        parseHostName(retval, req, session);
-        /*
-         * Set the module
-         */
-        {
-            String pathInfo = req.getRequestURI();
-            final int lastIndex = pathInfo.lastIndexOf(';');
-            if (lastIndex > 0) {
-                pathInfo = pathInfo.substring(0, lastIndex);
-            }
-            retval.setModule(pathInfo.substring(PREFIX.get().length()));
-        }
-        /*
-         * Set request URI
-         */
-        retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
-        /*
-         * Set the action
-         */
-        {
-            final String action = req.getParameter("action");
-            if (null == action) {
-                retval.setAction(req.getMethod().toUpperCase(Locale.US));
-            } else {
-                retval.setAction(action);
-            }
-        }
-        /*
-         * Set the format
-         */
-        retval.setFormat(req.getParameter("format"));
-        /*
-         * Pass all parameters to AJAX request object
-         */
-        {
-            @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
-            for (final Entry<String, String[]> entry : entrySet) {
-                retval.putParameter(entry.getKey(), entry.getValue()[0]);
-            }
-        }
-        /*
-         * Check for ETag header to support client caching
-         */
-        {
-            final String eTag = req.getHeader("If-None-Match");
-            if (null != eTag) {
-                retval.setETag(eTag);
-            }
-        }
-        /*
-         * Set request body
-         */
-        if (isFileUpload) {
-            final UploadEvent upload = processUploadStatic(req);
-            final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
-            while (iterator.hasNext()) {
-                retval.addFile(iterator.next());
-            }
-            final Iterator<String> names = upload.getFormFieldNames();
-            while (names.hasNext()) {
-                final String name = names.next();
-                retval.putParameter(name, upload.getFormField(name));
-            }
-            retval.setUploadEvent(upload);
-        } else if (preferStream || parseBoolParameter("binary", req)) {
-            /*
-             * Pass request's stream
-             */
-            retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
-        } else {
-            /*
-             * Guess an appropriate body object
-             */
-            final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body)) {
-                /*
-                 * Expect the body to be a JSON object
-                 */
-                try {
-                    retval.setData(new JSONObject(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
-                }
-            } else if (startsWith('[', body)) {
-                /*
-                 * Expect the body to be a JSON array
-                 */
-                try {
-                    retval.setData(new JSONArray(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
-                }
-            } else {
-                retval.setData(0 == body.length() ? null : body);
-            }
-        }
-        return retval;
-    }
+    
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes")));
-
-    private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
-        final String parameter = req.getParameter(name);
-        if (null == parameter) {
-            return false;
-        }
-        return BOOL_VALS.contains(parameter.toLowerCase(Locale.ENGLISH));
-    }
-
-    /**
-     * Parses host name, secure and AJP route.
-     *
-     * @param request The AJAX request data
-     * @param req The HTTP Servlet request
-     * @param session The associated session
-     */
-    public void parseHostName(final AJAXRequestData request, final HttpServletRequest req, final ServerSession session) {
-        request.setSecure(Tools.considerSecure(req));
-        {
-            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            if (null == hostnameService) {
-                request.setHostname(req.getServerName());
-            } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                request.setHostname(null == hn ? req.getServerName() : hn);
-            }
-        }
-        request.setRemoteAddress(req.getRemoteAddr());
-        request.setRoute(Tools.getRoute(req.getSession(true).getId()));
-    }
-
-    private static boolean startsWith(final char startingChar, final String toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
-    }
+   
 
 }

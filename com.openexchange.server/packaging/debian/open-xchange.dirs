@@ -1,5 +1,0 @@
-opt/open-xchange/etc/groupware/osgi
-opt/open-xchange/importCSV
-opt/open-xchange/sbin
-var/log/open-xchange
-var/spool/open-xchange/uploads

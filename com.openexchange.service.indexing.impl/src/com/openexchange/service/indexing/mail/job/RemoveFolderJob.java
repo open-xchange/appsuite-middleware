@@ -52,10 +52,9 @@ package com.openexchange.service.indexing.mail.job;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.service.indexing.mail.FakeSession;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
 
 /**
  * {@link RemoveFolderJob}
@@ -69,8 +68,6 @@ public final class RemoveFolderJob extends AbstractMailJob {
     private static final String SIMPLE_NAME = RemoveFolderJob.class.getSimpleName();
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveFolderJob.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final String fullName;
 
@@ -89,23 +86,22 @@ public final class RemoveFolderJob extends AbstractMailJob {
 
     @Override
     public void performJob() throws OXException, InterruptedException {
+        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            try {
-                final IndexAdapter indexAdapter = getAdapter();
-                final Session session = new FakeSession(info.primaryPassword, userId, contextId);
-                indexAdapter.deleteFolder(fullName, accountId, session);
-            } finally {
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(SIMPLE_NAME + " \"" + info + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
-                }
-            }
+            indexAccess = getIndexAccess();
+            final StringBuilder queryBuilder = new StringBuilder(128);
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+            indexAccess.deleteByQuery(queryBuilder.toString());
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
+        } finally {
+            releaseAccess(indexAccess);
         }
     }
 

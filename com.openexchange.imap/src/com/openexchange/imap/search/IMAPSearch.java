@@ -101,6 +101,9 @@ public final class IMAPSearch {
      */
     public static int[] searchMessages(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, final IMAPConfig imapConfig) throws MessagingException, OXException {
         final int msgCount = imapFolder.getMessageCount();
+        if (msgCount <= 0) {
+            return new int[0];
+        }
         final MailFields mailFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm));
         final boolean hasSearchCapability;
         {
@@ -269,7 +272,7 @@ public final class IMAPSearch {
 
     private static int[] search(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (0 == messageCount) {
+        if (0 >= messageCount) {
             return new int[0];
         }
         final int[] seqNums = (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {

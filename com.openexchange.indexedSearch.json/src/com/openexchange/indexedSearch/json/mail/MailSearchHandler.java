@@ -50,22 +50,28 @@
 package com.openexchange.indexedSearch.json.mail;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BooleanTerm;
@@ -73,8 +79,6 @@ import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.service.MailAttributeFetcher;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.mail.smal.adaper.IndexService;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -89,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailSearchHandler implements SearchHandler {
+public final class MailSearchHandler implements SearchHandler, SolrMailConstants {
 
     private final ServiceLookup services;
 
@@ -103,12 +107,13 @@ public final class MailSearchHandler implements SearchHandler {
 
     @Override
     public List<FieldResults> search(final JSONObject jsonQuery, final int[] range, final int[] fields, final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final IndexFacadeService indexFacade = services.getService(IndexFacadeService.class);
+        if (null == indexFacade) {
+            return Collections.emptyList();
+        }
+        IndexAccess<MailMessage> indexAccess = null;
         try {
-            final IndexService indexService = services.getService(IndexService.class);
-            if (null == indexService) {
-                return Collections.emptyList();
-            }
-            final IndexAdapter adapter = indexService.getAdapter();
+            indexAccess = indexFacade.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, session);
             // Parse query
             final MailQuery query = MailQuery.queryFor(jsonQuery);
             final MailField[] mailFields = MailField.getFields(fields);
@@ -120,17 +125,40 @@ public final class MailSearchHandler implements SearchHandler {
                 try {
                     more[0] = false;
                     final String name = null == names ? null : names.get(i++);
-                    final List<MailMessage> results =
-                        adapter.search(
-                            query.getFullName(),
-                            map(searchTerm),
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.DESC,
-                            mailFields,
-                            new IndexRange(range[0], range[1]),
-                            query.getAccountId(),
-                            session,
-                            more);
+                    final String queryString;
+                    {
+                        final StringBuilder queryBuilder = new StringBuilder(128);
+                        queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+                        queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+                        final int accountId = query.getAccountId();
+                        if (accountId >= 0) {
+                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+                        }
+                        final String fullName = query.getFullName();
+                        if (null != fullName) {
+                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+                        }
+                        if (null != searchTerm) {
+                            queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(map(searchTerm))).append(')');
+                        }
+                        queryString = queryBuilder.toString();
+                    }
+                    final Map<String, Object> params = new HashMap<String, Object>(4);
+                    // TODO: params.put("fields", mailFields);
+                    params.put("sort", FIELD_RECEIVED_DATE);
+                    params.put("order", "desc");
+                    final QueryParameters queryParameter =
+                        new QueryParameters.Builder(queryString).setOffset(range[0]).setLength(range[1] - range[0]).setType(
+                            IndexDocument.Type.MAIL).setParameters(params).build();
+                    final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+                    if (range[1] > 0 && range[1] < indexResult.getNumFound()) {
+                        more[0] = true;
+                    }
+                    final List<IndexDocument<MailMessage>> results = indexResult.getResults();
+                    final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+                    for (final IndexDocument<MailMessage> indexDocument : results) {
+                        mails.add(indexDocument.getObject());
+                    }
                     retval.add(new FieldResults(name, "mail", results, more[0]));
                 } catch (final InterruptedException e) {
                     // Thread interrupted
@@ -145,6 +173,10 @@ public final class MailSearchHandler implements SearchHandler {
             return retval;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != indexAccess) {
+                indexFacade.releaseIndexAccess(indexAccess);
+            }
         }
     }
 

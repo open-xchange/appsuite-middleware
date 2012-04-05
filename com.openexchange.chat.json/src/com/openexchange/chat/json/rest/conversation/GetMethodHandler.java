@@ -77,9 +77,9 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
-            retval.setAction("all");
+            requestData.setAction("all");
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;
@@ -88,7 +88,7 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                  * "Get all conversations"
                  *  GET /conversation
                  */
-                retval.setAction("all");
+                requestData.setAction("all");
             } else if (1 == length) {
                 /*-
                  * "Get specific conversation"
@@ -96,15 +96,15 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                  */
                 final String element = pathElements[0];
                 if (element.indexOf(',') < 0) {
-                    retval.setAction("get");
-                    retval.putParameter("id", element);
+                    requestData.setAction("get");
+                    requestData.putParameter("id", element);
                 } else {
-                    retval.setAction("list");
+                    requestData.setAction("list");
                     final JSONArray array = new JSONArray();
                     for (final String id : SPLIT_CSV.split(element)) {
                         array.put(id);
                     }
-                    retval.setData(array);
+                    requestData.setData(array);
                 }
             } else if ("message".equals(pathElements[1])) {
                 if (2 == length) {
@@ -112,25 +112,25 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                      * "Get all messages"
                      *  GET /conversation/11/message?since=<long:timestamp>
                      */
-                    retval.setAction("allMessages");
-                    retval.putParameter("id", pathElements[0]);
+                    requestData.setAction("allMessages");
+                    requestData.putParameter("id", pathElements[0]);
                 } else {
                     /*-
                      * "Get specific message"
                      *  GET /conversation/11/message/1234
                      */
-                    retval.putParameter("id", pathElements[0]);
+                    requestData.putParameter("id", pathElements[0]);
                     final String element = pathElements[2];
                     if (element.indexOf(',') < 0) {
-                        retval.setAction("getMessage");
-                        retval.putParameter("messageId", element);
+                        requestData.setAction("getMessage");
+                        requestData.putParameter("messageId", element);
                     } else {
-                        retval.setAction("listMessages");
+                        requestData.setAction("listMessages");
                         final JSONArray array = new JSONArray();
                         for (final String id : SPLIT_CSV.split(element)) {
                             array.put(id);
                         }
-                        retval.setData(array);
+                        requestData.setData(array);
                     }
                 }
             } else {

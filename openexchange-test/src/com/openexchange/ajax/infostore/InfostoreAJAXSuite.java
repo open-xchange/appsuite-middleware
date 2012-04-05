@@ -3,7 +3,6 @@ package com.openexchange.ajax.infostore;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
 
 public class InfostoreAJAXSuite extends TestSuite{
@@ -25,6 +24,7 @@ public class InfostoreAJAXSuite extends TestSuite{
 		tests.addTestSuite( SaveAsTest.class );
 		tests.addTestSuite( SearchTest.class );
 		tests.addTestSuite( CreateAndDeleteInfostoreTest.class );
+		tests.addTestSuite(DeleteMultipleFilesTest.class);
 
 		return tests;
 	}

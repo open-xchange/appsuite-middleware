@@ -173,3 +173,5 @@ com.openexchange.langdetect/jars
 com.openexchange.mail.smal/jars
 com.openexchange.index/jars
 com.openexchange.oauth.linked.json/build
+com.openexchange.index.solr/build
+com.openexchange.index.solr/jars

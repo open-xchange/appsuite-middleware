@@ -73,6 +73,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -113,6 +114,11 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     public static void setConfigService(final ConfigurationService service) {
         configService = service;
+    }
+
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        super.service(new CountingHttpServletRequest(req), resp);
     }
 
     @Override

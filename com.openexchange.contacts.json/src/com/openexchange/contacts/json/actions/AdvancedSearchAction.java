@@ -53,9 +53,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
@@ -77,6 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link AdvancedSearchAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "advanchedSearch", description = "Search contacts by filter (since 6.20).", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -141,4 +144,27 @@ public class AdvancedSearchAction extends ContactAction {
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        final List<Contact> contacts = new ArrayList<Contact>();
+        Date lastModified = new Date(0);
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = getContactService().searchContacts(request.getSession(), request.getSearchFilter(), 
+            		request.getFields(), request.getSortOptions());
+            while (searchIterator.hasNext()) {
+                final Contact contact = searchIterator.next();
+                lastModified = getLatestModified(lastModified, contact);
+                applyTimezoneOffset(contact, request.getTimeZone());
+                contacts.add(contact);
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+        }
+        request.sortInternalIfNeeded(contacts);
+        return new AJAXRequestResult(contacts, lastModified, "contact");
+    }
+    
 }

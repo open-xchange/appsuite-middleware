@@ -53,12 +53,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import org.json.JSONException;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -68,6 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ContactAction implements AJAXActionService {
 
@@ -87,10 +93,17 @@ public abstract class ContactAction implements AJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(requestData, session);
 
-        return perform(contactRequest);
+		return perform(contactRequest);
+//        try {
+//			return perform2(contactRequest);
+//		} catch (final JSONException e) {
+//			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+//		}
     }
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
+
+    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException, JSONException;
 
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
         try {
@@ -100,7 +113,46 @@ public abstract class ContactAction implements AJAXActionService {
         }
     }
 
-    protected Date getCorrectedTime(final Date date, final TimeZone timeZone) {
+    /**
+     * Gets the contact service.
+     * 
+     * @return the contact service 
+     * @throws OXException
+     */
+    protected ContactService getContactService() throws OXException {
+        try {
+            return serviceLookup.getService(ContactService.class);
+        } catch (final IllegalStateException e) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
+        }
+    }
+
+    /**
+     * Gets the latest modification date of the contact compared to another date. 
+     * 
+     * @param lastModified the date to compare
+     * @param contact the contact
+     * @return
+     */
+    protected static Date getLatestModified(final Date lastModified, final Contact contact) {
+    	final Date contactLastModified = contact.getLastModified();
+    	return lastModified.after(contactLastModified) ? lastModified : contactLastModified;
+    }
+    
+    /**
+     * Applies the timezone offsets to the last modified and creation dates in 
+     * the supplied contact.  
+     * 
+     * @param contact the contact to patch the times for
+     * @param timeZone the user's timezone
+     */
+    protected static void applyTimezoneOffset(final Contact contact, final TimeZone timeZone) {
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+    }
+    
+    protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {
         if (date == null) {
             return null;
         }

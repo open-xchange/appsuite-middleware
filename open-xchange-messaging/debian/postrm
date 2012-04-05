@@ -30,14 +30,14 @@ case "$1" in
 esac
 
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/facebookmessaging.properties \
-    /opt/open-xchange/etc/facebookmessaging.properties 6.99.9 open-xchange-messaging-facebook -- $1 \
+    /opt/open-xchange/etc/facebookmessaging.properties 6.20.99 open-xchange-messaging-facebook -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging-facebook)
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/rssmessaging.properties /opt/open-xchange/etc/rssmessaging.properties \
-    6.99.9 open-xchange-messaging-rss -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging-rss)
+    6.20.99 open-xchange-messaging-rss -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging-rss)
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/twittermessaging.properties \
-    /opt/open-xchange/etc/twittermessaging.properties 6.99.9 open-xchange-messaging-twitter -- $1 \
+    /opt/open-xchange/etc/twittermessaging.properties 6.20.99 open-xchange-messaging-twitter -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging-twitter)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/twitter.properties /opt/open-xchange/etc/twitter.properties 6.99.9 \
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/twitter.properties /opt/open-xchange/etc/twitter.properties 6.20.99 \
     open-xchange-twitter -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-twitter)
 
 # dh_installdeb will replace this with shell code automatically

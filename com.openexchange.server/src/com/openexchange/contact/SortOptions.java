@@ -76,6 +76,12 @@ public final class SortOptions {
 		this.order = order;
 	}
 
+	public SortOptions(final int rangeStart, final int limit) {
+		this();
+		this.limit = limit;
+		this.rangeStart = rangeStart;		
+	}
+
 	public SortOptions(final SortOrder... order) {
 		this(null, order);
 	}
@@ -86,6 +92,12 @@ public final class SortOptions {
 
 	public SortOptions() {
 		this((SortOrder[])null);
+	}
+
+	public SortOptions(final String collation, final ContactField orderBy, final Order order, final int rangeStart, final int limit) {
+		this(collation, orderBy, order);
+		this.limit = limit;
+		this.rangeStart = rangeStart;		
 	}
 
 	public SortOptions(final String collation, final ContactField orderBy, final Order order) {

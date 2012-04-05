@@ -49,19 +49,35 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link GetAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Action(
+    name = "get"
+    , description = "Get a specific JSlob associated with the current user and context." 
+    , method = RequestMethod.GET
+    , parameters = {
+        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        , @Parameter(name = "id", description = "The identifier of the JSlob.")
+    }
+)
 public final class GetAction extends JSlobAction {
 
     /**
@@ -84,12 +100,31 @@ public final class GetAction extends JSlobAction {
         final String id = jslobRequest.checkParameter("id");
         final JSlob jslob = jslobService.get(id, jslobRequest.getUserId(), jslobRequest.getContextId());
 
+        final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
+        if (!isEmpty(serlvetRequestURI)) {
+            final List<JSONPathElement> jPath = JSONPathElement.parsePath(serlvetRequestURI);
+            final Object object = JSONPathElement.getPathFrom(jPath, jslob);
+            return new AJAXRequestResult(null == object ? JSONObject.NULL : object, "json");
+        }
+
         return new AJAXRequestResult(jslob, "jslob");
     }
 
     @Override
     public String getAction() {
         return "get";
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

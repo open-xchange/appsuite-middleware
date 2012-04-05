@@ -51,7 +51,7 @@ package com.openexchange.mail.smal.impl.json;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 
 /**
  * {@link AbstractJSONMethod} - An abstract JSON method.
@@ -82,7 +82,7 @@ public abstract class AbstractJSONMethod {
      */
     protected static JSONServerSetting getVoipNowServerSetting() {
         final JSONServerSetting retval = new JSONServerSetting();
-        final ConfigurationService service = SMALServiceLookup.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService service = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
         retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
         retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
         retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));

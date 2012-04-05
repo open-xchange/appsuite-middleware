@@ -405,7 +405,7 @@ public final class InternalList {
         // Restores the initial permissions on the public root folder.
         new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask(),
 
-        // +++++++++++++++++++++++++++++++++ Version 7.0.0 starts here. +++++++++++++++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++ Version 6.21.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Add "replyTo" column to mail/transport account table
         new MailAccountAddReplyToTask(),

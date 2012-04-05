@@ -51,10 +51,13 @@ package com.openexchange.ajax.writer;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.exception.OXException;
@@ -139,7 +142,7 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.NUMBER_OF_IMAGES, contact.getNumberOfImages(), json);
         if (contact.containsImage1()) {
             final byte[] imageData = contact.getImage1();
-            if (imageData != null) {
+            if (imageData != null && null != session) {
                 try {
                     final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                     final ImageLocation imageLocation =

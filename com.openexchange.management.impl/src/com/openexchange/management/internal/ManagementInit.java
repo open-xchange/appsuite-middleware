@@ -110,6 +110,9 @@ public final class ManagementInit implements Initialization {
             }
             final int jmxPort = c.getIntProperty("JMXPort", 9999);
             agent.setJmxPort(jmxPort);
+            final int jmxServerPort = c.getIntProperty("JMXServerPort", 3000);
+            agent.setJmxServerPort(jmxServerPort);
+            agent.setJmxSinglePort(c.getBoolProperty("JMXSinglePort", false));
             agent.setJmxBindAddr(bindAddress);
             String jmxLogin = c.getProperty("JMXLogin");
             if (jmxLogin != null && (jmxLogin = jmxLogin.trim()).length() > 0) {

@@ -85,6 +85,7 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
@@ -1082,9 +1083,18 @@ public class Login extends AJAXServlet {
     }
 
     protected LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws OXException {
-        final String login = req.getParameter(loginParamName);
-        if (null == login) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
+        final String login;
+        {
+            String tmp = req.getParameter(loginParamName);
+            if (null == tmp) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
+            }
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final Object prop = null == service ? null : service.getProperty("com.openexchange.login.disableTrimLogin");
+            if (null == prop || !(Boolean.parseBoolean(prop.toString()))) {
+                tmp = tmp.trim();
+            }
+            login = tmp;
         }
         final String password = req.getParameter(LoginFields.PASSWORD_PARAM);
         if (null == password) {

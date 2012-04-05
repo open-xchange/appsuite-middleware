@@ -111,7 +111,11 @@ public final class IMAPSort {
         boolean applicationSort = true;
         Message[] msgs = null;
         final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-        final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            return new Message[0];
+        }
+        final int size = filter == null ? messageCount : filter.length;
         /*
          * Perform an IMAP-based sort provided that SORT capability is supported and IMAP sort is enabled through config or number of
          * messages to sort exceeds limit.
@@ -300,7 +304,7 @@ public final class IMAPSort {
      * @throws MessagingException If a messaging error occurs
      */
     public static long[] allUIDs(final IMAPFolder imapFolder, final boolean descending, final IMAPConfig imapConfig) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */

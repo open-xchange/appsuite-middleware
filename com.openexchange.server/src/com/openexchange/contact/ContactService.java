@@ -257,49 +257,45 @@ public interface ContactService {
      * Searches for contacts.
      * 
      * @param session the session
-     * @param folderId the ID of the parent folder
      * @param term the search term
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param session the session
-     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param session the session
-     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException;
 
     /**
      * Searches for contacts.
      * 
      * @param session the session
-     * @param folderId the ID of the parent folder
      * @param term the search term
      * @param fields the contact fields that should be retrieved
      * @param sortOptions the options to sort the results 
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> searchContacts(Session session, String folderId, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.

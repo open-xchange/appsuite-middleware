@@ -77,7 +77,7 @@ public final class DeleteMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
@@ -92,12 +92,12 @@ public final class DeleteMethodHandler extends AbstractMethodHandler {
              *  DELETE /conversation/11
              */
             final String element = pathElements[0];
-            retval.setAction("delete");
+            requestData.setAction("delete");
             final JSONArray array = new JSONArray();
             for (final String id : SPLIT_CSV.split(element)) {
                 array.put(id);
             }
-            retval.setData(array);
+            requestData.setData(array);
         } else if ("message".equals(pathElements[1])) {
             if (2 == length) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create();
@@ -106,14 +106,14 @@ public final class DeleteMethodHandler extends AbstractMethodHandler {
              * "Delete specific message"
              *  DELETE /conversation/11/message/1234
              */
-            retval.putParameter("id", pathElements[0]);
+            requestData.putParameter("id", pathElements[0]);
             final String element = pathElements[2];
-            retval.setAction("deleteMessages");
+            requestData.setAction("deleteMessages");
             final JSONArray array = new JSONArray();
             for (final String id : SPLIT_CSV.split(element)) {
                 array.put(id);
             }
-            retval.setData(array);
+            requestData.setData(array);
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
         }

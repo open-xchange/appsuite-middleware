@@ -68,8 +68,6 @@ public final class IndexingServiceInit {
 
     private final ServiceLookup services;
 
-    private volatile IndexingServiceQueueListener listener;
-
     private IndexingQueueSender sender;
 
     private IndexingQueueAsyncReceiver receiver;
@@ -130,7 +128,8 @@ public final class IndexingServiceInit {
              */
             final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
             final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
-            receiver = new IndexingQueueAsyncReceiver(new IndexingServiceQueueListener(executor));
+            final IndexingServiceQueueListener listener = new IndexingServiceQueueListener(executor);
+            receiver = new IndexingQueueAsyncReceiver(listener);
         }
     }
 
@@ -161,13 +160,10 @@ public final class IndexingServiceInit {
         }
     }
 
-    /**
-     * Gets the listener
-     * 
-     * @return The listener
-     */
-    public IndexingServiceQueueListener getListener() {
-        return listener;
+    @Override
+    protected void finalize() throws Throwable {
+        drop();
+        super.finalize();
     }
 
     /**

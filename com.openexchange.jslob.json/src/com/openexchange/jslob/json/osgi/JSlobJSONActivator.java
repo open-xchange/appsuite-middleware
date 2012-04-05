@@ -49,15 +49,23 @@
 
 package com.openexchange.jslob.json.osgi;
 
+import javax.servlet.ServletException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
+import com.openexchange.jslob.json.rest.jslob.JSlobRestServlet;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlobJSONActivator extends AJAXModuleActivator {
@@ -69,8 +77,35 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSlobJSONActivator.class));
         registerModule(new JSlobActionFactory(this), "jslob");
         registerService(ResultConverter.class, new JSlobJSONResultConverter());
+
+        track(HttpService.class, new SimpleRegistryListener<HttpService>() {
+
+            @Override
+            public void added(final ServiceReference<HttpService> ref, final HttpService service) {
+                try {
+                    service.registerServlet("/jslob", new JSlobRestServlet(), null, null);
+                } catch (final ServletException e) {
+                    log.error("Servlet registration failed: " + JSlobRestServlet.class.getName(), e);
+                } catch (final NamespaceException e) {
+                    log.error("Servlet registration failed: " + JSlobRestServlet.class.getName(), e);
+                }
+            }
+
+            @Override
+            public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
+                service.unregister("/jslob");
+            }
+        });
+        openTrackers();
+        log.info("Bundle successfully started: com.openexchange.jslob.json");
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        com.openexchange.log.Log.valueOf(LogFactory.getLog(JSlobJSONActivator.class)).info("Bundle stopped: com.openexchange.jslob.json");
+    }
 }

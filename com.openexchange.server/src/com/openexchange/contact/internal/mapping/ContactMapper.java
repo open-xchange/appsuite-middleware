@@ -96,6 +96,19 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 			mapping.validate(contact);			
 		}
 	}
+	
+	@Override
+	public ContactMapping<? extends Object> get(final ContactField field) throws OXException {
+		if (null == field) {
+			throw new IllegalArgumentException("field");
+		}
+		final ContactMapping<? extends Object> mapping = mappings.get(field);
+		if (null == mapping) {
+			throw OXException.notFound(field.toString());
+		}
+		return mapping;
+	}
+
 
 	@Override
 	public Contact newInstance() {
@@ -111,7 +124,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 	protected EnumMap<ContactField, ? extends com.openexchange.groupware.tools.mappings.Mapping<? extends Object, Contact>> getMappings() {
 		return mappings;
 	}	
-
+	
 	/**
 	 * Holds all known contact mappings.
 	 */
@@ -1995,6 +2008,24 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             @Override
             public Date get(Contact contact) { 
                 return contact.getImageLastModified();
+            }
+        });
+  
+        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new StringMapping() {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setImageContentType(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsImageContentType();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getImageContentType();
             }
         });
 

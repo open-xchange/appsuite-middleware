@@ -163,6 +163,8 @@ public class AJAXRequestResult {
 
     private final Map<String, String> headers;
 
+    private final Map<String, Object> parameters;
+
     private String format;
 
     private long expires;
@@ -214,7 +216,8 @@ public class AJAXRequestResult {
      */
     public AJAXRequestResult(final Object resultObject, final Date timestamp, final String format) {
         super();
-        headers = new LinkedHashMap<String, String>();
+        headers = new LinkedHashMap<String, String>(8);
+        parameters = new HashMap<String, Object>(4);
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         if (format == null) {
@@ -419,6 +422,39 @@ public class AJAXRequestResult {
      */
     public Map<String, String> getHeaders() {
         return new HashMap<String, String>(headers);
+    }
+
+    /**
+     * Sets a parameter.
+     * 
+     * @param name The parameter name
+     * @param value The value; if <code>null</code> a remove is performed
+     */
+    public void setParameter(final String name, final Object value) {
+        if (null == value) {
+            parameters.remove(name);
+        } else {
+            parameters.put(name, value);
+        }
+    }
+
+    /**
+     * Gets the associated parameter value.
+     * 
+     * @param name The parameter name
+     * @return The associated value or <code>null</code> if there is no such parameter
+     */
+    public Object getParameter(final String name) {
+        return headers.get(name);
+    }
+
+    /**
+     * Gets the parameters
+     * 
+     * @return The parameters
+     */
+    public Map<String, Object> getParameters() {
+        return new HashMap<String, Object>(parameters);
     }
 
     @Override

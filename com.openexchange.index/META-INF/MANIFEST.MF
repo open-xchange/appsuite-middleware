@@ -2,19 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Index Bundle
 Bundle-SymbolicName: com.openexchange.index
-Bundle-Version: 7.0.0.0
+Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.index.osgi.IndexActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.exception,
- com.openexchange.groupware.update,
+ com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.tools.sql,
+ com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.index
-Require-Bundle: com.openexchange.global,
- com.openexchange.server

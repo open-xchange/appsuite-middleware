@@ -75,10 +75,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete appointment.", parameters = {
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete appointments", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted appointments.")
-}, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment.",
+}, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment. To delete multiple appointments send an array of appointments.",
 responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
 public final class DeleteAction extends AppointmentAction {
 
@@ -94,33 +94,54 @@ public final class DeleteAction extends AppointmentAction {
     @Override
     protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
         Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        final JSONObject jData = req.getData();
+        if (req.getData() instanceof JSONObject) {
+            final JSONObject jData = req.getData();
+            final CalendarDataObject appointmentObj = new CalendarDataObject();
+            appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
+            final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
+            if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
+                appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
+            } else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
+                appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
 
-        final CalendarDataObject appointmentObj = new CalendarDataObject();
-        appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
-        final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
-
-        if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
-            appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
-        } else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
-            appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
-
-        }
-
-        final ServerSession session = req.getSession();
-        appointmentObj.setContext(session.getContext());
-
-        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
-
-        try {
-            appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
-            if (appointmentObj.getLastModified() != null) {
-                timestamp = appointmentObj.getLastModified();
             }
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-        }
+            final ServerSession session = req.getSession();
+            appointmentObj.setContext(session.getContext());
+            final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+            try {
+                appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
+                if (appointmentObj.getLastModified() != null) {
+                    timestamp = appointmentObj.getLastModified();
+                }
+            } catch (final SQLException e) {
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+            }
+        } else if (req.getData() instanceof JSONArray) {
+            JSONArray jsonArray = req.getData();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                final JSONObject jData = jsonArray.getJSONObject(i);
+                final CalendarDataObject appointmentObj = new CalendarDataObject();
+                appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
+                final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
+                if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
+                    appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
+                } else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
+                    appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
 
+                }
+                final ServerSession session = req.getSession();
+                appointmentObj.setContext(session.getContext());
+                final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+                try {
+                    appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
+                    if (appointmentObj.getLastModified() != null) {
+                        timestamp = appointmentObj.getLastModified();
+                    }
+                } catch (final SQLException e) {
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+                }
+            }
+        }
         return new AJAXRequestResult(new JSONArray(), timestamp, "json");
     }
 

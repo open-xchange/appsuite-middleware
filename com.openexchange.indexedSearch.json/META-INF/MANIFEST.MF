@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Index JSON Bundle
 Bundle-SymbolicName: com.openexchange.indexedSearch.json
-Bundle-Version: 7.0.0.0
+Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.indexedSearch.json.osgi.IndexJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -15,9 +15,13 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.writer,
  com.openexchange.documentation,
  com.openexchange.exception,
+ com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.index,
+ com.openexchange.index.solr,
+ com.openexchange.index.solr.mail,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail,
@@ -25,7 +29,6 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.search,
  com.openexchange.mail.search.service,
- com.openexchange.mail.smal.adaper,
  com.openexchange.osgi,
  com.openexchange.search,
  com.openexchange.server,

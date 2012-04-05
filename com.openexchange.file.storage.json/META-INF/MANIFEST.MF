@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage JSON Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.json
-Bundle-Version: 7.0.0.0
+Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -35,6 +35,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.mail,
+ com.openexchange.mail.mime,
  com.openexchange.multiple,
  com.openexchange.osgi,
  com.openexchange.rdiff,
@@ -46,6 +48,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.tx,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  javax.servlet,
  javax.servlet.http,
  javax.xml,

@@ -1,4 +1,10 @@
-open-xchange-osgi (7.0.0-1) unstable; urgency=low
+open-xchange-osgi (6.21.0-2) unstable; urgency=low
+
+  * Internal release build for EDP drop #0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 04 Apr 2012 15:50:23 +0200
+
+open-xchange-osgi (6.21.0-1) unstable; urgency=low
 
   * Initial release
 

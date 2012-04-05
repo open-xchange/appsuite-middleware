@@ -55,7 +55,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -72,6 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link UpdatesAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "updates", description = "Get updated contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -159,5 +162,53 @@ public class UpdatesAction extends ContactAction {
         }
 
         return new AJAXRequestResult(responseMap, timestamp, "contact");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        Date lastModified = new Date(0);
+        final ContactService contactService = getContactService();
+        final Date since = new Date(request.getTimestamp());
+        SearchIterator<Contact> searchIterator = null;
+        /*
+         * add modified contacts
+         */
+        final List<Contact> modifiedContacts = new ArrayList<Contact>(); 
+        try {
+            searchIterator = contactService.getModifiedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
+            while (searchIterator.hasNext()) {
+                final Contact contact = searchIterator.next();
+                lastModified = getLatestModified(lastModified, contact);
+                applyTimezoneOffset(contact, request.getTimeZone());
+                modifiedContacts.add(contact);
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+        }
+        /*
+         * add deleted contacts
+         */
+        final List<Contact> deletedContacts = new ArrayList<Contact>(); 
+        if (false == "deleted".equals(request.getIgnore())) {
+	        try {
+	            searchIterator = contactService.getDeletedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
+	            while (searchIterator.hasNext()) {
+	                final Contact contact = searchIterator.next();
+	                lastModified = getLatestModified(lastModified, contact);
+	                applyTimezoneOffset(contact, request.getTimeZone());
+	                deletedContacts.add(contact);
+	            }
+	        } finally {
+	        	if (null != searchIterator) {
+	        		searchIterator.close();
+	        	}
+	        }
+        }
+        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        responseMap.put("modified", modifiedContacts);
+        responseMap.put("deleted", deletedContacts);
+        return new AJAXRequestResult(responseMap, lastModified, "contact");
     }
 }

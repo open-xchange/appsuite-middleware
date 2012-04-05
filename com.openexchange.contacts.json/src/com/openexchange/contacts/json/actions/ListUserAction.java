@@ -53,17 +53,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,6 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ListUserAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "listuser", description = "Get a list of users.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -114,5 +124,43 @@ public class ListUserAction extends ContactAction {
 
         return new AJAXRequestResult(contacts, timestamp, "contact");
     }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        final int[] userIDs = request.getUserIds();
+        final List<Contact> contacts = new ArrayList<Contact>();
+        Date lastModified = new Date(0);
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = getContactService().searchContacts(request.getSession(), getSearchTermForUsers(userIDs));
+            while (searchIterator.hasNext()) {
+                final Contact contact = searchIterator.next();
+                lastModified = getLatestModified(lastModified, contact);
+                applyTimezoneOffset(contact, request.getTimeZone());
+                contacts.add(contact);
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+        }
+        return new AJAXRequestResult(contacts, lastModified, "contact");
+    }
 
+    private static CompositeSearchTerm getSearchTermForUsers(final int[] userIDs) {
+    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
+		folderIDTerm.addOperand(new ConstantOperand<String>(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
+		andTerm.addSearchTerm(folderIDTerm);
+    	final CompositeSearchTerm userIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
+    	for (int i = 0; i < userIDs.length; i++) {
+    		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+    		term.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID)); 
+    		term.addOperand(new ConstantOperand<Integer>(userIDs[i]));
+    		userIDsTerm.addSearchTerm(term);
+		}
+    	andTerm.addSearchTerm(userIDsTerm);
+		return andTerm;
+    }
 }

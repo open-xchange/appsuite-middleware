@@ -167,7 +167,9 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             /*
              * ... and remove from services
              */
-            services.remove(clazz);
+            if (services != null) {
+                services.remove(clazz);
+            }
             updateServiceState();
             super.removedService(reference, service);
         }
@@ -395,7 +397,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             /*
              * Stop with Bundle.STOP_TRANSIENT set to zero
              */
-            bundle.stop(0);
+            bundle.stop();
             if (LOG.isErrorEnabled()) {
                 errorBuilder.setLength(0);
                 LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n"));

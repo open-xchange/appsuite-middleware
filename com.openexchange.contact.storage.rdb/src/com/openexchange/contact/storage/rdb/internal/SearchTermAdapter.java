@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
@@ -70,6 +71,11 @@ import com.openexchange.search.SingleSearchTerm;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTermAdapter {
+	
+	/*
+	 * Pattern to check whether a string contains SQL wildcards or not
+	 */
+	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
 	
 	private final StringBuilder stringBuilder;
 	private final List<Object> parameters;
@@ -186,7 +192,14 @@ public class SearchTermAdapter {
 			} else {
 				//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
 				field = ContactField.getByAjaxName(value.toString());
-			}			
+				if (null == field) {
+					// try column name
+					field = Mappers.CONTACT.getMappedField(value.toString());					
+				}				
+			}
+			if (null == field) {
+				throw new IllegalArgumentException("unable to determine contact field for column operand: " + operand);
+			}
 			final String columnLabel = Mappers.CONTACT.get(field).getColumnLabel();
 			if (null != this.charset) {
 				stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(this.charset).append(')');
@@ -199,8 +212,8 @@ public class SearchTermAdapter {
 				throw new IllegalArgumentException("got no value for contact operand");
 			} else if (String.class.isInstance(value)) {
 				final String stringValue = (String)value;
-				if (stringValue.contains("*")) {
-					value = stringValue.replaceAll("\\*", "%");
+				if (WILDCARD_PATTERN.matcher(stringValue).find()) {
+					// use "LIKE" search 
 					final int index = stringBuilder.lastIndexOf("=");
 					stringBuilder.replace(index, index + 1, "LIKE");		
 				}

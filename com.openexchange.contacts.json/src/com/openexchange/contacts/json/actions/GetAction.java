@@ -51,6 +51,7 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -67,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link GetAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a contact.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -94,6 +96,14 @@ public class GetAction extends ContactAction {
         contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
         contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
 
+        return new AJAXRequestResult(contact, lastModified, "contact");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        final Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID());
+        final Date lastModified = contact.getLastModified();
+        applyTimezoneOffset(contact, request.getTimeZone());
         return new AJAXRequestResult(contact, lastModified, "contact");
     }
 }

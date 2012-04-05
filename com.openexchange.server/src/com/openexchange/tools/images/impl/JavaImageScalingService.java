@@ -57,6 +57,7 @@ import javax.imageio.ImageIO;
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleOp;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 
@@ -68,10 +69,22 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public class JavaImageScalingService implements ImageScalingService {
 
     @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
+    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
         BufferedImage image = ImageIO.read(pictureData);
 
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
+        DimensionConstrain constrain;
+        switch (scaleType) {
+        case COVER:
+            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
+            break;
+        case CONTAIN:
+            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
+            break;
+        default:
+            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
+            break;
+        }
+        ResampleOp op = new ResampleOp(constrain);
 
         BufferedImage scaled = op.filter(image, null);
 

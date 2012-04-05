@@ -69,7 +69,7 @@ public interface Constants {
     /**
      * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
      */
-    public static final int CHUNK_SIZE = 0;
+    public static final int CHUNK_SIZE = 100;
 
     /**
      * The number of chunks allowed being added to index in a single job's run.

@@ -49,16 +49,27 @@
 
 package com.openexchange.mail.smal.impl;
 
-import static com.openexchange.mail.smal.impl.SMALServiceLookup.getServiceStatic;
+import java.util.Collections;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.smal.adaper.IndexAdapter;
-import com.openexchange.mail.smal.adaper.IndexService;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
+import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
+import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
+import com.openexchange.mail.smal.impl.processor.Processor;
+import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -67,10 +78,15 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link AbstractSMALStorage}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
+
+    /**
+     * The logger.
+     */
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
 
     /**
      * The fields containing only the mail identifier.
@@ -108,6 +124,21 @@ public abstract class AbstractSMALStorage {
     protected final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
     /**
+     * The processor strategy to use.
+     */
+    protected final ProcessorStrategy processorStrategy;
+
+    /**
+     * The processor parameterized with <code>processorStrategy</code>.
+     */
+    protected final Processor processor;
+
+    /**
+     * The volatile job info reference.
+     */
+    private volatile MailJobInfo jobInfo;
+
+    /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
     protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
@@ -117,21 +148,97 @@ public abstract class AbstractSMALStorage {
         contextId = session.getContextId();
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
+        processorStrategy = DefaultProcessorStrategy.getInstance();
+        processor = new Processor(processorStrategy);
     }
 
     /**
-     * Gets the available index adapter.
-     *
-     * @return The index adapter
+     * Initiates processing of given folder.
+     * 
+     * @param fullName The folder full name
+     * @return The processing progress
+     * @throws OXException If folder retrieval fails
+     * @throws InterruptedException If interrupted
      */
-    protected static IndexAdapter getIndexAdapter() {
-        final IndexService indexService = getServiceStatic(IndexService.class);
-        return null == indexService ? null : indexService.getAdapter();
+    protected ProcessingProgress processFolder(final String fullName) throws OXException, InterruptedException {
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+            return processor.processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), accountId, session, Collections.<String, Object> emptyMap());
+        }
+        return processFolder(folderStorage.getFolder(fullName));
+    }
+
+    /**
+     * Initiates processing of given folder.
+     * 
+     * @param mailFolder The folder to process
+     * @return The processing progress
+     * @throws OXException If processing fails
+     * @throws InterruptedException If interrupted
+     */
+    protected ProcessingProgress processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
+        return processor.processFolder(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
+    }
+
+    /**
+     * Initiates processing of given folder.
+     * 
+     * @param mailFolderInfo The information of the folder to process
+     * @return The processing progress
+     * @throws OXException If processing fails
+     * @throws InterruptedException If interrupted
+     */
+    protected ProcessingProgress processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
+        return processor.processFolder(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
+    }
+
+    /**
+     * Submits specified job.
+     * 
+     * @param job The job
+     * @return <code>true</code> if successfully submitted; otherwise <code>false</code>
+     */
+    protected boolean submitJob(final IndexingJob job) {
+        try {
+            final IndexingService service = SmalServiceLookup.getServiceStatic(IndexingService.class);
+            if (null == service) {
+                return false;
+            }
+            service.addJob(job);
+            return true;
+        } catch (final OXException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Creates the appropriate job info for this storage access.
+     * 
+     * @return The job info
+     * @throws OXException If creation fails
+     */
+    protected MailJobInfo createJobInfo() throws OXException {
+        MailJobInfo jobInfo = this.jobInfo;
+        if (null == jobInfo) {
+            synchronized (this) {
+                jobInfo = this.jobInfo;
+                if (null == jobInfo) {
+                    final MailConfig config = delegateMailAccess.getMailConfig();
+                    jobInfo =
+                        new MailJobInfo.Builder(userId, contextId).accountId(accountId).login(config.getLogin()).password(
+                            config.getPassword()).port(config.getPort()).server(config.getServer()).secure(config.isSecure()).primaryPassword(
+                            session.getPassword()).build();
+                    this.jobInfo = jobInfo;
+                }
+            }
+        }
+        return jobInfo;
     }
 
     /**
      * Handles specified {@link RuntimeException} instance.
-     *
+     * 
      * @param e The runtime exception to handle
      * @return An appropriate {@link OXException}
      */
@@ -141,7 +248,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Creates a new {@link ThreadPoolCompletionService completion service}.
-     *
+     * 
      * @return A new completion service.
      * @throws OXException If completion service cannot be created due to absent {@link ThreadPoolService service}
      */

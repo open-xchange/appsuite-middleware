@@ -60,6 +60,9 @@ import net.freeutils.tnef.MAPIProps;
 import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
@@ -68,8 +71,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
@@ -138,12 +141,16 @@ public final class TextFinder {
                         }
                     }
                     textIsHtml = false;
-                } else {
-                    textIsHtml = ct.startsWith("text/htm");
+                } else if (ct.startsWith("text/htm")) {
+                    textIsHtml = true;
                     //content = htmlService.getConformHTML(content, "UTF-8");
-                    content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                    // content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                    content = new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                } else {
+                    content = extractPlainText(content);
+                    textIsHtml = false;
                 }
-                return textIsHtml ? extractPlainText(content) : content;
+                return content;
             }
             if (ct.startsWith("multipart/alternative")) {
                 /*

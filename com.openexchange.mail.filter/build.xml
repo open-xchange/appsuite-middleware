@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.mail.filter" basedir=".">
+<project name="com.openexchange.mail.filter" basedir="." default="prepare">
 
     <description>
         This script adds the additional step using javacc to create the code from the parser description.
     </description>
 
     <!-- Constants -->
+    <property name="mainSrcDir" value="src"/>
     <property name="jSievePrefix" value="org/apache"/>
     <property name="javaccDir" value="javacc"/>
+	<property name="libDir" value="lib"/>
 
-	<import file="build-project.xml" as="main"/>
+	<import file="build-project.xml" optional="true"/>
 
     <!-- Third party libs -->
     <fileset dir="${libDir}" id="javaCCJars">
@@ -18,25 +20,25 @@
 
     <target name="prepare">
         <!-- This target generated parts of the code out of the grammar file vor jjtree -->
-        <mkdir dir="${srcDir}/${jSievePrefix}/jsieve/parser/generated"/>
+        <mkdir dir="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated"/>
         <java classname="jjtree" fork="yes" failonerror="true">
-            <arg line="-output_directory=${srcDir}/${jSievePrefix}/jsieve/parser/generated ${javaccDir}/sieve.jjt"/>
+            <arg line="-output_directory=${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated ${javaccDir}/sieve.jjt"/>
             <classpath>
                 <fileset refid="javaCCJars"/>
             </classpath>
        </java>
 
         <!-- This part isn't needed anymore if we switch to JAVACC 4.0 which isn't supplied with Ubuntu at the moment -->
-        <replace file="${srcDir}/${jSievePrefix}/jsieve/parser/generated/SimpleNode.java" token="public class SimpleNode" value="public class SimpleNode extends org.apache.jsieve.parser.SieveNode"/>
+        <replace file="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated/SimpleNode.java" token="public class SimpleNode" value="public class SimpleNode extends org.apache.jsieve.parser.SieveNode"/>
 
         <java classname="javacc" fork="yes" failonerror="true">
-            <arg line="-output_directory=${srcDir}/${jSievePrefix}/jsieve/parser/generated ${srcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
+            <arg line="-output_directory=${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated ${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
             <classpath>
                 <fileset refid="javaCCJars"/>
             </classpath>
         </java>
 
-        <delete file="${srcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
+        <delete file="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
     </target>
 
 	<target name="postClean">

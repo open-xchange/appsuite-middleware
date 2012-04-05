@@ -62,6 +62,7 @@ import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldGet;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -70,9 +71,16 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileMetadataWriter {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
 
-    private static final JSONHandler JSON = new JSONHandler();
+    /**
+     * The logger constant.
+     */
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
+
+    /**
+     * The {@link JSONHandler} constant.
+     */
+    protected static final JSONHandler JSON = new JSONHandler();
 
     public JSONArray write(final SearchIterator<File> files, final List<File.Field> columns, final TimeZone timeZone) throws OXException {
         final JSONArray array = new JSONArray();
@@ -97,6 +105,7 @@ public class FileMetadataWriter {
 
 
     public static class JSONHandler extends AbstractFileFieldHandler {
+
         private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
         private final FileFieldGet get = new FileFieldGet();
@@ -104,23 +113,38 @@ public class FileMetadataWriter {
         @Override
         public Object handle(final Field field, final Object... args) {
             final Object value = field.doSwitch(get, args);
-            if(value == null && field == File.Field.LOCKED_UNTIL) {
-                return 0;
+            if (File.Field.FILE_MIMETYPE.equals(field)) {
+                if (null == value) {
+                    return value;
+                }
+                final String ct = value.toString();
+                if (ct.indexOf(';') <= 0) {
+                    return value;
+                }
+                try {
+                    return ContentType.getBaseType(ct);
+                } catch (final OXException e) {
+                    return value;
+                }
             }
-            if(Date.class.isInstance(value)) {
+            if ((value == null) && (field == File.Field.LOCKED_UNTIL)) {
+                return Integer.valueOf(0);
+            }
+            if (Date.class.isInstance(value)) {
                 final Date d = (Date) value;
                 TimeZone tz = get(1, TimeZone.class, args);
-                if(field == Field.LAST_MODIFIED_UTC) {
+                if (field == Field.LAST_MODIFIED_UTC) {
                     tz = UTC;
                 }
-                if(field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
-                    return 0;
+                if (field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
+                    return Integer.valueOf(0);
                 }
                 return writeDate((Date) value, tz);
             }
 
-            switch(field) {
-            case CATEGORIES: return handleCategories((String) value);
+            switch (field) {
+            case CATEGORIES:
+                return handleCategories((String) value);
             default: // do nothing;
             }
 
@@ -129,16 +153,16 @@ public class FileMetadataWriter {
 
         private Object writeDate(final Date date, final TimeZone tz) {
             final int offset = (tz == null) ? 0 : tz.getOffset(date.getTime());
-            long time = date.getTime()+offset;
+            long time = date.getTime() + offset;
             // Happens on infinite locks.
-            if(time < 0) {
+            if (time < 0) {
                 time = Long.MAX_VALUE;
             }
-            return time;
+            return Long.valueOf(time);
         }
 
         private JSONArray handleCategories(final String value) {
-            if(value == null) {
+            if (value == null) {
                 return null;
             }
             final String[] strings = value.split("\\s*,\\s*");

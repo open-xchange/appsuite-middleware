@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -66,6 +67,8 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     private final int folderId;
 
     private final int objectId;
+    
+    private final int[] objectIds;
 
     private final Date lastModified;
 
@@ -75,6 +78,16 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
         super();
         this.folderId = folderId;
         this.objectId = objectId;
+        this.objectIds = null;
+        this.lastModified = lastModified;
+        this.failOnError = failOnError;
+    }
+    
+    public DeleteRequest(final int folderId, final int[] objectIds, final Date lastModified, boolean failOnError) {
+        super();
+        this.folderId = folderId;
+        this.objectId = 0;
+        this.objectIds = objectIds;
         this.lastModified = lastModified;
         this.failOnError = failOnError;
     }
@@ -84,9 +97,13 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
             contact.getLastModified(), failOnError);
     }
 
+    public DeleteRequest(final int folderId, final int[] objectIds, final Date lastModified) {
+        this(folderId, objectIds, lastModified, true);
+	}
+    
     public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
         this(folderId, objectId, lastModified, true);
-	}
+    }
 
     public DeleteRequest(final Contact contact) {
         this(contact.getParentFolderID(), contact.getObjectID(),
@@ -98,10 +115,20 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
      */
     @Override
     public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+        if (objectIds == null) {
+            JSONObject json = new JSONObject();
+            json.put(DataFields.ID, objectId);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+            return json;
+        } else {
+            JSONArray jsonArray = new JSONArray();
+            for (final int id : objectIds) {
+                JSONObject json = new JSONObject();
+                json.put(DataFields.ID, id);
+                json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+            }
+            return jsonArray;
+        }
     }
 
     /**

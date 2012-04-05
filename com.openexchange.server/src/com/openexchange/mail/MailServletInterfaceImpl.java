@@ -126,6 +126,7 @@ import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -690,7 +691,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Sort root elements
              */
             final boolean descending = OrderDirection.DESC.equals(OrderDirection.getOrderDirection(order));
-            final MailSortField effectiveSortField = sortCol <= 0 ? MailSortField.RECEIVED_DATE :  MailSortField.getField(sortCol);
+            MailSortField effectiveSortField = sortCol <= 0 ? MailSortField.RECEIVED_DATE :  MailSortField.getField(sortCol);
+            if (null == effectiveSortField) {
+                effectiveSortField = MailSortField.RECEIVED_DATE;
+            }
             final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
             final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
                 
@@ -1222,7 +1226,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Add ZIP entry to output stream
                                  */
-                                final String name = parts[i].getFileName();
+                                String name = parts[i].getFileName();
+                                if (null == name) {
+                                    final List<String> extensions = MimeType2ExtMap.getFileExtensions(parts[i].getContentType().getBaseType());
+                                    name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
+                                }
                                 int num = 1;
                                 ZipArchiveEntry entry;
                                 while (true) {

@@ -51,10 +51,12 @@ package com.openexchange.contacts.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.converters.ContactParser;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -73,6 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link NewAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "new", description = "Create a contact.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
@@ -128,5 +131,24 @@ public class NewAction extends ContactAction {
         }
     }
 
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        final boolean containsImage = request.containsImage();
+        final JSONObject json = request.getContactJSON(containsImage);
+        if (false == json.has("folder_id")) {
+            throw OXException.mandatoryField("missing folder");
+        }
+        final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+        if (containsImage) {
+        	RequestTools.setImageData(request, contact);
+        }
+        getContactService().createContact(request.getSession(), json.getString("folder_id"), contact);
+        try {
+            final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
+            return new AJAXRequestResult(object, contact.getLastModified(), "json");
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+    }
 
 }

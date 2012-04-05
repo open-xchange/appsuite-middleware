@@ -1,3 +1,59 @@
+* 2012-04-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21901: Enforce by-name lookup - not by-full-name - for primary mail account
+
+* 2012-04-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21893: Dealing with outdated cache entry (invalidate & retry from storage)
+
+* 2012-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21796: Delivering MIME type's base type only (suppressing irrelevant parameters bound to it)
+ - Fix for bug 21187: Dealing with "null" value when trying to parse as a number
+
+* 2012-03-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21623: Introduced safety checks to omit folders with empty identifiers
+ - Fix for bug 21725: Properly sorting by creator's display name not by its numeric identifier
+
+* 2012-03-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21880: Dealing with skipped content within HTML's <head> tag
+
+* 2012-03-30 - jan.bauerdick@open-xchange.com
+
+ - Improved all DeleteRequests + documentation
+
+* 2012-03-29 - thorben.betten@open-xchange.com
+
+ - Fix fir bug 21866: Performing MIME decode when writing subject to JSON client
+
+* 2012-03-28 - jan.bauerdick@open-xchange.com
+
+ - Improved DeleteRequest to delete multiple object with one request
+
+* 2012-03-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21843: Restored with previous class version
+
+* 2012-03-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21798: Ensure non-existence of default IMAP folder prior to create attempt
+ - Fix for bug 21815: Trim login string for common and form login
+
+* 2012-03-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21046: Explicitly checking message count with "<= 0" operator and added sanitizing handling trying to detect that special
+   error (assuming it hints to an empty folder as stated by several reports/articles found during web research)
+
+* 2012-03-21 - jan.bauerdick@open-xchange.com
+
+ - Added bundle com.openexchange.push.mq for mq-based event distribution
+
+* 2012-03-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21802: Added support for individually marked reserved folder names
+
 * 2012-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 21785: Added needed javax.xml imports

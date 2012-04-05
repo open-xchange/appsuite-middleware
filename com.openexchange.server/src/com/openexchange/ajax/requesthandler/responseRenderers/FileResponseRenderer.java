@@ -70,6 +70,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -90,6 +91,12 @@ public class FileResponseRenderer implements ResponseRenderer {
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
     private volatile ImageScalingService scaler;
+    
+    private final String DELIVERY = "delivery";
+    
+    private final String DOWNLOAD = "download";
+    
+    private final String VIEW = "view";
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -122,6 +129,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        String delivery = req.getParameter(DELIVERY);
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
@@ -132,25 +140,26 @@ public class FileResponseRenderer implements ResponseRenderer {
             file = scaleIfImage(request, file);
             documentData = new BufferedInputStream(file.getStream());
             final String userAgent = req.getHeader("user-agent");
-            if (SAVE_AS_TYPE.equals(contentType)) {
+            if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload =
-                    DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
-                if (contentDisposition == null) {
-                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
-                } else {
-                    if (contentDisposition.indexOf(';') < 0) {
-                        final String disposition = checkedDownload.getContentDisposition();
-                        final int pos = disposition.indexOf(';');
-                        if (pos >= 0) {
-                            resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
+                if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
+                    if (contentDisposition == null) {
+                        resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+                    } else {
+                        if (contentDisposition.indexOf(';') < 0) {
+                            final String disposition = checkedDownload.getContentDisposition();
+                            final int pos = disposition.indexOf(';');
+                            if (pos >= 0) {
+                                resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                            } else {
+                                resp.setHeader("Content-Disposition", contentDisposition);
+                            }
                         } else {
                             resp.setHeader("Content-Disposition", contentDisposition);
                         }
-                    } else {
-                        resp.setHeader("Content-Disposition", contentDisposition);
                     }
                 }
                 if (contentType == null) {
@@ -165,13 +174,22 @@ public class FileResponseRenderer implements ResponseRenderer {
              * pragma header.
              */
             Tools.removeCachingHeader(resp);
-            /*
-             * ETag present?
-             */
-            final String eTag = result.getHeader("ETag");
-            if (null != eTag) {
-                final long expires = result.getExpires();
-                Tools.setETag(eTag, expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
+            if (delivery == null || !delivery.equalsIgnoreCase(DOWNLOAD)) {
+                /*
+                 * ETag present and caching?
+                 */
+                final String eTag = result.getHeader("ETag");
+                if (null != eTag) {
+                    final long expires = result.getExpires();
+                    Tools.setETag(eTag, expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
+                } else {
+                    final long expires = result.getExpires();
+                    if (expires < 0) {
+                        Tools.setExpiresInOneYear(resp);
+                    } else if (expires > 0) {
+                        Tools.setExpires(new Date(System.currentTimeMillis() + expires), resp);
+                    }
+                }
             }
             /*
              * Output binary content
@@ -234,7 +252,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Scale to new input stream
              */
-            final InputStream scaled = scaler.scale(file.getStream(), width, height);
+            final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
             return new FileHolder(scaled, -1, "image/png", "");
         } finally {
             Streams.close(file);

@@ -603,7 +603,7 @@ setup_admin()
 		else
 		    echo "using $MASTER_USER as master account"
 		    /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
-			-f /opt/open-xchange/etc/admindaemon/mpasswd -P "$MASTER_PASS" >/dev/null
+			-f /opt/open-xchange/etc/mpasswd -P "$MASTER_PASS" >/dev/null
 		fi
     else
 		v_setprop MASTER_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
@@ -643,6 +643,7 @@ fi
 
 if [ -d ${CONFDIR} ]; then
     setup_groupware
+    setup_admin
     echo
     echo "open-xchange daemon must now be restarted if already running"
 else

@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.mail.smal.impl.SMALServiceLookup;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.server.ServiceExceptionCodes;
 
 /**
@@ -81,7 +81,7 @@ public class SMALCheckTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = SMALServiceLookup.getInstance().getService(DatabaseService.class);
+        final DatabaseService dbService = SmalServiceLookup.getInstance().getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }

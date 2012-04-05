@@ -50,11 +50,15 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
+
+import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.converters.ContactParser;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -77,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link UpdateAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a contact.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -177,6 +182,19 @@ public class UpdateAction extends ContactAction {
 
         final JSONObject response = new JSONObject();
         return new AJAXRequestResult(response, contact.getLastModified(), "json");
+    }
+
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        final boolean containsImage = request.containsImage();
+        final JSONObject json = request.getContactJSON(containsImage);
+        final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+        if (containsImage) {
+        	RequestTools.setImageData(request, contact);
+        }
+        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact, 
+        		new Date(request.getTimestamp()));
+        return new AJAXRequestResult(new JSONObject(), contact.getLastModified(), "json");
     }
 
 }

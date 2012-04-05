@@ -75,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete mails.", parameters = {
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete mails", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted mails.")
 }, requestBody = "An array of objects providing folder IDs and object IDs of the deleted mails. [{ \"folder\":\"default0/INBOX\", \"id\":\"123\" } ... { \"folder\":\"default0/MyFolder\", \"id\":\"134\" }]",

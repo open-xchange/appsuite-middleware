@@ -76,7 +76,7 @@ public final class PutMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
@@ -89,8 +89,8 @@ public final class PutMethodHandler extends AbstractMethodHandler {
             /*-
              *  PUT /roster/11
              */
-            retval.setAction("update");
-            retval.putParameter("user", pathElements[0]);
+            requestData.setAction("update");
+            requestData.putParameter("user", pathElements[0]);
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
         }

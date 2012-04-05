@@ -76,13 +76,13 @@ public final class PutMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
             final String action = req.getParameter("action");
             if (null == action) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
             }
-            retval.setAction(action);
+            requestData.setAction(action);
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;
@@ -91,15 +91,15 @@ public final class PutMethodHandler extends AbstractMethodHandler {
                 if (null == action) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
                 }
-                retval.setAction(action);
+                requestData.setAction(action);
             } else if (1 == length) {
                 /*-
                  * "Update conv."
                  *  PUT /conversation/11
                  */
                 final String element = pathElements[0];
-                retval.setAction("update");
-                retval.putParameter("id", element);
+                requestData.setAction("update");
+                requestData.putParameter("id", element);
             } else if ("message".equals(pathElements[1])) {
                 if (2 == length) {
                     throw AjaxExceptionCodes.BAD_REQUEST.create();
@@ -108,9 +108,9 @@ public final class PutMethodHandler extends AbstractMethodHandler {
                  * "Update message"
                  *  PUT /conversation/11/message/1234
                  */
-                retval.putParameter("id", pathElements[0]);
-                retval.setAction("updateMessage");
-                retval.putParameter("messageId", pathElements[2]);
+                requestData.putParameter("id", pathElements[0]);
+                requestData.setAction("updateMessage");
+                requestData.putParameter("messageId", pathElements[2]);
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }

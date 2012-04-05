@@ -79,9 +79,9 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     // GET /roster (all) GET /roster/[identifier/email-adresse-denke-ich] ... UPDATE /roster/depp@horst.de etc.
 
     @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
-            retval.setAction("all");
+            requestData.setAction("all");
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;
@@ -90,7 +90,7 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                  * "Get all roster's presences"
                  *  GET /roster
                  */
-                retval.setAction("all");
+                requestData.setAction("all");
             } else if (1 == length) {
                 /*-
                  * "Get specific presence"
@@ -98,15 +98,15 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                  */
                 final String element = pathElements[0];
                 if (element.indexOf(',') < 0) {
-                    retval.setAction("get");
-                    retval.putParameter("user", element);
+                    requestData.setAction("get");
+                    requestData.putParameter("user", element);
                 } else {
-                    retval.setAction("list");
+                    requestData.setAction("list");
                     final JSONArray array = new JSONArray();
                     for (final String id : SPLIT_CSV.split(element)) {
                         array.put(id);
                     }
-                    retval.setData(array);
+                    requestData.setData(array);
                 }
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);

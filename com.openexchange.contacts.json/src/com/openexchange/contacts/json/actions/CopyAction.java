@@ -51,11 +51,14 @@ package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.databaseold.Database;
 import com.openexchange.documentation.RequestMethod;
@@ -87,6 +90,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link CopyAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {},
 requestBody = "",
@@ -151,6 +155,43 @@ public class CopyAction extends ContactAction {
         }
 
         return new AJAXRequestResult(response, timestamp, "json");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+        /*
+         * prepare original contact
+         */
+        final ContactService contactService = getContactService();
+        final Contact contact = contactService.getContact(request.getSession(), request.getFolderID(), request.getObjectID());
+        final int originalFolderID = contact.getParentFolderID();
+        final int originalObjectID = contact.getObjectID();
+        contact.removeObjectID();
+        contact.removeParentFolderID();
+        contact.removeInternalUserId();
+        boolean hasAttachments = 0 < contact.getNumberOfAttachments();
+        /*
+         * create copy
+         */
+        if (false == hasAttachments) {
+            contact.removeNumberOfAttachments();
+	        contactService.createContact(request.getSession(), request.getFolderIDFromData(), contact);
+	        copyAttachments(Integer.parseInt(request.getFolderIDFromData()), request.getSession(), request.getSession().getContext(), 
+	        		contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
+        } else {
+	        contactService.createContact(request.getSession(), request.getFolderIDFromData(), contact);
+        }
+        /*
+         * respond with new object ID
+         */
+        final JSONObject response = new JSONObject();
+        try {
+            response.put("id", contact.getObjectID());
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+
+        return new AJAXRequestResult(response, contact.getLastModified(), "json");
     }
 
     public static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {

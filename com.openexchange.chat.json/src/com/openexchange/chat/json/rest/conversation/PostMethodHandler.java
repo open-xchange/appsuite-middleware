@@ -76,14 +76,14 @@ public final class PostMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+    protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
-            retval.setAction("new");
+            requestData.setAction("new");
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;
             if (0 == length) {
-                retval.setAction("new");
+                requestData.setAction("new");
             } else if (1 == length) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create();
             } else if ("message".equals(pathElements[1])) {
@@ -94,8 +94,8 @@ public final class PostMethodHandler extends AbstractMethodHandler {
                  * "Post new message for Conv. #11"
                  *  POST /conversation/11/message
                  */
-                retval.putParameter("id", pathElements[0]);
-                retval.setAction("newMessage");
+                requestData.putParameter("id", pathElements[0]);
+                requestData.setAction("newMessage");
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }

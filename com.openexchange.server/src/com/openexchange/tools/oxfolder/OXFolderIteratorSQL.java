@@ -88,6 +88,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -633,15 +635,37 @@ public final class OXFolderIteratorSQL {
     private static SearchIterator<FolderObject> getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            final List<Condition> conditions = new ArrayList<Condition>(3);
-            conditions.add(new ConditionTreeMap.PrivateCondition(userId));
-            conditions.add(new ConditionTreeMap.ParentCondition(SYSTEM_PRIVATE_FOLDER_ID));
-            if (since != null) {
-                conditions.add(new ConditionTreeMap.LastModifiedCondition(since.getTime()));
+            try {
+                final List<Condition> conditions = new ArrayList<Condition>(3);
+                conditions.add(new ConditionTreeMap.PrivateCondition(userId));
+                conditions.add(new ConditionTreeMap.ParentCondition(SYSTEM_PRIVATE_FOLDER_ID));
+                if (since != null) {
+                    conditions.add(new ConditionTreeMap.LastModifiedCondition(since.getTime()));
+                }
+                final TIntSet set = treeMap.getVisibleForUser(userId, groups, accessibleModules, conditions);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
+                return new FolderObjectIterator(list, false);
+            } catch (final OXException e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
             }
-            final TIntSet set = treeMap.getVisibleForUser(userId, groups, accessibleModules, conditions);
-            final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
-            return new FolderObjectIterator(list, false);
         }
         /*
          * Query database
@@ -816,17 +840,39 @@ public final class OXFolderIteratorSQL {
         final boolean shared = parentFolder.isShared(userId);
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            final List<Condition> conditions = new ArrayList<Condition>(3);
-            if (shared) {
-                conditions.add(new ConditionTreeMap.TypeCondition(SHARED, userId));
+            try {
+                final List<Condition> conditions = new ArrayList<Condition>(3);
+                if (shared) {
+                    conditions.add(new ConditionTreeMap.TypeCondition(SHARED, userId));
+                }
+                conditions.add(new ConditionTreeMap.ParentCondition(parentFolder.getObjectID()));
+                if (since != null) {
+                    conditions.add(new ConditionTreeMap.LastModifiedCondition(since.getTime()));
+                }
+                final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
+                return new FolderObjectIterator(list, false);
+            } catch (final OXException e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
             }
-            conditions.add(new ConditionTreeMap.ParentCondition(parentFolder.getObjectID()));
-            if (since != null) {
-                conditions.add(new ConditionTreeMap.LastModifiedCondition(since.getTime()));
-            }
-            final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
-            final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
-            return new FolderObjectIterator(list, false);
         }
         /*
          * Query database
@@ -902,7 +948,29 @@ public final class OXFolderIteratorSQL {
     public static boolean isVisibleFolder(final int folderId, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
+            try {
+                return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
+            } catch (final Exception e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
+            }
         }
         /*
          * Query database
@@ -969,9 +1037,31 @@ public final class OXFolderIteratorSQL {
     public static TIntList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            final List<Condition> conditions = new ArrayList<Condition>(1);
-            conditions.add(new ConditionTreeMap.ParentCondition(parent));
-            return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
+            try {
+                final List<Condition> conditions = new ArrayList<Condition>(1);
+                conditions.add(new ConditionTreeMap.ParentCondition(parent));
+                return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
+            } catch (final Exception e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
+            }
         }
         /*
          * Query database
@@ -1052,17 +1142,39 @@ public final class OXFolderIteratorSQL {
     public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            final List<Condition> conditions = new ArrayList<Condition>(3);
-            conditions.add(new ConditionTreeMap.TypeCondition(FolderObject.SHARED, userId));
-            if (owner > -1) {
-                conditions.add(new ConditionTreeMap.CreatorCondition(owner));
+            try {
+                final List<Condition> conditions = new ArrayList<Condition>(3);
+                conditions.add(new ConditionTreeMap.TypeCondition(FolderObject.SHARED, userId));
+                if (owner > -1) {
+                    conditions.add(new ConditionTreeMap.CreatorCondition(owner));
+                }
+                if (since != null) {
+                    conditions.add(new ConditionTreeMap.LastModifiedCondition(since.getTime()));
+                }
+                final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
+                return new FolderObjectIterator(list, false);
+            } catch (final OXException e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
             }
-            if (since != null) {
-                conditions.add(new ConditionTreeMap.LastModifiedCondition(since.getTime()));
-            }
-            final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
-            final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
-            return new FolderObjectIterator(list, false);
         }
         /*
          * Query database
@@ -1723,22 +1835,44 @@ public final class OXFolderIteratorSQL {
     private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            final List<Condition> conditions = new ArrayList<Condition>(3);
-            {
-                final TIntSet set = new TIntHashSet(modules);
-                set.retainAll(accessibleModules);
-                if (set.isEmpty()) {
-                    return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+            try {
+                final List<Condition> conditions = new ArrayList<Condition>(3);
+                {
+                    final TIntSet set = new TIntHashSet(modules);
+                    set.retainAll(accessibleModules);
+                    if (set.isEmpty()) {
+                        return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+                    }
+                    conditions.add(new ConditionTreeMap.ModulesCondition(set));
                 }
-                conditions.add(new ConditionTreeMap.ModulesCondition(set));
+                conditions.add(new ConditionTreeMap.TypeCondition(type, userId));
+                if (parent != null) {
+                    conditions.add(new ConditionTreeMap.ParentCondition(parent.intValue()));
+                }
+                final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
+                return new FolderObjectIterator(list, false);
+            } catch (final OXException e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
             }
-            conditions.add(new ConditionTreeMap.TypeCondition(type, userId));
-            if (parent != null) {
-                conditions.add(new ConditionTreeMap.ParentCondition(parent.intValue()));
-            }
-            final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
-            final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
-            return new FolderObjectIterator(list, false);
         }
         /*
          * Query database
@@ -1818,9 +1952,31 @@ public final class OXFolderIteratorSQL {
     public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            final TIntSet set = treeMap.getVisibleModuleForUser(userId, memberInGroups, accessibleModules, module);
-            final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, readConArg);
-            return new FolderObjectIterator(list, false);
+            try {
+                final TIntSet set = treeMap.getVisibleModuleForUser(userId, memberInGroups, accessibleModules, module);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, readConArg);
+                return new FolderObjectIterator(list, false);
+            } catch (final OXException e) {
+                LOG.debug(e.getMessage(), e);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                final Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                };
+                if (null == threadPool) {
+                    task.run();
+                } else {
+                    threadPool.submit(ThreadPools.task(task));
+                }
+                // Retry from storage...
+            }
         }
         /*
          * Query database

@@ -62,6 +62,7 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -306,7 +307,7 @@ public final class AllFetch {
      */
     public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final LowCostItem[] items, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
@@ -379,6 +380,9 @@ public final class AllFetch {
                         }
                         protocol.notifyResponseHandlers(r);
                     } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            return new MailMessage[0];
+                        }
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,

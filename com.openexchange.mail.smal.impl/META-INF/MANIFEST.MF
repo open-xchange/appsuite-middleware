@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Super-MAL Implementation Bundle
 Bundle-SymbolicName: com.openexchange.mail.smal.impl
-Bundle-Version: 7.0.0.0
-Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SMALActivator
+Bundle-Version: 6.21.0
+Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SmalActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,
@@ -22,6 +22,8 @@ Import-Package: com.openexchange.api2,
  com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.index,
+ com.openexchange.index.solr,
+ com.openexchange.index.solr.mail,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.langdetect,
@@ -40,7 +42,6 @@ Import-Package: com.openexchange.api2,
  com.openexchange.mail.permission,
  com.openexchange.mail.search,
  com.openexchange.mail.smal,
- com.openexchange.mail.smal.adaper,
  com.openexchange.mail.text,
  com.openexchange.mail.usersetting,
  com.openexchange.mail.utils,
@@ -52,6 +53,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.secret.osgi.tools,
  com.openexchange.server,
  com.openexchange.server.impl,
+ com.openexchange.service.indexing,
  com.openexchange.service.indexing.mail,
  com.openexchange.service.indexing.mail.job,
  com.openexchange.session,

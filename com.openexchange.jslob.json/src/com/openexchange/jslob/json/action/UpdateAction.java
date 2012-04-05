@@ -51,7 +51,11 @@ package com.openexchange.jslob.json.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONUpdate;
 import com.openexchange.jslob.JSlob;
@@ -63,7 +67,19 @@ import com.openexchange.server.ServiceLookup;
  * {@link UpdateAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Action(
+    name = "update"
+    , description = "Updates or sets the JSlob associated with the current user and context." 
+    , method = RequestMethod.PUT
+    , parameters = {
+        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        , @Parameter(name = "id", description = "The path of the JSlob.", optional=true)
+    }
+    , requestBody = "A JSON object to perform update or set. If the object contains a path key-value pair update is performed, set otherwise."
+    , responseDescription = "The updated JSlob."
+)
 public final class UpdateAction extends JSlobAction {
 
     /**
@@ -84,25 +100,72 @@ public final class UpdateAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-
-        final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
-        final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
-        /*
-         * Update...
-         */
         final int userId = jslobRequest.getUserId();
         final int contextId = jslobRequest.getContextId();
-        jslobService.update(id, jsonUpdate, userId, contextId);
-        /*
-         * ... and write back
-         */
-        final JSlob jslob = jslobService.get(id, userId, contextId);
+
+        JSlob jslob;
+        {
+            final AJAXRequestData requestData = jslobRequest.getRequestData();
+            final String serlvetRequestURI = requestData.getSerlvetRequestURI();
+            if (!isEmpty(serlvetRequestURI)) {
+                /*
+                 * Update by request path
+                 */
+                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, requestData.getData());
+                /*
+                 * Update...
+                 */
+                jslobService.update(id, jsonUpdate, userId, contextId);
+                /*
+                 * ... and write back
+                 */
+                jslob = jslobService.get(id, userId, contextId);
+            } else {
+                /*
+                 * Update by JSON data
+                 */
+                final JSONObject jsonData = (JSONObject) requestData.getData();
+                if (jsonData.hasAndNotNull("path")) {
+                    final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
+                    /*
+                     * Update...
+                     */
+                    jslobService.update(id, jsonUpdate, userId, contextId);
+                    /*
+                     * ... and write back
+                     */
+                    jslob = jslobService.get(id, userId, contextId);
+                } else {
+                    /*
+                     * Perform Set
+                     */
+                    jslob = new JSlob(jsonData);
+                    jslobService.set(id, jslob, userId, contextId);
+                    /*
+                     * ... and write back
+                     */
+                    jslob = jslobService.get(id, userId, contextId);
+                }
+            }
+        }
         return new AJAXRequestResult(jslob, "jslob");
     }
 
     @Override
     public String getAction() {
         return "update";
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

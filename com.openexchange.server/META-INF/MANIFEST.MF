@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 7.0.0.0
-OXVersion: 6.20.0
-OXRevision: 20
+Bundle-Version: 6.21.0
+OXVersion: 6.21.0
+OXRevision: 2
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.davekoelle,
@@ -145,6 +145,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.ajax.parser,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.ajax.requesthandler.responseRenderers,
  com.openexchange.ajax.tools,
  com.openexchange.ajax.writer,
  com.openexchange.api2,
@@ -257,6 +258,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.tools.exceptions,
  com.openexchange.tools.file,
  com.openexchange.tools.file.external,
+ com.openexchange.tools.images,
  com.openexchange.tools.io,
  com.openexchange.tools.net,
  com.openexchange.tools.oxfolder,
@@ -291,5 +293,6 @@ Bundle-ClassPath: .,
  lib/ical4j-1.0.jar,
  lib/xSocket-2.7.1.jar,
  lib/jacksum.jar,
- lib/java-image-scaling-0.8.5.jar
+ lib/java-image-scaling-0.8.5.jar,
+ lib/jericho-3.2.jar
 

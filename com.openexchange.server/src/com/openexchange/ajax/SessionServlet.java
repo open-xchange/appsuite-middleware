@@ -92,11 +92,13 @@ import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -119,6 +121,9 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final String SESSION_KEY = "sessionObject";
+    
+    public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
+    
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
@@ -197,7 +202,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     protected void initializeSession(final HttpServletRequest req) throws OXException {
-        if (null != getSessionObject(req)) {
+        if (null != getSessionObject(req, true)) {
             return;
         }
         /*
@@ -207,25 +212,54 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        final String sessionId = getSessionId(req);
-        final ServerSession session = getSession(req, sessionId, sessiondService);
-        if (!sessionId.equals(session.getSessionID())) {
-            if (INFO) {
-                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
-            }
-            throw SessionExceptionCodes.WRONG_SESSION.create();
+        if (req.getParameter("session") != null) {
+            final String sessionId = getSessionId(req);
+            final ServerSession session = getSession(req, sessionId, sessiondService);
+            verifySession(req, sessiondService, sessionId, session);
+            rememberSession(req, session);
         }
-        final Context ctx = session.getContext();
-        if (!ctx.isEnabled()) {
-            sessiondService.removeSession(sessionId);
-            if (INFO) {
-                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+        
+        // Try public session
+        final Cookie[] cookies = req.getCookies();
+        
+        if (cookies != null) {
+            Session simpleSession = null;
+        	for (final Cookie cookie : cookies) {
+                if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
+                    simpleSession = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                    break;
+                }
             }
-            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        	
+        	if (simpleSession != null) {
+        		final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
+        		verifySession(req, sessiondService, session.getSessionID(), session);
+        		rememberPublicSession(req, session);
+        	}
+        	
         }
-        checkIP(session, req.getRemoteAddr());
-        rememberSession(req, session);
+
     }
+
+	private void verifySession(final HttpServletRequest req,
+			final SessiondService sessiondService, final String sessionId,
+			final ServerSession session) throws OXException {
+		if (!sessionId.equals(session.getSessionID())) {
+		    if (INFO) {
+		        LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+		    }
+		    throw SessionExceptionCodes.WRONG_SESSION.create();
+		}
+		final Context ctx = session.getContext();
+		if (!ctx.isEnabled()) {
+		    sessiondService.removeSession(sessionId);
+		    if (INFO) {
+		        LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+		    }
+		    throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+		}
+		checkIP(session, req.getRemoteAddr());
+	}
 
     /**
      * Checks the session ID supplied as a query parameter in the request URI.
@@ -234,9 +268,11 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
+        final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
+        String sessionId = null;
         try {
             initializeSession(req);
-            final ServerSession session = getSessionObject(req);
+            final ServerSession session = getSessionObject(req, true);
             /*
              * Check max. concurrent AJAX requests
              */
@@ -250,7 +286,12 @@ public abstract class SessionServlet extends AJAXServlet {
                     throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                 }
             }
-            super.service(req, resp);
+            ThreadLocalSessionHolder.getInstance().setSession(session);
+            if (null != threadCounter) {
+                sessionId = session.getSessionID();
+                threadCounter.increment(sessionId);
+            }
+            super.service(new CountingHttpServletRequest(req), resp);
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
                 LOG.debug(e.getMessage(), e);
@@ -284,6 +325,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         } finally {
+            if (null != sessionId && null != threadCounter) {
+                threadCounter.decrement(sessionId);
+            }
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();
@@ -624,6 +668,11 @@ public abstract class SessionServlet extends AJAXServlet {
         req.setAttribute(SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());
     }
+    
+    public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
+    	req.setAttribute(PUBLIC_SESSION_KEY, session);
+        session.setParameter("JSESSIONID", req.getSession().getId());	
+    }
 
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
@@ -670,12 +719,31 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     *
-     * @param req The servlet request.
-     * @return the The remembered session.
+     * 
+     * @param req The Servlet request
+     * @return The remembered session
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
-        return (ServerSession) req.getAttribute(SESSION_KEY);
+        return getSessionObject(req, false);
+    }
+
+    /**
+     * Returns the remembered session.
+     * 
+     * @param req The Servlet request.
+     * @param mayUseFallbackSession <code>true</code> to look-up fall-back session; otherwise <code>false</code>
+     * @return The remembered session
+     */
+    protected static ServerSession getSessionObject(final ServletRequest req, final boolean mayUseFallbackSession) {
+        final Object attribute = req.getAttribute(SESSION_KEY);
+        if (attribute != null) {
+            return (ServerSession) req.getAttribute(SESSION_KEY);
+        }
+        if (mayUseFallbackSession) {
+            return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
+        }
+
+        return null;
     }
 
 }

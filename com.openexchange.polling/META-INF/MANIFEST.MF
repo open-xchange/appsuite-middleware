@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Polling Plug-in
 Bundle-SymbolicName: com.openexchange.polling
-Bundle-Version: 7.0.0.0
+Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.polling.osgi.PollingActivator
 Bundle-Vendor: Open-Xchange inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

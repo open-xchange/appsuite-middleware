@@ -51,8 +51,12 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -65,21 +69,19 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link ListAction}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for contacts are defined in Common object data and Detailed contact data. The alias \"list\" uses a predefined columnset.")
-}, requestBody = "An array with id.",
-responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for contacts are defined in Common object data and Detailed contact data. The alias \"list\" uses the predefined columnset [20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569].") }, requestBody = "An array with id.", responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. The alias \"list\" uses the predefined columnset [600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102].")
 public class ListAction extends ContactAction {
 
     /**
      * Initializes a new {@link ListAction}.
+     * 
      * @param serviceLookup
      */
     public ListAction(final ServiceLookup serviceLookup) {
@@ -170,5 +172,63 @@ public class ListAction extends ContactAction {
         }
 
         return new AJAXRequestResult(sortedContacts, timestamp, "contact");
+    }
+    
+    @Override
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        /*
+         * get requested object and folder IDs
+         */
+        final int[][] objectIdsAndFolderIds = request.getListRequestData();
+        final Map<String, List<String>> ids = new HashMap<String, List<String>>();
+        for (final int[] objectIdAndFolderId : objectIdsAndFolderIds) {
+            final String folderID = Integer.toString(objectIdAndFolderId[1]);
+            if (false == ids.containsKey(folderID)) {
+            	ids.put(folderID, new ArrayList<String>());
+            }
+            ids.get(folderID).add(Integer.toString(objectIdAndFolderId[0]));
+        }
+        /*
+         * get contacts
+         */
+        final List<Contact> contacts = new ArrayList<Contact>();
+        Date lastModified = new Date(0);
+        for (final Entry<String, List<String>> entry : ids.entrySet()) {
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = getContactService().getContacts(request.getSession(), entry.getKey(), 
+                		entry.getValue().toArray(new String[entry.getValue().size()]), request.getFields());
+                final int parentFolderID = Integer.parseInt(entry.getKey());
+                while (searchIterator.hasNext()) {
+                    final Contact contact = searchIterator.next();
+                    contact.setParentFolderID(parentFolderID);
+                    lastModified = getLatestModified(lastModified, contact);
+                    applyTimezoneOffset(contact, request.getTimeZone());
+                    contacts.add(contact);
+                }
+            } finally {
+            	if (null != searchIterator) {
+            		searchIterator.close();
+            	}
+            }
+        }
+        if (null != contacts && 1 < contacts.size()) {
+            /*
+             * sort loaded contacts in the order they were requested
+             */
+            final List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
+            for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
+                final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
+                for (final Contact contact : contacts) {
+                    if (contact.getObjectID() == objectIdsAndFolderId[0] && contact.getParentFolderID() == objectIdsAndFolderId[1]) {
+                        sortedContacts.add(contact);
+                        break;
+                    }
+                }
+            }
+            return new AJAXRequestResult(sortedContacts, lastModified, "contact");
+        } else {
+        	return new AJAXRequestResult(contacts, lastModified, "contact");
+        }
     }
 }

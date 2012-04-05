@@ -49,8 +49,12 @@
 
 package com.openexchange.contact.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -78,6 +82,28 @@ public class PermissionFilter {
 			@Override
 			public boolean accept(final Contact contact) throws OXException {
 				return contact.getCreatedBy() == userID || canReadAll && false == contact.getPrivateFlag();			
+			}
+		};
+	}
+	
+	public static FilteringSearchIterator<Contact> create(final SearchIterator<Contact> delegate, final int userID) throws OXException {
+		final Map<String, Boolean> canReadAllMap = new HashMap<String, Boolean>();
+		return new FilteringSearchIterator<Contact>(delegate) {
+
+			@Override
+			public boolean accept(final Contact contact) throws OXException {
+				if (contact.getCreatedBy() == userID) {
+					return true;
+				} else if (contact.containsPrivateFlag()) {
+					return false;
+				} else {
+					final String folderID = Integer.toString(contact.getParentFolderID());
+					if (false == canReadAllMap.containsKey(folderID)) {
+						final EffectivePermission permission = Tools.getPermission(contact.getContextId(), folderID, userID);
+						canReadAllMap.put(folderID, permission.canReadAllObjects());
+					}
+					return canReadAllMap.get(folderID).booleanValue();
+				}
 			}
 		};
 	}

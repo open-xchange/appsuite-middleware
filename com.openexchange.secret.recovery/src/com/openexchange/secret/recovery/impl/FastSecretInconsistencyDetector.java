@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery.impl;
 
+import java.security.GeneralSecurityException;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,10 +68,13 @@ import com.openexchange.user.UserService;
  * {@link FastSecretInconsistencyDetector}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator {
 
-    private static final Log LOG = LogFactory.getLog(FastSecretInconsistencyDetector.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FastSecretInconsistencyDetector.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
 
@@ -89,7 +93,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         this.detector = detector;
     }
 
-    private static final String testString = "supercalifragilisticexplialidocious";
+    private static final String TEST_STRING = "supercalifragilisticexplialidocious";
 
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
@@ -113,15 +117,31 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
 
     private boolean canDecrypt(final String next, final String secret) {
         try {
-            return cryptoService.decrypt(next, secret).equals(testString);
+            return cryptoService.decrypt(next, secret).equals(TEST_STRING);
         } catch (final OXException e) {
+            try {
+                return OldStyleDecrypt.decrypt(next, secret).equals(TEST_STRING);
+            } catch (final GeneralSecurityException inner) {
+                // Ignore
+            }
+            if (DEBUG) {
+                final String message = "Could not decrypt fast-crypt token from user's attributes.";
+                final Throwable t = new Throwable(message);
+                LOG.debug(message, t);
+            }
             return false;
         }
     }
 
     private void saveNewToken(final User user, final String secret, final Context context) {
         try {
-            userService.setAttribute(PROPERTY, cryptoService.encrypt(testString, secret), user.getId(), context);
+            final String encrypted = cryptoService.encrypt(TEST_STRING, secret);
+            userService.setAttribute(PROPERTY, encrypted, user.getId(), context);
+            if (DEBUG) {
+                final String message = "Saved fast-crypt token in user's attributes: " + encrypted;
+                final Throwable t = new Throwable(message);
+                LOG.debug(message, t);
+            }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

@@ -56,10 +56,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -83,6 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
 public class RdbContactStorage extends DefaultContactStorage {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorage.class));
+    private static final boolean PREFETCH_ATTACHMENT_INFO = true;
 
     private final Executor executor;
     
@@ -116,9 +115,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */        
-            Contact contact = executor.selectSingle(connection, Table.CONTACTS, contextID, objectID, queryFields.getContactDataFields());
+            final Contact contact = executor.selectSingle(connection, Table.CONTACTS, contextID, objectID, queryFields.getContactDataFields());
             if (null == contact) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(objectID), Integer.valueOf(contextID));
             }
             contact.setObjectID(objectID);
             contact.setContextId(contextID);
@@ -137,7 +136,14 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             if (queryFields.hasDistListData() && 0 < contact.getNumberOfDistributionLists()) {
                 contact.setDistributionList(executor.select(connection, Table.DISTLIST, contextID, objectID, Fields.DISTLIST_DATABASE_ARRAY));
-            }            
+            }
+            /*
+             * add attachment information in advance if needed
+             */
+            //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+            if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
+            	contact.setLastModifiedOfNewestAttachment(executor.selectNewestAttachmentDate(connection, contextID, objectID));            	
+            }
             return contact;
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
@@ -297,7 +303,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                         }
                     } else {
                         // create new image
-                        this.executor.insert(connection, Table.IMAGES, contact, Fields.IMAGE_DATABASE_ARRAY);                        
+                    	final Contact imageData = new Contact();
+                    	imageData.setObjectID(objectID);
+                    	imageData.setContextId(contextID);
+                    	imageData.setImage1(contact.getImage1());
+                    	imageData.setImageContentType(contact.getImageContentType());
+                    	imageData.setImageLastModified(contact.getImageLastModified());                    	
+                        this.executor.insert(connection, Table.IMAGES, imageData, Fields.IMAGE_DATABASE_ARRAY);                        
                     }                    
                 }
             }
@@ -356,13 +368,14 @@ public class RdbContactStorage extends DefaultContactStorage {
     	return this.getContacts(false, contextID, folderId, null, since, fields, null, null);
     }
 
+    @Override
     public SearchIterator<Contact> modified(final int contextID, final String folderId, final Date since, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, contextID, folderId, null, since, fields, null, sortOptions);
     }
 
     @Override
-    public <O> SearchIterator<Contact> search(final int contextID, final String folderId, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
-    	return this.getContacts(false, contextID, folderId, null, null, fields, term, sortOptions);
+    public <O> SearchIterator<Contact> search(final int contextID, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, contextID, null, null, null, fields, term, sortOptions);
     }  
     
     @Override
@@ -426,6 +439,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                 if (queryFields.hasDistListData()) {
                     contacts = mergeDistListData(connection, deleted ? Table.DELETED_DISTLIST : Table.DISTLIST, contextID, contacts);
                 }
+                /*
+                 * merge attachment information in advance if needed
+                 */
+                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
+                	contacts = mergeAttachmentData(connection, contextID, contacts);            	
+                }
             }
             return getSearchIterator(contacts);
         } catch (final SQLException e) {
@@ -443,6 +463,20 @@ public class RdbContactStorage extends DefaultContactStorage {
                 final List<DistListMember> distList = distListData.get(Integer.valueOf(contact.getObjectID()));
                 if (null != distList) {
                     contact.setDistributionList(distList.toArray(new DistListMember[distList.size()]));
+                }
+            }
+        }
+        return contacts;
+    }
+
+    private List<Contact> mergeAttachmentData(final Connection connection, final int contextID, final List<Contact> contacts) throws SQLException, OXException {
+        final int[] objectIDs = getObjectIDsWithAttachments(contacts);
+        if (null != objectIDs && 0 < objectIDs.length) {
+            final Map<Integer, Date> attachmentData = executor.selectNewestAttachmentDates(connection, contextID, objectIDs);
+            for (final Contact contact : contacts) {
+                final Date attachmentLastModified = attachmentData.get(Integer.valueOf(contact.getObjectID()));
+                if (null != attachmentLastModified) {
+                    contact.setLastModifiedOfNewestAttachment(attachmentLastModified);
                 }
             }
         }
@@ -502,6 +536,17 @@ public class RdbContactStorage extends DefaultContactStorage {
         return Arrays.copyOf(objectIDs, i);
     }
     
+    private int[] getObjectIDsWithAttachments(final List<Contact> contacts) {
+        int i = 0;
+        final int[] objectIDs = new int[contacts.size()];
+        for (final Contact contact : contacts) {
+            if (0 < contact.getNumberOfAttachments()) {
+                objectIDs[i++] = contact.getObjectID();
+            }
+        }
+        return Arrays.copyOf(objectIDs, i);
+    }
+    
     private static DatabaseService getDatabaseService() throws OXException {
         return RdbServiceLookup.getService(DatabaseService.class, true);
     }
@@ -526,15 +571,4 @@ public class RdbContactStorage extends DefaultContactStorage {
         }
     }
 
-//    private static DistListMember[] getMembers(final DistributionListEntryObject[] distList, final int contextID, final int parentContactID) throws OXException {
-//    	if (null != distList) {
-//    		final DistListMember[] members = new DistListMember[distList.length];
-//    		for (int i = 0; i < members.length; i++) {
-//				members[i] = DistListMember.create(distList[i], contextID, parentContactID);
-//			}
-//        	return members;
-//    	}
-//    	return null;
-//    }
-    
 }

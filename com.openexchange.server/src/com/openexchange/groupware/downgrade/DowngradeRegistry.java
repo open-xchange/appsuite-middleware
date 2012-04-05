@@ -227,7 +227,8 @@ public final class DowngradeRegistry {
 	}
 
 	/**
-	 * Fires the downgrade event
+	 * Fires the downgrade event. This method deletes invisible data according to the given data in {@link DowngradeEvent}. This must only
+	 * be called from the "deleteinvisible" CLT or the according RMI call.
 	 *
 	 * @param downgradeEvent
 	 *            the downgrade event
