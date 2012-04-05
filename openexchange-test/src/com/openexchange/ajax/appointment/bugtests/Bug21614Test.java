@@ -65,10 +65,10 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link Bug21614Test}
@@ -134,7 +134,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         assertNotFind(clientB);
     }
 
-    private void assertNotFind(AJAXClient c) throws AjaxException, IOException, JSONException {
+    private void assertNotFind(AJAXClient c) throws IOException, JSONException, OXException {
         AllRequest allRequest = new AllRequest(c.getValues().getPrivateAppointmentFolder(), new int[] {Appointment.OBJECT_ID}, new Date(1334880000000L), new Date(1334966400000L), TimeZone.getTimeZone("UTC"), false);
         CommonAllResponse allResponse = c.execute(allRequest);
         
