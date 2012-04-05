@@ -164,17 +164,18 @@ public final class MIMEStructure2ComposedMailParser {
      * Parses specified JSON message structure & returns the resulting {@link ComposedMailMessage} instances.
      *
      * @param jsonMessage The JSON message structure
+     * @param warnings 
      * @return The resulting {@link ComposedMailMessage} instances.
      * @throws OXException If parsing fails
      */
-    public ComposedMailMessage[] parseMessage(final JSONObject jsonMessage) throws OXException {
+    public ComposedMailMessage[] parseMessage(final JSONObject jsonMessage, List<OXException> warnings) throws OXException {
         parseFlags(jsonMessage);
         parsePart(jsonMessage);
         /*
          * Fill composed mails
          */
         attachmentHandler.setTextPart(textBodyPart);
-        return attachmentHandler.generateComposedMails(composedMail);
+        return attachmentHandler.generateComposedMails(composedMail, warnings);
     }
 
     private void parseFlags(final JSONObject jsonMessage) throws OXException {

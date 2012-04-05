@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.parser;
 
+import java.util.List;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -105,7 +107,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
     }
 
     @Override
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source, List<OXException> warnings) throws OXException {
         source.setBodyPart(textPart);
         for (final MailPart attachment : attachments) {
             source.addEnclosedPart(attachment);
