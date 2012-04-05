@@ -103,14 +103,9 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     /*
      * Public methods
      */
-    @Override
-    public void release() {        
-        try {
-            final SolrAccessService accessService = Services.getService(SolrAccessService.class);
-            accessService.stopCore(identifier);
-        } catch (final OXException e) {
-            LOG.warn(e.getLogMessage(), e);
-        }
+    public void releaseCore() {        
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        accessService.freeResources(identifier);
     }
 
     public SolrCoreIdentifier getIdentifier() {

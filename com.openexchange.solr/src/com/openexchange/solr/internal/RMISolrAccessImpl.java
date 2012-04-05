@@ -51,13 +51,14 @@ package com.openexchange.solr.internal;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 
@@ -69,31 +70,11 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
 public class RMISolrAccessImpl implements RMISolrAccessService {
 
     private final SolrAccessService solrService;
+    
 
     public RMISolrAccessImpl(final SolrAccessService solrService) {
         super();
         this.solrService = solrService;
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public boolean startCoreRmi(final SolrCoreConfiguration configuration) throws RemoteException, OXException {
-        return solrService.startCore(configuration);
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public boolean stopCoreRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return solrService.stopCore(identifier);
-    }
-
-    // ---------------------------------------------------------------------------
-
-    @Override
-    public void reloadCoreRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        solrService.reloadCore(identifier);
     }
 
     // ---------------------------------------------------------------------------

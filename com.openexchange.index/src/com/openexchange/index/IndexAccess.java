@@ -171,11 +171,4 @@ public interface IndexAccess<V> {
      */
     TriggerType getTriggerType();
 
-    /**
-     * Releases this access and frees all possibly obtained resources.
-     * <p>
-     * Invoked on {@link IndexFacadeService#releaseIndexAccess(IndexAccess)}.
-     */
-    void release();
-
 }
