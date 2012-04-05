@@ -376,7 +376,11 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.
      */
     INVALID_FOLDER_NAME_TOO_LONG("Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.", Category.CATEGORY_USER_INPUT, 83),
-
+    /**
+     * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.
+     */
+    USED_PUBLISHING_FEATURE("The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.",  Category.CATEGORY_WARNING, 84),
+    
     ;
 
     private static final String PREFIX = "MSG";

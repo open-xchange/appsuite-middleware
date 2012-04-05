@@ -68,6 +68,9 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 	
 	private boolean shouldEnqueue(NotificationMail mail) {
+		if (mail.getOriginal() == null || mail.getAppointment() == null) {
+			return false;
+		}
 		Type stateType = mail.getStateType();
 		if (stateType == Type.MODIFIED || isStateChange(mail)) {
 			return !needsFastTrack(mail);
@@ -77,7 +80,9 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 	
 	private boolean needsFastTrack(NotificationMail mail) {
-		
+		if (mail.getOriginal() == null || mail.getAppointment() == null) {
+			return true;
+		}
 		return isChangeExceptionsMail(mail);
 	}
 

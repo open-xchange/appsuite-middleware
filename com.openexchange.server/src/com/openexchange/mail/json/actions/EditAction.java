@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
@@ -93,6 +96,8 @@ public final class EditAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
+        List<OXException> warnings = new ArrayList<OXException>();
+        
         try {
             if (!request.hasUploads()) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");
@@ -136,7 +141,7 @@ public final class EditAction extends AbstractMailAction {
                  */
                 if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
                     final ComposedMailMessage composedMail =
-                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID);
+                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
                     /*
                      * ... and edit draft
                      */
@@ -151,7 +156,9 @@ public final class EditAction extends AbstractMailAction {
             /*
              * Create JSON response object
              */
-            return new AJAXRequestResult(msgIdentifier, "string");
+            AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            result.addWarnings(warnings);
+            return result;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

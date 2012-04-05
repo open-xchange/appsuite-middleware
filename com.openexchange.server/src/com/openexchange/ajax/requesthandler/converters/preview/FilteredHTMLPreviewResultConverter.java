@@ -58,7 +58,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -109,28 +113,70 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             // Already sanitized
             return;
         }
-        boolean asDiv = requestData.getParameter("previewForceDiv", boolean.class);
+        final boolean asDiv = parseBool(requestData.getParameter("previewForceDiv"));
         final Map<String, String> metaData = previewDocument.getMetaData();
         final List<String> sanitizedHtml = new ArrayList<String>();
         {
+            final UserSettingMail usm = (UserSettingMail) session.getUserSettingMail().clone();
+            usm.setNoSave(true);
+            final boolean edit = parseBool(requestData.getParameter(PARAMETER_EDIT));
+            /*
+             * Overwrite settings with request's parameters
+             */
+            final DisplayMode mode = detectDisplayMode(edit, requestData.getParameter(PARAMETER_VIEW), usm);
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             for (String content : previewDocument.getContent()) {
-                content = htmlService.dropScriptTagsInHeader(content);
-                final String charset = metaData.get("charset");
-                content = htmlService.getConformHTML(content, charset == null ? "ISO-8859-1" : charset, false);
-                content = htmlService.checkBaseTag(content, false);
-                /*
-                 * Filter according to white-list
-                 */
-                content = htmlService.filterWhitelist(content);
-                final boolean[] modified = new boolean[1];
-                content = htmlService.filterExternalImages(content, modified);
-                /*
-                 * Replace CSS classes
-                 */
-                content = HTMLProcessing.saneCss(content, htmlService);
-                if (asDiv) {
-                	content = toDiv(content);
+                if (!DisplayMode.RAW.equals(mode)) {
+                    content = htmlService.dropScriptTagsInHeader(content);
+                    if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
+                        final boolean[] modified = new boolean[1];
+                        final boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                        content = htmlService.checkBaseTag(content, externalImagesAllowed);
+                        if (HTMLProcessing.useSanitize()) {
+                            // No need to generate well-formed HTML
+                            if (externalImagesAllowed) {
+                                /*
+                                 * TODO: Does not work reliably by now
+                                 */
+                                // retval = htmlService.checkExternalImages(retval);
+                                content = htmlService.sanitize(content, null, false, null);
+                            } else {
+                                content = htmlService.sanitize(content, null, true, modified);
+                            }
+                        } else {
+                            final String charset = metaData.get("charset");
+                            content = htmlService.getConformHTML(content, charset == null ? "ISO-8859-1" : charset, false);
+                            /*
+                             * Filter according to white-list
+                             */
+                            content = htmlService.filterWhitelist(content);
+                            if (externalImagesAllowed) {
+                                /*
+                                 * TODO: Does not work reliably by now
+                                 */
+                                // retval = htmlService.checkExternalImages(retval);
+                            } else {
+                                content = htmlService.filterExternalImages(content, modified);
+                            }
+                        }
+                        /*
+                         * Filter inlined images
+                         */
+                        {
+                            final MailMessage mail = (MailMessage) result.getParameter("__mail");
+                            if (mail != null) {
+                                final MailPath mailPath = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
+                                content = HTMLProcessing.filterInlineImages(content, session, mailPath);
+                            }
+                        }
+                        /*
+                         * Replace CSS classes
+                         */
+                        content = HTMLProcessing.saneCss(content, htmlService);
+                        if (asDiv) {
+                            content = toDiv(content);
+                        }
+                    }
                 }
                 sanitizedHtml.add(content);
             }
@@ -139,14 +185,15 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail(), previewDocument.isMoreAvailable()), FORMAT);
     }
 
-    private String toDiv(String content) {
-    	// Let's try and turn this into an appendable DIV
-    	content = content.replaceAll("<body[^>]*?>", "<div>");
-    	content = content.substring(content.indexOf("<div>"));
-    	content = content.replaceAll("</body[^>]*?>", "</div>"); 
-    	content = content.substring(0, content.lastIndexOf("</div>") + 6);
-    	return content;
-	}
+    private String toDiv(final String content) {
+        // Let's try and turn this into an appendable DIV
+        String ret = content;
+        ret = ret.replaceAll("<body[^>]*>", "<div>");
+        ret = ret.substring(ret.indexOf("<div>"));
+        ret = ret.replaceAll("</body[^>]*>", "</div>"); 
+        ret = ret.substring(0, ret.lastIndexOf("</div>") + 6);
+        return ret;
+    }
 
 	/**
      * {@link SanitizedPreviewDocument}
@@ -161,7 +208,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
 
         private final InputStream thumbnail;
         
-        private Boolean moreAvailable;
+        private final Boolean moreAvailable;
 
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
@@ -169,7 +216,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
          * @param metaData
          * @param sanitizedHtml
          */
-        protected SanitizedPreviewDocument(final Map<String, String> metaData, final List<String> sanitizedHtml, final InputStream thumbnail, Boolean moreAvailable) {
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final List<String> sanitizedHtml, final InputStream thumbnail, final Boolean moreAvailable) {
             this.metaData = metaData;
             this.sanitizedHtml = sanitizedHtml;
             this.thumbnail = thumbnail;

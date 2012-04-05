@@ -198,7 +198,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     }
 
     @Override
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source, List<OXException> warnings) throws OXException {
         if (!exceeded) {
             /*
              * No quota exceeded, return prepared source
@@ -243,6 +243,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          */
         publisher = target.getPublicationService();
         try {
+        	warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
             return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
         } catch (final OXException e) {
             /*

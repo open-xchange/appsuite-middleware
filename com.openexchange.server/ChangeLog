@@ -1,3 +1,7 @@
+* 2012-04-05 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21614: Fixed lost Delete Exception.
+
 * 2012-04-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 21903/21904: Ensure IDN presentation of obtained E-Mail address

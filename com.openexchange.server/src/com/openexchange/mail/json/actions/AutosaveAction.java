@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -88,13 +91,14 @@ public final class AutosaveAction extends AbstractMailAction {
             final ServerSession session = req.getSession();
             final MailServletInterface mailInterface = getMailInterface(req);
             String msgIdentifier = null;
+            List<OXException> warnings = new ArrayList<OXException>();
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().getData();
                 /*
                  * Parse with default account's transport provider
                  */
                 final ComposedMailMessage composedMail =
-                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID);
+                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                     LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
@@ -135,7 +139,9 @@ public final class AutosaveAction extends AbstractMailAction {
             /*
              * Fill JSON response object
              */
-            return new AJAXRequestResult(msgIdentifier, "string");
+            AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            result.addWarnings(warnings);
+            return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

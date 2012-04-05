@@ -153,11 +153,12 @@ public final class MessageParser {
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
      * @param accountId The account ID
+     * @param warnings 
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws OXException {
-        return parse(jsonObj, uploadEvent, session, accountId, null, null, false)[0];
+    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, List<OXException> warnings) throws OXException {
+        return parse(jsonObj, uploadEvent, session, accountId, null, null, false, warnings)[0];
     }
 
     /**
@@ -169,12 +170,13 @@ public final class MessageParser {
      * @param session The session
      * @param accountId The account ID
      * @param protocol The server's protocol
+     * @param warnings 
      * @param hostname The server's host name
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName) throws OXException {
-        return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true);
+    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, List<OXException> warnings) throws OXException {
+        return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true, warnings);
     }
 
     /**
@@ -189,10 +191,11 @@ public final class MessageParser {
      * @param hostname The server's host name
      * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise
      *            <code>false</code>
+     * @param warnings 
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport) throws OXException {
+    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport, List<OXException> warnings) throws OXException {
         try {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -292,7 +295,7 @@ public final class MessageParser {
             /*
              * Fill composed mail
              */
-            final ComposedMailMessage[] ret = attachmentHandler.generateComposedMails(composedMail);
+            final ComposedMailMessage[] ret = attachmentHandler.generateComposedMails(composedMail, warnings);
             for (final ComposedMailMessage mail : ret) {
                 if (!mail.containsAccountId()) {
                     mail.setAccountId(accountId);
