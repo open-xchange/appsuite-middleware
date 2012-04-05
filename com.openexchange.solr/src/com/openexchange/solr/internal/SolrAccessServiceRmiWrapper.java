@@ -51,13 +51,14 @@ package com.openexchange.solr.internal;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.rmi.RMISolrAccessService;
@@ -77,33 +78,6 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
     public SolrAccessServiceRmiWrapper(final RMISolrAccessService rmiAccessService) {
         super();
         this.rmiAccessService = rmiAccessService;
-    }
-
-    @Override
-    public boolean startCore(final SolrCoreConfiguration configuration) throws OXException {
-        try {
-            return rmiAccessService.startCoreRmi(configuration);
-        } catch (final RemoteException e) {
-            throw handleRemoteException(e);
-        }
-    }
-
-    @Override
-    public boolean stopCore(final SolrCoreIdentifier identifier) throws OXException {
-        try {
-            return rmiAccessService.stopCoreRmi(identifier);
-        } catch (final RemoteException e) {
-            throw handleRemoteException(e);
-        }
-    }
-
-    @Override
-    public void reloadCore(final SolrCoreIdentifier identifier) throws OXException {
-        try {
-            rmiAccessService.reloadCoreRmi(identifier);
-        } catch (final RemoteException e) {
-            throw handleRemoteException(e);
-        }
     }
 
     @Override
@@ -204,6 +178,11 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             throw handleRemoteException(e);
         }
     }
+    
+	@Override
+	public void freeResources(SolrCoreIdentifier identifier) {
+		return;
+	}
 
     private static OXException handleRemoteException(final RemoteException remoteException) {
         return SolrExceptionCodes.REMOTE_ERROR.create(remoteException, remoteException.getMessage());

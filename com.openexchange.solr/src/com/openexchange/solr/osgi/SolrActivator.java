@@ -12,23 +12,32 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.groupware.SolrCoreStoresCreateTableTask;
 import com.openexchange.solr.groupware.SolrCoresCreateTableService;
 import com.openexchange.solr.groupware.SolrCoresCreateTableTask;
 import com.openexchange.solr.internal.DelegationSolrAccessImpl;
 import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
+import com.openexchange.solr.internal.MessagingConstants;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
 import com.openexchange.solr.internal.Services;
 import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
@@ -43,20 +52,21 @@ public class SolrActivator extends HousekeepingActivator {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 
-	private volatile DelegationSolrAccessImpl managementService;
+	private volatile EmbeddedSolrAccessImpl managementService;
 
 	private static RMISolrAccessService solrRMI;
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
+		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, MessagingService.class };
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
 		Services.setServiceLookup(this);
-		final DelegationSolrAccessImpl accessService = this.managementService = new DelegationSolrAccessImpl(new EmbeddedSolrAccessImpl());
-		accessService.startUp();
+		final EmbeddedSolrAccessImpl embeddedAccess = this.managementService = new EmbeddedSolrAccessImpl();
+		embeddedAccess.startUp();
+		final DelegationSolrAccessImpl accessService = new DelegationSolrAccessImpl(embeddedAccess);
 		registerService(SolrAccessService.class, accessService);
 		final SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
 		registerService(SolrCoreConfigService.class, coreService);
@@ -66,6 +76,28 @@ public class SolrActivator extends HousekeepingActivator {
 		final SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
 		registerService(CreateTableService.class, createTableService);
 		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoreStoresCreateTableTask(), new SolrCoresCreateTableTask(createTableService)));
+	
+		final Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        ht.put(EventConstants.EVENT_TOPIC, new String[] { MessagingConstants.START_CORE_TOPIC });
+		final EventHandler startCoreEventHandler = new EventHandler() {			
+			@Override
+			public void handleEvent(Event event) {
+				final String topic = event.getTopic();
+				if (topic.equals(MessagingConstants.START_CORE_TOPIC)) {
+					final Object property = event.getProperty(MessagingConstants.PROP_IDENTIFIER);
+					if (property != null && property instanceof SolrCoreIdentifier) {
+						final SolrCoreIdentifier identifier = (SolrCoreIdentifier) property;
+						try {
+							embeddedAccess.startCore(identifier, false);
+						} catch (OXException e) {
+							LOG.error("Could not start solr core.", e);
+						}						
+					}
+				}				
+			}
+		};
+		
+		registerService(EventHandler.class, startCoreEventHandler);
 	}
 
 	@Override
@@ -73,7 +105,7 @@ public class SolrActivator extends HousekeepingActivator {
 		super.stopBundle();
 
 		unregisterRMIInterface();
-		final DelegationSolrAccessImpl accessService = this.managementService;
+		final EmbeddedSolrAccessImpl accessService = this.managementService;
 		if (accessService != null) {
 			accessService.shutDown();
 			this.managementService = null;

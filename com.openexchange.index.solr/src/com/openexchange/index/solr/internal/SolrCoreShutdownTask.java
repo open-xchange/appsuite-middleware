@@ -92,7 +92,7 @@ public class SolrCoreShutdownTask implements Runnable {
         	final long lastAccess = access.getLastAccess();
             if ((lastAccess < softBarrier && !access.isRetained()) || lastAccess < hardBarrier) {
                 indentifers.add(access.getIdentifier());
-                access.release();                
+                access.releaseCore();                
             }
         }
         
