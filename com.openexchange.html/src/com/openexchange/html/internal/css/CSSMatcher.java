@@ -265,6 +265,105 @@ public final class CSSMatcher {
      *
      * @param cssBuilder A {@link StringBuilder} containing CSS content
      * @param styleMap The style map
+     * @param cssPrefix The CSS prefix
+     * @return <code>true</code> if modified; otherwise <code>false</code>
+     */
+    public static boolean checkCSS(final StringBuilder cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix) {
+        if (isEmpty(cssPrefix)) {
+            return checkCSS(cssBuilder, styleMap, true);
+        }
+        boolean modified = false;
+        final StringBuilder cssElemsBuffer = new StringBuilder(128);
+        /*
+         * Feed matcher with buffer's content and reset
+         */
+        final String css = cssBuilder.toString();
+        final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+        cssBuilder.setLength(0);
+        int lastPos = 0;
+        while (m.find()) {
+            // Check prefix part
+            cssElemsBuffer.append(css.substring(lastPos, m.start()));
+            modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+            final String prefix = cssElemsBuffer.toString();
+            cssElemsBuffer.setLength(0);
+            // Check block part
+            cssElemsBuffer.append(m.group(2));
+            modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+            cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}'); // Surround with block definition
+            final String block = cssElemsBuffer.toString();
+            cssElemsBuffer.setLength(0);
+            // Add to main builder
+            cssBuilder.append(prefix);
+            cssBuilder.append(block);
+            lastPos = m.end();
+        }
+        cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+        final String tail = cssElemsBuffer.toString();
+        cssElemsBuffer.setLength(0);
+        cssBuilder.append(tail);
+        return modified;
+    }
+
+    private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
+
+    private static String prefixBlock(final String match, final String cssPrefix) {
+        if (isEmpty(match) || isEmpty(cssPrefix)) {
+            return match;
+        }
+        final int length = match.length();
+        if (1 == length) {
+            return match;
+        }
+        // Cut off trailing '{' character
+        final String s = match.substring(0, length - 1);
+        if (isEmpty(s)) {
+            return match;
+        }
+        final int len = s.length();
+        int pos = 0;
+        while (pos < len && Character.isWhitespace(s.charAt(pos))) {
+            pos++;
+        }
+        final StringBuilder builder = new StringBuilder(length << 1);
+        if (pos > 0) {
+            builder.append(s.substring(0, pos));
+        }
+        final int insertPos = builder.length();
+        boolean tagFound = false;
+        for (final String word : SPLIT_WORDS.split(s.substring(pos), 0)) {
+            final char first = word.charAt(0);
+            if ('.' == first) {
+                builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+            } else if ('#' == first) {
+                if (word.indexOf('.') < 0) { // contains no dots
+                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                } else {
+                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                }
+            } else {
+                if (!tagFound) {
+                    builder.insert(insertPos, '#' + cssPrefix + ' ');
+                    tagFound = true;
+                }
+                builder.append(replaceDots(word, cssPrefix)).append(' ');
+            }
+        }
+        return builder.append('{').toString();
+    }
+
+    private static final Pattern DOT = Pattern.compile("\\.");
+
+    private static String replaceDots(final String word, final String cssPrefix) {
+        return DOT.matcher(word).replaceAll('.' + cssPrefix + '-');
+    }
+
+    /**
+     * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
+     *
+     * @param cssBuilder A {@link StringBuilder} containing CSS content
+     * @param styleMap The style map
      * @param removeIfAbsent <code>true</code> to completely remove CSS element if not contained in specified style map; otherwise
      *            <code>false</code>
      * @return <code>true</code> if modified; otherwise <code>false</code>
