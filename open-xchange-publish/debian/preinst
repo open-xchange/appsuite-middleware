@@ -18,7 +18,7 @@ CONFFILES="contacts_hcard_censored.tmpl contacts_hcard_uncensored.tmpl contacts_
 
 case "$1" in
     install|upgrade)
-        if dpkg --compare-versions "$2" lt "7.0.0-0"; then
+        if dpkg --compare-versions "$2" lt "6.21.0-0"; then
             for FILE in ${CONFFILES}; do
                 dpkg-divert --package open-xchange-publish --add --rename --divert /opt/open-xchange/templates/${FILE}.dpkg-bak \
                     /opt/open-xchange/templates/${FILE}
@@ -36,7 +36,7 @@ case "$1" in
 esac
 
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/microformatWhitelist.properties \
-    /opt/open-xchange/etc/microformatWhitelist.properties 6.99.9 open-xchange-publish-microformats -- $1 \
+    /opt/open-xchange/etc/microformatWhitelist.properties 6.20.99 open-xchange-publish-microformats -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-publish-microformats)
 
 # dh_installdeb will replace this with shell code automatically
