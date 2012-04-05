@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -120,6 +123,7 @@ public final class NewAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
+        List<OXException> warnings = new ArrayList<OXException>();
         try {
             if (request.hasUploads() || request.getParameter(Mail.UPLOAD_FORMFIELD_MAIL) != null) {
                 final ServerSession session = req.getSession();
@@ -163,14 +167,14 @@ public final class NewAction extends AbstractMailAction {
                          * ... and save draft
                          */
                         final ComposedMailMessage composedMail =
-                            MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId);
+                            MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId, warnings);
                         msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
                     } else {
                         /*
                          * ... and send message
                          */
                         final ComposedMailMessage[] composedMails =
-                            MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname());
+                            MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname(), warnings);
                         final ComposeType sendType =
                             jsonMailObj.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                         msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
@@ -200,7 +204,9 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Create JSON response object
                  */
-                return new AJAXRequestResult(msgIdentifier, "string");
+                AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+                result.addWarnings(warnings);
+                return result;
             }
             /*
              * Non-POST
@@ -275,7 +281,9 @@ public final class NewAction extends AbstractMailAction {
                 responseObj.put(DataFields.ID, ids[0]);
                 responseData = responseObj;
             }
-            return new AJAXRequestResult(responseData, "json");
+            AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
+            result.addWarnings(warnings);
+            return result;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
