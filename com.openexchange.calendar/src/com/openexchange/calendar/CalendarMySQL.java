@@ -4563,7 +4563,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
                         update.setObjectID(edao.getRecurrenceID());
-                        update.setDeleteExceptions(collection.removeException(deleted_exceptions, calculated_exception));
+                        List<Date> asList = Arrays.asList(deleted_exceptions);
+                        asList.remove(calculated_exception);
+                        update.setDeleteExceptions(asList);
                         update.setModifiedBy(uid);
                         try {
                             final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);
