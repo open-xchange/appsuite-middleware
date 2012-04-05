@@ -1,4 +1,10 @@
-open-xchange-dav (7.0.0-1) unstable; urgency=low
+open-xchange-dav (6.21.0-2) unstable; urgency=low
+
+  * Internal release build for EDP drop #0
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 04 Apr 2012 15:50:38 +0200
+
+open-xchange-dav (6.21.0-1) unstable; urgency=low
 
   * Initial release
 

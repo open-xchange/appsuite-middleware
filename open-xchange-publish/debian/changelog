@@ -1,4 +1,10 @@
-open-xchange-publish (7.0.0-1) unstable; urgency=low
+open-xchange-publish (6.21.0-2) unstable; urgency=low
+
+  * Internal release build for EDP drop #0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 04 Apr 2012 15:50:58 +0200
+
+open-xchange-publish (6.21.0-1) unstable; urgency=low
 
   * Initial release
 
