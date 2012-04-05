@@ -272,7 +272,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 			 * 3. The core is started on another node
 			 *    => connect via RMI and return remote solr instance
 			 */
-			if (embeddedAccess.hasActiveCore(identifier) || embeddedAccess.startCore(identifier, false)) {
+			if (embeddedAccess.hasActiveCore(identifier) || embeddedAccess.startCore(identifier)) {
 	            return embeddedAccess;
 	        }
 			
