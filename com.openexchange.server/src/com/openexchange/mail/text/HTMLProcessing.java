@@ -195,6 +195,10 @@ public final class HTMLProcessing {
                     if (mailPath != null && session != null) {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
+                    /*
+                     * Replace CSS classes
+                     */
+                    retval = saneCss(retval, htmlService);
                 }
             }
         } else {
@@ -216,7 +220,10 @@ public final class HTMLProcessing {
 
     private static volatile Boolean useSanitize;
 
-    private static boolean useSanitize() {
+    /**
+     * Whether to use sanitize.
+     */
+    public static boolean useSanitize() {
         if (null == useSanitize) {
             synchronized (HTMLProcessing.class) {
                 if (null == useSanitize) {
@@ -629,7 +636,7 @@ public final class HTMLProcessing {
      * @param msgUID The message's unique path in mailbox
      * @return The HTML content with all inline images replaced with valid links
      */
-    private static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
+    public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
         String ret = filterImgInlineImages(content, session, msgUID);
         ret = filterBackgroundInlineImages(ret, session, msgUID);
         return ret;
