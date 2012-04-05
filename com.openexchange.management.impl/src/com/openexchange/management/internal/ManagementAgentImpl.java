@@ -117,7 +117,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
     private ManagementAgentImpl() {
         super();
         jmxPort = 9999;
-        jmxServerPort = 3000;
+        jmxServerPort = -1;
         jmxSinglePort = false;
     }
 
@@ -228,7 +228,8 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     // We can't use the JMXConnectorServerFactory because of
                     // http://bugs.sun.com/view_bug.do?bug_id=5107423
                     //
-                    cs = new RMIConnectorServer(new JMXServiceURL("rmi", hostname, jmxPort), env, stub, mbs) {
+                    final JMXServiceURL rmiUrl = new JMXServiceURL("rmi", hostname, jmxPort);
+                    cs = new RMIConnectorServer(rmiUrl, env, stub, mbs) {
 
                         @Override
                         public JMXServiceURL getAddress() {
@@ -333,6 +334,9 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         String host = hostName;
         if (null == host) {
             host = InetAddress.getLocalHost().getHostName();
+        }
+        if (jmxServerPort < 0) {
+            return new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + jmxRmiPort + "/jmxrmi");
         }
         return new JMXServiceURL("service:jmx:rmi://" + host + ":" + jmxServerPort + "/jndi/rmi://" + host + ":" + jmxRmiPort + "/jmxrmi");
     }

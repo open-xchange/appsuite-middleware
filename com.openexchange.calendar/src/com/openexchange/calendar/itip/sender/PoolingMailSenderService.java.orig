@@ -36,11 +36,7 @@ public class PoolingMailSenderService implements MailSenderService {
 			}
 			
 			if (shouldEnqueue(mail)) {
-				int sharedFolderOwner = -1;
-				if (mail.getSharedCalendarOwner() != null) {
-					sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
-				}
-				pool.enqueue(mail.getOriginal(), mail.getAppointment(), session, sharedFolderOwner);
+				pool.enqueue(mail.getOriginal(), mail.getAppointment(), session);
 				return;
 			}
 			

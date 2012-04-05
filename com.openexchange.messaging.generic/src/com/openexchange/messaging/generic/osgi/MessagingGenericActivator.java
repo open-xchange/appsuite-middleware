@@ -220,17 +220,19 @@ public class MessagingGenericActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            final List<ServiceTracker<?,?>> trackers = this.trackers;
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();
                 }
-                trackers = null;
+                this.trackers = null;
             }
+            final List<ServiceRegistration<?>> registrations = this.registrations;
             if (null != registrations) {
                 while (!registrations.isEmpty()) {
                     registrations.remove(0).unregister();
                 }
-                registrations = null;
+                this.registrations = null;
             }
             final CacheService cacheService = getService(CacheService.class);
             if (null != cacheService) {
@@ -240,7 +242,11 @@ public class MessagingGenericActivator extends HousekeepingActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
-            secretService.close();
+            final WhiteboardSecretService secretService = this.secretService;
+            if (null != secretService) {
+                secretService.close();
+                this.secretService = null;
+            }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingGenericActivator.class)).error(e.getMessage(), e);
             throw e;

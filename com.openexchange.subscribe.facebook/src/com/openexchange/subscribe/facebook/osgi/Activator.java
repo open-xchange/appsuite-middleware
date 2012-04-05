@@ -20,18 +20,9 @@ public class Activator extends HousekeepingActivator {
         openTrackers();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stopBundle() throws Exception {
-        closeTrackers();
-    }
-
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
 }

@@ -61,7 +61,7 @@ msgstr "Mot de passe"
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.facebook/src/com/openexchange/subscribe/facebook/FormStrings.java:62
 #: /var/lib/jenkins/workspace/unstableCreateServerPOT/open-xchange/com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
-msgid "The OAuth Account to use"
+msgid "Select an existing account"
 msgstr "Le compte OAuth à utiliser"
 
 #. The name for the folder of a facebook account containing user's wall posts.
