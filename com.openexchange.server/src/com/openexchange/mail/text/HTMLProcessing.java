@@ -195,6 +195,10 @@ public final class HTMLProcessing {
                     if (mailPath != null && session != null) {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
+                    /*
+                     * Replace CSS classes
+                     */
+                    retval = saneCss(retval, htmlService);
                 }
             }
         } else {
