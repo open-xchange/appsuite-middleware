@@ -102,7 +102,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
         /*
          * Create file holder from mail
          */
-        final MailMessage mail = (MailMessage) requestData.getData();
+        final MailMessage mail = (MailMessage) result.getResultObject();
         final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
         try {
             mail.writeTo(baos);
@@ -113,13 +113,15 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
             LOG.debug(e.getMessage(), e);
             baos.reset();
         }
+        mail.prepareForCaching();
         /*
          * Create appropriate file holder
          */
         final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
         fileHolder.setContentType("application/octet-stream");
         fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
-        requestData.setData(fileHolder, "file");
+        result.setResultObject(fileHolder, "file");
+        result.setParameter("__mail", mail);
         /*
          * Convert
          */
