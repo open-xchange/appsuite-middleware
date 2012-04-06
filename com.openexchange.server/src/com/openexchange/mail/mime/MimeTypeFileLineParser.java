@@ -68,7 +68,7 @@ import java.util.regex.Pattern;
  */
 public final class MimeTypeFileLineParser {
 
-    private static final Pattern PAT_VAL = Pattern.compile("(?:[^\"][\\p{ASCII}&&[^\\s\"]]*|\"[\\p{ASCII}&&[^\"]]+\")");
+    private static final Pattern PAT_VAL = Pattern.compile("(?:[^\"][\\p{L}&&[^\\s\"]]*|\"[\\p{L}&&[^\"]]+\")");
 
     private String type;
 

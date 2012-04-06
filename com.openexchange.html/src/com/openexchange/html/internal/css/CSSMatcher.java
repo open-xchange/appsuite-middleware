@@ -123,7 +123,7 @@ public final class CSSMatcher {
 
         final String strTIME = RegexUtility.group(RegexUtility.concat(strNUMBER, strTIME_UNITS), GroupType.NON_CAPTURING);
 
-        final String strURL = "url\\(\"?\\p{ASCII}+\"?\\)";
+        final String strURL = "url\\(\"?\\p{L}+\"?\\)";
 
         final String strCOLOR_KEYWORD = RegexUtility.group(
             "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",

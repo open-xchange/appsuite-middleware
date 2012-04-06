@@ -114,8 +114,8 @@ public class DovecotEntity2ACL extends Entity2ACL {
             return null;
         }
         final String quotedDelim = Pattern.quote(String.valueOf(delim));
-        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{ASCII}&&[^").append(
-            quotedDelim).append("]]+)").append(quotedDelim).append("\\p{ASCII}+").toString();
+        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
+            quotedDelim).append("]]+)").append(quotedDelim).append("\\p{L}+").toString();
         final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
         if (m.matches()) {
             return m.group(1).replaceAll("\\s+", String.valueOf(delim));
