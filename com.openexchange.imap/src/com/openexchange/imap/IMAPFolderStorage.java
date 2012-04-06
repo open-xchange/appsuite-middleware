@@ -53,6 +53,9 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2814,6 +2817,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return altnamespace;
     }*/
 
+    private static final TIntSet WILDCARDS = new TIntHashSet(Arrays.asList(Integer.valueOf('%'), Integer.valueOf('*')));
+
     /**
      * Checks id specified folder name is allowed to be used on folder creation. The folder name is valid if the separator character does
      * not appear or provided that MBox format is enabled may only appear at name's end.
@@ -2824,14 +2829,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * @return <code>true</code> if folder name is valid; otherwise <code>false</code>
      */
     private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
+        WILDCARDS.forEach(new TIntProcedure() {
+            
+            @Override
+            public boolean execute(final int value) {
+                return name.indexOf(value) < 0;
+            }
+        });
         final int pos = name.indexOf(separator);
         if (mboxEnabled) {
             /*
              * Allow trailing separator
              */
-            return (pos == -1) || (pos == name.length() - 1);
+            return (pos < 0) || (pos == name.length() - 1);
         }
-        return (pos == -1);
+        return (pos < 0);
     }
 
     private static final String REGEX_TEMPL = "[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+(?:\\Q#SEP#\\E[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+)*";
