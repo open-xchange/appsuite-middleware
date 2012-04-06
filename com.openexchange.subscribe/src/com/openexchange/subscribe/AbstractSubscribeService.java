@@ -286,9 +286,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
-    
     public void checkUpdate(Subscription subscription) throws OXException {
-    	if (subscription.getSession().getUserId() == subscription.getUserId() || canWrite(subscription)) {
+    	if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
     		return;
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
@@ -303,7 +302,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     
     private boolean canWrite(Subscription subscription) throws OXException {
     	OCLPermission permission = loadFolderPermission(subscription);
-    	return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS;
+    	return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  ( permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
     }
     
     private boolean isFolderAdmin(Subscription subscription) throws OXException {
