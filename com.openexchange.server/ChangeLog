@@ -1,3 +1,7 @@
+* 2012-04-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21939: Deny IMAP folder names containing any of the wildcard characters '%' or '*'
+
 * 2012-04-05 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21614: Fixed lost Delete Exception.
