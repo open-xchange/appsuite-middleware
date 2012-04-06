@@ -89,7 +89,8 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
     TEMPORARILY_UNAVAILABLE(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.TRY_AGAIN_LATER, SubscriptionErrorStrings.SERVICE_TEMPORARILY_UNAVAILABLE),
     INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorStrings.OUTPUT_MUST_MATCH_INPUT, SubscriptionErrorStrings.INCONSISTENT_WORKFLOW),
     INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA),
-    MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorStrings.MISSING_ARGUMENT, SubscriptionErrorStrings.MISSING_ARGUMENT);
+    MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorStrings.MISSING_ARGUMENT, SubscriptionErrorStrings.MISSING_ARGUMENT), 
+    PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorStrings.PERMISSION_DENIED, SubscriptionErrorStrings.PERMISSION_DENIED);
 
     private Category category;
     private int errorCode;
