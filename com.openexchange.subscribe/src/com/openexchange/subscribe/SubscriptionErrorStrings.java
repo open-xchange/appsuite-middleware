@@ -120,4 +120,6 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String SERVICE_TEMPORARILY_UNAVAILABLE = "This service is temporarily unavailable. This may be due to a temporary outage or a permanent change on the 3rd-party-side. Please try using this service again at a later time";
 
     public static final String MISSING_ARGUMENT = "Missing argument. %1$s";
+
+	public static final String PERMISSION_DENIED = "You do not have the permission to complete this operation.";
 }
