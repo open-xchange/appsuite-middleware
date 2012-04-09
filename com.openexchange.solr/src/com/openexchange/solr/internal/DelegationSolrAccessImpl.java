@@ -50,8 +50,6 @@
 package com.openexchange.solr.internal;
 
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -90,8 +88,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegationSolrAccessImpl.class));
 
     private final EmbeddedSolrAccessImpl embeddedAccess;
-
-    private String serverAddress = null;
 
     private final SolrIndexMysql indexMysql;
         
@@ -258,8 +254,12 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 	}
     
     private SolrAccessService getDelegate(final SolrCoreIdentifier identifier) throws OXException {
+    	if (identifier == null) {
+    		throw new IllegalArgumentException("Parameter `identifier` must not be null!");
+    	}
+    	
     	final ConfigurationService config = Services.getService(ConfigurationService.class);
-		final boolean isSolrNode = config.getBoolProperty(SolrProperties.PROP_IS_NODE, true);
+		final boolean isSolrNode = config.getBoolProperty(SolrProperties.PROP_IS_NODE, false);
 		if (isSolrNode) {
 			/*
 			 * Three possibilities here:
@@ -279,7 +279,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 			final int contextId = identifier.getContextId();
 	        final int userId = identifier.getUserId();
 	        final int module = identifier.getModule();			
-			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);			
+			final SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);			
 			if (solrCore.isActive()) {
 				return getRMIAccess(solrCore.getServer());
 			}
@@ -297,7 +297,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 			final int contextId = identifier.getContextId();
 	        final int userId = identifier.getUserId();
 	        final int module = identifier.getModule();
-			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);
+			final SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);
 			if (solrCore.isActive()) {
 				return getRMIAccess(solrCore.getServer());
 			}
@@ -308,9 +308,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         	final Message msg = new Message(MessagingConstants.START_CORE_TOPIC, properties);
         	msgService.postMessage(msg);
 
-        	
-        	// FIXME
-        	return null;
+        	// FIXME: Try to sleep and reconnect here?
+        	throw SolrExceptionCodes.CORE_NOT_STARTED.create(identifier.toString());
 		}   
     }
     
@@ -326,9 +325,15 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 				rmiAccess.pingRmi();
 			} catch (final RemoteException e) {
 				rmiAccess = updateRmiCache(server);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
+				}
 			}    		
     	}
         
+    	if (LOG.isDebugEnabled()) {
+			LOG.debug("Returning remote access for server " + server + ".");
+		}
         return new SolrAccessServiceRmiWrapper(rmiAccess);
     }
     
@@ -351,18 +356,5 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } catch (final NotBoundException e) {
             throw new OXException(e);
         }        
-    }
-
-    private String getLocalServerAddress() throws OXException {
-        if (serverAddress != null) {
-            return serverAddress;
-        }
-
-        try {
-            final InetAddress addr = InetAddress.getLocalHost();
-            return serverAddress = addr.getHostAddress();
-        } catch (final UnknownHostException e) {
-            throw new OXException(e);
-        }
     }
 }
