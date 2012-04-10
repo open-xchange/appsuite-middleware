@@ -10,8 +10,8 @@ Package: open-xchange-subscribe
 Architecture: all
 Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@), open-xchange-oauth (>= @OXVERSION@), open-xchange-xerces
 Pre-Depends: dpkg (>= 1.15.7.2)
-Replaces: open-xchange-subscribe-crawler (<< 7.0.0), open-xchange-subscribe-facebook (<< 7.0.0), open-xchange-subscribe-json (<< 7.0.0), open-xchange-subscribe-linkedin (<< 7.0.0), open-xchange-subscribe-microformats (<< 7.0.0), open-xchange-subscribe-msn (<< 7.0.0), open-xchange-subscribe-yahoo (<< 7.0.0)
-Breaks: open-xchange-subscribe-crawler (<< 7.0.0), open-xchange-subscribe-facebook (<< 7.0.0), open-xchange-subscribe-json (<< 7.0.0), open-xchange-subscribe-linkedin (<< 7.0.0), open-xchange-subscribe-microformats (<< 7.0.0), open-xchange-subscribe-msn (<< 7.0.0), open-xchange-subscribe-yahoo (<< 7.0.0)
-Conflicts: open-xchange-subscribe-crawler (<< 7.0.0), open-xchange-subscribe-facebook (<< 7.0.0), open-xchange-subscribe-json (<< 7.0.0), open-xchange-subscribe-linkedin (<< 7.0.0), open-xchange-subscribe-microformats (<< 7.0.0), open-xchange-subscribe-msn (<< 7.0.0), open-xchange-subscribe-yahoo (<< 7.0.0)
+Replaces: open-xchange-subscribe-crawler (<< 6.21.0), open-xchange-subscribe-facebook (<< 6.21.0), open-xchange-subscribe-json (<< 6.21.0), open-xchange-subscribe-linkedin (<< 6.21.0), open-xchange-subscribe-microformats (<< 6.21.0), open-xchange-subscribe-msn (<< 6.21.0), open-xchange-subscribe-yahoo (<< 6.21.0)
+Breaks: open-xchange-subscribe-crawler (<< 6.21.0), open-xchange-subscribe-facebook (<< 6.21.0), open-xchange-subscribe-json (<< 6.21.0), open-xchange-subscribe-linkedin (<< 6.21.0), open-xchange-subscribe-microformats (<< 6.21.0), open-xchange-subscribe-msn (<< 6.21.0), open-xchange-subscribe-yahoo (<< 6.21.0)
+Conflicts: open-xchange-subscribe-crawler (<< 6.21.0), open-xchange-subscribe-facebook (<< 6.21.0), open-xchange-subscribe-json (<< 6.21.0), open-xchange-subscribe-linkedin (<< 6.21.0), open-xchange-subscribe-microformats (<< 6.21.0), open-xchange-subscribe-msn (<< 6.21.0), open-xchange-subscribe-yahoo (<< 6.21.0)
 Description: The Open Xchange backend subscribe extension
  Adds the feature to subscribe to third party services or publications to the backend installation.

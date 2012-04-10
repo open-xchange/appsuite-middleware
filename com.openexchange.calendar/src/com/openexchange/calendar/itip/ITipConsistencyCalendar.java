@@ -379,7 +379,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     		try {
     			final User result = users.searchUser(principal, ctx);
     			final int uid = (result != null) ? result.getId() : 0;
-    			cdao.setOrganizerId(uid);
+    			cdao.setPrincipalId(uid);
     		} catch (final OXException e) {
     		}
 		}
