@@ -130,6 +130,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                     content = htmlService.dropScriptTagsInHeader(content);
                     if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                         final boolean[] modified = new boolean[1];
+                        final String cssPrefix = "ox-" + HTMLProcessing.getHash(Long.toString(System.currentTimeMillis()));
                         final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                         content = htmlService.checkBaseTag(content, externalImagesAllowed);
                         if (HTMLProcessing.useSanitize()) {
@@ -139,9 +140,9 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                                  * TODO: Does not work reliably by now
                                  */
                                 // retval = htmlService.checkExternalImages(retval);
-                                content = htmlService.sanitize(content, null, false, null);
+                                content = htmlService.sanitize(content, null, false, null, cssPrefix);
                             } else {
-                                content = htmlService.sanitize(content, null, true, modified);
+                                content = htmlService.sanitize(content, null, true, modified, cssPrefix);
                             }
                         } else {
                             final String charset = metaData.get("charset");
@@ -172,7 +173,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                         /*
                          * Replace CSS classes
                          */
-                        content = HTMLProcessing.saneCss(content, htmlService);
+                        content = HTMLProcessing.saneCss(content, htmlService, cssPrefix);
                         if (asDiv) {
                             content = toDiv(content);
                         }

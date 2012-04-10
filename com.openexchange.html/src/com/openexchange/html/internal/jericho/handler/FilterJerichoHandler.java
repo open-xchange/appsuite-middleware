@@ -167,6 +167,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private boolean replaceUrls = true;
 
+    private String cssPrefix;
+
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
@@ -204,6 +206,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
         htmlMap = Collections.unmodifiableMap(map);
         styleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
+    }
+
+    /**
+     * Sets the CSS prefix
+     *
+     * @param cssPrefix The CSS prefix to set
+     * @return This handler with new behavior applied
+     */
+    public FilterJerichoHandler setCssPrefix(final String cssPrefix) {
+        this.cssPrefix = cssPrefix;
+        return this;
     }
 
     /**
@@ -310,7 +323,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSS(cssBuffer.append(content), styleMap, true);
+                checkCSS(cssBuffer.append(content), styleMap, cssPrefix);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -449,7 +462,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     }
                 }
             } else if ("class".equals(attr) || "id".equals(attr)) {
-                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(attribute.getValue())).append('"');
+                final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
             } else {
                 final String val = attribute.getValue();
                 if (null == allowedAttributes) { // No restrictions
@@ -520,6 +534,57 @@ public final class FilterJerichoHandler implements JerichoHandler {
         htmlBuilder.append('>');
     }
 
+    private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
+
+    private static String prefixBlock(final String value, final String cssPrefix) {
+        if (isEmpty(value) || isEmpty(cssPrefix)) {
+            return value;
+        }
+        final int length = value.length();
+        int pos = 0;
+        while (pos < length && Character.isWhitespace(value.charAt(pos))) {
+            pos++;
+        }
+        final StringBuilder builder = new StringBuilder(length << 1);
+        if (pos > 0) {
+            builder.append(value.substring(0, pos));
+        }
+        for (final String word : SPLIT_WORDS.split(value.substring(pos), 0)) {
+            final char first = word.charAt(0);
+            if ('.' == first) {
+                builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+            } else if ('#' == first) {
+                if (word.indexOf('.') < 0) { // contains no dots
+                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                } else {
+                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                }
+            } else {
+                builder.append(cssPrefix).append('-').append(replaceDots(word, cssPrefix)).append(' ');
+            }
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
+    }
+
+    private static final Pattern DOT = Pattern.compile("\\.");
+
+    private static String replaceDots(final String word, final String cssPrefix) {
+        return DOT.matcher(word).replaceAll('.' + cssPrefix + '-');
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
     private String checkPossibleURL(final String val) {
         final Matcher m = PATTERN_URL_SOLE.matcher(val);
         if (!m.matches()) {
@@ -570,7 +635,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSS(cssBuffer.append(cdata), styleMap, true);
+                checkCSS(cssBuffer.append(cdata), styleMap, cssPrefix);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -588,7 +653,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleComment(final String comment) {
         if (isCss) {
-            checkCSS(cssBuffer.append(comment), styleMap, true);
+            checkCSS(cssBuffer.append(comment), styleMap, cssPrefix);
             String checkedCSS = cssBuffer.toString();
             cssBuffer.setLength(0);
             if (dropExternalImages) {

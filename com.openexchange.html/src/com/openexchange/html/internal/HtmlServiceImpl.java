@@ -457,7 +457,7 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     @Override
-    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified) {
+    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         String confName = optConfigName;
         if (null != confName && !confName.endsWith(".properties")) {
@@ -475,7 +475,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 handler = new FilterJerichoHandler(html.length(), definition);
             }
         }
-        JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages));
+        JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
         if (dropExternalImages && null != modified) {
             modified[0] |= handler.isImageURLFound();
         }

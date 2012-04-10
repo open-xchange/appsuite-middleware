@@ -55,7 +55,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.UUID;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -73,6 +74,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -81,6 +83,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
@@ -163,6 +166,7 @@ public final class HTMLProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
+                    final String cssPrefix = "ox-" + getHash(Long.toString(System.currentTimeMillis()));
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
@@ -170,9 +174,9 @@ public final class HTMLProcessing {
                              * TODO: Does not work reliably by now
                              */
                             // retval = htmlService.checkExternalImages(retval);
-                            retval = htmlService.sanitize(retval, null, false, null);
+                            retval = htmlService.sanitize(retval, null, false, null, cssPrefix);
                         } else {
-                            retval = htmlService.sanitize(retval, null, true, modified);
+                            retval = htmlService.sanitize(retval, null, true, modified, cssPrefix);
                         }
                     } else {
                         retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
@@ -198,7 +202,7 @@ public final class HTMLProcessing {
                     /*
                      * Replace CSS classes
                      */
-                    retval = saneCss(retval, htmlService);
+                    retval = replaceBody(retval, cssPrefix);
                 }
             }
         } else {
@@ -235,6 +239,50 @@ public final class HTMLProcessing {
         return useSanitize.booleanValue();
     }
 
+    private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
+
+    /**
+     * Calculates the MD5 for given string.
+     * 
+     * @param str The string
+     * @return The MD5 hash
+     */
+    public static String getHash(final String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        try {
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(str.getBytes(Charsets.UTF_8));
+            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+        } catch (final NoSuchAlgorithmException e) {
+            LOG.fatal(e.getMessage(), e);
+        }
+        return str;
+    }
+
+    private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Replaces body tag with an appropriate div tag.
+     * 
+     * @param htmlContent The HTML content
+     * @param cssPrefix The CSS prefix
+     * @return The HTML content with replaced body tag
+     */
+    private static String replaceBody(final String htmlContent, final String cssPrefix) {
+        if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
+            return htmlContent;
+        }
+        final Matcher m = PATTERN_BODY.matcher(htmlContent);
+        final StringBuffer sb = new StringBuffer(htmlContent.length() + 256);
+        if (m.find()) {
+            m.appendReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
     private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_HTML_BODY = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -252,7 +300,7 @@ public final class HTMLProcessing {
      * @param optHtmlService The optional HTML service
      * @return The HTML content with sanitized CSS style sheets
      */
-    public static String saneCss(final String htmlContent, final HtmlService optHtmlService) {
+    public static String saneCss(final String htmlContent, final HtmlService optHtmlService, final String cssPrefix) {
         if (null == htmlContent) {
             return null;
         }
@@ -275,14 +323,13 @@ public final class HTMLProcessing {
                 }
             }
             // Proceed replacing CSS
-            final String uuid = UUID.randomUUID().toString();
             final StringBuilder tmp = new StringBuilder(64);
             String newCss = css;
             do {
                 final String cssClass = cssClassMatcher.group();
                 tmp.setLength(0);
                 newCss =
-                    newCss.replace(cssClass, tmp.append('#').append(uuid).append(' ').append(cssClass).toString());
+                    newCss.replace(cssClass, tmp.append('#').append(cssPrefix).append(' ').append(cssClass).toString());
             } while (cssClassMatcher.find());
             tmp.setLength(0);
             newCss = tmp.append("<style>").append(newCss).append("</style>").toString();
@@ -291,11 +338,23 @@ public final class HTMLProcessing {
             if (htmlBodyMatcher.find()) {
                 tmp.setLength(0);
                 retval =
-                    tmp.append(newCss).append("<div id=\"").append(uuid).append("\" ").append(className).append(' ').append(
+                    tmp.append(newCss).append("<div id=\"").append(cssPrefix).append("\" ").append(className).append(' ').append(
                         styleName).append('>').append(htmlBodyMatcher.group(1)).append("</div>").toString();
             }
         }
         return retval;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);

@@ -101,5 +101,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // Can not reach solr core store. URI %1$s does not lead to an existing directory.
     public static final String CORE_STORE_NOT_EXISTS_ERROR_MSG = "Can not reach solr core store. URI %1$s does not lead to an existing directory.";
+
+    // The affected solr core %1$s is not started up yet. Please try again later.
+	public static final String CORE_NOT_STARTED_MSG = "The affected solr core %1$s is not started up yet. Please try again later.";
     
 }

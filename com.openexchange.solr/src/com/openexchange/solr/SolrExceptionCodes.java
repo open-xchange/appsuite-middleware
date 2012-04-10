@@ -111,6 +111,10 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      * Can not reach solr core store. URI %1$s does not lead to an existing directory.
      */
     CORE_STORE_NOT_EXISTS_ERROR(SolrExceptionMessages.CORE_STORE_NOT_EXISTS_ERROR_MSG, Category.CATEGORY_ERROR, 1012),
+    /**
+     * The affected solr core %1$s is not started up yet. Please try again later.
+     */
+    CORE_NOT_STARTED(SolrExceptionMessages.CORE_NOT_STARTED_MSG, Category.CATEGORY_ERROR, 1013)
     
     ;
 

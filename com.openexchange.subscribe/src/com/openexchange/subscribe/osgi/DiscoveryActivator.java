@@ -139,6 +139,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
         AbstractSubscribeService.ENCRYPTION_FACTORY = getService(SecretEncryptionFactoryService.class);
         AbstractSubscribeService.CRYPTO_SERVICE = getService(CryptoService.class);
         AbstractSubscribeService.FOLDERS = folders;
+        AbstractSubscribeService.USER_CONFIGS = userConfigs;
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);
