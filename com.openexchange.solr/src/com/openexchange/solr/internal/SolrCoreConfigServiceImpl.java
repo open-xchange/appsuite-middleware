@@ -119,14 +119,13 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
                 throw SolrExceptionCodes.CORE_STORE_NOT_EXISTS_ERROR.create(storeDir.getPath());
             }
             
-            final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);      
             final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
             final SolrCoreConfiguration coreConfig = new SolrCoreConfiguration(storeUri, identifier);
             final String coreDirPath = coreConfig.getCoreDirPath();
             final File coreDir = new File(coreDirPath);     
             if (coreDir.exists()) {
                 LOG.warn("Core directory " + coreDir.getPath() + " already exists. Checking consistency...");
-                if (structureIsConsistent(solrHome, coreConfig, module)) {
+                if (structureIsConsistent(coreConfig, module)) {
                     LOG.warn("Core directory " + coreDir.getPath() + " seems to be consistent.");
                     return true;
                 }
@@ -154,7 +153,7 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
         return false;
     }
     
-    private boolean structureIsConsistent(final String solrHome, final SolrCoreConfiguration coreConfig, final int module) throws OXException {
+    private boolean structureIsConsistent(final SolrCoreConfiguration coreConfig, final int module) throws OXException {
         final File coreDir = new File(coreConfig.getCoreDirPath());
         final File dataDir = new File(coreConfig.getDataDirPath());
         return isReadableAndWritableDirectory(coreDir) && isReadableAndWritableDirectory(dataDir);

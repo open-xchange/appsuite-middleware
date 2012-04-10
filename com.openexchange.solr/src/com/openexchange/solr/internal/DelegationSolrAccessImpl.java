@@ -259,7 +259,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     	}
     	
     	final ConfigurationService config = Services.getService(ConfigurationService.class);
-		final boolean isSolrNode = config.getBoolProperty(SolrProperties.PROP_IS_NODE, false);
+		final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
 		if (isSolrNode) {
 			/*
 			 * Three possibilities here:
