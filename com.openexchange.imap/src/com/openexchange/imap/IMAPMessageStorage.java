@@ -1504,7 +1504,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } else if ((destFullName == null) || (destFullName.length() == 0)) {
                 throw IMAPException.create(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, imapConfig, session, "target");
             } else if (sourceFullName.equals(destFullName) && move) {
-                throw IMAPException.create(IMAPException.Code.NO_EQUAL_MOVE, imapConfig, session, sourceFullName);
+//                throw IMAPException.create(IMAPException.Code.NO_EQUAL_MOVE, imapConfig, session, sourceFullName);
+                return new long[0];
             } else if (0 == mailIds.length) {
                 // Nothing to move
                 return new long[0];
@@ -1540,7 +1541,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 {
                     final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session);
                     if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullName);
+                        OXException exception = IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullName);
+                        throw exception;
                     }
                     if (!listEntry.canOpen()) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, destFullName);
