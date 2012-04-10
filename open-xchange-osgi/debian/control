@@ -10,7 +10,7 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 Package: open-xchange-osgi
 Architecture: all
 Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime
-Replaces: open-xchange-common (<< 7.0.0), open-xchange-activation (<< 7.0.0)
-Breaks: open-xchange-common (<< 7.0.0), open-xchange-activation (<< 7.0.0)
-Conflicts: open-xchange-common (<< 7.0.0), open-xchange-activation (<< 7.0.0)
+Replaces: open-xchange-common (<< 6.21.0), open-xchange-activation (<< 6.21.0)
+Breaks: open-xchange-common (<< 6.21.0), open-xchange-activation (<< 6.21.0)
+Conflicts: open-xchange-common (<< 6.21.0), open-xchange-activation (<< 6.21.0)
 Description: OSGi bundles commonly used by all Open-Xchange packages
