@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.filler;
 
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -85,18 +87,20 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -267,12 +271,15 @@ public class MimeMessageFiller {
          * Set organization to context-admin's company field setting
          */
         try {
-            final ContactInterface contactInterface =
-                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                    session);
-
-            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
+        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        	final Contact c = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), 
+        			Integer.toString(ctx.getMailadmin()), new ContactField[] { ContactField.COMPANY } );
+//            final ContactInterface contactInterface =
+//                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+//                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
+//                    session);
+//
+//            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
             if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                 final String encoded =
                     MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
