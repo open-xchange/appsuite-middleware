@@ -167,6 +167,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 				final CalendarDataObject original = delegate
 						.getObjectById(appointmentObject.getObjectID());
 				if (onlyOneParticipantRemaining(original)) {
+				    cleanOccurrencesAndUnitl(original);
 					delegate.deleteAppointmentObject(appointmentObject,
 							inFolder, clientLastModified, checkPermissions);
 				} else {
@@ -180,7 +181,13 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 			}
 		}
 
-		private void removeCurrentUserFromParticipants(
+		private void cleanOccurrencesAndUnitl(CalendarDataObject original) {
+		    if (original.containsOccurrence()) {
+		        original.removeUntil();
+		    }
+        }
+
+        private void removeCurrentUserFromParticipants(
 				final CalendarDataObject original) {
 			// New participants are all externals + all resources + all resolved
 			// users from user participants - the current user participant

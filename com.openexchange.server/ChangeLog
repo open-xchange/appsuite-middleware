@@ -1,3 +1,7 @@
+* 2012-04-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21956: Removed redundant information.
+
 * 2012-04-10 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21620: Mixed up principal and organizer ID.
