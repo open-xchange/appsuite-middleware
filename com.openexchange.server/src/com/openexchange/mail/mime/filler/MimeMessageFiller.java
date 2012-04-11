@@ -100,9 +100,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
@@ -272,17 +270,18 @@ public class MimeMessageFiller {
          */
         try {
         	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-        	final Contact c = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), 
-        			Integer.toString(ctx.getMailadmin()), new ContactField[] { ContactField.COMPANY } );
+        	final String organization = contactService.getOrganization(session);
 //            final ContactInterface contactInterface =
 //                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
 //                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
 //                    session);
 //
 //            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-            if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+//            if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+            if (null != organization && 0 < organization.length()) {
                 final String encoded =
-                    MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
+                        MimeUtility.fold(14, MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+//                		MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
                 mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
             }
         } catch (final Exception e) {
