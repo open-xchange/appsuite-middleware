@@ -77,6 +77,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
         List<String> allKeys = new ArrayList<String>(Arrays.asList(configKeys));
         allKeys.add(Property.IP_CHECK.getPropertyName());
         allKeys.add(Property.COOKIE_HASH.getPropertyName());
+        allKeys.add(Property.IP_CHECK_WHITELIST.getPropertyName());
 
         try {
             Dictionary<String, String> initParams = new Hashtable<String, String>();
