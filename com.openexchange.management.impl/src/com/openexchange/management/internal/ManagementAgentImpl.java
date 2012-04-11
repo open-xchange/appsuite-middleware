@@ -239,7 +239,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         @Override
                         public synchronized void start() throws IOException {
                             try {
-                                registry.bind("jmxrmi", stub);
+                                registry.bind("server", stub);
                             } catch (final AlreadyBoundException x) {
                                 final IOException io = new IOException(x.getMessage());
                                 io.initCause(x);
@@ -290,13 +290,13 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 final String ip = getHostName(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
                 /*-
                  * Start JMX URL
-                 * service:jmx:rmi://<TARGET_MACHINE>:<JMX_RMI_SERVER_PORT>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
-                 * The RMI registry tells the JMX clients where to find the JMX RMI port, specified via the jmxrmi key
+                 * service:jmx:rmi://<TARGET_MACHINE>:<JMX_RMI_SERVER_PORT>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
+                 * The RMI registry tells the JMX clients where to find the JMX RMI port, specified via the server key
                  * The RMI port is generally known and can be set via properties.
                  * The JMX RMI server port is normally chosen by the jvm at random
                  * 
-                 * To obtain the target machine connect to service:jmx:rmi:///jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
-                 * To obtain the JMX RMI server port connect to service:jmx:rmi/<TARGET_MACHINE>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
+                 * To obtain the target machine connect to service:jmx:rmi:///jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
+                 * To obtain the JMX RMI server port connect to service:jmx:rmi/<TARGET_MACHINE>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
                  *  
                  *  Our URL service:jmx:rmi:///jndi/rmi://localhost:9999/server
                  */
@@ -336,9 +336,9 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             host = InetAddress.getLocalHost().getHostName();
         }
         if (jmxServerPort < 0) {
-            return new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + jmxRmiPort + "/jmxrmi");
+            return new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + jmxRmiPort + "/server");
         }
-        return new JMXServiceURL("service:jmx:rmi://" + host + ":" + jmxServerPort + "/jndi/rmi://" + host + ":" + jmxRmiPort + "/jmxrmi");
+        return new JMXServiceURL("service:jmx:rmi://" + host + ":" + jmxServerPort + "/jndi/rmi://" + host + ":" + jmxRmiPort + "/server");
     }
 
     @Override

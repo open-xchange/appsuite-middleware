@@ -37,7 +37,7 @@ public class SolrCoreLoginHandler implements LoginHandlerService {
 				// TODO: extend with other modules
 				final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, Types.EMAIL);
 				final ConfigurationService config = Services.getService(ConfigurationService.class);
-				final boolean isSolrNode = config.getBoolProperty(SolrProperties.PROP_IS_NODE, false);
+				final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
 				if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
 					embeddedAccess.startCore(identifier);
 				}

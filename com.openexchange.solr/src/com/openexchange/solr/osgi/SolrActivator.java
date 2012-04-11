@@ -94,7 +94,7 @@ public class SolrActivator extends HousekeepingActivator {
 						final SolrCoreIdentifier identifier = (SolrCoreIdentifier) property;
 						try {
 							final ConfigurationService config = Services.getService(ConfigurationService.class);
-							final boolean isSolrNode = config.getBoolProperty(SolrProperties.PROP_IS_NODE, false);
+							final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
 							if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
 								embeddedAccess.startCore(identifier);
 							}

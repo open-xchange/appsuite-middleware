@@ -92,6 +92,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         final SolrIndexFacadeService solrFacadeService = new SolrIndexFacadeService();
+        solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
         registerService(CommandProvider.class, new UtilCommandProvider());
