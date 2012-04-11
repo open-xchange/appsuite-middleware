@@ -50,6 +50,8 @@
 package com.openexchange.contactcollector.osgi;
 
 import org.osgi.framework.BundleActivator;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
@@ -59,7 +61,6 @@ import com.openexchange.contactcollector.preferences.ContactCollectOnMailAccess;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailTransport;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -135,7 +136,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ContextService.class, UserService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class,
+            ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
             ThreadPoolService.class, DatabaseService.class };
     }
 

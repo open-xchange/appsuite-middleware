@@ -168,6 +168,11 @@ public class ContactServiceImpl implements ContactService {
 		return this.searchContacts(session, term, fields, null);
 	}
 	
+	@Override
+	public Contact getUser(Session session, int userID) throws OXException {
+		return getUser(session, userID, null);
+	}
+	
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
@@ -267,7 +272,22 @@ public class ContactServiceImpl implements ContactService {
 		final int userID = session.getUserId();
 		this.deleteContact(contextID, userID, folderId, id, lastRead);
 	}
+	
+	@Override
+    public Contact getUser(Session session, int userID, ContactField[] fields) throws OXException {
+		checkArgNotNull(session, "session");
+		final int contextID = session.getContextId();
+		final int currentUserID = session.getUserId();
+		return this.getUser(contextID, currentUserID, userID, fields);
+    }
     
+	@Override
+    public String getOrganization(Session session) throws OXException {
+		checkArgNotNull(session, "session");
+		final int contextID = session.getContextId();
+		return this.getOrganization(contextID);
+    }
+
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
@@ -762,6 +782,54 @@ public class ContactServiceImpl implements ContactService {
 		return folderIDs;
 	}
 
+	protected String getOrganization(final int contextID) throws OXException {
+		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		final int userID = Tools.getContext(contextID).getMailadmin();
+		final ContactStorage storage = Tools.getStorage(contextID, folderID);
+		final Contact contact = storage.get(contextID, folderID, Integer.toString(userID), new ContactField[] { ContactField.COMPANY } );
+		if (null == contact) {
+			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
+		} else {
+			return contact.getCompany();
+		}
+	}
+	
+	protected Contact getUser(final int contextID, final int currentUserID, final int userID, final ContactField[] fields) 
+			throws OXException {
+		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		final ContactStorage storage = Tools.getStorage(contextID, folderID);
+		/*
+		 * limit queried fields when necessary due to permissions
+		 */
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		final QueryFields queryFields;
+		if (currentUserID == userID && false == permission.canReadOwnObjects() ||
+				currentUserID != userID && false == permission.canReadAllObjects()) {
+			final ContactField[] allowedFields = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, 
+					ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX };
+			queryFields = new QueryFields(fields, allowedFields);
+		} else {
+			queryFields = new QueryFields(fields);		
+		}
+		/*
+		 * get user contact from storage
+		 */		
+		final Contact contact = storage.get(contextID, folderID, Integer.toString(userID), queryFields.getFields());
+		if (null == contact) {
+			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
+		}		
+		/*
+		 * Add attachment info if needed
+		 */
+		if (queryFields.needsAttachmentInfo()) {
+			Tools.addAttachmentInformation(contact, contextID);
+		}
+		/*
+		 * deliver user contact
+		 */
+		return contact;
+	}
+	
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */

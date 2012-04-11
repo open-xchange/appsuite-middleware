@@ -330,4 +330,53 @@ public interface ContactService {
      */
     void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException;
 
+    /**
+     * Gets a user's contact with all fields.<p>
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the following fields:
+     * <ul>
+     * <li>ContactField.DISPLAY_NAME</li>
+     * <li>ContactField.GIVEN_NAME</li>
+     * <li>ContactField.SUR_NAME</li>
+     * <li>ContactField.MIDDLE_NAME</li>
+     * <li>ContactField.SUFFIX</li>
+     * </ul>
+     * 
+     * @param session the session
+     * @param userID the user's ID
+     * @return the contact
+     * @throws OXException
+     */
+    Contact getUser(Session session, int userID) throws OXException;
+
+	/**
+     * Gets a user's contact with specified fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the following fields:
+     * <ul>
+     * <li><code>ContactField.DISPLAY_NAME</code></li>
+     * <li><code>ContactField.GIVEN_NAME</code></li>
+     * <li><code>ContactField.SUR_NAME</code></li>
+     * <li><code>ContactField.MIDDLE_NAME</code></li>
+     * <li><code>ContactField.SUFFIX</code></li>
+     * </ul>
+     * 
+     * @param session the session
+     * @param userID the user's ID
+     * @param fields the contact fields that should be retrieved
+     * @return the contact
+     * @throws OXException
+     */
+    Contact getUser(Session session, int userID, ContactField[] fields) throws OXException;
+    
+    /**
+     * Gets the value of the <code>ContactField.COMPANY</code> field from the
+     * contact representing the current context's mail admin.
+     * 
+     * @param session the session
+     * @return the organization
+     * @throws OXException
+     */
+    String getOrganization(Session session) throws OXException;
 }
