@@ -1,3 +1,7 @@
+* 2012-04-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21788: Removed sort from SQL query to reduce response time. Sorting now in code.
+
 * 2012-03-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 21707: oxinstaller works now with completely new path for configuration files.
