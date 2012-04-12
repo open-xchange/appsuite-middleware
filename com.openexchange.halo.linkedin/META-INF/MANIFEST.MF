@@ -7,7 +7,6 @@ Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.exception,
- com.openexchange.groupware.contact,
  com.openexchange.groupware.container,
  com.openexchange.halo,
  com.openexchange.oauth,
