@@ -558,6 +558,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
         PreparedStatement pst4 = null;
         PreparedStatement pst5 = null;
         PreparedStatement pst6 = null;
+        PreparedStatement pst7 = null;
+        PreparedStatement pst8 = null;
         final CalendarCollection collection = new CalendarCollection();
         try {
         	/*
@@ -658,6 +660,48 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst6 = writecon.prepareStatement(delete_participant_rights.toString());
             pst6.addBatch();
             pst6.executeBatch();
+            
+            StringBuilder replaceOrganizerId = new StringBuilder();
+            replaceOrganizerId.append("UPDATE ");
+            replaceOrganizerId.append(CalendarSql.DATES_TABLE_NAME);
+            replaceOrganizerId.append(" pd SET ");
+            replaceOrganizerId.append(collection.getFieldName(Appointment.ORGANIZER_ID));
+            replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append("NULL ");
+            replaceOrganizerId.append(", ");
+            replaceOrganizerId.append(collection.getFieldName(Appointment.LAST_MODIFIED));
+            replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append(System.currentTimeMillis());
+            replaceOrganizerId.append(" WHERE cid = ");
+            replaceOrganizerId.append(deleteEvent.getContext().getContextId());
+            replaceOrganizerId.append(" AND ");
+            replaceOrganizerId.append(collection.getFieldName(Appointment.ORGANIZER_ID));
+            replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append(deleteEvent.getId());
+            pst7 = writecon.prepareStatement(replaceOrganizerId.toString());
+            pst7.addBatch();
+            pst7.executeBatch();
+            
+            StringBuilder replacePrincipalId = new StringBuilder();
+            replacePrincipalId.append("UPDATE ");
+            replacePrincipalId.append(CalendarSql.DATES_TABLE_NAME);
+            replacePrincipalId.append(" pd SET ");
+            replacePrincipalId.append(collection.getFieldName(Appointment.PRINCIPAL_ID));
+            replacePrincipalId.append(" = ");
+            replacePrincipalId.append("NULL ");
+            replacePrincipalId.append(", ");
+            replacePrincipalId.append(collection.getFieldName(Appointment.LAST_MODIFIED));
+            replacePrincipalId.append(" = ");
+            replacePrincipalId.append(System.currentTimeMillis());
+            replacePrincipalId.append(" WHERE cid = ");
+            replacePrincipalId.append(deleteEvent.getContext().getContextId());
+            replacePrincipalId.append(" AND ");
+            replacePrincipalId.append(collection.getFieldName(Appointment.PRINCIPAL_ID));
+            replacePrincipalId.append(" = ");
+            replacePrincipalId.append(deleteEvent.getId());
+            pst8 = writecon.prepareStatement(replacePrincipalId.toString());
+            pst8.addBatch();
+            pst8.executeBatch();
 
         } finally {
             if (rs2 != null) {
@@ -677,6 +721,12 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
             if (pst6 != null) {
                 collection.closePreparedStatement(pst6);
+            }
+            if (pst7 != null) {
+                collection.closePreparedStatement(pst7);
+            }
+            if (pst8 != null) {
+                collection.closePreparedStatement(pst8);
             }
         }
     }
