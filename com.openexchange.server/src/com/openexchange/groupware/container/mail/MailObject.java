@@ -50,11 +50,13 @@
 package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
+
 import javax.activation.DataHandler;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -65,23 +67,19 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -460,12 +458,9 @@ public class MailObject {
              * Set organization
              */
             try {
-                final Context ctx = ContextStorage.getStorageContext(session);
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
-                final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-                if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                    msg.setHeader(HEADER_ORGANIZATION, c.getCompany());
+                final String organization = ServerServiceRegistry.getInstance().getService(ContactService.class).getOrganization(session);
+                if (null != organization && 0 < organization.length()) {
+                    msg.setHeader(HEADER_ORGANIZATION, organization);
                 }
             } catch (final Exception e) {
                 LOG.warn("Header \"Organization\" could not be set", e);

@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,16 +76,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.contact.ContactService;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
@@ -92,10 +97,8 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -2238,9 +2241,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Get user storage/contact interface to load user and its contact
              */
             final UserStorage us = UserStorage.getInstance();
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                session);
+            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
             /*
              * Needed variables
              */
@@ -2253,7 +2254,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Get user's contact
                  */
-                final Contact contact = contactInterface.getUserById(userId);
+                final Contact contact = contactService.getUser(session, userId, new ContactField[] { 
+                		ContactField.SUR_NAME, ContactField.GIVEN_NAME });
                 /*
                  * Determine locale
                  */

@@ -57,6 +57,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
@@ -72,7 +73,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -812,9 +818,31 @@ public class ContactServiceImpl implements ContactService {
 			queryFields = new QueryFields(fields);		
 		}
 		/*
+		 * prepare search term for user
+		 */
+		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+		final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+		userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+		userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
+		final CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND);
+		term.addSearchTerm(folderIDTerm);
+		term.addSearchTerm(userIDTerm);
+		/*
 		 * get user contact from storage
-		 */		
-		final Contact contact = storage.get(contextID, folderID, Integer.toString(userID), queryFields.getFields());
+		 */
+		Contact contact = null;
+		SearchIterator<Contact> searchIterator = null;
+		try {
+			searchIterator = storage.search(contextID, term, queryFields.getFields());
+			contact = searchIterator.next();
+			
+		} finally {
+			if (null != searchIterator) {
+				searchIterator.close();
+			}
+		}
 		if (null == contact) {
 			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
 		}		

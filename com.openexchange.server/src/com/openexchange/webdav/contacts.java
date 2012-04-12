@@ -52,17 +52,20 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -252,9 +255,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
             final XMLOutputter xo = new XMLOutputter();
 
             try {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
-
+            	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                 switch (action) {
                 case DataParser.SAVE:
                     if (contactObject.containsObjectID()) {
@@ -264,10 +265,11 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
                         final Date currentLastModified = lastModifiedCache.getLastModified(contactObject.getObjectID(), lastModified);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, lastModified);
-                        contactInterface.updateContactObject(contactObject, inFolder, currentLastModified);
+                        contactService.updateContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()), 
+                        		contactObject, currentLastModified);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     } else {
-                        contactInterface.insertContactObject(contactObject);
+                    	contactService.createContact(session, Integer.toString(inFolder), contactObject);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     }
                     break;
@@ -276,7 +278,8 @@ public final class contacts extends XmlServlet<ContactInterface> {
                         throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
 
-                    contactInterface.deleteContactObject(contactObject.getObjectID(), inFolder, lastModified);
+                    contactService.deleteContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()), 
+                    		contactObject.getLastModified());
                     break;
                 default:
                     throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
