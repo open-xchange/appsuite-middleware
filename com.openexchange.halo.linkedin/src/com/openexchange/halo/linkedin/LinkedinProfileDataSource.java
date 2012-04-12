@@ -50,11 +50,13 @@ package com.openexchange.halo.linkedin;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
@@ -83,9 +85,9 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		final int cid = session.getContextId();
 
 		final Contact contact = query.getContact();
-		final ContactInterfaceDiscoveryService cids = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+		final ContactService contactService = serviceLookup.getService(ContactService.class);
 		final UserService userService = serviceLookup.getService(UserService.class);
-		final ContactEMailCompletor cc = new ContactEMailCompletor(session, cids, userService);
+		final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
 		cc.complete(contact);
 
 		final List<String> email = getEMail(contact);
