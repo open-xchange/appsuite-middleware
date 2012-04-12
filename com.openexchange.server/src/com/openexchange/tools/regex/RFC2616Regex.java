@@ -106,7 +106,7 @@ public final class RFC2616Regex {
      */
     public static final Pattern QUOTED_PAIR = Pattern.compile(quotedPairRegex);
 
-    private static final String quotedStringRegex = "(?:\"(?:[\\p{L}\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]|(?:\\\\\\p{L}))*\")";
+    private static final String quotedStringRegex = "(?:\"(?:[\\p{L}\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]|(?:\\\\[\\p{L}\\p{ASCII}]))*\")";
 
     /**
      * Regular expression that satisfies a <code>quoted-string</code> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
