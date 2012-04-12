@@ -160,13 +160,13 @@ public final class Contacts {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
             try {
-                if (co.containsEmail1() && ((email = co.getEmail1()) != null) && (email.length() > 0)) {
+                if (co.containsEmail1() && ((email = co.getEmail1()) != null) && (email.trim().length() > 0)) {
                     new QuotedInternetAddress(email).validate();
                 }
-                if (co.containsEmail2() && ((email = co.getEmail2()) != null) && (email.length() > 0)) {
+                if (co.containsEmail2() && ((email = co.getEmail2()) != null) && (email.trim().length() > 0)) {
                     new QuotedInternetAddress(email).validate();
                 }
-                if (co.containsEmail3() && ((email = co.getEmail3()) != null) && (email.length() > 0)) {
+                if (co.containsEmail3() && ((email = co.getEmail3()) != null) && (email.trim().length() > 0)) {
                     new QuotedInternetAddress(email).validate();
                 }
             } catch (final AddressException e) {
