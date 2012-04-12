@@ -130,9 +130,23 @@ public class MoveMailTest extends AbstractMailTest {
     public void testShouldNotTryToMoveToSameFolder() throws Exception {
         MailTestManager manager = new MailTestManager(client, true);
         String sendAddress = values.getSendAddress();
-        TestMail sendMail = manager.send(new TestMail(sendAddress, sendAddress, "subject", MailContentType.PLAIN.toString(), "text"));
-        //ist mail in der inbox?
-        TestMail moved = manager.move(sendMail, getTrashFolder());
+        //Send mail to myself
+        TestMail sendMail = manager.send(new TestMail(
+            sendAddress,
+            sendAddress,
+            "Move me from sent to sent",
+            MailContentType.PLAIN.toString(),
+            "text"));
+        // Check if mail exists in sent folder
+        TestMail sentMail = manager.get(new String[] { getSentFolder(), sendMail.getId() });
+        assertNotNull("Sent mail may not be null and has to be found in sent-items folder", sentMail);
+        // Try to move to sent-items
+        TestMail movedMail = manager.move(sentMail, getSentFolder());
+        assertNotNull("Moved mail may not be null", movedMail);
+        // Check that mail remains in the original location
+        assertEquals("Mail should not be moved and remain in the original folder.", getSentFolder(), movedMail.getFolder());
+        // Check that sent mail wasn't duplicated
+        assertEquals("Mail shouldn't have been duplicated", 1, manager.findSimilarMailsInSameFolder(sentMail, client).size());
     }
 
 }
