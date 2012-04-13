@@ -272,7 +272,7 @@ public final class Tools {
 	 * @throws OXException
 	 */
 	public static FolderObject getFolder(final int contextID, final String folderId) throws OXException {
-		return ContactServiceLookup.getService(FolderService.class, true).getFolderObject(Integer.parseInt(folderId), contextID);
+		return ContactServiceLookup.getService(FolderService.class, true).getFolderObject(parse(folderId), contextID);
 	}
 	
 	/**
@@ -285,7 +285,7 @@ public final class Tools {
 	 * @throws OXException
 	 */
 	public static EffectivePermission getPermission(final int contextID, final String folderId, final int userID) throws OXException {
-		return ContactServiceLookup.getService(FolderService.class, true).getFolderPermission(Integer.parseInt(folderId), userID, contextID);
+		return ContactServiceLookup.getService(FolderService.class, true).getFolderPermission(parse(folderId), userID, contextID);
 	}
 	
 	public static FolderService getFolderService() throws OXException {
@@ -454,6 +454,21 @@ public final class Tools {
 		return folderIDs;
 	}
 
+	/**
+	 * Parses a numerical identifier from a string, wrapping a possible 
+	 * NumberFormatException into an OXException.
+	 * 
+	 * @param id the id string
+	 * @return the parsed identifier
+	 * @throws OXException
+	 */
+	public static int parse(final String id) throws OXException {
+		try {
+			return Integer.parseInt(id);
+		} catch (final NumberFormatException e) {
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+		}
+	}
 	
 	private Tools() {
 		// prevent instantiation

@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import static com.openexchange.contact.storage.rdb.internal.Tools.parse;
+
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -56,8 +58,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -551,24 +555,4 @@ public class RdbContactStorage extends DefaultContactStorage {
         return RdbServiceLookup.getService(DatabaseService.class, true);
     }
     
-    private static int parse(final String id) throws OXException {
-        try {
-            return Integer.parseInt(id);
-        } catch (final NumberFormatException e) {
-            throw new OXException(e);
-        }
-    }
-    
-    private static int[] parse(final String[] ids) throws OXException {
-        try {
-            final int[] intIDs = new int[ids.length];
-            for (int i = 0; i < intIDs.length; i++) {
-                intIDs[i] = Integer.parseInt(ids[i]);
-            }
-            return intIDs;
-        } catch (final NumberFormatException e) {
-            throw new OXException(e);
-        }
-    }
-
 }

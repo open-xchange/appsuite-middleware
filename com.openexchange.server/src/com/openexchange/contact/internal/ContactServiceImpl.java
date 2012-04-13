@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.internal;
 
+import static com.openexchange.contact.internal.Tools.parse;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -844,14 +846,6 @@ public class ContactServiceImpl implements ContactService {
 	private static void checkArgNotNull(final Object object, final String argumentName) {
 		if (null == object) {
 			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
-		}
-	}
-	
-	private static int parse(final String id) {
-		try {
-			return Integer.parseInt(id);
-		} catch (final NumberFormatException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 
