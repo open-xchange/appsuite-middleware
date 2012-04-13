@@ -52,6 +52,9 @@ package com.openexchange.contact.internal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.impl.EffectivePermission;
@@ -65,6 +68,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ResultIterator implements SearchIterator<Contact> {
 	
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResultIterator.class));
+
     private final SearchIterator<Contact> delegate;
     private final boolean needsAttachmentInfo;
     private final int userID;
@@ -150,9 +155,15 @@ public class ResultIterator implements SearchIterator<Contact> {
 		} else {
 			final String folderID = Integer.toString(contact.getParentFolderID());
 			if (false == canReadAllMap.containsKey(folderID)) {
-				final EffectivePermission permission = Tools.getPermission(this.contextID, folderID, this.userID);
-				canReadAllMap.put(folderID, Boolean.valueOf(permission.canReadAllObjects()));
-			}
+				boolean canReadAll = false;
+				try {
+					final EffectivePermission permission = Tools.getPermission(this.contextID, folderID, this.userID);
+					canReadAll = permission.canReadAllObjects();
+				} catch (final OXException e) {
+					LOG.warn("Unable to determine effective permissions for folder '" + folderID + "'", e);
+				}
+				canReadAllMap.put(folderID, Boolean.valueOf(canReadAll));
+			}				
 			return canReadAllMap.get(folderID).booleanValue();
 		}
 	}

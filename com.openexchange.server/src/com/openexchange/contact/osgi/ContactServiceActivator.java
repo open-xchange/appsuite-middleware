@@ -59,6 +59,7 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ContactServiceActivator}
@@ -85,8 +86,10 @@ public class ContactServiceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: com.openexchange.contact.service");
-            ContactServiceLookup.set(this);            
-            super.registerService(ContactService.class, new ContactServiceImpl());
+            ContactServiceLookup.set(this);
+            final ContactService contactService = new ContactServiceImpl();
+            super.registerService(ContactService.class, contactService);
+            ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.service\"", e);
             throw e;            

@@ -47,52 +47,28 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.caching.CacheService;
-import com.openexchange.contact.ContactService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CachingLoader;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.InfostoreDocumentLoader;
-import com.openexchange.publish.impl.InfostoreFolderLoader;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+final class FilestoreUsage {
 
-/**
- * {@link LoaderActivator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class LoaderActivator extends HousekeepingActivator {
+    private int ctxCount;
 
-    @Override
-    public void startBundle() throws Exception {
-        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
+    private long usage;
 
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserService users = getService(UserService.class);
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
-        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
-        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
-
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
-        compositeLoader.registerLoader("contacts", contactLoader);
-
-        registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
+    FilestoreUsage() {
+        super();
     }
 
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
+    final void addContextUsage(final long ctxUsage) {
+        ctxCount++;
+        usage += ctxUsage;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class, ContactService.class };
+    final int getCtxCount() {
+        return ctxCount;
     }
 
+    final long getUsage() {
+        return usage;
+    }
 }

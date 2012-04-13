@@ -243,7 +243,7 @@ public class ContentType extends ParameterizedHeader {
     /**
      * The regular expression that should match whole content type
      */
-    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([^/;\\s\"]+)(?:/([^;\\s\"]+))?\"?)|(?:/([^;\\s\"]+))");
+    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
 
     /**
      * The regular expression capturing whitespace characters.

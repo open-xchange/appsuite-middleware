@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.caching.CacheService;
-import com.openexchange.contact.ContactService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CachingLoader;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.InfostoreDocumentLoader;
-import com.openexchange.publish.impl.InfostoreFolderLoader;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * {@link LoaderActivator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class LoaderActivator extends HousekeepingActivator {
+class FilestoreContextBlock {
 
-    @Override
-    public void startBundle() throws Exception {
-        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
+    public final int representativeContextID, writeDBPoolID, filestoreID;
 
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserService users = getService(UserService.class);
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
-        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
-        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
+    public final Map<Integer, FilestoreInfo> filestores = new HashMap<Integer, FilestoreInfo>();
 
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
-        compositeLoader.registerLoader("contacts", contactLoader);
+    public FilestoreContextBlock(final int representativeContextID, final int writeDBPoolID, final int filestoreID) {
+        super();
+        this.representativeContextID = representativeContextID;
+        this.writeDBPoolID = writeDBPoolID;
+        this.filestoreID = filestoreID;
+    }
 
-        registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
+    public int size() {
+        return filestores.size();
+    }
+
+    public void add(final FilestoreInfo newInfo) {
+        filestores.put(I(newInfo.contextID), newInfo);
+    }
+
+    public void update(final int contextID, final long usage) {
+        final FilestoreInfo info = filestores.get(I(contextID));
+        if(info != null) {
+            info.usage = usage;
+        }
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
+    public String toString(){
+        return "["+filestoreID+"] Elements: " + size() + ", writepoolID: " + writeDBPoolID;
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class, ContactService.class };
-    }
-
 }

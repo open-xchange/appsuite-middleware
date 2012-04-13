@@ -47,52 +47,26 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.caching.CacheService;
-import com.openexchange.contact.ContactService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CachingLoader;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.InfostoreDocumentLoader;
-import com.openexchange.publish.impl.InfostoreFolderLoader;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+class FilestoreInfo {
 
-/**
- * {@link LoaderActivator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class LoaderActivator extends HousekeepingActivator {
+    public final int contextID, filestoreID, writeDBPoolID;
 
-    @Override
-    public void startBundle() throws Exception {
-        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
+    public final String dbSchema;
 
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserService users = getService(UserService.class);
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
-        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
-        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
+    public long usage;
 
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
-        compositeLoader.registerLoader("contacts", contactLoader);
-
-        registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
+    public FilestoreInfo(final int contextID, final int writeDBPoolID, final String dbSchema, final int filestoreID) {
+        super();
+        this.contextID = contextID;
+        this.writeDBPoolID = writeDBPoolID;
+        this.dbSchema = dbSchema;
+        this.filestoreID = filestoreID;
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
+    public String toString(){
+        return "cid: " + contextID + ", fid: " + filestoreID + ", db: " + dbSchema + ", writepoolID: " + writeDBPoolID + ", usage: " + usage;
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class, ContactService.class };
-    }
-
 }

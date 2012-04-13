@@ -50,14 +50,15 @@
 package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
@@ -202,16 +203,23 @@ public final class ContactImageDataSource implements ImageDataSource {
     }
 
     private static Contact optContact(final int objectId, final int folder, final Session session) throws OXException {
-        try {
-            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
-            if (null == discoveryService) {
-                return null;
-            }
-            final ContactInterface contactInterface = discoveryService.newContactInterface(folder, session);
-            return contactInterface.getObjectById(objectId, folder);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, false);
+    	if (null != contactService) {
+    		return contactService.getContact(session, Integer.toString(folder),Integer.toString(objectId), 
+    				new ContactField[] { ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.LAST_MODIFIED } );
+    	} else {
+    		return null;
+    	}    	
+//        try {
+//            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
+//            if (null == discoveryService) {
+//                return null;
+//            }
+//            final ContactInterface contactInterface = discoveryService.newContactInterface(folder, session);
+//            return contactInterface.getObjectById(objectId, folder);
+//        } catch (final OXException e) {
+//            throw new OXException(e);
+//        }
     }
 
     /**

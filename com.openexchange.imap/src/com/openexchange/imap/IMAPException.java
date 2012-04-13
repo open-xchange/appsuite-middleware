@@ -875,20 +875,22 @@ public final class IMAPException extends OXException {
 
         private final String message;
 
+        /*
+         * The IMAPCode this IMAPCode extends, iow the base code.
+         */
         private final IMAPCode extend;
 
         private final int detailNumber;
 
-        private final String prefix;
+        private final String prefix = IMAPProvider.PROTOCOL_IMAP.getName().toUpperCase();
 
         private final Category category;
-
+        
         private IMAPCode(final String message, final Category category, final int detailNumber) {
             this.message = message;
             extend = null;
             this.detailNumber = detailNumber;
             this.category = category;
-            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         private IMAPCode(final String message, final IMAPCode extend) {
@@ -896,7 +898,6 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = extend.detailNumber;
             category = extend.category;
-            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         private IMAPCode(final MailExceptionCode code, final IMAPCode extend) {
@@ -904,7 +905,6 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = code.getNumber();
             category = code.getCategory();
-            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         private IMAPCode(final MimeMailExceptionCode code, final IMAPCode extend) {
@@ -912,7 +912,6 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = code.getNumber();
             category = code.getCategory();
-            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         public Category getCategory() {
@@ -939,6 +938,8 @@ public final class IMAPException extends OXException {
             for (int i = 0; i < codes.length; i++) {
                 final IMAPCode code = codes[i];
                 if (null != code.extend) {
+                    //code.extend is actually the base code that is extended
+                    //e.g. NOT_CONNECTED(code.extend) -> NOT_CONNECTED_EXT(code)
                     EXT_MAP.put(code.extend, code);
                 }
             }
@@ -987,7 +988,7 @@ public final class IMAPException extends OXException {
             } else {
                 ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]).setLogMessage(message, args);
             }
-            return ret.addCategory(category).setPrefix("MSG");
+            return ret.addCategory(category).setPrefix(prefix);
         }
     }
 
@@ -995,8 +996,6 @@ public final class IMAPException extends OXException {
      * Throws a new OXException for specified error code.
      *
      * @param code The error code
-     * @param imapConfig The IMAP configuration providing account information
-     * @param session The session providing user information
      * @param messageArgs The message arguments
      * @return The new OXException
      */
@@ -1008,8 +1007,7 @@ public final class IMAPException extends OXException {
      * Throws a new OXException for specified error code.
      *
      * @param code The error code
-     * @param imapConfig The IMAP configuration providing account information
-     * @param session The session providing user information
+     * @param cause The initial cause
      * @param messageArgs The message arguments
      * @return The new OXException
      */

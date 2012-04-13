@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.osgi;
 
+import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JITipEmitter;
@@ -93,7 +94,7 @@ public class Activator extends HousekeepingActivator {
         openTrackers();
 
         registerService(ICalParser.class, new ICal4JParser(), null);
-        registerService(ICal4JEmitter.class, new ICal4JEmitter(), null);
+        registerService(ICalEmitter.class, new ICal4JEmitter(), null);
         registerService(ITipParser.class, new ICal4JITipParser(), null);
         registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
     }

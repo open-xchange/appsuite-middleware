@@ -185,6 +185,17 @@ public class EmptyEmailTest extends AbstractContactTest {
         contactObj.setSurName("Schmidt");
         insertContact(contactObj, "", "", "");
     }
+    
+    /**
+     * Create a new contact with email[1-3] set to the empty String.
+     * @throws Exception
+     */
+    public void testNewSpacy() throws Exception {
+        final Contact contactObj = createContactObject("Schmidt, Hans");
+        contactObj.setGivenName("Hans");
+        contactObj.setSurName("Schmidt");
+        insertContact(contactObj, "   ", "   ", "   ");
+    }
 
     /**
      * Update an existing contact to hold nulls in email[1-3].
@@ -216,6 +227,22 @@ public class EmptyEmailTest extends AbstractContactTest {
         int id = insertContact(contactObj);
         Contact loadedContact = loadContact(id, contactFolderId);
         updateContact(loadedContact, contactFolderId, "", "", "");
+    }
+    
+    /**
+     * Update an existing contact to hold empty strings in email[1-3].
+     * @throws Exception
+     */
+    public void testUpdateSpacy() throws Exception {
+        final Contact contactObj = createContactObject("Schmidt, Hans");
+        contactObj.setGivenName("Hans");
+        contactObj.setSurName("Schmidt");
+        contactObj.setEmail1("email1@open-xchange.com");
+        contactObj.setEmail2("email2@open-xchange.com");
+        contactObj.setEmail3("email3@open-xchange.com");
+        int id = insertContact(contactObj);
+        Contact loadedContact = loadContact(id, contactFolderId);
+        updateContact(loadedContact, contactFolderId, "   ", "   ", "   ");
     }
 
 }

@@ -48,7 +48,7 @@
  */
 package com.openexchange.halo.linkedin.osgi;
 
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
 import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
@@ -65,7 +65,7 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
 		return new Class[]{
 			LinkedInService.class,
 			OAuthService.class,
-			ContactInterfaceDiscoveryService.class,
+			ContactService.class,
 			UserService.class};
 	}
 
