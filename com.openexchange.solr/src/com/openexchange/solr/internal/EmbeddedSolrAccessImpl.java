@@ -112,14 +112,6 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
     public void startUp() throws OXException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String solrHome = config.getProperty(SolrProperties.SOLR_HOME);
-
-        /*
-         * Set some properties without the server would not start.
-         */
-        System.setProperty("solr.core.name", "");
-        System.setProperty("solr.core.dataDir", "");
-        System.setProperty("solr.core.instanceDir", "");
-        System.setProperty("logDir", "");
         coreContainer = new CoreContainer(solrHome);
     }
 
