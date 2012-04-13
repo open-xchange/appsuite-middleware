@@ -53,8 +53,10 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,21 +72,29 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link Tools} - Static utility functions for the contact service.
@@ -218,24 +228,33 @@ public final class Tools {
 	}
 	
 	/**
-	 * Gets a list of contact storages for the supplied folders.
+	 * Gets the contact storages for the supplied folders, each storage mapped 
+	 * to a list of folder IDs the respective storage is responsible for. 
 	 * 
 	 * @param contextID the current context ID
 	 * @param folderIDs the folder IDs to get the storages for
 	 * @return the contact storages
 	 * @throws OXException
 	 */
-	public static List<ContactStorage> getStorages(final int contextID, final List<String> folderIDs) throws OXException {
-		final List<ContactStorage> storages = new ArrayList<ContactStorage>();
+	public static Map<ContactStorage, List<String>> getStorages(final int contextID, final List<String> folderIDs) throws OXException {
+		final Map<ContactStorage, List<String>> storages = new HashMap<ContactStorage, List<String>>();
 		for (final String folderID : folderIDs) {
 			final ContactStorage storage = getStorage(contextID, folderID);
-			if (false == storages.contains(storage)) {
-				storages.add(storage);
+			if (false == storages.containsKey(storage)) {
+				storages.put(storage, new ArrayList<String>());
 			}
+			storages.get(storage).add(folderID);
 		}
 		return storages;
 	}
 	
+	/**
+	 * Gets a context.
+	 * 
+	 * @param contextID the context ID
+	 * @return the context
+	 * @throws OXException
+	 */
 	public static Context getContext(final int contextID) throws OXException {
 		final Context context = ContactServiceLookup.getService(ContextService.class, true).getContext(contextID);
 		if (null == context) {
@@ -287,17 +306,6 @@ public final class Tools {
 		}
 	}
 
-	public static boolean needsAttachmentInfo(final ContactField[] fields) {
-		if (null != fields) {
-			for (final ContactField field : fields) {
-				if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
 	/**
 	 * Checks whether the supplied string is empty, that is it is either 
 	 * <code>null</code>, or consists of whitespace characters exclusively.
@@ -328,6 +336,124 @@ public final class Tools {
 		final List<String> folders = new SearchTermAnalyzer(term).getFolderIDs();
 		return null != folders ? folders : new ArrayList<String>();
 	}
+	
+	/**
+	 * Constructs a search to search for specific folder IDs. 
+	 * 
+	 * @param folderIDs the folder IDs
+	 * @return the search term
+	 */
+	public static SearchTerm<?> getFoldersTerm(final List<String> folderIDs) {
+		if (null == folderIDs || 0 == folderIDs.size()) {
+			return null;			
+		} else if (1 == folderIDs.size()) {
+			return getFolderTerm(folderIDs.get(0));
+		} else {
+    		final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+			for (final String folderID : folderIDs) {
+				orTerm.addSearchTerm(getFolderTerm(folderID));
+			}
+			return orTerm;
+		}
+	}
+
+	/**
+	 * Constructs a search to search for the specific folder ID. 
+	 * 
+	 * @param folderID the folder ID
+	 * @return the search term
+	 */
+	public static SingleSearchTerm getFolderTerm(final String folderID) {
+    	final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+    	term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+    	term.addOperand(new ConstantOperand<String>(folderID));
+    	return term;
+    }
+
+	/**
+	 * Gets the contact folders that are used for search by default when no 
+	 * other folders are specified by the search term. This may either be a 
+	 * set of default folders for the user, or all contact folders visible to
+	 * the user. 
+	 * 
+	 * @param contextID the context ID
+	 * @param userID the user ID.
+	 * @return
+	 * @throws OXException
+	 */
+	public static List<String> getSearchFolders(final int contextID, final int userID) throws OXException {
+		if (ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
+			/*
+			 * use all visible folders for search
+			 */
+			return getVisibleFolders(contextID, userID);			
+		} else {
+			/*
+			 * use default set of folders for search
+			 */
+			return getBasicFolders(contextID, userID);
+		}
+	}
+	
+	/**
+	 * Gets all contact folders where the user at least has permissions to read 
+	 * own objects.  
+	 * 
+	 * @param contextID the context ID
+	 * @param userID the user ID
+	 * @return the folder IDs
+	 * @throws OXException
+	 */
+	private static List<String> getVisibleFolders(final int contextID, final int userID) throws OXException {
+		final List<String> folderIDs = new ArrayList<String>();
+        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(
+        		userID, Tools.getContext(contextID));
+        SearchIterator<FolderObject> searchIterator = null;
+        try {
+        	searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userID, userConfig.getGroups(), 
+        			userConfig.getAccessibleModules(), FolderObject.CONTACT, Tools.getContext(contextID));
+            while (searchIterator.hasNext()) {
+                final FolderObject folder = searchIterator.next();
+    			if (FolderObject.CONTACT != folder.getModule()) {
+    				continue;
+    			}
+    			final EffectivePermission permission = Tools.getPermission(
+    					contextID, Integer.toString(folder.getObjectID()), userID);
+    			if (null == permission || false == permission.canReadOwnObjects()) {
+    				continue;
+    			}
+    			folderIDs.add(Integer.toString(folder.getObjectID()));
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+		}
+        return folderIDs;
+	}
+	
+	/**
+	 * Gets a default set of folders used for searches of an user.
+	 * 
+	 * @param contextID the context ID
+	 * @param userID the user ID
+	 * @return the folder IDs
+	 * @throws OXException
+	 */
+	private static List<String> getBasicFolders(final int contextID, final int userID) throws OXException {
+		final List<String> folderIDs = new ArrayList<String>();
+		folderIDs.add(Integer.toString(
+				new OXFolderAccess(Tools.getContext(contextID)).getDefaultFolder(userID, FolderObject.CONTACT).getObjectID()));
+		if (Tools.getPermission(contextID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), userID).canReadAllObjects()) {
+			folderIDs.add(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+		}
+		final Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
+		if (null != collectedContactFolderID) {
+			folderIDs.add(Integer.toString(collectedContactFolderID));
+		}
+		return folderIDs;
+	}
+
 	
 	private Tools() {
 		// prevent instantiation

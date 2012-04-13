@@ -67,6 +67,14 @@ import com.openexchange.tools.iterator.SearchIterator;
 public interface ContactService {
 	
     /**
+     * Contact fields that may be queried from contacts of the global address 
+     * list, even if the current session's user has no sufficient access 
+     * permissions for that folder. 
+     */
+	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, 
+			ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED };
+	
+    /**
      * Gets a contact with all fields.
      * 
      * @param session the session
@@ -333,15 +341,9 @@ public interface ContactService {
     /**
      * Gets a user's contact with all fields.<p>
      * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to the following fields:
-     * <ul>
-     * <li>ContactField.DISPLAY_NAME</li>
-     * <li>ContactField.GIVEN_NAME</li>
-     * <li>ContactField.SUR_NAME</li>
-     * <li>ContactField.MIDDLE_NAME</li>
-     * <li>ContactField.SUFFIX</li>
-     * </ul>
-     * 
+     * but the queried contact fields are limited to fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     *  
      * @param session the session
      * @param userID the user's ID
      * @return the contact
@@ -353,14 +355,8 @@ public interface ContactService {
      * Gets a user's contact with specified fields.<p>
      * 
      * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to the following fields:
-     * <ul>
-     * <li><code>ContactField.DISPLAY_NAME</code></li>
-     * <li><code>ContactField.GIVEN_NAME</code></li>
-     * <li><code>ContactField.SUR_NAME</code></li>
-     * <li><code>ContactField.MIDDLE_NAME</code></li>
-     * <li><code>ContactField.SUFFIX</code></li>
-     * </ul>
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
      * 
      * @param session the session
      * @param userID the user's ID
@@ -369,6 +365,35 @@ public interface ContactService {
      * @throws OXException
      */
     Contact getUser(Session session, int userID, ContactField[] fields) throws OXException;
+    
+    /**
+     * Gets a user contacts with all fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param userIDs the user IDs
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getUsers(Session session, int[] userIDs) throws OXException;
+
+	/**
+     * Gets user contacts with specified fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param userIDs the user IDs
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
     
     /**
      * Gets the value of the <code>ContactField.COMPANY</code> field from the
