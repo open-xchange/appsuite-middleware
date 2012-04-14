@@ -5,6 +5,8 @@
     ${solr.abortOnConfigurationError:true}
   </abortOnConfigurationError>
 
+  <!--<luceneMatchVersion>LUCENE_32</luceneMatchVersion>-->
+
   <dataDir>${solr.core.dataDir}</dataDir>
 
   <indexDefaults>
@@ -14,7 +16,6 @@
     <maxFieldLength>10000</maxFieldLength>
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
-    <infoStream file="${solr.core.instanceDir}${logDir}/${solr.core.name}_debug.log">true</infoStream>
     <lockType>simple</lockType>
   </indexDefaults>
 
@@ -57,6 +58,7 @@
       </arr>
     </listener>
 
+<!--
     <listener event="firstSearcher" class="solr.QuerySenderListener">
       <arr name="queries">
         <lst>
@@ -69,6 +71,7 @@
         </lst>
       </arr>
     </listener>
+-->
 
     <useColdSearcher>false</useColdSearcher>
     <maxWarmingSearchers>5</maxWarmingSearchers>
@@ -85,12 +88,6 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
      </lst>
-<!-- Immo -->
-<!--
-    <arr name="first-components">
-      <str>auth</str>
-    </arr>
--->
     <arr name="last-components">
       <str>mlt</str>
       <str>highlight</str>      
@@ -99,11 +96,6 @@
   </requestHandler>
 
 
-<!--
-    Sven (19.01.2010):
-    Attention: Standard query handler removed - new standard handler is Dismax
-    parameters are subject to change - testing only at this moment
- -->
   <requestHandler name="/dismax" class="solr.SearchHandler">
     <lst name="defaults">
      <str name="defType">dismax</str>
@@ -127,12 +119,6 @@
      <str name="f.name.hl.fragsize">300</str>
      <str name="f.name.hl.alternateField">title</str>
      <str name="f.text.hl.fragmenter">regex</str>
-     <str name="facet">on</str>
-     <str name="facet.field">from_addr</str>
-     <str name="facet.missing">false</str>
-     <str name="facet.sort">count</str>
-     <int name="facet.mincount">1</int>
-     <!-- <str name="facet.field">from_plain</str> -->
     </lst>
     <arr name="last-components">
         <str>mlt</str>
@@ -140,72 +126,6 @@
         <str>debug</str>
      </arr>
   </requestHandler>
-
-<!-- Following handler uses explicit name instead of select-handler -->
-<!--  <requestHandler name="/cria" class="solr.SearchHandler" >-->
-<!--    <lst name="defaults">-->
-<!--     <str name="defType">dismax</str>-->
-<!--     <str name="echoParams">explicit</str>-->
-<!--     <str name="facet">true</str>-->
-<!--     <str name="facet.field">tax_a</str>-->
-<!--     <float name="tie">0.01</float>-->
-<!--     <str name="qf">-->
-<!--        content^1.0 title^3.0 site^1.0 url^0.7-->
-<!--     </str>-->
-<!--     <str name="pf">-->
-<!--        content^1.0 title^3.0 site^1.0-->
-<!--     </str>-->
-<!--     <str name="fl">-->
-<!--        id,title,content,tax_a,score-->
-<!--     </str>-->
-<!--     <int name="ps">100</int>-->
-<!--     <str name="q.alt">*:*</str>-->
-<!--     <str name="hl.fl">content title site</str>-->
-<!--     <str name="f.name.hl.fragsize">300</str>-->
-<!--     <str name="f.name.hl.alternateField">title</str>-->
-<!--     <str name="f.text.hl.fragmenter">regex</str>-->
-<!--    </lst>-->
-<!--    <arr name="components">-->
-<!--        <str>collapse</str>-->
-<!--        <str>mlt</str>-->
-<!--        <str>highlight</str>-->
-<!--        <str>debug</str>-->
-<!--     </arr>-->
-<!--  </requestHandler>-->
-
-  <!-- Immo -->
-
-<!--  <searchComponent name="auth"
-            class="de.kippdata.cria.solr.AuthSearchComponent">
-    <lst name="auth">
-      <str name="lucene.field">from_dn</str>
-      <str name="lucene.field">to_dn</str>
-      <str name="lucene.field">cc_dn</str>
-    </lst>
-  </searchComponent>
-
-  <searchComponent name="collapse"
-            class="org.apache.solr.handler.component.CollapseComponent" />
-  <searchComponent name="mlt"
-            class="org.apache.solr.handler.component.MoreLikeThisComponent" />
--->
-<!--  <requestHandler name="/taxonomy" class="solr.SearchHandler" >-->
-<!--    <lst name="defaults">-->
-<!--     <str name="defType">dismax</str>-->
-<!--     <str name="echoParams">explicit</str>-->
-<!--     <float name="tie">0.001</float>-->
-<!--     <str name="qf">-->
-<!--        classification^1-->
-<!--     </str>-->
-<!--     <str name="fl">-->
-<!--        content,subject,id,classification-->
-<!--     </str>-->
-<!--    </lst>-->
-<!--    <arr name="last-components">-->
-<!--      <str>debug</str>-->
-<!--    </arr>-->
-<!--  </requestHandler>-->
-
 
   <requestHandler name="/update/extract"
              class="org.apache.solr.handler.extraction.ExtractingRequestHandler"
@@ -230,28 +150,12 @@
     </arr>
   </requestHandler>
 
-<!-- DataImportHandler to import different datasources -->
-<!--
-  <requestHandler name="/dataimport"
-                  class="org.apache.solr.handler.dataimport.DataImportHandler">
-
-    <lst name="defaults">
-      <str name="config">data-config.xml</str>
-    </lst>
-  </requestHandler>
--->
-  <requestHandler name="/update"
-                  class="solr.XmlUpdateRequestHandler" />
-  <requestHandler name="/update/javabin"
-                  class="solr.BinaryUpdateRequestHandler" />
-  <requestHandler name="/analysis/document"
-                  class="solr.DocumentAnalysisRequestHandler" />
-  <requestHandler name="/analysis/field"
-                  class="solr.FieldAnalysisRequestHandler" />
-  <requestHandler name="/update/csv"
-                  class="solr.CSVRequestHandler" startup="lazy" />
-  <requestHandler name="/admin/"
-                  class="org.apache.solr.handler.admin.AdminHandlers" />
+  <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
+  <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
+  <requestHandler name="/analysis/document" class="solr.DocumentAnalysisRequestHandler" />
+  <requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler" />
+  <requestHandler name="/update/csv" class="solr.CSVRequestHandler" startup="lazy" />
+  <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
 
   <requestHandler name="/admin/ping" class="PingRequestHandler">
     <lst name="defaults">
@@ -303,21 +207,9 @@
 
 <!-- End of highlighting section -->
 
-  <!-- XSLT response writer transforms the XML output by any xslt file found
-       in Solr's conf/xslt directory.  Changes to xslt files are checked for
-       every xsltCacheLifetimeSeconds.  
-   -->
-  <queryResponseWriter name="xslt"
-                       class="org.apache.solr.request.XSLTResponseWriter">
-    <int name="xsltCacheLifetimeSeconds">5</int>
-  </queryResponseWriter>
-
-
   <!-- config for the admin interface -->
   <admin>
     <defaultQuery>solr</defaultQuery>
   </admin>
-
-  <!-- <luceneMatchVersion>LUCENE_32</luceneMatchVersion> -->
 
 </config>
