@@ -173,4 +173,40 @@ public final class Tools {
         // prevent instantiation
     }
 
+	/**
+	 * Parses a numerical identifier from a string, wrapping a possible 
+	 * NumberFormatException into an OXException.
+	 * 
+	 * @param id the id string
+	 * @return the parsed identifier
+	 * @throws OXException
+	 */
+	public static int parse(final String id) throws OXException {
+		try {
+			return Integer.parseInt(id);
+		} catch (final NumberFormatException e) {
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+		}
+	}
+
+	/**
+	 * Parses an array of numerical identifiers from a string, wrapping a 
+	 * possible NumberFormatException into an OXException.
+	 * 
+	 * @param id the id string
+	 * @return the parsed identifier
+	 * @throws OXException
+	 */
+	public static int[] parse(final String[] ids) throws OXException {
+        try {
+            final int[] intIDs = new int[ids.length];
+            for (int i = 0; i < intIDs.length; i++) {
+                intIDs[i] = Integer.parseInt(ids[i]);
+            }
+            return intIDs;
+        } catch (final NumberFormatException e) {
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, null != ids ? ids.toString() : null); 
+        }
+    }
+	
 }

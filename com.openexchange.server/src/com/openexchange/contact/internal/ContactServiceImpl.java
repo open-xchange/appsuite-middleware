@@ -49,9 +49,13 @@
 
 package com.openexchange.contact.internal;
 
+import static com.openexchange.contact.internal.Tools.parse;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -63,16 +67,11 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMergerator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -83,8 +82,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link ContactServiceImpl} - {@link ContactService} implementation.
@@ -177,6 +174,11 @@ public class ContactServiceImpl implements ContactService {
 	@Override
 	public Contact getUser(Session session, int userID) throws OXException {
 		return getUser(session, userID, null);
+	}
+	
+	@Override
+	public SearchIterator<Contact> getUsers(Session session, int[] userIDs) throws OXException {
+		return getUsers(session, userIDs, null);
 	}
 	
 	/*
@@ -285,6 +287,15 @@ public class ContactServiceImpl implements ContactService {
 		final int contextID = session.getContextId();
 		final int currentUserID = session.getUserId();
 		return this.getUser(contextID, currentUserID, userID, fields);
+    }
+    
+	@Override
+    public SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
+		checkArgNotNull(session, "session");
+		checkArgNotNull(userIDs, "userIDs");
+		final int contextID = session.getContextId();
+		final int currentUserID = session.getUserId();
+		return this.getUsers(contextID, currentUserID, userIDs, fields);
     }
     
 	@Override
@@ -697,97 +708,52 @@ public class ContactServiceImpl implements ContactService {
 	protected <O> SearchIterator<Contact> searchContacts(final int contextID, final int userID, final SearchTerm<O> term, 
 			final ContactField[] fields, final SortOptions sortOptions) throws OXException {
 		/*
-		 * extract folders
+		 * analyze term
 		 */
-		final List<String> folderIDs = getFoldersForSearch(contextID, userID, term);
+		final SearchTermAnalyzer termAnanlyzer = new SearchTermAnalyzer(term);
 		/*
-		 * determine storages
+		 * determine queried storages according to searched folders
 		 */
-		final List<ContactStorage> queriedStorages = Tools.getStorages(contextID, folderIDs);
-		if (0 == queriedStorages.size()) {
+		final Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(contextID, 
+				termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID));
+		if (null == queriedStorages || 0 == queriedStorages.size()) {
 			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
 		}
 		/*
 		 * prepare fields
 		 */
-		final QueryFields queryFields = new QueryFields(fields);		
+		final QueryFields queryFields = new QueryFields(fields);
 		/*
 		 * perform searches
 		 */
-		final List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
-		for (final ContactStorage storage : queriedStorages) {
+		final List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();		
+		for (final Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+			final SearchTerm<?> searchTerm;			
+			if (termAnanlyzer.hasFolderIDs()) {
+				/*
+				 * leave term as is
+				 */
+				searchTerm = term;
+			} else {
+				/*
+				 * combine term with extracted folder information for that storage
+				 */
+				final CompositeSearchTerm combinedTerm = new CompositeSearchTerm(CompositeOperation.AND);
+				combinedTerm.addSearchTerm(Tools.getFoldersTerm(queriedStorage.getValue()));
+				combinedTerm.addSearchTerm(term);
+				searchTerm = combinedTerm;
+			}			
 			/*
-			 * filter results respecting object permission restrictions, adding attachment info as needed
+			 * get results, filtered respecting object permission restrictions, adding attachment info as needed
 			 */
-			searchIterators.add(new ResultIterator(storage.search(contextID, term, queryFields.getFields(), sortOptions), 
-					queryFields.needsAttachmentInfo(), contextID, userID));
+			final SearchIterator<Contact> searchIterator = queriedStorage.getKey().search(
+					contextID, searchTerm, queryFields.getFields(), sortOptions);
+			searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), contextID, userID));
 		}
 		return 2 > searchIterators.size() ? searchIterators.get(0) : 
 			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
 	}
-
-	private <O> List<String> getFoldersForSearch(final int contextID, final int userID, final SearchTerm<O> term) throws OXException {
-		final List<String> folderIDs = Tools.extractFolderIDs(term);
-		if (0 == folderIDs.size()) {
-	        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(
-	        		userID, Tools.getContext(contextID));
-			if (ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
-				/*
-				 * use all visible folders for search
-				 */
-		        SearchIterator<FolderObject> searchIterator = null;
-		        try {
-		        	searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userID, userConfig.getGroups(), 
-		        			userConfig.getAccessibleModules(), FolderObject.CONTACT, Tools.getContext(contextID));
-		            while (searchIterator.hasNext()) {
-		                final FolderObject folder = searchIterator.next();
-		    			if (FolderObject.CONTACT != folder.getModule()) {
-		    				continue;
-		    			}
-		    			final EffectivePermission permission = Tools.getPermission(
-		    					contextID, Integer.toString(folder.getObjectID()), userID);
-		    			if (null != permission && false == permission.canReadOwnObjects()) {
-		    				continue;
-		    			}
-		    			folderIDs.add(Integer.toString(folder.getObjectID()));
-		            }
-		        } finally {
-		        	if (null != searchIterator) {
-		        		searchIterator.close();
-		        	}
-		        }
-			} else {
-				/*
-				 * use default set of folders for search
-				 */
-				folderIDs.add(Integer.toString(
-						new OXFolderAccess(Tools.getContext(contextID)).getDefaultFolder(userID, FolderObject.CONTACT).getObjectID()));
-				if (Tools.getPermission(contextID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), userID).canReadAllObjects()) {
-					folderIDs.add(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-				}
-				final Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
-				if (null != collectedContactFolderID) {
-					folderIDs.add(Integer.toString(collectedContactFolderID));
-				}
-			}
-		} else {
-			/*
-			 * check folders
-			 */
-			for (final String folderID : folderIDs) {
-				final FolderObject folder = Tools.getFolder(contextID, folderID);
-				if (FolderObject.CONTACT != folder.getModule()) {
-					throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-				}
-				final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-				if (false == permission.canReadOwnObjects()) {
-					throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
-				}
-			}
-		}
-		return folderIDs;
-	}
-
+	
 	protected String getOrganization(final int contextID) throws OXException {
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final int userID = Tools.getContext(contextID).getMailadmin();
@@ -802,42 +768,14 @@ public class ContactServiceImpl implements ContactService {
 	
 	protected Contact getUser(final int contextID, final int currentUserID, final int userID, final ContactField[] fields) 
 			throws OXException {
-		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-		final ContactStorage storage = Tools.getStorage(contextID, folderID);
-		/*
-		 * limit queried fields when necessary due to permissions
-		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		final QueryFields queryFields;
-		if (currentUserID == userID && false == permission.canReadOwnObjects() ||
-				currentUserID != userID && false == permission.canReadAllObjects()) {
-			final ContactField[] allowedFields = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, 
-					ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX };
-			queryFields = new QueryFields(fields, allowedFields);
-		} else {
-			queryFields = new QueryFields(fields);		
-		}
-		/*
-		 * prepare search term for user
-		 */
-		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
-		final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-		userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-		userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
-		final CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND);
-		term.addSearchTerm(folderIDTerm);
-		term.addSearchTerm(userIDTerm);
 		/*
 		 * get user contact from storage
 		 */
 		Contact contact = null;
 		SearchIterator<Contact> searchIterator = null;
 		try {
-			searchIterator = storage.search(contextID, term, queryFields.getFields());
+			searchIterator = this.getUsers(contextID, currentUserID, new int[] { userID }, fields); 
 			contact = searchIterator.next();
-			
 		} finally {
 			if (null != searchIterator) {
 				searchIterator.close();
@@ -847,15 +785,58 @@ public class ContactServiceImpl implements ContactService {
 			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
 		}		
 		/*
-		 * Add attachment info if needed
-		 */
-		if (queryFields.needsAttachmentInfo()) {
-			Tools.addAttachmentInformation(contact, contextID);
-		}
-		/*
 		 * deliver user contact
 		 */
 		return contact;
+	}
+	
+	protected SearchIterator<Contact> getUsers(final int contextID, final int currentUserID, final int[] userIDs, 
+			final ContactField[] fields) throws OXException {
+		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		final ContactStorage storage = Tools.getStorage(contextID, folderID);
+		/*
+		 * limit queried fields when necessary due to permissions
+		 */
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
+		final QueryFields queryFields;
+		
+		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
+			// no limitation
+			queryFields = new QueryFields(fields);		
+		} else {
+			// restrict queried fields
+			queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+		}
+		/*
+		 * prepare search term for users
+		 */
+		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+		final SearchTerm<?> userIDsTerm;
+		if (1 == userIDs.length) {
+			final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+			userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+			userIDTerm.addOperand(new ConstantOperand<Integer>(userIDs[0]));
+			userIDsTerm = userIDTerm;
+		} else {
+			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+			for (final int userID : userIDs) {
+				final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+				userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+				userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
+				orTerm.addSearchTerm(userIDTerm);
+			}
+			userIDsTerm = orTerm;
+		}
+		final CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND);
+		term.addSearchTerm(folderIDTerm);
+		term.addSearchTerm(userIDsTerm);
+		/*
+		 * get user contacts from storage
+		 */
+		return new ResultIterator(storage.search(contextID, term, queryFields.getFields()), queryFields.needsAttachmentInfo(), 
+				contextID, currentUserID, true);
 	}
 	
 	/*
@@ -865,14 +846,6 @@ public class ContactServiceImpl implements ContactService {
 	private static void checkArgNotNull(final Object object, final String argumentName) {
 		if (null == object) {
 			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
-		}
-	}
-	
-	private static int parse(final String id) {
-		try {
-			return Integer.parseInt(id);
-		} catch (final NumberFormatException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 

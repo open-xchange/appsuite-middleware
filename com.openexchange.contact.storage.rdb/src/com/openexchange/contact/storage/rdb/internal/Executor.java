@@ -202,6 +202,7 @@ public class Executor {
          */
         final SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
         final StringBuilder stringBuilder = new StringBuilder();
+//        stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" USE INDEX (cid) WHERE ")
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -521,7 +522,7 @@ public class Executor {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
         } else {
-            LOG.debug("executeUpdate: " + stmt.toString());
+            LOG.debug("executeQuery: " + stmt.toString());
             return stmt.executeQuery();
         }   
     }

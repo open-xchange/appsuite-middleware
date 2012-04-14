@@ -134,6 +134,8 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CATEGORY_ERROR, 252),
     /** User contacts can not be deleted. */
     NO_USER_CONTACT_DELETE(NO_USER_CONTACT_DELETE_MSG, Category.CATEGORY_PERMISSION_DENIED, 260),
+    /** The identifier %1$s can't be parsed. */
+    ID_PARSING_FAILED(ID_PARSING_FAILED_MSG, Category.CATEGORY_ERROR, 261),
     /** Number of documents attached to this contact is below zero. You can not remove any more attachments. */
     TOO_FEW_ATTACHMENTS(TOO_FEW_ATTACHMENTS_MSG, Category.CATEGORY_USER_INPUT, 400),
     /** Need at least a ContactObject and a value to set %s */
