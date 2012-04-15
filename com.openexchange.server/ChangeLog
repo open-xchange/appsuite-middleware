@@ -1,3 +1,7 @@
+* 2012-04-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21966: Correct error category for IMAP-2015 to let its message being properly displayed in web UI
+
 * 2012-04-12 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21854: Remove Organizer/Principal ID on user delete.
