@@ -275,11 +275,12 @@ public final class HTMLProcessing {
             return htmlContent;
         }
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
-        final StringBuffer sb = new StringBuffer(htmlContent.length() + 256);
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
         if (m.find()) {
-            m.appendReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
+            mr.appendLiteralReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
         }
-        m.appendTail(sb);
+        mr.appendTail(sb);
         return sb.toString();
     }
 
