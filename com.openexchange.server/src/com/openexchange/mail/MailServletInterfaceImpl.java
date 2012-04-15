@@ -631,7 +631,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final MailFields mailFields = new MailFields(MailField.getFields(fields));
             mailFields.add(MailField.toField(MailListField.getField(sortCol)));
             // Perform operation
-            return simplifiedThreadStructure.getThreadSortedMessages(fullname, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
+            try {
+                return simplifiedThreadStructure.getThreadSortedMessages(fullname, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
+            } catch (final OXException e) {
+                // Check for missing "THREAD=REFERENCES" capability
+                if (2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) {
+                    throw e;
+                }
+            }
         }
         /*
          * Check for needed capability
