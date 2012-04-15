@@ -645,7 +645,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final MailCapabilities capabilities = mailAccess.getMailConfig().getCapabilities();
         final boolean retry = !capabilities.hasThreadReferences();
         /*-
-         * 1. send 'all' request with id, folder_id, level, and received_date - you need all that data.
+         * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
          * 
          * 2. Whenever level equals 0, a new thread starts (new array)
          * 
