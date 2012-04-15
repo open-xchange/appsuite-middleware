@@ -403,9 +403,15 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
-        result.setResultObject(
-            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, mimeFilter),
-            "json");
+        final JSONObject jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, mimeFilter);
+        if (mail.containsPrevSeen()) {
+            try {
+                jMail.put("unseen", wasUnseen);
+            } catch (final JSONException e) {
+                LOG.warn("Couldn't set \"unseen\" field in JSON mail representation.", e);
+            }
+        }
+        result.setResultObject(jMail, "json");
         if (doUnseen) {
             /*-
              * Leave mail as unseen
