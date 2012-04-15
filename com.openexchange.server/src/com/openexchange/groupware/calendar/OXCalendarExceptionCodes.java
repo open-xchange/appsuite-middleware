@@ -16,7 +16,7 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
     /**
      * Unexpected SQL Error!
      */
-    CALENDAR_SQL_ERROR("Unexpected SQL Error!", 5, Category.CATEGORY_SERVICE_DOWN),
+    CALENDAR_SQL_ERROR("Unexpected SQL Error!", 5, Category.CATEGORY_ERROR),
     /**
      * TODO remove this exception. The AJAX interface should already check for a missing last modified.
      */
