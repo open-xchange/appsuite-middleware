@@ -52,7 +52,6 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -76,15 +75,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -634,7 +630,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final MailFields mailFields = new MailFields(MailField.getFields(fields));
             mailFields.add(MailField.toField(MailListField.getField(sortCol)));
             // Perform operation
-            return simplifiedThreadStructure.getThreadSortedMessages(fullname, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
+            try {
+                return simplifiedThreadStructure.getThreadSortedMessages(fullname, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
+            } catch (final OXException e) {
+                // Check for missing "THREAD=REFERENCES" capability
+                if (2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) {
+                    throw e;
+                }
+            }
         }
         /*
          * Check for needed capability
