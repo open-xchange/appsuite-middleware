@@ -625,7 +625,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        if (messageStorage instanceof ISimplifiedThreadStructure) {
+        if (mailConfig.getCapabilities().hasThreadReferences() && (messageStorage instanceof ISimplifiedThreadStructure)) {
             final ISimplifiedThreadStructure simplifiedThreadStructure = (ISimplifiedThreadStructure) messageStorage;
             // Effective fields
             final MailFields mailFields = new MailFields(MailField.getFields(fields));
