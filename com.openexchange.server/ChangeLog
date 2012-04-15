@@ -1,6 +1,7 @@
 * 2012-04-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 21966: Correct error category for IMAP-2015 to let its message being properly displayed in web UI
+ - Fix for bug 21962: Dropping duplicate inline image when sending previously stored draft message
 
 * 2012-04-12 - martin.herfurth@open-xchange.com
 
