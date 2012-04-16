@@ -403,7 +403,8 @@ public final class JSONObjectConverter {
                     mailPath,
                     usm,
                     modified,
-                    displayMode);
+                    displayMode,
+                    false);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_HTML);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -481,7 +482,8 @@ public final class JSONObjectConverter {
                 mailPath,
                 usm,
                 modified,
-                displayMode);
+                displayMode,
+                false);
         } else if (baseType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 RTF2HTMLConverter.convertRTFToHTML(src),
@@ -490,7 +492,8 @@ public final class JSONObjectConverter {
                 mailPath,
                 usm,
                 modified,
-                displayMode);
+                displayMode,
+                false);
         }
         return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
     }

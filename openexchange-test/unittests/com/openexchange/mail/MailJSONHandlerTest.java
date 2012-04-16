@@ -217,7 +217,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
             final JSONMessageHandler handler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,
                 "INBOX/123",
-                DisplayMode.DISPLAY,
+                DisplayMode.DISPLAY, false,
                 session,
                 UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()), false, -1);
             new MailMessageParser().parseMailMessage(mail, handler);

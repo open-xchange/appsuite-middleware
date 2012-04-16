@@ -356,6 +356,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         } catch (final NumberFormatException e) {
             ttlMillis = -1;
         }
+        tmp = requestData.getParameter("embedded");
+        final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter("ignorable");
         final MimeFilter mimeFilter;
         if (isEmpty(tmp)) {
@@ -403,7 +405,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
-        final JSONObject jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, mimeFilter);
+        final JSONObject jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, token, ttlMillis, mimeFilter);
         if (mail.containsPrevSeen()) {
             try {
                 jMail.put("unseen", wasUnseen);
@@ -448,9 +450,12 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
     }
 
-    private void convertSingle(final MailMessage mail, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
-        String view = request.getParameter(Mail.PARAMETER_VIEW);
+    private void convertSingle(final MailMessage mail, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        String view = requestData.getParameter(Mail.PARAMETER_VIEW);
         view = null == view ? null : view.toLowerCase(Locale.US);
+        String tmp = requestData.getParameter("embedded");
+        final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = null;
         final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
         /*
          * Deny saving for this request-specific settings
@@ -462,7 +467,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
         final List<OXException> warnings = new ArrayList<OXException>(2);
         final JSONObject jsonObject =
-            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, false, -1);
+            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1);
         result.addWarnings(warnings);
         result.setResultObject(jsonObject, "json");
     }

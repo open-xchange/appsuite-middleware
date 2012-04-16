@@ -868,6 +868,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface.getAccountID(),
                         mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave),
                         displayMode,
+                        false,
                         session,
                         usmNoSave,
                         warnings,
@@ -961,6 +962,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface.getAccountID(),
                         mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave),
                         displayMode,
+                        false,
                         session,
                         usmNoSave,
                         warnings,
@@ -1408,7 +1410,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
                     data =
-                        MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, mimeFilter);
+                        MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, false, session, usmNoSave, warnings, token, ttlMillis, mimeFilter);
                     if (doUnseen) {
                         /*
                          * Leave mail as unseen
@@ -2361,6 +2363,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface.getAccountID(),
                         mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
                         DisplayMode.MODIFYABLE,
+                        false,
                         session,
                         usmNoSave,
                         warnings,
@@ -2577,7 +2580,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Parse with default account's transport provider
                      */
-                    List<OXException> warnings = new ArrayList<OXException>();
+                    final List<OXException> warnings = new ArrayList<OXException>();
                     final ComposedMailMessage composedMail =
                         MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                     response.addWarnings(warnings);
@@ -4629,7 +4632,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
             return false;
         }
-        List<OXException> warnings = new ArrayList<OXException>();
+        final List<OXException> warnings = new ArrayList<OXException>();
         try {
             final String protocol = (String) uploadEvent.getParameter(UPLOAD_PARAM_PROTOCOL);
             final String serverName = (String) uploadEvent.getParameter(UPLOAD_PARAM_HOSTNAME);

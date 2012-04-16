@@ -107,7 +107,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
                         System.out.println(MessageWriter.writeMailMessage(
                             MailAccount.DEFAULT_ID,
                             mailConnection.getMessageStorage().getMessage("default.INBOX", mail.getMailId(), true),
-                            DisplayMode.DISPLAY,
+                            DisplayMode.DISPLAY, false,
                             session,
                             UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId())));
                         break;
@@ -119,7 +119,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
                         System.out.println(MessageWriter.writeMailMessage(
                             MailAccount.DEFAULT_ID,
                             mailConnection.getMessageStorage().getMessage("default.INBOX", mail.getMailId(), true),
-                            DisplayMode.DISPLAY,
+                            DisplayMode.DISPLAY, false,
                             session,
                             UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId())));
                         break;
