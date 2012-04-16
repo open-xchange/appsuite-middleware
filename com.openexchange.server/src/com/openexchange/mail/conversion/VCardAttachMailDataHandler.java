@@ -78,8 +78,8 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
@@ -209,6 +209,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 MailAccount.DEFAULT_ID,
                 MimeMessageConverter.convertMessage(mimeMessage),
                 DisplayMode.MODIFYABLE,
+                false,
                 session,
                 null);
             addFileInformation(mailObject, managedFile.getID());

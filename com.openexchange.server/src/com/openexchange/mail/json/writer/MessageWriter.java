@@ -138,8 +138,8 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, session, settings, null, false, -1);
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings) throws OXException {
+        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, null, false, -1);
     }
 
     /**
@@ -157,8 +157,8 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, session, settings, warnings, token, tokenTimeout, null);
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout) throws OXException {
+        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, null);
     }
 
     /**
@@ -177,7 +177,7 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
         final MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
             mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
@@ -193,7 +193,7 @@ public final class MessageWriter {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, session, usm, token, tokenTimeout);
+        final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
         final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
         parser.parseMailMessage(mail, handler);
         if (null != warnings) {
