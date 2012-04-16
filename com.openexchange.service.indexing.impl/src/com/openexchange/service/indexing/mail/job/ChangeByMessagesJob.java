@@ -141,7 +141,7 @@ public final class ChangeByMessagesJob extends AbstractMailJob {
             /*
              * Change flags
              */
-            indexAccess.change(toDocuments(messages), IndexAccess.ALL_FIELDS);
+            indexAccess.change(toDocuments(messages), null);
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
         } finally {

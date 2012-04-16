@@ -49,11 +49,8 @@
 
 package com.openexchange.index.solr.mail;
 
-import java.util.EnumMap;
-import java.util.List;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -72,14 +69,14 @@ public final class SolrMailUtility {
         super();
     }
 
-    /**
-     * Gets the field2name mapping.
-     * 
-     * @return The field2name mapping
-     */
-    public static EnumMap<MailField, List<String>> getField2NameMap() {
-        return MailSolrIndexAccess.getField2name();
-    }
+    // /**
+    // * Gets the field2name mapping.
+    // *
+    // * @return The field2name mapping
+    // */
+    // public static EnumMap<MailField, List<String>> getField2NameMap() {
+    // return MailSolrIndexAccess.getField2name();
+    // }
 
     /**
      * Gets the indexable fields.
@@ -87,7 +84,23 @@ public final class SolrMailUtility {
      * @return The indexable fields
      */
     public static MailFields getIndexableFields() {
-        return MailSolrIndexAccess.getIndexableFields();
+
+        return new MailFields(
+            MailField.ACCOUNT_NAME,
+            MailField.ID,
+            MailField.FOLDER_ID,
+            MailField.FROM,
+            MailField.TO,
+            MailField.CC,
+            MailField.BCC,
+            MailField.FLAGS,
+            MailField.SIZE,
+            MailField.SUBJECT,
+            MailField.RECEIVED_DATE,
+            MailField.SENT_DATE,
+            MailField.COLOR_LABEL,
+            MailField.CONTENT_TYPE,
+            MailField.BODY);
     }
 
     /**

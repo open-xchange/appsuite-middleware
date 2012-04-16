@@ -55,7 +55,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -145,7 +144,7 @@ public final class ChangeByIDsJob extends AbstractMailJob {
             /*
              * Change flags
              */
-            indexAccess.change(toDocuments(mails), IndexAccess.ALL_FIELDS);
+            indexAccess.change(toDocuments(mails), null);
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
         } finally {

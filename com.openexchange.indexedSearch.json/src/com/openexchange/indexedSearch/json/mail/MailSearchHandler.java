@@ -68,7 +68,9 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.SolrMailConstants;
+import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
 import com.openexchange.mail.MailField;
@@ -127,16 +129,46 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
                     final String name = null == names ? null : names.get(i++);
                     final String queryString;
                     {
+                        final String userField = SolrMailField.USER.solrName();
+                        final String contextField = SolrMailField.CONTEXT.solrName();
+                        final String accountField = SolrMailField.ACCOUNT.solrName();
+                        final String fullNameField = SolrMailField.FULL_NAME.solrName();
+                        
                         final StringBuilder queryBuilder = new StringBuilder(128);
-                        queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                        queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                        final int accountId = query.getAccountId();
-                        if (accountId >= 0) {
-                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+                        boolean first = true;
+                        if (userField != null) {
+                            queryBuilder.append('(').append(userField).append(':').append(session.getUserId()).append(')');
+                            first = false;
                         }
+                        
+                        if (contextField != null) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                queryBuilder.append(" AND ");
+                            }
+                            queryBuilder.append('(').append(contextField).append(':').append(session.getContextId()).append(')');
+                        }
+                        
+                        
+                        final int accountId = query.getAccountId();
+                        if (accountId >= 0 && accountField != null) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                queryBuilder.append(" AND ");
+                            }
+                            queryBuilder.append('(').append(accountField).append(':').append(accountId).append(')');
+                        }
+                        
                         final String fullName = query.getFullName();
-                        if (null != fullName) {
-                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+                        if (fullName != null && fullNameField != null) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                queryBuilder.append(" AND ");
+                            }
+                            queryBuilder.append('(').append(fullNameField).append(":\"").append(fullName).append("\")");
                         }
                         if (null != searchTerm) {
                             queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(map(searchTerm))).append(')');
@@ -145,7 +177,7 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
                     }
                     final Map<String, Object> params = new HashMap<String, Object>(4);
                     // TODO: params.put("fields", mailFields);
-                    params.put("sort", FIELD_RECEIVED_DATE);
+                    params.put("sort", MailIndexField.RECEIVED_DATE);
                     params.put("order", "desc");
                     final QueryParameters queryParameter =
                         new QueryParameters.Builder(queryString).setOffset(range[0]).setLength(range[1] - range[0]).setType(

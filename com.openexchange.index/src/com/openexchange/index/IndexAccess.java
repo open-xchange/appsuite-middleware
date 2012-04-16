@@ -112,31 +112,24 @@ public interface IndexAccess<V> {
     void addAttachments(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
 
     /**
-     * Special identifier to denote all supported fields.
-     */
-    public static final String ALL_FIELDS = "*";
-
-    /**
      * Changes the denoted fields of already existing document according to specified input document.
      * 
      * @param document The document providing changes
-     * @param fields The fields denoting the changes or {@link #ALL_FIELDS}
+     * @param fields The fields denoting the changes or <code>null</code> to indicate usage of all possible fields.
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
-     * @see #ALL_FIELDS
      */
-    void change(IndexDocument<V> document, String... fields) throws OXException, InterruptedException;
+    void change(IndexDocument<V> document, IndexField[] fields) throws OXException, InterruptedException;
 
     /**
      * Changes the denoted fields of already existing documents according to specified input documents.
      * 
      * @param documents The documents providing changes
-     * @param fields The fields denoting the changes or {@link #ALL_FIELDS}
+     * @param The fields denoting the changes or <code>null</code> to indicate usage of all possible fields.
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
-     * @see #ALL_FIELDS
      */
-    void change(Collection<IndexDocument<V>> documents, String... fields) throws OXException, InterruptedException;
+    void change(Collection<IndexDocument<V>> documents, IndexField[] fields) throws OXException, InterruptedException;
 
     /**
      * Deletes a document by identifier.
@@ -152,7 +145,7 @@ public interface IndexAccess<V> {
      * @param query The query string
      * @throws OXException
      */
-    void deleteByQuery(String query) throws OXException;
+    void deleteByQuery(QueryParameters parameters) throws OXException;
 
     /**
      * Queries indexed documents by specified query parameters.
