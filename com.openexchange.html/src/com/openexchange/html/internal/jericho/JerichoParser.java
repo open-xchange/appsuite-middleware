@@ -132,7 +132,7 @@ public final class JerichoParser {
             /*
              * Handle current segment
              */
-            handleSegment(handler, segment, true);
+            handleSegment(handler, segment, false);
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
