@@ -265,6 +265,8 @@ public final class HTMLProcessing {
         return str;
     }
 
+    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     /**
@@ -278,6 +280,37 @@ public final class HTMLProcessing {
         if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
             return htmlContent;
         }
+        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
+        if (!htmlMatcher.find()) {
+            return replaceBodyPlain(htmlContent, cssPrefix);
+        }
+        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
+        if (!headMatcher.find()) {
+            return replaceBodyPlain(htmlContent, cssPrefix);
+        }
+        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
+        if (!bodyMatcher.find()) {
+            return replaceBodyPlain(htmlContent, cssPrefix);
+        }
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+        sb.append("<div id=\"").append(cssPrefix).append('"');
+        {
+            final String rest = bodyMatcher.group(1);
+            if (!isEmpty(rest)) {
+                sb.append(' ').append(rest);
+            }
+        }
+        sb.append('>');
+        final Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
+        while (styleMatcher.find()) {
+            sb.append(styleMatcher.group());
+        }
+        sb.append(bodyMatcher.group(2));
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
