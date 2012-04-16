@@ -58,12 +58,12 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.carddav.mapping.CardDAVMapper;
-import com.openexchange.carddav.mapping.CardDAVMapping;
 import com.openexchange.contact.TruncatedContactAttribute;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -320,7 +320,7 @@ public class ContactResource extends CarddavResource {
 		        /*
 		         * Check for property changes
 		         */
-				for (final CardDAVMapping<? extends Object> mapping : CardDAVMapper.getInstance().getMappings().values()) {
+				for (final Mapping<? extends Object, Contact> mapping : CardDAVMapper.getInstance().getMappings().values()) {
 					if (mapping.isSet(this.contact)) {
 						if (false == mapping.isSet(newContact)) {
 							// set this one explicitly so that the property gets removed during update
@@ -412,7 +412,7 @@ public class ContactResource extends CarddavResource {
 	private boolean trimTruncatedAttribute(final TruncatedContactAttribute truncatedAttribute) {
 		if (null != this.contact && null != truncatedAttribute.getField() && 0 < truncatedAttribute.getMaxSize()) {
 			try {
-				final CardDAVMapping<? extends Object> mapping = CardDAVMapper.getInstance().get(truncatedAttribute.getField());
+				final Mapping<? extends Object, Contact> mapping = CardDAVMapper.getInstance().get(truncatedAttribute.getField());
 				if (null != mapping) {
 					return mapping.truncate(contact, truncatedAttribute.getMaxSize());
 				}

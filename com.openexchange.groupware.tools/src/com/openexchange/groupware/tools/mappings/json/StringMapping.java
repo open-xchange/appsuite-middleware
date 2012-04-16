@@ -79,4 +79,14 @@ public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
         }
 	}
 
+	@Override
+	public boolean truncate(O object, int length) throws OXException {
+		final String value = this.get(object);
+		if (null != value && length < value.length()) {
+			this.set(object, value.substring(0, length));
+			return true;
+		}
+		return false;
+	}
+	
 }

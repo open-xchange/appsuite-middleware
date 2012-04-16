@@ -89,6 +89,24 @@ public interface Mapping<T, O> {
 	T get(O object);
 
 	/**
+	 * Removes the property's value from an object.
+	 * 
+	 * @param object the object to remove the property for
+	 */
+	void remove(O object);
+	
+	/**
+	 * Truncates the current property value to the supplied length if it is 
+	 * longer.
+	 * 
+	 * @param object the object to truncate the property's value for
+	 * @param length the maximum length the property's value should be
+	 * @return <code>true</code>, if the value was actually truncated, 
+	 * <code>false</code>, otherwise 
+	 */
+	boolean truncate(O object, int length) throws OXException;
+
+	/**
 	 * Gets a value indicating whether a property's value is equal in two 
 	 * objects or not.
 	 * 

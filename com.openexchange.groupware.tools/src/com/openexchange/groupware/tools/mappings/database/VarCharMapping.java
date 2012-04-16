@@ -53,6 +53,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link VarCharMapping} - Database mapping for <code>Types.VARCHAR</code>. 
  *
@@ -70,4 +72,13 @@ public abstract class VarCharMapping<O> extends DefaultDbMapping<String, O> {
 		return resultSet.getString(this.getColumnLabel());
 	}
 
+	@Override
+	public boolean truncate(O object, int length) throws OXException {
+		final String value = this.get(object);
+		if (null != value && length < value.length()) {
+			this.set(object, value.substring(0, length));
+			return true;
+		}
+		return false;
+	}
 }

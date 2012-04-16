@@ -55,6 +55,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
+import com.openexchange.groupware.tools.mappings.DefaultMapping;
+import com.openexchange.groupware.tools.mappings.Mapping;
 
 /**
  * {@link CardDAVMapper}
@@ -92,16 +94,16 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 	}
 
 	@Override
-	public EnumMap<ContactField, CardDAVMapping<? extends Object>> getMappings() {
+	public EnumMap<ContactField, Mapping<? extends Object, Contact>> getMappings() {
 		return mappings;
 	}
 	
 	@Override
-	public CardDAVMapping<? extends Object> get(final ContactField field) throws OXException {
+	public Mapping<? extends Object, Contact> get(final ContactField field) throws OXException {
 		if (null == field) {
 			throw new IllegalArgumentException("field");
 		}
-		final CardDAVMapping<? extends Object> mapping = getMappings().get(field);
+		final Mapping<? extends Object, Contact> mapping = getMappings().get(field);
 		if (null == mapping) {
 			throw OXException.notFound(field.toString());
 		}
@@ -111,9 +113,9 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 	/**
 	 * Holds all known contact mappings.
 	 */
-	private static final EnumMap<ContactField, CardDAVMapping<? extends Object>> mappings;	
+	private static final EnumMap<ContactField, Mapping<? extends Object, Contact>> mappings;	
 	static {
-		mappings = new EnumMap<ContactField, CardDAVMapping<? extends Object>>(ContactField.class);
+		mappings = new EnumMap<ContactField, Mapping<? extends Object, Contact>>(ContactField.class);
 		
         mappings.put(ContactField.DISPLAY_NAME, new StringMapping() {
 
@@ -759,7 +761,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 			}
         });
         
-        mappings.put(ContactField.IMAGE1, new CardDAVMapping<byte[]>() {
+        mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>() {
 
 			@Override
 			public boolean isSet(Contact contact) {

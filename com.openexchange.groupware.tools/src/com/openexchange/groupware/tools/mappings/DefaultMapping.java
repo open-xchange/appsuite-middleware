@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
+public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
 
 	@Override
 	public boolean equals(final O object1, final O object2) {
@@ -68,8 +68,17 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O>{
 	}
 
 	@Override
-	public void copy(O from, O to) throws OXException {
+	public void copy(final O from, final O to) throws OXException {
 		this.set(to, this.get(from));
+	}
+	
+	/**
+	 * Default <code>truncate</code> implementation that never truncates, 
+	 * override if applicable for the mapped property.
+	 */
+	@Override
+	public boolean truncate(final O object, final int length) throws OXException {
+		return false;
 	}
 	
 }
