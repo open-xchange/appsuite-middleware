@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<schema name="cria4" version="1.1">
+<schema name="OX Schema Mail" version="1.1">
 
 	<types>
 		<fieldType name="uuid" class="solr.UUIDField" indexed="true" />
@@ -43,6 +43,8 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/english-stopwords.txt" />
 				<filter class="solr.EnglishMinimalStemFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
+				<filter class="solr.PatternReplaceFilterFactory" pattern="^\d*" replacement="" replace="all" />
+				<filter class="solr.LengthFilterFactory" min="2" max="30" />
 				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
@@ -64,6 +66,8 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/german-stopwords.txt" />
 				<filter class="solr.GermanStemFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
+				<filter class="solr.PatternReplaceFilterFactory" pattern="^\d*" replacement="" replace="all" />
+				<filter class="solr.LengthFilterFactory" min="2" max="30" />
 				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
@@ -157,50 +161,20 @@
 		<!-- jane.doe@some.de -->
 		<fieldType name="addr" class="solr.TextField">
 			<analyzer>
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="@" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/domain-stopwords.txt" />
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.PatternReplaceFilterFactory" pattern="@.*" replacement="" replace="all" />
+				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="0" catenateWords="0" catenateNumbers="0" catenateAll="0"
+					splitOnCaseChange="1" />
+				
+				
+				<!-- <tokenizer class="solr.PatternTokenizerFactory" pattern="@" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/domain-stopwords.txt" /> -->
 
 
 				<!-- http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters -->
 
 				<!-- <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1"
 					generateNumberParts="1"/> -->
-			</analyzer>
-		</fieldType>
-
-		<fieldType name="url" class="solr.TextField" positionIncrementGap="100">
-			<analyzer>
-				<tokenizer class="solr.StandardTokenizerFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
-			</analyzer>
-		</fieldType>
-
-		<fieldType name="phoneticText" class="solr.TextField" positionIncrementGap="100">
-			<analyzer>
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/german-stopwords.txt" />
-				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1" catenateAll="0"
-					splitOnCaseChange="1" />
-				<filter class="solr.DoubleMetaphoneFilterFactory" inject="false" maxCodeLength="8" />
-			</analyzer>
-		</fieldType>
-
-		<fieldType name="textSpell" class="solr.TextField" positionIncrementGap="100" multiValued="true">
-			<analyzer>
-				<tokenizer class="solr.StandardTokenizerFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/german-stopwords.txt" />
-				<filter class="solr.StandardFilterFactory" />
-			</analyzer>
-		</fieldType>
-
-		<fieldType name="categories" class="solr.TextField" positionIncrementGap="100">
-			<analyzer>
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 		</fieldType>
 
@@ -241,7 +215,7 @@
 		<!-- Address Fields "Doe, Jane" jane.doe@somewhere.org -->
 		<field name="from_personal" type="text" stored="false" indexed="true" multiValued="true" />
 		<field name="from_addr" type="addr" stored="false" indexed="true" multiValued="true" />
-		<field name="from_plain" type="string" stored="true" indexed="false" /> <!-- indexed true to use with facets -->
+		<field name="from_plain" type="string" stored="true" indexed="true" /> <!-- indexed true to use with facets -->
 
 		<field name="sender_personal" type="text" stored="false" indexed="true" multiValued="true" />
 		<field name="sender_addr" type="addr" stored="false" indexed="true" multiValued="true" />
@@ -249,18 +223,18 @@
 
 		<field name="to_personal" type="text" stored="false" indexed="true" multiValued="true" />
 		<field name="to_addr" type="addr" stored="false" indexed="true" multiValued="true" />
-		<field name="to_plain" type="string" stored="true" indexed="false" />
+		<field name="to_plain" type="string" stored="true" indexed="true" />
 
 		<field name="cc_personal" type="text" stored="false" indexed="true" multiValued="true" />
 		<field name="cc_addr" type="addr" stored="false" indexed="true" multiValued="true" />
-		<field name="cc_plain" type="string" stored="true" indexed="false" />
+		<field name="cc_plain" type="string" stored="true" indexed="true" />
 
 		<field name="bcc_personal" type="text" stored="false" indexed="true" multiValued="true" />
 		<field name="bcc_addr" type="addr" stored="false" indexed="true" multiValued="true" />
 		<field name="bcc_plain" type="string" stored="true" indexed="false" />
 
 		<!-- Subject Field -->
-		<field name="subject_plain" type="text" stored="true" indexed="false" />
+		<field name="subject_plain" type="string" stored="true" indexed="false" />
 		<field name="subject_en" type="text_stemmed_en" stored="false" indexed="true" />
 		<field name="subject_de" type="text_stemmed_de" stored="false" indexed="true" />
 		<!-- <field name="subject_fr" type="text_stemmed_fr" stored="true" indexed="true"/>

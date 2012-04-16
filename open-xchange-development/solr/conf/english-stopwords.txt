@@ -16,8 +16,6 @@
 #-----------------------------------------------------------------------
 # a couple of test stopwords to test that the words are really being
 # configured from this file:
-stopworda
-stopwordb
 
 #Standard english stop words taken from Lucene's StopAnalyzer
 #a - contained in English alphabet below
@@ -40,6 +38,9 @@ not
 of
 on
 or
+me
+my
+ve
 #s - contained in English alphabet below
 such
 #t - contained in English alphabet below
@@ -55,47 +56,6 @@ to
 was
 will
 with
-
-#English alphabet
-a
-b
-c
-d
-e
-f
-g
-h
-i
-j
-k
-l
-m
-n
-o
-p
-q
-r
-s
-t
-u
-v
-w
-x
-y
-z
-
-#0-9
-0
-1
-2
-3
-4
-5
-6
-7
-8
-9
-
 #Toasted Snow contribution
 all
 bit

@@ -541,7 +541,7 @@ public final class IMAPException extends OXException {
          * Mail folder "%1$s" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder
          * name)
          */
-        FOLDER_CREATION_FAILED("Mail folder \"%1$s\" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder name)", Category.CATEGORY_ERROR, 2015),
+        FOLDER_CREATION_FAILED("Mail folder \"%1$s\" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder name)", Category.CATEGORY_USER_INPUT, 2015),
         /**
          * Mail folder "%1$s" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder
          * name) on server %3$s with login %4$s (user=%5$s, context=%6$s)
