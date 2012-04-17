@@ -5,26 +5,26 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core >= @OXVERSION@
 %if 0%{?suse_version}  && !0%{?sles_version}
-BuildRequires:  java-sdk-openjdk
+BuildRequires: java-sdk-openjdk
 %endif
 %if 0%{?sles_version} == 11
 # SLES 11
-BuildRequires:  java-1_6_0-ibm-devel
+BuildRequires: java-1_6_0-ibm-devel
 %endif
 %if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires:  java-1.6.0-openjdk-devel
+BuildRequires: java-1.6.0-openjdk-devel
 %endif
-Version:    @OXVERSION@
-%define     ox_release 0
-Release:    %{ox_release}_<CI_CNT>.<B_CNT>
-Group:      Applications/Productivity
-License:    GPL-2.0 
-BuildRoot:  %{_tmppath}/%{name}-%{version}-build
-URL:        http://www.open-xchange.com/
-Source:     %{name}_%{version}.orig.tar.bz2
-Summary:    The Open-Xchange IMAP Bundle
-Requires:   open-xchange-osgi >= @OXVERSION@
-Provides:   open-xchange-mailstore
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0 
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       The Open-Xchange IMAP Bundle
+Requires:      open-xchange-osgi >= @OXVERSION@
+Provides:      open-xchange-mailstore
 
 %description
 This package implements the IMAP connection to the mail storages for Open-Xchange.
@@ -51,9 +51,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xch
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/imap.properties
+%config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/com.openexchange.imap.ini
+/opt/open-xchange/osgi/bundle.d/*
 
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
