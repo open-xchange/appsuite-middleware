@@ -1,5 +1,5 @@
 
-Name:           open-xchange-authentication-database
+Name:           open-xchange-xerces-sun
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
@@ -23,14 +23,13 @@ License:       GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:    The Open-Xchange database authentication
-Requires:     open-xchange-core >= @OXVERSION@
-Provides:       open-xchange-authentication
-Conflicts:      open-xchange-authentication-ldap
-Conflicts:      open-xchange-authentication-imap
+Summary:        Xerces Compat for Sun Java
+Requires:       open-xchange-core >= @OXVERSION@
+Provides:       open-xchange-xerces
+Conflicts:      open-xchange-xerces-ibm
 
 %description
-This package implements an authentication mechanism using the Open-Xchange database.
+Xerces compatibility for OX installations on Sun JVM.
 
 Authors:
 --------
@@ -44,7 +43,7 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-authentication-database -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-xerces-sun -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}
