@@ -32,17 +32,21 @@ Authors:
 --------
     Open-Xchange
 %prep
+
 %setup -q
+
 %build
+
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-INSTALL
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-preview -f build/build.xml clean build
+
 %clean
 %{__rm} -rf %{buildroot}
+
 %files
 %defattr(-,root,root)
-FILES
-%doc ChangeLog
+
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
 Internal release build for EDP drop #1
