@@ -8,6 +8,6 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-admin
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: The Open-Xchange backend administration extension
  This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation.
