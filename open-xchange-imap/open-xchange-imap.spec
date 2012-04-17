@@ -1,4 +1,4 @@
-Name:           open-xchange-imap
+Name:          open-xchange-imap
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
@@ -15,34 +15,45 @@ BuildRequires:  java-1_6_0-ibm-devel
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:    @OXVERSION@
-%define        ox_release 0
+%define     ox_release 0
 Release:    %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:       GPL-2.0 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:        %{name}_%{version}.orig.tar.bz2
+Group:      Applications/Productivity
+License:    GPL-2.0 
+BuildRoot:  %{_tmppath}/%{name}-%{version}-build
+URL:        http://www.open-xchange.com/
+Source:     %{name}_%{version}.orig.tar.bz2
 Summary:    The Open-Xchange IMAP Bundle
-Requires:     open-xchange-osgi >= @OXVERSION@
-Provides:     open-xchange-mailstore
-#
+Requires:   open-xchange-osgi >= @OXVERSION@
+Provides:   open-xchange-mailstore
+
 %description
 This package implements the IMAP connection to the mail storages for Open-Xchange.
 
 Authors:
 --------
     Open-Xchange
+
 %prep
+
 %setup -q
+
 %build
+
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-imap -f build/build.xml build
+
 %clean
 %{__rm} -rf %{buildroot}
+
 %files
 %defattr(-,root,root)
-
+%dir /opt/open-xchange/bundles/
+/opt/open-xchange/bundles/*
+%dir /opt/open-xchange/etc/
+%config(noreplace) /opt/open-xchange/etc/imap.properties
+%dir /opt/open-xchange/osgi/bundle.d/
+/opt/open-xchange/osgi/bundle.d/com.openexchange.imap.ini
 
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
