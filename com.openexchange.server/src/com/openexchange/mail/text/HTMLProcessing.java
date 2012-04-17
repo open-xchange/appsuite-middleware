@@ -107,7 +107,7 @@ public final class HTMLProcessing {
      * @return The formatted content
      */
     public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
-        return formatContentForDisplay(content, null, false, null, null, usm, null, mode);
+        return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false);
     }
 
     /**
@@ -120,11 +120,12 @@ public final class HTMLProcessing {
      * @param usm The settings used for formatting content
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
      * @param mode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
-        return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode);
+    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
+        return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode, embedded);
     }
 
     private static final String COMMENT_ID = "anchor-5fd15ca8-a027-4b14-93ea-35de1747419e:";
@@ -153,9 +154,10 @@ public final class HTMLProcessing {
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter (only
      *            needed by HTML content; may be <code>null</code> on plain text)
      * @param mode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
      * @return The formatted content
      */
-    public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
+    public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
         String retval = null;
         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
@@ -166,7 +168,7 @@ public final class HTMLProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
-                    final String cssPrefix = "ox-" + getHash(Long.toString(System.currentTimeMillis()));
+                    final String cssPrefix = embedded ? "ox-" + getHash(Long.toString(System.currentTimeMillis())) : null;
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
@@ -199,10 +201,12 @@ public final class HTMLProcessing {
                     if (mailPath != null && session != null) {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
-                    /*
-                     * Replace CSS classes
-                     */
-                    retval = replaceBody(retval, cssPrefix);
+                    if (embedded) {
+                        /*
+                         * Replace <body> with <div>
+                         */
+                        retval = replaceBody(retval, cssPrefix);
+                    }
                 }
             }
         } else {
@@ -261,6 +265,8 @@ public final class HTMLProcessing {
         return str;
     }
 
+    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     /**
@@ -274,6 +280,37 @@ public final class HTMLProcessing {
         if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
             return htmlContent;
         }
+        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
+        if (!htmlMatcher.find()) {
+            return replaceBodyPlain(htmlContent, cssPrefix);
+        }
+        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
+        if (!headMatcher.find()) {
+            return replaceBodyPlain(htmlContent, cssPrefix);
+        }
+        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
+        if (!bodyMatcher.find()) {
+            return replaceBodyPlain(htmlContent, cssPrefix);
+        }
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+        sb.append("<div id=\"").append(cssPrefix).append('"');
+        {
+            final String rest = bodyMatcher.group(1);
+            if (!isEmpty(rest)) {
+                sb.append(' ').append(rest);
+            }
+        }
+        sb.append('>');
+        final Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
+        while (styleMatcher.find()) {
+            sb.append(styleMatcher.group());
+        }
+        sb.append(bodyMatcher.group(2));
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);

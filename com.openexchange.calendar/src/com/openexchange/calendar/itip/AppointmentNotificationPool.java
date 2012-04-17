@@ -437,7 +437,7 @@ public class AppointmentNotificationPool implements
 						UserParticipant up = (UserParticipant) p;
 						UserParticipant oup = (UserParticipant) oldStates.get(String.valueOf(up.getIdentifier()));
 						up = new UserParticipant(up.getIdentifier());
-						if (up != null) {
+						if (oup != null) {
 							up.setConfirm(oup.getConfirm());
 							up.setConfirmMessage(oup.getConfirmMessage());
 						}

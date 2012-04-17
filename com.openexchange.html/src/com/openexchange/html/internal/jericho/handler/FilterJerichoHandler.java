@@ -336,7 +336,13 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 if (content.isWhiteSpace()) {
                     htmlBuilder.append(content);
                 } else {
-                    htmlBuilder.append(CharacterReference.reencode(content));
+                    /*-
+                     * Should we re-encode prior to appending?
+                     * E.g. "<" ==> "&lt;"
+                     * 
+                     * htmlBuilder.append(CharacterReference.reencode(content));
+                     */
+                    htmlBuilder.append(content);
                 }
             }
         }
