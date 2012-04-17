@@ -23,7 +23,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:    OSGi bundles commonly used by all Open-Xchange packages
 PreReq:       /usr/sbin/useradd
-Requires:     java-jre
 
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
