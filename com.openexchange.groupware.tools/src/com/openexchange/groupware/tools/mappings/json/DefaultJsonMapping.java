@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.TimeZone;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -83,10 +85,15 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 	
 	@Override
 	public void serialize(O from, JSONObject to) throws JSONException {
-		final T value = this.get(from);
-		if (null != value && 0 < String.valueOf(value).length()) {
-			to.put(getAjaxName(), value);
-        }
+		this.serialize(from, to, null);
 	}
 
+	@Override
+	public void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException {
+		if (this.isSet(from)) {
+			final T value = this.get(from);
+			to.put(getAjaxName(), null != value ? value : JSONObject.NULL);
+		}
+	}
+	
 }

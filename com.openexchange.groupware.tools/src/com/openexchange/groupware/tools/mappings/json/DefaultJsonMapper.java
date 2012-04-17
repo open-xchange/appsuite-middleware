@@ -58,6 +58,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,13 +107,36 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	
 	@Override
 	public JSONObject serialize(final O object, final E[] fields) throws JSONException, OXException {
-        final JSONObject json = new JSONObject();
-        for (final E field : fields) {
-        	this.get(field).serialize(object, json);
-		}
-        return json;
+		return this.serialize(object, fields, (TimeZone)null);
 	}
 
+	@Override
+	public JSONObject serialize(final O object, final E[] fields, final String timeZoneID) throws JSONException, OXException {
+		return this.serialize(object, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+	}
+
+	@Override
+	public JSONObject serialize(final O object, final E[] fields, final TimeZone timeZone) throws JSONException, OXException {
+		final JSONObject jsonObject = new JSONObject();
+		this.serialize(object, jsonObject, fields, timeZone);
+		return jsonObject;
+	}
+	
+	@Override
+	public void serialize(final O object, final JSONObject to, final E[] fields, final String timeZoneID) throws JSONException, OXException {
+		this.serialize(object, to, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+	}
+	
+	@Override
+	public void serialize(O object, JSONObject to, E[] fields, final TimeZone timeZone) throws JSONException, OXException {
+        for (final E field : fields) {
+        	final JsonMapping<? extends Object, O> mapping = this.get(field);
+        	if (null != mapping) {
+        		mapping.serialize(object, to, timeZone);
+        	}
+		}
+	}
+	
 	@Override
 	public JSONArray serialize(final List<O> objects, final E[] fields) throws JSONException, OXException {
 		final JSONArray jsonArray = new JSONArray();
@@ -208,5 +238,42 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	 * @return the mappings
 	 */
 	protected abstract EnumMap<E, ? extends JsonMapping<? extends Object, O>> createMappings();
+
+    private static final ConcurrentMap<String, Future<TimeZone>> ZONE_CACHE = new ConcurrentHashMap<String, Future<TimeZone>>();
+
+    /**
+     * Gets the <code>TimeZone</code> for the given ID.
+     *
+     * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
+     *            custom ID such as "GMT-8:00".
+     * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
+     */
+    protected static TimeZone getTimeZone(final String ID) {
+        Future<TimeZone> f = ZONE_CACHE.get(ID);
+        if (f == null) {
+            final FutureTask<TimeZone> ft = new FutureTask<TimeZone>(new Callable<TimeZone>() {
+
+                @Override
+                public TimeZone call() throws Exception {
+                    return TimeZone.getTimeZone(ID);
+                }
+            });
+            f = ZONE_CACHE.putIfAbsent(ID, ft);
+            if (null == f) {
+                ft.run();
+                f = ft;
+            }
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+        } catch (final ExecutionException e) {
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultJsonMapper.class));
+            LOG.error(e.getMessage(), e);
+        }
+        return TimeZone.getTimeZone(ID);
+    }
 
 }

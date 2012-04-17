@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -57,28 +58,34 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link BooleanMapping} - JSON specific mapping implementation for Booleans.
+ * {@link TimeMapping} - JSON specific mapping implementation for Times, 
+ * i.e. {@link Date}s in the client timezone. 
  *
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class BooleanMapping<O> extends DefaultJsonMapping<Boolean, O> {
+public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 
-	public BooleanMapping(final String ajaxName, final int columnID) {
+	public TimeMapping(final String ajaxName, final int columnID) {
 		super(ajaxName, columnID);
 	}
 
 	@Override
 	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		this.set(to, Boolean.valueOf(from.getBoolean(getAjaxName())));
+		final long value = from.getLong(getAjaxName());
+		this.set(to, new Date(value));
 	}
 
 	@Override
-	public void serialize(final O from, final JSONObject to, final TimeZone timeZone) throws JSONException {
+	public void serialize(final O from, final JSONObject to, TimeZone timeZone) throws JSONException {
 		if (this.isSet(from)) {
-			final Boolean value = this.get(from);
-			to.put(getAjaxName(), null != value ? value.booleanValue() : JSONObject.NULL); 
+			final Date value = this.get(from);
+			to.put(getAjaxName(), null != value ? addTimeZoneOffset(value.getTime(), timeZone) : JSONObject.NULL);
 		}
 	}
+
+    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
+    	return null == timeZone ? date : date + timeZone.getOffset(date); 
+    }
 
 }

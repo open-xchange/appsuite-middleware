@@ -295,9 +295,26 @@ public class ContactServiceImpl implements ContactService {
 		checkArgNotNull(userIDs, "userIDs");
 		final int contextID = session.getContextId();
 		final int currentUserID = session.getUserId();
-		return this.getUsers(contextID, currentUserID, userIDs, fields);
+		return this.getUsers(contextID, currentUserID, userIDs, null, fields, null);
     }
     
+	@Override
+    public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, final SortOptions sortOptions) throws OXException {
+		checkArgNotNull(session, "session");
+		final int contextID = session.getContextId();
+		final int currentUserID = session.getUserId();
+		return this.getUsers(contextID, currentUserID, null, null, fields, sortOptions);
+    }
+
+	@Override
+	public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+		checkArgNotNull(session, "session");
+		checkArgNotNull(term, "term");
+		final int contextID = session.getContextId();
+		final int userID = session.getUserId();
+		return this.getUsers(contextID, userID, null, term, fields, sortOptions);
+	}
+
 	@Override
     public String getOrganization(Session session) throws OXException {
 		checkArgNotNull(session, "session");
@@ -774,7 +791,7 @@ public class ContactServiceImpl implements ContactService {
 		Contact contact = null;
 		SearchIterator<Contact> searchIterator = null;
 		try {
-			searchIterator = this.getUsers(contextID, currentUserID, new int[] { userID }, fields); 
+			searchIterator = this.getUsers(contextID, currentUserID, new int[] { userID }, null, fields, null); 
 			contact = searchIterator.next();
 		} finally {
 			if (null != searchIterator) {
@@ -790,8 +807,8 @@ public class ContactServiceImpl implements ContactService {
 		return contact;
 	}
 	
-	protected SearchIterator<Contact> getUsers(final int contextID, final int currentUserID, final int[] userIDs, 
-			final ContactField[] fields) throws OXException {
+	protected <O> SearchIterator<Contact> getUsers(final int contextID, final int currentUserID, final int[] userIDs, final SearchTerm<O> term, 
+			final ContactField[] fields, final SortOptions sortOptions) throws OXException {
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
@@ -810,33 +827,44 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * prepare search term for users
 		 */
+		final SearchTerm<?> searchTerm;
 		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
 		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
 		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
-		final SearchTerm<?> userIDsTerm;
-		if (1 == userIDs.length) {
-			final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-			userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-			userIDTerm.addOperand(new ConstantOperand<Integer>(userIDs[0]));
-			userIDsTerm = userIDTerm;
-		} else {
-			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-			for (final int userID : userIDs) {
+		if (null != userIDs && 0 < userIDs.length) {
+			final SearchTerm<?> userIDsTerm;
+			if (1 == userIDs.length) {
 				final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
 				userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-				userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
-				orTerm.addSearchTerm(userIDTerm);
+				userIDTerm.addOperand(new ConstantOperand<Integer>(userIDs[0]));
+				userIDsTerm = userIDTerm;
+			} else {
+				final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+				for (final int userID : userIDs) {
+					final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+					userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+					userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
+					orTerm.addSearchTerm(userIDTerm);
+				}
+				userIDsTerm = orTerm;
 			}
-			userIDsTerm = orTerm;
+			final CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
+			compositeTerm.addSearchTerm(folderIDTerm);
+			compositeTerm.addSearchTerm(userIDsTerm);
+			searchTerm = compositeTerm;
+		} else if (null != term) {
+			final CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
+			compositeTerm.addSearchTerm(folderIDTerm);
+			compositeTerm.addSearchTerm(term);
+			searchTerm = compositeTerm;
+		} else {
+			searchTerm = folderIDTerm;
 		}
-		final CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND);
-		term.addSearchTerm(folderIDTerm);
-		term.addSearchTerm(userIDsTerm);
 		/*
 		 * get user contacts from storage
 		 */
-		return new ResultIterator(storage.search(contextID, term, queryFields.getFields()), queryFields.needsAttachmentInfo(), 
-				contextID, currentUserID, true);
+		return new ResultIterator(storage.search(contextID, searchTerm, queryFields.getFields(), sortOptions), 
+				queryFields.needsAttachmentInfo(), contextID, currentUserID, true);
 	}
 	
 	/*

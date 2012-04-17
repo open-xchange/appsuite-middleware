@@ -51,6 +51,7 @@ package com.openexchange.user.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
@@ -92,12 +93,19 @@ public class UserJSONActivator extends AJAXModuleActivator {
                 ServiceRegistry.getInstance(),
                 UserService.class));
             /*
+             * Contact service tracker
+             */
+            track(ContactService.class, new RegistryServiceTrackerCustomizer<ContactService>(
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ContactService.class));
+            /*
              * Contact interface factory tracker
              */
             track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                context,
-                ServiceRegistry.getInstance(),
-                ContactInterfaceFactory.class));
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ContactInterfaceFactory.class));
             track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
                 context,
                 ServiceRegistry.getInstance(),

@@ -102,8 +102,6 @@ public class GetAction extends ContactAction {
     @Override
     protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
         final Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID());
-        final Date lastModified = contact.getLastModified();
-        applyTimezoneOffset(contact, request.getTimeZone());
-        return new AJAXRequestResult(contact, lastModified, "contact");
+        return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
 }

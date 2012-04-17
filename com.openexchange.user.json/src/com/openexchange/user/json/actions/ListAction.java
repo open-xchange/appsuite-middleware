@@ -65,15 +65,19 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -85,6 +89,7 @@ import com.openexchange.user.json.writer.UserWriter;
  * {@link ListAction} - Maps the action to a <tt>list</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of users.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -114,6 +119,121 @@ public final class ListAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        try {
+            /*
+             * Parse parameters
+             */
+            final int[] userIdArray;
+            {
+                final JSONArray jsonArray = (JSONArray) request.getData();
+                if (null == jsonArray) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
+                }
+                final int len = jsonArray.length();
+                userIdArray = new int[len];
+                for (int a = 0; a < len; a++) {
+                    if (jsonArray.isNull(a)) {
+                        userIdArray[a] = session.getUserId();
+                    } else {
+                        userIdArray[a] = jsonArray.getInt(a);
+                    }
+                }
+            }
+            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            /*
+             * Get remaining parameters
+             */
+            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
+            /*
+             * Get services
+             */
+            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+            /*
+             * Get users/contacts
+             */
+            User[] users;
+            try {
+                users = userService.getUser(session.getContext(), userIdArray);
+            } catch (final OXException e) {
+                if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                final Context context = session.getContext();
+                {
+                    final Object[] excArgs = e.getLogArgs();
+                    if (excArgs != null && excArgs.length >= 2) {
+                        try {
+                            userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
+                        } catch (final Exception ignore) {
+                            // Ignore
+                        }
+                    } else {
+                        for (final int userId : userIdArray) {
+                            try {
+                                userService.invalidateUser(context, userId);
+                            } catch (final Exception ignore) {
+                                // Ignore
+                            }
+                        }
+                    }
+                }
+                // Load one-by-one
+                final int length = userIdArray.length;
+                final List<User> list = new ArrayList<User>(length);
+                for (int i = 0; i < length; i++) {
+                    try {
+                        list.add(userService.getUser(userIdArray[i], context));
+                    } catch (final OXException ue) {
+                        if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
+                            throw ue;
+                        }
+                    }
+                }
+                users = list.toArray(new User[list.size()]);
+            }
+            
+            final SearchIterator<Contact> it = contactService.getUsers(session, userIdArray, 
+            		ContactMapper.getInstance().getFields(columns, ContactField.LAST_MODIFIED));
+            final List<Contact> contactList = new ArrayList<Contact>(128);
+            try {
+                while (it.hasNext()) {
+                    contactList.add(it.next());
+                }
+            } finally {
+            	if (null != it) {
+            		it.close();
+            	}
+            }
+            final Contact[] contacts = contactList.toArray(new Contact[contactList.size()]);
+            /*
+             * Determine max. last-modified time stamp
+             */
+            Date lastModified = contacts[0].getLastModified();
+            for (int i = 1; i < contacts.length; i++) {
+                final Date lm = contacts[i].getLastModified();
+                if (lastModified.before(lm)) {
+                    lastModified = lm;
+                }
+            }
+            /*
+             * Write users as JSON arrays to JSON array
+             */
+            //TODO serialize with mappers, including user attributes?
+            censor(session, contacts);
+            censor(session, users);
+            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(jsonArray, lastModified);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+        }
+    }
+
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters

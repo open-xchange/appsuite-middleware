@@ -140,19 +140,6 @@ public abstract class ContactAction implements AJAXActionService {
     	return lastModified.after(contactLastModified) ? lastModified : contactLastModified;
     }
     
-    /**
-     * Applies the timezone offsets to the last modified and creation dates in 
-     * the supplied contact.  
-     * 
-     * @param contact the contact to patch the times for
-     * @param timeZone the user's timezone
-     */
-    protected static void applyTimezoneOffset(final Contact contact, final TimeZone timeZone) {
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-    }
-    
     protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {
         if (date == null) {
             return null;

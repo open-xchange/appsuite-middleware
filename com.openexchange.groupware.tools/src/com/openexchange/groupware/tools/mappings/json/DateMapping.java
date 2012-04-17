@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,11 +76,11 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 	}
 
 	@Override
-	public void serialize(final O from, final JSONObject to) throws JSONException {
-		final Date value = this.get(from);
-		if (null != value) {
-			to.put(getAjaxName(), value.getTime());
-        }
+	public void serialize(final O from, final JSONObject to, final TimeZone timeZone) throws JSONException {
+		if (this.isSet(from)) {
+			final Date value = this.get(from);
+			to.put(getAjaxName(), null != value ? value.getTime() : JSONObject.NULL); 
+		}
 	}
 
 }

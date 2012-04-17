@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.TimeZone;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -90,6 +92,17 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	void serialize(O from, JSONObject to) throws JSONException;
 
 	/**
+	 * Serializes the value of the mapped property from an object and sets it
+	 * in the supplied JSON object.
+	 * 
+	 * @param object the object to read the value from
+	 * @param jsonObject the JSON object to populate
+	 * @param timeZone the client time zone to consider
+	 * @throws JSONException 
+	 */
+	void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException;
+
+	/**
 	 * Deserializes the value of the mapped property from a JSON object and 
 	 * sets it in the supplied object.
 	 * 
@@ -99,4 +112,5 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	 * @throws OXException 
 	 */
 	void deserialize(JSONObject from, O to) throws JSONException, OXException;
+
 }

@@ -149,7 +149,6 @@ public class AllAction extends ContactAction {
             while (searchIterator.hasNext()) {
                 final Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
-                applyTimezoneOffset(contact, request.getTimeZone());
                 contacts.add(contact);
             }
         } finally {

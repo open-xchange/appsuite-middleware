@@ -49,35 +49,47 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.Arrays;
 import java.util.TimeZone;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.ArrayFactory;
 
 /**
- * {@link BooleanMapping} - JSON specific mapping implementation for Booleans.
+ * {@link ArrayMapping} - JSON specific mapping for array properties. 
  *
  * @param <O> the type of the object
+ * @param <T> the type of the array elements
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class BooleanMapping<O> extends DefaultJsonMapping<Boolean, O> {
+public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> implements ArrayFactory<T> {
 
-	public BooleanMapping(final String ajaxName, final int columnID) {
+	public ArrayMapping(final String ajaxName, final int columnID) {
 		super(ajaxName, columnID);
 	}
 
+	protected abstract T deserialize(final JSONArray array, int index) throws JSONException, OXException;
+	
 	@Override
 	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		this.set(to, Boolean.valueOf(from.getBoolean(getAjaxName())));
+		final JSONArray jsonArray = from.getJSONArray(getAjaxName());
+		final int size = jsonArray.length();		
+		final T[] array = newArray(size);
+		for (int i = 0; i < size; i++) {
+			array[i] = this.deserialize(jsonArray, i);
+		}
+		this.set(to, array);
 	}
 
 	@Override
-	public void serialize(final O from, final JSONObject to, final TimeZone timeZone) throws JSONException {
+	public void serialize(final O from, final JSONObject to, TimeZone timeZone) throws JSONException {
 		if (this.isSet(from)) {
-			final Boolean value = this.get(from);
-			to.put(getAjaxName(), null != value ? value.booleanValue() : JSONObject.NULL); 
+			final T[] value = this.get(from);
+			to.put(getAjaxName(), null != value ? Arrays.asList(value) : JSONObject.NULL); 
 		}
 	}
 

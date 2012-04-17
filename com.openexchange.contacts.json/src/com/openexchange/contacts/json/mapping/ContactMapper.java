@@ -69,13 +69,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
-import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 
 /**
  * {@link ContactMapper} - JSON mapper for contacts.
@@ -2270,63 +2271,64 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                 contact.removeNumberOfLinks();
             }
         });
-
-        mappings.put(ContactField.DISTRIBUTIONLIST, new DefaultJsonMapping<DistributionListEntryObject[], Contact>(ContactFields.DISTRIBUTIONLIST, 592) {
-
-            @Override
-            public void set(Contact contact, DistributionListEntryObject[] value) {
-                contact.setDistributionList(value);
-            }
-
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsDistributionLists();
-            }
-
-            @Override
-            public DistributionListEntryObject[] get(Contact contact) { 
-                return contact.getDistributionList();
-            }
-
-            @Override
-            public void remove(Contact contact) { 
-                contact.removeDistributionLists();
-            }
+        
+        mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, 592) {
 
 			@Override
-			public void deserialize(JSONObject from, Contact to) throws JSONException, OXException {
-				final JSONArray jsonArray = from.getJSONArray(this.getAjaxName());
-		        final DistributionListEntryObject[] distributionList = new DistributionListEntryObject[jsonArray.length()];
-		        for (int i = 0; i < jsonArray.length(); i++) {
-		            final JSONObject entry = jsonArray.getJSONObject(i);
-	                distributionList[i] = new DistributionListEntryObject();
-	                //FIXME: ui sends wrong values for "id": ===========> Bug #21894
-	                // "distribution_list":[{"id":"","mail_field":0,"mail":"otto@example.com","display_name":"otto"},
-	                //                      {"id":1,"mail_field":1,"mail":"horst@example.com","display_name":"horst"}] 
-	                if (entry.hasAndNotNull(DistributionListFields.ID) && 0 < entry.getString(DistributionListFields.ID).length()) {
-	                	distributionList[i].setEntryID(entry.getInt(DistributionListFields.ID));
-	                }
-	                if (entry.hasAndNotNull(DistributionListFields.FIRST_NAME)) {
-	                    distributionList[i].setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
-	                }
-	                if (entry.hasAndNotNull(DistributionListFields.LAST_NAME)) {
-	                    distributionList[i].setFirstname(entry.getString(DistributionListFields.LAST_NAME));
-	                }
-	                if (entry.hasAndNotNull(DistributionListFields.DISPLAY_NAME)) {
-	                    distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
-	                }
-	                if (entry.hasAndNotNull(DistributionListFields.MAIL)) {
-	                    distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
-	                }
-	                if (entry.hasAndNotNull(DistributionListFields.MAIL_FIELD)) {
-	                    distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
-	                }
-		        }		        
-		        this.set(to, distributionList);
+			public DistributionListEntryObject[] newArray(int size) {
+				return new DistributionListEntryObject[size];
+			}
+
+			@Override
+			public boolean isSet(Contact contact) {
+                return contact.containsDistributionLists();
+			}
+
+			@Override
+			public void set(Contact contact, DistributionListEntryObject[] value) throws OXException {
+                contact.setDistributionList(value);
+			}
+
+			@Override
+			public DistributionListEntryObject[] get(Contact contact) {
+                return contact.getDistributionList();
+			}
+
+			@Override
+			public void remove(Contact contact) {
+                contact.removeDistributionLists();
+			}
+
+			@Override
+			protected DistributionListEntryObject deserialize(final JSONArray array, int index) throws JSONException, OXException {
+	            final JSONObject entry = array.getJSONObject(index);
+	            final DistributionListEntryObject member = new DistributionListEntryObject();
+                //FIXME: ui sends wrong values for "id": ===========> Bug #21894
+                // "distribution_list":[{"id":"","mail_field":0,"mail":"otto@example.com","display_name":"otto"},
+                //                      {"id":1,"mail_field":1,"mail":"horst@example.com","display_name":"horst"}] 
+                if (entry.hasAndNotNull(DistributionListFields.ID) && 0 < entry.getString(DistributionListFields.ID).length()) {
+                	member.setEntryID(entry.getInt(DistributionListFields.ID));
+                }
+                if (entry.hasAndNotNull(DistributionListFields.FIRST_NAME)) {
+                	member.setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
+                }
+                if (entry.hasAndNotNull(DistributionListFields.LAST_NAME)) {
+                	member.setFirstname(entry.getString(DistributionListFields.LAST_NAME));
+                }
+                if (entry.hasAndNotNull(DistributionListFields.DISPLAY_NAME)) {
+                	member.setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+                }
+                if (entry.hasAndNotNull(DistributionListFields.MAIL)) {
+                	member.setEmailaddress(entry.getString(DistributionListFields.MAIL));
+                }
+                if (entry.hasAndNotNull(DistributionListFields.MAIL_FIELD)) {
+                	member.setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
+                }
+                return member;
 			}
 			
 			@Override
-			public void serialize(Contact from, JSONObject to) throws JSONException {
+			public void serialize(final Contact from, final JSONObject to) throws JSONException {
 				final DistributionListEntryObject[] distributionList = this.get(from);
 				if (null != distributionList) {
 			        final JSONArray jsonArray = new JSONArray();
@@ -2344,7 +2346,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			        to.put(getAjaxName(), jsonArray);
 		        }
 			}
-        });
+		});
 
 //        mappings.put(ContactField.LINKS, new (ContactFields.LINKS, 591) {
 //
@@ -2484,7 +2486,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CREATION_DATE, new DateMapping<Contact>(ContactFields.CREATION_DATE, 4) {
+        mappings.put(ContactField.CREATION_DATE, new TimeMapping<Contact>(ContactFields.CREATION_DATE, 4) {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -2507,7 +2509,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED, new DateMapping<Contact>(ContactFields.LAST_MODIFIED, 5) {
+        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(ContactFields.LAST_MODIFIED, 5) {
 
             @Override
             public void set(Contact contact, Date value) { 

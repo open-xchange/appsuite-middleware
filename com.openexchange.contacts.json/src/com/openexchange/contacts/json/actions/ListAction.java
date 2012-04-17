@@ -203,7 +203,6 @@ public class ListAction extends ContactAction {
                     final Contact contact = searchIterator.next();
                     contact.setParentFolderID(parentFolderID);
                     lastModified = getLatestModified(lastModified, contact);
-                    applyTimezoneOffset(contact, request.getTimeZone());
                     contacts.add(contact);
                 }
             } finally {

@@ -108,9 +108,7 @@ public class GetUserAction extends ContactAction {
     protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
     	final int userID = Integer.parseInt(request.getObjectID());
     	final Contact contact = getContactService().getUser(request.getSession(), userID);
-        final Date lastModified = contact.getLastModified();
-        applyTimezoneOffset(contact, request.getTimeZone());
-        return new AJAXRequestResult(contact, lastModified, "contact");
+        return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
     
 }

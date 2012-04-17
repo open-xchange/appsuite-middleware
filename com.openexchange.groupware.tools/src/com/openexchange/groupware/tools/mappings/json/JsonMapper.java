@@ -51,6 +51,7 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -113,6 +114,54 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	JSONObject serialize(O object, E[] fields) throws JSONException, OXException;
 	
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @param timeZone the client time zone to consider
+	 * @return the JSON object
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	JSONObject serialize(O object, E[] fields, final TimeZone timeZone) throws JSONException, OXException;
+	
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @param timeZoneID the client time zone identifier to consider
+	 * @return the JSON object
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	JSONObject serialize(O object, E[] fields, final String timeZoneID) throws JSONException, OXException;
+	
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param to the JSONObject to serialize into
+	 * @param fields the fields to be set
+	 * @param timeZone the client time zone to consider
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	void serialize(O object, JSONObject to, E[] fields, final TimeZone timeZone) throws JSONException, OXException;
+
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param to the JSONObject to serialize into
+	 * @param fields the fields to be set
+	 * @param timeZoneID the client time zone identifier to consider
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	void serialize(final O object, final JSONObject to, final E[] fields, final String timeZoneID) throws JSONException, OXException;
+
 	/**
 	 * Serializes the supplied objects to JSON.
 	 * 
