@@ -46,6 +46,13 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xch
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/bundles/
+/opt/open-xchange/bundles/*
+%dir /opt/open-xchange/osgi/bundle.d/
+/opt/open-xchange/osgi/bundle.d/*
+%dir /opt/open-xchange/etc/
+%config(noreplace) /opt/open-xchange/etc/*
+
 
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
