@@ -317,7 +317,8 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 public MailResult<List<MailMessage>> call() throws Exception {
                     // No need to await completion because getMessages() is called immediately after searchMessages()
                     // processingProgress.awaitCompletion();
-                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, mailIds, null, null, fields, session));
+                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, session, null, null));
+//                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, mailIds, null, null, fields, session));
                 }
             });
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {

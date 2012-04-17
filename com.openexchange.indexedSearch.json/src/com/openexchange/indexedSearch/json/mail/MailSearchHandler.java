@@ -109,107 +109,108 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
 
     @Override
     public List<FieldResults> search(final JSONObject jsonQuery, final int[] range, final int[] fields, final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final IndexFacadeService indexFacade = services.getService(IndexFacadeService.class);
-        if (null == indexFacade) {
-            return Collections.emptyList();
-        }
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            indexAccess = indexFacade.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, session);
-            // Parse query
-            final MailQuery query = MailQuery.queryFor(jsonQuery);
-            final MailField[] mailFields = MailField.getFields(fields);
-            final boolean[] more = new boolean[1];
-            final List<String> names = query.getNames();
-            final List<FieldResults> retval = new LinkedList<FieldResults>();
-            int i = 0;
-            for (final com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
-                try {
-                    more[0] = false;
-                    final String name = null == names ? null : names.get(i++);
-                    final String queryString;
-                    {
-                        final String userField = SolrMailField.USER.solrName();
-                        final String contextField = SolrMailField.CONTEXT.solrName();
-                        final String accountField = SolrMailField.ACCOUNT.solrName();
-                        final String fullNameField = SolrMailField.FULL_NAME.solrName();
-                        
-                        final StringBuilder queryBuilder = new StringBuilder(128);
-                        boolean first = true;
-                        if (userField != null) {
-                            queryBuilder.append('(').append(userField).append(':').append(session.getUserId()).append(')');
-                            first = false;
-                        }
-                        
-                        if (contextField != null) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                queryBuilder.append(" AND ");
-                            }
-                            queryBuilder.append('(').append(contextField).append(':').append(session.getContextId()).append(')');
-                        }
-                        
-                        
-                        final int accountId = query.getAccountId();
-                        if (accountId >= 0 && accountField != null) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                queryBuilder.append(" AND ");
-                            }
-                            queryBuilder.append('(').append(accountField).append(':').append(accountId).append(')');
-                        }
-                        
-                        final String fullName = query.getFullName();
-                        if (fullName != null && fullNameField != null) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                queryBuilder.append(" AND ");
-                            }
-                            queryBuilder.append('(').append(fullNameField).append(":\"").append(fullName).append("\")");
-                        }
-                        if (null != searchTerm) {
-                            queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(map(searchTerm))).append(')');
-                        }
-                        queryString = queryBuilder.toString();
-                    }
-                    final Map<String, Object> params = new HashMap<String, Object>(4);
-                    // TODO: params.put("fields", mailFields);
-                    params.put("sort", MailIndexField.RECEIVED_DATE);
-                    params.put("order", "desc");
-                    final QueryParameters queryParameter =
-                        new QueryParameters.Builder(queryString).setOffset(range[0]).setLength(range[1] - range[0]).setType(
-                            IndexDocument.Type.MAIL).setParameters(params).build();
-                    final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
-                    if (range[1] > 0 && range[1] < indexResult.getNumFound()) {
-                        more[0] = true;
-                    }
-                    final List<IndexDocument<MailMessage>> results = indexResult.getResults();
-                    final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
-                    for (final IndexDocument<MailMessage> indexDocument : results) {
-                        mails.add(indexDocument.getObject());
-                    }
-                    retval.add(new FieldResults(name, "mail", results, more[0]));
-                } catch (final InterruptedException e) {
-                    // Thread interrupted
-                    Thread.currentThread().interrupt();
-                    return Collections.emptyList();
-                }
-            }
-            // Prepare AJAX request data for mail ResultConverter
-            requestData.setAction(AJAXServlet.ACTION_ALL);
-            requestData.putParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
-            requestData.putParameter(AJAXServlet.PARAMETER_COLUMNS, toCSV(jsonQuery.getJSONArray(AJAXServlet.PARAMETER_COLUMNS)));
-            return retval;
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } finally {
-            if (null != indexAccess) {
-                indexFacade.releaseIndexAccess(indexAccess);
-            }
-        }
+        return null;
+//        final IndexFacadeService indexFacade = services.getService(IndexFacadeService.class);
+//        if (null == indexFacade) {
+//            return Collections.emptyList();
+//        }
+//        IndexAccess<MailMessage> indexAccess = null;
+//        try {
+//            indexAccess = indexFacade.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, session);
+//            // Parse query
+//            final MailQuery query = MailQuery.queryFor(jsonQuery);
+//            final MailField[] mailFields = MailField.getFields(fields);
+//            final boolean[] more = new boolean[1];
+//            final List<String> names = query.getNames();
+//            final List<FieldResults> retval = new LinkedList<FieldResults>();
+//            int i = 0;
+//            for (final com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
+//                try {
+//                    more[0] = false;
+//                    final String name = null == names ? null : names.get(i++);
+//                    final String queryString;
+//                    {
+//                        final String userField = SolrMailField.USER.solrName();
+//                        final String contextField = SolrMailField.CONTEXT.solrName();
+//                        final String accountField = SolrMailField.ACCOUNT.solrName();
+//                        final String fullNameField = SolrMailField.FULL_NAME.solrName();
+//                        
+//                        final StringBuilder queryBuilder = new StringBuilder(128);
+//                        boolean first = true;
+//                        if (userField != null) {
+//                            queryBuilder.append('(').append(userField).append(':').append(session.getUserId()).append(')');
+//                            first = false;
+//                        }
+//                        
+//                        if (contextField != null) {
+//                            if (first) {
+//                                first = false;
+//                            } else {
+//                                queryBuilder.append(" AND ");
+//                            }
+//                            queryBuilder.append('(').append(contextField).append(':').append(session.getContextId()).append(')');
+//                        }
+//                        
+//                        
+//                        final int accountId = query.getAccountId();
+//                        if (accountId >= 0 && accountField != null) {
+//                            if (first) {
+//                                first = false;
+//                            } else {
+//                                queryBuilder.append(" AND ");
+//                            }
+//                            queryBuilder.append('(').append(accountField).append(':').append(accountId).append(')');
+//                        }
+//                        
+//                        final String fullName = query.getFullName();
+//                        if (fullName != null && fullNameField != null) {
+//                            if (first) {
+//                                first = false;
+//                            } else {
+//                                queryBuilder.append(" AND ");
+//                            }
+//                            queryBuilder.append('(').append(fullNameField).append(":\"").append(fullName).append("\")");
+//                        }
+//                        if (null != searchTerm) {
+//                            queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(map(searchTerm))).append(')');
+//                        }
+//                        queryString = queryBuilder.toString();
+//                    }
+//                    final Map<String, Object> params = new HashMap<String, Object>(4);
+//                    // TODO: params.put("fields", mailFields);
+//                    params.put("sort", MailIndexField.RECEIVED_DATE);
+//                    params.put("order", "desc");
+//                    final QueryParameters queryParameter =
+//                        new QueryParameters.Builder(queryString).setOffset(range[0]).setLength(range[1] - range[0]).setType(
+//                            IndexDocument.Type.MAIL).setParameters(params).build();
+//                    final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+//                    if (range[1] > 0 && range[1] < indexResult.getNumFound()) {
+//                        more[0] = true;
+//                    }
+//                    final List<IndexDocument<MailMessage>> results = indexResult.getResults();
+//                    final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+//                    for (final IndexDocument<MailMessage> indexDocument : results) {
+//                        mails.add(indexDocument.getObject());
+//                    }
+//                    retval.add(new FieldResults(name, "mail", results, more[0]));
+//                } catch (final InterruptedException e) {
+//                    // Thread interrupted
+//                    Thread.currentThread().interrupt();
+//                    return Collections.emptyList();
+//                }
+//            }
+//            // Prepare AJAX request data for mail ResultConverter
+//            requestData.setAction(AJAXServlet.ACTION_ALL);
+//            requestData.putParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+//            requestData.putParameter(AJAXServlet.PARAMETER_COLUMNS, toCSV(jsonQuery.getJSONArray(AJAXServlet.PARAMETER_COLUMNS)));
+//            return retval;
+//        } catch (final JSONException e) {
+//            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+//        } finally {
+//            if (null != indexAccess) {
+//                indexFacade.releaseIndexAccess(indexAccess);
+//            }
+//        }
     }
 
     /**

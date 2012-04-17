@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,40 @@
  *
  */
 
-package com.openexchange.index.solr.mail;
+package com.openexchange.index;
 
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.mail.MailFields;
-import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link SolrMailUtility} - Provides utility methods for Solr mail access.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SearchHandler} - This enum defines possible search handlers. 
+ * A search handler takes part in {@link QueryParameters} and is an abstract definition of how
+ * a search is being performed. That means what pattern will be searched within which fields.
+ * A search handler may define some parameters that have to be set within 
+ * {@link QueryParameters}.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrMailUtility {
-
+public enum SearchHandler {
+    
     /**
-     * Initializes a new {@link SolrMailUtility}.
+     * This handler performs a simple search.
+     * Mandatory parameters: pattern
+     * Optional parameters: folder, sort, order
+     * Module dependent: accountId
      */
-    private SolrMailUtility() {
-        super();
-    }
-
-    // /**
-    // * Gets the field2name mapping.
-    // *
-    // * @return The field2name mapping
-    // */
-    // public static EnumMap<MailField, List<String>> getField2NameMap() {
-    // return MailSolrIndexAccess.getField2name();
-    // }
-
+    SIMPLE,
     /**
-     * Gets the indexable fields.
-     * 
-     * @return The indexable fields
+     * The custom search handler allows to define the fields to search in.
+     * Mandatory parameters: fields (an array of {@link IndexField}), pattern
+     * Optional parameters: folder, sort, order
+     * Module dependent: accountId
      */
-    public static MailFields getIndexableFields() {
-        return new MailFields(MailIndexField.getIndexableMailFields());
-    }
-
+    CUSTOM,
     /**
-     * Safely releases specified access using given facade.
-     * 
-     * @param facade The facade
-     * @param indexAccess The access
+     * This one searches for all items within a folder.
+     * Mandatory parameters: userId, contextId, folder.
+     * Optional parameters: sort, order
+     * Module dependent: accountId
      */
-    public static void releaseAccess(final IndexFacadeService facade, final IndexAccess<MailMessage> indexAccess) {
-        if (null != indexAccess) {
-            try {
-                facade.releaseIndexAccess(indexAccess);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-    }
+    ALL_REQUEST
 
 }

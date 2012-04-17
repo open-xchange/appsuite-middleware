@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -141,7 +142,7 @@ public final class ChangeByMessagesJob extends AbstractMailJob {
             /*
              * Change flags
              */
-            indexAccess.change(toDocuments(messages), null);
+            indexAccess.change(toDocuments(messages), MailIndexField.getFor(FIELDS));
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
         } finally {

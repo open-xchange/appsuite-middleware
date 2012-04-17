@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
+import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.IDMailMessage;

@@ -68,7 +68,7 @@ public final class QueryParameters {
         int len;
         String queryString;
         Map<String, Object> parameters;
-        String handler;
+        SearchHandler handler;
         Type type;
 
         /**
@@ -111,7 +111,7 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder setHandler(final String handler) {
+        public Builder setHandler(final SearchHandler handler) {
             this.handler = handler;
             return this;
         }
@@ -135,7 +135,7 @@ public final class QueryParameters {
 
     private final Map<String, Object> parameters;
 
-    private final String handler;
+    private final SearchHandler handler;
 
     private final Type type;
 
@@ -193,7 +193,7 @@ public final class QueryParameters {
      * 
      * @return The handler
      */
-    public String getHandler() {
+    public SearchHandler getHandler() {
         return handler;
     }
 

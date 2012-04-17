@@ -74,6 +74,7 @@ import com.openexchange.index.TriggerType;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
+import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;

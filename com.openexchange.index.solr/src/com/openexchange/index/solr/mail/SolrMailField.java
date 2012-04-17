@@ -97,6 +97,9 @@ public enum SolrMailField {
     FLAG_READ_ACK("flag_read_ack", MailIndexField.FLAG_READ_ACK),
     USER_FLAGS("user_flags", MailIndexField.USER_FLAGS),
     FROM("from", MailIndexField.FROM),
+    /*
+     * FIXME: remove?
+     */
     SENDER("sender", MailIndexField.SENDER),
     TO("to", MailIndexField.TO),
     CC("cc", MailIndexField.CC),

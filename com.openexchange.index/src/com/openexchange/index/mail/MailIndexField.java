@@ -49,6 +49,9 @@
 
 package com.openexchange.index.mail;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
 import com.openexchange.index.IndexField;
 import com.openexchange.mail.MailField;
 
@@ -72,18 +75,21 @@ public enum MailIndexField implements IndexField {
     RECEIVED_DATE(MailField.RECEIVED_DATE),
     SENT_DATE(MailField.SENT_DATE),
     SIZE(MailField.SIZE),
-    FLAG_ANSWERED(null),
-    FLAG_DELETED(null),
-    FLAG_DRAFT(null),
-    FLAG_FLAGGED(null),
-    FLAG_RECENT(null),
-    FLAG_SEEN(null),
-    FLAG_USER(null),
-    FLAG_SPAM(null),
-    FLAG_FORWARDED(null),
-    FLAG_READ_ACK(null),
-    USER_FLAGS(null),
+    FLAG_ANSWERED(MailField.FLAGS),
+    FLAG_DELETED(MailField.FLAGS),
+    FLAG_DRAFT(MailField.FLAGS),
+    FLAG_FLAGGED(MailField.FLAGS),
+    FLAG_RECENT(MailField.FLAGS),
+    FLAG_SEEN(MailField.FLAGS),
+    FLAG_USER(MailField.FLAGS),
+    FLAG_SPAM(MailField.FLAGS),
+    FLAG_FORWARDED(MailField.FLAGS),
+    FLAG_READ_ACK(MailField.FLAGS),
+    USER_FLAGS(MailField.FLAGS),
     FROM(MailField.FROM),
+    /*
+     * FIXME: remove?
+     */
     SENDER(null),
     TO(MailField.TO),
     CC(MailField.CC),
@@ -93,8 +99,51 @@ public enum MailIndexField implements IndexField {
     CONTENT(MailField.BODY);
     
     
+    private static final Map<MailField, EnumSet<MailIndexField>> reverseMap = new EnumMap<MailField, EnumSet<MailIndexField>>(MailField.class);
+    
+    private static final EnumSet<MailField> indexableMailFields = EnumSet.noneOf(MailField.class);
+    
     private final MailField mailField;
     
+    static {
+        for (final MailIndexField field : values()) {
+            final MailField tmpMailField = field.getMailField();
+            if (tmpMailField != null) {                
+                EnumSet<MailIndexField> enumSet = reverseMap.get(tmpMailField);
+                if (enumSet == null) {
+                    enumSet = EnumSet.noneOf(MailIndexField.class);
+                    reverseMap.put(tmpMailField, enumSet);
+                }
+                enumSet.add(field);                
+                indexableMailFields.add(tmpMailField);
+            }
+        }
+    }
+    
+    public static MailField[] getIndexableMailFields() {
+        return indexableMailFields.toArray(new MailField[indexableMailFields.size()]);
+    }
+    
+    public static MailIndexField[] getFor(final MailField[] mailFields) {
+        final EnumSet<MailIndexField> indexFields = EnumSet.noneOf(MailIndexField.class);
+        for (final MailField mailField : mailFields) {
+            final EnumSet<MailIndexField> enumSet = reverseMap.get(mailField);
+            if (enumSet != null) {
+                indexFields.addAll(enumSet);
+            }
+        }
+        
+        return indexFields.toArray(new MailIndexField[indexFields.size()]);
+    }
+    
+    public static MailIndexField getFor(final MailField mailField) {
+        final EnumSet<MailIndexField> enumSet = reverseMap.get(mailField);
+        if (enumSet.size() > 0) {
+            return enumSet.iterator().next();
+        }
+        
+        return null;
+    }
     
     private MailIndexField(final MailField mailField) {
         this.mailField = mailField;

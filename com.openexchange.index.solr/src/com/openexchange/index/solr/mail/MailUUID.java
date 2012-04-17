@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.index.solr.mail;
 
 import com.openexchange.mail.MailPath;
 

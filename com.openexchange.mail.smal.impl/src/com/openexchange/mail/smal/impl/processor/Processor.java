@@ -89,6 +89,7 @@ import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalExceptionCodes;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.MailJobInfo;
@@ -431,17 +432,8 @@ public final class Processor implements SolrMailConstants {
         if (null == fullName || accountId < 0) {
             return false;
         }
-        // Compose query string
-        final StringBuilder queryBuilder = new StringBuilder(128);
-        queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-        queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-        queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-        queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-        // Query parameters
-        final QueryParameters queryParameters =
-            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).build();
-        final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
-        return result.getNumFound() > 0;
+        
+        return IndexAccessAdapter.getInstance().containsFolder(accountId, fullName, session);
     }
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
@@ -477,36 +469,38 @@ public final class Processor implements SolrMailConstants {
          */
         final Map<String, MailMessage> indexMap;
         {
-            final String queryString;
-            {
-                final Session session = mailAccess.getSession();
-                final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(mailAccess.getAccountId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                queryString = queryBuilder.toString();
-            }
-            final Map<String, Object> params = new HashMap<String, Object>(4);
-            // TODO: params.put("fields", mailFields);
-            params.put("sort", FIELD_RECEIVED_DATE);
-            params.put("order", "desc");
-            params.put("fields", FIELD_ID);
-            final QueryParameters queryParameter =
-                new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
-                    params).build();
-            final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
-            final List<MailMessage> indexedMails;
-            if (0 >= indexResult.getNumFound()) {
-                indexedMails = Collections.emptyList();
-            } else {
-                final List<IndexDocument<MailMessage>> results = indexResult.getResults();
-                final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
-                for (final IndexDocument<MailMessage> indexDocument : results) {
-                    mails.add(indexDocument.getObject());
-                }
-                indexedMails = mails;
-            }
+//            final String queryString;
+//            {
+//                final Session session = mailAccess.getSession();
+//                final StringBuilder queryBuilder = new StringBuilder(128);
+//                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+//                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+//                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(mailAccess.getAccountId()).append(')');
+//                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+//                queryString = queryBuilder.toString();
+//            }
+//            final Map<String, Object> params = new HashMap<String, Object>(4);
+//            // TODO: params.put("fields", mailFields);
+//            params.put("sort", FIELD_RECEIVED_DATE);
+//            params.put("order", "desc");
+//            params.put("fields", FIELD_ID);
+//            final QueryParameters queryParameter =
+//                new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
+//                    params).build();
+//            final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+//            final List<MailMessage> indexedMails;
+//            if (0 >= indexResult.getNumFound()) {
+//                indexedMails = Collections.emptyList();
+//            } else {
+//                final List<IndexDocument<MailMessage>> results = indexResult.getResults();
+//                final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+//                for (final IndexDocument<MailMessage> indexDocument : results) {
+//                    mails.add(indexDocument.getObject());
+//                }
+//                indexedMails = mails;
+//            }
+            
+            final List<MailMessage> indexedMails = IndexAccessAdapter.getInstance().getMessages(mailAccess.getAccountId(), fullName, mailAccess.getSession(), MailSortField.RECEIVED_DATE, OrderDirection.DESC);
             if (indexedMails.isEmpty()) {
                 indexMap = Collections.emptyMap();
             } else {
