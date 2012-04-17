@@ -20,7 +20,7 @@ Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
-Source:        %{name}_%{version}.orig.tar.gz
+Source:        %{name}_%{version}.orig.tar.bz2
 Summary:    OSGi bundles commonly used by all Open-Xchange packages
 PreReq:       /usr/sbin/useradd
 Requires:     java-jre
@@ -76,6 +76,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xch
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/bundles/
+/opt/open-xchange/bundles/*
+%dir /opt/open-xchange/osgi/bundle.d/
+/opt/open-xchange/osgi/bundle.d/*
 
-%doc ChangeLog
 %changelog
