@@ -23,7 +23,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open Xchange POP3 Plugin
-Requires:      open-xchange-osgi >= @OXVERSION@
+Requires:      open-xchange-core >= @OXVERSION@
 
 %description
 Open Xchange POP3 Plugin
