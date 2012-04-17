@@ -70,6 +70,10 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-osgi -f build/build.xml clean build
 
+%pre
+/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
+/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
+
 %clean
 %{__rm} -rf %{buildroot}
 
