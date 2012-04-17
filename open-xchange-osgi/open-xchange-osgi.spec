@@ -1,4 +1,4 @@
-# norootforbuild
+
 Name:           open-xchange-osgi
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
@@ -17,9 +17,9 @@ Version:    @OXVERSION@
 %define        ox_release 0
 Release:    %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
-License:        GNU General Public License (GPL)
+License:       GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-#URL:            
+URL:            http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:    OSGi bundles commonly used by all Open-Xchange packages
 PreReq:       /usr/sbin/useradd
@@ -61,10 +61,12 @@ Requires: java-sun
 Authors:
 --------
     Open-Xchange
-    
+
 %prep
 %setup -q
+
 %build
+
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 
