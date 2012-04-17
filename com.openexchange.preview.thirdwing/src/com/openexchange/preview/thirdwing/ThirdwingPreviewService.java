@@ -207,50 +207,15 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     private PreviewDocument generatePreview(final File file, final Session session, int pages) throws OXException {
         final IConversionJob transformer = ConversionJobfactory.getTransformer(file);
         final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);
-        final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
+        final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session, pages, transformer, file);
 
-        final ThreadPoolService poolService = ThreadPools.getThreadPool();
-        IOUnit unit;
-        FileInputStream fis = null;
-        IContentIterator contentIterator = null;
-        try {
-            unit = new IOUnit((fis = new FileInputStream(file)));
-            unit.setStreamProvider(streamProvider);
-            transformer.addObserver(observationTask);
-            contentIterator = transformer.transformDocument(unit, 80, true);
+        final Map<String, String> metaData = new HashMap<String, String>();
+        metaData.put("content-type", "text/html");
+        metaData.put("resourcename", "document.html");
+        ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, observationTask.call(), streamProvider.getPreviewImage(), observationTask.hasMoreContent());
 
-            List<String> content = new ArrayList<String>();
-
-            int pageCount = 1;
-            while (contentIterator.hasNext() && (pages == -1 || pageCount <= pages)) {
-                contentIterator.writeNextContent();
-                Future<String> future = poolService.submit(observationTask);
-                content.add(future.get());
-                pageCount++;
-            }
-
-            final Map<String, String> metaData = new HashMap<String, String>();
-            metaData.put("content-type", "text/html");
-            metaData.put("resourcename", "document.html");
-            ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage(), contentIterator.hasNext());
-
-            return previewDocument;
-        } catch (final FileNotFoundException e) {
-            // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
-        } catch (final XHTMLConversionException e) {
-            // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
-        } catch (InterruptedException e) {
-            throw PreviewExceptionCodes.ERROR.create();
-        } catch (ExecutionException e) {
-            throw PreviewExceptionCodes.ERROR.create();
-        } finally {
-            if (contentIterator != null) {
-                contentIterator.releaseData();
-            }
-            Streams.close(fis);
-        }
+        return previewDocument;
+        
     }
 
     private File streamToFile(final InputStream is, final String name) throws OXException, IOException {
