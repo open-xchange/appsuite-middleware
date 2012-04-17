@@ -1,29 +1,28 @@
 # norootforbuild
-Name:           open-xchange-core
+Name:          open-xchange-core
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-#BuildRequires:  ant >= 1.7 ant-nodeps open-xchange-log4j
+BuildRequires: ant ant-nodeps open-xchange-log4j
 %if 0%{?suse_version}  && !0%{?sles_version}
-#BuildRequires:  java-sdk-openjdk
+BuildRequires: java-sdk-openjdk
 %endif
 %if 0%{?sles_version} == 11
 # SLES 11
-#BuildRequires:  java-1_6_0-ibm-devel
+BuildRequires: java-1_6_0-ibm-devel
 %endif
 %if 0%{?rhel_version} || 0%{?fedora_version}
-#BuildRequires:  java-1.6.0-openjdk-devel
+BuildRequires: java-1.6.0-openjdk-devel
 %endif
-Version:    @OXVERSION@
+Version:       @OXVERSION@
 %define        ox_release 0
-Release:    %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:		http://www.open-xchange.com/            
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0 
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:		   http://www.open-xchange.com/            
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:    The main bundles for the Open-Xchange collaboration suite
-#PreReq:       PREREQUIRES
-Requires:     open-xchange-osgi >= @OXVERSION@
+Summary:       The main bundles for the Open-Xchange collaboration suite
+Requires:      open-xchange-osgi >= @OXVERSION@
 
 Obsoletes: open-xchange < 6.21.0, open-xchange-ajp, open-xchange-cache
 Obsoletes: open-xchange-calendar, open-xchange-charset, open-xchange-common, open-xchange-config-cascade
@@ -42,15 +41,17 @@ Obsoletes: open-xchange-secret-recovery-json, open-xchange-secret-recovery-mail,
 Obsoletes: open-xchange-settings-extensions, open-xchange-sql, open-xchange-templating, open-xchange-templating-base
 Obsoletes: open-xchange-threadpool, open-xchange-tx, open-xchange-user-json, open-xchange-xml
 
-#
 %description
-
 Authors:
 --------
     Open-Xchange
+
 %prep
+
 %setup -q
+
 %build
+
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 
@@ -58,10 +59,29 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xch
 
 %clean
 %{__rm} -rf %{buildroot}
+
+%pre
+# TODO! All postinst, postrm, preinst, prerm from debian package still missing!
+
 %files
 %defattr(-,root,root)
-FILES
-%doc ChangeLog
+%dir /opt/open-xchange/bundles/
+/opt/open-xchange/bundles/*
+%dir /opt/open-xchange/etc/
+/opt/open-xchange/etc/*
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*
+%dir /opt/open-xchange/importCSV/
+/opt/open-xchange/importCSV/*
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/oxfunctions.sh
+%dir /opt/open-xchange/osgi/bundle.d/
+/opt/open-xchange/osgi/bundle.d/*
+%dir /opt/open-xchange/osgi/
+/opt/open-xchange/osgi/config.ini.template
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/* 
+
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
 Internal release build for EDP drop #1
