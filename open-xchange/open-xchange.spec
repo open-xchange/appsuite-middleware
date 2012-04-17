@@ -1,6 +1,6 @@
 
 Name:           open-xchange
-BuildArch:     noarch
+BuildArch:      noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
@@ -14,16 +14,16 @@ BuildRequires:  java-1_6_0-ibm-devel
 %if 0%{?rhel_version} || 0%{?fedora_version}
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
-Version:    @OXVERSION@
-%define        ox_release 0
-Release:    %{ox_release}_<CI_CNT>.<B_CNT>
+Version:        @OXVERSION@
+%define         ox_release 0
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
-License:       GPL-2.0 
+License:        GPL-2.0 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
-Source:        %{name}_%{version}.orig.tar.bz2
-Source1:      open-xchange.init
-Summary:     Open-Xchange Backend
+Source:         %{name}_%{version}.orig.tar.bz2
+Source1:        open-xchange.init
+Summary:        Open-Xchange Backend
 Requires:     open-xchange-core >= @OXVERSION@, open-xchange-authentication, open-xchange-authorization, open-xchange-mailstore, open-xchange-smtp >= @OXVERSION@
 #
 
@@ -73,6 +73,3 @@ if
 /etc/init.d/*
 
 %changelog
-* Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
-Internal release build for EDP drop #1
-
