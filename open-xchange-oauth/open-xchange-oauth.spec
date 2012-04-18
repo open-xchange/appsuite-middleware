@@ -22,8 +22,20 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open-Xchange OAuth implementation
 Requires:	open-xchange-core >= @OXVERSION@
-Provides:       open-xchange-http-deferrer = @OXVERSION@ open-xchange-oauth-facebook = @OXVERSION@ open-xchange-oauth-json = @OXVERSION@ open-xchange-oauth-linkedin = @OXVERSION@ open-xchange-oauth-msn = @OXVERSION@ open-xchange-oauth-twitter = @OXVERSION@ open-xchange-oauth-yahoo = @OXVERSION@
-Obsoletes:      open-xchange-http-deferrer <= @OXVERSION@ open-xchange-oauth-facebook <= @OXVERSION@ open-xchange-oauth-json <= @OXVERSION@ open-xchange-oauth-linkedin <= @OXVERSION@ open-xchange-oauth-msn <= @OXVERSION@ open-xchange-oauth-twitter <= @OXVERSION@ open-xchange-oauth-yahoo <= @OXVERSION@
+Provides:       open-xchange-http-deferrer = %{version}
+Obsoletes:      open-xchange-http-deferrer <= %{version}
+Provides:       open-xchange-oauth-facebook = %{version}
+Obsoletes:      open-xchange-oauth-facebook <= %{version}
+Provides:       open-xchange-oauth-json = %{version}
+Obsoletes:      open-xchange-oauth-json <= %{version}
+Provides:       open-xchange-oauth-linkedin = %{version}
+Obsoletes:      open-xchange-oauth-linkedin <= %{version}
+Provides:       open-xchange-oauth-msn = %{version}
+Obsoletes:      open-xchange-oauth-msn <= %{version}
+Provides:       open-xchange-oauth-twitter = %{version}
+Obsoletes:      open-xchange-oauth-twitter <= %{version}
+Provides:       open-xchange-oauth-yahoo = %{version}
+Obsoletes:      open-xchange-oauth-yahoo <= %{version}
 #
 
 %description

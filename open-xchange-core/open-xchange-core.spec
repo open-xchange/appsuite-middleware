@@ -23,23 +23,121 @@ URL:		   http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The main bundles for the Open-Xchange collaboration suite
 Requires:      open-xchange-osgi >= @OXVERSION@
+Provides:      open-xchange-ajp = %{version}
+Obsoletes:     open-xchange-ajp <= %{version}
+Provides:      open-xchange-cache = %{version}
+Obsoletes:     open-xchange-cache <= %{version}
+Provides:      open-xchange-calendar = %{version}
+Obsoletes:     open-xchange-calendar <= %{version}
+Provides:      open-xchange-charset = %{version}
+Obsoletes:     open-xchange-charset <= %{version}
+Provides:      open-xchange-common = %{version}
+Obsoletes:     open-xchange-common <= %{version}
+Provides:      open-xchange-config-cascade = %{version}
+Obsoletes:     open-xchange-config-cascade <= %{version}
+Provides:      open-xchange-config-cascade-context = %{version}
+Obsoletes:     open-xchange-config-cascade-context <= %{version}
+Provides:      open-xchange-config-cascade-user = %{version}
+Obsoletes:     open-xchange-config-cascade-user <= %{version}
+Provides:      open-xchange-configread = %{version}
+Obsoletes:     open-xchange-configread <= %{version}
+Provides:      open-xchange-contactcollector = %{version}
+Obsoletes:     open-xchange-contactcollector <= %{version}
+Provides:      open-xchange-conversion = %{version}
+Obsoletes:     open-xchange-conversion <= %{version}
+Provides:      open-xchange-conversion-engine = %{version}
+Obsoletes:     open-xchange-conversion-engine <= %{version}
+Provides:      open-xchange-conversion-servlet = %{version}
+Obsoletes:     open-xchange-conversion-servlet <= %{version}
+Provides:      open-xchange-crypto = %{version}
+Obsoletes:     open-xchange-crypto <= %{version}
+Provides:      open-xchange-data-conversion-ical4j = %{version}
+Obsoletes:     open-xchange-data-conversion-ical4j <= %{version}
+Provides:      open-xchange-dataretention = %{version}
+Obsoletes:     open-xchange-dataretention <= %{version}
+Provides:      open-xchange-genconf = %{version}
+Obsoletes:     open-xchange-genconf <= %{version}
+Provides:      open-xchange-genconf-mysql = %{version}
+Obsoletes:     open-xchange-genconf-mysql <= %{version}
+Provides:      open-xchange-file-storage = %{version}
+Obsoletes:     open-xchange-file-storage <= %{version}
+Provides:      open-xchange-file-storage-composition = %{version}
+Obsoletes:     open-xchange-file-storage-composition <= %{version}
+Provides:      open-xchange-file-storage-config = %{version}
+Obsoletes:     open-xchange-file-storage-config <= %{version}
+Provides:      open-xchange-file-storage-generic = %{version}
+Obsoletes:     open-xchange-file-storage-generic <= %{version}
+Provides:      open-xchange-file-storage-infostore = %{version}
+Obsoletes:     open-xchange-file-storage-infostore <= %{version}
+Provides:      open-xchange-file-storage-json = %{version}
+Obsoletes:     open-xchange-file-storage-json <= %{version}
+Provides:      open-xchange-folder-json = %{version}
+Obsoletes:     open-xchange-folder-json <= %{version}
+Provides:      open-xchange-frontend-uwa = %{version}
+Obsoletes:     open-xchange-frontend-uwa <= %{version}
+Provides:      open-xchange-frontend-uwa-json = %{version}
+Obsoletes:     open-xchange-frontend-uwa-json <= %{version}
+Provides:      open-xchange-global = %{version}
+Obsoletes:     open-xchange-global <= %{version}
+Provides:      open-xchange-html = %{version}
+Obsoletes:     open-xchange-html <= %{version}
+Provides:      open-xchange-i18n = %{version}
+Obsoletes:     open-xchange-i18n <= %{version}
+Provides:      open-xchange-jcharset = %{version}
+Obsoletes:     open-xchange-jcharset <= %{version}
+Provides:      open-xchange-logging = %{version}
+Obsoletes:     open-xchange-logging <= %{version}
+Provides:      open-xchange-management = %{version}
+Obsoletes:     open-xchange-management <= %{version}
+Provides:      open-xchange-modules-json = %{version}
+Obsoletes:     open-xchange-modules-json <= %{version}
+Provides:      open-xchange-modules-model = %{version}
+Obsoletes:     open-xchange-modules-model <= %{version}
+Provides:      open-xchange-modules-storage = %{version}
+Obsoletes:     open-xchange-modules-storage <= %{version}
+Provides:      open-xchange-monitoring = %{version}
+Obsoletes:     open-xchange-monitoring <= %{version}
+Provides:      open-xchange-proxy = %{version}
+Obsoletes:     open-xchange-proxy <= %{version}
+Provides:      open-xchange-proxy-servlet = %{version}
+Obsoletes:     open-xchange-proxy-servlet <= %{version}
+Provides:      open-xchange-publish-basic = %{version}
+Obsoletes:     open-xchange-publish-basic <= %{version}
+Provides:      open-xchange-publish-infostore-online = %{version}
+Obsoletes:     open-xchange-publish-infostore-online <= %{version}
+Provides:      open-xchange-push = %{version}
+Obsoletes:     open-xchange-push <= %{version}
+Provides:      open-xchange-push-udp = %{version}
+Obsoletes:     open-xchange-push-udp <= %{version}
+Provides:      open-xchange-secret = %{version}
+Obsoletes:     open-xchange-secret <= %{version}
+Provides:      open-xchange-secret-recovery = %{version}
+Obsoletes:     open-xchange-secret-recovery <= %{version}
+Provides:      open-xchange-secret-recovery-json = %{version}
+Obsoletes:     open-xchange-secret-recovery-json <= %{version}
+Provides:      open-xchange-secret-recovery-mail = %{version}
+Obsoletes:     open-xchange-secret-recovery-mail <= %{version}
+Provides:      open-xchange-server = %{version}
+Obsoletes:     open-xchange-server <= %{version}
+Provides:      open-xchange-sessiond = %{version}
+Obsoletes:     open-xchange-sessiond <= %{version}
+Provides:      open-xchange-settings-extensions = %{version}
+Obsoletes:     open-xchange-settings-extensions <= %{version}
+Provides:      open-xchange-sql = %{version}
+Obsoletes:     open-xchange-sql <= %{version}
+Provides:      open-xchange-templating = %{version}
+Obsoletes:     open-xchange-templating <= %{version}
+Provides:      open-xchange-templating-base = %{version}
+Obsoletes:     open-xchange-templating-base <= %{version}
+Provides:      open-xchange-threadpool = %{version}
+Obsoletes:     open-xchange-threadpool <= %{version}
+Provides:      open-xchange-tx = %{version}
+Obsoletes:     open-xchange-tx <= %{version}
+Provides:      open-xchange-user-json = %{version}
+Obsoletes:     open-xchange-user-json <= %{version}
+Provides:      open-xchange-xml = %{version}
+Obsoletes:     open-xchange-xml <= %{version}
 
-Obsoletes: open-xchange < 6.21.0, open-xchange-ajp, open-xchange-cache
-Obsoletes: open-xchange-calendar, open-xchange-charset, open-xchange-common, open-xchange-config-cascade
-Obsoletes: open-xchange-config-cascade-context, open-xchange-config-cascade-user, open-xchange-configread
-Obsoletes: open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine
-Obsoletes: open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j
-Obsoletes: open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql
-Obsoletes: open-xchange-file-storage, open-xchange-file-storage-composition, open-xchange-file-storage-config
-Obsoletes: open-xchange-file-storage-generic, open-xchange-file-storage-infostore, open-xchange-file-storage-json
-Obsoletes: open-xchange-folder-json, open-xchange-frontend-uwa, open-xchange-frontend-uwa-json, open-xchange-global
-Obsoletes: open-xchange-html, open-xchange-i18n, open-xchange-jcharset, open-xchange-logging, open-xchange-management
-Obsoletes: open-xchange-modules-json, open-xchange-modules-model, open-xchange-modules-storage, open-xchange-monitoring
-Obsoletes: open-xchange-proxy, open-xchange-proxy-servlet, open-xchange-publish-basic, open-xchange-publish-infostore-online
-Obsoletes: open-xchange-push < 6.21.0, open-xchange-push-udp, open-xchange-secret < 6.21.0, open-xchange-secret-recovery
-Obsoletes: open-xchange-secret-recovery-json, open-xchange-secret-recovery-mail, open-xchange-server, open-xchange-sessiond
-Obsoletes: open-xchange-settings-extensions, open-xchange-sql, open-xchange-templating, open-xchange-templating-base
-Obsoletes: open-xchange-threadpool, open-xchange-tx, open-xchange-user-json, open-xchange-xml
 
 %description
 Authors:
