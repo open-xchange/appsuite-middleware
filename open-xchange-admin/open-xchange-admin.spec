@@ -25,6 +25,20 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend administration extension
 Requires:      open-xchange-core >= @OXVERSION@
+Provides:      open-xchange-admin-plugin-hosting = %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting <= %{version}
+Provides:      open-xchange-admin-lib = %{version}
+Obsoletes:     open-xchange-admin-lib <= %{version}
+Provides:      open-xchange-admin-plugin-hosting-client = %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting-client <= %{version}
+Provides:      open-xchange-admin-plugin-hosting-doc = %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting-doc <= %{version}
+Provides:      open-xchange-admin-client = %{version}
+Obsoletes:     open-xchange-admin-client <= %{version}
+Provides:      open-xchange-admin-plugin-hosting-lib = %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting-lib <= %{version}
+Provides:      open-xchange-admin-doc = %{version}
+Obsoletes:     open-xchange-admin-doc <= %{version}
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation.
@@ -42,6 +56,17 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+
+%post
+if [ ${1:-0} -eq 2 ]; then
+    CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties User.properties mpasswd plugin/hosting.properties"
+    for FILE in ${CONFFILES}; do
+        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
+            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
+            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
+        fi
+    done
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
