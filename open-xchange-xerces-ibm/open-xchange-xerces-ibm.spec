@@ -4,7 +4,6 @@ BuildArch:      noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
-BuildRequires:  open-xchange-osgi >= @OXVERSION@
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires:  java-sdk-openjdk
 %endif
@@ -24,9 +23,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for IBM Java
-Requires:       open-xchange-osgi >= @OXVERSION@
+Requires:       java-1_6_0-ibm
 Provides:       open-xchange-xerces
-Conflicts:      open-xchange-xerces-ibm
+Conflicts:      open-xchange-xerces-sun
 
 %description
 Xerces compatibility for OX installations on IBM JVM.
