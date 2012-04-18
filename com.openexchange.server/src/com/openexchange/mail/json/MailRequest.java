@@ -71,7 +71,7 @@ public final class MailRequest {
 
     private final ServerSession session;
 
-    private final AJAXRequestData request;
+    private final AJAXRequestData requestData;
 
     /**
      * Initializes a new {@link MailRequest}.
@@ -81,16 +81,16 @@ public final class MailRequest {
      */
     public MailRequest(final AJAXRequestData request, final ServerSession session) {
         super();
-        this.request = request;
+        this.requestData = request;
         this.session = session;
     }
 
     public String checkParameter(final String name) throws OXException {
-        return request.checkParameter(name);
+        return requestData.checkParameter(name);
     }
 
     public String getParameter(final String name) {
-        return request.getParameter(name);
+        return requestData.getParameter(name);
     }
 
     /**
@@ -101,7 +101,7 @@ public final class MailRequest {
      * @throws OXException If parameter is an invalid number value
      */
     public int optInt(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return NOT_FOUND;
         }
@@ -125,7 +125,7 @@ public final class MailRequest {
      * @throws OXException If an error occurs
      */
     public int[] checkIntArray(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
@@ -157,7 +157,7 @@ public final class MailRequest {
      * @throws OXException If parameter is absdent
      */
     public String[] checkStringArray(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
@@ -171,7 +171,7 @@ public final class MailRequest {
      * @return The <code>String</code> array
      */
     public String[] optStringArray(final String name) {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return null;
         }
@@ -184,7 +184,7 @@ public final class MailRequest {
      * @return The request
      */
     public AJAXRequestData getRequest() {
-        return request;
+        return requestData;
     }
 
     /**

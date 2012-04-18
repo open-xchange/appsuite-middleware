@@ -20,7 +20,6 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
 	dh_clean 
 
 install: build
@@ -28,7 +27,6 @@ install: build
 	dh_testroot
 	dh_prep 
 	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install

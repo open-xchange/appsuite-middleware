@@ -303,7 +303,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
                 MailAccount.DEFAULT_ID,
                 null,
                 rfc2231Mail,
-                DisplayMode.DISPLAY,
+                DisplayMode.DISPLAY, false,
                 session,
                 UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()), false, -1);
             new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
@@ -340,7 +340,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
                 MailAccount.DEFAULT_ID,
                 null,
                 rfc2231Mail,
-                DisplayMode.DISPLAY,
+                DisplayMode.DISPLAY, false,
                 session,
                 UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()), false, -1);
             new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
