@@ -38,6 +38,11 @@ Requires:      java-1.6.0-openjdk
 # RHEL5 removed sun-java5, but some might still use it, so just depend on sun-java
 Requires:      java-sun
 %endif
+Provides:       open-xchange-common = %{version}
+Obsoletes:      open-xchange-common <= %{version}
+Provides:       open-xchange-activation = %{version}
+Obsoletes:      open-xchange-activation <= %{version}
+Description: OSGi bundles commonly used by all Open-Xchange packages
 
 %description
 OSGi bundles commonly used by all Open-Xchange packages
