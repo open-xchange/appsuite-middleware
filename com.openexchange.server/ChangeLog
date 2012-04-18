@@ -1,3 +1,43 @@
+* 2012-04-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21995: Fixed image handling throughout reply/forward sequences
+
+* 2012-04-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21966: Correct error category for IMAP-2015 to let its message being properly displayed in web UI
+ - Fix for bug 21962: Dropping duplicate inline image when sending previously stored draft message
+ - Fix for bug 21950: Add missing imports to file storage's WebDAV bundle
+
+* 2012-04-12 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21854: Remove Organizer/Principal ID on user delete.
+
+* 2012-04-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21842: Changing client IP in session now if global IP check is disabled.
+
+* 2012-04-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21956: Removed redundant information.
+
+* 2012-04-10 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21620: Mixed up principal and organizer ID.
+
+* 2012-04-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21939: Deny IMAP folder names containing any of the wildcard characters '%' or '*'
+
+* 2012-04-05 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21614: Fixed lost Delete Exception.
+
+* 2012-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21903/21904: Ensure IDN presentation of obtained E-Mail address
+ - Fix for bug 21755: Fixed possible NPE on messaging bundle shut-down
+
+>>>>>>> c8a6e8d... Fix for bug 21995: Fixed image handling throughout reply/forward sequences
 * 2012-04-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 21901: Enforce by-name lookup - not by-full-name - for primary mail account

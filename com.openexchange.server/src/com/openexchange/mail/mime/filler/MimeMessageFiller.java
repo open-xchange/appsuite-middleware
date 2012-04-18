@@ -130,6 +130,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImage;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
@@ -1458,11 +1459,11 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      */
     protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MimeMessageFiller msgFiller) throws MessagingException, OXException {
-        final Matcher m = MimeMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        final ImageMatcher m = ImageMatcher.matcher(htmlContent);
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
         if (m.find()) {
-            final Set<String> uploadFileIDs = msgFiller.uploadFileIDs = new HashSet<String>();
+            final Set<String> uploadFileIDs = msgFiller.uploadFileIDs = new HashSet<String>(4);
+            final Set<String> trackedIds = new HashSet<String>(4);
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
@@ -1470,9 +1471,9 @@ public class MimeMessageFiller {
             do {
                 final String imageTag = m.group();
                 if (MimeMessageUtility.isValidImageUri(imageTag)) {
-                    final String id = m.group(5);
+                    final String id = m.getManagedFileId();
                     final ImageProvider imageProvider;
-                    if (mfm.contains(id)) {
+                    if (null != id && mfm.contains(id)) {
                         try {
                             imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
                         } catch (final OXException e) {
@@ -1486,7 +1487,7 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
                     } else {
@@ -1509,13 +1510,13 @@ public class MimeMessageFiller {
                         if (null == imageLocation) {
                             if (LOG.isWarnEnabled()) {
                                 tmp.setLength(0);
-                                LOG.warn(tmp.append("No image found with id \"").append(id).append("\". Referenced image is skipped.").toString());
+                                LOG.warn(tmp.append("No image found with id \"").append(m.getImageId()).append("\". Referenced image is skipped.").toString());
                             }
                             /*
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
                         final ImageDataSource dataSource =
@@ -1530,7 +1531,7 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, imageTag);
                             continue;
                         }
                         try {
@@ -1538,38 +1539,43 @@ public class MimeMessageFiller {
                         } catch (final OXException e) {
                             if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
                                 tmp.setLength(0);
-                                mr.appendLiteralReplacement(sb, imageTag);
+                                m.appendLiteralReplacement(sb, imageTag);
                                 continue;
                             }
                             throw e;
                         }
                     }
-                    final boolean appendBodyPart;
-                    if (uploadFileIDs.contains(id)) {
-                        appendBodyPart = false;
+                    final String iid;
+                    if (null == id) {
+                        iid = m.getImageId();
                     } else {
                         /*
                          * Remember id to avoid duplicate attachment and for later cleanup
                          */
                         uploadFileIDs.add(id);
+                        iid = id;
+                    }
+                    final boolean appendBodyPart;
+                    if (trackedIds.contains(iid)) {
+                        appendBodyPart = false;
+                    } else {
+                        trackedIds.add(iid);
                         appendBodyPart = true;
                     }
-                    mr.appendLiteralReplacement(
+                    m.appendLiteralReplacement(
                         sb,
                         imageTag.replaceFirst(
                             "(?i)src=\"[^\"]*\"",
-                            "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
-                    // mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp,
-                    // mp)));
+                            "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
                 } else {
                     /*
                      * Re-append as-is
                      */
-                    mr.appendLiteralReplacement(sb, imageTag);
+                    m.appendLiteralReplacement(sb, imageTag);
                 }
             } while (m.find());
         }
-        mr.appendTail(sb);
+        m.appendTail(sb);
         return sb.toString();
     }
 

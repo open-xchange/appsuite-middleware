@@ -66,6 +66,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -108,6 +110,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
@@ -450,6 +453,24 @@ public final class MessageParser {
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
+    }
+
+    private static final Pattern PATTERN_ID_ATTRIBUTE = Pattern.compile("id=\"((?:\\\\\\\"|[^\"])+?)\"");
+
+    private static Set<String> extractContentIds(final String htmlContent) {
+        final ImageMatcher m = ImageMatcher.matcher(htmlContent);
+        if (!m.find()) {
+            return Collections.emptySet();
+        }
+        final Set<String> set = new HashSet<String>(4);
+        do {
+            final String imageTag = m.group();
+            final Matcher tmp = PATTERN_ID_ATTRIBUTE.matcher(imageTag);
+            if (tmp.find()) {
+                set.add(tmp.group(1));
+            }
+        } while (m.find());
+        return set;
     }
 
     /**
