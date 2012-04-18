@@ -1,8 +1,10 @@
-# norootforbuild
+
 Name:          open-xchange-core
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant ant-nodeps open-xchange-log4j
+BuildRequires: ant
+BuildRequires: ant-nodeps
+BuildRequires: open-xchange-log4j
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
 %endif
@@ -19,7 +21,7 @@ Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:		   http://www.open-xchange.com/            
+URL:           http://www.open-xchange.com/            
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The main bundles for the Open-Xchange collaboration suite
 Requires:      open-xchange-osgi >= @OXVERSION@
@@ -140,20 +142,20 @@ Obsoletes:     open-xchange-xml <= %{version}
 
 
 %description
+The main bundles for the Open-Xchange collaboration suite.
+
 Authors:
 --------
     Open-Xchange
 
 %prep
-
 %setup -q
 
 %build
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-core -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}

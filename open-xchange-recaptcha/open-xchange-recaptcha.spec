@@ -2,7 +2,8 @@
 Name:          open-xchange-recaptcha
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant ant-nodeps
+BuildRequires: ant
+BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 %if 0%{?suse_version} && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk

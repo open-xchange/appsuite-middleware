@@ -2,7 +2,8 @@
 Name:          open-xchange-unifiedmail
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant ant-nodeps
+BuildRequires: ant
+BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 %if 0%{?suse_version} && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
@@ -24,7 +25,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend extension for Unified Mail
 Requires:      open-xchange-core >= @OXVERSION@
-Obsoletes:     open-xchange-unifiedinbox < @OXVERSION@
+Obsoletes:     open-xchange-unifiedinbox <= @OXVERSION@
 Provides:      open-xchange-unifiedinbox = @OXVERSION@
 
 %description

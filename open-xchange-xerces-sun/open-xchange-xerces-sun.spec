@@ -1,32 +1,32 @@
 
-Name:           open-xchange-xerces-sun
+Name:          open-xchange-xerces-sun
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant
-BuildRequires:  ant-nodeps
-BuildRequires:  open-xchange-core >= @OXVERSION@
+BuildRequires: ant
+BuildRequires: ant-nodeps
+BuildRequires: open-xchange-core
 %if 0%{?suse_version}  && !0%{?sles_version}
-BuildRequires:  java-sdk-openjdk
+BuildRequires: java-sdk-openjdk
 %endif
 %if 0%{?sles_version} == 11
 # SLES 11
-BuildRequires:  java-1_6_0-ibm-devel
+BuildRequires: java-1_6_0-ibm-devel
 %endif
 %if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires:  java-1.6.0-openjdk-devel
+BuildRequires: java-1.6.0-openjdk-devel
 %endif
-Version:    @OXVERSION@
+Version:       @OXVERSION@
 %define        ox_release 0
-Release:    %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
 License:       GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:        Xerces Compat for Sun Java
-Requires:       open-xchange-core >= @OXVERSION@
-Provides:       open-xchange-xerces
-Conflicts:      open-xchange-xerces-ibm
+Summary:       Xerces Compat for Sun Java
+Requires:      open-xchange-core >= @OXVERSION@
+Provides:      open-xchange-xerces
+Conflicts:     open-xchange-xerces-ibm
 
 %description
 Xerces compatibility for OX installations on Sun JVM.
@@ -42,8 +42,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-xerces-sun -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}
