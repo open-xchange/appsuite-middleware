@@ -16,18 +16,20 @@ Version:        @OXVERSION@
 %define         ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
-License:        GNU General Public License (GPL)
+License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-#URL:            
+URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open Xchange backend publish extension
+Summary:        The Open-Xchange backend publish extension
 Requires:	open-xchange-core >= @OXVERSION@
-Obsoletes:      open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-templating-json
-Conflicts:      open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-templating-json
-#
+Provides:       open-xchange-publish-json = @OXVERSION@
+Obsoletes:      open-xchange-publish-json <= @OXVERSION@
+Provides:       open-xchange-publish-microformats = @OXVERSION@
+Obsoletes:      open-xchange-publish-microformats <= @OXVERSION@
+Provides:       open-xchange-templating-json = @OXVERSION@
+Obsoletes:      open-xchange-templating-json <= @OXVERSION@
 
 %description
-
 Add the feature to publish content to the backend installation.
 
 Authors:
@@ -41,7 +43,6 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-publish -f build/build.xml clean build
 
 %post
