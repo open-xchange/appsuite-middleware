@@ -320,6 +320,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     private boolean noSave;
 
+    private boolean dropReplyForwardPrefix;
+
     /**
      * Initializes a new {@link UserSettingMail}.
      *
@@ -362,6 +364,24 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     public int getAutoLinebreak() {
         return autoLinebreak;
+    }
+
+    /**
+     * Gets the dropReplyForwardPrefix.
+     *
+     * @return The dropReplyForwardPrefix
+     */
+    public boolean isDropReplyForwardPrefix() {
+        return dropReplyForwardPrefix;
+    }
+    
+    /**
+     * Sets the dropReplyForwardPrefix.
+     *
+     * @param dropReplyForwardPrefix The dropReplyForwardPrefix to set
+     */
+    public void setDropReplyForwardPrefix(final boolean dropReplyForwardPrefix) {
+        this.dropReplyForwardPrefix = dropReplyForwardPrefix;
     }
 
     /**
