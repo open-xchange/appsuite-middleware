@@ -1,9 +1,10 @@
+
 Name:          open-xchange-pop3
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core == @OXVERSION@
+BuildRequires: open-xchange-core
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
 %endif
@@ -31,15 +32,15 @@ Open Xchange POP3 Plugin
 Authors:
 --------
     Open-Xchange
-%prep
 
+%prep
 %setup -q
 
 %build
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-pop3 -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}

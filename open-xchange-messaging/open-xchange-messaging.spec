@@ -1,5 +1,6 @@
-Name:           open-xchange-messaging
-BuildArch:      noarch
+
+Name:          open-xchange-messaging
+BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
@@ -8,6 +9,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires:  java-sdk-openjdk
+BuildRequires:  open-xchange-xerces-sun
 %endif
 %if 0%{?sles_version} == 11
 # SLES 11
@@ -15,6 +17,7 @@ BuildRequires:  java-1_6_0-ibm-devel
 %endif
 %if 0%{?rhel_version} || 0%{?fedora_version}
 BuildRequires:  java-1.6.0-openjdk-devel
+BuildRequires:  open-xchange-xerces-sun
 %endif
 Version:        @OXVERSION@
 %define         ox_release 0
@@ -28,11 +31,18 @@ Summary:        The Open Xchange backend messaging extension
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-oauth >= @OXVERSION@
 Requires:       open-xchange-xerces
-# TODO: versionen?
-Provides:       open-xchange-messaging-facebook open-xchange-messaging-generic open-xchange-messaging-json
-Provides:       open-xchange-messaging-rss open-xchange-messaging-twitter open-xchange-twitter
-Obsoletes:      open-xchange-messaging-facebook open-xchange-messaging-generic open-xchange-messaging-json
-Obsoletes:      open-xchange-messaging-rss open-xchange-messaging-twitter open-xchange-twitter   
+Provides:       open-xchange-messaging-facebook = %{version}
+Provides:       open-xchange-messaging-generic = %{version}
+Provides:       open-xchange-messaging-json = %{version}
+Provides:       open-xchange-messaging-rss = %{version}
+Provides:       open-xchange-messaging-twitter = %{version}
+Provides:       open-xchange-twitter = %{version}
+Obsoletes:      open-xchange-messaging-facebook <= %{version}
+Obsoletes:      open-xchange-messaging-generic <= %{version}
+Obsoletes:      open-xchange-messaging-json <= %{version}
+Obsoletes:      open-xchange-messaging-rss <= %{version}
+Obsoletes:      open-xchange-messaging-twitter <= %{version}
+Obsoletes:      open-xchange-twitter <= %{version}
 
 %description
 Adds the feature to use messaging services to the backend installation.
@@ -53,6 +63,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %clean
 %{__rm} -rf %{buildroot}
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/

@@ -2,7 +2,8 @@
 Name:          open-xchange-osgi
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant ant-nodeps
+BuildRequires: ant
+BuildRequires: ant-nodeps
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
 %endif
@@ -24,18 +25,18 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       OSGi bundles commonly used by all Open-Xchange packages
 PreReq:        /usr/sbin/useradd
 %if 0%{?suse_version} && ! 0%{?sles_version} == 11
-Requires:       java-openjdk
+Requires:      java-openjdk
 %endif
 %if 0%{?sles_version} == 11
 # SLES11
-Requires:       java-1_6_0-ibm
+Requires:      java-1_6_0-ibm
 %endif
 %if 0%{?fedora_version}
-Requires:       java-1.6.0-openjdk
+Requires:      java-1.6.0-openjdk
 %endif
 %if 0%{?rhel_version}
 # RHEL5 removed sun-java5, but some might still use it, so just depend on sun-java
-Requires:       java-sun
+Requires:      java-sun
 %endif
 
 %description
@@ -52,7 +53,10 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-osgi -f build/build.xml clean build
+
+mkdir -m 750 -p %{buildroot}/opt/open-xchange/osgi
+
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %pre
 /usr/sbin/groupadd -r open-xchange 2> /dev/null || :
@@ -63,6 +67,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xch
 
 %files
 %defattr(-,root,root)
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/

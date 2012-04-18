@@ -2,8 +2,11 @@
 Name:          open-xchange-subscribe
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant ant-nodeps
-BuildRequires: open-xchange-core open-xchange-oauth open-xchange-xerces
+BuildRequires: ant
+BuildRequires: ant-nodeps
+BuildRequires: open-xchange-core
+BuildRequires: open-xchange-oauth
+BuildRequires: open-xchange-xerces
 %if 0%{?suse_version} && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
 %endif

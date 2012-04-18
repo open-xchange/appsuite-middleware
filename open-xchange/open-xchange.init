@@ -45,7 +45,7 @@
 
 
 OXFUNCTIONS=/opt/open-xchange/lib/oxfunctions.sh
-OXCONFIG=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+OXCONFIG=/opt/open-xchange/etc/ox-scriptconf.sh
 for f in $OXFUNCTIONS $OXCONFIG; do
 	if [ ! -f $f ]; then
 		echo "$f missing, exiting"
