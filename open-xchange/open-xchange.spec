@@ -42,8 +42,15 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
+
 mkdir -p %{buildroot}/etc/init.d
+mkdir -p %{buildroot}/sbin
+
 install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange
+ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
+
+mkdir -p %{buildroot}/var/log/open-xchange
+mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
 
 %post
 if [ ${1:-0} -eq 2 ]; then
@@ -62,13 +69,16 @@ if [ ${1:-0} -eq 2 ]; then
 	    mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
 	fi
     done
-if
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
+%dir %attr(750,open-xchange,open-xchange) /var/log/open-xchange
+%dir %attr(750,open-xchange,root) /var/spool/open-xchange/uploads
 /etc/init.d/open-xchange
+/sbin/rcopen-xchange
 
 %changelog

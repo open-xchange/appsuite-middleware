@@ -52,6 +52,9 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
+
+mkdir -p %{buildroot}/opt/open-xchange/etc/osgi
+
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-osgi -f build/build.xml clean build
 
 %pre
@@ -63,6 +66,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xch
 
 %files
 %defattr(-,root,root)
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/etc/osgi
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
