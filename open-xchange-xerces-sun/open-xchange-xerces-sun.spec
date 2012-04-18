@@ -4,7 +4,7 @@ BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
-BuildRequires:  open-xchange-core >= @OXVERSION@
+BuildRequires:  open-xchange-osgi >= @OXVERSION@
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires:  java-sdk-openjdk
 %endif
@@ -24,7 +24,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for Sun Java
-Requires:       open-xchange-core >= @OXVERSION@
+Requires:       open-xchange-osgi >= @OXVERSION@
 Provides:       open-xchange-xerces
 Conflicts:      open-xchange-xerces-ibm
 
@@ -43,7 +43,7 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-xerces-sun -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}
