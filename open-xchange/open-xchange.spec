@@ -71,7 +71,6 @@ if
 
 %files
 %defattr(-,root,root)
-%dir /etc/init.d
-/etc/init.d/*
+/etc/init.d/open-xchange
 
 %changelog
