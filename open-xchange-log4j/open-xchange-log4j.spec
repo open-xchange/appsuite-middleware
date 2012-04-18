@@ -3,7 +3,7 @@ Name:          open-xchange-log4j
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant ant-nodeps
-BuildRequires: open-xchange-osgi >= @OXVERSION@
+BuildRequires: open-xchange-osgi
 %if 0%{?suse_version} && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
 %endif
@@ -39,7 +39,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=open-xchange-log4j -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}

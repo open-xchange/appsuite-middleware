@@ -1,31 +1,34 @@
 
-Name:           open-xchange
-BuildArch:      noarch
+Name:          open-xchange
+BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant
-BuildRequires:  ant-nodeps
+BuildRequires: ant
+BuildRequires: ant-nodeps
 %if 0%{?suse_version}  && !0%{?sles_version}
-BuildRequires:  java-sdk-openjdk
+BuildRequires: java-sdk-openjdk
 %endif
 %if 0%{?sles_version} == 11
 # SLES 11
-BuildRequires:  java-1_6_0-ibm-devel
+BuildRequires: java-1_6_0-ibm-devel
 %endif
 %if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires:  java-1.6.0-openjdk-devel
+BuildRequires: java-1.6.0-openjdk-devel
 %endif
-Version:        @OXVERSION@
-%define         ox_release 0
-Release:        %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Source1:        open-xchange.init
-Summary:        Open-Xchange Backend
-Requires:     open-xchange-core >= @OXVERSION@, open-xchange-authentication, open-xchange-authorization, open-xchange-mailstore, open-xchange-smtp >= @OXVERSION@
-#
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0 
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Source1:       open-xchange.init
+Summary:       Open-Xchange Backend
+Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-authentication
+Requires:      open-xchange-authorization
+Requires:      open-xchange-mailstore
+Requires:      open-xchange-smtp >= @OXVERSION@
 
 %description
 This package only contains the dependencies to install a working Open-Xchange 7 backend system.
@@ -38,7 +41,6 @@ Authors:
 %setup -q
 
 %build
-
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
