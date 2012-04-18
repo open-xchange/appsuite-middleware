@@ -86,12 +86,27 @@ public class UserContact {
 	private final User user;
 	private final Contact contact;
 
+	/**
+	 * Initializes a new {@link UserContact}.
+	 * 
+	 * @param contact the contact
+	 * @param user the user
+	 */
     public UserContact(final Contact contact, final User user) {
         super();
         this.contact = contact;
         this.user = user;
-    }    
+    }
     
+    /**
+     * Serializes the user- and contact data into a JSON object.
+     * 
+     * @param contactFields the contact fields to consider
+     * @param userFields the user fields to consider
+     * @param timeZoneID the client timezone ID
+     * @return the serialized user contact
+     * @throws OXException
+     */
     public JSONObject serialize(final ContactField[] contactFields, final UserField[] userFields, final String timeZoneID) throws OXException {
     	final JSONObject jsonObject = new JSONObject();
     	try {
@@ -103,6 +118,15 @@ public class UserContact {
     	return jsonObject;
     }
     
+    /**
+     * Serializes the user- and contact data into a JSON array.
+     * 
+     * @param columnIDs the column identifiers of the correspondig fields to serialize 
+     * @param timeZoneID the client timezone ID
+     * @param attributeParameters the attribute parameters to append to the array
+     * @return the serialized user contact
+     * @throws OXException
+     */
     public JSONArray serialize(final int[] columnIDs, final String timeZoneID, final Map<String, List<String>> attributeParameters) 
     		throws OXException {
     	final JSONArray jsonArray = new JSONArray();
@@ -126,14 +150,18 @@ public class UserContact {
             LOG.warn("Unknown field: " + columnID, new Throwable());
 		}
 		if (null != attributeParameters && 0 < attributeParameters.size()) {
-			for (final Entry<String, List<String>> entry : attributeParameters.entrySet()) {
-				appendUserAttribute(jsonArray, entry.getKey(), entry.getValue());
+			try {
+				for (final Entry<String, List<String>> entry : attributeParameters.entrySet()) {
+					appendUserAttribute(jsonArray, entry.getKey(), entry.getValue());
+				}
+			} catch (final JSONException e) {
+	    		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 			}
 		}
     	return jsonArray;
     }
     
-    private void appendUserAttribute(final JSONArray jsonArray, final String attributePrefix, final List<String> attributes) {
+    private void appendUserAttribute(final JSONArray jsonArray, final String attributePrefix, final List<String> attributes) throws JSONException {
         if (null != attributes && 0 < attributes.size()) {
         	final Map<String, Set<String>> userAttributes = user.getAttributes();
             if (1 == attributes.size() && ALL.equals(attributes.get(0))) {
@@ -146,7 +174,7 @@ public class UserContact {
                 	final JSONObject jsonObject = new JSONObject();
                 	for (Entry<String, Set<String>> entry : userAttributes.entrySet()) {
                 		if (entry.getKey().startsWith(attributePrefix)) {
-                			jsonArray.put(toJSONValue(entry.getValue()));
+                			jsonObject.put(entry.getKey(), toJSONValue(entry.getValue()));
                 		}
 					}
                 	jsonArray.put(jsonObject);

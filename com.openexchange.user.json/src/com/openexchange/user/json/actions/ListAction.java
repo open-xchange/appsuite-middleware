@@ -82,6 +82,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
@@ -119,119 +120,113 @@ public final class ListAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final int[] userIDs = parseUserIDs(request, session.getUserId());
+        final int[] columnIDs = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        final String timeZoneID = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
+        /*
+         * Get users/contacts
+         */
+        Date lastModified = new Date(0);
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        final List<Contact> contacts = new ArrayList<Contact>();
+        SearchIterator<Contact> searchIterator = null;
         try {
-            /*
-             * Parse parameters
-             */
-            final int[] userIdArray;
-            {
-                final JSONArray jsonArray = (JSONArray) request.getData();
-                if (null == jsonArray) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
-                }
-                final int len = jsonArray.length();
-                userIdArray = new int[len];
-                for (int a = 0; a < len; a++) {
-                    if (jsonArray.isNull(a)) {
-                        userIdArray[a] = session.getUserId();
-                    } else {
-                        userIdArray[a] = jsonArray.getInt(a);
-                    }
-                }
-            }
-            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            /*
-             * Get remaining parameters
-             */
-            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
-            /*
-             * Get services
-             */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-            /*
-             * Get users/contacts
-             */
-            User[] users;
-            try {
-                users = userService.getUser(session.getContext(), userIdArray);
-            } catch (final OXException e) {
-                if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                final Context context = session.getContext();
-                {
-                    final Object[] excArgs = e.getLogArgs();
-                    if (excArgs != null && excArgs.length >= 2) {
-                        try {
-                            userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
-                        } catch (final Exception ignore) {
-                            // Ignore
-                        }
-                    } else {
-                        for (final int userId : userIdArray) {
-                            try {
-                                userService.invalidateUser(context, userId);
-                            } catch (final Exception ignore) {
-                                // Ignore
-                            }
-                        }
-                    }
-                }
-                // Load one-by-one
-                final int length = userIdArray.length;
-                final List<User> list = new ArrayList<User>(length);
-                for (int i = 0; i < length; i++) {
-                    try {
-                        list.add(userService.getUser(userIdArray[i], context));
-                    } catch (final OXException ue) {
-                        if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
-                            throw ue;
-                        }
-                    }
-                }
-                users = list.toArray(new User[list.size()]);
-            }
-            
-            final SearchIterator<Contact> it = contactService.getUsers(session, userIdArray, 
-            		ContactMapper.getInstance().getFields(columns, ContactField.LAST_MODIFIED));
-            final List<Contact> contactList = new ArrayList<Contact>(128);
-            try {
-                while (it.hasNext()) {
-                    contactList.add(it.next());
-                }
-            } finally {
-            	if (null != it) {
-            		it.close();
+        	searchIterator = contactService.getUsers(session, userIDs, 
+            		ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
+            while (searchIterator.hasNext()) {
+            	final Contact contact = searchIterator.next();
+            	if (contact.getLastModified().after(lastModified)) {
+            		lastModified = contact.getLastModified();
             	}
+                contacts.add(contact);
             }
-            final Contact[] contacts = contactList.toArray(new Contact[contactList.size()]);
-            /*
-             * Determine max. last-modified time stamp
-             */
-            Date lastModified = contacts[0].getLastModified();
-            for (int i = 1; i < contacts.length; i++) {
-                final Date lm = contacts[i].getLastModified();
-                if (lastModified.before(lm)) {
-                    lastModified = lm;
-                }
-            }
-            /*
-             * Write users as JSON arrays to JSON array
-             */
-            //TODO serialize with mappers, including user attributes?
-            censor(session, contacts);
-            censor(session, users);
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(jsonArray, lastModified);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
         }
+        /*
+         * Write associated users/contacts to json array
+         */
+        final JSONArray jsonArray = new JSONArray();
+        final User[] users = getUsers(session, userIDs);
+        for (final User user : users) {
+        	for (final Contact contact : contacts) {
+        		if (user.getId() == contact.getInternalUserId()) {
+        			jsonArray.put(new UserContact(contact, user).serialize(columnIDs, timeZoneID, attributeParameters));
+        			break;
+        		}
+			}
+		}
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(jsonArray, lastModified);
     }
+
+	private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
+	    final JSONArray jsonArray = (JSONArray)request.getData();
+	    if (null == jsonArray) {
+	        throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
+	    }
+	    final int length = jsonArray.length();
+	    final int[] userIDs = new int[length];
+    	try {
+		    for (int i = 0; i < length; i++) {
+					userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
+		    }
+		} catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+		}
+		return userIDs;
+	}
+
+	private User[] getUsers(final ServerSession session, final int[] userIDs) throws OXException {
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+		try {
+		    return userService.getUser(session.getContext(), userIDs);
+		} catch (final OXException e) {
+		    if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+		        throw e;
+		    }
+		    final Context context = session.getContext();
+		    {
+		        final Object[] excArgs = e.getLogArgs();
+		        if (excArgs != null && excArgs.length >= 2) {
+		            try {
+		                userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
+		            } catch (final Exception ignore) {
+		                // Ignore
+		            }
+		        } else {
+		            for (final int userId : userIDs) {
+		                try {
+		                    userService.invalidateUser(context, userId);
+		                } catch (final Exception ignore) {
+		                    // Ignore
+		                }
+		            }
+		        }
+		    }
+		    // Load one-by-one
+		    final int length = userIDs.length;
+		    final List<User> list = new ArrayList<User>(length);
+		    for (int i = 0; i < length; i++) {
+		        try {
+		            list.add(userService.getUser(userIDs[i], context));
+		        } catch (final OXException ue) {
+		            if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
+		                throw ue;
+		            }
+		        }
+		    }
+		    return list.toArray(new User[list.size()]);
+		}
+	}
 
     public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
