@@ -22,12 +22,12 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open-Xchange backend publish extension
 Requires:	open-xchange-core >= @OXVERSION@
-Provides:       open-xchange-publish-json = @OXVERSION@
-Obsoletes:      open-xchange-publish-json <= @OXVERSION@
-Provides:       open-xchange-publish-microformats = @OXVERSION@
-Obsoletes:      open-xchange-publish-microformats <= @OXVERSION@
-Provides:       open-xchange-templating-json = @OXVERSION@
-Obsoletes:      open-xchange-templating-json <= @OXVERSION@
+Provides:       open-xchange-publish-json = %{version}
+Obsoletes:      open-xchange-publish-json <= %{version}
+Provides:       open-xchange-publish-microformats = %{version}
+Obsoletes:      open-xchange-publish-microformats <= %{version}
+Provides:       open-xchange-templating-json = %{version}
+Obsoletes:      open-xchange-templating-json <= %{version}
 
 %description
 Add the feature to publish content to the backend installation.
