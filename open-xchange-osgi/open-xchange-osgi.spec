@@ -42,7 +42,6 @@ Provides:       open-xchange-common = %{version}
 Obsoletes:      open-xchange-common <= %{version}
 Provides:       open-xchange-activation = %{version}
 Obsoletes:      open-xchange-activation <= %{version}
-Description: OSGi bundles commonly used by all Open-Xchange packages
 
 %description
 OSGi bundles commonly used by all Open-Xchange packages
