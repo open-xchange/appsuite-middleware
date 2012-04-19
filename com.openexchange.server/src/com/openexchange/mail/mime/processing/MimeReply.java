@@ -555,7 +555,7 @@ public final class MimeReply {
             }
             found = true;
         }
-        if (found) {
+        if (found && !usm.isDropReplyForwardPrefix()) {
             final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
             String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
             {
