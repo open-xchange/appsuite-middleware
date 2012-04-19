@@ -211,6 +211,10 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
+    private static boolean writeThreadAsObjects() {
+        return false;
+    }
+
     private static final MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriter(new MailListField[] {MailListField.ID})[0];
 
     private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final int userId, final int contextId) throws OXException, JSONException {
@@ -226,23 +230,29 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         // Add child nodes
         final JSONArray jChildMessages = new JSONArray();
-        for (final MailMessage child : mails) {
-            final JSONObject jChild = new JSONObject();
-            accountID = child.getAccountId();
-            /*-
-             * TODO: Uncomment to write all fields
-             *
-            for (int j = 0; j < writers.length; j++) {
-                writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
-            }
-            if (null != headerWriters) {
-                for (int j = 0; j < headerWriters.length; j++) {
-                    headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
+        if (writeThreadAsObjects()) {
+            for (final MailMessage child : mails) {
+                final JSONObject jChild = new JSONObject();
+                accountID = child.getAccountId();
+                /*-
+                 * TODO: Uncomment to write all fields
+                 *
+                for (int j = 0; j < writers.length; j++) {
+                    writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
+                if (null != headerWriters) {
+                    for (int j = 0; j < headerWriters.length; j++) {
+                        headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
+                    }
+                }
+                */
+                WRITER_ID.writeField(jChild, child, 0, true, accountID, userId, contextId);
+                jChildMessages.put(jChild);
             }
-            */
-            WRITER_ID.writeField(jChild, child, 0, true, accountID, userId, contextId);
-            jChildMessages.put(jChild);
+        } else {
+            for (final MailMessage child : mails) {
+                jChildMessages.put(child.getMailId());
+            }
         }
         jMail.put("thread", jChildMessages);
     }
