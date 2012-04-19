@@ -326,7 +326,7 @@ public class NotificationMail {
     
     private boolean onlyPseudoChangesOnParticipants() {
         AppointmentDiff appDiff = getDiff();
-        boolean onlyParticipantsChanged = appDiff.onlyTheseChanged(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+        boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
         if (onlyParticipantsChanged) {
             FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
             Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();

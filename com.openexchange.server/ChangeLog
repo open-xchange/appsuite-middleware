@@ -1,6 +1,7 @@
 * 2012-04-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21982: NullPointer Fix.
+ - Fix for bug 21992: NullPointer Fix.
  
 * 2012-04-18 - thorben.betten@open-xchange.com
 
