@@ -133,7 +133,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                 }
             }
             final boolean unseen = req.optBool("unseen");
-            if (unseen) {
+            final boolean ignoreDeleted = !req.optBool("deleted", true);
+            if (unseen || ignoreDeleted) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
@@ -166,15 +167,22 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns, fromToIndices);
-            if (unseen) {
-                boolean found;
+            if (unseen || ignoreDeleted) {
+                boolean foundUnseen;
                 for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
                     final List<MailMessage> list = iterator.next();
-                    found = false;
-                    for (final Iterator<MailMessage> tmp = list.iterator(); !found && tmp.hasNext(); ) {
-                        found = !tmp.next().isSeen();
+                    foundUnseen = false;
+                    for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext(); ) {
+                        final MailMessage message = tmp.next();
+                        if (ignoreDeleted && message.isDeleted()) {
+                            // Ignore mail marked for deletion
+                            tmp.remove();
+                        } else {
+                            // Check if unseen
+                            foundUnseen |= !message.isSeen();
+                        }
                     }
-                    if (!found) {
+                    if (unseen && !foundUnseen) {
                         iterator.remove();
                     }
                 }
