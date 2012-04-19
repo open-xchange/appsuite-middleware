@@ -1,3 +1,7 @@
+* 2012-04-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21982: NullPointer Fix.
+ 
 * 2012-04-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 21995: Fixed image handling throughout reply/forward sequences
