@@ -99,7 +99,7 @@ public final class AllAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+            int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
             final String sort = req.getParameter(Mail.PARAMETER_SORT);
             final String order = req.getParameter(Mail.PARAMETER_ORDER);
             if (sort != null && order == null) {
@@ -143,6 +143,21 @@ public final class AllAction extends AbstractMailAction {
                     fromToIndices = new int[] {start,end};
                 }
             }
+            final boolean unseen = req.optBool("unseen");
+            if (unseen) {
+                // Ensure flags is contained in provided columns
+                final int fieldFlags = MailListField.FLAGS.getField();
+                boolean found = false;
+                for (int i = 0; !found && i < columns.length; i++) {
+                   found = fieldFlags == columns[i];
+                }
+                if (!found) {
+                    final int[] tmp = columns;
+                    columns = new int[columns.length + 1];
+                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
+                    columns[tmp.length] = fieldFlags;
+                }
+            }
             /*
              * Get mail interface
              */
@@ -177,7 +192,7 @@ public final class AllAction extends AbstractMailAction {
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm) {
+                        if (null != mm && (!unseen || !mm.isSeen())) {
                             mm.setAccountId(mailInterface.getAccountID());
                             mails.add(mm);
                         }
@@ -191,7 +206,7 @@ public final class AllAction extends AbstractMailAction {
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm) {
+                        if (null != mm && (!unseen || !mm.isSeen())) {
                             mm.setAccountId(mailInterface.getAccountID());
                             mails.add(mm);
                         }

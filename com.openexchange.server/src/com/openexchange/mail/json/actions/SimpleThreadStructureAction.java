@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -87,7 +88,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+            int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
             final String sort = req.getParameter(Mail.PARAMETER_SORT);
             final String order = req.getParameter(Mail.PARAMETER_ORDER);
             if (sort != null && order == null) {
@@ -131,6 +132,21 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     fromToIndices = new int[] {start,end};
                 }
             }
+            final boolean unseen = req.optBool("unseen");
+            if (unseen) {
+                // Ensure flags is contained in provided columns
+                final int fieldFlags = MailListField.FLAGS.getField();
+                boolean found = false;
+                for (int i = 0; !found && i < columns.length; i++) {
+                   found = fieldFlags == columns[i];
+                }
+                if (!found) {
+                    final int[] tmp = columns;
+                    columns = new int[columns.length + 1];
+                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
+                    columns[tmp.length] = fieldFlags;
+                }
+            }
             /*
              * Get mail interface
              */
@@ -150,6 +166,19 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns, fromToIndices);
+            if (unseen) {
+                boolean found;
+                for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
+                    final List<MailMessage> list = iterator.next();
+                    found = false;
+                    for (final Iterator<MailMessage> tmp = list.iterator(); !found && tmp.hasNext(); ) {
+                        found = !tmp.next().isSeen();
+                    }
+                    if (!found) {
+                        iterator.remove();
+                    }
+                }
+            }
             return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
