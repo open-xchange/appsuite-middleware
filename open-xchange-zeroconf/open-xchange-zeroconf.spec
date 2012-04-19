@@ -24,11 +24,11 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/ 
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend zeroconf extension
-Requires:      open-xchange-core >= @OXVERSION@
-Obsoletes:     open-xchange-mdns <= @OXVERSION@
-Provides:      open-xchange-mdns = @OXVERSION@
-Obsoletes:     open-xchange-service-messaging <= @OXVERSION@
-Provides:      open-xchange-service-messaging = @OXVERSION@
+Requires:      open-xchange-core >= %{version}
+Obsoletes:     open-xchange-mdns <= %{version}
+Provides:      open-xchange-mdns = %{version}
+Obsoletes:     open-xchange-service-messaging <= %{version}
+Provides:      open-xchange-service-messaging = %{version}
 
 %description
 The bundles use the zeroconf or multi-cast DNS standard to find
