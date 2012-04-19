@@ -439,7 +439,7 @@ public class ContactServiceImpl implements ContactService {
 		 */
 		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
 		 * check source folder
@@ -484,17 +484,17 @@ public class ContactServiceImpl implements ContactService {
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsObjectID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
 		 * prepare update
@@ -515,6 +515,7 @@ public class ContactServiceImpl implements ContactService {
         		delta.setImageContentType(null);        		
         	}
         }
+        Tools.invalidateAddressesIfNeeded(delta);
 		/*
 		 * pass through to storage
 		 */
@@ -541,7 +542,7 @@ public class ContactServiceImpl implements ContactService {
 				throw e;
 			}
 		}
-	}	
+	}
 	
 	protected void updateContact(final int contextID, final int userID, final String folderID, final String objectID, 
 			final Contact contact, final Date lastRead) throws OXException {
@@ -551,7 +552,7 @@ public class ContactServiceImpl implements ContactService {
 		 */
 		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
 		 * check folder
@@ -589,19 +590,19 @@ public class ContactServiceImpl implements ContactService {
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsObjectID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsParentFolderID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(objectID, contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
 		 * prepare update
@@ -621,6 +622,7 @@ public class ContactServiceImpl implements ContactService {
         		delta.setImageContentType(null);        		
         	}
         }
+        Tools.invalidateAddressesIfNeeded(delta);
 		/*
 		 * pass through to storage
 		 */

@@ -250,7 +250,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             final Contact contact = new Contact();
             contact.setLastModified(new Date());
             contact.setModifiedBy(userID);
-            executor.update(connection, Table.CONTACTS, contextID, objectID, minLastModified, contact, new ContactField[] { 
+            executor.update(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified, contact, new ContactField[] { 
             		ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
             /*
              * commit
@@ -288,6 +288,20 @@ public class RdbContactStorage extends DefaultContactStorage {
             final Date now = new Date();
             contact.setLastModified(now);
             final QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
+            /*
+             * insert copied record to 'deleted' table when parent folder changes
+             */
+            if (contact.containsParentFolderID() && false == Integer.toString(contact.getParentFolderID()).equals(folderId)) {
+	            executor.delete(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified);
+	            if (0 == executor.insertFrom(connection, Table.CONTACTS, Table.DELETED_CONTACTS, contextID, objectID, minLastModified)) {
+	                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
+	            }
+	            final Contact deletedContact = new Contact();
+	            deletedContact.setLastModified(now);
+	            deletedContact.setModifiedBy(contact.getModifiedBy());
+	            executor.update(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified, deletedContact, new ContactField[] { 
+	            		ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
+            }
             /*
              * update image data if needed
              */

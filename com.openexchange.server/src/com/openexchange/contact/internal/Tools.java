@@ -470,6 +470,36 @@ public final class Tools {
 		}
 	}
 	
+	/**
+	 * Invalidates the address properties of the given contact if one of the 
+	 * corresponding parts of the address is set, e.g. sets the "Business
+	 * Address" to <code>null</code>, when the "Postal Code Business" is set.
+	 * 
+	 * Necessary for Outlook, see bug #19827 for details
+	 * 
+	 * @param contact the contact to invalidate the addresses for
+	 */
+	public static void invalidateAddressesIfNeeded(final Contact contact) {
+		if (false == contact.containsAddressBusiness()) {
+			if (contact.containsStreetBusiness() || contact.containsPostalCodeBusiness() || contact.containsCityBusiness() ||
+					contact.containsStateBusiness() || contact.containsCountryBusiness()) {
+				contact.setAddressBusiness(null);
+			}
+		}
+		if (false == contact.containsAddressHome()) {
+			if (contact.containsStreetHome() || contact.containsPostalCodeHome() || contact.containsCityHome() ||
+					contact.containsStateHome() || contact.containsCountryHome()) {
+				contact.setAddressHome(null);
+			}
+		}
+		if (false == contact.containsAddressOther()) {
+			if (contact.containsStreetOther() || contact.containsPostalCodeOther() || contact.containsCityOther() ||
+					contact.containsStateOther() || contact.containsCountryOther()) {
+				contact.setAddressOther(null);
+			}
+		}
+	}
+	
 	private Tools() {
 		// prevent instantiation
 	}
