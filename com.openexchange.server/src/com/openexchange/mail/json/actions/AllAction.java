@@ -144,7 +144,8 @@ public final class AllAction extends AbstractMailAction {
                 }
             }
             final boolean unseen = req.optBool("unseen");
-            if (unseen) {
+            final boolean ignoreDeleted = !req.optBool("deleted", true);
+            if (unseen || ignoreDeleted) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
@@ -192,7 +193,7 @@ public final class AllAction extends AbstractMailAction {
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm && (!unseen || !mm.isSeen())) {
+                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
                             mm.setAccountId(mailInterface.getAccountID());
                             mails.add(mm);
                         }
@@ -206,7 +207,7 @@ public final class AllAction extends AbstractMailAction {
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm && (!unseen || !mm.isSeen())) {
+                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
                             mm.setAccountId(mailInterface.getAccountID());
                             mails.add(mm);
                         }

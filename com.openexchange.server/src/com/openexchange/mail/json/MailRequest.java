@@ -98,18 +98,28 @@ public final class MailRequest {
      *
      * @param name The parameter name
      * @return The <code>boolean</code>
-     * @throws OXException If parameter is an invalid number value
      */
-    public boolean optBool(final String name) throws OXException {
+    public boolean optBool(final String name) {
         final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return false;
         }
-        try {
-            return Boolean.parseBoolean(parameter.trim());
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+        return Boolean.parseBoolean(parameter.trim());
+    }
+
+    /**
+     * Gets optional <code>boolean</code> parameter.
+     *
+     * @param name The parameter name
+     * @param def The default value to return if such a parameter is absent
+     * @return The <code>boolean</code>
+     */
+    public boolean optBool(final String name, final boolean def) {
+        final String parameter = requestData.getParameter(name);
+        if (null == parameter) {
+            return def;
         }
+        return Boolean.parseBoolean(parameter.trim());
     }
 
     /**
