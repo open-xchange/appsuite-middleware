@@ -959,13 +959,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         try {
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
             }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
-            if (0 >= imapFolder.getMessageCount()) {
+            if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
             final TIntList seqNums;
@@ -1019,7 +1019,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Generate structure
                  */
                 final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
-                final List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
+                List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
                 /*
                  * Sort according to order direction
                  */
@@ -1033,6 +1033,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 };
                 Collections.sort(list, listComparator);
+                if (null != indexRange) {
+                    final int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    final int size = list.size();
+                    if ((fromIndex) > size) {
+                        /*
+                         * Return empty iterator if start is out of range
+                         */
+                        return Collections.emptyList();
+                    }
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= size) {
+                        toIndex = size;
+                    }
+                    list = list.subList(fromIndex, toIndex);
+                }
                 return list;
             }
             /*
@@ -1055,7 +1073,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Sort according to order direction
              */
-            final List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
+            List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
             /*
              * Sort according to order direction
              */
@@ -1069,6 +1087,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             };
             Collections.sort(list, listComparator);
+            if (null != indexRange) {
+                final int fromIndex = indexRange.start;
+                int toIndex = indexRange.end;
+                final int size = list.size();
+                if ((fromIndex) > size) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return Collections.emptyList();
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                if (toIndex >= size) {
+                    toIndex = size;
+                }
+                list = list.subList(fromIndex, toIndex);
+            }
             return list;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
