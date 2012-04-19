@@ -105,12 +105,12 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                         final int pos = s.indexOf(',');
                         if (pos < 0) {
                             start = 0;
-                            final int i = Integer.parseInt(s);
+                            final int i = Integer.parseInt(s.trim());
                             end = i < 0 ? 0 : i;
                         } else {
-                            int i = Integer.parseInt(s.substring(0, pos));
+                            int i = Integer.parseInt(s.substring(0, pos).trim());
                             start = i < 0 ? 0 : i;
-                            i = Integer.parseInt(s.substring(pos)+1);
+                            i = Integer.parseInt(s.substring(pos+1).trim());
                             end = i < 0 ? 0 : i;
                         }
                     } catch (final NumberFormatException e) {
