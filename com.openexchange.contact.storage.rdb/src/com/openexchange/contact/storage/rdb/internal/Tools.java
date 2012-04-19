@@ -52,7 +52,6 @@ package com.openexchange.contact.storage.rdb.internal;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,22 +76,11 @@ public final class Tools {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
 	
     /**
-     * Constructs an array containing the object IDs of the supplied {@link Contact}s.
-     *  
-     * @param contacts the contacts to get the IDs from
-     * @return the IDs
+     * Constructs a comma separated string vor the given numeric values.
+     * 
+     * @param values the values
+     * @return the csv-string
      */
-    public static int[] getObjectIDs(final List<Contact> contacts) {
-        if (null == contacts) {
-            return null;
-        }
-        final int[] objectIDs = new int[contacts.size()];
-        for (int i = 0; i < objectIDs.length; i++) {
-            objectIDs[i] = contacts.get(i).getObjectID();                        
-        }
-        return objectIDs;
-    }
-    
     public static String toCSV(final int[] values) {
         final StringBuilder stringBuilder = new StringBuilder();
         if (null != values && 0 < values.length) {
@@ -105,10 +93,12 @@ public final class Tools {
     }
 
     /**
-     * Gets a string to be used as parameter values in <code>INSERT</code>- or <code>UPDATE</code>-statements.
+     * Gets a string to be used as parameter values in <code>INSERT</code>- or
+     * <code>UPDATE</code>-statements.
      *   
      * @param count the number of parameters 
-     * @return the parameter string without surrounding parentheses, e.g. "?,?,?,?"
+     * @return the parameter string without surrounding parentheses, e.g. 
+     * "?,?,?,?"
      */
     public static String getParameters(final int count) {
         final StringBuilder parametersBuilder = new StringBuilder(2 * count);
@@ -130,8 +120,19 @@ public final class Tools {
         }
     }
     
-    public static OXException truncation(final Connection connection, final DataTruncation e, final Contact contact, final Table table)
-    		throws OXException {
+    /**
+     * Extracts the relevant information from a {@link DataTruncation} 
+     * exception and puts it into a corresponding {@link OXException}.
+     * 
+     * @param connection
+     * @param e
+     * @param contact
+     * @param table
+     * @return
+     * @throws OXException
+     */
+    public static OXException getTruncationException(final Connection connection, final DataTruncation e, final Contact contact, 
+    		final Table table) throws OXException {
         final String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
         final StringBuilder stringBuilder = new StringBuilder();
         /*
@@ -158,10 +159,11 @@ public final class Tools {
         final OXException truncationException;
         if (truncatedAttributes.length > 0) {
             final OXException.Truncated truncated = truncatedAttributes[0];
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(truncated.getMaxSize()),
-                Integer.valueOf(truncated.getLength()));
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), 
+            		Integer.valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
         } else {
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1), 
+            		Integer.valueOf(-1));
         }
         for (final OXException.Truncated truncated : truncatedAttributes) {
             truncationException.addProblematic(truncated);

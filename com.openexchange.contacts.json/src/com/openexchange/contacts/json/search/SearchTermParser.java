@@ -66,8 +66,6 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.tools.StringCollection;
-
 
 /**
  * {@link SearchTermParser} - Constructs {@link SearchTerm}s from 
@@ -140,11 +138,7 @@ public class SearchTermParser {
     	/*
     	 * combine with folders term when set
     	 */
-    	final SearchTerm<?> foldersTerm = json.hasAndNotNull("folder") ? parseFoldersTerm(json) : null;
-    	if (null != foldersTerm && null != foldersTerm.getOperands() && 0 < foldersTerm.getOperands().length) {
-    		searchTerm = null == searchTerm ? foldersTerm : getCompositeTerm(foldersTerm, searchTerm);
-    	} 
-    	return searchTerm;
+    	return combineWithFoldersTerm(searchTerm, json);
     }
     
     /**
@@ -177,9 +171,20 @@ public class SearchTermParser {
     	if (emailAutoComplete) {
     		searchTerm = getCompositeTerm(searchTerm, HAS_EMAIL_TERM);
     	}
-    	/*
-    	 * combine with folders term when set
-    	 */
+    	return combineWithFoldersTerm(searchTerm, json);
+    }
+    
+    /**
+     * Creates an 'AND' composite term, combining the given search term with 
+     * the set folders or the folders found in the json object.
+     * 
+     * @param term
+     * @param json
+     * @return
+     * @throws JSONException
+     * @throws OXException
+     */
+    private SearchTerm<?> combineWithFoldersTerm(final SearchTerm<?> term, final JSONObject json) throws JSONException, OXException {
     	final SearchTerm<?> foldersTerm;
     	if (null != this.folderIDs) {
     		foldersTerm = getFoldersTerm(folderIDs);
@@ -188,12 +193,11 @@ public class SearchTermParser {
     	} else {
     		foldersTerm = null;
     	}    	
-    	
-//    	final SearchTerm<?> foldersTerm = json.hasAndNotNull("folder") ? parseFoldersTerm(json) : null;
     	if (null != foldersTerm && null != foldersTerm.getOperands() && 0 < foldersTerm.getOperands().length) {
-    		searchTerm = getCompositeTerm(foldersTerm, searchTerm);
+    		return getCompositeTerm(foldersTerm, term);
+    	} else {
+    		return term;
     	}
-    	return searchTerm;
     }
     
     /**
@@ -274,27 +278,27 @@ public class SearchTermParser {
 			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
 			final SingleSearchTerm lessThanTerm = new SingleSearchTerm(SingleOperation.LESS_THAN);
 			lessThanTerm.addOperand(new ColumnOperand(field));
-			lessThanTerm.addOperand(new ConstantOperand<String>("0%"));
+			lessThanTerm.addOperand(new ConstantOperand<String>("0*"));
 			orTerm.addSearchTerm(lessThanTerm);
 			final SingleSearchTerm greaterThanTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
 			greaterThanTerm.addOperand(new ColumnOperand(field));
-			greaterThanTerm.addOperand(new ConstantOperand<String>("z%"));
+			greaterThanTerm.addOperand(new ConstantOperand<String>("z*"));
 			orTerm.addSearchTerm(greaterThanTerm);
 			andTerm.addSearchTerm(orTerm);
 			final SingleSearchTerm notEqualsTerm = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
 			notEqualsTerm.addOperand(new ColumnOperand(field));
-			notEqualsTerm.addOperand(new ConstantOperand<String>("z%"));
+			notEqualsTerm.addOperand(new ConstantOperand<String>("z*"));
 			andTerm.addSearchTerm(notEqualsTerm);
 			return andTerm;
 		} else if (pattern.matches("\\d")) {
 			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
 			final SingleSearchTerm greaterThanTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
 			greaterThanTerm.addOperand(new ColumnOperand(field));
-			greaterThanTerm.addOperand(new ConstantOperand<String>("0%"));
+			greaterThanTerm.addOperand(new ConstantOperand<String>("0*"));
 			andTerm.addSearchTerm(greaterThanTerm);
 			final SingleSearchTerm lessThanTerm = new SingleSearchTerm(SingleOperation.LESS_THAN);
 			lessThanTerm.addOperand(new ColumnOperand(field));
-			lessThanTerm.addOperand(new ConstantOperand<String>("a%"));
+			lessThanTerm.addOperand(new ConstantOperand<String>("a*"));
 			andTerm.addSearchTerm(lessThanTerm);
 			return andTerm;
 		} else if (false == "all".equals(pattern)) {
@@ -316,7 +320,7 @@ public class SearchTermParser {
 			/*
 			 * <field> LIKE '<pattern>%'
 			 */
-			final String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true);
+			final String preparedPattern = addWildcards(pattern, false, true); 
 			final SingleSearchTerm equalsTerm = new SingleSearchTerm(SingleOperation.EQUALS);
 			equalsTerm.addOperand(new ColumnOperand(field));
 			equalsTerm.addOperand(new ConstantOperand<String>(preparedPattern));
@@ -343,13 +347,54 @@ public class SearchTermParser {
 			return null;
 		}
 	}
+	
+	private static String addWildcards(final String pattern, final boolean prependWildcard, final boolean appendWildcard) {
+		if (null != pattern && (appendWildcard || prependWildcard)) {
+			final int length = pattern.length();
+			if (0 == length) {
+				return "*";
+			} else {
+				return String.format("%s%s%s", 
+						prependWildcard && '*' != pattern.charAt(0) ? "*" : "",
+						pattern,
+						appendWildcard && '*' != pattern.charAt(length - 1) ? "*" : "");
+			}
+		} else {
+			return pattern;
+		}
+	}
    
+    /**
+     * Gets a search term for a contact field, optionally surrounding the search pattern with wildcards.
+     * 
+     * @param field
+     * @param pattern
+     * @param prependWildcard
+     * @param appendWildcard
+     * @return
+     * @throws OXException
+     */
+    private static SingleSearchTerm getSearchTerm(final ContactField field, final String pattern, final boolean prependWildcard, 
+    		final boolean appendWildcard) throws OXException {
+		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+		term.addOperand(new ContactFieldOperand(field));
+		Search.checkPatternLength(pattern);
+		term.addOperand(new ConstantOperand<String>(addWildcards(pattern, prependWildcard, appendWildcard)));
+		return term;
+    }
+
+	/**
+	 * Contact fields that may be used by the 'Search contacts alternative'
+	 */
     private static final ContactField[] ALTERNATIVE_SEARCH_FIELDS = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
     	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY,
     	ContactField.STREET_BUSINESS, ContactField.CITY_BUSINESS, ContactField.DEPARTMENT, ContactField.CATEGORIES, 
     	ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_COMPANY    	
     };
     
+    /**
+     * Search term to ensure that found contacts have at least one e-mail address, or represent a distribution list 
+     */
     private static final CompositeSearchTerm HAS_EMAIL_TERM;
     static {
     	final ContactField[] emailFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
@@ -370,13 +415,4 @@ public class SearchTermParser {
     	
     }
     
-    private static SingleSearchTerm getSearchTerm(final ContactField field, final String pattern, final boolean prependWildcard, 
-    		final boolean appendWildcard) throws OXException {
-		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-		term.addOperand(new ContactFieldOperand(field));
-		Search.checkPatternLength(pattern);
-		term.addOperand(new ConstantOperand<String>(StringCollection.prepareForSearch(pattern, prependWildcard, appendWildcard, true)));
-		return term;
-    }
-
 }

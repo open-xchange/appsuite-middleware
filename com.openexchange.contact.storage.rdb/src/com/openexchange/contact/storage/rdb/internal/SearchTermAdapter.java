@@ -64,15 +64,16 @@ import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SearchTerm.OperationPosition;
 import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.tools.StringCollection;
 
 /**
- * {@link SearchTermAdapter} - helps constructing the database statement for a search term.
+ * {@link SearchTermAdapter} - Helps constructing the database statement for a search term.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTermAdapter {
 	
-	/*
+	/**
 	 * Pattern to check whether a string contains SQL wildcards or not
 	 */
 	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
@@ -81,6 +82,13 @@ public class SearchTermAdapter {
 	private final List<Object> parameters;
 	private final String charset;
 	
+	/**
+	 * Initializes a new {@link SearchTermAdapter}.
+	 * 
+	 * @param term
+	 * @param charset
+	 * @throws OXException
+	 */
 	public SearchTermAdapter(final SearchTerm<?> term, final String charset) throws OXException {
 		super();
 		this.stringBuilder = new StringBuilder();
@@ -89,6 +97,12 @@ public class SearchTermAdapter {
 		this.append(term);
 	}
     
+	/**
+	 * Initializes a new {@link SearchTermAdapter}.
+	 * 
+	 * @param term
+	 * @throws OXException
+	 */
 	public SearchTermAdapter(final SearchTerm<?> term) throws OXException {
 		this(term, null);
 	}
@@ -100,7 +114,7 @@ public class SearchTermAdapter {
 	 * @return the parameters
 	 */
 	public Object[] getParameters() {
-		return this.parameters.toArray(new Object[0]);
+		return this.parameters.toArray(new Object[parameters.size()]);
 	}
 	
 	/**
@@ -182,47 +196,54 @@ public class SearchTermAdapter {
 	}
 	
     private void append(final Operand<?> operand) throws OXException {
-		if (Operand.Type.COLUMN.equals(operand.getType())) {
-			ContactField field = null;
-			final Object value = operand.getValue();
-			if (null == value) {
-				throw new IllegalArgumentException("column operand without value: " + operand);
-			} else if (ContactField.class.isInstance(value)) {
-				field = (ContactField)value;
-			} else {
-				//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
-				field = ContactField.getByAjaxName(value.toString());
-				if (null == field) {
-					// try column name
-					field = Mappers.CONTACT.getMappedField(value.toString());					
-				}				
-			}
-			if (null == field) {
-				throw new IllegalArgumentException("unable to determine contact field for column operand: " + operand);
-			}
-			final String columnLabel = Mappers.CONTACT.get(field).getColumnLabel();
-			if (null != this.charset) {
-				stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(this.charset).append(')');
-			} else {
-				stringBuilder.append(columnLabel);
-			}
+		final Object value = operand.getValue();
+		if (null == value) {
+			throw new IllegalArgumentException("got no value for operand");
+		} else if (Operand.Type.COLUMN.equals(operand.getType())) {
+			appendColumnOperand(value);
 		} else if (Operand.Type.CONSTANT.equals(operand.getType())) {
-			Object value = operand.getValue();
-			if (null == value) {
-				throw new IllegalArgumentException("got no value for contact operand");
-			} else if (String.class.isInstance(value)) {
-				final String stringValue = (String)value;
-				if (WILDCARD_PATTERN.matcher(stringValue).find()) {
-					// use "LIKE" search 
-					final int index = stringBuilder.lastIndexOf("=");
-					stringBuilder.replace(index, index + 1, "LIKE");		
-				}
-			}
-			parameters.add(value);
-			stringBuilder.append('?');
+			appendConstantOperand(value);
 		} else {
 			throw new IllegalArgumentException("unknown type in operand: " + operand.getType());
 		}
     }
+
+	private void appendConstantOperand(final Object value) {
+		if (String.class.isInstance(value)) {
+			final String preparedPattern = StringCollection.prepareForSearch((String)value, false, true);
+			if (WILDCARD_PATTERN.matcher(preparedPattern).find()) {
+				// use "LIKE" search 
+				final int index = stringBuilder.lastIndexOf("=");
+				stringBuilder.replace(index, index + 1, "LIKE");		
+			}
+			parameters.add(preparedPattern);
+		} else {
+			parameters.add(value);
+		}
+		stringBuilder.append('?');
+	}
+
+	private void appendColumnOperand(final Object value) throws OXException {
+		ContactField field = null;
+		if (ContactField.class.isInstance(value)) {
+			field = (ContactField)value;
+		} else {
+			//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
+			field = ContactField.getByAjaxName(value.toString());
+			if (null == field) {
+				// try column name
+				field = Mappers.CONTACT.getMappedField(value.toString());					
+			}				
+		}
+		if (null == field) {
+			throw new IllegalArgumentException("unable to determine contact field for column operand value: " + value);
+		}
+		final String columnLabel = Mappers.CONTACT.get(field).getColumnLabel();
+		if (null != this.charset) {
+			stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(this.charset).append(')');
+		} else {
+			stringBuilder.append(columnLabel);
+		}
+	}
 
 }
