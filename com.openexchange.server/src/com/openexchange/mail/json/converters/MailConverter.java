@@ -211,6 +211,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
+    private static final MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriter(new MailListField[] {MailListField.ID})[0];
+
     private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final int userId, final int contextId) throws OXException, JSONException {
         final MailMessage mail = mails.get(0);
         int accountID = mail.getAccountId();
@@ -227,6 +229,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         for (final MailMessage child : mails) {
             final JSONObject jChild = new JSONObject();
             accountID = child.getAccountId();
+            /*-
+             * TODO: Uncomment to write all fields
+             *
             for (int j = 0; j < writers.length; j++) {
                 writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
             }
@@ -235,6 +240,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
             }
+            */
+            WRITER_ID.writeField(jChild, child, 0, true, accountID, userId, contextId);
             jChildMessages.put(jChild);
         }
         jMail.put("thread", jChildMessages);
