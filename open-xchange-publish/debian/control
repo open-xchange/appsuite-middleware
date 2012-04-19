@@ -10,8 +10,7 @@ Package: open-xchange-publish
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Pre-Depends: dpkg (>= 1.15.7.2)
-Replaces: open-xchange-publish-json (<< 6.21.0), open-xchange-publish-microformats (<< 6.21.0), open-xchange-templating-json (<< 6.21.0)
-Breaks: open-xchange-publish-json (<< 6.21.0), open-xchange-publish-microformats (<< 6.21.0), open-xchange-templating-json (<< 6.21.0)
-Conflicts: open-xchange-publish-json (<< 6.21.0), open-xchange-publish-microformats (<< 6.21.0), open-xchange-templating-json (<< 6.21.0)
+Replaces: open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-templating-json
+Conflicts: open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-templating-json
 Description: The Open Xchange backend publish extension
  Add the feature to publish content to the backend installation.
