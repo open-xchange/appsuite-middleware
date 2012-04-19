@@ -831,6 +831,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
             asRawContent(plainText.id, plainText.contentType, plainText.content);
         }
         try {
+            final String headersKey = MailJSONField.HEADERS.getKey();
+            if (!jsonObject.hasAndNotNull(headersKey)) {
+                jsonObject.put(headersKey, new JSONObject());
+            }
             final String attachKey = MailJSONField.ATTACHMENTS.getKey();
             final String dispKey = MailJSONField.DISPOSITION.getKey();
             if (jsonObject.hasAndNotNull(attachKey)) {
