@@ -97,7 +97,16 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
             {
                 final String s = req.getParameter("limit");
                 if (null == s) {
-                    fromToIndices = null;
+                    final int leftHandLimit = req.optInt(Mail.LEFT_HAND_LIMIT);
+                    final int rightHandLimit = req.optInt(Mail.RIGHT_HAND_LIMIT);
+                    if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
+                        fromToIndices = null;
+                    } else {
+                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit};
+                        if (fromToIndices[0] >= fromToIndices[1]) {
+                            return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>>emptyList()), "mail");
+                        }
+                    }
                 } else {
                     int start;
                     int end;
