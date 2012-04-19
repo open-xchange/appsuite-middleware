@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -92,6 +93,35 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_ORDER);
             }
+            final int[] fromToIndices;
+            {
+                final String s = req.getParameter("limit");
+                if (null == s) {
+                    fromToIndices = null;
+                } else {
+                    int start;
+                    int end;
+                    try {
+                        final int pos = s.indexOf(',');
+                        if (pos < 0) {
+                            start = 0;
+                            final int i = Integer.parseInt(s);
+                            end = i < 0 ? 0 : i;
+                        } else {
+                            int i = Integer.parseInt(s.substring(0, pos));
+                            start = i < 0 ? 0 : i;
+                            i = Integer.parseInt(s.substring(pos)+1);
+                            end = i < 0 ? 0 : i;
+                        }
+                    } catch (final NumberFormatException e) {
+                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
+                    }
+                    if (start >= end) {
+                        return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>>emptyList()), "mail");
+                    }
+                    fromToIndices = new int[] {start,end};
+                }
+            }
             /*
              * Get mail interface
              */
@@ -110,7 +140,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              * Start response
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-            final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns);
+            final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns, fromToIndices);
             return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
