@@ -76,7 +76,11 @@ fi
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+/opt/open-xchange/etc/mysql
+%dir /opt/open-xchange/etc/plugin
+%config(noreplace) /opt/open-xchange/etc/plugin/*
+%config(noreplace) /opt/open-xchange/etc/*.properties
+%config(noreplace) %attr(750,open-xchange,root) /opt/open-xchange/etc/mpasswd
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/osgi/bundle.d/
