@@ -107,7 +107,7 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder setQueryString(final String queryString) {
+        public Builder setPattern(final String queryString) {
             this.queryString = queryString;
             return this;
         }

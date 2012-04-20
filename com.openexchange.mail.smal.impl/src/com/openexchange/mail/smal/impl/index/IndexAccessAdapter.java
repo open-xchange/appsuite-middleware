@@ -79,22 +79,9 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.BccTerm;
-import com.openexchange.mail.search.BodyTerm;
-import com.openexchange.mail.search.BooleanTerm;
-import com.openexchange.mail.search.CcTerm;
-import com.openexchange.mail.search.FlagTerm;
-import com.openexchange.mail.search.FromTerm;
-import com.openexchange.mail.search.HeaderTerm;
-import com.openexchange.mail.search.NOTTerm;
+import com.openexchange.mail.search.AbstractSearchTermVisitor;
 import com.openexchange.mail.search.ORTerm;
-import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.search.SearchTermVisitor;
-import com.openexchange.mail.search.SentDateTerm;
-import com.openexchange.mail.search.SizeTerm;
-import com.openexchange.mail.search.SubjectTerm;
-import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
@@ -271,9 +258,9 @@ public final class IndexAccessAdapter implements SolrMailConstants {
                 final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
                 searchTerm.accept(visitor);
                 if (visitor.simple) {
-                    parameters = builder.setHandler(SearchHandler.SIMPLE).setQueryString(searchTerm.getPattern().toString()).build();
+                    parameters = builder.setHandler(SearchHandler.SIMPLE).setPattern(searchTerm.getPattern().toString()).build();
                 } else {
-                    parameters = builder.setHandler(SearchHandler.SIMPLE).setSearchTerm(searchTerm).build();
+                    parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
                 }
             }
 
@@ -582,7 +569,7 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         }
     }
 
-    private static final class SimpleSearchTermVisitor implements SearchTermVisitor {
+    private static final class SimpleSearchTermVisitor extends AbstractSearchTermVisitor {
 
         boolean simple = true;
 
@@ -599,73 +586,8 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         }
 
         @Override
-        public void visit(final BccTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final BodyTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final BooleanTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final CcTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final FlagTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final FromTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final HeaderTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final NOTTerm term) {
-            // Nothing to do
-        }
-
-        @Override
         public void visit(final ORTerm term) {
             simple = false;
-        }
-
-        @Override
-        public void visit(final ReceivedDateTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final SentDateTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final SizeTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final SubjectTerm term) {
-            // Nothing to do
-        }
-
-        @Override
-        public void visit(final ToTerm term) {
-            // Nothing to do
         }
 
     }
