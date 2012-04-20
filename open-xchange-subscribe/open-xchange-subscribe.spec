@@ -61,7 +61,16 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-# FIXME INSTALL SCRIPTS MISSING!
+%post
+if [ ${1:-0} -eq 2 ]; then
+    CONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
+    for FILE in ${CONFFILES}; do
+        if [ -e "/opt/open-xchange/etc/groupware/${FILE}" ]; then
+            mv "/opt/open-xchange/etc/${FILE}" "/opt/open-xchange/etc/${FILE}.rpmnew"
+            mv "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}"
+        fi
+    done
+fi
 
 %clean
 %{__rm} -rf %{buildroot}

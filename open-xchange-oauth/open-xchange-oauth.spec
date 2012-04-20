@@ -59,8 +59,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
-    GWCONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties msnoauth.properties twitteroauth.properties yahoooauth.properties"
-    for FILE in ${GWCONFFILES}; do
+    CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties msnoauth.properties twitteroauth.properties yahoooauth.properties"
+    for FILE in ${CONFFILES}; do
         if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
             mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
             mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
