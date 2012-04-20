@@ -312,5 +312,13 @@ public class SimContactService implements ContactService {
 		return null;
 	}
 
+    /* (non-Javadoc)
+     * @see com.openexchange.contact.ContactService#searchUsers(com.openexchange.session.Session, com.openexchange.search.SearchTerm, com.openexchange.groupware.contact.helpers.ContactField[], com.openexchange.contact.SortOptions)
+     */
+    @Override
+    public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return null;
+    }
+
 
 }
