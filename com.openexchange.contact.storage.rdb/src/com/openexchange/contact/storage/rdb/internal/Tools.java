@@ -56,12 +56,12 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.contact.TruncatedContactAttribute;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.sql.DBUtils;
@@ -148,7 +148,7 @@ public final class Tools {
 			final int actualSize = null != object && String.class.isInstance(object) ? 
 					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
 			stringBuilder.append(mapping.getReadableName());       		        		
-			truncatedAttributes[i] = new TruncatedContactAttribute(field, maximumSize, actualSize);
+			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize);
         	if (i != truncatedColumns.length - 1) {
         		stringBuilder.append(", ");
         	}

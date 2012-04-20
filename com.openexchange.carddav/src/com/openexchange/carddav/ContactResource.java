@@ -58,11 +58,10 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.carddav.mapping.CardDAVMapper;
-import com.openexchange.contact.TruncatedContactAttribute;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -333,21 +332,6 @@ public class ContactResource extends CarddavResource {
 						}
 					}
 				}
-//		        for (final int field : ContactResource.CARDDAV_FIELDS) {
-//					if (this.contact.contains(field)) {
-//						if (false == newContact.contains(field)) {
-//							// set this one explicitly so that the property gets removed during update
-//							newContact.set(field, newContact.get(field));
-//						} else {
-//							final Object oldValue = this.contact.get(field);
-//							final Object newValue = newContact.get(field);
-//							if (null == oldValue && null == newValue || null != oldValue && oldValue.equals(newValue)) {
-//								// this is no change, so ignore in update
-//								newContact.remove(field);								
-//							}
-//						}
-//					}
-//				}
 		        /*
 		         * Never update the UID
 		         */
@@ -398,29 +382,12 @@ public class ContactResource extends CarddavResource {
 	}
 	
 	private boolean trimTruncatedAttributes(final OXException e) {
-		boolean hasTrimmed = false;
-		if (null != this.contact && null != e && null != e.getProblematics()) {
-			for (final ProblematicAttribute problematicAttribute : e.getProblematics()) {
-				if (TruncatedContactAttribute.class.isInstance(problematicAttribute)) {
-					hasTrimmed |= this.trimTruncatedAttribute((TruncatedContactAttribute)problematicAttribute);
-				}
-			}
+		try {
+			return MappedTruncation.truncate(e.getProblematics(), this.contact);
+		} catch (final OXException x) {
+			LOG.warn("error trying to handle truncated attributes", x);
+			return false;
 		}
-		return hasTrimmed;
 	}
 	
-	private boolean trimTruncatedAttribute(final TruncatedContactAttribute truncatedAttribute) {
-		if (null != this.contact && null != truncatedAttribute.getField() && 0 < truncatedAttribute.getMaxSize()) {
-			try {
-				final Mapping<? extends Object, Contact> mapping = CardDAVMapper.getInstance().get(truncatedAttribute.getField());
-				if (null != mapping) {
-					return mapping.truncate(contact, truncatedAttribute.getMaxSize());
-				}
-			} catch (final OXException x) {
-				// no success
-				LOG.warn("error trying to handle truncated attribute", x);
-			}
-		}
-		return false;
-	}
 }

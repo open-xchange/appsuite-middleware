@@ -312,5 +312,13 @@ public class SimContactService implements ContactService {
 		return null;
 	}
 
+	@Override
+	public <O> SearchIterator<Contact> searchUsers(Session session,
+			SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }
