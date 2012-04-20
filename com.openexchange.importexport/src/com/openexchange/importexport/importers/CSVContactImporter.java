@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * Importer for OX own CSV file format - this format is able to represent a contact with all fields that appear in the OX.
  *
- * @see com.openexchange.importexport.importers.OutlookCSVContactImporter - imports files prduced by Outlook
+ * @see com.openexchange.importexport.importers.OutlookCSVContactImporter - imports files produced by Outlook
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class CSVContactImporter extends AbstractImporter {
@@ -213,7 +213,7 @@ public class CSVContactImporter extends AbstractImporter {
         final List<ImportResult> results = new LinkedList<ImportResult>();
 
         for(final ImportIntention intention : intentions) {
-            if (intention.contact != null) {
+        	if (intention.contact != null && intention.contact.getObjectID() != 0) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
@@ -222,6 +222,10 @@ public class CSVContactImporter extends AbstractImporter {
                     result.setException(intention.result.getException());
                 }
                 results.add(result);
+            } else if (intention.contact != null && intention.contact.getObjectID() == 0) {
+            	ImportResult notCreated = new ImportResult();
+            	notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+            	results.add(notCreated);
             } else if (intention.result != null) {
                 results.add(intention.result);
             }
