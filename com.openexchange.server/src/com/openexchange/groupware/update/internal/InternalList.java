@@ -445,6 +445,9 @@ public final class InternalList {
 
         // Drops useless foreign keys from 'malPollHash' table
         new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask(),
+        
+        // Extends dn fields in calendar tables to 320 chars.
+        new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2(),
 
     };
 }
