@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class CalendarExtendDNColumnTaskV2 extends CalendarExtendDNColumnTask implements UpdateTaskV2 {
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         super.perform(params.getSchema(), params.getContextId());
     }
 
