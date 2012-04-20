@@ -142,7 +142,11 @@ public final class SessionThreadCounterImpl implements SessionThreadCounter {
 
     @Override
     public int decrement(final String sessionId) {
-        return getCount(sessionId).decrementAndGet();
+        final ThreadCountEntry ret = map.get(sessionId);
+        if (null == ret) {
+            return 0;
+        }
+        return ret.decrementAndGet();
     }
 
     @Override
