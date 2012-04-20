@@ -81,6 +81,12 @@ public enum SearchHandler {
      * Optional parameters: sort, order
      * Module dependent: accountId
      */
-    ALL_REQUEST
+    ALL_REQUEST,
+    /**
+     * This one searches for a list of index uuids.
+     * Mandatory parameters: ids - A string-array of index uuids.
+     * Optional parameters: sort, order
+     */
+    GET_REQUEST
 
 }

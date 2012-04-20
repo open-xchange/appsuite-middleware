@@ -49,10 +49,14 @@
 
 package com.openexchange.service.indexing.mail.job;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 
@@ -92,12 +96,13 @@ public final class RemoveFolderJob extends AbstractMailJob {
              * Check flags of contained mails
              */
             indexAccess = getIndexAccess();
-            final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-            indexAccess.deleteByQuery(queryBuilder.toString());
+            final Map<String, Object> params = new HashMap<String, Object>();
+            params.put("userId", userId);
+            params.put("contextId", contextId);
+            params.put("accountId", accountId);
+            params.put("folder", fullName);
+            final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(MAIL).build();
+            indexAccess.deleteByQuery(query);
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
         } finally {

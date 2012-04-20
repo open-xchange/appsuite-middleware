@@ -70,6 +70,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.SolrMailUtility;
@@ -253,12 +254,10 @@ public final class FolderJob extends AbstractMailJob {
                              */
                             deleteDBEntry();
                             final Map<String, Object> params = new HashMap<String, Object>();
-                            final Map<MailIndexField, String> inner = new HashMap<MailIndexField, String>();
-                            inner.put(MailIndexField.USER, String.valueOf(userId));
-                            inner.put(MailIndexField.CONTEXT, String.valueOf(contextId));
-                            inner.put(MailIndexField.ACCOUNT, String.valueOf(accountId));
-                            inner.put(MailIndexField.FULL_NAME, String.valueOf(fullName));
-                            params.put("searchFields", inner);
+                            params.put("userId", userId);
+                            params.put("contextId", contextId);
+                            params.put("accountId", accountId);
+                            params.put("folder", fullName);
                             final Builder queryBuilder = new Builder(params).setType(MAIL);
                             
 //                            final StringBuilder queryBuilder = new StringBuilder(128);
@@ -266,7 +265,7 @@ public final class FolderJob extends AbstractMailJob {
 //                            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
 //                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
 //                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                            indexAccess.deleteByQuery(queryBuilder.build());
+                            indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).build());
                             unset = false;
                             return;
                         }
