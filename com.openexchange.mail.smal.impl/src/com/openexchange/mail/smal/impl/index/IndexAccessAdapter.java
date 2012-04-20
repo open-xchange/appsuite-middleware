@@ -168,12 +168,12 @@ public final class IndexAccessAdapter implements SolrMailConstants {
              */
             if (null == optMailIds || 0 == optMailIds.length) {
                 final Map<String, Object> params = new HashMap<String, Object>();
-                params.put("userId", userId);
-                params.put("contextId", contextId);
                 params.put("accountId", accountId);
-                params.put("folder", fullName);
-                final QueryParameters query =
-                    new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(Type.MAIL).build();
+                final QueryParameters query = new QueryParameters.Builder(params)
+                .setHandler(SearchHandler.ALL_REQUEST)
+                .setType(Type.MAIL)
+                .setFolder(fullName).build();
+                
                 indexAccess.deleteByQuery(query);
                 return;
             }
@@ -235,24 +235,27 @@ public final class IndexAccessAdapter implements SolrMailConstants {
 
             /*
              * search
-             */
-            final Map<String, Object> params = new HashMap<String, Object>(2);
+             */            
+            final Map<String, Object> params = new HashMap<String, Object>(1);
+            final QueryParameters.Builder builder = new QueryParameters.Builder(params)
+                                                                                .setOffset(0)
+                                                                                .setLength(Integer.MAX_VALUE)
+                                                                                .setType(IndexDocument.Type.MAIL);
+            
+            
             if (null != sortField) {
                 final MailField field = MailField.getField(sortField.getField());
                 final MailIndexField indexSortField = MailIndexField.getFor(field);
                 if (indexSortField != null) {
-                    params.put("sort", indexSortField);
-                    params.put("order", OrderDirection.DESC.equals(order) ? "desc" : "asc");
+                    builder.setSortField(indexSortField);
+                    builder.setOrder(OrderDirection.DESC.equals(order) ? "desc" : "asc");
                 }
             }
-            final QueryParameters.Builder builder =
-                new QueryParameters.Builder(params).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL);
+            
             final QueryParameters parameters;
             if (searchTerm == null) {
-                params.put("userId", userId);
-                params.put("contextId", contextId);
+                builder.setFolder(fullName);
                 params.put("accountId", accountId);
-                params.put("folder", fullName);
                 parameters = builder.setHandler(SearchHandler.ALL_REQUEST).build();
             } else {
                 final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
@@ -390,13 +393,10 @@ public final class IndexAccessAdapter implements SolrMailConstants {
     private boolean exists(final int userId, final int contextId, final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
         // Query parameters
         final Map<String, Object> params = new HashMap<String, Object>();
-        params.put("userId", userId);
-        params.put("contextId", contextId);
         params.put("accountId", accountId);
-        params.put("folder", fullName);
         final QueryParameters qp =
             new QueryParameters.Builder(params).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setHandler(
-                SearchHandler.ALL_REQUEST).build();
+                SearchHandler.ALL_REQUEST).setFolder(fullName).build();
         return indexAccess.query(qp).getNumFound() > 0L;
     }
 
@@ -445,10 +445,7 @@ public final class IndexAccessAdapter implements SolrMailConstants {
             }
 
             final Map<String, Object> params = new HashMap<String, Object>();
-            params.put("userId", userId);
-            params.put("contextId", contextId);
             params.put("accountId", accountId);
-            params.put("folder", fullName);
             if (null != sortField) {
                 final MailField field = MailField.getField(sortField.getField());
                 final MailIndexField indexSortField = MailIndexField.getFor(field);
@@ -461,7 +458,7 @@ public final class IndexAccessAdapter implements SolrMailConstants {
                 }
             }
             final QueryParameters query =
-                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(Type.MAIL).build();
+                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolder(fullName).setType(Type.MAIL).build();
             final IndexResult<MailMessage> result = indexAccess.query(query);
             final List<MailMessage> mails = new ArrayList<MailMessage>();
             mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));

@@ -68,8 +68,10 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.TriggerType;
@@ -686,16 +688,10 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     public void deleteById(final String id) throws OXException {
         deleteDocumentById(id);
     }
-
-    @Override
-    public void deleteByQuery(final QueryParameters parameters) throws OXException {
+    
+    private SearchHandler checkQueryParametersAndGetSearchHandler(final QueryParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("Parameter `parameters` must not be null!");
-        }
-        
-        final Map<String, Object> params = parameters.getParameters();
-        if (params == null) {
-            throw new IllegalArgumentException("Parameter `parameters.parameters` must not be null!");
         }
         
         final SearchHandler searchHandler = parameters.getHandler();        
@@ -703,152 +699,95 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             throw new IllegalArgumentException("Parameter `search handler` must not be null!");
         }
         
+        final Type type = parameters.getType();
+        if (type == null || type != Type.MAIL) {
+            throw new IllegalArgumentException("Parameter `type` must be `mail`!");
+        }
+        
+        switch(searchHandler) {
+            case ALL_REQUEST:
+                return searchHandler;
+                
+            case CUSTOM:
+                if (parameters.getSearchTerm() == null) {
+                    throw new IllegalArgumentException("Parameter `search term` must not be null!");
+                }
+                return searchHandler;
+                
+            case GET_REQUEST:
+                final Map<String, Object> params = parameters.getParameters();
+                if (params == null) {
+                    throw new IllegalArgumentException("Parameter `parameters.parameters` must not be null!");
+                }
+                final Object idsObj = params.get("ids");
+                if (idsObj == null || !(idsObj instanceof String[])) {
+                    throw new IllegalArgumentException("Parameter `parameters.parameters.ids` must not be null and an instance of String[]!");
+                }
+                return searchHandler;
+                
+            case SIMPLE:
+                if (parameters.getPattern() == null) {
+                    throw new IllegalArgumentException("Parameter `pattern` must not be null!");
+                }
+                return searchHandler;                
+                
+            default:
+                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for this action.");
+        }
+    }
+    
+    private int getAccountId(final QueryParameters parameters) {
+        final Object accountIdObj = parameters.getParameters().get("accountId");
+        if (accountIdObj == null || !(accountIdObj instanceof Integer)) {
+            return -1;
+        }
+        
+        return ((Integer) accountIdObj).intValue();
+    }
+    
+    private String[] getIds(final QueryParameters parameters) {
+        return (String[]) parameters.getParameters().get("ids");
+    }
+    
+    private void setSortAndOrder(final QueryParameters parameters, final SolrQuery query) {
+        final IndexField indexField = parameters.getSortField();
+        String sortField = null;
+        if (indexField != null && indexField instanceof MailIndexField) {
+            sortField = SolrMailField.solrMailFieldFor((MailIndexField) indexField).solrName();
+        }
+        
+        final String orderStr = parameters.getOrder();
+        if (sortField != null) {
+            final ORDER order = orderStr == null ? ORDER.desc : orderStr.equalsIgnoreCase("desc") ? ORDER.desc : ORDER.asc;
+            query.setSortField(sortField, order);
+        }
+    }
+
+    @Override
+    public void deleteByQuery(final QueryParameters parameters) throws OXException {
+        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);  
         if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
-            final int userId;
-            final int contextId;
-            final int accountId;
-            final String folder;            
-            final Object userIdObj = params.get("userId");
-            final Object contextIdObj = params.get("contextId");
-            final Object folderObj = params.get("folder");
-            final Object accountIdObj = params.get("accountId");
-            
-            if (userIdObj == null || !(userIdObj instanceof Integer)) {
-                throw new IllegalArgumentException("Parameter `userId` must not be null and must be an instance of Integer!");
-            }
-            if (contextIdObj == null || !(contextIdObj instanceof Integer)) {
-                throw new IllegalArgumentException("Parameter `contextId` must not be null and must be an instance of Integer!");
-            }
-            if (accountIdObj == null || !(accountIdObj instanceof Integer)) {
-                throw new IllegalArgumentException("Parameter `accountId` must not be null and must be an instance of Integer!");
-            }
-            if (folderObj == null || !(folderObj instanceof String)) {
-                throw new IllegalArgumentException("Parameter `folder` must not be null and must be an instance of String!");
-            }
-            
-            userId = ((Integer) userIdObj).intValue();
-            contextId = ((Integer) contextIdObj).intValue();
-            accountId = ((Integer) accountIdObj).intValue();
-            folder = (String) folderObj;
-            deleteDocumentsByQuery(buildQueryString(contextId, userId, accountId, folder));
-//            SolrMailField sortField = null;
-//            final Object sortObj = params.get("sort");
-//            if (sortObj != null && sortObj instanceof MailIndexField) {
-//                sortField = SolrMailField.solrMailFieldFor((MailIndexField) sortObj);
-//            }
-//            
-//            ORDER order = null;
-//            final Object orderObj = params.get("order");
-//            if (orderObj != null && orderObj instanceof String) {
-//                final String orderStr = (String) orderObj;
-//                if (orderStr.equalsIgnoreCase("desc")) {
-//                    order = ORDER.desc;
-//                } else {
-//                    order = ORDER.asc;
-//                }
-//            }
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            deleteDocumentsByQuery(buildQueryString(accountId, folder));
         } else {
             throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
         }
-//        
-//        final StringBuilder sb = new StringBuilder();
-//        final Object searchFieldsObj = parameters.getParameters().get("searchFields");
-//        if (searchFieldsObj != null && searchFieldsObj instanceof Map<?, ?>) {
-//            final Map<?, ?> map = (Map<?, ?>) searchFieldsObj;
-//            boolean first = true;
-//            for (final Object keyObj : map.keySet()) {
-//                final Object valueObj = map.get(keyObj);
-//                if (keyObj instanceof MailIndexField && valueObj instanceof String) {
-//                    final MailIndexField field = (MailIndexField) keyObj;
-//                    final SolrMailField solrField = SolrMailField.solrMailFieldFor(field);
-//                    final String solrName = solrField.solrName();
-//                    final String value = (String) valueObj;
-//                    if (solrName != null) {
-//                        if (first) {
-//                            first = false;
-//                        } else {
-//                            sb.append(" AND ");
-//                        }
-//                        sb.append('(').append(solrName).append(":\"").append(value).append("\")");
-//                    }                    
-//                }
-//            }
-//        }
-//        deleteDocumentsByQuery(sb.toString());
     }
 
     @Override
     public IndexResult<MailMessage> query(final QueryParameters parameters) throws OXException, InterruptedException {
-        if (parameters == null) {
-            throw new IllegalArgumentException("Parameter `parameters` must not be null!");
-        }
-        
-        final Map<String, Object> params = parameters.getParameters();
-        if (params == null) {
-            throw new IllegalArgumentException("Parameter `parameters.parameters` must not be null!");
-        }
-        
-        final SearchHandler searchHandler = parameters.getHandler();        
-        if (searchHandler == null) {
-            throw new IllegalArgumentException("Parameter `search handler` must not be null!");
-        }
-        
+        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);     
+        final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
+        IndexResult<MailMessage> result = Indexes.emptyResult();
         if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
-            final int userId;
-            final int contextId;
-            final int accountId;
-            final String folder;            
-            final Object userIdObj = params.get("userId");
-            final Object contextIdObj = params.get("contextId");
-            final Object folderObj = params.get("folder");
-            final Object accountIdObj = params.get("accountId");
-            
-            if (userIdObj == null || !(userIdObj instanceof Integer)) {
-                throw new IllegalArgumentException("Parameter `userId` must not be null and must be an instance of Integer!");
-            }
-            if (contextIdObj == null || !(contextIdObj instanceof Integer)) {
-                throw new IllegalArgumentException("Parameter `contextId` must not be null and must be an instance of Integer!");
-            }
-            if (accountIdObj == null || !(accountIdObj instanceof Integer)) {
-                throw new IllegalArgumentException("Parameter `accountId` must not be null and must be an instance of Integer!");
-            }
-            if (folderObj == null || !(folderObj instanceof String)) {
-                throw new IllegalArgumentException("Parameter `folder` must not be null and must be an instance of String!");
-            }
-            
-            userId = ((Integer) userIdObj).intValue();
-            contextId = ((Integer) contextIdObj).intValue();
-            accountId = ((Integer) accountIdObj).intValue();
-            folder = (String) folderObj;
-            SolrMailField sortField = null;
-            final Object sortObj = params.get("sort");
-            if (sortObj != null && sortObj instanceof MailIndexField) {
-                sortField = SolrMailField.solrMailFieldFor((MailIndexField) sortObj);
-            }
-            
-            ORDER order = null;
-            final Object orderObj = params.get("order");
-            if (orderObj != null && orderObj instanceof String) {
-                final String orderStr = (String) orderObj;
-                if (orderStr.equalsIgnoreCase("desc")) {
-                    order = ORDER.desc;
-                } else {
-                    order = ORDER.asc;
-                }
-            }
-            
-            final SolrQuery solrQuery = new SolrQuery(buildQueryString(contextId, userId, accountId, folder));
-            if (sortField != null && order != null) {
-                final String solrSortField = sortField.solrName();
-                if (solrSortField != null) {
-                    solrQuery.setSortField(solrSortField, order);
-                }
-            }
-            
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            final SolrQuery solrQuery = new SolrQuery(buildQueryString(accountId, folder));
+            setSortAndOrder(parameters, solrQuery);
+
             int off = parameters.getOff();
-            int len = parameters.getLen();
-            final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
-            final MailIndexResult result = new MailIndexResult();
+            int len = parameters.getLen();            
             do {
                 if (len > QUERY_ROWS) {
                     len = QUERY_ROWS;
@@ -868,12 +807,62 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 off += size;
             } while (off < len);
             
-            result.setResults(mails);
-            result.setNumFound(mails.size());            
-            return result;
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;
+        } else if (searchHandler.equals(SearchHandler.SIMPLE)) {
+            final SolrQuery solrQuery = new SolrQuery(parameters.getPattern());            
+            solrQuery.setQueryType("simpleSearch");
+            setSortAndOrder(parameters, solrQuery);
+            solrQuery.setStart(parameters.getOff());
+            solrQuery.setRows(parameters.getLen());
+            // TODO: set filter query for folder and account
+            final QueryResponse queryResponse = query(solrQuery);
+            final SolrDocumentList results = queryResponse.getResults();   
+            for (int i = 0; i < results.size(); i++) {
+                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
+            }
+            
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;     
+        } else if (searchHandler.equals(SearchHandler.GET_REQUEST)) {
+            final String[] ids = getIds(parameters);
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            final String queryString = buildQueryString(accountId, folder);
+            final StringBuilder sb = new StringBuilder(queryString);
+            sb.append(" AND (");
+            boolean first = true;
+            for (final String id : ids) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(" OR ");
+                }
+                sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
+            }
+            sb.append(')');
+            
+            final SolrQuery solrQuery = new SolrQuery(sb.toString());
+            setSortAndOrder(parameters, solrQuery);
+            solrQuery.setStart(parameters.getOff());
+            solrQuery.setRows(parameters.getLen());
+            
+            final QueryResponse queryResponse = query(solrQuery);
+            final SolrDocumentList results = queryResponse.getResults();   
+            for (int i = 0; i < results.size(); i++) {
+                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
+            }
+            
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;  
         } else {
             throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
         }
+        
+        return result;
     }
 
     @Override
@@ -881,31 +870,21 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         return triggerType;
     }
 
-    private String buildQueryString(final int contextId, final int userId, final int accountId, final String folder) {
+    private String buildQueryString(final int accountId, final String folder) {
         final StringBuilder sb = new StringBuilder(128);
         sb.append('(').append(SolrMailField.USER.solrName()).append(":\"").append(userId).append("\")");
         sb.append(" AND ");
-        sb.append('(').append(SolrMailField.CONTEXT.solrName()).append(":\"").append(contextId).append("\")");
-        sb.append(" AND ");
-        sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
-        sb.append(" AND ");
-        sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
+        sb.append('(').append(SolrMailField.CONTEXT.solrName()).append(":\"").append(contextId).append("\")");        
+        if (accountId >= 0) {
+            sb.append(" AND ");
+            sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
+        }
+            
+        if (folder != null) {
+            sb.append(" AND ");
+            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
+        }        
         
         return sb.toString();
     }
-    /**
-     * Checks for an empty string.
-     */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

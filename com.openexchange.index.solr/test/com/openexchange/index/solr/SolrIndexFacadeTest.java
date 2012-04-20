@@ -93,17 +93,17 @@ public class SolrIndexFacadeTest extends TestCase {
         "arise.").getBytes();
     
     public void testAddAndGetMessage() throws Exception {
-        final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
-        final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 3, 1);
-        final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
-        final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
-        indexAccess.addContent(document);
+//        final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
+//        final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 3, 1);
+//        final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
+//        final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
+//        indexAccess.addContent(document);
 //        
-        final Map<String, Object> params = new HashMap<String, Object>(4);
-        params.put("sort", "received_date");
-        params.put("order", "desc");
-        final QueryParameters queryParameter = new QueryParameters.Builder("(user:3) AND (context:1) AND (content_flag:true) AND (from_personal:alice)").setType(IndexDocument.Type.MAIL).setParameters(params).build();
-        final IndexResult<MailMessage> result = indexAccess.query(queryParameter);
+//        final Map<String, Object> params = new HashMap<String, Object>(4);
+//        params.put("sort", "received_date");
+//        params.put("order", "desc");
+//        final QueryParameters queryParameter = new QueryParameters.Builder("(user:3) AND (context:1) AND (content_flag:true) AND (from_personal:alice)").setType(IndexDocument.Type.MAIL).setParameters(params).build();
+//        final IndexResult<MailMessage> result = indexAccess.query(queryParameter);
 //        assertEquals("Found wrong number of mails.", 1, result.getNumFound());        
 //        final MailMessage foundMessage = result.getResults().get(0).getObject();
 //        assertEquals("Dates were not equal.", message.getSentDate(), foundMessage.getSentDate());
@@ -112,7 +112,7 @@ public class SolrIndexFacadeTest extends TestCase {
 //        assertEquals("Message-ID were not equal.", message.getMailId(), foundMessage.getMailId());
 //        assertEquals("Subject were not equal.", message.getSubject(), foundMessage.getSubject());
 //        assertEquals("Mail size were not equal.", message.getSize(), foundMessage.getSize());
-        facade.releaseIndexAccess(indexAccess);
+//        facade.releaseIndexAccess(indexAccess);
     }
 
 }

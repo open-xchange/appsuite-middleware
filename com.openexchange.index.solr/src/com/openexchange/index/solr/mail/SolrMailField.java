@@ -76,36 +76,36 @@ import com.openexchange.solr.SolrProperties;
  */
 public enum SolrMailField {
 
-    UUID("uuid", MailIndexField.UUID),
-    TIMESTAMP("timestamp", MailIndexField.TIMESTAMP),
-    CONTEXT("context", MailIndexField.CONTEXT),
-    USER("user", MailIndexField.USER),
-    ACCOUNT("account", MailIndexField.ACCOUNT),
-    FULL_NAME("full_name", MailIndexField.FULL_NAME),
-    ID("id", MailIndexField.ID),
-    COLOR_LABEL("color_label", MailIndexField.COLOR_LABEL),
-    ATTACHMENT("attachment", MailIndexField.ATTACHMENT),
-    RECEIVED_DATE("received_date", MailIndexField.RECEIVED_DATE),
-    SENT_DATE("sent_date", MailIndexField.SENT_DATE),
-    SIZE("size", MailIndexField.SIZE),
-    FLAG_ANSWERED("flag_answered", MailIndexField.FLAG_ANSWERED),
-    FLAG_DELETED("flag_deleted", MailIndexField.FLAG_DELETED),
-    FLAG_DRAFT("flag_draft", MailIndexField.FLAG_DRAFT),
-    FLAG_FLAGGED("flag_flagged", MailIndexField.FLAG_FLAGGED),
-    FLAG_RECENT("flag_recent", MailIndexField.FLAG_RECENT),
-    FLAG_SEEN("flag_seen", MailIndexField.FLAG_SEEN),
-    FLAG_USER("flag_user", MailIndexField.FLAG_USER),
-    FLAG_SPAM("flag_spam", MailIndexField.FLAG_SPAM),
-    FLAG_FORWARDED("flag_forwarded", MailIndexField.FLAG_FORWARDED),
-    FLAG_READ_ACK("flag_read_ack", MailIndexField.FLAG_READ_ACK),
-    USER_FLAGS("user_flags", MailIndexField.USER_FLAGS),
-    FROM("from", MailIndexField.FROM),
-    TO("to", MailIndexField.TO),
-    CC("cc", MailIndexField.CC),
-    BCC("bcc", MailIndexField.BCC),
-    SUBJECT("subject", MailIndexField.SUBJECT),
-    CONTENT_FLAG("content_flag", MailIndexField.CONTENT_FLAG),
-    CONTENT("content", MailIndexField.CONTENT);
+    UUID("UUID", MailIndexField.UUID),
+    TIMESTAMP("TIMESTAMP", MailIndexField.TIMESTAMP),
+    CONTEXT("CONTEXT", MailIndexField.CONTEXT),
+    USER("USER", MailIndexField.USER),
+    ACCOUNT("ACCOUNT", MailIndexField.ACCOUNT),
+    FULL_NAME("FULL_NAME", MailIndexField.FULL_NAME),
+    ID("ID", MailIndexField.ID),
+    COLOR_LABEL("COLOR_LABEL", MailIndexField.COLOR_LABEL),
+    ATTACHMENT("ATTACHMENT", MailIndexField.ATTACHMENT),
+    RECEIVED_DATE("RECEIVED_DATE", MailIndexField.RECEIVED_DATE),
+    SENT_DATE("SENT_DATE", MailIndexField.SENT_DATE),
+    SIZE("SIZE", MailIndexField.SIZE),
+    FLAG_ANSWERED("FLAG_ANSWERED", MailIndexField.FLAG_ANSWERED),
+    FLAG_DELETED("FLAG_DELETED", MailIndexField.FLAG_DELETED),
+    FLAG_DRAFT("FLAG_DRAFT", MailIndexField.FLAG_DRAFT),
+    FLAG_FLAGGED("FLAG_FLAGGED", MailIndexField.FLAG_FLAGGED),
+    FLAG_RECENT("FLAG_RECENT", MailIndexField.FLAG_RECENT),
+    FLAG_SEEN("FLAG_SEEN", MailIndexField.FLAG_SEEN),
+    FLAG_USER("FLAG_USER", MailIndexField.FLAG_USER),
+    FLAG_SPAM("FLAG_SPAM", MailIndexField.FLAG_SPAM),
+    FLAG_FORWARDED("FLAG_FORWARDED", MailIndexField.FLAG_FORWARDED),
+    FLAG_READ_ACK("FLAG_READ_ACK", MailIndexField.FLAG_READ_ACK),
+    USER_FLAGS("USER_FLAGS", MailIndexField.USER_FLAGS),
+    FROM("FROM", MailIndexField.FROM),
+    TO("TO", MailIndexField.TO),
+    CC("CC", MailIndexField.CC),
+    BCC("BCC", MailIndexField.BCC),
+    SUBJECT("SUBJECT", MailIndexField.SUBJECT),
+    CONTENT_FLAG("CONTENT_FLAG", MailIndexField.CONTENT_FLAG),
+    CONTENT("CONTENT", MailIndexField.CONTENT);
 
     private static final String PROP_FILE = "solr_mailfields.properties";
 
@@ -162,7 +162,7 @@ public enum SolrMailField {
 
         return names.toArray(new String[names.size()]);
     }
-    
+
     public static SolrMailField solrMailFieldFor(final MailIndexField indexField) {
         final SolrMailField solrField = fieldMapping.get(indexField);
         return solrField;
@@ -187,34 +187,34 @@ public enum SolrMailField {
 
             case FLAG_ANSWERED:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_DELETED:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_DRAFT:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_FLAGGED:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_RECENT:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_SEEN:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_USER:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_SPAM:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_FORWARDED:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case FLAG_READ_ACK:
                 return Boolean.valueOf((mail.getFlags() & MailMessage.FLAG_FORWARDED) > 0);
-                
+
             case USER_FLAGS:
                 final String[] userFlags = mail.getUserFlags();
                 if (null != userFlags && userFlags.length > 0) {
@@ -222,7 +222,7 @@ public enum SolrMailField {
                 } else {
                     return null;
                 }
-                
+
             default:
                 return null;
         }

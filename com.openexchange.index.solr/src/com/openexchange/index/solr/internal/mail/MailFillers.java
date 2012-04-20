@@ -223,7 +223,10 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setColorLabel(MailFillers.<Integer> getFieldValue(SolrMailField.COLOR_LABEL.solrName(), doc).intValue());
+            final Integer colorLabel = MailFillers.<Integer> getFieldValue(SolrMailField.COLOR_LABEL.solrName(), doc);
+            if (colorLabel != null) {
+                mail.setColorLabel(colorLabel.intValue());
+            }            
         }
     };
 
@@ -231,7 +234,10 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setHasAttachment(MailFillers.<Boolean> getFieldValue(SolrMailField.ATTACHMENT.solrName(), doc).booleanValue());
+            final Boolean hasAttachment = MailFillers.<Boolean> getFieldValue(SolrMailField.ATTACHMENT.solrName(), doc);
+            if (hasAttachment != null) {
+                mail.setHasAttachment(hasAttachment.booleanValue());
+            }            
         }
     };
 

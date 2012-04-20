@@ -267,58 +267,63 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Acquire exclusive flag
                      */
-                    if (!acquire(fullName, accountId, userId, contextId)) {
-                        // Another thread already running
-                        processingProgress.setFirstTime(false).setProcessType(ProcessType.NONE);
-                        if (DEBUG) {
-                            LOG.debug("\tAnother thread processes \"" + fullName + "\" " + new DebugInfo(accountId, userId, contextId));
-                        }
-                        return null;
-                    }
-                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                    IndexAccess<MailMessage> indexAccess = null;
                     try {
-                        indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-                        final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
-                        mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
-                        mailAccess.connect(false);
-                        if (initial) {
-                            /*-
-                             * 
-                             * Denoted folder has not been added to index before
-                             * 
-                             */
-                            processingProgress.setFirstTime(true);
-                            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
-                            final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
-                            process(
-                                new MailFolderInfo(fullName, messageCount),
-                                processingProgress,
-                                mailAccess,
-                                indexAccess,
-                                storageMails,
-                                indexMails);
-                        } else {
-                            /*-
-                             * 
-                             * Denoted folder has already been added to index before
-                             * 
-                             */
-                            processingProgress.setProcessType(ProcessType.JOB);
-                            submitAsJob(folderInfo, mailAccess, Collections.<String, Object>emptyMap());
+                        if (!acquire(fullName, accountId, userId, contextId)) {
+                            // Another thread already running
+                            processingProgress.setFirstTime(false).setProcessType(ProcessType.NONE);
                             if (DEBUG) {
-                                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                                LOG.debug("\tAnother thread processes \"" + fullName + "\" " + new DebugInfo(accountId, userId, contextId));
                             }
+                            return null;
                         }
-                        return null;
-                    } finally {
-                        if (processingProgress.countDown) {
-                            processingProgress.latch.countDown();
-                            processingProgress.countDown = false;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        IndexAccess<MailMessage> indexAccess = null;
+                        try {
+                            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+                            final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
+                            mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
+                            mailAccess.connect(false);
+                            if (initial) {
+                                /*-
+                                 * 
+                                 * Denoted folder has not been added to index before
+                                 * 
+                                 */
+                                processingProgress.setFirstTime(true);
+                                final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+                                final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
+                                process(
+                                    new MailFolderInfo(fullName, messageCount),
+                                    processingProgress,
+                                    mailAccess,
+                                    indexAccess,
+                                    storageMails,
+                                    indexMails);
+                            } else {
+                                /*-
+                                 * 
+                                 * Denoted folder has already been added to index before
+                                 * 
+                                 */
+                                processingProgress.setProcessType(ProcessType.JOB);
+                                submitAsJob(folderInfo, mailAccess, Collections.<String, Object>emptyMap());
+                                if (DEBUG) {
+                                    LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                                }
+                            }
+                            return null;
+                        } finally {
+                            if (processingProgress.countDown) {
+                                processingProgress.latch.countDown();
+                                processingProgress.countDown = false;
+                            }
+                            SmalMailAccess.closeUnwrappedInstance(mailAccess);
+                            releaseAccess(facade, indexAccess);
+                            release(fullName, accountId, userId, contextId);
                         }
-                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
-                        releaseAccess(facade, indexAccess);
-                        release(fullName, accountId, userId, contextId);
+                    } catch (final Exception e) {
+                        LOG.error(e.getMessage(), e);
+                        throw e;
                     }
                 }
 

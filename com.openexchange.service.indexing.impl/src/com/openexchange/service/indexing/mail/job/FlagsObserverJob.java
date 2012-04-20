@@ -156,9 +156,7 @@ public final class FlagsObserverJob extends AbstractMailJob {
                 
                 final Map<String, Object> params = new HashMap<String, Object>();
                 params.put("ids", partialUUIDs);
-                params.put("sort", MailIndexField.RECEIVED_DATE);
-                params.put("order", "desc");
-                final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.GET_REQUEST).setType(MAIL).setOffset(0).setLength(len).build();
+                final QueryParameters query = new QueryParameters.Builder(params).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(SearchHandler.GET_REQUEST).setType(MAIL).setOffset(0).setLength(len).build();
                 final IndexResult<MailMessage> indexResult = indexAccess.query(query);
                 if (0 < indexResult.getNumFound()) {
                     for (final IndexDocument<MailMessage> indexDocument : indexResult.getResults()) {

@@ -73,6 +73,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -254,18 +255,9 @@ public final class FolderJob extends AbstractMailJob {
                              */
                             deleteDBEntry();
                             final Map<String, Object> params = new HashMap<String, Object>();
-                            params.put("userId", userId);
-                            params.put("contextId", contextId);
                             params.put("accountId", accountId);
-                            params.put("folder", fullName);
                             final Builder queryBuilder = new Builder(params).setType(MAIL);
-                            
-//                            final StringBuilder queryBuilder = new StringBuilder(128);
-//                            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
-//                            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
-//                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-//                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                            indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).build());
+                            indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).setFolder(fullName).build());
                             unset = false;
                             return;
                         }
@@ -308,13 +300,8 @@ public final class FolderJob extends AbstractMailJob {
                     List<MailMessage> indexedMails = this.indexMails;
                     if (null == indexedMails) {
                         final Map<String, Object> params = new HashMap<String, Object>();
-                        final Map<MailIndexField, String> inner = new HashMap<MailIndexField, String>();
-                        inner.put(MailIndexField.USER, String.valueOf(userId));
-                        inner.put(MailIndexField.CONTEXT, String.valueOf(contextId));
-                        inner.put(MailIndexField.ACCOUNT, String.valueOf(accountId));
-                        inner.put(MailIndexField.FULL_NAME, String.valueOf(fullName));
-                        params.put("searchFields", inner);
-                        final Builder queryBuilder = new Builder(params).setType(MAIL);
+                        params.put("accountId", accountId);
+                        final Builder queryBuilder = new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(SearchHandler.ALL_REQUEST);
                             
 //                            final StringBuilder queryBuilder = new StringBuilder(128);
 //                            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
@@ -324,8 +311,8 @@ public final class FolderJob extends AbstractMailJob {
 //                            queryString = queryBuilder.toString();
 //                        final Map<String, Object> params = new HashMap<String, Object>(4);
                         // TODO: params.put("fields", mailFields);
-                        params.put("sort", MailIndexField.RECEIVED_DATE);
-                        params.put("order", "desc");
+//                        params.put("sort", MailIndexField.RECEIVED_DATE);
+//                        params.put("order", "desc");
 //                        final QueryParameters queryParameter =
 //                            new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(
 //                                IndexDocument.Type.MAIL).setParameters(params).build();
@@ -389,20 +376,11 @@ public final class FolderJob extends AbstractMailJob {
                 /*
                  * Delete
                  */
-                if (!deletedIds.isEmpty()) {
-                    final Map<String, Object> params = new HashMap<String, Object>();
-                    final Map<MailIndexField, String> inner = new HashMap<MailIndexField, String>();
-                    inner.put(MailIndexField.USER, String.valueOf(userId));
-                    inner.put(MailIndexField.CONTEXT, String.valueOf(contextId));
-                    inner.put(MailIndexField.ACCOUNT, String.valueOf(accountId));
-                    inner.put(MailIndexField.FULL_NAME, String.valueOf(fullName));
-                    params.put("searchFields", inner);
-                    final Builder queryBuilder = new Builder(params).setType(MAIL);
-                    
+                if (!deletedIds.isEmpty()) {                    
                     // Iterate identifiers
                     for (final String id : deletedIds) {
-                        inner.put(MailIndexField.ID, id);
-                        indexAccess.deleteByQuery(queryBuilder.build());
+                        final MailUUID uuid = new MailUUID(contextId, userId, accountId, fullName, id);
+                        indexAccess.deleteById(uuid.getUUID());
                     }
                     setTimestamp(fullName, System.currentTimeMillis());
                     if (debug) {

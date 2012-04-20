@@ -77,7 +77,7 @@ public enum SearchHandler {
     CUSTOM,
     /**
      * This one searches for all items within a folder.
-     * Mandatory parameters: userId, contextId, folder.
+     * Mandatory parameters: folder.
      * Optional parameters: sort, order
      * Module dependent: accountId
      */

@@ -97,11 +97,8 @@ public final class RemoveFolderJob extends AbstractMailJob {
              */
             indexAccess = getIndexAccess();
             final Map<String, Object> params = new HashMap<String, Object>();
-            params.put("userId", userId);
-            params.put("contextId", contextId);
             params.put("accountId", accountId);
-            params.put("folder", fullName);
-            final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(MAIL).build();
+            final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(MAIL).setFolder(fullName).build();
             indexAccess.deleteByQuery(query);
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);

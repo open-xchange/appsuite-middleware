@@ -400,9 +400,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                         return MailResult.newIndexResult(IndexAccessAdapter.getInstance().search(accountId, folder, searchTerm, sortField, order, fields, indexRange, session));
                     } catch (final OXException e) {
                         if (!MailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                            LOG.error(e.getMessage(), e);
                             throw e;
                         }
                         return MailResult.emptyResult();
+                    } catch (final Exception e) {
+                        LOG.error(e.getMessage(), e);
+                        throw e;
                     }
                 }
             });
@@ -410,7 +414,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
-                    return MailResult.newStorageResult(asList(ms.searchMessages(folder, indexRange, sortField, order, searchTerm, fields)));
+                    try {
+                        return MailResult.newStorageResult(asList(ms.searchMessages(
+                            folder,
+                            indexRange,
+                            sortField,
+                            order,
+                            searchTerm,
+                            fields)));
+                    } catch (final Exception e) {
+                        LOG.error(e.getMessage(), e);
+                        throw e;
+                    }
                 }
             });
             MailResult<List<MailMessage>> result = takeNextFrom(completionService);

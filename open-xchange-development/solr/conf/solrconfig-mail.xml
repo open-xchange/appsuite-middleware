@@ -96,7 +96,7 @@
   </requestHandler>
 
 
-  <requestHandler name="/dismax" class="solr.SearchHandler">
+  <requestHandler name="simpleSearch" class="solr.SearchHandler">
     <lst name="defaults">
      <str name="defType">dismax</str>
      <str name="echoParams">explicit</str>
