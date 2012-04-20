@@ -157,11 +157,26 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    GWCONFFILES="filestorage.properties folderjson.properties mail-push.properties messaging.properties publications.properties push.properties secret.properties secrets threadpool.properties meta/ui.yml settings/themes.properties settings/ui.properties"
+    COCONFFILES="i18n.properties"
+    for FILE in ${GWCONFFILES}; do
+        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
+            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
+            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
+        fi
+    done
+    for FILE in ${COCONFFILES}; do
+        if [ -e /opt/open-xchange/etc/common/${FILE} ]; then
+            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
+            mv /opt/open-xchange/etc/common/${FILE} /opt/open-xchange/etc/${FILE}
+        fi
+    done
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
-
-%pre
-# TODO! All postinst, postrm, preinst, prerm from debian package still missing!
 
 %files
 %defattr(-,root,root)
