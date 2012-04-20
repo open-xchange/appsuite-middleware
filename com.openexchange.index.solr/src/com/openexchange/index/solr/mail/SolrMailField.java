@@ -55,10 +55,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.mail.MailIndexField;
@@ -97,10 +100,6 @@ public enum SolrMailField {
     FLAG_READ_ACK("flag_read_ack", MailIndexField.FLAG_READ_ACK),
     USER_FLAGS("user_flags", MailIndexField.USER_FLAGS),
     FROM("from", MailIndexField.FROM),
-    /*
-     * FIXME: remove?
-     */
-    SENDER("sender", MailIndexField.SENDER),
     TO("to", MailIndexField.TO),
     CC("cc", MailIndexField.CC),
     BCC("bcc", MailIndexField.BCC),
@@ -112,6 +111,8 @@ public enum SolrMailField {
 
     private static final Map<MailIndexField, SolrMailField> fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
 
+    private static final Set<MailIndexField> indexedFields;
+
     private static Properties properties = null;
 
     private final String propertyName;
@@ -119,9 +120,16 @@ public enum SolrMailField {
     private final MailIndexField indexField;
 
     static {
+        checkProperties();
+        final Set<MailIndexField> set = EnumSet.noneOf(MailIndexField.class);
         for (final SolrMailField field : values()) {
             fieldMapping.put(field.indexField, field);
+
+            if (null == field.solrName()) {
+                set.add(field.indexField);
+            }
         }
+        indexedFields = Collections.unmodifiableSet(set);
     }
 
     private SolrMailField(final String propertyName, final MailIndexField indexField) {
@@ -137,6 +145,10 @@ public enum SolrMailField {
         }
 
         return value;
+    }
+
+    public static Set<MailIndexField> getIndexedFields() {
+        return indexedFields;
     }
 
     public static String[] solrNamesFor(final SolrMailField[] fields) {

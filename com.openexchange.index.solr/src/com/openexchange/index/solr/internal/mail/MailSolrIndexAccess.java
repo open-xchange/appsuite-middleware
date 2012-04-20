@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,18 +66,15 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
-import org.junit.runners.ParentRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
-import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.TriggerType;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
 import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.index.solr.mail.SolrMailField;
@@ -239,6 +237,11 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         super(identifier);
         this.triggerType = triggerType;
         helper = SolrInputDocumentHelper.getInstance();
+    }
+
+    @Override
+    public Set<? extends IndexField> getIndexedFields() {
+        return SolrMailField.getIndexedFields();
     }
 
     @Override

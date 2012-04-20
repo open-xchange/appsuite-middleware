@@ -348,7 +348,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     final MailProvider provider = delegateMailAccess.getProvider();
                     LOG.debug("SmalMessageStorage.getMessages(): "+(null == provider ? "Storage" : provider.getProtocol().getName())+" result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
                 }
-                cancelRemaining(completionService);
+                // TODO: cancelRemaining(completionService);
                 break;
             }
             final List<MailMessage> mails = result.result;
@@ -448,7 +448,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     final MailProvider provider = delegateMailAccess.getProvider();
                     LOG.debug("SmalMessageStorage.searchMessages(): "+(null == provider ? "Storage" : provider.getProtocol().getName())+" result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
                 }
-                cancelRemaining(completionService);
+                // TODO cancelRemaining(completionService);
                 if (!processingProgress.asJob() && new MailFields(fields).containsAny(MAIL_FIELDS_FLAGS)) {
                     scheduleChangeJob(folder, result);
                 }

@@ -87,10 +87,6 @@ public enum MailIndexField implements IndexField {
     FLAG_READ_ACK(MailField.FLAGS),
     USER_FLAGS(MailField.FLAGS),
     FROM(MailField.FROM),
-    /*
-     * FIXME: remove?
-     */
-    SENDER(null),
     TO(MailField.TO),
     CC(MailField.CC),
     BCC(MailField.BCC),

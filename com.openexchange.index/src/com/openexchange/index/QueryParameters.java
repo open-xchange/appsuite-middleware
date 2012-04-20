@@ -70,6 +70,7 @@ public final class QueryParameters {
         Map<String, Object> parameters;
         SearchHandler handler;
         Type type;
+        Object searchTerm;
 
         /**
          * Initializes a new builder.
@@ -89,6 +90,11 @@ public final class QueryParameters {
             off = 0;
             len = Integer.MAX_VALUE;
             this.parameters = parameters;
+        }
+
+        public Builder setSearchTerm(final Object searchTerm) {
+            this.searchTerm = searchTerm;
+            return this;
         }
 
         public Builder setOffset(final int off) {
@@ -137,6 +143,8 @@ public final class QueryParameters {
 
     private final SearchHandler handler;
 
+    private final Object searchTerm;
+
     private final Type type;
 
     /**
@@ -150,6 +158,16 @@ public final class QueryParameters {
         this.parameters = builder.parameters;
         this.queryString = builder.queryString;
         this.type = builder.type;
+        this.searchTerm = builder.searchTerm;
+    }
+
+    /**
+     * Gets the search term
+     *
+     * @return The search term
+     */
+    public Object getSearchTerm() {
+        return searchTerm;
     }
 
     /**

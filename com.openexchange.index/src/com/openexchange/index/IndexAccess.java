@@ -50,6 +50,7 @@
 package com.openexchange.index;
 
 import java.util.Collection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 /**
@@ -59,6 +60,13 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexAccess<V> {
+
+    /**
+     * Gets the fields indexed by this access.
+     * 
+     * @return The indexed fields
+     */
+    Set<? extends IndexField> getIndexedFields();
 
     /**
      * Adds specified document's headers to associated index.
