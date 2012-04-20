@@ -5,6 +5,7 @@
 * 2012-04-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21875: Extends Display Name Field for external participants.
+ - Fix for bug 22006: Throw Data Truncation error.
 
 * 2012-04-19 - martin.herfurth@open-xchange.com
 
