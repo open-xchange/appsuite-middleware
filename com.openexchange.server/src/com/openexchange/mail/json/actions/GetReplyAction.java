@@ -144,6 +144,9 @@ public final class GetReplyAction extends AbstractMailAction {
              * Overwrite settings with request's parameters
              */
             detectDisplayMode(true, view, usmNoSave);
+            if (Boolean.parseBoolean(req.getParameter("dropPrefix"))) {
+                usmNoSave.setDropReplyForwardPrefix(true);
+            }
             /*
              * Get mail interface
              */

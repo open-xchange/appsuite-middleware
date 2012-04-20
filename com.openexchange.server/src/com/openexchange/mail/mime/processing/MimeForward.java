@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailExceptionCode;
@@ -102,6 +103,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -295,9 +297,9 @@ public final class MimeForward {
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(
-                    generateForwardText(
+                    usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(
                         firstSeenText,
-                        new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)),
+                        new LocaleAndTimeZone(getUser(session, ctx)),
                         originalMsg,
                         isHtml),
                     contentType.getCharsetParameter(),
@@ -334,9 +336,9 @@ public final class MimeForward {
             }
             final String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
             forwardMsg.setText(
-                generateForwardText(
+                usm.isDropReplyForwardPrefix() ? (content == null ? "" : content) : generateForwardText(
                     content == null ? "" : content,
-                    new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)),
+                    new LocaleAndTimeZone(getUser(session, ctx)),
                     originalMsg,
                     originalContentType.startsWith(TEXT_HTM)),
                 originalContentType.getCharsetParameter(),
@@ -358,7 +360,7 @@ public final class MimeForward {
                 contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(
-                    generateForwardText("", new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)), originalMsg, false),
+                    usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false),
                     MailProperties.getInstance().getDefaultMimeCharset(),
                     "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -412,6 +414,13 @@ public final class MimeForward {
             forwardMail.setMsgref(msgref);
         }
         return forwardMail;
+    }
+
+    private static User getUser(final Session session, final Context ctx) {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), ctx);
     }
 
     private static MailMessage asAttachmentForward(final MailMessage[] originalMsgs, final MimeMessage forwardMsg) throws MessagingException, OXException {
