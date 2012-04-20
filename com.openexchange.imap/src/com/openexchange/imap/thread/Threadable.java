@@ -49,9 +49,9 @@
 
 package com.openexchange.imap.thread;
 
+import gnu.trove.set.TIntSet;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -97,9 +97,11 @@ public final class Threadable {
 
     String id;
 
+    String inReplyTo;
+
     String[] refs;
 
-    private int message_number;
+    int messageNumber;
 
     private String subject2;
 
@@ -145,7 +147,7 @@ public final class Threadable {
         return s + " ) ]";
     }
 
-    void simplifySubject() {
+    private void simplifySubject() {
 
         int start = 0;
         final int L = subject.length();
@@ -207,22 +209,35 @@ public final class Threadable {
     }
 
     /**
-     * An enumeration for all nested elements.
-     * 
-     * @return The enumeration
+     * Returns each subsequent element in the set of messages of which this IThreadable is the root. Order is unimportant.
      */
     public Enumeration<Threadable> allElements() {
         return new ThreadableEnumeration(this, true);
     }
 
+    /**
+     * Returns an object identifying this message. Generally this will be a representation of the contents of the Message-ID header.
+     */
     public String messageThreadID() {
         return id;
     }
 
+    /**
+     * Returns the IDs of the set of messages referenced by this one. This list should be ordered from oldest-ancestor to youngest-ancestor.
+     */
     public String[] messageThreadReferences() {
         return refs;
     }
 
+    /**
+     * When no references are present, subjects will be used to thread together messages. This method should return a threadable subject:
+     * two messages with the same simplifiedSubject will be considered to belong to the same thread. This string should not have `Re:' on
+     * the front, and may have been simplified in whatever other ways seem appropriate.
+     * <p>
+     * This is a String of Unicode characters, and should have had any encodings (such as RFC 2047 charset encodings) removed first.
+     * <p>
+     * If you aren't interested in threading by subject at all, return null.
+     */
     public String simplifiedSubject() {
         if (subject2 == null) {
             simplifySubject();
@@ -230,6 +245,10 @@ public final class Threadable {
         return subject2;
     }
 
+    /**
+     * Whether the original subject was one that appeared to be a reply (that is, had a `Re:' or some other indicator.) When threading by
+     * subject, this property is used to tell whether two messages appear to be siblings, or in a parent/child relationship.
+     */
     public boolean subjectIsReply() {
         if (subject2 == null) {
             simplifySubject();
@@ -237,27 +256,37 @@ public final class Threadable {
         return has_re;
     }
 
-    // Used by both IThreadable and ISortable
+    /**
+     * When the proper thread order has been computed, these two methods will be called on each IThreadable in the chain, to set up the
+     * proper tree structure.
+     */
     public void setNext(final Object next) {
         this.next = (Threadable) next;
         flushSubjectCache();
     }
 
-    // Used by both IThreadable and ISortable
     public void setChild(final Object kid) {
         this.kid = (Threadable) kid;
         flushSubjectCache();
     }
 
     /**
-     * Create a dummy instance.
-     * 
-     * @return The dummy instance
+     * Creates a dummy parent object.
+     * <P>
+     * With some set of messages, the only way to achieve proper threading is to introduce an element into the tree which represents
+     * messages which are not present in the set: for example, when two messages share a common ancestor, but that ancestor is not in the
+     * set. This method is used to make a placeholder for those sorts of ancestors. It should return an object which is also a IThreadable.
+     * The setNext() and setChild() methods will be used on this placeholder, as either the object or the argument, just as for other
+     * elements of the tree.
      */
     public static Threadable makeDummy() {
         return new Threadable();
     }
 
+    /**
+     * This should return true of dummy messages, false otherwise. It is legal to pass dummy messages in with the list returned by
+     * elements(); the isDummy() method is the mechanism by which they are noted and ignored.
+     */
     public boolean isDummy() {
         return (subject == null);
     }
@@ -349,8 +378,75 @@ public final class Threadable {
                     threadable.id = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
                 }
             });
+            put(MessageHeaders.HDR_IN_REPLY_TO, new HeaderHandler() {
+
+                @Override
+                public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+                    threadable.inReplyTo = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
+                }
+            });
         }
     };
+
+    public static String toThreadReferences(final Threadable threadable, final TIntSet filter) {
+        final StringBuilder sb = new StringBuilder(256);
+        toThreadReferences0(threadable, filter, sb);
+        return sb.toString();
+    }
+
+    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final StringBuilder sb) {
+        Threadable t = threadable;
+        if (null == filter) {
+            while (null != t) {
+                sb.append('(');
+                if (t.messageNumber > 0) {
+                    sb.append(t.messageNumber);
+                }
+                final Threadable kid = t.kid;
+                if (null != kid) {
+                    if (t.messageNumber > 0) {
+                        sb.append(' ');
+                    }
+                    toThreadReferences0(kid, null, sb);
+                }
+                final int lastPos = sb.length() - 1;
+                if ('(' == sb.charAt(lastPos)) {
+                    sb.deleteCharAt(lastPos);
+                } else {
+                    sb.append(')');
+                }
+                t = t.next;
+            }
+        } else {
+            while (null != t) {
+                if (filter.contains(t.messageNumber)) {
+                    sb.append('(');
+                    if (t.messageNumber > 0) {
+                        sb.append(t.messageNumber);
+                    }
+                    final Threadable kid = t.kid;
+                    if (null != kid) {
+                        if (t.messageNumber > 0) {
+                            sb.append(' ');
+                        }
+                        toThreadReferences0(kid, null, sb);
+                    }
+                    final int lastPos = sb.length() - 1;
+                    if ('(' == sb.charAt(lastPos)) {
+                        sb.deleteCharAt(lastPos);
+                    } else {
+                        sb.append(')');
+                    }
+                } else {
+                    final Threadable kid = t.kid;
+                    if (null != kid) {
+                        toThreadReferences0(kid, filter, sb);
+                    }
+                }
+                t = t.next;
+            }
+        }
+    }
 
     /**
      * Gets the threadables for given IMAP folder.
@@ -359,16 +455,15 @@ public final class Threadable {
      * @return The detected threadables
      * @throws MessagingException If an error occurs
      */
-    @SuppressWarnings("unchecked")
-    public static List<Threadable> getAllThreadablesFrom(final IMAPFolder imapFolder) throws MessagingException {
+    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
              * Empty folder...
              */
-            return Collections.emptyList();
+            return null;
         }
-        return (List<Threadable>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (Threadable) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -378,15 +473,9 @@ public final class Threadable {
                     command = new StringBuilder(128).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
                     final boolean rev1 = protocol.isREV1();
                     if (rev1) {
-                        command.append("BODY.PEEK[HEADER.FIELDS (");
+                        command.append("BODY.PEEK[HEADER.FIELDS (Subject Message-Id Reference In-Reply-To)]");
                     } else {
-                        command.append("RFC822.HEADER.LINES (");
-                    }
-                    command.append("Subject Message-Id Reference");
-                    if (rev1) {
-                        command.append(")]");
-                    } else {
-                        command.append(')');
+                        command.append("RFC822.HEADER.LINES (Subject Message-Id Reference In-Reply-To)");
                     }
                     command.append(')');
                     r = protocol.command(command.toString(), null);
@@ -395,15 +484,16 @@ public final class Threadable {
                 final Response response = r[len];
                 if (response.isOK()) {
                     try {
-                        final List<Threadable> threadables = new ArrayList<Threadable>();
+                        final List<Threadable> threadables = new ArrayList<Threadable>(messageCount);
                         for (int j = 0; j < len; j++) {
                             if ("FETCH".equals(((IMAPResponse) r[j]).getKey())) {
+                                final FetchResponse fetchResponse = (FetchResponse) r[j];
                                 final InternetHeaders h;
                                 {
                                     final InputStream headerStream;
-                                    final BODY body = getItemOf(BODY.class, (FetchResponse) r[j]);
+                                    final BODY body = getItemOf(BODY.class, fetchResponse);
                                     if (null == body) {
-                                        final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, (FetchResponse) r[j]);
+                                        final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
                                         headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
                                     } else {
                                         headerStream = body.getByteArrayInputStream();
@@ -417,6 +507,7 @@ public final class Threadable {
                                 }
                                 if (h != null) {
                                     final Threadable t = new Threadable();
+                                    t.messageNumber = fetchResponse.getNumber();
                                     for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                                         final Header hdr = (Header) e.nextElement();
                                         final HeaderHandler headerHandler = HANDLERS.get(hdr.getName());
@@ -424,13 +515,28 @@ public final class Threadable {
                                             headerHandler.handle(hdr, t);
                                         }
                                     }
-                                    r[j] = null;
+                                    // Check References and In-Reply-To
+                                    if (null != t.refs && null != t.inReplyTo) {
+                                        final String[] tmp = t.refs;
+                                        t.refs = new String[tmp.length + 1];
+                                        System.arraycopy(tmp, 0, t.refs, 0, tmp.length);
+                                        t.refs[tmp.length] = t.inReplyTo;
+                                    }
                                     threadables.add(t);
+                                    r[j] = null;
                                 }
                             }
                         }
                         protocol.notifyResponseHandlers(r);
-                        return threadables;
+                        final Threadable first = threadables.remove(0);
+                        {
+                            Threadable cur = first;
+                            for (final Threadable threadable : threadables) {
+                                cur.next = threadable;
+                                cur = threadable;
+                            }
+                        }
+                        return first;
                     } catch (final MessagingException e) {
                         throw new ProtocolException(e.getMessage(), e);
                     }
