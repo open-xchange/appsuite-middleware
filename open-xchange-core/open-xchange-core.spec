@@ -159,7 +159,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
-    GWCONFFILES="filestorage.properties folderjson.properties mail-push.properties messaging.properties publications.properties push.properties secret.properties secrets threadpool.properties meta/ui.yml settings/themes.properties settings/ui.properties "
+    GWCONFFILES="filestorage.properties folderjson.properties mail-push.properties messaging.properties publications.properties push.properties secret.properties secrets threadpool.properties meta/ui.yml settings/themes.properties settings/ui.properties"
     COCONFFILES="i18n.properties"
     for FILE in ${GWCONFFILES}; do
         if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
