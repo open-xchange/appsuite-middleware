@@ -279,7 +279,7 @@ public final class Threadable {
      * The setNext() and setChild() methods will be used on this placeholder, as either the object or the argument, just as for other
      * elements of the tree.
      */
-    public static Threadable makeDummy() {
+    public Threadable makeDummy() {
         return new Threadable();
     }
 

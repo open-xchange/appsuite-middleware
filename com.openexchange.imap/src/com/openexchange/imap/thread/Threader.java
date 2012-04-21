@@ -54,7 +54,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link Threader}
+ * {@link Threader} - This is an implementation of a message threading algorithm, as originally devised by Zamie Zawinski. See <a
+ * href="http://www.jwz.org/doc/threading.html">http://www.jwz.org/doc/threading.html</a> for details. For his Java implementation, see <a
+ * href="http://lxr.mozilla.org/mozilla/source/grendel/sources/grendel/view/Threader.java">http://lxr.mozilla.org/mozilla/source/grendel
+ * /sources/grendel/view/Threader.java</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -135,9 +138,9 @@ public class Threader {
     //
     private void buildContainer(final Threadable threadable) {
         String id = threadable.messageThreadID();
-        ThreadContainer c = idMap.get(id);
+        ThreadContainer container = idMap.get(id);
 
-        if (c != null) {
+        if (container != null) {
             // There is already a ThreadContainer in the table for this ID.
             // Under normal circumstances, there will be no IThreadable in it
             // (since it was a forward reference from a References field.)
@@ -147,55 +150,55 @@ public class Threader {
             // this one, sigh... This ID is only used to cause the two entries
             // in the hash table to not stomp each other.
             //
-            if (c.threadable != null) {
+            if (container.threadable != null) {
                 id = "<Bogus-id:" + (bogusIdCount++) + ">";
-                c = null;
+                container = null;
             } else {
-                c.threadable = threadable;
+                container.threadable = threadable;
             }
         }
 
         // Create a ThreadContainer for this IThreadable, and index it in
         // the hash table.
         //
-        if (c == null) {
-            c = new ThreadContainer();
-            c.threadable = threadable;
+        if (container == null) {
+            container = new ThreadContainer();
+            container.threadable = threadable;
             // c.debug_id = id;
-            idMap.put(id, c);
+            idMap.put(id, container);
         }
 
         // Create ThreadContainers for each of the references which don't
         // have them. Link each of the referenced messages together in the
         // order implied by the references field, unless they are already
         // linked.
-        ThreadContainer parent_ref = null;
+        ThreadContainer parentRef = null;
         {
             final String[] refs = threadable.messageThreadReferences();
             final int len = (refs == null ? 0 : refs.length);
             for (int i = 0; i < len; i++) {
-                final String ref_string = refs[i];
-                ThreadContainer ref = idMap.get(ref_string);
+                final String refString = refs[i];
+                ThreadContainer ref = idMap.get(refString);
 
                 if (ref == null) {
                     ref = new ThreadContainer();
                     // ref.debug_id = ref_string;
-                    idMap.put(ref_string, ref);
+                    idMap.put(refString, ref);
                 }
 
                 // If we have references A B C D, make D be a child of C, etc,
                 // except if they have parents already.
                 //
-                if (parent_ref != null && // there is a parent
+                if (parentRef != null && // there is a parent
                 ref.parent == null && // don't have a parent already
-                parent_ref != ref && // not a tight loop
-                !parent_ref.find_child(ref)) { // not a wide loop
+                parentRef != ref && // not a tight loop
+                !parentRef.findChild(ref)) { // not a wide loop
                     // Ok, link it into the parent's child list.
-                    ref.parent = parent_ref;
-                    ref.next = parent_ref.child;
-                    parent_ref.child = ref;
+                    ref.parent = parentRef;
+                    ref.next = parentRef.child;
+                    parentRef.child = ref;
                 }
-                parent_ref = ref;
+                parentRef = ref;
             }
         }
 
@@ -203,11 +206,11 @@ public class Threader {
         // in the references field. Make that be the parent of this container,
         // unless doing so would introduce a circularity.
         //
-        if (parent_ref != null && (parent_ref == c || c.find_child(parent_ref))) {
-            parent_ref = null;
+        if (parentRef != null && (parentRef == container || container.findChild(parentRef))) {
+            parentRef = null;
         }
 
-        if (c.parent != null) {
+        if (container.parent != null) {
             // If it has a parent already, that's there because we saw this message
             // in a references field, and presumed a parent based on the other
             // entries in that field. Now that we have the actual message, we can
@@ -220,30 +223,30 @@ public class Threader {
             // kind of lie...)
             //
             ThreadContainer rest, prev;
-            for (prev = null, rest = c.parent.child; rest != null; prev = rest, rest = rest.next) {
-                if (rest == c) {
+            for (prev = null, rest = container.parent.child; rest != null; prev = rest, rest = rest.next) {
+                if (rest == container) {
                     break;
                 }
             }
             if (rest == null) {
-                throw new Error("didn't find " + c + " in parent " + c.parent);
+                throw new RuntimeException("Didnt find " + container + " in parent" + container.parent);
             }
 
             if (prev == null) {
-                c.parent.child = c.next;
+                container.parent.child = container.next;
             } else {
-                prev.next = c.next;
+                prev.next = container.next;
             }
 
-            c.next = null;
-            c.parent = null;
+            container.next = null;
+            container.parent = null;
         }
 
         // If we have a parent, link c into the parent's child list.
-        if (parent_ref != null) {
-            c.parent = parent_ref;
-            c.next = parent_ref.child;
-            parent_ref.child = c;
+        if (parentRef != null) {
+            container.parent = parentRef;
+            container.next = parentRef.child;
+            parentRef.child = container;
         }
     }
 
@@ -256,7 +259,7 @@ public class Threader {
         for (final ThreadContainer c : idMap.values()) {
             if (c.parent == null) {
                 if (c.next != null) {
-                    throw new Error("c.next is " + c.next.toString());
+                    throw new RuntimeException("c.next is " + c.next.toString());
                 }
                 c.next = root.child;
                 root.child = c;
@@ -369,7 +372,7 @@ public class Threader {
         }
 
         // Make the hash table large enough to not need to be rehashed.
-        Map<String, ThreadContainer> subj_table = new HashMap<String, ThreadContainer>((int) (count * 1.2), (float) 0.9);
+        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>((int) (count * 1.2), (float) 0.9);
 
         count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
@@ -388,7 +391,7 @@ public class Threader {
                 continue;
             }
 
-            final ThreadContainer old = subj_table.get(subj);
+            final ThreadContainer old = subjTable.get(subj);
 
             // Add this container to the table if:
             // - There is no container in the table with this subject, or
@@ -399,7 +402,7 @@ public class Threader {
             // The non-re version is the more interesting of the two.
             //
             if (old == null || (c.threadable == null && old.threadable != null) || (old.threadable != null && old.threadable.subjectIsReply() && c.threadable != null && !c.threadable.subjectIsReply())) {
-                subj_table.put(subj, c);
+                subjTable.put(subj, c);
                 count++;
             }
         }
@@ -427,7 +430,7 @@ public class Threader {
                 continue;
             }
 
-            final ThreadContainer old = subj_table.get(subj);
+            final ThreadContainer old = subjTable.get(subj);
             if (old == c) {
                 continue;
             }
@@ -523,9 +526,6 @@ public class Threader {
             // we've done a merge, so keep the same `prev' next time around.
             c = prev;
         }
-
-        subj_table.clear();
-        subj_table = null;
     }
 
     /**
@@ -584,13 +584,13 @@ public class Threader {
 
         // Returns true if child is under self's tree. This is used for
         // detecting circularities in the references header.
-        boolean find_child(final ThreadContainer target) {
+        boolean findChild(final ThreadContainer target) {
             if (child == null) {
                 return false;
             } else if (child == target) {
                 return true;
             } else {
-                return child.find_child(target);
+                return child.findChild(target);
             }
         }
 
