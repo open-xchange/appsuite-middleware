@@ -964,9 +964,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         try {
-            if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
-                throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
-            }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
             if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
