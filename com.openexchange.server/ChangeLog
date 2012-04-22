@@ -1,5 +1,9 @@
 * 2012-04-20 - thorben.betten@open-xchange.com
 
+ - Fix for bug 21997: Denied mail access for admin user now leads to a better understandable message
+
+* 2012-04-20 - thorben.betten@open-xchange.com
+
  - Fix for bug 21858: Introduced parameter to drop reply/forward prefix (which might incompatible with external clients)
 
 * 2012-04-20 - martin.herfurth@open-xchange.com
