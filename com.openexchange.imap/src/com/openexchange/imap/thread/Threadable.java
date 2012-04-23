@@ -150,7 +150,7 @@ public final class Threadable {
     private void simplifySubject() {
 
         int start = 0;
-        final int L = subject.length();
+        final int len = subject.length();
 
         boolean done = false;
         while (!done) {
@@ -161,24 +161,22 @@ public final class Threadable {
                 start++;
             }
 
-            if (start < (L - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e' || subject.charAt(start + 1) == 'e')) {
+            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e' || subject.charAt(start + 1) == 'e')) {
                 if (subject.charAt(start + 2) == ':') {
                     start += 3; // Skip over "Re:"
                     has_re = true; // yes, we found it.
                     done = false; // keep going.
-                    done = false;
-
-                } else if (start < (L - 2) && (subject.charAt(start + 2) == '[' || subject.charAt(start + 2) == '(')) {
+                } else if (start < (len - 2) && (subject.charAt(start + 2) == '[' || subject.charAt(start + 2) == '(')) {
                     int i = start + 3; // skip over "Re[" or "Re("
 
                     // Skip forward over digits after the "[" or "(".
-                    while (i < L && subject.charAt(i) >= '0' && subject.charAt(i) <= '9') {
+                    while (i < len && subject.charAt(i) >= '0' && subject.charAt(i) <= '9') {
                         i++;
                     }
 
                     // Now ensure that the following thing is "]:" or "):"
                     // Only if it is do we alter `start'.
-                    if (i < (L - 1) && (subject.charAt(i) == ']' || subject.charAt(i) == ')') && subject.charAt(i + 1) == ':') {
+                    if (i < (len - 1) && (subject.charAt(i) == ']' || subject.charAt(i) == ')') && subject.charAt(i + 1) == ':') {
                         start = i + 2; // Skip over "]:"
                         has_re = true; // yes, we found it.
                         done = false; // keep going.
@@ -191,13 +189,13 @@ public final class Threadable {
             }
         }
 
-        int end = L;
+        int end = len;
         // Strip trailing whitespace.
         while (end > start && subject.charAt(end - 1) < ' ') {
             end--;
         }
 
-        if (start == 0 && end == L) {
+        if (start == 0 && end == len) {
             subject2 = subject;
         } else {
             subject2 = subject.substring(start, end);
