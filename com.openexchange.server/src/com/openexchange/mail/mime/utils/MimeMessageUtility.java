@@ -1316,8 +1316,10 @@ public final class MimeMessageUtility {
     private static final Pattern PAT_ENC_WORDS;
 
     static {
-        final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
-        PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
+        final String regex = "(\\?=)" + "(?:\r?\n(?:\t| +))" + "(=\\?)";
+        PAT_ENC_WORDS = Pattern.compile(regex);
+        //final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
+        //PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
     }
 
     /**
