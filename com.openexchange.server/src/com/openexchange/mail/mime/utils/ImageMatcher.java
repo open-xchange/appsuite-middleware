@@ -84,7 +84,7 @@ public final class ImageMatcher {
      * The pattern to look-up Open-Xchange image URLs inside HTML content.
      * 
      * <pre>
-     * final Matcher m = PATTERN_REF_IMG.matcher(s);
+     * final Matcher m = ImageMatcher.matcher(s);
      * if (m.find()) {
      *     System.out.println(m.group(5)); // Prints the managed file identifier or &lt;code&gt;null&lt;/code&gt;
      *     System.out.println(m.group(13)); // Prints the image identifier or &lt;code&gt;null&lt;/code&gt;
