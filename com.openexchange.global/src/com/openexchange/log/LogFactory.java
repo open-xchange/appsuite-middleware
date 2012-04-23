@@ -55,6 +55,7 @@ import org.apache.commons.logging.LogConfigurationException;
  * {@link LogFactory} - The <code>org.apache.commons.logging.LogFactory</code> using {@link LogService}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc annotations
  */
 public class LogFactory {
 
