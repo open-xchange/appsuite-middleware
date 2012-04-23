@@ -62,7 +62,7 @@ import com.openexchange.oauth.internal.DeleteListenerRegistry;
  */
 public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer<OAuthAccountDeleteListener,OAuthAccountDeleteListener> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteListenerServiceTracker.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteListenerServiceTracker.class));
 
     private final BundleContext context;
 

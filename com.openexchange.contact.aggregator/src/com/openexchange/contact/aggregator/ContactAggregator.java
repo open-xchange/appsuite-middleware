@@ -52,7 +52,7 @@ package com.openexchange.contact.aggregator;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.aggregator.ContactSource.Type;

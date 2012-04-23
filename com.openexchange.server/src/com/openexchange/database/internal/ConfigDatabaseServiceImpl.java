@@ -58,7 +58,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;

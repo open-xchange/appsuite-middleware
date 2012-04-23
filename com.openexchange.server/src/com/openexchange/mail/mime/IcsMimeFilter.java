@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.mail.BodyPart;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MessageUtility;

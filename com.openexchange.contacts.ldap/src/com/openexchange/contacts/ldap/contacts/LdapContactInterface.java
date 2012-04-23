@@ -96,7 +96,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactInterface implements ContactInterface {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapContactInterface.class));
 
     private class ContactLoaderTask implements Runnable {
 

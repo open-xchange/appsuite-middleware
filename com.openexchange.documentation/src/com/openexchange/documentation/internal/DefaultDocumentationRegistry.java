@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ContainerDescription;
 import com.openexchange.documentation.descriptions.ModuleDescription;

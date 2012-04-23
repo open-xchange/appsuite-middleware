@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;

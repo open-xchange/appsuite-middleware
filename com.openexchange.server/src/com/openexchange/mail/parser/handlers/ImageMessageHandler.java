@@ -78,7 +78,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class ImageMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageMessageHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageMessageHandler.class));
 
     private final String cid;
 

@@ -96,7 +96,7 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -300,7 +300,7 @@ public final class MailFolderImpl extends AbstractFolder {
                             name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                         }
                     } catch (final OXException e) {
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
                         mailFolderType = MailFolderType.NONE;
                     }
                 }

@@ -62,7 +62,7 @@ public final class AJPv13CPingRequest extends AbstractAJPv13Request {
 
     private static final String STR_RECEIVED_CPING = "Received CPing";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13CPingRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13CPingRequest.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

@@ -89,7 +89,7 @@ public final class FolderWriter {
      * The logger constant.
      */
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderWriter.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderWriter.class));
 
     protected static final boolean WARN = LOG.isWarnEnabled();
 

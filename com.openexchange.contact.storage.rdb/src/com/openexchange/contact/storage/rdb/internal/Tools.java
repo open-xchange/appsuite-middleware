@@ -54,7 +54,7 @@ import java.sql.DataTruncation;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;

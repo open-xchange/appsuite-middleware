@@ -185,7 +185,7 @@ public class ProxyServlet extends SessionServlet {
             final Response response = new ResponseImpl(httpMethod);
             for (final Restriction restriction : registration.getRestrictions()) {
                 if (!restriction.allow(response)) {
-                    final org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class));
+                    final org.apache.commons.logging.Log log = Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServlet.class));
                     log.info("Status code 403 (FORBIDDEN): Restriction failed: " + restriction.getDescription());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
                     return;
@@ -215,7 +215,7 @@ public class ProxyServlet extends SessionServlet {
                 try {
                     responseStream.close();
                 } catch (final Exception e) {
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
                 }
             }
         } finally {
@@ -286,7 +286,7 @@ public class ProxyServlet extends SessionServlet {
                     stream.close();
                 }
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

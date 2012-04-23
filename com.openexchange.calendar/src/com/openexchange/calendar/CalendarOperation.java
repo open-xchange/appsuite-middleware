@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;

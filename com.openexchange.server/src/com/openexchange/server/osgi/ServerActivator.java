@@ -59,7 +59,7 @@ import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

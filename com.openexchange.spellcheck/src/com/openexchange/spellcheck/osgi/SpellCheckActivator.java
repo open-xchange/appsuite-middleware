@@ -67,7 +67,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SpellCheckActivator extends HousekeepingActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(SpellCheckActivator.class);
 
 	/**

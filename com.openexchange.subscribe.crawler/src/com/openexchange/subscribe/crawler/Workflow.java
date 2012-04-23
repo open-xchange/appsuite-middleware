@@ -53,7 +53,7 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.BrowserVersionFeatures;

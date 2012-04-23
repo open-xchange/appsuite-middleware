@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class AutosaveAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AutosaveAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AutosaveAction.class));
 
     /**
      * Initializes a new {@link AutosaveAction}.

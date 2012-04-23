@@ -220,7 +220,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                     return service;
                 }
                 final org.apache.commons.logging.Log logger =
-                    org.apache.commons.logging.LogFactory.getLog(OSGIMessagingServiceRegistry.Customizer.class);
+                    com.openexchange.log.LogFactory.getLog(OSGIMessagingServiceRegistry.Customizer.class);
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("Messaging service ").append(addMe.getDisplayName()).append(
                         " could not be added to registry. Another service is already registered with identifier: ").append(addMe.getId()).toString());

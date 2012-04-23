@@ -59,7 +59,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;

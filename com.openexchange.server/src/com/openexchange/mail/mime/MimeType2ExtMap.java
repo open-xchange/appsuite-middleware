@@ -83,7 +83,7 @@ import com.openexchange.configuration.SystemConfig;
  */
 public final class MimeType2ExtMap {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeType2ExtMap.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeType2ExtMap.class));
 
     private static volatile Map<String, String> typeMap;
 

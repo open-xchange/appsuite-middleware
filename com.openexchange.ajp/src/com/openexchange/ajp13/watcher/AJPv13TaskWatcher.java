@@ -75,7 +75,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AJPv13TaskWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13TaskWatcher.class));
 
     private ScheduledTimerTask scheduledTimerTask;
 

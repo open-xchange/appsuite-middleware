@@ -72,7 +72,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -625,7 +625,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
             } catch (final Exception e) {
                 final org.apache.commons.logging.Log log =
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheFolderStorage.class));
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheFolderStorage.class));
                 if (log.isDebugEnabled()) {
                     log.debug(e.getMessage(), e);
                 }

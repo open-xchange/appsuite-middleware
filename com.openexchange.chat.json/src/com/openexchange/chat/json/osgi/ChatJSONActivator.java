@@ -51,7 +51,7 @@ package com.openexchange.chat.json.osgi;
 
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;

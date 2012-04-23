@@ -73,7 +73,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private static final long serialVersionUID = 6666321725945931657L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxAccess.class));
 
     /**
      * Fullname of INBOX.

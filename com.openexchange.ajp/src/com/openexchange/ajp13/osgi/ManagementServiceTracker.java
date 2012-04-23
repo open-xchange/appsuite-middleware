@@ -52,7 +52,7 @@ package com.openexchange.ajp13.osgi;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;

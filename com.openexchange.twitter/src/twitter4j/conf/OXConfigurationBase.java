@@ -101,7 +101,7 @@ public final class OXConfigurationBase {
      * @param configurationService The service
      */
     public void parseFrom(final ConfigurationService configurationService) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterConfiguration.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterConfiguration.class));
         {
             String property = configurationService.getProperty("com.openexchange.twitter.clientVersion");
             if (null == property) {

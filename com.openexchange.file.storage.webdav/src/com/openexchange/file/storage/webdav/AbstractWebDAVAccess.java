@@ -109,7 +109,7 @@ public abstract class AbstractWebDAVAccess {
                     stream.close();
                 }
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractWebDAVAccess.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractWebDAVAccess.class)).error(e.getMessage(), e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

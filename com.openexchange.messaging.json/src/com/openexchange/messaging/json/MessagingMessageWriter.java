@@ -59,7 +59,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

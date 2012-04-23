@@ -70,7 +70,7 @@ import com.openexchange.osgi.ServiceRegistry;
 public class VirtualFolderStorageActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualFolderStorageActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualFolderStorageActivator.class));
 
     /**
      * Initializes a new {@link VirtualFolderStorageActivator}.

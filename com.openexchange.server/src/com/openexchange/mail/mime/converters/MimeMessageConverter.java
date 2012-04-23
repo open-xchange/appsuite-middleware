@@ -121,7 +121,7 @@ import com.sun.mail.pop3.POP3Folder;
  */
 public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageConverter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -165,7 +165,7 @@ public final class MimeMessageConverter {
             MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
         public static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessageFieldFiller.class));
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageFieldFiller.class));
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.

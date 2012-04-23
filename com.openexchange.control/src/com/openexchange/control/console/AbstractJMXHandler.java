@@ -33,7 +33,7 @@ public abstract class AbstractJMXHandler {
 
     protected static final class AbstractConsoleJMXAuthenticator implements JMXAuthenticator {
 
-        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractConsoleJMXAuthenticator.class));
+        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractConsoleJMXAuthenticator.class));
 
         private static volatile Charset US_ASCII;
 

@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractAttachmentAction implements AJAXActionService {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractAttachmentAction.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractAttachmentAction.class));
 
     protected static final AttachmentParser PARSER = new AttachmentParser();
 

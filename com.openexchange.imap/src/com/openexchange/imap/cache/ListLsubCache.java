@@ -77,7 +77,7 @@ public final class ListLsubCache {
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListLsubCache.Key.class);
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ListLsubCache.Key.class);
 
     private static final class Key {
 

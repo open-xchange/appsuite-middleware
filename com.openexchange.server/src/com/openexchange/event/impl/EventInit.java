@@ -50,7 +50,7 @@
 package com.openexchange.event.impl;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;

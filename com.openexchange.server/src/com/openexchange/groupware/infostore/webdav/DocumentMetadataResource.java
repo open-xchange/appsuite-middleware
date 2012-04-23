@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;

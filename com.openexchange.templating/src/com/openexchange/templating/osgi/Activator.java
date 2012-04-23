@@ -61,7 +61,7 @@ import com.openexchange.templating.impl.OXIntegration;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Activator.class));
 
     @Override
     public void startBundle() throws Exception {

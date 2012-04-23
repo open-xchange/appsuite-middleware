@@ -41,7 +41,7 @@ public class XmlPullParserFactory {
         referenceContextClass = f.getClass();
     }
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(XmlPullParserFactory.class);
 
     /** Name of the system or midlet property that should be used for

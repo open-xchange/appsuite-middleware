@@ -108,7 +108,7 @@ responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(NewAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAction.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

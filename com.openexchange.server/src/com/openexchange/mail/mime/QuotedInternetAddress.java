@@ -83,7 +83,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final long serialVersionUID = -2523736473507495692L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(QuotedInternetAddress.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(QuotedInternetAddress.class));
 
     private static final boolean IGNORE_BOGUS_GROUP_NAME = getBooleanSystemProperty("mail.mime.address.ignorebogusgroupname", true);
 

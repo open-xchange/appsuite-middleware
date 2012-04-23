@@ -99,7 +99,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class AllAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AllAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AllAction.class));
 
     /**
      * Initializes a new {@link AllAction}.

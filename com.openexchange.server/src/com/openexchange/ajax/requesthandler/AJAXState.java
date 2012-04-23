@@ -65,7 +65,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class AJAXState {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJAXState.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJAXState.class));
 
     private final Map<String, Object> properties;
 

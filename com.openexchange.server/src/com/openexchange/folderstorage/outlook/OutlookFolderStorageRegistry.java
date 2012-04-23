@@ -124,7 +124,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
                 } else {
                     // No, already present
                     final org.apache.commons.logging.Log log =
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageRegistry.class));
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorageRegistry.class));
                     if (log.isErrorEnabled()) {
                         log.error("Duplicate folder storage for content type \"" + contentTypes[j].toString() + "\"", new Throwable());
                     }

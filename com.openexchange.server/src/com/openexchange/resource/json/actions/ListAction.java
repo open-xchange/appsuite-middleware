@@ -80,7 +80,7 @@ responseDescription = "An array of resource objects as described in Resource res
 public final class ListAction extends AbstractResourceAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListAction.class));
 
     /**
      * Initializes a new {@link ListAction}.

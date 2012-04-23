@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedFileImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
 
     private static final ManagedFileImageDataSource IMAGE_DATA_SOURCE = new ManagedFileImageDataSource();
 

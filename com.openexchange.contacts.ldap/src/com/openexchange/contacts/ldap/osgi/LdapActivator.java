@@ -75,7 +75,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class LdapActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapActivator.class));
 
     /**
      * Initializes a new {@link LdapActivator}

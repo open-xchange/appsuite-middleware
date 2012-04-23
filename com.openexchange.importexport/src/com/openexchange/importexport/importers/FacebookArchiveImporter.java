@@ -54,7 +54,7 @@ public class FacebookArchiveImporter extends AbstractImporter {
             zis.close();
             is.close();
         } catch (final IOException e) {
-            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FacebookArchiveImporter.class);
+            final org.apache.commons.logging.Log log = com.openexchange.log.LogFactory.getLog(FacebookArchiveImporter.class);
             log.error("Unexpected exception.", e);
         }
 

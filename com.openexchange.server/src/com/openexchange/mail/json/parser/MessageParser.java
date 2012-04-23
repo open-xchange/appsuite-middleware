@@ -132,7 +132,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageParser.class));
 
     /**
      * No instantiation

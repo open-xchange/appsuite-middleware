@@ -131,7 +131,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The logger instance for {@link IMAPAccess} class.
      */
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPAccess.class));
 
     /**
      * Whether info logging is enabled for this class.

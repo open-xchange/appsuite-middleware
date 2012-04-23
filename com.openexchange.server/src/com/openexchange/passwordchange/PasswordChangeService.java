@@ -80,7 +80,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public abstract class PasswordChangeService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasswordChangeService.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasswordChangeService.class));
 
     /**
      * Initializes a new {@link PasswordChangeService}

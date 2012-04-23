@@ -76,7 +76,7 @@ import com.openexchange.osgi.ServiceRegistry;
 public final class MessagingFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingFolderStorageActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingFolderStorageActivator.class));
 
     private ServiceRegistration<FolderStorage> folderStorageRegistration;
 

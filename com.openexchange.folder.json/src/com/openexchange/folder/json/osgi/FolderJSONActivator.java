@@ -51,7 +51,7 @@ package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
@@ -146,7 +146,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJSONActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderJSONActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

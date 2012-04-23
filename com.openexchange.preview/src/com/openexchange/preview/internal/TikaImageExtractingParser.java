@@ -76,7 +76,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 public final class TikaImageExtractingParser implements Parser {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaImageExtractingParser.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TikaImageExtractingParser.class));
 
     private static final Set<MediaType> TYPES_IMAGE;
 

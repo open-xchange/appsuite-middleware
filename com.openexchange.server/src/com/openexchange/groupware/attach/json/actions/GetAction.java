@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An object containing all data of the requested attachment. The fields of the object are listed in Common object data (with only id, created_by and creation_date available) and Attachment object.")
 public final class GetAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetAction.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
 
     private static final String DATASOURCE = "datasource";
 

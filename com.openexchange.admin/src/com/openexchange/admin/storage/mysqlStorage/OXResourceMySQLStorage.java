@@ -56,7 +56,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.PoolException;
