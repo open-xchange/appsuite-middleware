@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public final class TransportLoginHandler implements LoginHandlerService {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TransportLoginHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportLoginHandler.class));
 
     /**
      * Initializes a new {@link TransportLoginHandler}.

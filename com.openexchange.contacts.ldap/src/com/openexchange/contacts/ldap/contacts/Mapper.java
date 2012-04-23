@@ -71,7 +71,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class Mapper {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Mapper.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Mapper.class));
 
     public interface SetterDateClosure {
 

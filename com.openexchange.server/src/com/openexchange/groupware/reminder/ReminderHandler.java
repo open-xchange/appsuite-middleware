@@ -62,7 +62,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;

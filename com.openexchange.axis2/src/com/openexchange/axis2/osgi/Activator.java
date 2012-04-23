@@ -60,7 +60,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 public class Activator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Activator.class);
 
     private final AtomicBoolean started;
 

@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class MailAccountProperties implements IMailProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountProperties.class));
 
     protected final Map<String, String> properties;
 

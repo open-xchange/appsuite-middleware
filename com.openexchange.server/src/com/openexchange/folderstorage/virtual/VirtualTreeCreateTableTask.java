@@ -119,7 +119,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         createTable("virtualBackupPermission", getDelTable2(), contextId);
         createTable("virtualBackupSubscription", getDelTable3(), contextId);
 
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualTreeCreateTableTask.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualTreeCreateTableTask.class));
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'VirtualTreeCreateTableTask' successfully performed!");
         }

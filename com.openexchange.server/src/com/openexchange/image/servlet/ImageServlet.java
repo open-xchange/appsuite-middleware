@@ -63,7 +63,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
@@ -398,7 +398,7 @@ public final class ImageServlet extends HttpServlet {
         try {
             in.close();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
         }
     }
 

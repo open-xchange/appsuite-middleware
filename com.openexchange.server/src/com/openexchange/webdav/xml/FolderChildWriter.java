@@ -53,7 +53,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.groupware.container.DataObject;

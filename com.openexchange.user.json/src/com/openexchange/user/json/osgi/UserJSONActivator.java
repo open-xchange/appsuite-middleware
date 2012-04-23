@@ -112,7 +112,7 @@ public class UserJSONActivator extends AJAXModuleActivator {
                 ContactInterfaceDiscoveryService.class));
             openTrackers();
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserJSONActivator.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserJSONActivator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }

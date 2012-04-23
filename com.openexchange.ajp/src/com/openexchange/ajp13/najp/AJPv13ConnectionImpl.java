@@ -84,7 +84,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ConnectionImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13ConnectionImpl.class));
 
     private int state;
 

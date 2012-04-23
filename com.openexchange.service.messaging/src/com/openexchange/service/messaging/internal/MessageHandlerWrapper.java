@@ -65,7 +65,7 @@ import com.openexchange.service.messaging.MessagingServiceConstants;
  */
 public final class MessageHandlerWrapper {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageHandlerWrapper.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageHandlerWrapper.class));
 
     private final ServiceReference reference;
 

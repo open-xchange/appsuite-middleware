@@ -18,7 +18,7 @@
 package com.openexchange.ajp13.coyote;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.

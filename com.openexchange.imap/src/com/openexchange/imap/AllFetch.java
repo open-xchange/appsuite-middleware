@@ -95,7 +95,7 @@ public final class AllFetch {
     /**
      * The logger constant.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AllFetch.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AllFetch.class));
 
     /**
      * Whether debug logging is enabled.

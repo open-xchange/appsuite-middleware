@@ -107,7 +107,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     protected static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(AjpProcessor.class));
 
     private static final boolean TRACE = LOG.isTraceEnabled();
 

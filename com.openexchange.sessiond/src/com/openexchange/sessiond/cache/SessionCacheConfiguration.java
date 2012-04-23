@@ -63,7 +63,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
  */
 public final class SessionCacheConfiguration implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SessionCacheConfiguration.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SessionCacheConfiguration.class));
 
     private static final SessionCacheConfiguration instance = new SessionCacheConfiguration();
 

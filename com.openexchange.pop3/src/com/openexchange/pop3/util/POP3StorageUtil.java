@@ -74,7 +74,7 @@ import com.openexchange.pop3.storage.POP3StoragePropertyNames;
  */
 public class POP3StorageUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3StorageUtil.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StorageUtil.class));
 
     /**
      * Initializes a new {@link POP3StorageUtil}.

@@ -116,7 +116,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class JSONMessageHandler implements MailMessageHandler {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JSONMessageHandler.class));
 
     private static final String VIRTUAL = "___VIRTUAL___";
 

@@ -65,7 +65,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class POP3Properties extends AbstractProtocolProperties implements IPOP3Properties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3Properties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3Properties.class));
 
     private static final POP3Properties instance = new POP3Properties();
 

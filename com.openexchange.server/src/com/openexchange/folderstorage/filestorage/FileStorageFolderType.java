@@ -110,7 +110,7 @@ public final class FileStorageFolderType implements FolderType {
         try {
             pfi = new FileStorageFolderIdentifier(folderId);
         } catch (final OXException e) {
-            // com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageFolderType.class)).warn(e.getMessage(), e);
+            // com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageFolderType.class)).warn(e.getMessage(), e);
             return false;
         }
         /*

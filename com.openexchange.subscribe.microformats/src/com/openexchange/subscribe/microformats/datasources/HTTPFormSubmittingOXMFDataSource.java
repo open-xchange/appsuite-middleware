@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 import com.openexchange.exception.OXException;

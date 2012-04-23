@@ -68,7 +68,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class ExtendedMimeMessage extends MimeMessage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ExtendedMimeMessage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ExtendedMimeMessage.class));
 
     private final String fullname;
 

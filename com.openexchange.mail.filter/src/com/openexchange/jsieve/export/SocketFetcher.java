@@ -68,7 +68,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class SocketFetcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SocketFetcher.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SocketFetcher.class));
 
     private static final class PrivilegedActionImpl implements PrivilegedAction<Object> {
 

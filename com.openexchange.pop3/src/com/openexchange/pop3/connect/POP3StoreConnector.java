@@ -89,7 +89,7 @@ import com.sun.mail.pop3.POP3Store;
  */
 public final class POP3StoreConnector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3StoreConnector.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StoreConnector.class));
 
     private static final PrintStream EMPTY_PRINTER = new PrintStream(new OutputStream() {
 
@@ -437,7 +437,7 @@ public final class POP3StoreConnector {
                     final List<Exception> warnings = prober.getWarnings();
                     if (!warnings.isEmpty()) {
                         final org.apache.commons.logging.Log logger =
-                            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3StoreConnector.class));
+                            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StoreConnector.class));
                         if (logger.isDebugEnabled()) {
                             final StringBuilder sb = new StringBuilder(128);
                             sb.append("Exception during probing POP3 server \"").append(server).append("\": ");

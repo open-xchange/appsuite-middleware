@@ -110,7 +110,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                     try {
                         jsonArray = (JSONArray) data;
                     } catch (final ClassCastException e) {
-                        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(NewCallAction.class));
+                        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewCallAction.class));
                         log.warn(e.getMessage(), e);
                         try {
                             jsonArray = new JSONArray(data.toString());

@@ -53,7 +53,7 @@ package com.openexchange.webdav.xml;
 
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;

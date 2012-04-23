@@ -64,7 +64,7 @@ import com.openexchange.spamhandler.spamassassin.api.SpamdService;
  */
 public class SpamdInstallationServiceListener implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpamdInstallationServiceListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamdInstallationServiceListener.class));
 
     private final BundleContext context;
 

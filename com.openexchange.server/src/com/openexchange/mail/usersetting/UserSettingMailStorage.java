@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class UserSettingMailStorage implements CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserSettingMailStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserSettingMailStorage.class));
 
     private static volatile UserSettingMailStorage singleton;
 

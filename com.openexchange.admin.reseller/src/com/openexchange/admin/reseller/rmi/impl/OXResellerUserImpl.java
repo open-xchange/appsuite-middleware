@@ -50,7 +50,7 @@
 package com.openexchange.admin.reseller.rmi.impl;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;

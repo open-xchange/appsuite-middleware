@@ -200,7 +200,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                     }
                 }
                 final org.apache.commons.logging.Log logger =
-                    org.apache.commons.logging.LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
+                    com.openexchange.log.LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(addMe.getClass().getSimpleName()).append(
                         " could not be added. Provider is already present.").toString());

@@ -82,7 +82,7 @@ import java.util.concurrent.Future;
 import javax.mail.internet.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;

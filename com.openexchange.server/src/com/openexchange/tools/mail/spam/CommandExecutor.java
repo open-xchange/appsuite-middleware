@@ -63,7 +63,7 @@ import java.io.OutputStream;
  */
 public final class CommandExecutor {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CommandExecutor.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CommandExecutor.class));
 
     private final Process process;
 

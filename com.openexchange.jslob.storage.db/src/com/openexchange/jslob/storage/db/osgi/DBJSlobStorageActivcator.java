@@ -68,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class DBJSlobStorageActivcator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DBJSlobStorageActivcator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(DBJSlobStorageActivcator.class);
 
     /**
      * Initializes a new {@link DBJSlobStorageActivcator}.

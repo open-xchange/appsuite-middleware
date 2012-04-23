@@ -52,7 +52,7 @@ package com.openexchange.imap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.sun.mail.imap.IMAPStore;
 
 

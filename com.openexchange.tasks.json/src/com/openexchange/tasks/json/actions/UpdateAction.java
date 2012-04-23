@@ -81,7 +81,7 @@ import com.openexchange.tasks.json.TaskRequest;
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated task, and maybe errors.")
 public class UpdateAction extends TaskAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
 
     /**
      * Initializes a new {@link UpdateAction}.

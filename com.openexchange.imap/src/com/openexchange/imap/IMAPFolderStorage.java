@@ -130,7 +130,7 @@ import com.sun.mail.imap.Rights;
  */
 public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPFolderStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountPOP3Properties extends MailAccountProperties implements IPOP3Properties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountPOP3Properties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountPOP3Properties.class));
 
     /**
      * Initializes a new {@link MailAccountPOP3Properties}.

@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.mail;
 
-import static org.apache.commons.logging.LogFactory.getLog;
+import static com.openexchange.log.LogFactory.getLog;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

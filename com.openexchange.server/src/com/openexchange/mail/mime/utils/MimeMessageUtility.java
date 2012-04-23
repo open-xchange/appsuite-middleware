@@ -114,7 +114,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 public final class MimeMessageUtility {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageUtility.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageUtility.class));
 
     private static final boolean TRACE = LOG.isTraceEnabled();
 

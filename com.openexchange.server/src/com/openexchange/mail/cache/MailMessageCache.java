@@ -149,7 +149,7 @@ public final class MailMessageCache {
         return updaters;
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessageCache.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageCache.class));
 
     private static final Object[] EMPTY_ARGS = new Object[0];
 

@@ -117,7 +117,7 @@ public class VoipNowActivator extends AJAXModuleActivator {
             openTrackers();
         } catch (final Throwable e) {
             final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VoipNowActivator.class));
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VoipNowActivator.class));
             LOG.error(e.getMessage(), e);
             // throw e;
         }
@@ -129,7 +129,7 @@ public class VoipNowActivator extends AJAXModuleActivator {
             cleanUp();
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VoipNowActivator.class));
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VoipNowActivator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }

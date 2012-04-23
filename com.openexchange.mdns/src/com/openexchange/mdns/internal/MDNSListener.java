@@ -63,7 +63,7 @@ import com.openexchange.mdns.MDNSServiceEntry;
  */
 public final class MDNSListener implements javax.jmdns.ServiceListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MDNSListener.class));
 
     private static final boolean INFO = LOG.isInfoEnabled();
 

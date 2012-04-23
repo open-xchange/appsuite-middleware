@@ -81,7 +81,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 public final class IMAPSearch {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSearch.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPSearch.class));
 
     /**
      * No instantiation

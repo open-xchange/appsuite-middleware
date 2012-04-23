@@ -63,7 +63,7 @@ import com.openexchange.spellcheck.servlet.SpellCheckServlet;
  */
 public final class SpellCheckServletActivator extends AbstractSessionServletActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpellCheckServletActivator.class));
 
     private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
 

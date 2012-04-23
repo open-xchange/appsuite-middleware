@@ -88,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class MailConverter implements ResultConverter, MailActionConstants {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailConverter.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailConverter.class));
 
     /**
      * Initializes a new {@link MailConverter}.
