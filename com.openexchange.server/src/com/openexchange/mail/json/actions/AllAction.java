@@ -145,7 +145,8 @@ public final class AllAction extends AbstractMailAction {
             }
             final boolean unseen = req.optBool("unseen");
             final boolean ignoreDeleted = !req.optBool("deleted", true);
-            if (unseen || ignoreDeleted) {
+            final boolean filterApplied = (unseen || ignoreDeleted);
+            if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
@@ -189,7 +190,7 @@ public final class AllAction extends AbstractMailAction {
                             MailSortField.RECEIVED_DATE.getField(),
                             orderDir,
                             columns,
-                            (unseen || ignoreDeleted) ? null : fromToIndices);
+                            filterApplied ? null : fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
@@ -203,7 +204,7 @@ public final class AllAction extends AbstractMailAction {
                     /*
                      * Get iterator
                      */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, (unseen || ignoreDeleted) ? null : fromToIndices);
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
@@ -218,7 +219,7 @@ public final class AllAction extends AbstractMailAction {
                     it.close();
                 }
             }
-            if ((null != fromToIndices) && (unseen || ignoreDeleted)) {
+            if (filterApplied && (null != fromToIndices)) {
                 final int fromIndex = fromToIndices[0];
                 int toIndex = fromToIndices[1];
                 final int sz = mails.size();
