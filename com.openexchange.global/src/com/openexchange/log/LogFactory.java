@@ -75,7 +75,7 @@ public class LogFactory {
      *            underlying logging implementation that is being wrapped)
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
      */
-    public static org.apache.commons.logging.Log getLog(final String def) {
-        return Log.valueOf(com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(def)));
+    public static org.apache.commons.logging.Log getLog(final String name) {
+        return Log.valueOf(com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(name)));
     }
 }
