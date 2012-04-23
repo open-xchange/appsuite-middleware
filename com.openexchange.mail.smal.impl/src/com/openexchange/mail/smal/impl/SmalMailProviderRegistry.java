@@ -76,7 +76,7 @@ public final class SmalMailProviderRegistry {
     private static final String SMAL_PROVIDER = "smal.provider";
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMailProviderRegistry.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalMailProviderRegistry.class));
 
     /**
      * Concurrent map used as set for mail providers

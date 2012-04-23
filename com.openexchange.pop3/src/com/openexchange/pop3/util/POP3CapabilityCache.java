@@ -77,7 +77,7 @@ public final class POP3CapabilityCache {
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3CapabilityCache.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3CapabilityCache.class));
 
     /**
      * The default capabilities providing only mandatory POP3 commands.

@@ -120,7 +120,7 @@ public class LdapJNDIImpl implements LdapInterface {
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapJNDIImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapJNDIImpl.class));
 
     private final FolderProperties folderprop;
 

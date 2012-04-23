@@ -63,7 +63,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class TimerImpl implements TimerService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimerImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(TimerImpl.class);
 
     private final AtomicBoolean started;
 

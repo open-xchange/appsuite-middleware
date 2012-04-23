@@ -75,7 +75,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CacheActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheActivator.class));
 
     private static volatile CacheService cacheService;
 

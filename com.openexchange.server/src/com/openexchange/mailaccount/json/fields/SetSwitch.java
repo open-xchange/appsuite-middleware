@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class SetSwitch implements AttributeSwitch {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SetSwitch.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SetSwitch.class));
 
     private final MailAccountDescription desc;
 

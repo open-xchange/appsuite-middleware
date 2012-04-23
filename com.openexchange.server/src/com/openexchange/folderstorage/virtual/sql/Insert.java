@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.event.impl.EventClient;

@@ -85,7 +85,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // $1($1_MSG,
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXException.class));
+        com.openexchange.exception.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXException.class));
 
     private static final long serialVersionUID = 2058371531364916608L;
 

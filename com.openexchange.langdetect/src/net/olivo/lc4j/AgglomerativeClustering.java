@@ -42,7 +42,7 @@ import cern.colt.list.IntArrayList;
  */
 public class AgglomerativeClustering {
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AgglomerativeClustering.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AgglomerativeClustering.class));
 	/** Enable debugging? */
 	private static final boolean DEBUG = LOG.isDebugEnabled();
 	/** Default buffer size. */

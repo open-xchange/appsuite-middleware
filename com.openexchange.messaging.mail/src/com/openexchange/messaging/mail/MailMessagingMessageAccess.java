@@ -85,7 +85,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class MailMessagingMessageAccess implements MessagingMessageAccess {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessagingMessageAccess.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessagingMessageAccess.class));
 
     private final IMailMessageStorage messageStorage;
 

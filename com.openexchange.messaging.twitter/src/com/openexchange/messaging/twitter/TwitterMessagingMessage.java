@@ -138,7 +138,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
             sz = multipartContent.get(0).getSize() + multipartContent.get(1).getSize();
         } catch (final OXException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingMessage.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMessagingMessage.class)).error(e.getMessage(), e);
         }
         size = sz;
 

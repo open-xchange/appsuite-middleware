@@ -55,7 +55,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -74,7 +74,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPNotifierMessageRecentListener.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPNotifierMessageRecentListener.class));
 
     private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
 

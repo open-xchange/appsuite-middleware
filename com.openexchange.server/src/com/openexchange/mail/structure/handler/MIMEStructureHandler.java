@@ -127,7 +127,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MIMEStructureHandler.class));
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
 

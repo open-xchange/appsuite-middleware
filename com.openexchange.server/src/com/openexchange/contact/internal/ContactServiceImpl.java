@@ -59,7 +59,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;

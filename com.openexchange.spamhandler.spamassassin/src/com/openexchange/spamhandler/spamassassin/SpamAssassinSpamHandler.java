@@ -167,7 +167,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 
     private static final SpamAssassinSpamHandler instance = new SpamAssassinSpamHandler();
 
-//    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class));
+//    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PropertyHandler.class));
 
     private static final String NAME = "SpamAssassin";
 

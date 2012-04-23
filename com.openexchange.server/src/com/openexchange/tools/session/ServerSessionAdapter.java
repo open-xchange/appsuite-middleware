@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
 public class ServerSessionAdapter implements ServerSession {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServerSessionAdapter.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServerSessionAdapter.class));
 
     /**
      * Gets the server session for specified session.

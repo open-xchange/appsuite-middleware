@@ -91,7 +91,7 @@ import com.openexchange.user.UserService;
 public final class IMAPActivator extends HousekeepingActivator {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPActivator.class));
 
     private WhiteboardSecretService secretService;
 

@@ -60,7 +60,7 @@ import com.openexchange.timer.internal.TimerImpl;
  */
 public final class TimerActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimerActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(TimerActivator.class);
 
     private TimerImpl timer;
 

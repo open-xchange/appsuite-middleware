@@ -74,7 +74,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfAction extends AbstractAction {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(WebdavIfAction.class);
 
     private static final IfHeaderApply STANDARD_APPLY = new StandardIfHeaderApply();

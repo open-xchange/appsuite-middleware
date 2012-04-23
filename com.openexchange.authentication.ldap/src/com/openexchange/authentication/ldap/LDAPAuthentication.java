@@ -65,7 +65,7 @@ import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;

@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MailAccessWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccessWatcher.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccessWatcher.class));
 
     private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 

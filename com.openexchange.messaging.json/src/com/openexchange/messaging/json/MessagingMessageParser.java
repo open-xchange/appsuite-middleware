@@ -259,7 +259,7 @@ public class MessagingMessageParser {
                             try {
                                 in.close();
                             } catch (final IOException e) {
-                                org.apache.commons.logging.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
+                                com.openexchange.log.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
                                     "Couldn't close input stream.",
                                     e);
                             }
@@ -501,7 +501,7 @@ public class MessagingMessageParser {
                     try {
                         in.close();
                     } catch (final IOException e) {
-                        org.apache.commons.logging.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
+                        com.openexchange.log.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
                             "Couldn't close input stream.",
                             e);
                     }

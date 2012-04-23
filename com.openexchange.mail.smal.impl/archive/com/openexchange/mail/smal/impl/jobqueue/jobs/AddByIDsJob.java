@@ -77,7 +77,7 @@ public final class AddByIDsJob extends AbstractMailSyncJob {
     private static final String SIMPLE_NAME = AddByIDsJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AddByIDsJob.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AddByIDsJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

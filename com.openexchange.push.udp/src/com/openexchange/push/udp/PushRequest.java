@@ -55,7 +55,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 
 /**

@@ -95,7 +95,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 public final class NewAppointmentsSearchAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(NewAppointmentsSearchAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAppointmentsSearchAction.class));
 
     /**
      * Initializes a new {@link NewAppointmentsSearchAction}.

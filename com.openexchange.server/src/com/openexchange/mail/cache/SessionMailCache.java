@@ -110,7 +110,7 @@ public final class SessionMailCache {
             }
         } catch (final Exception e) {
             // SWALLOW
-            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SessionMailCache.class));
+            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SessionMailCache.class));
             logger.warn(e.getMessage(), e);
         }
     }

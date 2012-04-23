@@ -61,7 +61,7 @@ import java.util.List;
 import java.util.Queue;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api2.AppointmentSQLInterface;

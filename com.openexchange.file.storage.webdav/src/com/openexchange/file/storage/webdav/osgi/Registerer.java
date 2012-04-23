@@ -65,7 +65,7 @@ import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
  */
 public final class Registerer implements EventHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Registerer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Registerer.class));
 
     private final BundleContext context;
 

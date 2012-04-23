@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public final class TwitterMailActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMailActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMailActivator.class));
 
     /**
      * Initializes a new {@link TwitterMailActivator}

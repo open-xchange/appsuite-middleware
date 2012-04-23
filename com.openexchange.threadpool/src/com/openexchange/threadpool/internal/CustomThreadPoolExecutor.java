@@ -231,7 +231,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CustomThreadPoolExecutor.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CustomThreadPoolExecutor.class));
 
     static final Object PRESENT = new Object();
 

@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.carddav.GroupwareCarddavFactory.State;
 import com.openexchange.carddav.mixins.CTag;

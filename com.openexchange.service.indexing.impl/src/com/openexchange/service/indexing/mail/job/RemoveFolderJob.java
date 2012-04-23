@@ -50,7 +50,7 @@
 package com.openexchange.service.indexing.mail.job;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.mail.dataobjects.MailMessage;

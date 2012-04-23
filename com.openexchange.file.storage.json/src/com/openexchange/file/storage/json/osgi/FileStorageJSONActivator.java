@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.json.osgi;
 
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;

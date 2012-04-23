@@ -8,6 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.config,
  com.openexchange.configjump,
  com.openexchange.exception,
+ com.openexchange.log,
  com.openexchange.osgi,
  javax.servlet.http,
  org.apache.commons.httpclient,

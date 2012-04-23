@@ -66,7 +66,7 @@ public final class DataSourceTracker implements ServiceTrackerCustomizer<DataSou
     private static final String PROP_IDENTIFIER = "identifier";
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DataSourceTracker.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DataSourceTracker.class));
 
     private final BundleContext context;
 

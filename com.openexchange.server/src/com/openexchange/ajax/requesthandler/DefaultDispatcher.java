@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 public class DefaultDispatcher implements Dispatcher {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultDispatcher.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultDispatcher.class));
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
 

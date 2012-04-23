@@ -64,7 +64,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.OAuthRequest;
@@ -304,7 +304,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
                             Integer.valueOf(size),
                             Integer.valueOf(messageIds.length));
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FacebookMessagingMessageAccess.class)).warn(warning.getMessage(), warning);
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingMessageAccess.class)).warn(warning.getMessage(), warning);
                 }
                 final Iterator<Element> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);

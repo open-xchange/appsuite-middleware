@@ -60,7 +60,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
@@ -439,7 +439,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForInfoitem.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForInfoitem.class));
 
         private final DatabaseImpl database;
 
@@ -501,7 +501,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForAttachment.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForAttachment.class));
 
         private final AttachmentBase attachments;
 
@@ -567,7 +567,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class RemoveFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoveFile.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RemoveFile.class));
 
         private final FileStorage storage;
 
@@ -600,7 +600,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteInfoitem.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteInfoitem.class));
 
         private final DatabaseImpl database;
 
@@ -652,7 +652,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteAttachment implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteAttachment.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAttachment.class));
 
         private final AttachmentBase attachments;
         public DeleteAttachment(final AttachmentBase attachments) {
@@ -712,7 +712,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateInfoitem.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateInfoitem.class));
 
         private static final String description = "This file needs attention";
         private static final String title = "Restoredfile";

@@ -71,7 +71,7 @@ public final class ACLPermission extends MailPermission {
 
     private static final long serialVersionUID = -3140342221453395764L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ACLPermission.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ACLPermission.class));
 
     private transient ACL acl;
 

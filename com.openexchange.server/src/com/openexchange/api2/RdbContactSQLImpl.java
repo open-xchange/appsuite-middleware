@@ -74,7 +74,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.database.provider.SimpleDBProvider;

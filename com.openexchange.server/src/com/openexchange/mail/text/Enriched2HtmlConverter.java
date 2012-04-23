@@ -60,7 +60,7 @@ import java.io.StringReader;
  */
 public class Enriched2HtmlConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Enriched2HtmlConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Enriched2HtmlConverter.class));
 
     private static enum ParaType {
 
