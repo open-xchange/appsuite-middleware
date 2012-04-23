@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -137,9 +138,10 @@ public final class UpdateAction extends JSlobAction {
                     jslob = jslobService.get(id, userId, contextId);
                 } else {
                     /*
-                     * Perform Set
+                     * Perform merge
                      */
-                    jslob = new JSlob(jsonData);
+                    final JSONObject merged = JSONUtil.merge(jslobService.get(id, userId, contextId).getJsonObject(), jsonData);
+                    jslob = new JSlob(merged);
                     jslobService.set(id, jslob, userId, contextId);
                     /*
                      * ... and write back

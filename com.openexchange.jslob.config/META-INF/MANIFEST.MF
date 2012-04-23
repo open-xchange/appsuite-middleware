@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.jslob.config
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.ajax.tools,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
