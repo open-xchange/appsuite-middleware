@@ -187,8 +187,8 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(term, "term");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(term, "term");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.searchContacts(contextID, userID, term, fields, sortOptions);
@@ -196,8 +196,8 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.getContacts(false, contextID, userID, folderId, null, fields, sortOptions, null);
@@ -205,9 +205,9 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(ids, "ids");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(ids, "ids");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.getContacts(false, contextID, userID, folderId, ids, fields, sortOptions, null);
@@ -215,9 +215,9 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, final SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(since, "since");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(since, "since");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.getContacts(false, contextID, userID, folderId, null, fields, sortOptions, since);
@@ -225,9 +225,9 @@ public class ContactServiceImpl implements ContactService {
 	
 	@Override
 	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(since, "since");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(since, "since");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.getContacts(true, contextID, userID, folderId, null, fields, sortOptions, since);
@@ -235,9 +235,9 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public Contact getContact(final Session session, final String folderId, final String id, final ContactField[] fields) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(id, "id");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(id, "id");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.getContact(contextID, userID, folderId, id, fields);
@@ -245,9 +245,9 @@ public class ContactServiceImpl implements ContactService {
 	
 	@Override
 	public void createContact(Session session, String folderId, Contact contact) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(contact, "contact");		
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(contact, "contact");		
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		this.createContact(contextID, userID, folderId, contact);
@@ -256,11 +256,11 @@ public class ContactServiceImpl implements ContactService {
 	@Override
 	public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
 			throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(id, "id");
-		checkArgNotNull(lastRead, "lastRead");
-		checkArgNotNull(contact, "contact");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(id, "id");
+		Check.argNotNull(lastRead, "lastRead");
+		Check.argNotNull(contact, "contact");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
@@ -272,10 +272,10 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(folderId, "folderId");
-		checkArgNotNull(id, "id");
-		checkArgNotNull(lastRead, "lastRead");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(folderId, "folderId");
+		Check.argNotNull(id, "id");
+		Check.argNotNull(lastRead, "lastRead");
 		final int contextID = session.getContextId();		
 		final int userID = session.getUserId();
 		this.deleteContact(contextID, userID, folderId, id, lastRead);
@@ -283,7 +283,7 @@ public class ContactServiceImpl implements ContactService {
 	
 	@Override
     public Contact getUser(Session session, int userID, ContactField[] fields) throws OXException {
-		checkArgNotNull(session, "session");
+		Check.argNotNull(session, "session");
 		final int contextID = session.getContextId();
 		final int currentUserID = session.getUserId();
 		return this.getUser(contextID, currentUserID, userID, fields);
@@ -291,8 +291,8 @@ public class ContactServiceImpl implements ContactService {
     
 	@Override
     public SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(userIDs, "userIDs");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(userIDs, "userIDs");
 		final int contextID = session.getContextId();
 		final int currentUserID = session.getUserId();
 		return this.getUsers(contextID, currentUserID, userIDs, null, fields, null);
@@ -300,7 +300,7 @@ public class ContactServiceImpl implements ContactService {
     
 	@Override
     public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, final SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
+		Check.argNotNull(session, "session");
 		final int contextID = session.getContextId();
 		final int currentUserID = session.getUserId();
 		return this.getUsers(contextID, currentUserID, null, null, fields, sortOptions);
@@ -308,8 +308,8 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		checkArgNotNull(session, "session");
-		checkArgNotNull(term, "term");
+		Check.argNotNull(session, "session");
+		Check.argNotNull(term, "term");
 		final int contextID = session.getContextId();
 		final int userID = session.getUserId();
 		return this.getUsers(contextID, userID, null, term, fields, sortOptions);
@@ -317,7 +317,7 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
     public String getOrganization(Session session) throws OXException {
-		checkArgNotNull(session, "session");
+		Check.argNotNull(session, "session");
 		final int contextID = session.getContextId();
 		return this.getOrganization(contextID);
     }
@@ -333,34 +333,27 @@ public class ContactServiceImpl implements ContactService {
 		 * check folder
 		 */
 		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-		}
+		Check.isContactFolder(folder, contextID, userID);
 		/*
 		 * check general permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		if (false == permission.canReadOwnObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
-		}
+		Check.canReadAll(permission, contextID, userID, folderID);
 		/*
 		 * prepare fields
 		 */
-		final QueryFields queryFields = new QueryFields(fields);		
+		final QueryFields queryFields = new QueryFields(fields);
 		/*
 		 * get contact from storage
-		 */		
+		 */
 		final Contact contact = storage.get(contextID, folderID, id, queryFields.getFields());
-		if (null == contact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), contextID);
-		}		
+		Check.contactNotNull(contact, contextID, userID);
 		/*
 		 * check further permission restrictions
 		 */
-		if (false == permission.canReadAllObjects() && contact.getCreatedBy() != userID) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
-		} else if (contact.getPrivateFlag() && contact.getCreatedBy() != userID) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
+		if (contact.getCreatedBy() != userID) {
+			Check.canReadAll(permission, contextID, userID, folderID);
+			Check.isNotPrivate(contact, contextID, userID, folderID);
 		}
 		/*
 		 * Add attachment info if needed
@@ -379,25 +372,19 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		ContactMapper.getInstance().validateAll(contact);		
+		Check.validateProperties(contact);		
 		/*
 		 * check folder
 		 */
 		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-		} else if (FolderObject.PUBLIC == folder.getType() && contact.getPrivateFlag()) {
-            throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(parse(folderID), contextID, userID);
-        } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
-        	Tools.checkWriteInGAB(storage, contextID, userID, folderID, contact);
-        }
+		Check.isContactFolder(folder, contextID, userID);
+		Check.noPrivateInPublic(folder, contact, contextID, userID);
+		Check.canWriteInGAB(storage, contextID, userID, folderID, contact);
 		/*
 		 * check general permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		if (false == permission.canCreateObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
-		}
+		Check.canCreateObjects(permission, contextID, userID, folderID);
 		/*
 		 * prepare create
 		 */
@@ -445,40 +432,28 @@ public class ContactServiceImpl implements ContactService {
 		 * check source folder
 		 */
 		final FolderObject sourceFolder = Tools.getFolder(contextID, sourceFolderId);
-		if (FolderObject.CONTACT != sourceFolder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(sourceFolderId), contextID, userID);
-		}
+		Check.isContactFolder(sourceFolder, contextID, userID);
 		final EffectivePermission sourceFolderPermission = Tools.getPermission(contextID, sourceFolderId, userID);
-		if (false == sourceFolderPermission.canDeleteOwnObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(sourceFolderId), contextID, userID);
-		}
+		Check.canDeleteOwn(sourceFolderPermission, contextID, userID, sourceFolderId);
 		/*
 		 * check destination folder
 		 */
 		final FolderObject targetFolder = Tools.getFolder(contextID, targetFolderId);
-		if (FolderObject.CONTACT != targetFolder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(targetFolderId), contextID, userID);
-		} else if (FolderObject.PUBLIC == targetFolder.getType() && contact.getPrivateFlag()) {
-	        throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(parse(targetFolderId), contextID, userID);
-	    }
+		Check.isContactFolder(targetFolder, contextID, userID);
+		Check.noPrivateInPublic(targetFolder, contact, contextID, userID);
 		final EffectivePermission targetFolderPermission = Tools.getPermission(contextID, targetFolderId, userID);
-		if (false == targetFolderPermission.canCreateObjects()) {
-			throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(targetFolderId), contextID, userID);
-		} 
+		Check.canCreateObjects(targetFolderPermission, contextID, userID, targetFolderId);
 		/*
 		 * check currently stored contact
 		 */
 		final ContactStorage sourceStorage = Tools.getStorage(contextID, sourceFolderId);
 		final Contact storedContact = sourceStorage.get(contextID, sourceFolderId, objectID, ContactField.values());
-		if (null == storedContact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
-		} else if (false == sourceFolderPermission.canDeleteAllObjects() && storedContact.getCreatedBy() != userID) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(sourceFolderId), contextID, userID);
-		} else if (lastRead.before(storedContact.getLastModified())) {
-			throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
-		} else if (storedContact.getParentFolderID() != parse(sourceFolderId)) {
-			throw ContactExceptionCodes.NOT_IN_FOLDER.create(parse(objectID), parse(sourceFolderId), contextID); 
-		}		
+		Check.contactNotNull(storedContact, contextID, userID);
+		if (storedContact.getCreatedBy() != userID) {
+			Check.canDeleteAll(sourceFolderPermission, contextID, userID, sourceFolderId);
+		}
+		Check.lastModifiedBefore(storedContact, lastRead);
+		Check.folderEquals(storedContact, sourceFolderId, contextID);
 		/*
 		 * check for not allowed changes
 		 */
@@ -550,7 +525,7 @@ public class ContactServiceImpl implements ContactService {
 		/*
 		 * check supplied contact
 		 */
-		ContactMapper.getInstance().validateAll(contact);
+		Check.validateProperties(contact);
 		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
@@ -558,33 +533,24 @@ public class ContactServiceImpl implements ContactService {
 		 * check folder
 		 */
 		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-		} else if (FolderObject.PUBLIC == folder.getType() && contact.getPrivateFlag()) {
-	        throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(parse(folderID), contextID, userID);
-	    } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
-	    	Tools.checkWriteInGAB(storage, contextID, userID, folderID, contact);
-        }
+		Check.isContactFolder(folder, contextID, userID);
+		Check.noPrivateInPublic(folder, contact, contextID, userID);
+		Check.canWriteInGAB(storage, contextID, userID, folderID, contact);
 		/*
 		 * check general permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		if (false == permission.canWriteOwnObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(folderID), contextID, userID);
-		}
+		Check.canWriteOwn(permission, contextID, userID, folderID);
 		/*
 		 * check currently stored contact
 		 */
 		final Contact storedContact = storage.get(contextID, folderID, objectID, ContactField.values());
-		if (null == storedContact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
-		} else if (false == permission.canWriteAllObjects() && storedContact.getCreatedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(folderID), contextID, userID);
-		} else if (lastRead.before(storedContact.getLastModified())) {
-			throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
-		} else if (storedContact.getParentFolderID() != parse(folderID)) {
-			throw ContactExceptionCodes.NOT_IN_FOLDER.create(parse(objectID), parse(folderID), contextID); 
+		Check.contactNotNull(storedContact, contextID, userID);
+		if (storedContact.getCreatedBy() != userID) {
+			Check.canWriteAll(permission, contextID, userID, folderID);
 		}
+		Check.lastModifiedBefore(storedContact, lastRead);
+		Check.folderEquals(storedContact, folderID, contextID);
 		/*
 		 * check for not allowed changes
 		 */
@@ -629,35 +595,28 @@ public class ContactServiceImpl implements ContactService {
 		storage.update(contextID, folderID, objectID, delta, lastRead);
 	}
 	
-	protected void deleteContact(final int contextID, final int userID, final String folderID, final String objectID, final Date lastRead) 
-			throws OXException {
+	protected void deleteContact(int contextID, int userID, String folderID, String objectID, Date lastRead) throws OXException {
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check folder
 		 */
 		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-		}
+		Check.isContactFolder(folder, contextID, userID);
 		/*
 		 * check general permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		if (false == permission.canDeleteOwnObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), contextID, userID);
-		}
+		Check.canDeleteOwn(permission, contextID, userID, folderID);
 		/*
 		 * check currently stored contact
 		 */
 		final Contact storedContact = storage.get(contextID, folderID, objectID, new ContactField[] { ContactField.CREATED_BY, 
 				ContactField.LAST_MODIFIED });
-		if (null == storedContact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
-		} else if (false == permission.canDeleteAllObjects() && storedContact.getCreatedBy() != userID) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), contextID, userID);
-		} else if (lastRead.before(storedContact.getLastModified())) {
-			throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
-		} 
+		Check.contactNotNull(storedContact, contextID, userID);
+		if (storedContact.getCreatedBy() != userID) {
+			Check.canDeleteAll(permission, contextID, userID, folderID);
+		}
+		Check.lastModifiedBefore(storedContact, lastRead);
 		/*
 		 * delete contact from storage
 		 */
@@ -688,16 +647,12 @@ public class ContactServiceImpl implements ContactService {
 		 * check folder
 		 */
 		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(parse(folderID), contextID, userID);
-		}
+		Check.isContactFolder(folder, contextID, userID);
 		/*
 		 * check general permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		if (false == permission.canReadOwnObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
-		}
+		Check.canReadOwn(permission, contextID, userID, folderID);
 		/*
 		 * prepare fields
 		 */
@@ -778,11 +733,8 @@ public class ContactServiceImpl implements ContactService {
 		final int userID = Tools.getContext(contextID).getMailadmin();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		final Contact contact = storage.get(contextID, folderID, Integer.toString(userID), new ContactField[] { ContactField.COMPANY } );
-		if (null == contact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
-		} else {
-			return contact.getCompany();
-		}
+		Check.contactNotNull(contact, contextID, userID);
+		return contact.getCompany();
 	}
 	
 	protected Contact getUser(final int contextID, final int currentUserID, final int userID, final ContactField[] fields) 
@@ -800,9 +752,7 @@ public class ContactServiceImpl implements ContactService {
 				searchIterator.close();
 			}
 		}
-		if (null == contact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
-		}		
+		Check.contactNotNull(contact, contextID, userID);
 		/*
 		 * deliver user contact
 		 */
@@ -817,8 +767,7 @@ public class ContactServiceImpl implements ContactService {
 		 * limit queried fields when necessary due to permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
-		final QueryFields queryFields;
-		
+		final QueryFields queryFields;		
 		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);		
@@ -873,10 +822,4 @@ public class ContactServiceImpl implements ContactService {
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
 	
-	private static void checkArgNotNull(final Object object, final String argumentName) {
-		if (null == object) {
-			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
-		}
-	}
-
 }
