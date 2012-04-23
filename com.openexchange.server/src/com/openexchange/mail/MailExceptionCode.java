@@ -74,9 +74,9 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     NO_MAIL_ACCESS("No mail module access permitted", Category.CATEGORY_PERMISSION_DENIED, 13),
     /**
-     * No mail account exists for admin user in context %1$s
+     * Mail account is disabled for admin user in context %1$s
      */
-    ACCOUNT_DOES_NOT_EXIST("No mail account exists for admin user in context %1$s", Category.CATEGORY_CONFIGURATION, 14),
+    ACCOUNT_DOES_NOT_EXIST("Mail account is disabled for admin user in context %1$s", Category.CATEGORY_CONFIGURATION, 14),
     /**
      * Process was interrupted. Please try again.
      */

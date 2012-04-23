@@ -72,7 +72,7 @@ public class ThreadSortNode {
      *
      * @param msgNum The number of this tree node's message.
      */
-    ThreadSortNode(final int msgNum) {
+    public ThreadSortNode(final int msgNum) {
         this.msgNum = msgNum;
         childs = new ArrayList<ThreadSortNode>();
     }
@@ -82,7 +82,7 @@ public class ThreadSortNode {
      *
      * @param child The child to add.
      */
-    void addChild(final ThreadSortNode child) {
+    public void addChild(final ThreadSortNode child) {
         childs.add(child);
     }
 
@@ -91,7 +91,7 @@ public class ThreadSortNode {
      *
      * @param childThreads The children to add.
      */
-    void addChildren(final List<ThreadSortNode> childThreads) {
+    public void addChildren(final List<ThreadSortNode> childThreads) {
         childs.addAll(childThreads);
     }
 

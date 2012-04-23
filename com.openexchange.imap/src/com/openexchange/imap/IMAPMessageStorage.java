@@ -57,6 +57,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -105,6 +106,8 @@ import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
+import com.openexchange.imap.thread.Threadable;
+import com.openexchange.imap.thread.Threader;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
@@ -961,9 +964,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         try {
-            if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
-                throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
-            }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
             if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
@@ -974,9 +974,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Sort messages by thread reference
                  */
-                final long start = System.currentTimeMillis();
-                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                final String threadResp;
+                if (imapConfig.getImapCapabilities().hasThreadReferences()) {
+                    final long start = System.currentTimeMillis();
+                    threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                } else {
+                    final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder));
+                    threadResp = Threadable.toThreadReferences(threadable, null);
+                }
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
@@ -1116,9 +1122,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
-            if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
-                throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
-            }
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
             if (0 >= imapFolder.getMessageCount()) {
                 return EMPTY_RETVAL;
@@ -1140,9 +1143,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
             final boolean descending = OrderDirection.DESC.equals(order);
-            final TIntList seqnums;
-            final List<ThreadSortNode> threadList;
-            {
+            /*
+             * Create threaded structure dependent on THREAD=REFERENCES capability
+             */
+            final String threadResp;
+            if (imapConfig.getImapCapabilities().hasThreadReferences()) {
                 /*
                  * Sort messages by thread reference
                  */
@@ -1167,14 +1172,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Get THREAD response; e.g: "((1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13))"
                  */
                 final long start = System.currentTimeMillis();
-                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
+                threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                /*
-                 * Parse THREAD response to a list structure and extract sequence numbers
-                 */
-                threadList = ThreadSortUtil.parseThreadResponse(threadResp);
-                seqnums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
+            } else {
+                final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder));
+                threadResp = Threadable.toThreadReferences(threadable, null == filter ? null : new TIntHashSet(filter));
             }
+            /*
+             * Parse THREAD response to a list structure and extract sequence numbers
+             */
+            final List<ThreadSortNode> threadList = ThreadSortUtil.parseThreadResponse(threadResp);
+            final TIntList seqnums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
             if (null == threadList) {
                 // No threads found
                 return getAllMessages(fullName, indexRange, sortField, order, mailFields);
