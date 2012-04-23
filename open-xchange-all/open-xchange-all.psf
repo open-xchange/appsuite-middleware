@@ -24,6 +24,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-xerces-sun"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-xerces-ibm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-edp1,open-xchange-recaptcha"/>
