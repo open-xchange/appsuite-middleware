@@ -49,7 +49,7 @@
 
 package com.openexchange.logging.internal;
 
-import com.openexchange.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -67,9 +67,9 @@ public final class Log4JCorrector implements LoggingCorrector {
 
     @Override
     public final void correct() {
-        for (String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {
+        for (final String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {
             LogFactory.getLog(className);
-            Logger logger = LogManager.getLogger(className);
+            final Logger logger = LogManager.getLogger(className);
             logger.setLevel(Level.INFO);
         }
     }
