@@ -51,7 +51,7 @@ package com.openexchange.jcharset;
 
 import java.nio.charset.spi.CharsetProvider;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
