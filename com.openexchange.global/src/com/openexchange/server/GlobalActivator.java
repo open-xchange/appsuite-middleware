@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -63,6 +62,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -76,7 +76,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public final class GlobalActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GlobalActivator.class));
+    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
 
     private Initialization initialization;
 
