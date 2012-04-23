@@ -75,10 +75,10 @@ public final class ImageMatcher {
     private static final int GROUP_IMG_ID = 13;
 
     private static final String REGEX_IMAGE_URL =
-        "(<img[^>]*?)(src=\")(?:.*)" + ImageServlet.ALIAS + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+        "(<img[^>]*?)(src=\")(?:.*?)" + ImageServlet.ALIAS + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
     private static final String REGEX_FILE_URL =
-        "(<img[^>]*?)(src=\")(?:.*)ajax/file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+        "(<img[^>]*?)(src=\")(?:.*?)ajax/file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
     /**
      * The pattern to look-up Open-Xchange image URLs inside HTML content.
