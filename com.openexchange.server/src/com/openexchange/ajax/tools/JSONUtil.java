@@ -50,6 +50,7 @@
 package com.openexchange.ajax.tools;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -77,8 +78,15 @@ public final class JSONUtil {
      * @throws JSONException If composing merged JSON object fails for any reason
      */
     public static JSONObject merge(final JSONObject jObject1, final JSONObject... jObjects) throws JSONException {
-        if ((null == jObject1) || (null == jObjects) || (0 == jObjects.length)) {
+        if (null == jObject1) {
             return jObject1;
+        }
+        if ((null == jObjects) || (0 == jObjects.length)) {
+            final JSONObject ret = new JSONObject();
+            for (final Entry<String,Object> entry : jObject1.entrySet()) {
+                ret.put(entry.getKey(), entry.getValue());
+            }
+            return ret;
         }
         final JSONObject merged = new JSONObject();
         for (final Iterator<String> iter = jObject1.keys(); iter.hasNext();) {
