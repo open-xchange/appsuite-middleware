@@ -49,6 +49,8 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +87,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 )
 public final class UpdateAction extends JSlobAction {
 
+    private final List<Method> restMethods;
+
     /**
      * Initializes a new {@link UpdateAction}.
      * 
@@ -92,6 +96,7 @@ public final class UpdateAction extends JSlobAction {
      */
     public UpdateAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
         super(services, actions);
+        restMethods = Collections.singletonList(Method.POST);
     }
 
     @Override
@@ -157,7 +162,10 @@ public final class UpdateAction extends JSlobAction {
     }
 
     @Override
-    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest) throws OXException, JSONException {
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
+        if (!Method.POST.equals(method)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
         /*
          * REST style access
          */
@@ -176,12 +184,26 @@ public final class UpdateAction extends JSlobAction {
             /*-
              *  PUT /jslob/11
              */
-            requestData.setAction("set");
+            requestData.setAction("update");
             requestData.putParameter("id", pathElements[0]);
+        } else if (2 == length) {
+            /*-
+             *  PUT /jslob/11/<path>
+             */
+            requestData.setAction("update");
+            requestData.putParameter("id", pathElements[0]);
+            try {
+                final JSONObject jObject = new JSONObject();
+                jObject.put("path", pathElements[1]);
+                jObject.put("value", requestData.getData());
+                requestData.setData(jObject, "json");
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()); 
+            }
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
         }
-        return actions.get("set").perform(jslobRequest);
+        return perform(jslobRequest);
     }
 
     @Override
@@ -190,8 +212,8 @@ public final class UpdateAction extends JSlobAction {
     }
 
     @Override
-    public String getRESTAction() {
-        return "PUT";
+    public List<Method> getRESTMethods() {
+        return restMethods;
     }
 
 }

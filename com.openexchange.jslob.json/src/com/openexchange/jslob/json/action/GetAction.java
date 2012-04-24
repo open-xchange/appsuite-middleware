@@ -49,9 +49,11 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -83,6 +85,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 )
 public final class GetAction extends JSlobAction {
 
+    private final List<Method> restMethods;
+
     /**
      * Initializes a new {@link GetAction}.
      * 
@@ -90,6 +94,7 @@ public final class GetAction extends JSlobAction {
      */
     public GetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
         super(services, actions);
+        restMethods = Collections.singletonList(Method.GET);
     }
 
     @Override
@@ -117,7 +122,10 @@ public final class GetAction extends JSlobAction {
     }
 
     @Override
-    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest) throws OXException {
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
+        if (!Method.GET.equals(method)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
         /*
          * REST style access
          */
@@ -155,12 +163,17 @@ public final class GetAction extends JSlobAction {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }
         }
-        return perform(jslobRequest);
+        return actions.get(requestData.getAction()).perform(jslobRequest);
     }
 
     @Override
     public String getAction() {
         return "get";
+    }
+
+    @Override
+    public List<Method> getRESTMethods() {
+        return restMethods;
     }
 
 }

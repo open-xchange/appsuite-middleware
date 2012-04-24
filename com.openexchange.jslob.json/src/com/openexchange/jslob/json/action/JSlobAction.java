@@ -49,6 +49,8 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.json.JSONException;
@@ -124,7 +126,11 @@ public abstract class JSlobAction implements AJAXActionService {
         try {
             final String action = requestData.getParameter("action");
             if (null == action) {
-                return performREST(new JSlobRequest(requestData, session));
+                final Method method = Method.methodFor(requestData.getAction());
+                if (null == method) {
+                    throw AjaxExceptionCodes.BAD_REQUEST.create();
+                }
+                return performREST(new JSlobRequest(requestData, session), method);
             }
             return perform(new JSlobRequest(requestData, session));
         } catch (final JSONException e) {
@@ -160,11 +166,13 @@ public abstract class JSlobAction implements AJAXActionService {
      * Performs given JSlob request in REST style.
      * 
      * @param jslobRequest The JSlob request
+     * @param method The REST method to perform
      * @return The AJAX result
      * @throws OXException If performing request fails for any reason
      * @throws JSONException If a JSON error occurs
      */
-    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest) throws OXException, JSONException {
+    @SuppressWarnings("unused")
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
 
@@ -176,12 +184,12 @@ public abstract class JSlobAction implements AJAXActionService {
     public abstract String getAction();
 
     /**
-     * Gets the REST method identifier for this JSlob action.
+     * Gets the REST method identifiers for this JSlob action.
      * 
-     * @return The REST method identifier or <code>null</code> (e.g. <code>"GET"</code>)
+     * @return The REST method identifiers or <code>null</code> (e.g. <code>"GET"</code>)
      */
-    public String getRESTAction() {
-        return null;
+    public List<Method> getRESTMethods() {
+        return Collections.emptyList();
     }
 
 }
