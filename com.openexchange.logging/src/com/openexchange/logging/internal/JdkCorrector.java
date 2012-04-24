@@ -68,8 +68,8 @@ public final class JdkCorrector implements LoggingCorrector {
 
     @Override
     public final void correct() {
-        LogManager manager = LogManager.getLogManager();
-        for (String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {
+        final LogManager manager = LogManager.getLogManager();
+        for (final String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {
             LogFactory.getLog(className);
             Logger logger = manager.getLogger(className);
             if (null == logger) {
@@ -77,7 +77,7 @@ public final class JdkCorrector implements LoggingCorrector {
             }
             logger.setLevel(Level.INFO);
             do {
-                for (Handler handler : logger.getHandlers()) {
+                for (final Handler handler : logger.getHandlers()) {
                     handler.setLevel(Level.INFO);
                 }
                 logger = logger.getParent();

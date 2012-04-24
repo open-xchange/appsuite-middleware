@@ -51,7 +51,7 @@ package com.openexchange.admin.user.copy.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;

@@ -52,7 +52,7 @@ package com.openexchange.groupware.notify;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Types;

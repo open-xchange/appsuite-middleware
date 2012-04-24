@@ -108,7 +108,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjectMap<MailMessage>> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SimpleFetchIMAPCommand.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SimpleFetchIMAPCommand.class));
 
     private static final boolean WARN = LOG.isWarnEnabled();
 

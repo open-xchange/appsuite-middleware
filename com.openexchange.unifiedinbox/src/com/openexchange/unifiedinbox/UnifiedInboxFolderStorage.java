@@ -90,7 +90,7 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedInboxFolderStorage extends MailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxFolderStorage.class));
 
     // private final UnifiedINBOXAccess access;
 

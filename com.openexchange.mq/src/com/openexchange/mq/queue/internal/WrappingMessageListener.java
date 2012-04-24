@@ -57,7 +57,7 @@ import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mq.internal.AbstractWrappingMessageListener;
 import com.openexchange.mq.queue.MQQueueListener;
 import com.openexchange.mq.topic.MQTopicListener;

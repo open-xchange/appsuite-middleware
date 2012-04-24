@@ -64,7 +64,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public class FolderCacheInvalidation implements GenericCacheInvalidationInterface {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(FolderCacheInvalidation.class);
 
 	private static final String REMOTE_NAME = "FolderCacheInvalidation";

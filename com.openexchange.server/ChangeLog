@@ -1,3 +1,8 @@
+* 2012-04-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22015: Fixed unfolding of folded encoded-words as per RFC 2047
+ - Fix for bug 22018: Checking for possible table existence prior to create attempt
+
 * 2012-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 21997: Denied mail access for admin user now leads to a better understandable message

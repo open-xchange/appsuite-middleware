@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class ConvertAction extends AbstractConversionAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConvertAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConvertAction.class));
 
     private static final String JSON_ARGS = "args";
 

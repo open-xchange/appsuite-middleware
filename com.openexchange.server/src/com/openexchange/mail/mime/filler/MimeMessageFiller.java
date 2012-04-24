@@ -157,7 +157,7 @@ import com.openexchange.user.UserService;
  */
 public class MimeMessageFiller {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageFiller.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageFiller.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

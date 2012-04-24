@@ -197,7 +197,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
                 }
-                final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Customizer.class));
+                final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Customizer.class));
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("OAuth service meta data ").append(addMe.getDisplayName()).append(
                         " could not be added to registry. Another service meta data is already registered with identifier: ").append(

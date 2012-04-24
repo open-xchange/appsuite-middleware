@@ -77,7 +77,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     private static final String SIMPLE_NAME = MailAccountJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountJob.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountJob.class));
 
     private final String identifier;
 

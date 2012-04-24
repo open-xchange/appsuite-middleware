@@ -52,7 +52,7 @@ package com.openexchange.groupware.settings.extensions.osgi;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

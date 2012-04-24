@@ -69,7 +69,7 @@ import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
  */
 public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = { MailService.class, ConfigurationService.class };
 

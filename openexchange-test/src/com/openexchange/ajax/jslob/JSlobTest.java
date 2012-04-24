@@ -127,6 +127,16 @@ public final class JSlobTest extends AbstractAJAXSession {
             assertTrue("Retrieved JSON data is not equal to provided one.", jsonObject2.hasAndNotNull("string") && JSONAssertion.equals(jsonObject.get("string"), jsonObject2.get("string")));
             assertTrue("Retrieved JSON data is not equal to provided one.", jsonObject2.hasAndNotNull("array") && JSONAssertion.equals(jsonObject.get("array"), jsonObject2.get("array")));
             assertTrue("Retrieved JSON data is not equal to provided one.", jsonObject2.hasAndNotNull("object") && JSONAssertion.equals(jsonObject.get("object"), jsonObject2.get("object")));
+
+            final AllJSlobRequest request = new AllJSlobRequest();
+            final AllJSlobResponse response = client.execute(request);
+
+            final List<JSlob> list = response.getJSlobs();
+            if (!list.isEmpty()) {
+                for (final JSlob jSlob : list) {
+                    assertNotNull(jSlob.getJsonObject());
+                }
+            }
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

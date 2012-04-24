@@ -64,7 +64,7 @@ import com.openexchange.log.Log;
  */
 public final class StringCache {
 
-    private static final org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringCache.class));
+    private static final org.apache.commons.logging.Log log = Log.valueOf(com.openexchange.log.LogFactory.getLog(StringCache.class));
 
     /**
      * Enabled ?

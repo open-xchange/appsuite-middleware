@@ -91,7 +91,7 @@ import com.openexchange.sql.grammar.UPDATE;
  */
 public class AppStoreServiceImpl implements AppStoreService {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AppStoreServiceImpl.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(AppStoreServiceImpl.class);
     private final ServiceLookup serviceLookup;
 
     /**

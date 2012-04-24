@@ -50,7 +50,7 @@
 package com.openexchange.publish.online.infostore.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.infostore.InfostoreFacade;

@@ -84,7 +84,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetDocumentAction.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetDocumentAction.class));
 
     /**
      * Initializes a new {@link GetDocumentAction}.

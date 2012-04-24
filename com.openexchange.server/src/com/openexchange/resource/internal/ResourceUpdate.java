@@ -69,7 +69,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ResourceUpdate {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ResourceUpdate.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ResourceUpdate.class));
 
     private final User user;
 

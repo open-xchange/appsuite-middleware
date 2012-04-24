@@ -145,7 +145,8 @@ public final class AllAction extends AbstractMailAction {
             }
             final boolean unseen = req.optBool("unseen");
             final boolean ignoreDeleted = !req.optBool("deleted", true);
-            if (unseen || ignoreDeleted) {
+            final boolean filterApplied = (unseen || ignoreDeleted);
+            if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
@@ -176,7 +177,7 @@ public final class AllAction extends AbstractMailAction {
             /*
              * Start response
              */
-            final List<MailMessage> mails = new LinkedList<MailMessage>();
+            List<MailMessage> mails = new LinkedList<MailMessage>();
             SearchIterator<MailMessage> it = null;
             try {
                 /*
@@ -189,7 +190,7 @@ public final class AllAction extends AbstractMailAction {
                             MailSortField.RECEIVED_DATE.getField(),
                             orderDir,
                             columns,
-                            fromToIndices);
+                            filterApplied ? null : fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
@@ -203,7 +204,7 @@ public final class AllAction extends AbstractMailAction {
                     /*
                      * Get iterator
                      */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices);
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
@@ -216,6 +217,25 @@ public final class AllAction extends AbstractMailAction {
             } finally {
                 if (null != it) {
                     it.close();
+                }
+            }
+            if (filterApplied && (null != fromToIndices)) {
+                final int fromIndex = fromToIndices[0];
+                int toIndex = fromToIndices[1];
+                final int sz = mails.size();
+                if ((fromIndex) > sz) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    mails = Collections.emptyList();
+                } else {
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= sz) {
+                        toIndex = sz;
+                    }
+                    mails = mails.subList(fromIndex, toIndex);
                 }
             }
             return new AJAXRequestResult(mails, "mail");

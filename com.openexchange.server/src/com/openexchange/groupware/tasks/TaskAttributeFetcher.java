@@ -63,7 +63,7 @@ import com.openexchange.search.SearchAttributeFetcher;
  */
 public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AttributeGetter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AttributeGetter.class));
 
     private static interface AttributeGetter {
 

@@ -72,7 +72,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
     private static final long serialVersionUID = 3887048765113161340L;
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalMailAccess.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalMailAccess.class));
 
     private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 

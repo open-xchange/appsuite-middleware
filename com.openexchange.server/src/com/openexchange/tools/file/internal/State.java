@@ -62,7 +62,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;

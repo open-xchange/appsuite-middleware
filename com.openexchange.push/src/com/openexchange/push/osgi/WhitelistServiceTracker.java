@@ -82,7 +82,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<C
         final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
         clientWhitelist.clear();
         if (null == property) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WhitelistServiceTracker.class))));
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WhitelistServiceTracker.class))));
             log.info("Cleared push client white-list from.");
         } else {
             final String[] wildcardPatterns = property.split(" *, *", 0);
@@ -91,7 +91,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<C
                     clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
                 }
             }
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WhitelistServiceTracker.class))));
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WhitelistServiceTracker.class))));
             log.info("Built push client white-list from: " + property);
         }
         return service;

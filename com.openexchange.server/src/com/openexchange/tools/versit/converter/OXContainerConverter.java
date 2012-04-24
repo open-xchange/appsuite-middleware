@@ -165,7 +165,7 @@ public class OXContainerConverter {
 
     private static final String P_CLASS = "CLASS";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXContainerConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXContainerConverter.class));
 
     private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 

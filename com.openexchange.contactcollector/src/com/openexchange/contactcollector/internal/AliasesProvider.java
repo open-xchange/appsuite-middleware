@@ -74,7 +74,7 @@ import com.openexchange.user.UserService;
  */
 public final class AliasesProvider {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AliasesProvider.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AliasesProvider.class));
 
     private static final AliasesProvider INSTANCE = new AliasesProvider();
 

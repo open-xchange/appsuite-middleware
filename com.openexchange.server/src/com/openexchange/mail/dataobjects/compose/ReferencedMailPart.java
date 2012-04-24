@@ -94,7 +94,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     private static final long serialVersionUID = 1097727980840011436L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ReferencedMailPart.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ReferencedMailPart.class));
 
     protected static final int DEFAULT_BUF_SIZE = 0x2000;
 

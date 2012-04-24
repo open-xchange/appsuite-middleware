@@ -78,7 +78,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class HttpServletRequestWrapper extends ServletRequestWrapper implements HttpServletRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpServletRequestWrapper.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestWrapper.class));
 
     private String authType;
 

@@ -227,7 +227,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
                     messagingFolderType = MessagingFolderType.NONE;
                 }
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingFolderImpl.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingFolderImpl.class)).error(e.getMessage(), e);
                 messagingFolderType = MessagingFolderType.NONE;
             }
         } else {

@@ -56,12 +56,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
+import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -74,6 +74,7 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -247,9 +248,10 @@ public final class ConfigJSlobService implements JSlobService {
             final List<JSONPathElement> path = jsonUpdate.getPath();
             if (path.isEmpty()) {
                 /*
-                 * Update whole object
+                 * Merge whole object
                  */
-                set(id, jsonJSlob.setJsonObject((JSONObject) jsonUpdate.getValue()), user, context);
+                final JSONObject merged = JSONUtil.merge(storageObject, (JSONObject) jsonUpdate.getValue());
+                set(id, jsonJSlob.setJsonObject(merged), user, context);
                 return;
             }
             /*

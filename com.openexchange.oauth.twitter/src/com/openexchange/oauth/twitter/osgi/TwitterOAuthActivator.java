@@ -87,7 +87,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              */
             registerService(OAuthServiceMetaData.class, new OAuthServiceMetaDataTwitterImpl());
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -101,7 +101,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              */
             TwitterOAuthServiceRegistry.setServiceLookup(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

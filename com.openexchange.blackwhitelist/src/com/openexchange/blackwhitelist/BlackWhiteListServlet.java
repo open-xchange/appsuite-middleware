@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BlackWhiteListServlet extends DataServlet {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BlackWhiteListServlet.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(BlackWhiteListServlet.class);
 
     private static final String ADD = "add";
 

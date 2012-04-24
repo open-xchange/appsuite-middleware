@@ -94,7 +94,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
     /**
      * The logger constant.
      */
-    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
+    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Task.class));
 
     /**
      * Whether debug log level is enabled.

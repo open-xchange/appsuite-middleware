@@ -51,7 +51,7 @@ package com.openexchange.resource.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.Initialization;

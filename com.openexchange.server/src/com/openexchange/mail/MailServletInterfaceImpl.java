@@ -184,7 +184,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final int MAX_NUMBER_OF_MESSAGES_2_CACHE = 50;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailServletInterfaceImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailServletInterfaceImpl.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
@@ -624,7 +624,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        if (mailConfig.getCapabilities().hasThreadReferences() && (messageStorage instanceof ISimplifiedThreadStructure)) {
+        if (messageStorage instanceof ISimplifiedThreadStructure) {
             final ISimplifiedThreadStructure simplifiedThreadStructure = (ISimplifiedThreadStructure) messageStorage;
             // Effective fields
             final MailFields mailFields = new MailFields(MailField.getFields(fields));

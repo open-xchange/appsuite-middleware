@@ -18,7 +18,7 @@ package org.xmpp.component;
 
 import java.text.MessageFormat;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.dom4j.Element;
 import org.xmpp.packet.IQ;
 

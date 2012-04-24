@@ -43,3 +43,4 @@ Export-Package: com.openexchange.admin.rmi,
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .
+

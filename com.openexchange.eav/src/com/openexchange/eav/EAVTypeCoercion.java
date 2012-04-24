@@ -55,7 +55,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.TimeZone;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 
 /**

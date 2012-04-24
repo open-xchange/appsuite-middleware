@@ -50,7 +50,7 @@
 package com.openexchange.authorization.standard.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.authorization.standard.DefaultAuthorizationImpl;
 import com.openexchange.osgi.HousekeepingActivator;

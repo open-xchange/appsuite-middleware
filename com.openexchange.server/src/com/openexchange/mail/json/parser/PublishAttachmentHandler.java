@@ -111,7 +111,7 @@ import com.openexchange.user.UserService;
  */
 public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PublishAttachmentHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PublishAttachmentHandler.class));
 
     private final Session session;
 

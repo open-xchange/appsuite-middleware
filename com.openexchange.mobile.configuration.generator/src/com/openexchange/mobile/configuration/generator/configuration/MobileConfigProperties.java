@@ -1,7 +1,7 @@
 package com.openexchange.mobile.configuration.generator.configuration;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.ServiceRegistry;
 

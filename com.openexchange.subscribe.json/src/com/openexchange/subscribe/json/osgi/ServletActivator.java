@@ -65,7 +65,7 @@ import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscove
  */
 public class ServletActivator extends AbstractSessionServletActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServletActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletActivator.class));
 
     private static final String SUBSCRIPTION_ALIAS = "ajax/subscriptions";
 

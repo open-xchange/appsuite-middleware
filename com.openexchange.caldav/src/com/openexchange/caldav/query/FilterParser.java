@@ -58,7 +58,7 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.jdom.Attribute;
 import org.jdom.Element;
 

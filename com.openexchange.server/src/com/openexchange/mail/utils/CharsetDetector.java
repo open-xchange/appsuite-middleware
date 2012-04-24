@@ -69,7 +69,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
  */
 public final class CharsetDetector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CharsetDetector.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CharsetDetector.class));
 
     private static final String STR_US_ASCII = "US-ASCII";
 

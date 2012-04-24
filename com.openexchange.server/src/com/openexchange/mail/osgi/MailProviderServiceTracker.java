@@ -63,7 +63,7 @@ import com.openexchange.mail.api.MailProvider;
  */
 public final class MailProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider,MailProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailProviderServiceTracker.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailProviderServiceTracker.class));
 
     private final BundleContext context;
 

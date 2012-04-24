@@ -71,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactsAddIndex4AutoCompleteSearch.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ContactsAddIndex4AutoCompleteSearch.class));
 
     public ContactsAddIndex4AutoCompleteSearch() {
         super();

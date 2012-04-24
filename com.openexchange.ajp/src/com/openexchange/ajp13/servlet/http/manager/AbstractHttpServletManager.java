@@ -79,7 +79,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * The logger.
      */
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractHttpServletManager.class));
 
     /**
      * The empty class array.
@@ -110,7 +110,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * Creates the static servlets identified by servlet constructor map.
      */
     private final void createServlets(final Map<String, Constructor<?>> servletConstructorMap) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractHttpServletManager.class));
         final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
         if (null == configLoader) {
             log.error("Aborting servlets' initialization: HTTP service has not been initialized since default servlet configuration loader is null.");

@@ -89,7 +89,7 @@ public final class DictonaryStorage {
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DictonaryStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(DictonaryStorage.class);
 
     /**
      * Initializes a new {@link DictonaryStorage}

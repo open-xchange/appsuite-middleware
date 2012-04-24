@@ -217,7 +217,7 @@ public final class Select {
                 }
             } catch (final SQLException e) {
                 if (null != stmt) {
-                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Select.class));
+                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                     if (LOG.isDebugEnabled()) {
                         final String sql = getSQLString(stmt);
                         LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
@@ -264,7 +264,7 @@ public final class Select {
                 }
             } catch (final SQLException e) {
                 if (null != stmt) {
-                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Select.class));
+                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                     if (LOG.isDebugEnabled()) {
                         final String sql = getSQLString(stmt);
                         LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
@@ -292,7 +292,7 @@ public final class Select {
                 virtualFolder.setSubscribed(subscribed);
             } catch (final SQLException e) {
                 if (null != stmt) {
-                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Select.class));
+                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                     if (LOG.isDebugEnabled()) {
                         final String sql = getSQLString(stmt);
                         LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
@@ -388,7 +388,7 @@ public final class Select {
             return subfolderIds.toArray(new String[subfolderIds.size()]);
         } catch (final SQLException e) {
             if (null != stmt) {
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Select.class));
+                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
                     LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());

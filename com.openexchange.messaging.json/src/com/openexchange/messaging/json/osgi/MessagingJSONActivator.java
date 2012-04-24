@@ -51,7 +51,7 @@ package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.caching.Cache;

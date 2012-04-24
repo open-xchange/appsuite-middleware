@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class UpdatesAction extends AbstractResourceAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdatesAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
 
     /**
      * Initializes a new {@link UpdatesAction}.

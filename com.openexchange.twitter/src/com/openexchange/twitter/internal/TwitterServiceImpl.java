@@ -86,7 +86,7 @@ import com.openexchange.twitter.TwitterService;
  */
 public final class TwitterServiceImpl implements TwitterService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TwitterServiceImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(TwitterServiceImpl.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
