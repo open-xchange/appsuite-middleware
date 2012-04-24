@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogConfigurationException;
  */
 public class LogFactory {
 
+	public static LogWrapperFactory FACTORY = null;
     /**
      * Convenience method to return a named logger, without the application having to care about factories.
      * 
@@ -66,7 +67,11 @@ public class LogFactory {
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
      */
     public static org.apache.commons.logging.Log getLog(final Class<?> clazz) {
-        return Log.valueOf(com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(clazz)));
+		org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(clazz);
+		if (FACTORY != null) {
+			log = FACTORY.wrap(log);
+		}
+		return Log.valueOf(com.openexchange.exception.Log.valueOf(log));
     }
 
     /**
@@ -77,6 +82,14 @@ public class LogFactory {
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
      */
     public static org.apache.commons.logging.Log getLog(final String name) {
-        return Log.valueOf(com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(name)));
+		org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(name);
+		if (FACTORY != null) {
+			log = FACTORY.wrap(log);
+		}
+		return Log.valueOf(com.openexchange.exception.Log.valueOf(log));
     }
+	
+	
+
+
 }
