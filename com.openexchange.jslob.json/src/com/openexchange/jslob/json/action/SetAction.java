@@ -49,7 +49,10 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -59,6 +62,7 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link SetAction}
@@ -84,8 +88,8 @@ public final class SetAction extends JSlobAction {
      * 
      * @param services The service look-up
      */
-    public SetAction(final ServiceLookup services) {
-        super(services);
+    public SetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
     }
 
     @Override
@@ -107,8 +111,42 @@ public final class SetAction extends JSlobAction {
     }
 
     @Override
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest) throws OXException, JSONException {
+        /*
+         * REST style access
+         */
+        final AJAXRequestData requestData = jslobRequest.getRequestData();
+        final String pathInfo = requestData.getPathInfo();
+        // E.g. pathInfo="11" (preceding "jslob" removed)
+        if (isEmpty(pathInfo)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        final String[] pathElements = SPLIT_PATH.split(pathInfo);
+        final int length = pathElements.length;
+        if (0 == length) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        if (1 == length) {
+            /*-
+             *  DELETE /jslob/11
+             */
+            requestData.setAction("set");
+            requestData.putParameter("id", pathElements[0]);
+            requestData.setData(null);
+        } else {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+        }
+        return perform(jslobRequest);
+    }
+
+    @Override
     public String getAction() {
         return "set";
+    }
+
+    @Override
+    public String getRESTAction() {
+        return "DELETE";
     }
 
 }

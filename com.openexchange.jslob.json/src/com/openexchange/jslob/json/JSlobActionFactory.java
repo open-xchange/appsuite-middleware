@@ -78,14 +78,18 @@ public class JSlobActionFactory implements AJAXActionServiceFactory {
     public JSlobActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, JSlobAction>(4);
-        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services));
+        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services, actions));
     }
 
     private void addJSlobAction(final JSlobAction jslobAction) {
+        final String restMethod = jslobAction.getRESTAction();
+        if (null != restMethod) {
+            actions.put(restMethod, jslobAction);
+        }
         actions.put(jslobAction.getAction(), jslobAction);
     }
 
