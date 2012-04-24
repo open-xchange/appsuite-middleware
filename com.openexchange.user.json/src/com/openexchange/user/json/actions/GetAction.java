@@ -69,8 +69,6 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContact;
-import com.openexchange.user.json.field.UserField;
-import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
@@ -105,13 +103,10 @@ public final class GetAction extends AbstractUserAction {
          */
         final int[] columns = parseOptionalIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final ContactField[] contactFields;
-        final UserField[] userFields;
         if (null == columns || 0 == columns.length) {
             contactFields = ContactMapper.getInstance().getAllFields();
-            userFields = UserMapper.getInstance().getAllFields();
         } else {
             contactFields = ContactMapper.getInstance().getFields(columns);
-            userFields = UserMapper.getInstance().getFields(columns);
         }
         final String idParam = request.getParameter("id");
         int userId;
@@ -120,7 +115,6 @@ public final class GetAction extends AbstractUserAction {
         } else {
             userId = checkIntParameter("id", request);
         }
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         /*
          * Obtain user from user service
          */
@@ -132,14 +126,9 @@ public final class GetAction extends AbstractUserAction {
         final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
         final Contact contact = contactService.getUser(session, userId, contactFields);
         /*
-         * Merge user & contact into JSON object
-         */
-        final UserContact userContact = new UserContact(contact, user);
-        final JSONObject jsonObject = userContact.serialize(contactFields, userFields, timeZoneId);
-        /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonObject, contact.getLastModified());
+        return new AJAXRequestResult(new UserContact(contact, user), contact.getLastModified(), "usercontact");
     }
     
     public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {

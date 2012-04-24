@@ -79,9 +79,10 @@ import com.openexchange.user.json.mapping.UserMapper;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UserContact {
+
+	public static final String ALL_ATTRIBUTES = "*";
 	
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserContact.class));
-    private static final String ALL = "*";
 
 	private final User user;
 	private final Contact contact;
@@ -121,7 +122,7 @@ public class UserContact {
     /**
      * Serializes the user- and contact data into a JSON array.
      * 
-     * @param columnIDs the column identifiers of the correspondig fields to serialize 
+     * @param columnIDs the column identifiers of the corresponding fields to serialize 
      * @param timeZoneID the client timezone ID
      * @param attributeParameters the attribute parameters to append to the array
      * @return the serialized user contact
@@ -148,6 +149,7 @@ public class UserContact {
     			}
 			}
             LOG.warn("Unknown field: " + columnID, new Throwable());
+			jsonArray.put(JSONObject.NULL);
 		}
 		if (null != attributeParameters && 0 < attributeParameters.size()) {
 			try {
@@ -164,7 +166,7 @@ public class UserContact {
     private void appendUserAttribute(final JSONArray jsonArray, final String attributePrefix, final List<String> attributes) throws JSONException {
         if (null != attributes && 0 < attributes.size()) {
         	final Map<String, Set<String>> userAttributes = user.getAttributes();
-            if (1 == attributes.size() && ALL.equals(attributes.get(0))) {
+            if (1 == attributes.size() && ALL_ATTRIBUTES.equals(attributes.get(0))) {
                 /*
                  * Wildcard
                  */

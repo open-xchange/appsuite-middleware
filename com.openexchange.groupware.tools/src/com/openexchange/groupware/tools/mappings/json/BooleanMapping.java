@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
-import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -71,14 +69,6 @@ public abstract class BooleanMapping<O> extends DefaultJsonMapping<Boolean, O> {
 	@Override
 	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
 		this.set(to, Boolean.valueOf(from.getBoolean(getAjaxName())));
-	}
-
-	@Override
-	public void serialize(final O from, final JSONObject to, final TimeZone timeZone) throws JSONException {
-		if (this.isSet(from)) {
-			final Boolean value = this.get(from);
-			to.put(getAjaxName(), null != value ? value.booleanValue() : JSONObject.NULL); 
-		}
 	}
 
 }

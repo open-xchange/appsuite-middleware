@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.osgi;
 
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.contact.ContactService;
@@ -56,6 +57,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
 import com.openexchange.user.json.services.ServiceRegistry;
 
@@ -85,6 +87,10 @@ public class UserJSONActivator extends AJAXModuleActivator {
              * Register user multiple service
              */
             registerModule(UserActionFactory.getInstance(), Constants.MODULE);
+            /*
+             * Register result converter
+             */
+            registerService(ResultConverter.class, new UserContactResultConverter());
             /*
              * User service tracker
              */

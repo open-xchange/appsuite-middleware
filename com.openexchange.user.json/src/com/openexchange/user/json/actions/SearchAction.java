@@ -140,90 +140,79 @@ public final class SearchAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
+        final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
+        final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
+        /*
+         * Parse search term 
+         */
+        SearchTerm<?> term;
+		try {
+			term = new SearchTermParser((JSONObject)request.getData()).getSearchTerm();
+		} catch (JSONException e) {
+			throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+		}
+    	UserField orderField = UserMapper.getInstance().getMappedField(orderBy);
+    	SortOptions sortOptions = new SortOptions(collation); 
+    	if (null == orderField) {
+    		// Sort field is a contact field: pass as it is
+    		final ContactField sortField = ContactMapper.getInstance().getMappedField(orderBy);
+    		if (null != sortField) {        			
+    			sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, order) });
+    		}
+    	}
+    	/*
+    	 * Perform search
+    	 */        	
+    	Date lastModified = new Date(0);
+    	final List<UserContact> userContacts = new ArrayList<UserContact>();
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
+        final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns, 
+        		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);            
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        SearchIterator<Contact> searchIterator = null;
         try {
-            /*
-             * Parse parameters
-             */
-            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-            final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
-            final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
-            final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            /*
-             * Get remaining parameters
-             */
-            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
-            final JSONObject jData = (JSONObject) request.getData();
-            /*
-             * Parse search term 
-             */
-            final SearchTerm<?> term = new SearchTermParser(jData).getSearchTerm();
-        	final UserField orderField = UserMapper.getInstance().getMappedField(orderBy);
-        	final SortOptions sortOptions = new SortOptions(collation); 
-        	if (null == orderField) {
-        		// Sort field is a contact field: pass as it is
-        		final ContactField sortField = ContactMapper.getInstance().getMappedField(orderBy);
-        		if (null != sortField) {        			
-        			sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, order) });
-        		}
-        	}
+        	searchIterator = contactService.searchUsers(session, term, contactFields, sortOptions);
         	/*
-        	 * Perform search
-        	 */        	
-        	Date lastModified = new Date(0);
-        	final List<UserContact> userContacts = new ArrayList<UserContact>();
-            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
-            final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns, 
-            		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);            
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-            SearchIterator<Contact> searchIterator = null;
-            try {
-            	searchIterator = contactService.searchUsers(session, term, contactFields, sortOptions);
+        	 * Process results
+        	 */
+            while (searchIterator.hasNext()) {
+            	final Contact contact = searchIterator.next();
             	/*
-            	 * Process results
+            	 * Check last modified
             	 */
-                while (searchIterator.hasNext()) {
-                	final Contact contact = searchIterator.next();
-                	/*
-                	 * Check last modified
-                	 */
-                	if (contact.getLastModified().after(lastModified)) {
-                		lastModified = contact.getLastModified();
-                	}                	
-                	/*
-                	 * Get corresponding user
-                	 */
-                	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
-                	userContacts.add(new UserContact(contact, user));
-                }
-            } finally {
-            	if (null != searchIterator) {
-            		searchIterator.close();
-            	}
+            	if (contact.getLastModified().after(lastModified)) {
+            		lastModified = contact.getLastModified();
+            	}                	
+            	/*
+            	 * Get corresponding user
+            	 */
+            	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
+            	userContacts.add(new UserContact(contact, user));
             }
-            /*
-             * Sort by users if a user field was denoted by sort field
-             */
-            if (1 < userContacts.size()) {
-            	final UserField orderByUserField = UserMapper.getInstance().getMappedField(orderBy);
-            	if (null != orderByUserField) {
-            		Collections.sort(userContacts, UserContact.getComparator(
-            				orderByUserField, session.getUser().getLocale(), Order.DESCENDING.equals(order)));
-            	}
-            }
-            /*
-             * Return appropriate result
-             */
-            final JSONArray jsonArray = new JSONArray();
-            for (final UserContact userContact : userContacts) {
-            	jsonArray.put(userContact.serialize(columns, timeZoneId, attributeParameters));
-			}
-            return new AJAXRequestResult(jsonArray, lastModified);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
         }
+        /*
+         * Sort by users if a user field was denoted by sort field
+         */
+        if (1 < userContacts.size()) {
+        	final UserField orderByUserField = UserMapper.getInstance().getMappedField(orderBy);
+        	if (null != orderByUserField) {
+        		Collections.sort(userContacts, UserContact.getComparator(
+        				orderByUserField, session.getUser().getLocale(), Order.DESCENDING.equals(order)));
+        	}
+        }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(userContacts, lastModified, "usercontact");
     }
 
     public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
