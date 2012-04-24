@@ -49,13 +49,12 @@
 
 package com.openexchange.contacts.json.mapping;
 
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,9 +65,11 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
@@ -77,6 +78,8 @@ import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactMapper} - JSON mapper for contacts.
@@ -106,18 +109,23 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         
     }
     
-    public ContactField[] getFields(final int[] columnIDs, final EnumSet<ContactField> illegalFields, final ContactField... mandatoryFields) throws OXException {
+    public ContactField[] getFields(int[] columnIDs, EnumSet<ContactField> illegalFields, ContactField... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
 		}
-		final Set<ContactField> fields = new HashSet<ContactField>();
-		for (final int columnID : columnIDs) {
+		final List<ContactField> fields = new ArrayList<ContactField>();
+		for (int columnID : columnIDs) {
 			final ContactField field = this.getMappedField(columnID);
 			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {
                 fields.add(field);
             } else if (Contact.IMAGE1_URL == columnID) {
-            	// query IMAGE1 to set image URL afterwards
-            	fields.add(ContactField.IMAGE1);
+            	// query NUMBER_OF_IMAGES to set image URL afterwards
+            	fields.add(ContactField.NUMBER_OF_IMAGES);
+            } else if (Contact.LAST_MODIFIED_UTC == columnID) {
+            	// query LAST_MODIFIED to set last modified utc afterwards
+            	fields.add(ContactField.LAST_MODIFIED);
+            } else {
+            	throw OXException.notFound("No mapping for column ID: " + Integer.toString(columnID));
             }
 		}
         if (null != mandatoryFields) {
@@ -156,7 +164,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		final EnumMap<ContactField, JsonMapping<? extends Object, Contact>> mappings = new 
 				EnumMap<ContactField, JsonMapping<? extends Object, Contact>>(ContactField.class);
 
-        mappings.put(ContactField.DISPLAY_NAME, new StringMapping<Contact>(ContactFields.DISPLAY_NAME, 500) {
+        mappings.put(ContactField.DISPLAY_NAME, new StringMapping<Contact>(ContactFields.DISPLAY_NAME, Contact.DISPLAY_NAME) {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -179,7 +187,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SUR_NAME, new StringMapping<Contact>(ContactFields.LAST_NAME, 502) {
+        mappings.put(ContactField.SUR_NAME, new StringMapping<Contact>(ContactFields.LAST_NAME, Contact.SUR_NAME) {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2203,7 +2211,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>(DataFields.ID, 1) {
+        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>(DataFields.ID, Contact.OBJECT_ID) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2249,30 +2257,32 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_LINKS, 103) {
+        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_LINKS, Contact.CONTACT_NUMBER_OF_LINKS) {
 
             @Override
+            @Deprecated
             public void set(Contact contact, Integer value) { 
-                contact.setNumberOfLinks(value);
             }
 
             @Override
+            @Deprecated
             public boolean isSet(Contact contact) {
-                return contact.containsNumberOfLinks();
+                return false;
             }
 
             @Override
+            @Deprecated
             public Integer get(Contact contact) { 
-                return contact.getNumberOfLinks();
+                return 0;
             }
 
             @Override
+            @Deprecated
             public void remove(Contact contact) { 
-                contact.removeNumberOfLinks();
             }
         });
         
-        mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, 592) {
+        mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, Contact.DISTRIBUTIONLIST) {
 
 			@Override
 			public DistributionListEntryObject[] newArray(int size) {
@@ -2328,10 +2338,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
 			
 			@Override
-			public void serialize(final Contact from, final JSONObject to) throws JSONException {
-				final DistributionListEntryObject[] distributionList = this.get(from);
+			public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+				JSONArray jsonArray = null;
+				DistributionListEntryObject[] distributionList = this.get(from);
 				if (null != distributionList) {
-			        final JSONArray jsonArray = new JSONArray();
+					jsonArray = new JSONArray();
 			        for (int i = 0; i < distributionList.length; i++) {
 			            final JSONObject entry = new JSONObject();
 			            final int emailField = distributionList[i].getEmailfield();
@@ -2343,35 +2354,69 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
 			            jsonArray.put(entry);
 			        }
-			        to.put(getAjaxName(), jsonArray);
 		        }
+		        return jsonArray;
 			}
+
+//			@Override
+//			public void serialize(final Contact from, final JSONObject to) throws JSONException {
+//				final DistributionListEntryObject[] distributionList = this.get(from);
+//				if (null != distributionList) {
+//			        final JSONArray jsonArray = new JSONArray();
+//			        for (int i = 0; i < distributionList.length; i++) {
+//			            final JSONObject entry = new JSONObject();
+//			            final int emailField = distributionList[i].getEmailfield();
+//			            if (DistributionListEntryObject.INDEPENDENT != emailField) {
+//			                entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
+//			            }
+//			            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
+//			            entry.put(DistributionListFields.DISPLAY_NAME, distributionList[i].getDisplayname());
+//			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
+//			            jsonArray.put(entry);
+//			        }
+//			        to.put(getAjaxName(), jsonArray);
+//		        }
+//			}
 		});
 
-//        mappings.put(ContactField.LINKS, new (ContactFields.LINKS, 591) {
-//
-//            @Override
-//            public void set(Contact contact,  value) { 
-//                contact.setLinks(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsLinks();
-//            }
-//
-//            @Override
-//            public  get(Contact contact) { 
-//                return contact.getLinks();
-//            }
-//
-//            @Override
-//            public void remove(Contact contact) { 
-//                contact.removeLinks();
-//            }
-//        });
+        mappings.put(ContactField.LINKS, new ArrayMapping<LinkEntryObject, Contact>(ContactFields.LINKS, Contact.LINKS) {
 
-        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(ContactFields.FOLDER_ID, 20) {
+            @Override
+            @Deprecated
+            public boolean isSet(Contact contact) {
+                return false;
+            }
+
+            @Override
+            @Deprecated
+            public void remove(Contact contact) { 
+            }
+
+			@Override
+            @Deprecated
+			public LinkEntryObject[] newArray(int size) {
+				return new LinkEntryObject[size];
+			}
+
+			@Override
+            @Deprecated
+			public void set(Contact contact, LinkEntryObject[] value) throws OXException {
+			}
+
+			@Override
+            @Deprecated
+			public LinkEntryObject[] get(Contact contact) {
+				return null;
+			}
+
+			@Override
+            @Deprecated
+			protected LinkEntryObject deserialize(JSONArray array, int index) throws JSONException, OXException {
+				return new LinkEntryObject();
+			}
+        });
+
+        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(ContactFields.FOLDER_ID, Contact.FOLDER_ID) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2417,7 +2462,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 //            }
 //        });
 
-        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(ContactFields.PRIVATE_FLAG, 101) {
+        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG) {
 
             @Override
             public void set(Contact contact, Boolean value) { 
@@ -2509,7 +2554,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(ContactFields.LAST_MODIFIED, 5) {
+        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(ContactFields.LAST_MODIFIED, Contact.LAST_MODIFIED) {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -2578,28 +2623,77 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-//        mappings.put(ContactField.IMAGE1, new DefaultJsonMapping<byte[], Contact>(ContactFields.IMAGE1, 570) {
-//
-//            @Override
-//            public void set(Contact contact, byte[] value) { 
-//                contact.setImage1(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsImage1();
-//            }
-//
-//            @Override
-//            public byte[] get(Contact contact) { 
-//                return contact.getImage1();
-//            }
-//
-//            @Override
-//            public void remove(Contact contact) { 
-//                contact.removeImage1();
-//            }
-//        });
+        mappings.put(ContactField.IMAGE1, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1) {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+            	return contact.containsImage1();
+            }
+
+            @Override
+        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+            	/*
+            	 * override serialization here, and serialize as "image1_url" instead of byte array
+            	 */
+            	try {
+					return ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, timeZone, session);
+				} catch (OXException e) {
+					throw new JSONException(e);
+				}
+        	}
+        
+            @Override
+            public String get(Contact contact) {
+            	return null;
+            }
+
+            @Override
+            public void remove(Contact contact) { 
+                throw new UnsupportedOperationException();
+            }
+        });
+        
+        mappings.put(ContactField.IMAGE1_URL, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL) {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+            	return false;
+            }
+            
+            @Override
+        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+            	if (0 < from.getNumberOfImages()) {
+    				ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
+    						String.valueOf(from.getObjectID())).build();
+					try {
+						return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
+					} catch (OXException e) {
+						throw new JSONException(e);
+					}
+            	}
+    			return JSONObject.NULL;
+        	}
+
+            @Override
+            public String get(Contact contact) {
+            	return null;
+            }
+
+            @Override
+            public void remove(Contact contact) { 
+                throw new UnsupportedOperationException();
+            }
+        });
 
         mappings.put(ContactField.IMAGE_LAST_MODIFIED, new DateMapping<Contact>("image_last_modified", 597) {
 
@@ -2670,7 +2764,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FILE_AS, new StringMapping<Contact>(ContactFields.FILE_AS, 599) {
+        mappings.put(ContactField.FILE_AS, new StringMapping<Contact>(ContactFields.FILE_AS, Contact.FILE_AS) {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2691,9 +2785,44 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             public void remove(Contact contact) { 
                 contact.removeFileAs();
             }
+            
+        	@Override
+        	public void serialize(Contact from, JSONObject to) throws JSONException {
+        		if (this.isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			super.serialize(from, to);
+        		}
+        	}
+
+        	@Override
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException {
+        		if (this.isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			super.serialize(from, to, timeZone);
+        		}
+        	}
+
+        	@Override
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+        		if (isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			super.serialize(from, to, timeZone, session);
+        		}
+        	}
+            
+        	@Override
+        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+        		if (isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			return super.serialize(from, timeZone, session);
+        		} else {
+        			return null;
+        		}
+        	}
+
         });
 
-        mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>(ContactFields.DEFAULT_ADDRESS, 605) {
+        mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>(ContactFields.DEFAULT_ADDRESS, Contact.DEFAULT_ADDRESS) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2714,6 +2843,41 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             public void remove(Contact contact) { 
                 contact.removeDefaultAddress();
             }
+            
+        	@Override
+        	public void serialize(Contact from, JSONObject to) throws JSONException {
+        		if (this.isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			super.serialize(from, to);
+        		}
+        	}
+
+        	@Override
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException {
+        		if (this.isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			super.serialize(from, to, timeZone);
+        		}
+        	}
+
+        	@Override
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+        		if (isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			super.serialize(from, to, timeZone, session);
+        		}
+        	}
+            
+        	@Override
+        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+        		if (isSet(from)) {
+        			// only serialize if set; workaround for bug #13960
+        			return super.serialize(from, timeZone, session);
+        		} else {
+        			return null;
+        		}
+        	}
+
         });
 
         mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new BooleanMapping<Contact>(ContactFields.MARK_AS_DISTRIBUTIONLIST, 602) {
@@ -2855,6 +3019,29 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
+        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new StringMapping<Contact>("image1_content_type", Contact.IMAGE1_CONTENT_TYPE) {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setImageContentType(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsImageContentType();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getImageContentType();
+            }
+
+            @Override
+            public void remove(Contact contact) { 
+                contact.removeImageContentType();
+            }
+        });
+
         mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new DateMapping<Contact>(ContactFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, 105) {
 
             @Override
@@ -2901,59 +3088,27 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-//        mappings.put(ContactField.IMAGE1_URL, new StringMapping<Contact>(ContactFields.IMAGE1_URL, 606) {
-//
-//            @Override
-//            public void set(Contact contact, String value) { 
-//                contact.setImage1URL(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsImage1URL();
-//            }
-//
-//            @Override
-//            public String get(Contact contact) { 
-//                return contact.getImage1Url();
-//            }
-//
-//            @Override
-//            public void remove(Contact contact) { 
-//                contact.removeImage1Url();
-//            }
-//        });
+        mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(ContactFields.LAST_MODIFIED_UTC, Contact.LAST_MODIFIED_UTC) {
 
-        mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(ContactFields.LAST_MODIFIED_UTC, 6) {
+			@Override
+			public boolean isSet(Contact contact) {
+				return contact.containsLastModified();
+			}
 
-            @Override
-            public void set(Contact contact, Date value) {
-                final Calendar calendar = new GregorianCalendar();
-                calendar.setTime(value);
-                final int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
-                calendar.add(Calendar.MILLISECOND, offset);
-                contact.setLastModified(value);
-            }
+			@Override
+			public void set(Contact contact, Date value) throws OXException {
+				contact.setLastModified(value);
+			}
 
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsLastModified();
-            }
+			@Override
+			public Date get(Contact contact) {
+				return contact.getLastModified();
+			}
 
-            @Override
-            public Date get(Contact contact) {
-                final Date lastModified = contact.getLastModified();
-                final Calendar calendar = new GregorianCalendar();
-                calendar.setTime(lastModified);
-                final int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
-                calendar.add(Calendar.MILLISECOND, -offset);
-                return calendar.getTime();
-            }
-
-            @Override
-            public void remove(Contact contact) { 
-                contact.removeLastModified();
-            }
+			@Override
+			public void remove(Contact contact) {
+				contact.removeLastModified();
+			}
         });
 
         mappings.put(ContactField.HOME_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_HOME, Contact.ADDRESS_HOME) {

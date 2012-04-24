@@ -144,11 +144,6 @@ public final class AllAction extends AbstractUserAction {
             final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
             final int leftHandLimit = parseIntParameter(AJAXServlet.LEFT_HAND_LIMIT, request);
             final int rightHandLimit = parseIntParameter(AJAXServlet.RIGHT_HAND_LIMIT, request);
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            /*
-             * Get remaining parameters
-             */
-            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
             /*
              * Determine sort options
              */
@@ -207,11 +202,7 @@ public final class AllAction extends AbstractUserAction {
             /*
              * Return appropriate result
              */
-            final JSONArray jsonArray = new JSONArray();
-            for (final UserContact userContact : userContacts) {
-            	jsonArray.put(userContact.serialize(columns, timeZoneId, attributeParameters));
-			}
-            return new AJAXRequestResult(jsonArray, lastModified);
+            return new AJAXRequestResult(userContacts, lastModified, "usercontact");
         } catch (final OXException e) {
             throw new OXException(e);
         }

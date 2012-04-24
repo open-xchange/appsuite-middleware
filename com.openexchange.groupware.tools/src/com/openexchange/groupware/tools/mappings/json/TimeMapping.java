@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link TimeMapping} - JSON specific mapping implementation for Times, 
@@ -77,11 +78,9 @@ public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 	}
 
 	@Override
-	public void serialize(final O from, final JSONObject to, TimeZone timeZone) throws JSONException {
-		if (this.isSet(from)) {
-			final Date value = this.get(from);
-			to.put(getAjaxName(), null != value ? addTimeZoneOffset(value.getTime(), timeZone) : JSONObject.NULL);
-		}
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+		Date value = this.get(from);
+		return null != value ? addTimeZoneOffset(value.getTime(), timeZone) : JSONObject.NULL;
 	}
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {

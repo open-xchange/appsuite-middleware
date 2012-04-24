@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
-import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,14 +74,6 @@ public abstract class IntegerMapping<O> extends DefaultJsonMapping<Integer, O> {
 	        throw new IllegalArgumentException(value + " cannot be cast to int without changing its value.");
 	    }
 		this.set(to, Integer.valueOf(intValue));
-	}
-
-	@Override
-	public void serialize(final O from, final JSONObject to, final TimeZone timeZone) throws JSONException {
-		if (this.isSet(from)) {
-			final Integer value = this.get(from);
-			to.put(getAjaxName(), null != value ? value.longValue() : JSONObject.NULL); 
-		}
 	}
 
 }
