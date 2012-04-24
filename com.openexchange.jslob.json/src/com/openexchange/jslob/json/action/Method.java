@@ -47,64 +47,42 @@
  *
  */
 
-package com.openexchange.jslob.json;
+package com.openexchange.jslob.json.action;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.jslob.json.action.JSlobAction;
-import com.openexchange.jslob.json.action.Method;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link JSlobActionFactory}
+ * An enumeration for HTTP methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-@Module(name = "jslob", description = "Provides access to JSlob data associated with the current user and context.")
-public class JSlobActionFactory implements AJAXActionServiceFactory {
+public enum Method {
+    GET, PUT, POST, DELETE;
 
-    private final Map<String, JSlobAction> actions;
+    private static final Map<String, Method> MAP;
+
+    static {
+        final Method[] values = Method.values();
+        final Map<String, Method> m = new HashMap<String, Method>(values.length);
+        for (final Method method : values) {
+            m.put(method.name(), method);
+        }
+        MAP = Collections.unmodifiableMap(m);
+    }
 
     /**
-     * Initializes a new {@link JSlobActionFactory}.
+     * Gets the appropriate method.
      * 
-     * @param services The service look-up
+     * @param method The method identifier
+     * @return The appropriate method or <code>null</code>
      */
-    public JSlobActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, JSlobAction>(4);
-        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services, actions));
-        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services, actions));
-        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services, actions));
-        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services, actions));
-        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services, actions));
-    }
-
-    private void addJSlobAction(final JSlobAction jslobAction) {
-        final List<Method> restMethods = jslobAction.getRESTMethods();
-        if (null != restMethods && !restMethods.isEmpty()) {
-            for (final Method method : restMethods) {
-                actions.put(method.toString(), jslobAction);
-            }
+    public static Method methodFor(final String method) {
+        if (null == method) {
+            return null;
         }
-        actions.put(jslobAction.getAction(), jslobAction);
+        return MAP.get(method.toUpperCase(Locale.US));
     }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }
