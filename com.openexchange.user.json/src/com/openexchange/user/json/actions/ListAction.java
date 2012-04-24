@@ -123,14 +123,11 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Parse parameters
          */
-        final int[] userIDs = parseUserIDs(request, session.getUserId());
-        final int[] columnIDs = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-        final String timeZoneID = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
+        int[] userIDs = parseUserIDs(request, session.getUserId());
+        int[] columnIDs = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         /*
          * Get users/contacts
          */
-        Date lastModified = new Date(0);
         final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
         final List<Contact> contacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
@@ -138,11 +135,7 @@ public final class ListAction extends AbstractUserAction {
         	searchIterator = contactService.getUsers(session, userIDs, 
             		ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
             while (searchIterator.hasNext()) {
-            	final Contact contact = searchIterator.next();
-            	if (contact.getLastModified().after(lastModified)) {
-            		lastModified = contact.getLastModified();
-            	}
-                contacts.add(contact);
+                contacts.add(searchIterator.next());
             }
         } finally {
         	if (null != searchIterator) {
@@ -150,14 +143,18 @@ public final class ListAction extends AbstractUserAction {
         	}
         }
         /*
-         * Write associated users/contacts to json array
+         * Map user to contact information
          */
-        final JSONArray jsonArray = new JSONArray();
-        final User[] users = getUsers(session, userIDs);
-        for (final User user : users) {
-        	for (final Contact contact : contacts) {
+        Date lastModified = new Date(0);
+        User[] users = getUsers(session, userIDs);
+        List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
+        for (User user : users) {
+        	for (Contact contact : contacts) {
         		if (user.getId() == contact.getInternalUserId()) {
-        			jsonArray.put(new UserContact(contact, user).serialize(columnIDs, timeZoneID, attributeParameters));
+        			userContacts.add(new UserContact(contact, user));
+                	if (contact.getLastModified().after(lastModified)) {
+                		lastModified = contact.getLastModified();
+                	}
         			break;
         		}
 			}
@@ -165,7 +162,7 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonArray, lastModified);
+        return new AJAXRequestResult(userContacts, lastModified, "usercontact");
     }
 
 	private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {

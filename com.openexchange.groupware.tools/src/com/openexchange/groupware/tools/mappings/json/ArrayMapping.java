@@ -58,6 +58,7 @@ import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.ArrayFactory;
+import com.openexchange.session.Session;
 
 /**
  * {@link ArrayMapping} - JSON specific mapping for array properties. 
@@ -73,7 +74,7 @@ public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> impl
 	}
 
 	protected abstract T deserialize(final JSONArray array, int index) throws JSONException, OXException;
-	
+
 	@Override
 	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
 		final JSONArray jsonArray = from.getJSONArray(getAjaxName());
@@ -86,11 +87,9 @@ public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> impl
 	}
 
 	@Override
-	public void serialize(final O from, final JSONObject to, TimeZone timeZone) throws JSONException {
-		if (this.isSet(from)) {
-			final T[] value = this.get(from);
-			to.put(getAjaxName(), null != value ? Arrays.asList(value) : JSONObject.NULL); 
-		}
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+		final T[] value = this.get(from);
+		return null != value ? Arrays.asList(value) : (JSONArray)null;
 	}
 
 }
