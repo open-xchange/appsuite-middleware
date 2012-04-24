@@ -53,9 +53,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
 
 /**
  * {@link AllJSlobResponse}
@@ -83,8 +85,11 @@ public final class AllJSlobResponse extends AbstractAJAXResponse {
         final JSONArray jslobs = (JSONArray) getData();
         final int len = jslobs.length();
         final List<JSlob> list = new ArrayList<JSlob>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(new JSlob(jslobs.getJSONObject(i)));
+        for (int i = 0; i < len; i++) {            
+            final JSONObject jData = jslobs.getJSONObject(i);
+            final JSlob jSlob = new JSlob(jData.getJSONObject("jslob"));
+            jSlob.setId(new JSlobId(null, jData.getString("id"), 0, 0));
+            list.add(jSlob);
         }
         return list;
     }

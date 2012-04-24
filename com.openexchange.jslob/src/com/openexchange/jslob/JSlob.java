@@ -88,6 +88,20 @@ public class JSlob {
         super();
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("JSlob {");
+        if (jsonObject != null) {
+            builder.append("jsonObject=").append(jsonObject).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id);
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
     /**
      * Initializes a new {@link JSlob}.
      * 
