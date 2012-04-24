@@ -54,6 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
 
 /**
  * {@link UpdateJSlobResponse}
@@ -79,6 +80,8 @@ public final class UpdateJSlobResponse extends AbstractAJAXResponse {
      */
     public JSlob getJSlob() throws JSONException {
         final JSONObject jData = (JSONObject) getData();
-        return new JSlob(jData);
+        final JSlob jSlob = new JSlob(jData.getJSONObject("jslob"));
+        jSlob.setId(new JSlobId(null, jData.getString("id"), 0, 0));
+        return jSlob;
     }
 }
