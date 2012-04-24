@@ -162,6 +162,9 @@ public final class JSONUtil {
      * @throws JSONException If String cannot be transformed to any object according to JSON specification
      */
     public static Object toObject(final String value) throws JSONException {
+        if (null == value) {
+            return null;
+        }
         return new JSONTokener(value).nextValue();
     }
 
