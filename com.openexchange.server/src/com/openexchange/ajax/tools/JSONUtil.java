@@ -50,8 +50,11 @@
 package com.openexchange.ajax.tools;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 /**
  * {@link JSONUtil} - Provides JSON utility methods.
@@ -76,22 +79,90 @@ public final class JSONUtil {
      * @throws JSONException If composing merged JSON object fails for any reason
      */
     public static JSONObject merge(final JSONObject jObject1, final JSONObject... jObjects) throws JSONException {
-        if ((null == jObject1) || (null == jObjects) || (0 == jObjects.length)) {
+        if ((null == jObject1)) {
             return jObject1;
         }
         final JSONObject merged = new JSONObject();
-        for (final Iterator<String> iter = jObject1.keys(); iter.hasNext();) {
-            final String key = iter.next();
-            merged.put(key, jObject1.get(key));
+        for (final Entry<String,Object> entry : jObject1.entrySet()) {
+            merged.put(entry.getKey(), entry.getValue());
+        }
+        if ((null == jObjects) || (0 == jObjects.length)) {
+            return merged;
         }
         // Iterate others
         for (final JSONObject obj : jObjects) {
-            for (final Iterator<String> iter = obj.keys(); iter.hasNext();) {
-                final String key = iter.next();
-                merged.put(key, obj.get(key));
-            }
+            mergeInto(merged, obj);
         }
         return merged;
+    }
+
+    private static void mergeInto(final JSONObject j1, final JSONObject j2) throws JSONException {
+        for (final Iterator<String> keys2 = j2.keys(); keys2.hasNext();) {
+            final String key = keys2.next();
+            final Object object2 = j2.get(key);
+            if (object2 instanceof JSONObject) {
+                if (j1.hasAndNotNull(key)) {
+                    final Object object1 = j1.get(key);
+                    if (!(object1 instanceof JSONObject)) {
+                        throw new JSONException("JSON merge failed for key \"" + key + "\": Incompatible values " + object1.getClass().getSimpleName() + " != " + object2.getClass().getSimpleName());
+                    }
+                    mergeInto((JSONObject) object1, (JSONObject) object2);
+                    j1.put(key, object1);
+                } else {
+                    j1.put(key, object2);
+                }
+            } else if (object2 instanceof JSONArray) {
+                if (j1.hasAndNotNull(key)) {
+                    final Object object1 = j1.get(key);
+                    if (!(object1 instanceof JSONArray)) {
+                        throw new JSONException("JSON merge failed for key \"" + key + "\": Incompatible values " + object1.getClass().getSimpleName() + " != " + object2.getClass().getSimpleName());
+                    }
+                    mergeInto((JSONArray) object1, (JSONArray) object2);
+                    j1.put(key, object1);
+                } else {
+                    j1.put(key, object2);
+                }
+            } else {
+                if (j1.hasAndNotNull(key) && !object2.equals(j1.get(key))) {
+                    throw new JSONException("JSON merge failed for key \"" + key + "\": Conflicting values " + j1.get(key) + " != " + object2);
+                }
+                j1.put(key, object2);
+            }
+        }
+        
+    }
+
+    private static void mergeInto(final JSONArray a1, final JSONArray a2) throws JSONException {
+        final int len = a2.length();
+        for (int i = 0; i < len; i++) {
+            final Object object = a2.get(i);
+            if (!contains(a1, object)) {
+                a1.put(object);
+            }
+        }
+    }
+
+    private static boolean contains(final JSONArray jsonArray, final Object object) throws JSONException {
+        final int len = jsonArray.length();
+        for (int i = 0; i < len; i++) {
+            if (jsonArray.get(i).equals(object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the appropriate JSON value for specified string.
+     * <p>
+     * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
+     * 
+     * @param value The value
+     * @return The resulting object
+     * @throws JSONException If String cannot be transformed to any object according to JSON specification
+     */
+    public static Object toObject(final String value) throws JSONException {
+        return new JSONTokener(value).nextValue();
     }
 
 }
