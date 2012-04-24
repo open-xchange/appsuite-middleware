@@ -60,7 +60,8 @@ import org.apache.commons.logging.LogConfigurationException;
 public class LogFactory {
 
 	public static LogWrapperFactory FACTORY = null;
-    /**
+
+	/**
      * Convenience method to return a named logger, without the application having to care about factories.
      * 
      * @param clazz The class from which a log name will be derived
