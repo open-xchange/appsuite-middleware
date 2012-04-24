@@ -52,6 +52,7 @@ package com.openexchange.ajax.tools;
 import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 /**
  * {@link JSONUtil} - Provides JSON utility methods.
@@ -92,6 +93,19 @@ public final class JSONUtil {
             }
         }
         return merged;
+    }
+
+    /**
+     * Gets the appropriate JSON value for specified string.
+     * <p>
+     * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
+     * 
+     * @param value The value
+     * @return The resulting object
+     * @throws JSONException If String cannot be transformed to any object according to JSON specification
+     */
+    public static Object toObject(final String value) throws JSONException {
+        return new JSONTokener(value).nextValue();
     }
 
 }
