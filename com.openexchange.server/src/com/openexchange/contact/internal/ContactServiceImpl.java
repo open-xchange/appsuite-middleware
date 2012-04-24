@@ -58,14 +58,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMergerator;
@@ -88,246 +86,15 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactServiceImpl implements ContactService {
+public class ContactServiceImpl extends DefaultContactService {
 	
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceImpl.class));
-    
     public ContactServiceImpl() {
     	super();
-    	LOG.debug("initialized.");
     }
 
-	/*
-	 * -----------------------------------------------------------------------------------------------------------------------------------
-	 */    
-    
-	@Override
-	public Contact getContact(Session session, String folderId, String id) throws OXException {
-		return this.getContact(session, folderId, id, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getAllContacts(Session session, String folderId) throws OXException {
-		return this.getAllContacts(session, folderId, null, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getAllContacts(Session session, String folderId, SortOptions sortOptions) throws OXException {
-		return this.getAllContacts(session, folderId, null, sortOptions);
-	}
-
-	@Override
-	public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields) throws OXException {
-		return this.getAllContacts(session, folderId, fields, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids) throws OXException {
-		return this.getContacts(session, folderId, ids, null, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, SortOptions sortOptions) throws OXException {
-		return this.getContacts(session, folderId, ids, null, sortOptions);
-	}
-
-	@Override
-	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields) throws OXException {
-		return this.getContacts(session, folderId, ids, fields, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since) throws OXException {
-		return this.getDeletedContacts(session, folderId, since, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, final Date since, final ContactField[] fields) throws OXException {
-		return this.getDeletedContacts(session, folderId, since, fields, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since) throws OXException {
-		return this.getModifiedContacts(session, folderId, since, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, final ContactField[] fields) throws OXException {
-		return this.getModifiedContacts(session, folderId, since, fields, SortOptions.EMPTY);
-	}
-
-	@Override
-	public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term) throws OXException {
-		return this.searchContacts(session, term, null, null);
-	}
-
-	@Override
-	public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
-		return this.searchContacts(session, term, null, sortOptions);
-	}
-
-	@Override
-	public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
-		return this.searchContacts(session, term, fields, null);
-	}
-	
-	@Override
-	public Contact getUser(Session session, int userID) throws OXException {
-		return getUser(session, userID, null);
-	}
-	
-	@Override
-	public SearchIterator<Contact> getUsers(Session session, int[] userIDs) throws OXException {
-		return getUsers(session, userIDs, null);
-	}
-	
-	/*
-	 * -----------------------------------------------------------------------------------------------------------------------------------
-	 */
-
-	@Override
-	public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(term, "term");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.searchContacts(contextID, userID, term, fields, sortOptions);
-	}
-
-	@Override
-	public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.getContacts(false, contextID, userID, folderId, null, fields, sortOptions, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(ids, "ids");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.getContacts(false, contextID, userID, folderId, ids, fields, sortOptions, null);
-	}
-
-	@Override
-	public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, final SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(since, "since");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.getContacts(false, contextID, userID, folderId, null, fields, sortOptions, since);
-	}
-	
-	@Override
-	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(since, "since");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.getContacts(true, contextID, userID, folderId, null, fields, sortOptions, since);
-	}
-
-	@Override
-	public Contact getContact(final Session session, final String folderId, final String id, final ContactField[] fields) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(id, "id");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.getContact(contextID, userID, folderId, id, fields);
-	}
-	
-	@Override
-	public void createContact(Session session, String folderId, Contact contact) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(contact, "contact");		
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		this.createContact(contextID, userID, folderId, contact);
-	}
-
-	@Override
-	public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
-			throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(id, "id");
-		Check.argNotNull(lastRead, "lastRead");
-		Check.argNotNull(contact, "contact");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
-			this.updateAndMoveContact(contextID, userID, folderId, Integer.toString(contact.getParentFolderID()), id, contact, lastRead);			
-		} else {
-			this.updateContact(contextID, userID, folderId, id, contact, lastRead);
-		}
-	}
-
-	@Override
-	public void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(id, "id");
-		Check.argNotNull(lastRead, "lastRead");
-		final int contextID = session.getContextId();		
-		final int userID = session.getUserId();
-		this.deleteContact(contextID, userID, folderId, id, lastRead);
-	}
-	
-	@Override
-    public Contact getUser(Session session, int userID, ContactField[] fields) throws OXException {
-		Check.argNotNull(session, "session");
-		final int contextID = session.getContextId();
-		final int currentUserID = session.getUserId();
-		return this.getUser(contextID, currentUserID, userID, fields);
-    }
-    
-	@Override
-    public SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(userIDs, "userIDs");
-		final int contextID = session.getContextId();
-		final int currentUserID = session.getUserId();
-		return this.getUsers(contextID, currentUserID, userIDs, null, fields, null);
-    }
-    
-	@Override
-    public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, final SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		final int contextID = session.getContextId();
-		final int currentUserID = session.getUserId();
-		return this.getUsers(contextID, currentUserID, null, null, fields, sortOptions);
-    }
-
-	@Override
-	public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(term, "term");
-		final int contextID = session.getContextId();
-		final int userID = session.getUserId();
-		return this.getUsers(contextID, userID, null, term, fields, sortOptions);
-	}
-
-	@Override
-    public String getOrganization(Session session) throws OXException {
-		Check.argNotNull(session, "session");
-		final int contextID = session.getContextId();
-		return this.getOrganization(contextID);
-    }
-
-	/*
-	 * -----------------------------------------------------------------------------------------------------------------------------------
-	 */
-	
-	protected Contact getContact(final int contextID, final int userID, final String folderID, final String id, final ContactField[] fields) 
-			throws OXException {
+	protected Contact doGetContact(Session session, String folderID, String id, ContactField[] fields) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check folder
@@ -367,7 +134,9 @@ public class ContactServiceImpl implements ContactService {
 		return contact;
 	}
 	
-	protected void createContact(final int contextID, final int userID, final String folderID, final Contact contact) throws OXException {
+	protected void doCreateContact(Session session, String folderID, Contact contact) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check supplied contact
@@ -417,10 +186,16 @@ public class ContactServiceImpl implements ContactService {
 		 * pass through to storage
 		 */
 		storage.create(contextID, folderID, contact);
+		/*
+		 * broadcast event
+		 */
+		new EventClient(session).create(contact, folder);
 	}
 	
-	protected void updateAndMoveContact(final int contextID, final int userID, final String sourceFolderId, final String targetFolderId, 
-			final String objectID, final Contact contact, final Date lastRead) throws OXException {
+	protected void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID, 
+			Contact contact, Date lastRead) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		/*
 		 * check supplied contact
 		 */
@@ -517,10 +292,15 @@ public class ContactServiceImpl implements ContactService {
 				throw e;
 			}
 		}
+		/*
+		 * broadcast event
+		 */
+		new EventClient(session).move(delta, sourceFolder, targetFolder);
 	}
 	
-	protected void updateContact(final int contextID, final int userID, final String folderID, final String objectID, 
-			final Contact contact, final Date lastRead) throws OXException {
+	protected void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check supplied contact
@@ -593,9 +373,15 @@ public class ContactServiceImpl implements ContactService {
 		 * pass through to storage
 		 */
 		storage.update(contextID, folderID, objectID, delta, lastRead);
+		/*
+		 * broadcast event
+		 */
+		new EventClient(session).modify(storedContact, contact, folder);
 	}
 	
-	protected void deleteContact(int contextID, int userID, String folderID, String objectID, Date lastRead) throws OXException {
+	protected void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check folder
@@ -621,28 +407,20 @@ public class ContactServiceImpl implements ContactService {
 		 * delete contact from storage
 		 */
 		storage.delete(contextID, userID, folderID, objectID, lastRead);
+		/*
+		 * broadcast event
+		 */
+		storedContact.setContextId(contextID);
+		storedContact.setParentFolderID(parse(folderID));
+		storedContact.setObjectID(parse(objectID));
+		new EventClient(session).delete(storedContact, folder);
 	}
 	
-	/**
-	 * Gets contacts from the storage, performing the necessary permission 
-	 * checks and other validations. Depending on the supplied parameters, the  
-	 * call is delegated to different methods in the storage layer implicitly.
-	 * 
-	 * @param deleted whether to get 'deleted' contacts or not
-	 * @param contextID the context ID
-	 * @param userID the user ID
-	 * @param folderID the folder ID
-	 * @param ids the object IDs
-	 * @param term the search term
-	 * @param fields the contact fields to retrieve
-	 * @param sortOptions the sort options to apply
-	 * @param since the date of the last modification
-	 * @return the contacts
-	 * @throws OXException
-	 */
-	protected <O> SearchIterator<Contact> getContacts(boolean deleted, final int contextID, final int userID, final String folderID, 
+	protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, final String folderID, 
 			final String[] ids, final ContactField[] fields, final SortOptions sortOptions, 
 			final Date since) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		/*
 		 * check folder
 		 */
@@ -679,8 +457,10 @@ public class ContactServiceImpl implements ContactService {
 		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), contextID, userID, permission.canReadAllObjects());	
 	}
 	
-	protected <O> SearchIterator<Contact> searchContacts(final int contextID, final int userID, final SearchTerm<O> term, 
-			final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+	protected <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
+			SortOptions sortOptions) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
 		/*
 		 * analyze term
 		 */
@@ -728,7 +508,7 @@ public class ContactServiceImpl implements ContactService {
 			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
 	}
 	
-	protected String getOrganization(final int contextID) throws OXException {
+	protected String doGetOrganization(int contextID) throws OXException {
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final int userID = Tools.getContext(contextID).getMailadmin();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
@@ -737,30 +517,10 @@ public class ContactServiceImpl implements ContactService {
 		return contact.getCompany();
 	}
 	
-	protected Contact getUser(final int contextID, final int currentUserID, final int userID, final ContactField[] fields) 
-			throws OXException {
-		/*
-		 * get user contact from storage
-		 */
-		Contact contact = null;
-		SearchIterator<Contact> searchIterator = null;
-		try {
-			searchIterator = this.getUsers(contextID, currentUserID, new int[] { userID }, null, fields, null); 
-			contact = searchIterator.next();
-		} finally {
-			if (null != searchIterator) {
-				searchIterator.close();
-			}
-		}
-		Check.contactNotNull(contact, contextID, userID);
-		/*
-		 * deliver user contact
-		 */
-		return contact;
-	}
-	
-	protected <O> SearchIterator<Contact> getUsers(final int contextID, final int currentUserID, final int[] userIDs, final SearchTerm<O> term, 
-			final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+	protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
+			ContactField[] fields, SortOptions sortOptions) throws OXException {
+		int currentUserID = session.getUserId();
+		int contextID = session.getContextId();
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
@@ -817,9 +577,5 @@ public class ContactServiceImpl implements ContactService {
 		return new ResultIterator(storage.search(contextID, searchTerm, queryFields.getFields(), sortOptions), 
 				queryFields.needsAttachmentInfo(), contextID, currentUserID, true);
 	}
-	
-	/*
-	 * -----------------------------------------------------------------------------------------------------------------------------------
-	 */
 	
 }

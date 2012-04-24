@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -81,6 +80,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -215,12 +215,13 @@ public final class Tools {
 	
 	/**
 	 * Adds the date of the last modification to attachments of the given 
-	 * contact when needed. 
+	 * contact when needed, i.e. the information is not already present.
 	 * 
 	 * @param contact the contact to add the attachment information for
+	 * @param contextID the context ID
 	 * @throws OXException
 	 */
-	public static void addAttachmentInformation(final Contact contact, final int contextID) throws OXException {
+	public static void addAttachmentInformation(Contact contact, int contextID) throws OXException {
 		if (false == contact.containsLastModifiedOfNewestAttachment() && 0 < contact.getNumberOfAttachments()) {
 			contact.setLastModifiedOfNewestAttachment(Attachments.getInstance().getNewestCreationDate(
 					Tools.getContext(contextID), Types.CONTACT, contact.getObjectID()));
