@@ -108,11 +108,12 @@ public final class UpdateAction extends JSlobAction {
         {
             final AJAXRequestData requestData = jslobRequest.getRequestData();
             final String serlvetRequestURI = requestData.getSerlvetRequestURI();
+            final Object data = requestData.getData();
             if (!isEmpty(serlvetRequestURI)) {
                 /*
                  * Update by request path
                  */
-                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, requestData.getData());
+                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, data instanceof String ? JSONUtil.toObject(data.toString()) : data);
                 /*
                  * Update...
                  */
@@ -125,7 +126,7 @@ public final class UpdateAction extends JSlobAction {
                 /*
                  * Update by JSON data
                  */
-                final JSONObject jsonData = (JSONObject) requestData.getData();
+                final JSONObject jsonData = (JSONObject) data;
                 if (jsonData.hasAndNotNull("path")) {
                     final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
                     /*
