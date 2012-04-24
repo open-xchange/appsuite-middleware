@@ -69,8 +69,9 @@ public class LogFactory {
      */
     public static org.apache.commons.logging.Log getLog(final Class<?> clazz) {
 		org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(clazz);
+		String name = clazz.getName();
 		if (FACTORY != null) {
-			log = FACTORY.wrap(log);
+			log = FACTORY.wrap(name, log);
 		}
 		return Log.valueOf(com.openexchange.exception.Log.valueOf(log));
     }
@@ -85,7 +86,7 @@ public class LogFactory {
     public static org.apache.commons.logging.Log getLog(final String name) {
 		org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(name);
 		if (FACTORY != null) {
-			log = FACTORY.wrap(log);
+			log = FACTORY.wrap(name, log);
 		}
 		return Log.valueOf(com.openexchange.exception.Log.valueOf(log));
     }

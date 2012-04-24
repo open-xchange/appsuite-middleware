@@ -112,9 +112,9 @@ public final class GlobalActivator implements BundleActivator {
 			LogFactory.FACTORY = new LogWrapperFactory() {
 				
 				@Override
-				public Log wrap(Log log) {
+				public Log wrap(String name, Log log) {
 					for(LogWrapperFactory factory: logWrapperTracker.getTracked().values()) {
-						log = factory.wrap(log);
+						log = factory.wrap(name, log);
 					}
 					return log;
 				}
