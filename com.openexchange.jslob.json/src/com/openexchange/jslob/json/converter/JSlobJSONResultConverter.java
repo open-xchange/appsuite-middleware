@@ -118,7 +118,7 @@ public class JSlobJSONResultConverter implements ResultConverter {
         final JSONObject json = new JSONObject();
         json.put("id", jslob.getId().getId());
         json.put("jslob", jslob.getJsonObject());
-        return jslob.getJsonObject();
+        return json;
     }
 
 }
