@@ -147,6 +147,7 @@ public class ICalExporter implements Exporter {
         CalendarObject.NOTE,
         CalendarObject.RECURRENCE_TYPE,
         CalendarObject.PARTICIPANTS,
+        Task.UID,
         Task.ACTUAL_COSTS,
         Task.ACTUAL_DURATION,
         Task.ALARM,
