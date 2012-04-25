@@ -79,7 +79,7 @@ public class JSlobActionFactory implements AJAXActionServiceFactory {
      */
     public JSlobActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, JSlobAction>(4);
+        actions = new ConcurrentHashMap<String, JSlobAction>(10);
         addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services, actions));
         addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services, actions));
         addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services, actions));
