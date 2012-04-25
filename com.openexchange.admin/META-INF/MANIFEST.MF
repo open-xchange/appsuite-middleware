@@ -27,6 +27,7 @@ Import-Package: com.mysql.jdbc,
  com.openexchange.groupware.update,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.mime,
  com.openexchange.mail.usersetting,
@@ -74,4 +75,3 @@ Bundle-ActivationPolicy: lazy
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: lib/opencsv-2.0.jar,
  .
-
