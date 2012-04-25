@@ -28,4 +28,8 @@
         </copy>
     </target>
 
+    <target name="postInstall" description="Installs the language files.">
+        <mkdir dir="${destDir}/${i18nDir}"/>
+    </target>
+
 </project>
