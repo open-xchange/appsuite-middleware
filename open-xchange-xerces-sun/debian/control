@@ -8,7 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-xerces-sun
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-osgi (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@)
 Conflicts: open-xchange-xerces-ibm
 Provides: open-xchange-xerces
 Description: Xerces Compat for Sun Java
