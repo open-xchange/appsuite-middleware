@@ -185,7 +185,6 @@ fi
 %dir /opt/open-xchange/etc/
 /opt/open-xchange/etc/*
 %dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*
 %dir /opt/open-xchange/importCSV/
 /opt/open-xchange/importCSV/*
 %dir /opt/open-xchange/lib/
