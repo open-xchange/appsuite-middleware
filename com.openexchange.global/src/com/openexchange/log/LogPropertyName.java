@@ -92,7 +92,11 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The TRACE log level
          */
-        TRACE(100), ;
+        TRACE(100), 
+        /*
+         * Don't log this
+         */
+        OFF(Integer.MAX_VALUE), ;
         
         private int lvl;
         

@@ -4,10 +4,10 @@ import org.apache.commons.logging.Log;
 
 public class TrackingFileLog implements Log {
 
-	private TrackingConfiguration config;
+	private ScopedTrackingConfiguration config;
 	private Log delegate;
 
-	public TrackingFileLog(TrackingConfiguration config, Log delegate) {
+	public TrackingFileLog(ScopedTrackingConfiguration config, Log delegate) {
 		this.config = config;
 		this.delegate = delegate;
 	}

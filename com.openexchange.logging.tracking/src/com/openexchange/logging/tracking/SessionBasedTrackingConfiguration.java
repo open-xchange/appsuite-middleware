@@ -6,13 +6,13 @@ import org.apache.commons.logging.Log;
 
 import com.openexchange.tools.session.SessionHolder;
 
-public class SessionBasedTrackingConfiguration implements TrackingConfiguration {
+public class SessionBasedTrackingConfiguration implements ScopedTrackingConfiguration {
 	
 	private SessionHolder sh;
-	private GlobalTrackingConfiguration config;
+	private TrackingConfiguration config;
 	private String[] className;
 	
-	public SessionBasedTrackingConfiguration(String className, GlobalTrackingConfiguration config, SessionHolder sh) {
+	public SessionBasedTrackingConfiguration(String className, TrackingConfiguration config, SessionHolder sh) {
 		this.sh = sh;
 		this.config = config;
 		this.className = className.split("\\.");
@@ -43,6 +43,6 @@ public class SessionBasedTrackingConfiguration implements TrackingConfiguration 
 	}
 
 	public Log getLog() {
-		return config.getLog(className, sh.getSessionObject());
+		return config.getLog(sh.getSessionObject());
 	}
 }
