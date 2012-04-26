@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="oxscript overrides" basedir=".">
+
+    <description>
+        This build file uses the postInstall target to patch a lot of script files before installing them.
+    </description>
+
+    <!-- Constants -->
+    <property name="sbinDir" value="sbin"/>
+
+    <import file="build-project.xml"/>
+
+    <target name="postInstall">
+        <antcall target="patchAndInstallScripts"/>
+    </target>
+
+    <target name="patchAndInstallScripts" depends="patchScripts">
+        <property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}"/>
+        <copy todir="${sbinInstallDir}" overwrite="true">
+            <fileset dir="${patchSbinDir}"/>
+        </copy>
+        <chmod perm="755" file="${sbinInstallDir}/installbundle"/>
+        <chmod perm="755" file="${sbinInstallDir}/listbundles"/>
+        <chmod perm="755" file="${sbinInstallDir}/listservices"/>
+        <chmod perm="755" file="${sbinInstallDir}/refreshbundles"/>
+        <chmod perm="755" file="${sbinInstallDir}/shutdown"/>
+        <chmod perm="755" file="${sbinInstallDir}/startbundle"/>
+        <chmod perm="755" file="${sbinInstallDir}/stopbundle"/>
+        <chmod perm="755" file="${sbinInstallDir}/uninstallbundle"/>
+        <chmod perm="755" file="${sbinInstallDir}/updatebundle"/>
+    </target>
+
+    <target name="patchScripts">
+        <property name="patchSbinDir" value="${tmpDir}/${sbinDir}"/>
+        <mkdir dir="${patchSbinDir}"/>
+        <antcall target="moveAndPatchScripts"/>
+    </target>
+
+    <target name="moveAndPatchScripts">
+        <copy todir="${patchSbinDir}" overwrite="true">
+            <fileset dir="${sbinDir}"/>
+            <mapper type="glob" from="*.in" to="*"/>
+        </copy>
+        <replace dir="${patchSbinDir}" includes="installbundle listbundles listservices refreshbundles shutdown startbundle stopbundle uninstallbundle updatebundle">
+            <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
+            <replacefilter token="@prefix@" value="${prefix}"/>
+        </replace>
+    </target>
+
+</project>
