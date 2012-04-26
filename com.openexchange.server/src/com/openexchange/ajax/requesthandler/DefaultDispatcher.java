@@ -92,7 +92,9 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public void end(final AJAXState state) {
-        state.close();
+        if (null != state) {
+            state.close();
+        }
     }
 
     @Override
