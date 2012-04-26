@@ -2,6 +2,7 @@
 
  - Fix for bug 21647: Clearing cache for Outlook folder tree
  - Fix for bug 22029: Ignoring heading header name during Content-Type parsing
+ - Fix for bug 21908: Support for SMS-specific compose type
 
 * 2012-04-23 - thorben.betten@open-xchange.com
 
