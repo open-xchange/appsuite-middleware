@@ -1,6 +1,7 @@
 * 2012-04-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 21647: Clearing cache for Outlook folder tree
+ - Fix for bug 22029: Ignoring heading header name during Content-Type parsing
 
 * 2012-04-23 - thorben.betten@open-xchange.com
 
