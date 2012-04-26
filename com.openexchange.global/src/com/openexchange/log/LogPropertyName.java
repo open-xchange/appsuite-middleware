@@ -124,6 +124,9 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         }
 
 		public boolean includes(LogLevel other) {
+			if (this == OFF) {
+				return false;
+			}
 			return other.lvl <= lvl;
 		}
 		

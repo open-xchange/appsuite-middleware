@@ -8,16 +8,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.ReflectionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.impl.NoOpLog;
 
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -153,6 +147,9 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 
 	public Log getLog(Session session) {
+		if (session == null) {
+			return new NoOpLog();
+		}
 		final Log[] logs = new Log[]{
 			LogFactory.getLog("com.openexchange.logging.tracking.session."+session.getSessionID()),
 			LogFactory.getLog("com.openexchange.logging.tracking.ctx."+session.getContextId()),
