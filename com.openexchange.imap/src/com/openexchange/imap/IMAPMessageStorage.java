@@ -983,6 +983,32 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } else {
                 final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder));
+                {
+                    final IMAPFolder sentFolder = (IMAPFolder) imapStore.getFolder(imapFolderStorage.getSentFolder());
+                    sentFolder.open(IMAPFolder.READ_ONLY);
+                    try {
+                        final Threadable sentThreadable = Threadable.getAllThreadablesFrom(sentFolder);
+                        /*-
+                         * 1. One of thread's "Message-Id"s appears in sent's "References" or "In-Reply-To"
+                         * 
+                         * 2. Any of sent's "Message-Id"s appears in thread's "References" or "In-Reply-To"
+                         * 
+                         * 3. Link them by subject (with "Re:" and "Fwd:" Prefix ignored)
+                         * 
+                         * 4. Merge into thread by "Date"
+                         */
+                        
+                        Threadable current = threadable;
+                        while (null != current) {
+                            
+                            current = current.next();
+                        }
+                    } finally {
+                        sentFolder.close(false);
+                    }
+                }
+                
+                
                 threadResp = Threadable.toThreadReferences(threadable, null);
             }
             /*
