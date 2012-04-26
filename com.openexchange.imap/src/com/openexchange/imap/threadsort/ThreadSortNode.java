@@ -63,17 +63,17 @@ public class ThreadSortNode {
     /**
      * The number of this tree node's message.
      */
-    final int msgNum;
+    final MessageId msgId;
 
     private final List<ThreadSortNode> childs;
 
     /**
      * Initializes a new {@link ThreadSortNode}.
      *
-     * @param msgNum The number of this tree node's message.
+     * @param msgId The identifier of this tree node's message.
      */
-    public ThreadSortNode(final int msgNum) {
-        this.msgNum = msgNum;
+    public ThreadSortNode(final MessageId msgId) {
+        this.msgId = msgId;
         childs = new ArrayList<ThreadSortNode>();
     }
 
@@ -97,7 +97,16 @@ public class ThreadSortNode {
 
     @Override
     public String toString() {
-        return new StringBuilder().append(msgNum).append(' ').append(childs).toString();
+        return new StringBuilder().append(msgId).append(' ').append(childs).toString();
+    }
+
+    /**
+     * Gets the message identifier
+     *
+     * @return The message identifier
+     */
+    public MessageId getMsgId() {
+        return msgId;
     }
 
     /**
@@ -106,7 +115,7 @@ public class ThreadSortNode {
      * @return The number of this tree node's message.
      */
     public int getMsgNum() {
-        return msgNum;
+        return msgId.getMessageNumber();
     }
 
     /**

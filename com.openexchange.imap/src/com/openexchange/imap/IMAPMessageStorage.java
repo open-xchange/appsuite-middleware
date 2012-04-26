@@ -53,10 +53,12 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
-import gnu.trove.list.TIntList;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.procedure.TLongObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,9 +67,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
@@ -108,6 +112,7 @@ import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.thread.Threadable;
 import com.openexchange.imap.thread.Threader;
+import com.openexchange.imap.threadsort.MessageId;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
@@ -968,30 +973,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
-            final TIntList seqNums;
-            final List<ThreadSortNode> threadList;
-            {
-                /*
-                 * Sort messages by thread reference
-                 */
-                final String threadResp;
-                if (imapConfig.getImapCapabilities().hasThreadReferences()) {
-                    final long start = System.currentTimeMillis();
-                    threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                } else {
-                    final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder));
-                    threadResp = Threadable.toThreadReferences(threadable, null);
-                }
-                /*
-                 * Parse THREAD response to a list structure and extract sequence numbers
-                 */
-                threadList = ThreadSortUtil.parseThreadResponse(threadResp);
-                seqNums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
+            /*
+             * Sort messages by thread reference
+             */
+            final String threadResp;
+            if (imapConfig.getImapCapabilities().hasThreadReferences()) {
+                final long start = System.currentTimeMillis();
+                threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } else {
+                final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder));
+                threadResp = Threadable.toThreadReferences(threadable, null);
             }
+            /*
+             * Parse THREAD response to a list structure and extract sequence numbers
+             */
+            final List<ThreadSortNode> threadList = ThreadSortUtil.parseThreadResponse(threadResp);
             if (null == threadList) {
                 // No threads found
                 return Collections.<List<MailMessage>> singletonList(Arrays.asList(getAllMessages(fullName, null, sortField, order, mailFields)));
+            }
+            final List<MessageId> messageIds = ThreadSortUtil.fromThreadResponse(threadList);
+            final TIntObjectMap<MessageId> seqNum2MessageId = new TIntObjectHashMap<MessageId>(messageIds.size());
+            for (final MessageId messageId : messageIds) {
+                seqNum2MessageId.put(messageId.getMessageNumber(), messageId);
             }
             /*
              * Fetch messages
@@ -1006,25 +1011,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
-                final long start = System.currentTimeMillis();
-                final TLongObjectMap<MailMessage> messages =
-                    new SimpleFetchIMAPCommand(
-                        imapFolder,
-                        getSeparator(imapFolder),
-                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                        seqNums.toArray(),
-                        fetchProfile).doCommand();
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                final Map<MessageId, MailMessage> mapping;
+                {
+                    final long start = System.currentTimeMillis();
+                    final TLongObjectMap<MailMessage> messages =
+                        new SimpleFetchIMAPCommand(
+                            imapFolder,
+                            getSeparator(imapFolder),
+                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                            MessageId.toSeqNums(messageIds).toArray(),
+                            fetchProfile).doCommand();
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    mapping = new HashMap<MessageId, MailMessage>(messages.size());
+                    messages.forEachEntry(new TLongObjectProcedure<MailMessage>() {
+
+                        @Override
+                        public boolean execute(final long seqNum, final MailMessage m) {
+                            mapping.put(seqNum2MessageId.get((int) seqNum), m);
+                            return true;
+                        }
+                    });
+                }
                 /*
                  * Apply account identifier
                  */
-                for (final MailMessage mail : messages.valueCollection()) {
+                for (final MailMessage mail : mapping.values()) {
                     setAccountInfo(mail);
                 }
                 /*
                  * Generate structure
                  */
-                final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
+                final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, mapping);
                 List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
                 /*
                  * Sort according to order direction
@@ -1063,7 +1080,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Include body
              */
             final Message[] msgs =
-                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
+                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), MessageId.toSeqNums(messageIds), fetchProfile, false, true, body).doCommand();
             /*
              * Apply thread level
              */
@@ -1182,10 +1199,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Parse THREAD response to a list structure and extract sequence numbers
              */
             final List<ThreadSortNode> threadList = ThreadSortUtil.parseThreadResponse(threadResp);
-            final TIntList seqnums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
             if (null == threadList) {
                 // No threads found
                 return getAllMessages(fullName, indexRange, sortField, order, mailFields);
+            }
+            final List<MessageId> messageIds = ThreadSortUtil.fromThreadResponse(threadList);
+            final TIntObjectMap<MessageId> seqNum2MessageId = new TIntObjectHashMap<MessageId>(messageIds.size());
+            for (final MessageId messageId : messageIds) {
+                seqNum2MessageId.put(messageId.getMessageNumber(), messageId);
             }
             /*
              * Fetch messages
@@ -1199,16 +1220,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             if (!body) {
-                final long start = System.currentTimeMillis();
-                final TLongObjectMap<MailMessage> messages =
-                    new SimpleFetchIMAPCommand(
-                        imapFolder,
-                        getSeparator(imapFolder),
-                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                        seqnums.toArray(),
-                        fetchProfile).doCommand();
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
+                final Map<MessageId, MailMessage> mapping;
+                {
+                    final long start = System.currentTimeMillis();
+                    final TLongObjectMap<MailMessage> messages =
+                        new SimpleFetchIMAPCommand(
+                            imapFolder,
+                            getSeparator(imapFolder),
+                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                            MessageId.toSeqNums(messageIds).toArray(),
+                            fetchProfile).doCommand();
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    mapping = new HashMap<MessageId, MailMessage>(messages.size());
+                    messages.forEachEntry(new TLongObjectProcedure<MailMessage>() {
+
+                        @Override
+                        public boolean execute(final long seqNum, final MailMessage m) {
+                            mapping.put(seqNum2MessageId.get((int) seqNum), m);
+                            return true;
+                        }
+                    });
+                }
+                final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, mapping);
                 /*
                  * Sort according to order direction
                  */
@@ -1216,7 +1249,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Output as flat list
                  */
-                final List<MailMessage> flatList = new ArrayList<MailMessage>(messages.size());
+                final List<MailMessage> flatList = new ArrayList<MailMessage>(mapping.size());
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     for (final MailMessage mail : flatList) {
                         setAccountInfo(mail);
@@ -1229,7 +1262,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Include body
              */
             Message[] msgs =
-                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqnums, fetchProfile, false, true, body).doCommand();
+                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), MessageId.toSeqNums(messageIds), fetchProfile, false, true, body).doCommand();
             /*
              * Apply thread level
              */
