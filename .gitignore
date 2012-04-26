@@ -55,6 +55,7 @@ com.openexchange.modules.model/jars
 com.openexchange.modules.storage/jars
 com.openexchange.oauth.linkedin/jars
 com.openexchange.oauth.linkedin.json/jars
+com.openexchange.oauth.linkedin.json/build
 com.openexchange.oauth/jars
 com.openexchange.secret.recovery/jars
 com.openexchange.sessiond/jars
@@ -103,11 +104,13 @@ com.openexchange.push.udp/jars
 com.openexchange.service.messaging/jars
 com.openexchange.spellcheck.servlet/jars
 com.openexchange.subscribe.crawler/jars
+com.openexchange.subscribe.crawler/tmp
 com.openexchange.subscribe.json/jars
 com.openexchange.subscribe.microformats/jars
 com.openexchange.subscribe.msn/jars
 com.openexchange.templating.json/jars
 com.openexchange.templating/jars
+com.openexchange.templating/tmp
 com.openexchange.twitter/jars
 com.openexchange.url.mail.attachment/jars
 com.openexchange.user.json/jars
@@ -167,7 +170,9 @@ com.openexchange.tasks.json/jars
 org.apache.commons.logging.log4j/jars
 org.apache.log4j.configuration/jars
 com.openexchange.admin.plugin.hosting/jars
+com.openexchange.admin.plugin.hosting/tmp
 com.openexchange.admin/jars
+com.openexchange.admin/tmp
 com.openexchange.halo.mail/jars
 com.openexchange.langdetect/jars
 com.openexchange.mail.smal/jars
@@ -175,3 +180,6 @@ com.openexchange.index/jars
 com.openexchange.oauth.linked.json/build
 com.openexchange.index.solr/build
 com.openexchange.index.solr/jars
+com.openexchange.authentication.imap/jars
+com.openexchange.contact.storage.rdb/jars
+com.openexchange.groupware.tools/jars
