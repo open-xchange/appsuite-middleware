@@ -255,7 +255,16 @@ public final class Threadable {
     }
 
     /**
-     * When the proper thread order has been computed, these two methods will be called on each IThreadable in the chain, to set up the
+     * Gets the next
+     *
+     * @return The next
+     */
+    public Threadable next() {
+        return next;
+    }
+
+    /**
+     * When the proper thread order has been computed, these two methods will be called on each Threadable in the chain, to set up the
      * proper tree structure.
      */
     public void setNext(final Object next) {
