@@ -63,6 +63,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogWrapperFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -106,6 +107,21 @@ public final class GlobalActivator implements BundleActivator {
 
             trackers = new ArrayList<ServiceTracker<?,?>>(2);
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
+            
+            final ServiceTracker<LogWrapperFactory, LogWrapperFactory> logWrapperTracker = new ServiceTracker<LogWrapperFactory, LogWrapperFactory>(context, LogWrapperFactory.class, null);
+			LogFactory.FACTORY = new LogWrapperFactory() {
+				
+				@Override
+				public Log wrap(String name, Log log) {
+					for(LogWrapperFactory factory: logWrapperTracker.getTracked().values()) {
+						log = factory.wrap(name, log);
+					}
+					return log;
+				}
+			};
+            
+            trackers.add(logWrapperTracker);
+            
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
