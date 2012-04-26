@@ -67,42 +67,37 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The ALL log level.
          */
-        ALL(10000),
-        /**
-         * The DEBUG log level.
-         */
-        DEBUG(300),
-        /**
-         * The INFO log level.
-         */
-        INFO(200),
-        /**
-         * The WARNING log level.
-         */
-        WARNING(400),
-        /**
-         * The ERROR log level.
-         */
-        ERROR(500), 
-        /**
-         * The FATAL log level.
-         */
-        FATAL(600), 
-
+        ALL,
         /**
          * The TRACE log level
          */
-        TRACE(100), 
+        TRACE, 
+        /**
+         * The DEBUG log level.
+         */
+        DEBUG,
+        /**
+         * The INFO log level.
+         */
+        INFO,
+        /**
+         * The WARNING log level.
+         */
+        WARNING,
+        /**
+         * The ERROR log level.
+         */
+        ERROR, 
+        /**
+         * The FATAL log level.
+         */
+        FATAL, 
+
         /*
          * Don't log this
          */
-        OFF(Integer.MAX_VALUE), ;
+        OFF, ;
         
-        private int lvl;
-        
-        LogLevel(int lvl) {
-        	this.lvl = lvl;
-        }
 
         /**
          * Gets the appropriate log level for specified naming.
@@ -127,7 +122,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 			if (this == OFF) {
 				return false;
 			}
-			return other.lvl <= lvl;
+			return other.ordinal() <= ordinal();
 		}
 		
 		public static Comparator<LogLevel> getComparator() {
@@ -135,7 +130,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
 				@Override
 				public int compare(LogLevel o1, LogLevel o2) {
-					return o1.lvl - o2.lvl;
+					return o1.ordinal() - o2.ordinal();
 				}
 				
 			};

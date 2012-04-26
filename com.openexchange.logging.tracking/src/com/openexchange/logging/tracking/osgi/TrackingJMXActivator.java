@@ -18,7 +18,7 @@ public class TrackingJMXActivator extends HousekeepingActivator {
 	
 	static {
 		try {
-			OBJECT_NAME = new ObjectName("com.openexchange.logging.tracking.TrackingConfiguration", "name", "TrackingConfiguration");
+			OBJECT_NAME = new ObjectName("com.openexchange.logging.tracking", "name", "TrackingConfiguration");
 		} catch (MalformedObjectNameException e) {
 			LogFactory.getLog(TrackingJMXActivator.class).error(e.getMessage(), e);
 		} catch (NullPointerException e) {

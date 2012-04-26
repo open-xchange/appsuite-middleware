@@ -73,7 +73,7 @@ public class LogFactory {
 		if (FACTORY != null) {
 			log = FACTORY.wrap(name, log);
 		}
-		return com.openexchange.exception.Log.valueOf(log);
+		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
     }
 
     /**
@@ -88,7 +88,7 @@ public class LogFactory {
 		if (FACTORY != null) {
 			log = FACTORY.wrap(name, log);
 		}
-		return com.openexchange.exception.Log.valueOf(log);
+		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
     }
 	
 	
