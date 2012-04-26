@@ -49,6 +49,7 @@
 
 package com.openexchange.log;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -118,5 +119,10 @@ public final class Props {
     public void remove(final String name) {
         map.remove(name);
     }
+
+	public Props copy() {
+		return new Props(new HashMap<String, Object>(map));
+	}
+
 
 }
