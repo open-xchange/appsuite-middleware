@@ -51,7 +51,7 @@ package com.openexchange.mail.mime.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.image.servlet.ImageServlet;
+import com.openexchange.image.ImageActionFactory;
 
 /**
  * {@link ImageMatcher}
@@ -75,7 +75,7 @@ public final class ImageMatcher {
     private static final int GROUP_IMG_ID = 13;
 
     private static final String REGEX_IMAGE_URL =
-        "(<img[^>]*?)(src=\")(?:.*?)" + ImageServlet.ALIAS + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+        "(<img[^>]*?)(src=\")(?:.*?)" + ImageActionFactory.ALIAS + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
     private static final String REGEX_FILE_URL =
         "(<img[^>]*?)(src=\")(?:.*?)ajax/file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";

@@ -84,7 +84,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.image.servlet.ImageServlet;
+import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -333,7 +333,7 @@ public final class MimeMessageUtility {
         return false;
     }
 
-    private static final String IMAGE_ALIAS = ImageServlet.ALIAS;
+    private static final String IMAGE_ALIAS = ImageActionFactory.ALIAS;
 
     private static final String FILE_ALIAS = "ajax/file";
 

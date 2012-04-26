@@ -51,6 +51,7 @@ package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -124,6 +125,11 @@ public final class ContactImageDataSource implements ImageDataSource {
     @Override
     public ImageLocation parseUrl(final String url) {
         return ImageUtility.parseImageLocationFrom(url);
+    }
+
+    @Override
+    public ImageLocation parseRequest(AJAXRequestData requestData) {
+        return ImageUtility.parseImageLocationFrom(requestData);
     }
 
     @Override
