@@ -171,7 +171,7 @@ public final class Threadable {
         while (!done) {
             done = true;
             // skip whitespace.
-            while (start < len && subject.charAt(start) <= ' ') {
+            while (subject.charAt(start) <= ' ') {
                 start++;
                 if (start >= len) {
                     subject2 = "";
