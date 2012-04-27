@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,6 +67,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
@@ -696,7 +698,11 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
             final int accountId = getAccountId(parameters);
             final String folder = parameters.getFolder();
-            deleteDocumentsByQuery(buildQueryString(accountId, folder));
+            String queryString = buildQueryString(accountId, folder);
+            if (queryString.length() == 0) {
+            	queryString = "*:*";
+            }
+            deleteDocumentsByQuery(queryString);
         } else {
             throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
         }
@@ -712,7 +718,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final String folder = parameters.getFolder(); 
             final SolrQuery solrQuery;
             if (folder == null) {
-                solrQuery = new SolrQuery("(*: *)");
+                solrQuery = new SolrQuery("*:*");
             } else {
                 solrQuery = new SolrQuery(folder);
                 solrQuery.setQueryType("allSearch");
@@ -721,7 +727,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             setSortAndOrder(parameters, solrQuery);
 
             int off = parameters.getOff();
-            int len = parameters.getLen();
+            final int len = parameters.getLen();
             int maxRows = len;
             if (maxRows > QUERY_ROWS) {
                 maxRows = QUERY_ROWS;
@@ -768,7 +774,11 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final String folder = parameters.getFolder();
             final String queryString = buildQueryString(accountId, folder);
             final StringBuilder sb = new StringBuilder(queryString);
-            sb.append(" AND (");
+            if (queryString.length() != 0) {
+            	sb.append(" AND (");
+            } else {
+            	sb.append('(');
+            }
             boolean first = true;
             for (final String id : ids) {
                 if (first) {
@@ -797,6 +807,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         } else if (searchHandler.equals(SearchHandler.CUSTOM)) {
             final SearchTerm<?> searchTerm = (SearchTerm<?>) parameters.getSearchTerm();
             final SolrQuery solrQuery = new SolrQuery("*:*");
+            solrQuery.setQueryType("customSearch");
             SolrSearchTermVisitor.setQuery(solrQuery, searchTerm);
             setSortAndOrder(parameters, solrQuery);
             solrQuery.setStart(parameters.getOff());
@@ -813,7 +824,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             indexResult.setResults(mails);
             result = indexResult;
         } else {
-            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
+            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.query().");
         }
         
         return result;
@@ -904,10 +915,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     }
 
     private String buildQueryString(final int accountId, final String folder) {
-        final StringBuilder sb = new StringBuilder(128);
-        sb.append('(').append(SolrMailField.USER.solrName()).append(":\"").append(userId).append("\")");
-        sb.append(" AND ");
-        sb.append('(').append(SolrMailField.CONTEXT.solrName()).append(":\"").append(contextId).append("\")");        
+        final StringBuilder sb = new StringBuilder(128); 
         if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
             sb.append(" AND ");
             sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
@@ -916,7 +924,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
             sb.append(" AND ");
             sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
-        }        
+        }  
         
         return sb.toString();
     }
