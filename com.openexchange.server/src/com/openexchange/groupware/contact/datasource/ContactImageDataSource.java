@@ -201,6 +201,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         }
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contact.getImageContentType());
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
+        properties.put(DataProperties.PROPERTY_NAME, contact.getImageContentType().replace('/', '.'));
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
     }
 
