@@ -816,6 +816,7 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
             
             final QueryResponse queryResponse = query(solrQuery);
+            // TODO: analyze svens header for failed query parsing
             final SolrDocumentList results = queryResponse.getResults();   
             for (int i = 0; i < results.size(); i++) {
                 mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
