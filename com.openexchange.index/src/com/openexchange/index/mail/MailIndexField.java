@@ -52,6 +52,7 @@ package com.openexchange.index.mail;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
+
 import com.openexchange.index.IndexField;
 import com.openexchange.mail.MailField;
 
@@ -65,8 +66,6 @@ public enum MailIndexField implements IndexField {
     
     UUID(null),
     TIMESTAMP(null),
-    CONTEXT(null),
-    USER(null),
     ACCOUNT(MailField.ACCOUNT_NAME),
     FULL_NAME(MailField.FOLDER_ID),
     ID(MailField.ID),

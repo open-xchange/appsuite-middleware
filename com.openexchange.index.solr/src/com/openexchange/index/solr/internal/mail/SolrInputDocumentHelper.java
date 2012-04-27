@@ -52,9 +52,12 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.mail.internet.InternetAddress;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.StandardIndexDocument;
@@ -149,7 +152,7 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
         return documents;
     }
     
-    private static String createAddressHeader(InternetAddress[] addrs) {
+    private static String createAddressHeader(final InternetAddress[] addrs) {
         String line;
         if (addrs == null || addrs.length <= 0) {
             line = null;
@@ -174,8 +177,6 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
          */
         setFieldInDocument(inputDocument, SolrMailField.TIMESTAMP, stamp);
         setFieldInDocument(inputDocument, SolrMailField.UUID, uuid);
-        setFieldInDocument(inputDocument, SolrMailField.CONTEXT, contextId);
-        setFieldInDocument(inputDocument, SolrMailField.USER, userId);
         setFieldInDocument(inputDocument, SolrMailField.ACCOUNT, accountId);
 
         /*

@@ -62,8 +62,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.Services;
@@ -79,34 +81,32 @@ public enum SolrMailField {
 
     UUID("UUID", MailIndexField.UUID, "param1"),
     TIMESTAMP("TIMESTAMP", MailIndexField.TIMESTAMP, "param2"),
-    CONTEXT("CONTEXT", MailIndexField.CONTEXT, "param3"),
-    USER("USER", MailIndexField.USER, "param4"),
-    ACCOUNT("ACCOUNT", MailIndexField.ACCOUNT, "param5"),
-    FULL_NAME("FULL_NAME", MailIndexField.FULL_NAME, "param6"),
-    ID("ID", MailIndexField.ID, "param7"),
-    COLOR_LABEL("COLOR_LABEL", MailIndexField.COLOR_LABEL, "param8"),
-    ATTACHMENT("ATTACHMENT", MailIndexField.ATTACHMENT, "param9"),
-    RECEIVED_DATE("RECEIVED_DATE", MailIndexField.RECEIVED_DATE, "param10"),
-    SENT_DATE("SENT_DATE", MailIndexField.SENT_DATE, "param11"),
-    SIZE("SIZE", MailIndexField.SIZE, "param12"),
-    FLAG_ANSWERED("FLAG_ANSWERED", MailIndexField.FLAG_ANSWERED, "param13"),
-    FLAG_DELETED("FLAG_DELETED", MailIndexField.FLAG_DELETED, "param14"),
-    FLAG_DRAFT("FLAG_DRAFT", MailIndexField.FLAG_DRAFT, "param15"),
-    FLAG_FLAGGED("FLAG_FLAGGED", MailIndexField.FLAG_FLAGGED, "param16"),
-    FLAG_RECENT("FLAG_RECENT", MailIndexField.FLAG_RECENT, "param17"),
-    FLAG_SEEN("FLAG_SEEN", MailIndexField.FLAG_SEEN, "param18"),
-    FLAG_USER("FLAG_USER", MailIndexField.FLAG_USER, "param19"),
-    FLAG_SPAM("FLAG_SPAM", MailIndexField.FLAG_SPAM, "param20"),
-    FLAG_FORWARDED("FLAG_FORWARDED", MailIndexField.FLAG_FORWARDED, "param21"),
-    FLAG_READ_ACK("FLAG_READ_ACK", MailIndexField.FLAG_READ_ACK, "param22"),
-    USER_FLAGS("USER_FLAGS", MailIndexField.USER_FLAGS, "param23"),
-    FROM("FROM", MailIndexField.FROM, "param24"),
-    TO("TO", MailIndexField.TO, "param25"),
-    CC("CC", MailIndexField.CC, "param26"),
-    BCC("BCC", MailIndexField.BCC, "param27"),
-    SUBJECT("SUBJECT", MailIndexField.SUBJECT, "param28"),
-    CONTENT_FLAG("CONTENT_FLAG", MailIndexField.CONTENT_FLAG, "param29"),
-    CONTENT("CONTENT", MailIndexField.CONTENT, "param30");
+    ACCOUNT("ACCOUNT", MailIndexField.ACCOUNT, "param3"),
+    FULL_NAME("FULL_NAME", MailIndexField.FULL_NAME, "param4"),
+    ID("ID", MailIndexField.ID, "param5"),
+    COLOR_LABEL("COLOR_LABEL", MailIndexField.COLOR_LABEL, "param6"),
+    ATTACHMENT("ATTACHMENT", MailIndexField.ATTACHMENT, "param7"),
+    RECEIVED_DATE("RECEIVED_DATE", MailIndexField.RECEIVED_DATE, "param8"),
+    SENT_DATE("SENT_DATE", MailIndexField.SENT_DATE, "param9"),
+    SIZE("SIZE", MailIndexField.SIZE, "param10"),
+    FLAG_ANSWERED("FLAG_ANSWERED", MailIndexField.FLAG_ANSWERED, "param11"),
+    FLAG_DELETED("FLAG_DELETED", MailIndexField.FLAG_DELETED, "param12"),
+    FLAG_DRAFT("FLAG_DRAFT", MailIndexField.FLAG_DRAFT, "param13"),
+    FLAG_FLAGGED("FLAG_FLAGGED", MailIndexField.FLAG_FLAGGED, "param14"),
+    FLAG_RECENT("FLAG_RECENT", MailIndexField.FLAG_RECENT, "param15"),
+    FLAG_SEEN("FLAG_SEEN", MailIndexField.FLAG_SEEN, "param16"),
+    FLAG_USER("FLAG_USER", MailIndexField.FLAG_USER, "param17"),
+    FLAG_SPAM("FLAG_SPAM", MailIndexField.FLAG_SPAM, "param18"),
+    FLAG_FORWARDED("FLAG_FORWARDED", MailIndexField.FLAG_FORWARDED, "param19"),
+    FLAG_READ_ACK("FLAG_READ_ACK", MailIndexField.FLAG_READ_ACK, "param20"),
+    USER_FLAGS("USER_FLAGS", MailIndexField.USER_FLAGS, "param21"),
+    FROM("FROM", MailIndexField.FROM, "param22"),
+    TO("TO", MailIndexField.TO, "param23"),
+    CC("CC", MailIndexField.CC, "param24"),
+    BCC("BCC", MailIndexField.BCC, "param25"),
+    SUBJECT("SUBJECT", MailIndexField.SUBJECT, "param26"),
+    CONTENT_FLAG("CONTENT_FLAG", MailIndexField.CONTENT_FLAG, "param27"),
+    CONTENT("CONTENT", MailIndexField.CONTENT, "param28");
 
     private static final String PROP_FILE = "solr_mailfields.properties";
 
