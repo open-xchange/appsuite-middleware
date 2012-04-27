@@ -105,7 +105,7 @@ public final class ChangeByIDsJob extends AbstractMailJob {
     private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         final List<String> mailIds = this.mailIds;
         if (null == mailIds || mailIds.isEmpty()) {
             return;

@@ -107,7 +107,7 @@ public final class ChangeByMessagesJob extends AbstractMailJob {
     private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         List<MailMessage> messages = this.messages;
         if (null == messages) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
