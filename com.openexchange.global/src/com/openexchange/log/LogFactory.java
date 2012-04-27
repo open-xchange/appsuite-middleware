@@ -60,6 +60,9 @@ import org.apache.commons.logging.LogConfigurationException;
  */
 public class LogFactory {
 
+	/**
+	 * The <tt>AtomicReference</tt> holding {@link LogWrapperFactory} instance.
+	 */
 	public static final AtomicReference<LogWrapperFactory> FACTORY = new AtomicReference<LogWrapperFactory>();
 
 	/**
