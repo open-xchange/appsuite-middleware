@@ -17,21 +17,23 @@ public abstract class AbstractImportAction implements AJAXActionService {
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		return perform(new ImportRequest(requestData,session));
+		return perform(new ImportRequest(requestData, session));
 	}
 
 	public abstract Format getFormat();
+
 	public abstract Importer getImporter();
 
 	private AJAXRequestResult perform(ImportRequest req) throws OXException {
-        final List<ImportResult> importResult;
+		final List<ImportResult> importResult;
 
-            importResult = getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), null);
+		importResult = getImporter().importData(req.getSession(), getFormat(),
+				req.getImportFileAsStream(), req.getFolders(), null);
 
-            ImportExportWriter writer = new ImportExportWriter(req.getSession());
-            AJAXRequestResult result = new AJAXRequestResult();
-            //write import result to request result -> JSONify
-            return result;
+		ImportExportWriter writer = new ImportExportWriter(req.getSession());
+		AJAXRequestResult result = new AJAXRequestResult();
+		// write import result to request result -> JSONify
+		return result;
 
 	}
 
