@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.Date;
+
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
@@ -155,7 +156,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		    }
 		}
 
-		for (int i = 0; i < contacts_1.length; i++) {
+		for (int i = 0; i < contacts_2.length; i++) {
             if (contacts_2[i].getObjectID() == contactObject2.getObjectID()) {
                 found2 = true;
             }
