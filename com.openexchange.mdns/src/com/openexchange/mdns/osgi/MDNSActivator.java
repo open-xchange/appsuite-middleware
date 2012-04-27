@@ -53,9 +53,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.ServiceReference;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
@@ -89,7 +89,7 @@ public final class MDNSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ThreadPoolService.class };
     }
 
     @Override
