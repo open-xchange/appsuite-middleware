@@ -990,7 +990,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
-            if (includeSent) {
+            final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
+            if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
                 sentFolder.open(IMAPFolder.READ_ONLY);
                 addOpenedFolder(sentFolder);
@@ -999,7 +1000,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Sort messages by thread reference
              */
             List<ThreadSortNode> threadList = null;
-            if (!includeSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
+            if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
                 final long start = System.currentTimeMillis();
                 final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -1013,7 +1014,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Need to use in-application Threader because of missing capability or merging with sent messages
                  */
                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
-                if (includeSent) {
+                if (mergeWithSent) {
                     Threadable.append(threadable, Threadable.getAllThreadablesFrom(sentFolder));
                     // Sort them by thread reference
                     threadable = new Threader().thread(threadable);
@@ -1046,7 +1047,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
                 final Map<MessageId, MailMessage> mapping;
-                if (includeSent) {
+                if (mergeWithSent) {
                     final Map<String, TIntList> m = new HashMap<String, TIntList>(2);
                     final int size = messageIds.size();
                     for (final MessageId messageId : messageIds) {
@@ -1150,7 +1151,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Include body
              */
             final Message[] msgs;
-            if (!includeSent) {
+            if (!mergeWithSent) {
                 msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), MessageId.toSeqNums(messageIds), fetchProfile, false, true, body).doCommand();
             } else {
                 final Map<String, TIntList> m = new HashMap<String, TIntList>(2);
