@@ -100,17 +100,16 @@ public final class RemoveByIDsJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         final List<String> mailIds = this.mailIds;
         if (null == mailIds) {
             return;
         }
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             // Iterate identifiers
             for (final String id : mailIds) {
                 final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
@@ -121,8 +120,6 @@ public final class RemoveByIDsJob extends AbstractMailJob {
             }
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

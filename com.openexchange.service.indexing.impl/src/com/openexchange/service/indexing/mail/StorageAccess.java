@@ -47,8 +47,14 @@
  *
  */
 
-package com.openexchange.service.indexing.mail.job;
+package com.openexchange.service.indexing.mail;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
@@ -56,7 +62,14 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.QueryParameters.Builder;
+import com.openexchange.index.SearchHandler;
+import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -65,8 +78,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.mail.FakeSession;
-import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.job.AbstractMailJob;
 import com.openexchange.session.Session;
 
 /**
@@ -79,7 +91,7 @@ public final class StorageAccess {
     /**
      * ID, FLAGS, and COLOR_LABEL
      */
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
+    public static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
 
     /**
      * The mail index document type.
@@ -135,7 +147,7 @@ public final class StorageAccess {
     }
 
     /**
-     * Releases index access.
+     * Releases associated index access.
      */
     public void releaseAccess() {
         final IndexAccess<MailMessage> indexAccess = this.indexAccess;
@@ -208,11 +220,66 @@ public final class StorageAccess {
     }
 
     /**
-     * Closes mail access.
+     * Closes associated mail access.
      */
     public void releaseMailAccess() {
         getSmalAccessService().closeUnwrappedInstance(mailAccess);
         mailAccess = null;
+    }
+
+    /**
+     * Gets all messages from specified folder retrieved from index.
+     * 
+     * @param fullName The folder's full name
+     * @return All messages
+     * @throws OXException If retrieval fails
+     */
+    public List<MailMessage> allMailsFromIndex(final String fullName) throws OXException, InterruptedException {
+        final Map<String, Object> params = new HashMap<String, Object>();
+        params.put("accountId", Integer.valueOf(info.accountId));
+        final Builder queryBuilder =
+            new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(
+                SearchHandler.ALL_REQUEST);
+        final IndexResult<MailMessage> indexResult = getIndexAccess().query(queryBuilder.build());
+        if (0 >= indexResult.getNumFound()) {
+            return Collections.emptyList();
+        }
+        final List<IndexDocument<MailMessage>> results = indexResult.getResults();
+        final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+        for (final IndexDocument<MailMessage> indexDocument : results) {
+            mails.add(indexDocument.getObject());
+        }
+        return mails;
+    }
+
+    /**
+     * Gets all messages from specified folder retrieved from storage.
+     * 
+     * @param fullName The folder's full name
+     * @param mailFields
+     * @return All messages
+     * @throws OXException If retrieval fails
+     */
+    public List<MailMessage> allMailsFromStorage(final String fullName) throws OXException {
+        return allMailsFromStorage(fullName, FIELDS);
+    }
+
+    /**
+     * Gets all messages from specified folder retrieved from storage.
+     * 
+     * @param fullName The folder's full name
+     * @param mailFields
+     * @return All messages
+     * @throws OXException If retrieval fails
+     */
+    public List<MailMessage> allMailsFromStorage(final String fullName, final MailField[] mailFields) throws OXException {
+        return Arrays.asList(mailAccessFor().getMessageStorage().searchMessages(
+            fullName,
+            IndexRange.NULL,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            null,
+            mailFields == null ? FIELDS : mailFields));
     }
 
 }

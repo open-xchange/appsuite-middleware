@@ -110,17 +110,16 @@ public final class FlagsObserverJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         final List<MailMessage> storageMails = this.storageMails;
         if (null == storageMails) {
             return;
         }
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             /*
              * Get the mails from index
              */
@@ -189,8 +188,6 @@ public final class FlagsObserverJob extends AbstractMailJob {
             changedMails = null;
         } catch (final Exception e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

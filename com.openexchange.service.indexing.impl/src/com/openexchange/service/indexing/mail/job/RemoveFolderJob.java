@@ -89,21 +89,18 @@ public final class RemoveFolderJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
-        IndexAccess<MailMessage> indexAccess = null;
+    protected void performMailJob() throws OXException, InterruptedException {
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             final Map<String, Object> params = new HashMap<String, Object>();
-            params.put("accountId", accountId);
+            params.put("accountId", Integer.valueOf(accountId));
             final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(MAIL).setFolder(fullName).build();
             indexAccess.deleteByQuery(query);
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

@@ -50,7 +50,6 @@
 package com.openexchange.service.indexing.mail.job;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,9 +59,6 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 
@@ -142,36 +138,22 @@ public final class AddByIDsJob extends AbstractMailJob {
         if (null == mailIds) {
             return;
         }
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             final List<MailMessage> mails;
-            {
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                try {
-                    mailAccess = mailAccessFor();
-                    /*
-                     * Get the mails from mail storage
-                     */
-                    mailAccess.connect(false);
-                    /*
-                     * Fetch mails
-                     */
-                    final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-                    // fields.removeMailField(MailField.BODY);  <--- Allow body!
-                    fields.removeMailField(MailField.FULL);
-                    mails =
-                        Arrays.asList(mailAccess.getMessageStorage().getMessages(
-                            fullName,
-                            mailIds.toArray(new String[mailIds.size()]),
-                            fields.toArray()));
-                } finally {
-                    getSmalAccessService().closeUnwrappedInstance(mailAccess);
-                    mailAccess = null;
-                }
+            try {
+                /*
+                 * Fetch mails
+                 */
+                final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
+                // fields.removeMailField(MailField.BODY);  <--- Allow body!
+                fields.removeMailField(MailField.FULL);
+                mails = storageAccess.allMailsFromStorage(fullName, fields.toArray());
+            } finally {
+                storageAccess.releaseMailAccess();
             }
             /*
              * Add them to index
@@ -214,8 +196,6 @@ public final class AddByIDsJob extends AbstractMailJob {
             }
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

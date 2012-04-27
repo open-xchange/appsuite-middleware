@@ -72,6 +72,7 @@ import com.openexchange.service.indexing.StandardIndexingJob;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.mail.Constants;
 import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.StorageAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

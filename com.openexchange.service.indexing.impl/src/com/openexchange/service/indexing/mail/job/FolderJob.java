@@ -68,18 +68,13 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailUtility;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
@@ -200,11 +195,6 @@ public final class FolderJob extends AbstractMailJob {
         return this;
     }
 
-    /**
-     * ID, FLAGS, and COLOR_LABEL
-     */
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
-
     @Override
     protected void performMailJob() throws OXException, InterruptedException {
         final boolean debug = LOG.isDebugEnabled();
@@ -261,14 +251,7 @@ public final class FolderJob extends AbstractMailJob {
                             /*
                              * Fetch mails
                              */
-                            mails =
-                                Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-                                    fullName,
-                                    IndexRange.NULL,
-                                    MailSortField.RECEIVED_DATE,
-                                    OrderDirection.ASC,
-                                    null,
-                                    FIELDS));
+                            mails = storageAccess.allMailsFromStorage(fullName);
                         } else {
                             mails = storageMails;
                         }
@@ -295,22 +278,7 @@ public final class FolderJob extends AbstractMailJob {
                 {
                     List<MailMessage> indexedMails = this.indexMails;
                     if (null == indexedMails) {
-                        final Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("accountId", Integer.valueOf(accountId));
-                        final Builder queryBuilder =
-                            new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder(
-                                "desc").setHandler(SearchHandler.ALL_REQUEST);
-                        final IndexResult<MailMessage> indexResult = indexAccess.query(queryBuilder.build());
-                        if (0 >= indexResult.getNumFound()) {
-                            indexedMails = Collections.emptyList();
-                        } else {
-                            final List<IndexDocument<MailMessage>> results = indexResult.getResults();
-                            final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
-                            for (final IndexDocument<MailMessage> indexDocument : results) {
-                                mails.add(indexDocument.getObject());
-                            }
-                            indexedMails = mails;
-                        }
+                        indexedMails = storageAccess.allMailsFromIndex(fullName);
                     }
                     if (indexedMails.isEmpty()) {
                         indexMap = Collections.emptyMap();
@@ -501,10 +469,9 @@ public final class FolderJob extends AbstractMailJob {
     }
 
     private void add2Index(final List<String> ids, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         List<IndexDocument<MailMessage>> documents = null;
         try {
-            mailAccess = storageAccess.mailAccessFor();
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = storageAccess.mailAccessFor();
             /*
              * Specify fields
              */
@@ -596,7 +563,6 @@ public final class FolderJob extends AbstractMailJob {
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         } finally {
             storageAccess.releaseMailAccess();
-            mailAccess = null;
         }
     }
 
