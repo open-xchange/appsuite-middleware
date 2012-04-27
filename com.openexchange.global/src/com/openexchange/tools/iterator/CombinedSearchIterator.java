@@ -100,7 +100,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
     @Override
     public T next() throws OXException {
         if (iterators.length == 0 || !next) {
-            throw SearchIteratorException.Code.NO_SUCH_ELEMENT.create("NON");
+            throw SearchIteratorExceptionCodes.NO_SUCH_ELEMENT.create().setPrefix("NON");
         }
         return iterators[i].next();
     }

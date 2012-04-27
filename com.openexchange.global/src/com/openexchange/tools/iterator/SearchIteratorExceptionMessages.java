@@ -49,18 +49,32 @@
 
 package com.openexchange.tools.iterator;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link SearchIteratorException} - The xception for {@link SearchIterator}.
+ * {@link SearchIteratorExceptionMessages}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SearchIteratorException extends OXException {
+public class SearchIteratorExceptionMessages implements LocalizableStrings {
 
-    private static final long serialVersionUID = -4303608920163984898L;
+    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
 
-    private SearchIteratorException() {
+    public static final String DBPOOLING_ERROR_MSG = "A DBPool error occurred: 1$%s";
+
+    public static final String CLOSED_MSG = "Operation not allowed on a closed SearchIterator";
+
+    public static final String NOT_IMPLEMENTED_MSG = "Mapping for %1$d not implemented";
+
+    public static final String CALCULATION_ERROR_MSG = "FreeBusyResults calculation problem with oid: %1$d";
+
+    public static final String INVALID_CONSTRUCTOR_ARG_MSG = "Invalid constructor argument. Instance of %1$s not supported";
+
+    public static final String NO_SUCH_ELEMENT_MSG = "No such element.";
+
+    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
+
+    private SearchIteratorExceptionMessages() {
         super();
     }
 }
