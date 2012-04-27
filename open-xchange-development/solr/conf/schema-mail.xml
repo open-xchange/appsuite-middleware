@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <schema name="OX Schema Mail" version="1.1">
-
 	<types>
-		<fieldType name="uuid" class="solr.UUIDField" indexed="true" />
-
-		<fieldType name="date" class="solr.DateField" omitNorms="true" />
-
 		<fieldType name="boolean" class="solr.BoolField" omitNorms="true" />
-
 		<fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
-
 		<fieldType name="long" class="solr.LongField" omitNorms="true" />
-
 		<fieldType name="int" class="solr.IntField" omitNorms="true" />
-
-		<fieldType name="float" class="solr.FloatField" omitNorms="true" />
-
+		
 		<fieldType name="text" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
 			<analyzer type="index">
 				<tokenizer class="solr.WhitespaceTokenizerFactory" />
@@ -35,130 +24,6 @@
 			</analyzer>
 		</fieldType>
 
-		<fieldType name="text_stemmed_en" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
-			<analyzer type="index">
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1" catenateAll="0"
-					splitOnCaseChange="1" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/english-stopwords.txt" />
-				<filter class="solr.EnglishMinimalStemFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^\d*" replacement="" replace="all" />
-				<filter class="solr.LengthFilterFactory" min="2" max="30" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
-			</analyzer>
-			<analyzer type="query">
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1" catenateAll="0"
-					splitOnCaseChange="1" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/english-stopwords.txt" />
-				<filter class="solr.EnglishMinimalStemFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
-			</analyzer>
-		</fieldType>
-		<fieldType name="text_stemmed_de" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
-			<analyzer type="index">
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1" catenateAll="0"
-					splitOnCaseChange="1" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/german-stopwords.txt" />
-				<filter class="solr.GermanStemFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^\d*" replacement="" replace="all" />
-				<filter class="solr.LengthFilterFactory" min="2" max="30" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
-			</analyzer>
-			<analyzer type="query">
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1" catenateAll="0"
-					splitOnCaseChange="1" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/german-stopwords.txt" />
-				<filter class="solr.GermanStemFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
-			</analyzer>
-		</fieldType>
-		<!-- <fieldType name="text_stemmed_fr" class="solr.TextField" positionIncrementGap="100"
-			omitNorms="false"> <analyzer type="index"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.StopFilterFactory"
-			ignoreCase="true" words="french-stopwords.txt"/> <filter class="solr.FrenchStemFilterFactory"
-			protected="protwords.txt"/> <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
-			</analyzer> <analyzer type="query"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.SynonymFilterFactory"
-			synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true"
-			/> <filter class="solr.StopFilterFactory" ignoreCase="true" words="french-stopwords.txt"/>
-			<filter class="solr.FrenchStemFilterFactory" protected="protwords.txt"/>
-			<filter class="solr.RemoveDuplicatesTokenFilterFactory"/> </analyzer> </fieldType> -->
-		<!-- <fieldType name="text_stemmed_nl" class="solr.TextField" positionIncrementGap="100"
-			omitNorms="false"> <analyzer type="index"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.StopFilterFactory"
-			ignoreCase="true" words="dutch-stopwords.txt"/> <filter class="solr.DutchStemFilterFactory"
-			protected="protwords.txt"/> <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
-			</analyzer> <analyzer type="query"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.SynonymFilterFactory"
-			synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true"
-			/> <filter class="solr.StopFilterFactory" ignoreCase="true" words="dutch-stopwords.txt"/>
-			<filter class="solr.DutchStemFilterFactory" protected="protwords.txt"/> <filter
-			class="solr.RemoveDuplicatesTokenFilterFactory"/> </analyzer> </fieldType> -->
-		<!-- <fieldType name="text_stemmed_sv" class="solr.TextField" positionIncrementGap="100"
-			omitNorms="false"> <analyzer type="index"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.StopFilterFactory"
-			ignoreCase="true" words="swedish-stopwords.txt"/> <filter class="solr.SwedishLightStemFilterFactory"
-			protected="protwords.txt"/> <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
-			</analyzer> <analyzer type="query"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.SynonymFilterFactory"
-			synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true"
-			/> <filter class="solr.StopFilterFactory" ignoreCase="true" words="swedish-stopwords.txt"/>
-			<filter class="solr.SwedishLightStemFilterFactory" protected="protwords.txt"/>
-			<filter class="solr.RemoveDuplicatesTokenFilterFactory"/> </analyzer> </fieldType> -->
-		<!-- <fieldType name="text_stemmed_es" class="solr.TextField" positionIncrementGap="100"
-			omitNorms="false"> <analyzer type="index"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.StopFilterFactory"
-			ignoreCase="true" words="spanish-stopwords.txt"/> <filter class="solr.SpanishLightStemFilterFactory"
-			protected="protwords.txt"/> <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
-			</analyzer> <analyzer type="query"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.SynonymFilterFactory"
-			synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true"
-			/> <filter class="solr.StopFilterFactory" ignoreCase="true" words="spanish-stopwords.txt"/>
-			<filter class="solr.SpanishLightStemFilterFactory" protected="protwords.txt"/>
-			<filter class="solr.RemoveDuplicatesTokenFilterFactory"/> </analyzer> </fieldType> -->
-		<!-- <fieldType name="text_stemmed_it" class="solr.TextField" positionIncrementGap="100"
-			omitNorms="false"> <analyzer type="index"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.StopFilterFactory"
-			ignoreCase="true" words="italian-stopwords.txt"/> <filter class="solr.ItalianLightStemFilterFactory"
-			protected="protwords.txt"/> <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
-			</analyzer> <analyzer type="query"> <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-			<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
-			catenateWords="0" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
-			<filter class="solr.LowerCaseFilterFactory"/> <filter class="solr.SynonymFilterFactory"
-			synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true"
-			/> <filter class="solr.StopFilterFactory" ignoreCase="true" words="spanish-stopwords.txt"/>
-			<filter class="solr.ItalianLightStemFilterFactory" protected="protwords.txt"/>
-			<filter class="solr.RemoveDuplicatesTokenFilterFactory"/> </analyzer> </fieldType> -->
-
-
-		<!-- jane.doe@some.de -->
 		<fieldType name="addr" class="solr.TextField">
 			<analyzer>
 				<tokenizer class="solr.UAX29URLEmailTokenizerFactory" />
@@ -195,7 +60,7 @@
 		<field name="sent_date" type="long" stored="true" indexed="true" />
 		<field name="size" type="long" stored="true" indexed="true" />
 
-		<!-- Flags fields -->
+		<!-- Flag fields -->
 		<field name="flag_answered" type="boolean" stored="true" indexed="true" />
 		<field name="flag_deleted" type="boolean" stored="true" indexed="true" />
 		<field name="flag_draft" type="boolean" stored="true" indexed="true" />
@@ -206,62 +71,30 @@
 		<field name="flag_spam" type="boolean" stored="true" indexed="true" />
 		<field name="flag_forwarded" type="boolean" stored="true" indexed="true" />
 		<field name="flag_read_ack" type="boolean" stored="true" indexed="true" />
-
-		<!-- User flag field -->
 		<field name="user_flags" type="string" stored="true" indexed="true" multiValued="true" />
 
-		<!-- Address Fields "Doe, Jane" jane.doe@somewhere.org -->
-<!-- 		<field name="from_personal" type="text" stored="false" indexed="true" multiValued="true" /> -->
-<!-- 		<field name="from_addr" type="addr" stored="false" indexed="true" multiValued="true" /> -->
-		<field name="from" type="string" stored="true" indexed="false" /> <!-- indexed true to use with facets -->
+		<field name="from" type="string" stored="true" indexed="false" />
 		<field name="from_analyzed" type="addr" stored="false" indexed="true" />
 		<copyField source="from" dest="from_analyzed" />
 
-<!-- 		<field name="to_personal" type="text" stored="false" indexed="true" multiValued="true" /> -->
-<!-- 		<field name="to_addr" type="addr" stored="false" indexed="true" multiValued="true" /> -->
 		<field name="to" type="string" stored="true" indexed="false" />
 		<field name="to_analyzed" type="addr" stored="false" indexed="true" />
 		<copyField source="to" dest="to_analyzed" />
 
-<!-- 		<field name="cc_personal" type="text" stored="false" indexed="true" multiValued="true" /> -->
-<!-- 		<field name="cc_addr" type="addr" stored="false" indexed="true" multiValued="true" /> -->
 		<field name="cc" type="string" stored="true" indexed="false" />
 		<field name="cc_analyzed" type="addr" stored="false" indexed="true" />
 		<copyField source="cc" dest="cc_analyzed" />
 
-<!-- 		<field name="bcc_personal" type="text" stored="false" indexed="true" multiValued="true" /> -->
-<!-- 		<field name="bcc_addr" type="addr" stored="false" indexed="true" multiValued="true" /> -->
 		<field name="bcc" type="string" stored="true" indexed="false" />
 		<field name="bcc_analyzed" type="addr" stored="false" indexed="true" />
 		<copyField source="bcc" dest="bcc_analyzed" />
 
 		<!-- Subject Field -->
-		<field name="subject" type="string" stored="true" indexed="false" />
-		<copyField source="subject" dest="subject_en" />
-		<field name="subject_en" type="text_stemmed_en" stored="false" indexed="true" />
-<!-- 		<field name="subject_de" type="text_stemmed_de" stored="false" indexed="true" /> -->
-		<!-- <field name="subject_fr" type="text_stemmed_fr" stored="true" indexed="true"/>
-			<field name="subject_nl" type="text_stemmed_nl" stored="true" indexed="true"/>
-			<field name="subject_sv" type="text_stemmed_sv" stored="true" indexed="true"/>
-			<field name="subject_es" type="text_stemmed_es" stored="true" indexed="true"/>
-			<field name="subject_it" type="text_stemmed_it" stored="true" indexed="true"/> -->
-
+		<field name="subject" type="text" stored="true" indexed="true" />
 		<field name="content_flag" type="boolean" stored="false" indexed="true" />
-		<field name="content_en" type="text_stemmed_en" stored="false" indexed="true" />
-<!-- 		<field name="content_de" type="text_stemmed_de" stored="false" indexed="true" /> -->
-		<!-- <field name="content_fr" type="text_stemmed_fr" stored="false" indexed="true"/>
-			<field name="content_nl" type="text_stemmed_nl" stored="false" indexed="true"/>
-			<field name="content_sv" type="text_stemmed_sv" stored="false" indexed="true"/>
-			<field name="content_es" type="text_stemmed_es" stored="false" indexed="true"/>
-			<field name="content_it" type="text_stemmed_it" stored="false" indexed="true"/> -->
-
+		<field name="content" type="text" stored="true" indexed="true" />
 	</fields>
 
 	<uniqueKey>uuid</uniqueKey>
-	<defaultSearchField>from_analyzed</defaultSearchField>
-	<solrQueryParser defaultOperator="OR" />
-
-	<!-- <copyField source="content" dest="phonCont"/> -->
-	<!-- <copyField source="content" dest="spell"/> -->
-
+	<solrQueryParser defaultOperator="AND" />
 </schema>

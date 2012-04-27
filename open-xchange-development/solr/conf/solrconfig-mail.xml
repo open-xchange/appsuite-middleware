@@ -1,24 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <config>
 	<abortOnConfigurationError>
 		${solr.abortOnConfigurationError:true}
 	</abortOnConfigurationError>
 
-	<!--<luceneMatchVersion>LUCENE_32</luceneMatchVersion> -->
+	<luceneMatchVersion>LUCENE_33</luceneMatchVersion>
 
 	<dataDir>${solr.core.dataDir}</dataDir>
 	<lib dir="${libDir:/opt/open-xchange/solr/lib}" />
-
-	<indexDefaults>
-		<useCompoundFile>false</useCompoundFile>
-		<mergeFactor>10</mergeFactor>
-		<ramBufferSizeMB>32</ramBufferSizeMB>
-		<maxFieldLength>10000</maxFieldLength>
-		<writeLockTimeout>1000</writeLockTimeout>
-		<commitLockTimeout>10000</commitLockTimeout>
-		<lockType>simple</lockType>
-	</indexDefaults>
 
 	<mainIndex>
 		<useCompoundFile>false</useCompoundFile>
@@ -27,71 +16,45 @@
 		<maxFieldLength>10000</maxFieldLength>
 		<unlockOnStartup>true</unlockOnStartup>
 		<reopenReaders>true</reopenReaders>
+		<writeLockTimeout>1000</writeLockTimeout>
+		<commitLockTimeout>10000</commitLockTimeout>
+		<lockType>simple</lockType>
 		<deletionPolicy class="solr.SolrDeletionPolicy">
 			<str name="keepOptimizedOnly">false</str>
 			<str name="maxCommitsToKeep">1</str>
 		</deletionPolicy>
 	</mainIndex>
 
-	<jmx />
+<!-- 	<jmx /> -->
 
 	<updateHandler class="solr.DirectUpdateHandler2" />
 
 	<query>
 		<maxBooleanClauses>1024</maxBooleanClauses>
 		<filterCache class="solr.FastLRUCache" size="512" initialSize="512" autowarmCount="0" />
-
 		<queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0" />
-
-		<documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0" />
-
+		<documentCache class="solr.LRUCache" size="512"	initialSize="512" autowarmCount="0" />
 		<enableLazyFieldLoading>true</enableLazyFieldLoading>
-
 		<queryResultWindowSize>20</queryResultWindowSize>
-
 		<queryResultMaxDocsCached>200</queryResultMaxDocsCached>
-
 		<listener event="newSearcher" class="solr.QuerySenderListener">
-			<arr name="queries">
-			</arr>
+			<arr name="queries"></arr>
 		</listener>
-
-		<!--
-			<listener event="firstSearcher" class="solr.QuerySenderListener">
-			<arr name="queries">
-			<lst>
-			<str name="q">solr rocks</str>
-			<str name="start">0</str>
-			<str name="rows">10</str>
-			</lst>
-			<lst>
-			<str name="q">static firstSearcher warming query from solrconfig.xml</str>
-			</lst>
-			</arr>
-			</listener>
-		-->
-
 		<useColdSearcher>false</useColdSearcher>
 		<maxWarmingSearchers>5</maxWarmingSearchers>
 	</query>
 
 	<requestDispatcher handleSelect="true">
-		<requestParsers enableRemoteStreaming="true" multipartUploadLimitInKB="2048000" />
-
+		<requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" />
 		<httpCaching never304="true" />
 	</requestDispatcher>
 
-	<requestHandler name="standard" class="solr.SearchHandler" default="true">
+	<!-- For debugging purposes only -->
+	<requestHandler name="standard" class="solr.SearchHandler" default="false">
 		<lst name="defaults">
 			<str name="echoParams">explicit</str>
 		</lst>
-		<arr name="last-components">
-			<str>mlt</str>
-			<str>highlight</str>
-			<str>debug</str>
-		</arr>
 	</requestHandler>
-
 
 	<requestHandler name="simpleSearch" class="solr.SearchHandler">
 		<lst name="invariants">
@@ -100,33 +63,19 @@
 			<float name="tie">0.01</float>
 			<str name="qf">
 				content_de^1.0 content_en^1.0 subject_de^3.0 subject_en^3.0
-			</str>
-			<!-- <str name="pf"> -->
-			<!-- content_de^1.0 content_en^1.0 subject_de^3.0 subject_en^3.0 -->
-			<!-- </str> -->
-			<str name="fl">*</str>
-			<!-- IGNORE -->
-			<!-- <str name="mm"> -->
-			<!-- 2&lt;-1 5&lt;-2 6&lt;90% -->
-			<!-- </str> -->
-			<!-- <int name="ps">100</int> -->
-			<!-- <str name="q.alt">*:*</str> -->
-			<!-- <str name="hl.fl">content subject from to cc bcc</str> -->
-			<!-- <str name="f.name.hl.fragsize">300</str> -->
-			<!-- <str name="f.name.hl.alternateField">title</str> -->
-			<!-- <str name="f.text.hl.fragmenter">regex</str> -->
+			</str>			
 		</lst>
-		<!-- <arr name="last-components"> -->
-		<!-- <str>mlt</str> -->
-		<!-- <str>highlight</str> -->
-		<!-- <str>debug</str> -->
-		<!-- </arr> -->
+		<lst name="defaults">
+			<str name="fl">*</str> <!-- Envelope Felder -->
+		</lst>
 	</requestHandler>
 
 	<requestHandler name="allSearch" class="solr.SearchHandler">
 		<lst name="invariants">
 			<str name="df">full_name</str>
-			<str name="fl">*</str>
+		</lst>
+		<lst name="defaults">
+			<str name="fl">*</str> <!-- Envelope Felder -->
 		</lst>
 	</requestHandler>
 
@@ -163,93 +112,20 @@
 		<str name="param21">flag_forwarded</str>
 		<str name="param22">flag_read_ack</str>
 		<str name="param23">user_flags</str>
-		<str name="param24">from</str>
-		<str name="param25">to</str>
-		<str name="param26">cc</str>
-		<str name="param27">bcc</str>
+		<str name="param24">from_analyzed</str>
+		<str name="param25">to_analyzed</str>
+		<str name="param26">cc_analyzed</str>
+		<str name="param27">bcc_analyzed</str>
 		<str name="param28">subject</str>
 		<str name="param29">content_flag</str>
 		<str name="param30">content</str>
 	</searchComponent>
 
-	<!-- OLD STUFF -->
-
-	<requestHandler name="/update/extract" class="org.apache.solr.handler.extraction.ExtractingRequestHandler" startup="lazy">
-		<lst name="defaults">
-			<str name="uprefix">ignored_</str>
-			<str name="map.content">text</str>
-		</lst>
-	</requestHandler>
-
-
-	<searchComponent name="termsComponent" class="org.apache.solr.handler.component.TermsComponent" />
-
-	<requestHandler name="/terms" class="org.apache.solr.handler.component.SearchHandler">
-		<lst name="defaults">
-			<bool name="terms">true</bool>
-		</lst>
-		<arr name="components">
-			<str>termsComponent</str>
-		</arr>
-	</requestHandler>
-
 	<requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
 	<requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
-	<requestHandler name="/analysis/document" class="solr.DocumentAnalysisRequestHandler" />
-	<requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler" />
-	<requestHandler name="/update/csv" class="solr.CSVRequestHandler" startup="lazy" />
-	<requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
-
-	<requestHandler name="/admin/ping" class="PingRequestHandler">
-		<lst name="defaults">
-			<str name="qt">standard</str>
-			<str name="q">solrpingquery</str>
-			<str name="echoParams">all</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="/debug/dump" class="solr.DumpRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<str name="echoHandler">true</str>
-		</lst>
-	</requestHandler>
-
-
-	<!-- Highlighting -->
-
-	<highlighting>
-		<!-- Configure the standard fragmenter -->
-		<!-- This could most likely be commented out in the "default" case -->
-		<fragmenter name="gap" class="org.apache.solr.highlight.GapFragmenter" default="true">
-			<lst name="defaults">
-				<int name="hl.fragsize">100</int>
-			</lst>
-		</fragmenter>
-
-		<!-- A regular-expression-based fragmenter (f.i., for sentence extraction) -->
-		<fragmenter name="regex" class="org.apache.solr.highlight.RegexFragmenter">
-			<lst name="defaults">
-				<int name="hl.fragsize">70</int>
-				<float name="hl.regex.slop">0.5</float>
-				<str name="hl.regex.pattern">[-\w ,/\n\"']{20,200}</str>
-			</lst>
-		</fragmenter>
-
-		<!-- Configure the standard formatter -->
-		<formatter name="html" class="org.apache.solr.highlight.HtmlFormatter" default="true">
-			<lst name="defaults">
-				<str name="hl.simple.pre"><![CDATA[<em>]]></str>
-				<str name="hl.simple.post"><![CDATA[</em>]]></str>
-			</lst>
-		</formatter>
-	</highlighting>
-
-	<!-- End of highlighting section -->
-
-	<!-- config for the admin interface -->
-	<admin>
-		<defaultQuery>solr</defaultQuery>
-	</admin>
+<!-- 	<requestHandler name="/analysis/document" class="solr.DocumentAnalysisRequestHandler" /> -->
+<!-- 	<requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler" /> -->
+<!-- 	<requestHandler name="/update/csv" class="solr.CSVRequestHandler" startup="lazy" /> -->
+<!-- 	<requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" /> -->
 
 </config>

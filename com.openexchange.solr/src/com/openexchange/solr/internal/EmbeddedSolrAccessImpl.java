@@ -49,6 +49,7 @@
 
 package com.openexchange.solr.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -58,7 +59,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServer;
@@ -72,6 +75,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.xml.sax.SAXException;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -142,6 +146,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             }
 
             final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final String solrHome = config.getProperty(SolrProperties.SOLR_HOME);
             final String schemaFile = getSchemaFileByModule(module);
             final String configFile = getConfigFileByModule(module);
             final String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
@@ -153,7 +158,8 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             properties.put("data.dir", dataDir);
             properties.put("logDir", "/var/log/open-xchange");
             properties.put("confDir", configDir);
-            properties.put("libDir", "/development/git/backend/open-xchange-development/solr/lib");
+            // TODO: own property
+            properties.put("libDir", solrHome + File.separator + "lib");
             final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, configuration.getCoreDirPath());
             coreDescriptor.setDataDir(dataDir);
             coreDescriptor.setSchemaName(schemaFile);
