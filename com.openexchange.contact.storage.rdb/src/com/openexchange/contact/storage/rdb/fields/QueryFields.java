@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.storage.rdb.fields;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -153,6 +155,26 @@ public class QueryFields {
      */
     public ContactField[] getImageDataFields() {
         return this.imageDataFields;
+    }
+
+    /**
+     * Gets the image data fields.
+     * 
+     * @param forUpdate whether the fields should be used for an update or not 
+     * @return the fields
+     */
+    public ContactField[] getImageDataFields(boolean forUpdate) {
+    	if (forUpdate) {
+    		List<ContactField> updateFields = new ArrayList<ContactField>();
+    		for (ContactField field : imageDataFields) {
+				if (false == ContactField.OBJECT_ID.equals(field) && false == ContactField.CONTEXTID.equals(field)) {
+					updateFields.add(field);
+				}
+			}
+    		return updateFields.toArray(new ContactField[updateFields.size()]);
+    	} else {
+    		return this.imageDataFields;
+    	}
     }
     
     /**
