@@ -696,11 +696,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (0 >= imapFolder.getMessageCount()) {
                 return null;
             }
-            final IMAPMessage msg;
-            {
+            IMAPMessage msg;
+            try {
                 final long start = System.currentTimeMillis();
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final MessagingException e) {
+                final Exception cause = e.getNextException();
+                if (!(cause instanceof BadCommandException)) {
+                    throw e;
+                }
+                // Hm... Something weird with executed "UID FETCH" command; retry manually...
+                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] {msgUID});
+                if (null == seqNums || 0 == seqNums.length) {
+                    return null;
+                }
+                final int seqNum = seqNums[0];
+                msg = (IMAPMessage) imapFolder.getMessage(seqNum);
             }
             if (msg == null) {
                 // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
