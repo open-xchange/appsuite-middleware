@@ -109,7 +109,7 @@ public final class GlobalActivator implements BundleActivator {
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
             
             final ServiceTracker<LogWrapperFactory, LogWrapperFactory> logWrapperTracker = new ServiceTracker<LogWrapperFactory, LogWrapperFactory>(context, LogWrapperFactory.class, null);
-			LogFactory.FACTORY = new LogWrapperFactory() {
+			LogFactory.FACTORY.set(new LogWrapperFactory() {
 				
 				@Override
                 public Log wrap(final String name, final Log log) {
@@ -119,7 +119,7 @@ public final class GlobalActivator implements BundleActivator {
                     }
                     return retval;
                 }
-			};
+			});
             
             trackers.add(logWrapperTracker);
             

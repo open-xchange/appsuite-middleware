@@ -49,6 +49,7 @@
 
 package com.openexchange.log;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogConfigurationException;
 
 /**
@@ -59,7 +60,7 @@ import org.apache.commons.logging.LogConfigurationException;
  */
 public class LogFactory {
 
-	public static LogWrapperFactory FACTORY = null;
+	public static final AtomicReference<LogWrapperFactory> FACTORY = new AtomicReference<LogWrapperFactory>();
 
 	/**
      * Convenience method to return a named logger, without the application having to care about factories.
@@ -69,9 +70,10 @@ public class LogFactory {
      */
     public static org.apache.commons.logging.Log getLog(final Class<?> clazz) {
 		org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
-		String name = clazz.getName();
-		if (FACTORY != null) {
-			log = FACTORY.wrap(name, log);
+		final String name = clazz.getName();
+		final LogWrapperFactory factory = FACTORY.get();
+        if (factory != null) {
+			log = factory.wrap(name, log);
 		}
 		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
     }
@@ -85,8 +87,9 @@ public class LogFactory {
      */
     public static org.apache.commons.logging.Log getLog(final String name) {
 		org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(name));
-		if (FACTORY != null) {
-			log = FACTORY.wrap(name, log);
+		final LogWrapperFactory factory = FACTORY.get();
+        if (factory != null) {
+			log = factory.wrap(name, log);
 		}
 		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
     }
