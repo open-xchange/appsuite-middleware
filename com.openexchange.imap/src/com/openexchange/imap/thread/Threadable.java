@@ -52,6 +52,7 @@ package com.openexchange.imap.thread;
 import gnu.trove.set.TIntSet;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -66,6 +67,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.threadsort.MessageId;
+import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -511,6 +513,38 @@ public final class Threadable {
     }
 
     /**
+     * Transforms <tt>Threadable</tt> to list of <tt>ThreadSortNode</tt>s.
+     * 
+     * @param t The <tt>Threadable</tt> to transform
+     * @return The resulting list of <tt>ThreadSortNode</tt>s
+     */
+    public static List<ThreadSortNode> toNodeList(final Threadable t) {
+        if (null == t) {
+            return Collections.emptyList();
+        }
+        final List<ThreadSortNode> list = new LinkedList<ThreadSortNode>();
+        fillInList(t, list);
+        return list;
+    }
+
+    private static void fillInList(final Threadable t, final List<ThreadSortNode> list) {
+        Threadable cur = t;
+        while (null != cur) {
+            final ThreadSortNode node = new ThreadSortNode(cur.toMessageId());
+            list.add(node);
+            // Check kids
+            final Threadable kid = cur.kid;
+            if (null != kid) {
+                final List<ThreadSortNode> sublist = new LinkedList<ThreadSortNode>();
+                fillInList(kid, sublist);
+                node.addChildren(sublist);
+            }
+            // Proceed to next
+            cur = cur.next;
+        }
+    }
+
+    /**
      * Filters from <tt>Threadable</tt> those sub-trees which solely consist of specified <tt>Threadable</tt>s associated with given full
      * name
      * 
@@ -527,7 +561,7 @@ public final class Threadable {
             }
         }
         // Filter
-        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext(); ) {
+        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
             final Threadable cur = iterator.next();
             if (checkFullName(fullName, cur)) {
                 iterator.remove();
