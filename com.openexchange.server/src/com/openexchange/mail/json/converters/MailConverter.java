@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
@@ -247,7 +248,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         // Add child nodes
         final JSONArray jChildMessages = new JSONArray();
-        if (containsMultipleFolders || writeThreadAsObjects()) {
+        if (writeThreadAsObjects()) {
             for (final MailMessage child : mails) {
                 final JSONObject jChild = new JSONObject();
                 accountID = child.getAccountId();
@@ -269,8 +270,17 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 jChildMessages.put(jChild);
             }
         } else {
-            for (final MailMessage child : mails) {
-                jChildMessages.put(child.getMailId());
+            if (containsMultipleFolders) {
+                final StringBuilder sb = new StringBuilder(16);
+                final char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
+                for (final MailMessage child : mails) {
+                    sb.setLength(0);
+                    jChildMessages.put(sb.append(child.getFolder()).append(defaultSeparator).append(child.getMailId()).toString());
+                }
+            } else {
+                for (final MailMessage child : mails) {
+                    jChildMessages.put(child.getMailId());
+                }
             }
         }
         jMail.put("thread", jChildMessages);
