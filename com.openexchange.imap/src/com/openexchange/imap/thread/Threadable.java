@@ -167,6 +167,7 @@ public final class Threadable {
             return;
         }
 
+        // Try by RegEx
         {
             final Matcher m = PATTERN_SUBJECT.matcher(subject);
             if (m.matches()) {
@@ -174,7 +175,7 @@ public final class Threadable {
                 return;
             }
         }
-        
+
         // Start position
         int start = 0;
         final String subject = this.subject.trim();
@@ -183,7 +184,7 @@ public final class Threadable {
             subject2 = subject;
             return;
         }
-        
+
         boolean done = false;
         while (!done && (start < len)) {
             done = true;
