@@ -50,10 +50,14 @@
 package com.openexchange.contacts.json.mapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -110,6 +114,22 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         
     }
     
+	public ContactField[] getAssignedFields(final Contact contact, ContactField... mandatoryFields) {
+		if (null == contact) {
+			throw new IllegalArgumentException("contact");
+		}
+		Set<ContactField> setFields = new HashSet<ContactField>();
+		for (Entry<ContactField, ? extends JsonMapping<? extends Object, Contact>> entry : getMappings().entrySet()) {
+			if (entry.getValue().isSet(contact)) {
+				setFields.add(entry.getKey());
+			}
+		}
+		if (null != mandatoryFields) {
+			setFields.addAll(Arrays.asList(mandatoryFields));
+		}		
+		return setFields.toArray(newArray(setFields.size()));
+	}
+
     public ContactField[] getFields(int[] columnIDs, EnumSet<ContactField> illegalFields, ContactField... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
