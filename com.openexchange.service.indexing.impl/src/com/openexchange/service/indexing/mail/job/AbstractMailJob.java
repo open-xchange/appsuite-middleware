@@ -57,31 +57,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SmalAccessService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.StandardIndexingJob;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.mail.Constants;
-import com.openexchange.service.indexing.mail.FakeSession;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
+import com.openexchange.service.indexing.mail.StorageAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -137,6 +128,11 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
     protected final int accountId;
 
     /**
+     * The storage access.
+     */
+    protected final StorageAccess storageAccess;
+
+    /**
      * Initializes a new {@link AbstractMailJob}.
      */
     protected AbstractMailJob(final MailJobInfo info) {
@@ -145,6 +141,7 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
         this.accountId = info.accountId;
         this.userId = info.userId;
         this.contextId = info.contextId;
+        storageAccess = new StorageAccess(info);
     }
 
     @Override
@@ -152,42 +149,22 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
         return new Class<?>[] { DatabaseService.class, MailService.class, IndexFacadeService.class, SmalAccessService.class };
     }
 
-    /**
-     * Gets the associated index access.
-     * 
-     * @return The index access
-     * @throws OXException If access cannot be returned
-     */
-    protected IndexAccess<MailMessage> getIndexAccess() throws OXException {
-        final IndexFacadeService service = Services.getService(IndexFacadeService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexFacadeService.class.getName());
+    @Override
+    public final void performJob() throws OXException, InterruptedException {
+        try {
+            performMailJob();
+        } finally {
+            storageAccess.close();
         }
-        return service.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, userId, contextId);
     }
 
     /**
-     * Releases specified index access.
+     * Performs this job's task.
      * 
-     * @param indexAccess The index access to release (<code>null</code> is no-op)
+     * @throws OXException If performing job fails for any reason
+     * @throws InterruptedException If job has been interrupted
      */
-    protected static void releaseAccess(final IndexAccess<MailMessage> indexAccess) {
-        if (null == indexAccess) {
-            return;
-        }
-        final IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
-        if (null != indexFacade) {
-            try {
-                indexFacade.releaseIndexAccess(indexAccess);
-            } catch (final OXException e) {
-                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailJob.class));
-                log.warn("Closing index access failed.", e);
-            } catch (final RuntimeException e) {
-                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailJob.class));
-                log.warn("Closing index access failed.", e);
-            }
-        }
-    }
+    protected abstract void performMailJob() throws OXException, InterruptedException;
 
     /**
      * Converts <code>MailMessage</code> collection to an <code>IndexDocument</code> list.
@@ -204,46 +181,6 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
             documents.add(new StandardIndexDocument<MailMessage>(mail, MAIL));
         }
         return documents;
-    }
-
-    /**
-     * Gets the tracked SMAL access service.
-     * 
-     * @return The SMAL access service
-     */
-    protected SmalAccessService getSmalAccessService() {
-        return Services.getService(SmalAccessService.class);
-    }
-
-    /**
-     * Gets a new unconnected {@link MailAccess} instance appropriate for this job.
-     * 
-     * @return The new {@link MailAccess} instance
-     * @throws OXException If initialization of {@link MailAccess} instance fails
-     */
-    protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccessFor() throws OXException {
-        /*
-         * Fake session & signaling not to lookup cache
-         */
-        final Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
-        session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            getSmalAccessService().getUnwrappedInstance(session, accountId);
-        /*
-         * Safety close & not cacheable
-         */
-        mailAccess.close(true);
-        mailAccess.setCacheable(false);
-        /*
-         * Parameterize configuration
-         */
-        final MailConfig mailConfig = mailAccess.getMailConfig();
-        mailConfig.setLogin(info.login);
-        mailConfig.setPassword(info.password);
-        mailConfig.setServer(info.server);
-        mailConfig.setPort(info.port);
-        mailConfig.setSecure(info.secure);
-        return mailAccess;
     }
 
     /**

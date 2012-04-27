@@ -68,20 +68,13 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexResult;
-import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
 import com.openexchange.index.QueryParameters.Builder;
-import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailUtility;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.MailIdleCounterImpl;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
@@ -202,15 +195,9 @@ public final class FolderJob extends AbstractMailJob {
         return this;
     }
 
-    /**
-     * ID, FLAGS, and COLOR_LABEL
-     */
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
-
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         final boolean debug = LOG.isDebugEnabled();
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check against table entry if allowed to be run
@@ -235,7 +222,7 @@ public final class FolderJob extends AbstractMailJob {
                 if (debug) {
                     LOG.debug("Starting folder job: " + info);
                 }
-                indexAccess = getIndexAccess();
+                final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
                 /*
                  * Get the mails from storage
                  */
@@ -244,8 +231,7 @@ public final class FolderJob extends AbstractMailJob {
                     final List<MailMessage> mails;
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     try {
-                        mailAccess = mailAccessFor();
-                        mailAccess.connect(true);
+                        mailAccess = storageAccess.mailAccessFor();
                         /*
                          * At first check existence of denoted folder
                          */
@@ -255,7 +241,7 @@ public final class FolderJob extends AbstractMailJob {
                              */
                             deleteDBEntry();
                             final Map<String, Object> params = new HashMap<String, Object>();
-                            params.put("accountId", accountId);
+                            params.put("accountId", Integer.valueOf(accountId));
                             final Builder queryBuilder = new Builder(params).setType(MAIL);
                             indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).setFolder(fullName).build());
                             unset = false;
@@ -265,19 +251,12 @@ public final class FolderJob extends AbstractMailJob {
                             /*
                              * Fetch mails
                              */
-                            mails =
-                                Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-                                    fullName,
-                                    IndexRange.NULL,
-                                    MailSortField.RECEIVED_DATE,
-                                    OrderDirection.ASC,
-                                    null,
-                                    FIELDS));
+                            mails = storageAccess.allMailsFromStorage(fullName);
                         } else {
                             mails = storageMails;
                         }
                     } finally {
-                        getSmalAccessService().closeUnwrappedInstance(mailAccess);
+                        storageAccess.releaseMailAccess();
                         mailAccess = null;
                     }
                     if (mails.isEmpty()) {
@@ -299,34 +278,7 @@ public final class FolderJob extends AbstractMailJob {
                 {
                     List<MailMessage> indexedMails = this.indexMails;
                     if (null == indexedMails) {
-                        final Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("accountId", accountId);
-                        final Builder queryBuilder = new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(SearchHandler.ALL_REQUEST);
-                            
-//                            final StringBuilder queryBuilder = new StringBuilder(128);
-//                            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
-//                            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
-//                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-//                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-//                            queryString = queryBuilder.toString();
-//                        final Map<String, Object> params = new HashMap<String, Object>(4);
-                        // TODO: params.put("fields", mailFields);
-//                        params.put("sort", MailIndexField.RECEIVED_DATE);
-//                        params.put("order", "desc");
-//                        final QueryParameters queryParameter =
-//                            new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(
-//                                IndexDocument.Type.MAIL).setParameters(params).build();
-                        final IndexResult<MailMessage> indexResult = indexAccess.query(queryBuilder.build());
-                        if (0 >= indexResult.getNumFound()) {
-                            indexedMails = Collections.emptyList();
-                        } else {
-                            final List<IndexDocument<MailMessage>> results = indexResult.getResults();
-                            final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
-                            for (final IndexDocument<MailMessage> indexDocument : results) {
-                                mails.add(indexDocument.getObject());
-                            }
-                            indexedMails = mails;
-                        }
+                        indexedMails = storageAccess.allMailsFromIndex(fullName);
                     }
                     if (indexedMails.isEmpty()) {
                         indexMap = Collections.emptyMap();
@@ -376,7 +328,7 @@ public final class FolderJob extends AbstractMailJob {
                 /*
                  * Delete
                  */
-                if (!deletedIds.isEmpty()) {                    
+                if (!deletedIds.isEmpty()) {
                     // Iterate identifiers
                     for (final String id : deletedIds) {
                         final MailUUID uuid = new MailUUID(contextId, userId, accountId, fullName, id);
@@ -446,7 +398,7 @@ public final class FolderJob extends AbstractMailJob {
                                 }
                                 lists.add(ids.subList(start, end));
                             }
-                            final IndexingService indexingService = Services.getService(IndexingService.class); 
+                            final IndexingService indexingService = Services.getService(IndexingService.class);
                             final CountDownLatch latch = new CountDownLatch(lists.size());
                             for (final List<String> subIds : lists) {
                                 final AddByIDsJob addJob = new AddByIDsJob(fullName, info, insertType).setMailIds(subIds);
@@ -463,7 +415,7 @@ public final class FolderJob extends AbstractMailJob {
                             }
                             latch.await();
                             if (DEBUG) {
-                            	final long dur = System.currentTimeMillis() - st1;
+                                final long dur = System.currentTimeMillis() - st1;
                                 LOG.debug("\tFolder job \"" + info + "\" completed after " + dur + " ms.");
                             }
                         } else {
@@ -509,8 +461,6 @@ public final class FolderJob extends AbstractMailJob {
             }
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 
@@ -519,18 +469,17 @@ public final class FolderJob extends AbstractMailJob {
     }
 
     private void add2Index(final List<String> ids, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         List<IndexDocument<MailMessage>> documents = null;
         try {
-            mailAccess = mailAccessFor();
-            mailAccess.connect(true);
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = storageAccess.mailAccessFor();
             /*
              * Specify fields
              */
             final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-//            //fields.removeMailField(MailField.BODY);  <--- Allow body!
+            // //fields.removeMailField(MailField.BODY); <--- Allow body!
             fields.removeMailField(MailField.FULL);
-            final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
+            final List<MailMessage> mails =
+                Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
             // Read primary content
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof IMailMessageStorageExt) {
@@ -544,7 +493,7 @@ public final class FolderJob extends AbstractMailJob {
                         if (end > size) {
                             end = size;
                         }
-                        final String[] mailIds = new String[end-start];
+                        final String[] mailIds = new String[end - start];
                         int index = 0;
                         for (int i = start; i < end; i++) {
                             mailIds[index++] = mails.get(i).getMailId();
@@ -613,7 +562,7 @@ public final class FolderJob extends AbstractMailJob {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         } finally {
-            getSmalAccessService().closeUnwrappedInstance(mailAccess);
+            storageAccess.releaseMailAccess();
         }
     }
 
@@ -669,14 +618,12 @@ public final class FolderJob extends AbstractMailJob {
         final Set<String> storageUserFlags;
         {
             final String[] stoUserFlags = storageMail.getUserFlags();
-            storageUserFlags =
-                null == stoUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(stoUserFlags));
+            storageUserFlags = null == stoUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(stoUserFlags));
         }
         final Set<String> indexUserFlags;
         {
             final String[] idxUserFlags = indexMail.getUserFlags();
-            indexUserFlags =
-                null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
+            indexUserFlags = null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
         }
         return (!storageUserFlags.equals(indexUserFlags));
     }
@@ -686,48 +633,60 @@ public final class FolderJob extends AbstractMailJob {
         private static final long serialVersionUID = -9073396036107129988L;
 
         private final IndexingJob delegate;
+
         private final CountDownLatch latch;
+
         protected LatchedIndexingJob(final IndexingJob job, final CountDownLatch latch) {
             super();
             this.delegate = job;
             this.latch = latch;
         }
+
         @Override
         public Class<?>[] getNeededServices() {
             return delegate.getNeededServices();
         }
+
         @Override
         public void performJob() throws OXException, InterruptedException {
             delegate.performJob();
         }
+
         @Override
         public boolean isDurable() {
             return delegate.isDurable();
         }
+
         @Override
         public int getPriority() {
             return delegate.getPriority();
         }
+
         @Override
         public void setPriority(final int priority) {
             delegate.setPriority(priority);
         }
+
         @Override
         public long getTimeStamp() {
             return delegate.getTimeStamp();
         }
+
         @Override
         public Origin getOrigin() {
             return Origin.PASSIVE;
         }
+
         @Override
         public Behavior getBehavior() {
             return delegate.getBehavior();
         }
+
         @Override
         public void beforeExecute() {
             delegate.beforeExecute();
         }
+
         @Override
         public void afterExecute(final Throwable t) {
             try {
@@ -739,5 +698,5 @@ public final class FolderJob extends AbstractMailJob {
             }
         }
     }
-    
+
 }
