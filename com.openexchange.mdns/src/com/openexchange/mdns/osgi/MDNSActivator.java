@@ -89,7 +89,7 @@ public final class MDNSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ThreadPoolService.class };
     }
 
     @Override
