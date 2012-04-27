@@ -132,7 +132,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     fromToIndices = new int[] {start,end};
                 }
             }
-            final boolean unseen = req.optBool("unseen");
+            final boolean includeSent = req.optBool("includeSent", false);
+            final boolean unseen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
             if (unseen || ignoreDeleted) {
                 // Ensure flags is contained in provided columns
@@ -167,10 +168,10 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!unseen && !ignoreDeleted) {
-                final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns, fromToIndices);
+                final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, sortCol, orderDir, columns, fromToIndices);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns, null);
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, sortCol, orderDir, columns, null);
             boolean foundUnseen;
             for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
                 final List<MailMessage> list = iterator.next();

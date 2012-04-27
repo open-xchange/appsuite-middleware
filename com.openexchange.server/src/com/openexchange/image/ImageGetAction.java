@@ -147,12 +147,13 @@ public class ImageGetAction implements AJAXActionService {
         String ct;
         String fileName;
 
-        final DataProperties dataProperties = data.getDataProperties();
+        DataProperties dataProperties = data.getDataProperties();
         ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
         fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         
         InputStream in = data.getData();
-        IFileHolder fileHolder = new FileHolder(in, -1, ct, fileName);
+        FileHolder fileHolder = new FileHolder(in, -1, ct, fileName);
+        fileHolder.setDelivery("view");
         requestResult.setResultObject(fileHolder, "file");
     }
 

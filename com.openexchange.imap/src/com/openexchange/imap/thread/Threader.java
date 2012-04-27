@@ -77,7 +77,9 @@ public class Threader {
     }
 
     /**
-     * Threads the set of messages indicated by threadable_root. The IThreadable returned is the new first element of the root set.
+     * Threads the set of messages indicated by <tt>threadableRoot</tt>.
+     * <p>
+     * The <tt>Threadable</tt> returned is the new first element of the root set.
      * 
      * @param threadableRoot The start of the list.
      */

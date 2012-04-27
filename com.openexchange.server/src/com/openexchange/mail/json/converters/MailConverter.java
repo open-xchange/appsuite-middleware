@@ -51,8 +51,10 @@ package com.openexchange.mail.json.converters;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
@@ -194,6 +197,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Start response
          */
+        final boolean containsMultipleFolders = containsMultipleFolders(structure, new HashSet<String>(2));
         jsonWriter.array();
         try {
             final int userId = session.getUserId();
@@ -201,7 +205,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             for (final List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
                     final JSONObject jo = new JSONObject();
-                    writeThreadSortedMail(mails, jo, writers, headerWriters, userId, contextId);
+                    writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, userId, contextId);
                     jsonWriter.value(jo);
                 }
             }
@@ -211,13 +215,27 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
+    private static boolean containsMultipleFolders(final ThreadedStructure structure, final Set<String> fullNames) {        
+        for (final List<MailMessage> mails : structure.getMails()) {
+            for (final MailMessage mailMessage : mails) {
+                if (fullNames.add(mailMessage.getFolder()) && fullNames.size() > 1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Enforces to write thread as JSON objects.
+     */
     private static boolean writeThreadAsObjects() {
         return false;
     }
 
-    private static final MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriter(new MailListField[] {MailListField.ID})[0];
+    private static final MailFieldWriter[] WRITER_IDS = MessageWriter.getMailFieldWriter(new MailListField[] {MailListField.ID, MailListField.FOLDER_ID});
 
-    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final int userId, final int contextId) throws OXException, JSONException {
+    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final int userId, final int contextId) throws OXException, JSONException {
         final MailMessage mail = mails.get(0);
         int accountID = mail.getAccountId();
         for (int j = 0; j < writers.length; j++) {
@@ -246,12 +264,23 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     }
                 }
                 */
-                WRITER_ID.writeField(jChild, child, 0, true, accountID, userId, contextId);
+                for (final MailFieldWriter w : WRITER_IDS) {
+                    w.writeField(jChild, child, 0, true, accountID, userId, contextId);
+                }
                 jChildMessages.put(jChild);
             }
         } else {
-            for (final MailMessage child : mails) {
-                jChildMessages.put(child.getMailId());
+            if (containsMultipleFolders) {
+                final StringBuilder sb = new StringBuilder(16);
+                final char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
+                for (final MailMessage child : mails) {
+                    sb.setLength(0);
+                    jChildMessages.put(sb.append(child.getFolder()).append(defaultSeparator).append(child.getMailId()).toString());
+                }
+            } else {
+                for (final MailMessage child : mails) {
+                    jChildMessages.put(child.getMailId());
+                }
             }
         }
         jMail.put("thread", jChildMessages);

@@ -87,6 +87,21 @@ public final class MessageId {
     }
 
     /**
+     * Extracts the message numbers from specified collection
+     * 
+     * @param messageIds The message identifiers
+     * @return The message numbers
+     */
+    public static int[] toSeqNumsArray(final Collection<MessageId> messageIds) {
+        final int[] ret = new int[messageIds.size()];
+        int i = 0;
+        for (final MessageId messageId : messageIds) {
+            ret[i++] = messageId.messageNumber;
+        }
+        return ret;
+    }
+
+    /**
      * Gets the message identifier for specified string.
      * 
      * @param msgId The message idenfifier's string representation

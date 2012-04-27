@@ -617,7 +617,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final boolean includeSent, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -633,10 +633,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             try {
                 return simplifiedThreadStructure.getThreadSortedMessages(
                     fullname,
+                    includeSent,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
                     MailSortField.getField(sortCol),
-                    OrderDirection.getOrderDirection(order),
-                    mailFields.toArray());
+                    OrderDirection.getOrderDirection(order), mailFields.toArray());
             } catch (final OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
                 if (2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) {

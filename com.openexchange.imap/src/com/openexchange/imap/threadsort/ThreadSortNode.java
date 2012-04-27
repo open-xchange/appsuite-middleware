@@ -50,6 +50,7 @@
 package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -126,4 +127,51 @@ public class ThreadSortNode {
     public List<ThreadSortNode> getChilds() {
         return childs;
     }
+
+    /**
+     * Filters from nodes those sub-trees which solely consist of nodes associated with given full name
+     * 
+     * @param fullName The full name to filter with
+     * @param threadList The nodes
+     */
+    public static void filterFullName(final String sentFullName, final List<ThreadSortNode> threadList) {
+        for (final Iterator<ThreadSortNode> iterator = threadList.iterator(); iterator.hasNext();) {
+            if (checkFullName(sentFullName, iterator.next())) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private static boolean checkFullName(final String fullName, final ThreadSortNode node) {
+        if (!fullName.equals(node.msgId.getFullName())) {
+            return false;
+        }
+        final List<ThreadSortNode> childs = node.getChilds();
+        if (null != childs) {
+            for (final ThreadSortNode child : childs) {
+                if (!checkFullName(fullName, child)) {
+                    return false;
+                }
+            }
+        }
+        // Solely consists of threadables associated with given full name
+        return true;
+    }
+
+    /**
+     * Applies specified full name to every node.
+     * 
+     * @param fullName The full name to apply
+     * @param threadList The thread list to apply to
+     */
+    public static void applyFullName(final String fullName, final List<ThreadSortNode> threadList) {
+        if (null == threadList) {
+            return;
+        }
+        for (final ThreadSortNode node : threadList) {
+            node.msgId.setFullName(fullName);
+            applyFullName(fullName, node.getChilds());
+        }
+    }
+
 }

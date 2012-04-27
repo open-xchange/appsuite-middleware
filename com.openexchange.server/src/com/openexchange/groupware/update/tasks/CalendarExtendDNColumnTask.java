@@ -117,19 +117,46 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             } catch (final OXException e) {
                 throw new OXException(e);
             }
+            /*
+             * Check if size needs to be increased
+             */
+            ResultSet rs = null;
+            try {
+                final DatabaseMetaData metadata = writeCon.getMetaData();
+                rs = metadata.getColumns(null, null, tableName, null);
+                final String columnName = "dn";
+                while (rs.next()) {
+                    final String name = rs.getString("COLUMN_NAME");
+                    if (columnName.equals(name)) {
+                        /*
+                         * A column whose VARCHAR size shall possibly be changed
+                         */
+                        final int size = rs.getInt("COLUMN_SIZE");
+                        if (size >= DESIRED_SIZE) {
+                            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Column " + tableName + '.' + name + " with size " + size + " is already equal to/greater than " + DESIRED_SIZE);
+                            return;
+                        }
+                    }
+                }
+            } catch (final SQLException e) {
+                throw wrapSQLException(e);
+            } finally {
+                closeSQLStuff(rs);
+                rs = null;
+                Database.back(contextId, true, writeCon);
+            }
+            /*
+             * ALTER TABLE...
+             */
             PreparedStatement stmt = null;
             try {
-                try {
-                    stmt = writeCon.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw wrapSQLException(e);
-                }
+                stmt = writeCon.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw wrapSQLException(e);
             } finally {
                 closeSQLStuff(null, stmt);
-                if (writeCon != null) {
-                    Database.backNoTimeout(contextId, true, writeCon);
-                }
+                Database.backNoTimeout(contextId, true, writeCon);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Size of column `dn` in table `" + tableName + "` successfully extended.");

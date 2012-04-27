@@ -109,16 +109,17 @@ public final class GlobalActivator implements BundleActivator {
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
             
             final ServiceTracker<LogWrapperFactory, LogWrapperFactory> logWrapperTracker = new ServiceTracker<LogWrapperFactory, LogWrapperFactory>(context, LogWrapperFactory.class, null);
-			LogFactory.FACTORY = new LogWrapperFactory() {
+			LogFactory.FACTORY.set(new LogWrapperFactory() {
 				
 				@Override
-				public Log wrap(String name, Log log) {
-					for(LogWrapperFactory factory: logWrapperTracker.getTracked().values()) {
-						log = factory.wrap(name, log);
-					}
-					return log;
-				}
-			};
+                public Log wrap(final String name, final Log log) {
+                    Log retval = log;
+                    for (final LogWrapperFactory factory : logWrapperTracker.getTracked().values()) {
+                        retval = factory.wrap(name, retval);
+                    }
+                    return retval;
+                }
+			});
             
             trackers.add(logWrapperTracker);
             

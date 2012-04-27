@@ -1,108 +1,179 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.log;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.log.LogPropertyName.LogLevel;
 
+/**
+ * {@link PropertiesAppendingLogWrapper}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class PropertiesAppendingLogWrapper implements Log {
 
-	private org.apache.commons.logging.Log delegate;
+	private final org.apache.commons.logging.Log delegate;
 
-	public PropertiesAppendingLogWrapper(org.apache.commons.logging.Log delegate) {
+	public PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
 		this.delegate = delegate;
 	}
 
-	public void debug(Object arg0, Throwable arg1) {
-		delegate.debug(appendProperties(arg0.toString(), LogLevel.DEBUG), arg1);
+	@Override
+    public void debug(final Object arg0, final Throwable arg1) {
+		delegate.debug(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.DEBUG), arg1);
 	}
 
-	public void debug(Object arg0) {
-		delegate.debug(appendProperties(arg0.toString(), LogLevel.DEBUG));
+	@Override
+    public void debug(final Object arg0) {
+		delegate.debug(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.DEBUG));
 	}
 
-	public void error(Object arg0, Throwable arg1) {
-		delegate.error(appendProperties(arg0.toString(), LogLevel.ERROR), arg1);
+	@Override
+    public void error(final Object arg0, final Throwable arg1) {
+		delegate.error(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.ERROR), arg1);
 	}
 
-	public void error(Object arg0) {
-		delegate.error(appendProperties(arg0.toString(), LogLevel.ERROR));
+	@Override
+    public void error(final Object arg0) {
+		delegate.error(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.ERROR));
 	}
 
-	public void fatal(Object arg0, Throwable arg1) {
-		delegate.fatal(appendProperties(arg0.toString(), LogLevel.FATAL), arg1);
+	@Override
+    public void fatal(final Object arg0, final Throwable arg1) {
+		delegate.fatal(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.FATAL), arg1);
 	}
 
-	public void fatal(Object arg0) {
-		delegate.fatal(appendProperties(arg0.toString(), LogLevel.FATAL));
+	@Override
+    public void fatal(final Object arg0) {
+		delegate.fatal(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.FATAL));
 	}
 
-	public void info(Object arg0, Throwable arg1) {
-		delegate.info(appendProperties(arg0.toString(), LogLevel.INFO), arg1);
+	@Override
+    public void info(final Object arg0, final Throwable arg1) {
+		delegate.info(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.INFO), arg1);
 	}
 
-	public void info(Object arg0) {
-		delegate.info(appendProperties(arg0.toString(), LogLevel.INFO));
+	@Override
+    public void info(final Object arg0) {
+		delegate.info(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.INFO));
 	}
 	
-	public void trace(Object arg0, Throwable arg1) {
-		delegate.trace(appendProperties(arg0.toString(), LogLevel.TRACE), arg1);
+	@Override
+    public void trace(final Object arg0, final Throwable arg1) {
+		delegate.trace(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.TRACE), arg1);
 	}
 
-	public void trace(Object arg0) {
-		delegate.trace(appendProperties(arg0.toString(), LogLevel.TRACE));
+	@Override
+    public void trace(final Object arg0) {
+		delegate.trace(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.TRACE));
 	}
 
-	public void warn(Object arg0, Throwable arg1) {
-		delegate.warn(appendProperties(arg0.toString(), LogLevel.WARNING), arg1);
+	@Override
+    public void warn(final Object arg0, final Throwable arg1) {
+		delegate.warn(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.WARNING), arg1);
 	}
 
-	public void warn(Object arg0) {
-		delegate.warn(appendProperties(arg0.toString(), LogLevel.WARNING));
+	@Override
+    public void warn(final Object arg0) {
+		delegate.warn(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.WARNING));
 	}
 
-	public boolean isDebugEnabled() {
+	@Override
+    public boolean isDebugEnabled() {
 		return delegate.isDebugEnabled();
 	}
 
-	public boolean isErrorEnabled() {
+	@Override
+    public boolean isErrorEnabled() {
 		return delegate.isErrorEnabled();
 	}
 
-	public boolean isFatalEnabled() {
+	@Override
+    public boolean isFatalEnabled() {
 		return delegate.isFatalEnabled();
 	}
 
-	public boolean isInfoEnabled() {
+	@Override
+    public boolean isInfoEnabled() {
 		return delegate.isInfoEnabled();
 	}
 
-	public boolean isTraceEnabled() {
+	@Override
+    public boolean isTraceEnabled() {
 		return delegate.isTraceEnabled();
 	}
 
-	public boolean isWarnEnabled() {
+	@Override
+    public boolean isWarnEnabled() {
 		return delegate.isWarnEnabled();
 	}
 
 	
-	public String appendProperties(String message,
-			LogLevel logLevel) {
+	public String appendProperties(final String message,
+			final LogLevel logLevel) {
 		if (!LogProperties.isEnabled()) {
 			return message;
 		}
-		Props logProps = LogProperties.optLogProperties();
+		final Props logProps = LogProperties.optLogProperties();
 		if (logProps == null) {
 			return message;
 		}
-		StringBuilder sb = new StringBuilder(message);
+		final StringBuilder sb = new StringBuilder(message);
 		final Map<String, Object> properties = logProps.getMap();
 		if (properties == null) {
 			return message;
