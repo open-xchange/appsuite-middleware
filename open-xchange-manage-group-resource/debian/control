@@ -9,6 +9,6 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-manage-group-resource
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: The Open-Xchange backend HTTP/JSON group and resource management interfaces
  This package needs to be installed if users should be allowed to manage groups and resources through the web interface.

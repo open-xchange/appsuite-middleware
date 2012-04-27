@@ -1,0 +1,19 @@
+Source: open-xchange-l10n
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-l10n-de-de
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: German localization for the Open-Xchange backend
+ This package contains the German localization files for the Open-Xchange backend
+ 
+Package: open-xchange-l10n-fr-fr
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: French localization for the Open-Xchange backend
+ This package contains the French localization files for the Open-Xchange backend

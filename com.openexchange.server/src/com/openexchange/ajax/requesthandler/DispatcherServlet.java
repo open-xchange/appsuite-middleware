@@ -61,12 +61,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -196,6 +196,11 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
+     * The <code>ETag</code> result type.
+     */
+    private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
+
+    /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
      * @param httpRequest The HTTP request to handle
@@ -234,7 +239,7 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Check result's type
              */
-            if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
+            if (ETAG.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 final long expires = result.getExpires();
                 Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);

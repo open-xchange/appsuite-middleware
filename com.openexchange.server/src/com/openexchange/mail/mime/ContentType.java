@@ -243,7 +243,17 @@ public class ContentType extends ParameterizedHeader {
     /**
      * The regular expression that should match whole content type
      */
-    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
+    // private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
+    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{L}_0-9-]+)(?:/([\\p{L}_0-9-]+))?\"?)|(?:/([\\p{L}_0-9-]+))");
+
+    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.]+");
+
+    private static boolean isInvalidToken(final String token) {
+        if (null == token) {
+            return true;
+        }
+        return !PATTERN_TOKEN.matcher(token).matches();
+    }
 
     /**
      * The regular expression capturing whitespace characters.
@@ -372,7 +382,47 @@ public class ContentType extends ParameterizedHeader {
         }
         final String cts = prepareParameterizedHeader(contentType);
         int pos = cts.indexOf(';');
-        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(pos < 0 ? cts : cts.substring(0, pos));
+        final String type = pos < 0 ? cts : cts.substring(0, pos);
+        // Check for '/' character
+        final int slashPos = type.indexOf(DELIMITER);
+        if (slashPos >= 0) {
+            // Primary type
+            {
+                String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
+                if (pt.charAt(0) == '"') {
+                    pt = pt.substring(1);
+                }
+                if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
+                    pt = pt.substring(13);
+                    if (pt.charAt(0) == '"') {
+                        pt = pt.substring(1);
+                    }
+                }
+                if (isInvalidToken(pt)) {
+                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                }
+                primaryType = pt;
+            }
+            // Subtype
+            {
+                String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
+                final int mlen = st.length() - 1;
+                if (st.charAt(mlen) == '"') {
+                    st = st.substring(0, mlen);
+                }
+                if (isInvalidToken(st)) {
+                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                }
+                subType = st;
+            }
+            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            if (paramList) {
+                parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+            }
+            return;
+        }
+        // Try with regex-based parsing
+        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(type);
         if (ctMatcher.find()) {
             if (ctMatcher.start() != 0) {
                 throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);

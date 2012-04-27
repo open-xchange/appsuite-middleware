@@ -101,6 +101,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
          * Set request URI
          */
         requestData.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
+        requestData.setPathInfo(req.getPathInfo());
         /*
          * Determine action by path information (extra path information follows the Servlet path but precedes the query string and
          * will start with a "/" character)

@@ -9,6 +9,5 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-dav
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
-Provides: open-xchange-dav
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: The Open-Xchange CardDAV and CalDAV implementation

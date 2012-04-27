@@ -9,8 +9,8 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-authentication-database
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
-Conflicts: open-xchange-authentication-ldap
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Conflicts: open-xchange-authentication-ldap, open-xchange-authentication-imap
 Provides: open-xchange-authentication
 Description: The Open-Xchange database authentication
  This package implements an authentication mechanism using the Open-Xchange database.

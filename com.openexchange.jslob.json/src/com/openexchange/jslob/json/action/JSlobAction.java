@@ -49,6 +49,10 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -75,23 +79,59 @@ public abstract class JSlobAction implements AJAXActionService {
     protected static final String DEFAULT_SERVICE_ID = "com.openexchange.jslob.config";
 
     /**
+     * Splits a char sequence by comma-separated (<code>','</code>) values.
+     */
+    protected static final Pattern SPLIT_CSV = Pattern.compile(" *, *");
+
+    /**
+     * Splits a char sequence by slash-separated (<code>'/'</code>) values.
+     */
+    protected static final Pattern SPLIT_PATH = Pattern.compile(Pattern.quote("/"));
+
+    /**
      * The service look-up
      */
     protected final ServiceLookup services;
+
+    /**
+     * Registered actions.
+     */
+    protected final Map<String, JSlobAction> actions;
 
     /**
      * Initializes a new {@link JSlobAction}.
      * 
      * @param services The service look-up
      */
-    protected JSlobAction(final ServiceLookup services) {
+    protected JSlobAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
         super();
         this.services = services;
+        this.actions = actions;
+    }
+
+    protected static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
+            final String action = requestData.getParameter("action");
+            if (null == action) {
+                final Method method = Method.methodFor(requestData.getAction());
+                if (null == method) {
+                    throw AjaxExceptionCodes.BAD_REQUEST.create();
+                }
+                return performREST(new JSlobRequest(requestData, session), method);
+            }
             return perform(new JSlobRequest(requestData, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -123,10 +163,33 @@ public abstract class JSlobAction implements AJAXActionService {
     protected abstract AJAXRequestResult perform(JSlobRequest jslobRequest) throws OXException, JSONException;
 
     /**
+     * Performs given JSlob request in REST style.
+     * 
+     * @param jslobRequest The JSlob request
+     * @param method The REST method to perform
+     * @return The AJAX result
+     * @throws OXException If performing request fails for any reason
+     * @throws JSONException If a JSON error occurs
+     */
+    @SuppressWarnings("unused")
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
+        throw AjaxExceptionCodes.BAD_REQUEST.create();
+    }
+
+    /**
      * Gets the action identifier for this JSlob action.
      * 
      * @return The action identifier; e.g. <code>"get"</code>
      */
     public abstract String getAction();
+
+    /**
+     * Gets the REST method identifiers for this JSlob action.
+     * 
+     * @return The REST method identifiers or <code>null</code> (e.g. <code>"GET"</code>)
+     */
+    public List<Method> getRESTMethods() {
+        return Collections.emptyList();
+    }
 
 }

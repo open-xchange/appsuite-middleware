@@ -59,9 +59,9 @@ import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -129,9 +129,31 @@ public final class ImageUtility {
         }
         final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
         if (null == registrationName) {
-            registrationName = ImageServlet.getRegistrationNameFor(imageUri);
+            registrationName = ImageActionFactory.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
                 throw new IllegalArgumentException("No known registration name for: " + imageUri);
+            }
+        }
+        il.setRegistrationName(registrationName);
+        return il;
+    }
+    
+    public static ImageLocation parseImageLocationFrom(AJAXRequestData requestData) {
+        if (requestData == null) {
+            return null;
+        }
+
+        String accountId = requestData.getParameter("accountId");
+        String folder = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
+        String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
+        String registrationName = requestData.getParameter("source");
+
+        ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
+        if (null == registrationName) {
+            registrationName = ImageActionFactory.getRegistrationNameFor(requestData.getSerlvetRequestURI());
+            if (null == registrationName) {
+                throw new IllegalArgumentException("No known registration name for: " + requestData.getSerlvetRequestURI());
             }
         }
         il.setRegistrationName(registrationName);

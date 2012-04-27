@@ -762,7 +762,7 @@ public class MimeMessageFiller {
              * If any condition is true, we ought to create a multipart/ message
              */
             if (sendMultipartAlternative) {
-                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, images, textBodyPart);
+                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, images, textBodyPart, type);
                 if (primaryMultipart == null) {
                     primaryMultipart = alternativeMultipart;
                 } else {
@@ -798,9 +798,9 @@ public class MimeMessageFiller {
                          * Well-formed HTML
                          */
                         final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(wellFormedHTMLContent, charset, false, true), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(wellFormedHTMLContent, charset, false, true, type), 0);
                     } else {
-                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, charset, false, false), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, charset, false, false, type), 0);
                     }
                 } else {
                     /*-
@@ -944,9 +944,9 @@ public class MimeMessageFiller {
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
-                        mailText = performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
                     } else {
-                        mailText = performLineFolding(text, usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(text, usm.getAutoLinebreak());
                     }
                 } else {
                     mailText = htmlService.getConformHTML(content, mail.getContentType().getCharsetParameter());
@@ -1063,6 +1063,24 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      */
     protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart) throws OXException, MessagingException {
+        return createMultipartAlternative(mail, mailBody, embeddedImages, images, textBodyPart, null);
+    }
+
+    /**
+     * Creates a "multipart/alternative" object.
+     *
+     * @param mail The source composed mail
+     * @param mailBody The composed mail's HTML content
+     * @param embeddedImages <code>true</code> if specified HTML content contains inline images (an appropriate "multipart/related" object
+     *            is going to be created ); otherwise <code>false</code>.
+     * @param images
+     * @param textBodyPart The text body part
+     * @param type The optional compose type
+     * @return An appropriate "multipart/alternative" object.
+     * @throws OXException If a mail error occurs
+     * @throws MessagingException If a messaging error occurs
+     */
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart, final ComposeType type) throws OXException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -1105,9 +1123,9 @@ public class MimeMessageFiller {
          */
         final String plainText = textBodyPart.getPlainText();
         if (null == plainText) {
-            alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, charset, true, true), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, charset, true, true, type), 0);
         } else {
-            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, charset, true, false), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, charset, true, false, type), 0);
         }
         return alternativeMultipart;
     }
@@ -1360,9 +1378,24 @@ public class MimeMessageFiller {
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      */
-    protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean isHtml) throws MessagingException {
+//    protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean isHtml) throws MessagingException {
+//        return createTextBodyPart(content, charset, appendHref, isHtml, null);
+//    }
+
+    /**
+     * Creates a body part of type <code>text/plain</code> from given HTML content
+     *
+     * @param content The content
+     * @param charset The character encoding
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
+     * @param isHtml Whether provided content is HTML or not
+     * @param type The compose type
+     * @return A body part of type <code>text/plain</code> from given HTML content
+     * @throws MessagingException If a messaging error occurs
+     */
+    protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
         /*
-         * Convert html content to regular text. First: Create a body part for text content
+         * Convert HTML content to regular text. First: Create a body part for text content
          */
         final MimeBodyPart text = new MimeBodyPart();
         /*
@@ -1372,9 +1405,9 @@ public class MimeMessageFiller {
         if (content == null || content.length() == 0) {
             textContent = "";
         } else if (isHtml) {
-            textContent = performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
+            textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
         } else {
-            textContent = performLineFolding(content, usm.getAutoLinebreak());
+            textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(content, usm.getAutoLinebreak());
         }
         text.setText(textContent, charset);
         // text.setText(performLineFolding(getConverter().convertWithQuotes(

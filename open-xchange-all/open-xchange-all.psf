@@ -13,6 +13,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-smtp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-calendar-printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-chat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-manage-group-resource"/>
@@ -24,6 +25,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-sun"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-ibm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>

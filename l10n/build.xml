@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.i18n overrides" basedir=".">
+
+    <description>
+        Installs the localization files.
+    </description>
+
+    <!-- Constants -->
+    <property name="i18nDir" value="${prefix}/i18n"/>
+    <property name="languages" value="de_DE,fr_FR"/>
+
+    <import file="build-project.xml"/>
+
+    <target name="postInstall" description="Installs the language files.">
+        <antcall target="installLanguage"/>
+    </target>
+
+    <!-- This target is only for easier installation of all languages. Packaging only needs the installLanguage target. -->
+    <target name="installLanguages">
+        <foreach list="${languages}" target="installLanguage" param="language" inheritAll="true"/>
+    </target>
+
+    <target name="installLanguage">
+        <mkdir dir="${destDir}/${i18nDir}"/>
+        <copy todir="${destDir}/${i18nDir}">
+            <fileset dir="${basedir}">
+                <include name="backend.${language}.po"/>
+            </fileset>
+        </copy>
+    </target>
+
+</project>

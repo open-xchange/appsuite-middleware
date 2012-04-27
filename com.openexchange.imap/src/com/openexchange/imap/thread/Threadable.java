@@ -55,6 +55,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -63,6 +65,7 @@ import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.threadsort.MessageId;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -89,19 +92,21 @@ public final class Threadable {
 
     Threadable kid;
 
-    String subject;
+    String fullName;
 
-    private String author;
+    String subject;
 
     private long date;
 
-    String id;
+    String messageId;
 
     String inReplyTo;
 
     String[] refs;
 
     int messageNumber;
+
+    String id;
 
     private String subject2;
 
@@ -125,8 +130,12 @@ public final class Threadable {
     public Threadable(final Threadable next, final String subject, final String id, final String[] references) {
         this.next = next;
         this.subject = subject;
-        this.id = id;
+        this.messageId = id;
         this.refs = references;
+    }
+
+    public MessageId toMessageId() {
+        return new MessageId(messageNumber).setFullName(fullName);
     }
 
     @Override
@@ -135,7 +144,7 @@ public final class Threadable {
             return "[dummy]";
         }
 
-        String s = "[ " + id + ": " + subject + " (";
+        String s = "[ " + messageId + ": " + subject + " (";
         if (refs != null) {
             for (int i = 0; i < refs.length; i++) {
                 s += " " + refs[i];
@@ -216,14 +225,14 @@ public final class Threadable {
     /**
      * Returns an object identifying this message. Generally this will be a representation of the contents of the Message-ID header.
      */
-    public String messageThreadID() {
-        return id;
+    public String messageID() {
+        return messageId;
     }
 
     /**
      * Returns the IDs of the set of messages referenced by this one. This list should be ordered from oldest-ancestor to youngest-ancestor.
      */
-    public String[] messageThreadReferences() {
+    public String[] messageReferences() {
         return refs;
     }
 
@@ -255,7 +264,45 @@ public final class Threadable {
     }
 
     /**
-     * When the proper thread order has been computed, these two methods will be called on each IThreadable in the chain, to set up the
+     * Sets the full name
+     * 
+     * @param fullName The full name to set
+     * @return This threadable
+     */
+    public Threadable setFullName(final String fullName) {
+        this.fullName = fullName;
+        return this;
+    }
+
+    /**
+     * Gets the full name
+     * 
+     * @return The full name
+     */
+    public String getFullName() {
+        return fullName;
+    }
+
+    /**
+     * Gets the kid
+     * 
+     * @return The kid
+     */
+    public Threadable kid() {
+        return kid;
+    }
+
+    /**
+     * Gets the next
+     * 
+     * @return The next
+     */
+    public Threadable next() {
+        return next;
+    }
+
+    /**
+     * When the proper thread order has been computed, these two methods will be called on each Threadable in the chain, to set up the
      * proper tree structure.
      */
     public void setNext(final Object next) {
@@ -263,8 +310,8 @@ public final class Threadable {
         flushSubjectCache();
     }
 
-    public void setChild(final Object kid) {
-        this.kid = (Threadable) kid;
+    public void setChild(final Threadable kid) {
+        this.kid = kid;
         flushSubjectCache();
     }
 
@@ -295,11 +342,11 @@ public final class Threadable {
 
         Enumeration<Threadable> kids;
 
-        boolean recursive_p;
+        boolean recursive;
 
-        ThreadableEnumeration(final Threadable thread, final boolean recursive_p) {
-            this.recursive_p = recursive_p;
-            if (recursive_p) {
+        ThreadableEnumeration(final Threadable thread, final boolean recursive) {
+            this.recursive = recursive;
+            if (recursive) {
                 tail = thread;
             } else {
                 tail = thread.kid;
@@ -321,7 +368,7 @@ public final class Threadable {
                 // Return `tail', but first note its children, if any.
                 // We will descend into them the next time around.
                 final Threadable result = tail;
-                if (recursive_p && tail.kid != null) {
+                if (recursive && tail.kid != null) {
                     kids = new ThreadableEnumeration(tail.kid, true);
                 }
                 tail = tail.next;
@@ -373,7 +420,7 @@ public final class Threadable {
 
                 @Override
                 public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
-                    threadable.id = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
+                    threadable.messageId = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
                 }
             });
             put(MessageHeaders.HDR_IN_REPLY_TO, new HeaderHandler() {
@@ -398,7 +445,7 @@ public final class Threadable {
             while (null != t) {
                 sb.append('(');
                 if (t.messageNumber > 0) {
-                    sb.append(t.messageNumber);
+                    sb.append(t.toMessageId());
                 }
                 final Threadable kid = t.kid;
                 if (null != kid) {
@@ -420,7 +467,7 @@ public final class Threadable {
                 if (filter.contains(t.messageNumber)) {
                     sb.append('(');
                     if (t.messageNumber > 0) {
-                        sb.append(t.messageNumber);
+                        sb.append(t.toMessageId());
                     }
                     final Threadable kid = t.kid;
                     if (null != kid) {
@@ -447,10 +494,80 @@ public final class Threadable {
     }
 
     /**
-     * Gets the threadables for given IMAP folder.
+     * Appends the latter <tt>Threadable</tt> to the first <tt>Threadable</tt> instance.
+     * 
+     * @param threadable The <tt>Threadable</tt> instance
+     * @param toAppend The <tt>Threadable</tt> instance to append
+     */
+    public static void append(final Threadable threadable, final Threadable toAppend) {
+        if (null == threadable) {
+            return;
+        }
+        Threadable t = threadable;
+        while (null != t.next) {
+            t = t.next;
+        }
+        t.next = toAppend;
+    }
+
+    /**
+     * Filters from <tt>Threadable</tt> those sub-trees which solely consist of specified <tt>Threadable</tt>s associated with given full
+     * name
+     * 
+     * @param fullName The full name to filter with
+     * @param t The <tt>Threadable</tt> instance
+     */
+    public static Threadable filterFullName(final String fullName, final Threadable t) {
+        final List<Threadable> list = new LinkedList<Threadable>();
+        {
+            Threadable cur = t;
+            while (null != cur) {
+                list.add(cur);
+                cur = cur.next;
+            }
+        }
+        // Filter
+        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext(); ) {
+            final Threadable cur = iterator.next();
+            if (checkFullName(fullName, cur)) {
+                iterator.remove();
+            }
+        }
+        // Fold
+        final Threadable first = list.remove(0);
+        {
+            Threadable cur = first;
+            for (final Threadable threadable : list) {
+                cur.next = threadable;
+                cur = threadable;
+            }
+        }
+        return first;
+    }
+
+    private static boolean checkFullName(final String fullName, final Threadable t) {
+        Threadable cur = t;
+        while (null != cur) {
+            if (t.messageNumber > 0 && !fullName.equals(cur.fullName)) {
+                return false;
+            }
+            final Threadable kid = t.kid;
+            if (null != kid) {
+                if (!checkFullName(fullName, kid)) {
+                    return false;
+                }
+            }
+            cur = cur.next;
+        }
+        // Solely consists of threadables associated with given full name
+        return true;
+    }
+
+    /**
+     * Gets the <tt>Threadable</tt>s for given IMAP folder.
      * 
      * @param imapFolder The IMAP folders
-     * @return The detected threadables
+     * @return The detected <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
     public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder) throws MessagingException {
@@ -483,6 +600,7 @@ public final class Threadable {
                 if (response.isOK()) {
                     try {
                         final List<Threadable> threadables = new ArrayList<Threadable>(messageCount);
+                        final String fullName = imapFolder.getFullName();
                         for (int j = 0; j < len; j++) {
                             if ("FETCH".equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fetchResponse = (FetchResponse) r[j];
@@ -504,7 +622,7 @@ public final class Threadable {
                                     }
                                 }
                                 if (h != null) {
-                                    final Threadable t = new Threadable();
+                                    final Threadable t = new Threadable().setFullName(fullName);
                                     t.messageNumber = fetchResponse.getNumber();
                                     for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                                         final Header hdr = (Header) e.nextElement();

@@ -117,6 +117,7 @@ public class MultipleAdapter implements MultipleHandler {
         request.setFormat("json");
         request.setAction(action);
         request.setServletRequestURI(path);
+        request.setPathInfo(path);
 
         return request;
     }

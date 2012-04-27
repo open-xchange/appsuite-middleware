@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -332,6 +333,7 @@ public final class CreatePerformer extends AbstractPerformer {
                             }
                             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
+                        OutlookFolderStorage.clearTCM();
                         return toCreate.getID();
                     }
                 }
