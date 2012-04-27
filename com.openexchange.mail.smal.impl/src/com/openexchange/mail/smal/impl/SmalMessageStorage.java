@@ -317,7 +317,8 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 public MailResult<List<MailMessage>> call() throws Exception {
                     // No need to await completion because getMessages() is called immediately after searchMessages()
                     // processingProgress.awaitCompletion();
-                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, mailIds, null, null, fields, session));
+                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, session, null, null));
+//                    return MailResult.newIndexResult(IndexAccessAdapter.getInstance().getMessages(accountId, folder, mailIds, null, null, fields, session));
                 }
             });
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
@@ -347,7 +348,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     final MailProvider provider = delegateMailAccess.getProvider();
                     LOG.debug("SmalMessageStorage.getMessages(): "+(null == provider ? "Storage" : provider.getProtocol().getName())+" result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
                 }
-                cancelRemaining(completionService);
+                // TODO: cancelRemaining(completionService);
                 break;
             }
             final List<MailMessage> mails = result.result;
@@ -399,9 +400,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                         return MailResult.newIndexResult(IndexAccessAdapter.getInstance().search(accountId, folder, searchTerm, sortField, order, fields, indexRange, session));
                     } catch (final OXException e) {
                         if (!MailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                            LOG.error(e.getMessage(), e);
                             throw e;
                         }
                         return MailResult.emptyResult();
+                    } catch (final Exception e) {
+                        LOG.error(e.getMessage(), e);
+                        throw e;
                     }
                 }
             });
@@ -409,7 +414,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
-                    return MailResult.newStorageResult(asList(ms.searchMessages(folder, indexRange, sortField, order, searchTerm, fields)));
+                    try {
+                        return MailResult.newStorageResult(asList(ms.searchMessages(
+                            folder,
+                            indexRange,
+                            sortField,
+                            order,
+                            searchTerm,
+                            fields)));
+                    } catch (final Exception e) {
+                        LOG.error(e.getMessage(), e);
+                        throw e;
+                    }
                 }
             });
             MailResult<List<MailMessage>> result = takeNextFrom(completionService);
@@ -447,7 +463,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     final MailProvider provider = delegateMailAccess.getProvider();
                     LOG.debug("SmalMessageStorage.searchMessages(): "+(null == provider ? "Storage" : provider.getProtocol().getName())+" result came first for \"" + folder + "\" " + new DebugInfo(delegateMailAccess));
                 }
-                cancelRemaining(completionService);
+                // TODO cancelRemaining(completionService);
                 if (!processingProgress.asJob() && new MailFields(fields).containsAny(MAIL_FIELDS_FLAGS)) {
                     scheduleChangeJob(folder, result);
                 }

@@ -84,9 +84,13 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
      */
     INDEX_FAULT(SolrIndexExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
     /**
-     * No IndexAccess implementation was found for module $1%s.
+     * No IndexAccess implementation was found for module %1$s.
      */
-    MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006)
+    MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006),
+    /**
+     * Field %1$s is not indexed.
+     */
+    FIELD_NOT_INDEXED(SolrIndexExceptionMessages.FIELD_NOT_INDEXED_MSG, CATEGORY_ERROR, 1007),
     
     ;
 

@@ -58,7 +58,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.apache.solr.client.solrj.SolrServer;
@@ -72,6 +74,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.xml.sax.SAXException;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -142,6 +145,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             }
 
             final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final String libDir = config.getProperty(SolrProperties.LIB_DIR);
             final String schemaFile = getSchemaFileByModule(module);
             final String configFile = getConfigFileByModule(module);
             final String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
@@ -153,6 +157,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             properties.put("data.dir", dataDir);
             properties.put("logDir", "/var/log/open-xchange");
             properties.put("confDir", configDir);
+            properties.put("libDir", libDir);
             final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, configuration.getCoreDirPath());
             coreDescriptor.setDataDir(dataDir);
             coreDescriptor.setSchemaName(schemaFile);

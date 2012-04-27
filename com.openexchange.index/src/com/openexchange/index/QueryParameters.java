@@ -66,19 +66,30 @@ public final class QueryParameters {
 
         int off;
         int len;
-        String queryString;
+        String pattern;
+        String folder;
+        IndexField sortField;
+        String order;
         Map<String, Object> parameters;
-        String handler;
+        SearchHandler handler;
         Type type;
+        Object searchTerm;
 
         /**
          * Initializes a new builder.
          */
-        public Builder(final String queryString) {
+        public Builder(final String pattern) {
             super();
+            init();
+            this.pattern = pattern;
+        }
+        
+        private void init() {
             off = 0;
             len = Integer.MAX_VALUE;
-            this.queryString = queryString;
+            folder = null;
+            sortField = null;
+            order = null;
         }
 
         /**
@@ -91,6 +102,11 @@ public final class QueryParameters {
             this.parameters = parameters;
         }
 
+        public Builder setSearchTerm(final Object searchTerm) {
+            this.searchTerm = searchTerm;
+            return this;
+        }
+
         public Builder setOffset(final int off) {
             this.off = off;
             return this;
@@ -101,8 +117,8 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder setQueryString(final String queryString) {
-            this.queryString = queryString;
+        public Builder setPattern(final String pattern) {
+            this.pattern = pattern;
             return this;
         }
 
@@ -111,7 +127,7 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder setHandler(final String handler) {
+        public Builder setHandler(final SearchHandler handler) {
             this.handler = handler;
             return this;
         }
@@ -120,24 +136,47 @@ public final class QueryParameters {
             this.type = type;
             return this;
         }
+        
+        public Builder setFolder(String folder) {
+            this.folder = folder;
+            return this;
+        }
+        
+        public Builder setSortField(IndexField sortField) {
+            this.sortField = sortField;
+            return this;
+        }
+        
+        public Builder setOrder(String order) {
+            this.order = order;
+            return this;
+        }
 
         public QueryParameters build() {
             return new QueryParameters(this);
         }
-
     }
 
     private final int off;
 
     private final int len;
 
-    private final String queryString;
+    private final String pattern;
 
     private final Map<String, Object> parameters;
 
-    private final String handler;
+    private final SearchHandler handler;
+
+    private final Object searchTerm;
 
     private final Type type;
+
+    
+    String folder;
+    
+    IndexField sortField;
+    
+    String order;
 
     /**
      * Initializes a new {@link QueryParameters}.
@@ -148,8 +187,21 @@ public final class QueryParameters {
         this.len = builder.len;
         this.off = builder.off;
         this.parameters = builder.parameters;
-        this.queryString = builder.queryString;
+        this.pattern = builder.pattern;
         this.type = builder.type;
+        this.searchTerm = builder.searchTerm;
+        this.folder = builder.folder;
+        this.sortField = builder.sortField;
+        this.order = builder.order;
+    }
+
+    /**
+     * Gets the search term or <code>null</code> if not set.
+     *
+     * @return The search term
+     */
+    public Object getSearchTerm() {
+        return searchTerm;
     }
 
     /**
@@ -171,12 +223,21 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the query string.
+     * Gets the query string or <code>null</code> if not set.
      * 
      * @return The query string
      */
-    public String getQueryString() {
-        return queryString;
+    public String getPattern() {
+        return pattern;
+    }
+    
+    /**
+     * Gets the folder or <code>null</code> if not set.
+     * 
+     * @return The folder
+     */
+    public String getFolder() {
+        return folder;
     }
 
     /**
@@ -193,7 +254,7 @@ public final class QueryParameters {
      * 
      * @return The handler
      */
-    public String getHandler() {
+    public SearchHandler getHandler() {
         return handler;
     }
 
@@ -204,6 +265,24 @@ public final class QueryParameters {
      */
     public Type getType() {
         return type;
+    }
+    
+    /**
+     * Gets the sortField
+     *
+     * @return The sortField
+     */
+    public IndexField getSortField() {
+        return sortField;
+    }
+    
+    /**
+     * Gets the order
+     *
+     * @return The order
+     */
+    public String getOrder() {
+        return order;
     }
 
 }

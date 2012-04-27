@@ -116,13 +116,13 @@ public final class MailAccountJob extends AbstractMailJob {
     private List<String> getList() throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = mailAccessFor();
+            mailAccess = storageAccess.mailAccessFor();
             mailAccess.connect(true);
             final List<String> fullNames = new LinkedList<String>();
             handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, mailAccess.getFolderStorage(), fullNames);
             return fullNames;
         } finally {
-            getSmalAccessService().closeUnwrappedInstance(mailAccess);
+            storageAccess.releaseMailAccess();
         }
     }
 
@@ -135,7 +135,7 @@ public final class MailAccountJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         try {
             final IndexingService indexingService = Services.getService(IndexingService.class);
             if (null == filter || filter.isEmpty()) {
