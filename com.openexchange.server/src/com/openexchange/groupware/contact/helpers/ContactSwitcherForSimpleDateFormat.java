@@ -160,7 +160,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
                          * Detected invalid value. Set to null.
                          */
                         objects[1] = null;
-                        ((Contact) objects[0]).addWarning(ImportExportExceptionCodes.INVALID_DATE.create(dateString));
+                        ((Contact) objects[0]).addWarning(ContactExceptionCodes.DATE_CONVERSION_FAILED.create(dateString));
                     }
                     return objects;
                 } catch (final ParseException e) {
