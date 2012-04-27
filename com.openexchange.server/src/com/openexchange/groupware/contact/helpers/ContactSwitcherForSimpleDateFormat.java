@@ -55,12 +55,13 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
+import com.openexchange.log.LogFactory;
 
 /**
  * This switcher is able to convert a given String into a date using
