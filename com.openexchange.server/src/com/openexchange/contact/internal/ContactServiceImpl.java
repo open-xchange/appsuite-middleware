@@ -295,7 +295,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * broadcast event
 		 */
-		new EventClient(session).move(delta, sourceFolder, targetFolder);
+		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 	
 	protected void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) throws OXException {
