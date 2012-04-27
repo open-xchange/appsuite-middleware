@@ -52,6 +52,7 @@ package com.openexchange.mail.json;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -100,11 +101,7 @@ public final class MailRequest {
      * @return The <code>boolean</code>
      */
     public boolean optBool(final String name) {
-        final String parameter = requestData.getParameter(name);
-        if (null == parameter) {
-            return false;
-        }
-        return Boolean.parseBoolean(parameter.trim());
+        return AJAXRequestDataTools.parseBoolParameter(requestData.getParameter(name));
     }
 
     /**
@@ -119,7 +116,7 @@ public final class MailRequest {
         if (null == parameter) {
             return def;
         }
-        return Boolean.parseBoolean(parameter.trim());
+        return AJAXRequestDataTools.parseBoolParameter(parameter);
     }
 
     /**

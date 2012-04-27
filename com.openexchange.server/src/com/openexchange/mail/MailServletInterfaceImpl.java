@@ -617,7 +617,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final boolean includeSent, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
