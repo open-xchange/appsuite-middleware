@@ -112,7 +112,7 @@ public final class Threadable {
 
     private String subject2;
 
-    private boolean has_re;
+    private boolean hasRe;
 
     /**
      * Initializes a new {@link Threadable}.
@@ -165,24 +165,21 @@ public final class Threadable {
         }
         // Start position
         int start = 0;
+        final String subject = this.subject.trim();
         final int len = subject.length();
+        if (len <= 2) {
+            subject2 = subject;
+            return;
+        }
         
         boolean done = false;
-        while (!done) {
+        while (!done && (start < len)) {
             done = true;
-            // skip whitespace.
-            while (start < len && subject.charAt(start) <= ' ') {
-                start++;
-                if (start >= len) {
-                    subject2 = "";
-                    return;
-                }
-            }
 
-            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e' || subject.charAt(start + 1) == 'e')) {
+            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e')) {
                 if (subject.charAt(start + 2) == ':') {
                     start += 3; // Skip over "Re:"
-                    has_re = true; // yes, we found it.
+                    hasRe = true; // yes, we found it.
                     done = false; // keep going.
                 } else if (start < (len - 2) && (subject.charAt(start + 2) == '[' || subject.charAt(start + 2) == '(')) {
                     int i = start + 3; // skip over "Re[" or "Re("
@@ -196,7 +193,7 @@ public final class Threadable {
                     // Only if it is do we alter `start'.
                     if (i < (len - 1) && (subject.charAt(i) == ']' || subject.charAt(i) == ')') && subject.charAt(i + 1) == ':') {
                         start = i + 2; // Skip over "]:"
-                        has_re = true; // yes, we found it.
+                        hasRe = true; // yes, we found it.
                         done = false; // keep going.
                     }
                 }
@@ -207,16 +204,10 @@ public final class Threadable {
             }
         }
 
-        int end = len;
-        // Strip trailing whitespace.
-        while (end > start && subject.charAt(end - 1) < ' ') {
-            end--;
-        }
-
-        if (start == 0 && end == len) {
+        if (start == 0) {
             subject2 = subject;
         } else {
-            subject2 = subject.substring(start, end);
+            subject2 = subject.substring(start).trim();
         }
     }
 
@@ -281,7 +272,7 @@ public final class Threadable {
         if (subject2 == null) {
             simplifySubject();
         }
-        return has_re;
+        return hasRe;
     }
 
     /**
