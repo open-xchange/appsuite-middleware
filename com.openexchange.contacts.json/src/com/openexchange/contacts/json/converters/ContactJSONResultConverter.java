@@ -129,44 +129,51 @@ public class ContactJSONResultConverter implements ResultConverter {
         	timeZoneID = session.getUser().getTimeZone();
         }
         /*
-         * get requested column IDs
-         */
-        int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData, "columns");
-        ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) : 
-        	ContactMapper.getInstance().getAllFields();        
-        /*
-         * convert result object to json
+         * check and convert result object
          */
         Object resultObject = result.getResultObject();
         if (resultObject instanceof Contact) {
             /*
              * Only one contact to convert
              */
-            resultObject = convertSingleContact((Contact)resultObject, fields, timeZoneID, session);
-        } else if ("updates".equals(requestData.getAction())) {
-        	/*
-        	 * result contains a Map<String, List<Contact>> to decide between deleted and modified contacts
-        	 */
-            @SuppressWarnings("unchecked") final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) resultObject;
-            final List<Contact> modified = contactMap.get("modified");
-            final List<Contact> deleted = contactMap.get("deleted");
-            JSONArray jsonArray = convertListOfContacts(modified, fields, timeZoneID, session);
-            if (null != deleted && 0 < deleted.size()) {
-                addObjectIdsToResultArray(jsonArray, deleted);
-            }
-            resultObject = jsonArray;
+            resultObject = convertSingleContact((Contact)resultObject, timeZoneID, session);
         } else {
-        	/*
-        	 * A list of contacts to convert
-        	 */
-            @SuppressWarnings("unchecked") final List<Contact> contacts = (List<Contact>) resultObject;
-            resultObject = convertListOfContacts(contacts, fields, timeZoneID, session);
+            /*
+             * get requested column IDs
+             */
+            int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData, "columns");
+            ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) : 
+            	ContactMapper.getInstance().getAllFields();        
+            /*
+             * Convert list of contacts
+             */
+        	if ("updates".equals(requestData.getAction())) {
+            	/*
+            	 * result contains a Map<String, List<Contact>> to decide between deleted and modified contacts
+            	 */
+                @SuppressWarnings("unchecked") final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) resultObject;
+                final List<Contact> modified = contactMap.get("modified");
+                final List<Contact> deleted = contactMap.get("deleted");
+                JSONArray jsonArray = convertListOfContacts(modified, fields, timeZoneID, session);
+                if (null != deleted && 0 < deleted.size()) {
+                    addObjectIdsToResultArray(jsonArray, deleted);
+                }
+                resultObject = jsonArray;
+            } else {
+            	/*
+            	 * A list of contacts to convert
+            	 */
+                @SuppressWarnings("unchecked") final List<Contact> contacts = (List<Contact>) resultObject;
+                resultObject = convertListOfContacts(contacts, fields, timeZoneID, session);
+            }
         }
         result.setResultObject(resultObject, "json");
     }
     
-    private JSONObject convertSingleContact(Contact contact, ContactField[] fields, String timeZoneID, Session session) throws OXException {
+    private JSONObject convertSingleContact(Contact contact, String timeZoneID, Session session) throws OXException {
     	try {
+    		// always add NUMBER_OF_IMAGES to contact result (bug #13960)
+    		ContactField[] fields = ContactMapper.getInstance().getAssignedFields(contact, ContactField.NUMBER_OF_IMAGES);
 			return ContactMapper.getInstance().serialize(contact, fields, timeZoneID, session);
 		} catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

@@ -50,10 +50,14 @@
 package com.openexchange.contacts.json.mapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -74,6 +78,7 @@ import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
@@ -109,6 +114,22 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         
     }
     
+	public ContactField[] getAssignedFields(final Contact contact, ContactField... mandatoryFields) {
+		if (null == contact) {
+			throw new IllegalArgumentException("contact");
+		}
+		Set<ContactField> setFields = new HashSet<ContactField>();
+		for (Entry<ContactField, ? extends JsonMapping<? extends Object, Contact>> entry : getMappings().entrySet()) {
+			if (entry.getValue().isSet(contact)) {
+				setFields.add(entry.getKey());
+			}
+		}
+		if (null != mandatoryFields) {
+			setFields.addAll(Arrays.asList(mandatoryFields));
+		}		
+		return setFields.toArray(newArray(setFields.size()));
+	}
+
     public ContactField[] getFields(int[] columnIDs, EnumSet<ContactField> illegalFields, ContactField... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
@@ -2623,40 +2644,115 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.IMAGE1, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1) {
+        mappings.put(ContactField.IMAGE1, new DefaultJsonMapping<byte[], Contact>(ContactFields.IMAGE1, Contact.IMAGE1) {
 
-            @Override
-            public void set(Contact contact, String value) { 
-                throw new UnsupportedOperationException();
-            }
+			@Override
+			public void set(Contact contact, byte[] value) { 
+			    contact.setImage1(value);
+			}
+			
+			@Override
+			public boolean isSet(Contact contact) {
+			    return contact.containsImage1();
+			}
+			
+			@Override
+			public byte[] get(Contact contact) { 
+			    return contact.getImage1();
+			}
+			
+			@Override
+			public void remove(Contact contact) { 
+			    contact.removeImage1();
+			}
+			
+			@Override
+			public void deserialize(JSONObject from, Contact to) throws JSONException, OXException {
+				Object value = from.get(getAjaxName());
+				if (null == value || 0 == value.toString().length()) {
+					to.setImage1(null);
+				} else if (byte[].class.isInstance(value)) {
+					to.setImage1((byte[])value);
+				} else {
+					throw new JSONException("unable to deserialize image data");
+				}
+			}
+			
+			@Override
+			public void serialize(Contact from, JSONObject to) throws JSONException {
+				// always serialize as URL
+				try {
+					ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, to);
+				} catch (OXException e) {
+					throw new JSONException(e);
+				}
+			}
 
-            @Override
-            public boolean isSet(Contact contact) {
-            	return contact.containsImage1();
-            }
+			@Override
+			public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException {
+				// always serialize as URL
+				try {
+					ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, to, timeZone);
+				} catch (OXException e) {
+					throw new JSONException(e);
+				}
+			}
 
-            @Override
-        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
-            	/*
-            	 * override serialization here, and serialize as "image1_url" instead of byte array
-            	 */
-            	try {
+			@Override
+			public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+				// always serialize as URL
+				try {
+					ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, to, timeZone, session);
+				} catch (OXException e) {
+					throw new JSONException(e);
+				}
+			}
+
+			@Override
+			public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+				// always serialize as URL
+				try {
 					return ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, timeZone, session);
 				} catch (OXException e) {
 					throw new JSONException(e);
 				}
-        	}
-        
-            @Override
-            public String get(Contact contact) {
-            	return null;
-            }
-
-            @Override
-            public void remove(Contact contact) { 
-                throw new UnsupportedOperationException();
-            }
+			}
         });
+        
+//        mappings.put(ContactField.IMAGE1, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1) {
+//
+//            @Override
+//            public void set(Contact contact, String value) { 
+//                throw new UnsupportedOperationException();
+//            }
+//
+//            @Override
+//            public boolean isSet(Contact contact) {
+//            	return contact.containsImage1();
+//            }
+//
+//            @Override
+//        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+//            	/*
+//            	 * override serialization here, and serialize as "image1_url" instead of byte array
+//            	 */
+//            	try {
+//					return ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, timeZone, session);
+//				} catch (OXException e) {
+//					throw new JSONException(e);
+//				}
+//        	}
+//        
+//            @Override
+//            public String get(Contact contact) {
+//            	return null;
+//            }
+//
+//            @Override
+//            public void remove(Contact contact) { 
+//                throw new UnsupportedOperationException();
+//            }
+//        });
         
         mappings.put(ContactField.IMAGE1_URL, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL) {
 
