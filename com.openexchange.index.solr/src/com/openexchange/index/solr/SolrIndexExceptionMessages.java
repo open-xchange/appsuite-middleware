@@ -83,5 +83,8 @@ public final class SolrIndexExceptionMessages implements LocalizableStrings {
 
     // No IndexAccess implementation was found for module $1%s.
     public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
+
+    // Field %1$s is not indexed.
+    public static final String FIELD_NOT_INDEXED_MSG = "Field %1$s is not indexed.";
     
 }

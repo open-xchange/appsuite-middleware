@@ -60,10 +60,12 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.solr.SolrAccessService;
 
 
 /**
@@ -93,8 +95,18 @@ public class SolrIndexFacadeTest extends TestCase {
         "arise.").getBytes();
     
     public void testAddAndGetMessage() throws Exception {
-//        final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
-//        final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 3, 1);
+        try {
+            IndexFacadeService facade = Services.getService(IndexFacadeService.class);
+            IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 3, 1);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("accountId", 0);
+            QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(Type.MAIL).setFolder("INBOX").build();
+            IndexResult<MailMessage> result = indexAccess.query(qp);
+            facade.releaseIndexAccess(indexAccess);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 //        final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
 //        final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
 //        indexAccess.addContent(document);

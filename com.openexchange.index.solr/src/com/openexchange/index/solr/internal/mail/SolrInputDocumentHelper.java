@@ -52,6 +52,7 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.mail.internet.InternetAddress;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -147,6 +148,23 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
 
         return documents;
     }
+    
+    private static String createAddressHeader(InternetAddress[] addrs) {
+        String line;
+        if (addrs == null || addrs.length <= 0) {
+            line = null;
+        } else {
+            final StringBuilder lineBuilder = new StringBuilder(256);
+            for (int i = 0; i < addrs.length; i++) {
+                final InternetAddress address = addrs[i];
+                lineBuilder.append(", ").append(address.toString());
+            }
+            lineBuilder.delete(0, 2);
+            line = lineBuilder.toString();
+        }
+        
+        return line;
+    }
 
     private static SolrInputDocument createDocument(final String uuid, final MailMessage mail, final int accountId, final int userId, final int contextId, final long stamp) {
         final SolrInputDocument inputDocument = new SolrInputDocument();
@@ -164,11 +182,11 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
          * Envelope data
          */
         setFieldInDocument(inputDocument, SolrMailField.FULL_NAME, mail.getFolder());
-        setFieldInDocument(inputDocument, SolrMailField.ID, mail.getMailId());
-        setFieldInDocument(inputDocument, SolrMailField.FROM, Arrays.asList(mail.getFrom()));
-        setFieldInDocument(inputDocument, SolrMailField.TO, Arrays.asList(mail.getTo()));
-        setFieldInDocument(inputDocument, SolrMailField.CC, Arrays.asList(mail.getCc()));
-        setFieldInDocument(inputDocument, SolrMailField.CC, Arrays.asList(mail.getBcc()));
+        setFieldInDocument(inputDocument, SolrMailField.ID, mail.getMailId());        
+        setFieldInDocument(inputDocument, SolrMailField.FROM, createAddressHeader(mail.getFrom()));        
+        setFieldInDocument(inputDocument, SolrMailField.TO, createAddressHeader(mail.getTo()));
+        setFieldInDocument(inputDocument, SolrMailField.CC, createAddressHeader(mail.getCc()));
+        setFieldInDocument(inputDocument, SolrMailField.BCC, createAddressHeader(mail.getBcc()));        
         setFieldInDocument(inputDocument, SolrMailField.ATTACHMENT, mail.hasAttachment());
         setFieldInDocument(inputDocument, SolrMailField.COLOR_LABEL, mail.getColorLabel());
         setFieldInDocument(inputDocument, SolrMailField.SIZE, mail.getSize());

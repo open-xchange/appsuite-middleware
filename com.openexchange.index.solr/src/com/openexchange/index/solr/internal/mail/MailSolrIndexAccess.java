@@ -82,6 +82,7 @@ import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -688,6 +689,140 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
     public void deleteById(final String id) throws OXException {
         deleteDocumentById(id);
     }
+
+    @Override
+    public void deleteByQuery(final QueryParameters parameters) throws OXException {
+        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);  
+        if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            deleteDocumentsByQuery(buildQueryString(accountId, folder));
+        } else {
+            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
+        }
+    }
+
+    @Override
+    public IndexResult<MailMessage> query(final QueryParameters parameters) throws OXException, InterruptedException {
+        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);     
+        final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
+        IndexResult<MailMessage> result = Indexes.emptyResult();
+        if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder(); 
+            final SolrQuery solrQuery;
+            if (folder == null) {
+                solrQuery = new SolrQuery("(*: *)");
+            } else {
+                solrQuery = new SolrQuery(folder);
+                solrQuery.setQueryType("allSearch");
+            }
+            solrQuery.setFilterQueries(buildFilterQueries(accountId, null));
+            setSortAndOrder(parameters, solrQuery);
+
+            int off = parameters.getOff();
+            int len = parameters.getLen();
+            int maxRows = len;
+            if (maxRows > QUERY_ROWS) {
+                maxRows = QUERY_ROWS;
+            }
+            do {                
+                solrQuery.setStart(off);
+                solrQuery.setRows(maxRows);
+                final QueryResponse queryResponse = query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();                
+                final int size = results.size();
+                if (results.size() == 0) {
+                    break;
+                }
+                
+                for (int i = 0; i < size; i++) {
+                    mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
+                }
+                off += size;
+            } while (off < len);
+            
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;
+        } else if (searchHandler.equals(SearchHandler.SIMPLE)) {
+            final SolrQuery solrQuery = new SolrQuery(parameters.getPattern());            
+            solrQuery.setQueryType("simpleSearch");
+            setSortAndOrder(parameters, solrQuery);
+            solrQuery.setStart(parameters.getOff());
+            solrQuery.setRows(parameters.getLen());
+            solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+            
+            final QueryResponse queryResponse = query(solrQuery);
+            final SolrDocumentList results = queryResponse.getResults();   
+            for (int i = 0; i < results.size(); i++) {
+                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
+            }
+            
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;
+        } else if (searchHandler.equals(SearchHandler.GET_REQUEST)) {
+            final String[] ids = getIds(parameters);
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            final String queryString = buildQueryString(accountId, folder);
+            final StringBuilder sb = new StringBuilder(queryString);
+            sb.append(" AND (");
+            boolean first = true;
+            for (final String id : ids) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(" OR ");
+                }
+                sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
+            }
+            sb.append(')');
+            
+            final SolrQuery solrQuery = new SolrQuery(sb.toString());
+            setSortAndOrder(parameters, solrQuery);
+            solrQuery.setStart(parameters.getOff());
+            solrQuery.setRows(parameters.getLen());
+            
+            final QueryResponse queryResponse = query(solrQuery);
+            final SolrDocumentList results = queryResponse.getResults();   
+            for (int i = 0; i < results.size(); i++) {
+                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
+            }
+            
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;  
+        } else if (searchHandler.equals(SearchHandler.CUSTOM)) {
+            final SearchTerm<?> searchTerm = (SearchTerm<?>) parameters.getSearchTerm();
+            final SolrQuery solrQuery = new SolrQuery("*:*");
+            SolrSearchTermVisitor.setQuery(solrQuery, searchTerm);
+            setSortAndOrder(parameters, solrQuery);
+            solrQuery.setStart(parameters.getOff());
+            solrQuery.setRows(parameters.getLen());
+            solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+            
+            final QueryResponse queryResponse = query(solrQuery);
+            final SolrDocumentList results = queryResponse.getResults();   
+            for (int i = 0; i < results.size(); i++) {
+                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
+            }
+            
+            final MailIndexResult indexResult = new MailIndexResult(mails.size());
+            indexResult.setResults(mails);
+            result = indexResult;
+        } else {
+            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
+        }
+        
+        return result;
+    }
+
+    @Override
+    public TriggerType getTriggerType() {
+        return triggerType;
+    }
     
     private SearchHandler checkQueryParametersAndGetSearchHandler(final QueryParameters parameters) {
         if (parameters == null) {
@@ -709,8 +844,11 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                 return searchHandler;
                 
             case CUSTOM:
-                if (parameters.getSearchTerm() == null) {
+                final Object searchTerm = parameters.getSearchTerm();
+                if (searchTerm == null) {
                     throw new IllegalArgumentException("Parameter `search term` must not be null!");
+                } else if (!(searchTerm instanceof SearchTerm)) {
+                    throw new IllegalArgumentException("Parameter `search term` must be an instance of com.openexchange.mail.search.SearchTerm!");
                 }
                 return searchHandler;
                 
@@ -720,8 +858,10 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
                     throw new IllegalArgumentException("Parameter `parameters.parameters` must not be null!");
                 }
                 final Object idsObj = params.get("ids");
-                if (idsObj == null || !(idsObj instanceof String[])) {
-                    throw new IllegalArgumentException("Parameter `parameters.parameters.ids` must not be null and an instance of String[]!");
+                if (idsObj == null) {
+                    throw new IllegalArgumentException("Parameter `parameters.parameters.ids` must not be null!");
+                } else if (!(idsObj instanceof String[])) {
+                    throw new IllegalArgumentException("Parameter `parameters.parameters.ids` must not be an instance of String[]!");
                 }
                 return searchHandler;
                 
@@ -763,128 +903,33 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
         }
     }
 
-    @Override
-    public void deleteByQuery(final QueryParameters parameters) throws OXException {
-        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);  
-        if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
-            final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            deleteDocumentsByQuery(buildQueryString(accountId, folder));
-        } else {
-            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
-        }
-    }
-
-    @Override
-    public IndexResult<MailMessage> query(final QueryParameters parameters) throws OXException, InterruptedException {
-        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);     
-        final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
-        IndexResult<MailMessage> result = Indexes.emptyResult();
-        if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
-            final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            final SolrQuery solrQuery = new SolrQuery(buildQueryString(accountId, folder));
-            setSortAndOrder(parameters, solrQuery);
-
-            int off = parameters.getOff();
-            int len = parameters.getLen();            
-            do {
-                if (len > QUERY_ROWS) {
-                    len = QUERY_ROWS;
-                }
-                solrQuery.setStart(off);
-                solrQuery.setRows(len);
-                final QueryResponse queryResponse = query(solrQuery);
-                final SolrDocumentList results = queryResponse.getResults();                
-                final int size = results.size();
-                if (results.size() == 0) {
-                    break;
-                }
-                
-                for (int i = 0; i < size; i++) {
-                    mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
-                }
-                off += size;
-            } while (off < len);
-            
-            final MailIndexResult indexResult = new MailIndexResult(mails.size());
-            indexResult.setResults(mails);
-            result = indexResult;
-        } else if (searchHandler.equals(SearchHandler.SIMPLE)) {
-            final SolrQuery solrQuery = new SolrQuery(parameters.getPattern());            
-            solrQuery.setQueryType("simpleSearch");
-            setSortAndOrder(parameters, solrQuery);
-            solrQuery.setStart(parameters.getOff());
-            solrQuery.setRows(parameters.getLen());
-            // TODO: set filter query for folder and account
-            final QueryResponse queryResponse = query(solrQuery);
-            final SolrDocumentList results = queryResponse.getResults();   
-            for (int i = 0; i < results.size(); i++) {
-                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
-            }
-            
-            final MailIndexResult indexResult = new MailIndexResult(mails.size());
-            indexResult.setResults(mails);
-            result = indexResult;     
-        } else if (searchHandler.equals(SearchHandler.GET_REQUEST)) {
-            final String[] ids = getIds(parameters);
-            final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            final String queryString = buildQueryString(accountId, folder);
-            final StringBuilder sb = new StringBuilder(queryString);
-            sb.append(" AND (");
-            boolean first = true;
-            for (final String id : ids) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(" OR ");
-                }
-                sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
-            }
-            sb.append(')');
-            
-            final SolrQuery solrQuery = new SolrQuery(sb.toString());
-            setSortAndOrder(parameters, solrQuery);
-            solrQuery.setStart(parameters.getOff());
-            solrQuery.setRows(parameters.getLen());
-            
-            final QueryResponse queryResponse = query(solrQuery);
-            final SolrDocumentList results = queryResponse.getResults();   
-            for (int i = 0; i < results.size(); i++) {
-                mails.add(helper.readDocument(results.get(i), MailFillers.allFillers()));
-            }
-            
-            final MailIndexResult indexResult = new MailIndexResult(mails.size());
-            indexResult.setResults(mails);
-            result = indexResult;  
-        } else {
-            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
-        }
-        
-        return result;
-    }
-
-    @Override
-    public TriggerType getTriggerType() {
-        return triggerType;
-    }
-
     private String buildQueryString(final int accountId, final String folder) {
         final StringBuilder sb = new StringBuilder(128);
         sb.append('(').append(SolrMailField.USER.solrName()).append(":\"").append(userId).append("\")");
         sb.append(" AND ");
         sb.append('(').append(SolrMailField.CONTEXT.solrName()).append(":\"").append(contextId).append("\")");        
-        if (accountId >= 0) {
+        if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
             sb.append(" AND ");
             sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
         }
             
-        if (folder != null) {
+        if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
             sb.append(" AND ");
             sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
         }        
         
         return sb.toString();
+    }
+    
+    private String[] buildFilterQueries(final int accountId, final String folder) {
+        final List<String> filters = new ArrayList<String>(2);
+        if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
+            filters.add(SolrMailField.ACCOUNT.solrName() + ':' + String.valueOf(accountId));
+        }
+        if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
+            filters.add(SolrMailField.FULL_NAME.solrName() + ':' + folder);
+        }
+        
+        return filters.toArray(new String[filters.size()]);
     }
 }

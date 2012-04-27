@@ -59,7 +59,7 @@ public interface SolrMailConstants {
 
     public static final int ADD_ROWS = 2000;
 
-    public static final int QUERY_ROWS = 2000;
+    public static final int QUERY_ROWS = 1000;
 
     public static final int ALL_ROWS = 4000;
 

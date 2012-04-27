@@ -237,10 +237,12 @@ public final class IndexAccessAdapter implements SolrMailConstants {
              * search
              */            
             final Map<String, Object> params = new HashMap<String, Object>(1);
+            params.put("accountId", accountId);
             final QueryParameters.Builder builder = new QueryParameters.Builder(params)
-                                                                                .setOffset(0)
-                                                                                .setLength(Integer.MAX_VALUE)
-                                                                                .setType(IndexDocument.Type.MAIL);
+                                                        .setOffset(0)
+                                                        .setLength(Integer.MAX_VALUE)
+                                                        .setType(IndexDocument.Type.MAIL)
+                                                        .setFolder(fullName);
             
             
             if (null != sortField) {
@@ -254,8 +256,6 @@ public final class IndexAccessAdapter implements SolrMailConstants {
             
             final QueryParameters parameters;
             if (searchTerm == null) {
-                builder.setFolder(fullName);
-                params.put("accountId", accountId);
                 parameters = builder.setHandler(SearchHandler.ALL_REQUEST).build();
             } else {
                 final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
