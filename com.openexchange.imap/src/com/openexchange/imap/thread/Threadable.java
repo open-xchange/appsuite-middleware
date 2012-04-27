@@ -159,7 +159,7 @@ public final class Threadable {
         return s + " ) ]";
     }
 
-    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(?:Re|Aw|Fwd|Antw)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private void simplifySubject() {
         if (isEmpty(subject)) {
@@ -170,7 +170,7 @@ public final class Threadable {
         {
             final Matcher m = PATTERN_SUBJECT.matcher(subject);
             if (m.matches()) {
-                subject2 = m.group(1);
+                subject2 = m.group(2);
                 return;
             }
         }
