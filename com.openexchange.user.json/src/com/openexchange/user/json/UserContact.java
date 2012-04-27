@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +66,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.comparator.Comparators;
 import com.openexchange.user.json.field.UserField;
@@ -108,14 +109,39 @@ public class UserContact {
      * @return the serialized user contact
      * @throws OXException
      */
-    public JSONObject serialize(final ContactField[] contactFields, final UserField[] userFields, final String timeZoneID) throws OXException {
+    private JSONObject serialize(final ContactField[] contactFields, final UserField[] userFields, final String timeZoneID) throws OXException {
     	final JSONObject jsonObject = new JSONObject();
     	try {
         	ContactMapper.getInstance().serialize(contact, jsonObject, contactFields, timeZoneID);
         	UserMapper.getInstance().serialize(user, jsonObject, userFields, timeZoneID);
     	} catch (final JSONException e) {
     		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-    	}
+		} catch (final RuntimeException x) {
+			System.out.print(x.getMessage());
+		}
+    	return jsonObject;
+    }
+    
+    /**
+     * Serializes the user- and contact data into a JSON object.
+     * 
+     * @param timeZoneID the client timezone ID
+     * @return the serialized user contact
+     * @throws OXException
+     */
+    public JSONObject serialize(String timeZoneID, Session session) throws OXException {
+    	JSONObject jsonObject = null;
+    	try {
+    		// always add NUMBER_OF_IMAGES to contact result (bug #13960)
+    		ContactField[] contactFields = ContactMapper.getInstance().getAssignedFields(contact, ContactField.NUMBER_OF_IMAGES);
+    		jsonObject = ContactMapper.getInstance().serialize(contact, contactFields, timeZoneID, session);
+    		UserField[] userFields = UserMapper.getInstance().getAssignedFields(user);
+        	UserMapper.getInstance().serialize(user, jsonObject, userFields, timeZoneID);
+    	} catch (final JSONException e) {
+    		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+		} catch (final RuntimeException x) {
+			System.out.print(x.getMessage());
+		}
     	return jsonObject;
     }
     

@@ -64,13 +64,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.json.actions.GetAction;
-import com.openexchange.user.json.field.UserField;
-import com.openexchange.user.json.mapping.UserMapper;
 
 /**
  * {@link UserContactResultConverter} - JSON result converter for user contacts.
@@ -122,17 +118,8 @@ public class UserContactResultConverter implements ResultConverter {
 			/*
 			 * convert single user contact
 			 */
-            ContactField[] contactFields;
-            UserField[] userFields;
-            if (null == columnIDs || 0 == columnIDs.length) {
-                contactFields = ContactMapper.getInstance().getAllFields();
-                userFields = UserMapper.getInstance().getAllFields();
-            } else {
-                contactFields = ContactMapper.getInstance().getFields(columnIDs);
-                userFields = UserMapper.getInstance().getFields(columnIDs);
-            }
 			UserContact userContact = (UserContact)resultObject;
-			resultObject = userContact.serialize(contactFields, userFields, timeZoneID);
+			resultObject = userContact.serialize(timeZoneID, session);
 		} else {
 			/*
 			 * convert multiple user contacts into array
