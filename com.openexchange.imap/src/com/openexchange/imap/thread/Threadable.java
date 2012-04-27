@@ -176,7 +176,7 @@ public final class Threadable {
         while (!done && (start < len)) {
             done = true;
 
-            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e')) {
+            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e' || subject.charAt(start + 1) == 'E')) {
                 if (subject.charAt(start + 2) == ':') {
                     start += 3; // Skip over "Re:"
                     hasRe = true; // yes, we found it.
