@@ -49,7 +49,6 @@
 
 package com.openexchange.solr.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -146,7 +145,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             }
 
             final ConfigurationService config = Services.getService(ConfigurationService.class);
-            final String solrHome = config.getProperty(SolrProperties.SOLR_HOME);
+            final String libDir = config.getProperty(SolrProperties.LIB_DIR);
             final String schemaFile = getSchemaFileByModule(module);
             final String configFile = getConfigFileByModule(module);
             final String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
@@ -158,8 +157,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             properties.put("data.dir", dataDir);
             properties.put("logDir", "/var/log/open-xchange");
             properties.put("confDir", configDir);
-            // TODO: own property
-            properties.put("libDir", solrHome + File.separator + "lib");
+            properties.put("libDir", libDir);
             final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, configuration.getCoreDirPath());
             coreDescriptor.setDataDir(dataDir);
             coreDescriptor.setSchemaName(schemaFile);

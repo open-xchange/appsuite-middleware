@@ -90,7 +90,7 @@
 		<!-- Subject Field -->
 		<field name="subject" type="text" stored="true" indexed="true" />
 		<field name="content_flag" type="boolean" stored="false" indexed="true" />
-		<field name="content" type="text" stored="true" indexed="true" />
+		<field name="content" type="text" stored="false" indexed="true" />
 	</fields>
 
 	<uniqueKey>uuid</uniqueKey>

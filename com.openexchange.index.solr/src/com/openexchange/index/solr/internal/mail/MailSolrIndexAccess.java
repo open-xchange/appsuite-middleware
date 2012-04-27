@@ -808,7 +808,8 @@ public final class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessa
             final SearchTerm<?> searchTerm = (SearchTerm<?>) parameters.getSearchTerm();
             final SolrQuery solrQuery = new SolrQuery("*:*");
             solrQuery.setQueryType("customSearch");
-            SolrSearchTermVisitor.setQuery(solrQuery, searchTerm);
+            final StringBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
+            solrQuery.add("cq", queryBuilder.toString());
             setSortAndOrder(parameters, solrQuery);
             solrQuery.setStart(parameters.getOff());
             solrQuery.setRows(parameters.getLen());
