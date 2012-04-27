@@ -61,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Header;
 import javax.mail.MessagingException;
@@ -158,11 +159,22 @@ public final class Threadable {
         return s + " ) ]";
     }
 
+    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(?:Re|Aw|Fwd|Antw)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private void simplifySubject() {
         if (isEmpty(subject)) {
             subject2 = "";
             return;
         }
+
+        {
+            final Matcher m = PATTERN_SUBJECT.matcher(subject);
+            if (m.matches()) {
+                subject2 = m.group(1);
+                return;
+            }
+        }
+        
         // Start position
         int start = 0;
         final String subject = this.subject.trim();
