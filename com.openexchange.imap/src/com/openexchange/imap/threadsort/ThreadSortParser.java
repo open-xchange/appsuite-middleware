@@ -159,7 +159,7 @@ final class ThreadSortParser {
         if (DEBUG) {
             LOG.debug(new StringBuilder("Parsing messageID: ").append(threadList).toString());
         }
-        final MessageId messageId = MessageId.valueOf(threadList);
+        final MessageId messageId = MessageId.valueOf(threadList, 0, threadList.indexOf('}') + 1);
         if (DEBUG) {
             LOG.debug(new StringBuilder("Parsed number: ").append(messageId).toString());
         }

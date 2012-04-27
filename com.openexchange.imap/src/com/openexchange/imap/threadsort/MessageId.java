@@ -111,17 +111,21 @@ public final class MessageId {
             pos++;
         }
         final int end = '}' == msgId.charAt(len - 1) ? len - 1 : len;
-        final int sepPos = msgId.lastIndexOf(SEPERATOR, pos);
+        final int sepPos = msgId.lastIndexOf(SEPERATOR, end);
         if (sepPos < 0) {
             return new MessageId(getUnsignedInteger(msgId.substring(pos, end))).setSlen(len);
         }
         final String firstPart = msgId.substring(pos, sepPos);
         final int firstSep = firstPart.indexOf(SEPERATOR);
         if (firstSep < 0) {
-            return new MessageId().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1))).setSlen(len);
+            return new MessageId().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end))).setSlen(len);
         }
-        final MessageId messageId = new MessageId().setAccountId(getUnsignedInteger(firstPart.substring(0, firstSep))).setSlen(len);
-        return messageId.setFullName(firstPart.substring(firstSep + 1)).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1)));
+        final int accId = getUnsignedInteger(firstPart.substring(0, firstSep));
+        if (accId < 0) {
+            return new MessageId().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end))).setSlen(len);
+        }
+        final MessageId messageId = new MessageId().setAccountId(accId).setSlen(len);
+        return messageId.setFullName(firstPart.substring(firstSep + 1)).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end)));
     }
 
     private static boolean isEmpty(final String string) {
@@ -261,7 +265,7 @@ public final class MessageId {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + accountId;
+        // result = prime * result + accountId;
         result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
         result = prime * result + messageNumber;
         return result;
@@ -276,9 +280,9 @@ public final class MessageId {
             return false;
         }
         final MessageId other = (MessageId) obj;
-        if (accountId != other.accountId) {
-            return false;
-        }
+        // if (accountId != other.accountId) {
+        // return false;
+        // }
         if (fullName == null) {
             if (other.fullName != null) {
                 return false;

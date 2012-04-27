@@ -137,7 +137,7 @@ public class Threader {
     // is a ThreadContainer in the table (an empty one, if necessary.)
     //
     private void buildContainer(final Threadable threadable) {
-        String id = threadable.messageThreadID();
+        String id = threadable.messageID();
         ThreadContainer container = idMap.get(id);
 
         if (container != null) {
@@ -174,7 +174,7 @@ public class Threader {
         // linked.
         ThreadContainer parentRef = null;
         {
-            final String[] refs = threadable.messageThreadReferences();
+            final String[] refs = threadable.messageReferences();
             final int len = (refs == null ? 0 : refs.length);
             for (int i = 0; i < len; i++) {
                 final String refString = refs[i];
