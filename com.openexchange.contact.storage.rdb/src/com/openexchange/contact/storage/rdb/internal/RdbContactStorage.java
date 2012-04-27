@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
@@ -310,13 +310,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                 queryFields.update(Mappers.CONTACT.getAssignedFields(contact));
                 if (null == contact.getImage1()) {
                     // delete previous image if exists
-                    executor.delete(connection, Table.IMAGES, contextID, objectID, now.getTime());
+                    executor.delete(connection, Table.IMAGES, contextID, objectID, minLastModified);
                 } else {
                     if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { 
                     		ContactField.OBJECT_ID })) {
                         // update previous image
-                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, now.getTime(), contact, 
-                        		queryFields.getImageDataFields())) {
+                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, minLastModified, contact, 
+                        		queryFields.getImageDataFields(true))) {
                         	throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
                         }
                     } else {

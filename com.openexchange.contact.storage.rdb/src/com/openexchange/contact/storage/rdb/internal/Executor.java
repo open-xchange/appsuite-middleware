@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 
 
@@ -377,7 +377,7 @@ public class Executor {
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, 
     		final long minLastModified) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("INSERT INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
+        stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
         if (from.isDistListTable()) {
         	stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
         		.append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=?");

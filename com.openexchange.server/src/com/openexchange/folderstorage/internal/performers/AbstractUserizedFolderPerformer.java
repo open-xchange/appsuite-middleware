@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -309,7 +310,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         {
             final Date cd = f.getCreationDate();
             if (null != cd) {
-                userizedFolder.setCreationDate(new Date(addTimeZoneOffset(cd.getTime(), getTimeZone())));
+                final long time = cd.getTime();
+                userizedFolder.setCreationDate(new Date(addTimeZoneOffset(time, getTimeZone())));
+                userizedFolder.setCreationDateUTC(new Date(time));
             }
         }
         {

@@ -53,9 +53,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
@@ -77,6 +78,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private Permission ownPermission;
 
     private Date lastModifiedUTC;
+
+    private Date creationDateUTC;
 
     private Locale locale;
 
@@ -125,6 +128,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
             clone.folder = (Folder) clone.folder.clone();
             clone.ownPermission = ownPermission == null ? null : (Permission) ownPermission.clone();
             clone.lastModifiedUTC = null == lastModifiedUTC ? null : new Date(lastModifiedUTC.getTime());
+            clone.creationDateUTC = null == creationDateUTC ? null : new Date(creationDateUTC.getTime());
             clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
         } catch (final CloneNotSupportedException e) {
@@ -320,6 +324,16 @@ public final class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setLastModifiedUTC(final Date lastModifiedUTC) {
         this.lastModifiedUTC = lastModifiedUTC == null ? null : new Date(lastModifiedUTC.getTime());
+    }
+
+    @Override
+    public Date getCreationDateUTC() {
+        return creationDateUTC == null ? null : new Date(creationDateUTC.getTime());
+    }
+
+    @Override
+    public void setCreationDateUTC(final Date creationDateUTC) {
+        this.creationDateUTC = creationDateUTC == null ? null : new Date(creationDateUTC.getTime());
     }
 
     @Override
