@@ -173,7 +173,7 @@ public final class Threadable {
             // skip whitespace.
             while (subject.charAt(start) <= ' ') {
                 start++;
-                if (start >= len) {
+                if (start >= len - 1) {
                     subject2 = "";
                     return;
                 }
