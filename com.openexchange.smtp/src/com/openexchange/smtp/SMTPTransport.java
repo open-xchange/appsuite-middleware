@@ -50,6 +50,7 @@
 package com.openexchange.smtp;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
@@ -65,13 +66,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
-import javax.mail.Part;
 import javax.mail.Transport;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
@@ -89,7 +88,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -697,20 +695,7 @@ public final class SMTPTransport extends MailTransport {
 
     private void saveChangesSafe(final SMTPMessage smtpMessage) throws OXException {
         try {
-            try {
-                smtpMessage.saveChanges();
-            } catch (final javax.mail.internet.ParseException e) {
-                /*-
-                 * Probably parsing of a Content-Type header failed.
-                 *
-                 * Try to sanitize parameter list headers
-                 */
-                sanitizeContentTypeHeaders(smtpMessage, new ContentType());
-                /*
-                 * ... and retry
-                 */
-                smtpMessage.saveChanges();
-            }
+            saveChanges(smtpMessage);
             /*
              * Change Message-Id header appropriately
              */
@@ -763,60 +748,6 @@ public final class SMTPTransport extends MailTransport {
             LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
         }
         return staticHostName;
-    }
-
-    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
-        final DataHandler dh;
-        try {
-            dh = part.getDataHandler();
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
-        if (dh == null) {
-            return;
-        }
-        try {
-            final String type = dh.getContentType();
-            sanitizer.setContentType(type);
-            try {
-                /*
-                 * Try to parse with JavaMail Content-Type implementation
-                 */
-                new javax.mail.internet.ContentType(type);
-            } catch (final javax.mail.internet.ParseException e) {
-                /*
-                 * Sanitize Content-Type header
-                 */
-                final String cts = sanitizer.toString(true);
-                try {
-                    new javax.mail.internet.ContentType(cts);
-                } catch (final javax.mail.internet.ParseException pe) {
-                    /*
-                     * Still not parseable
-                     */
-                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, type);
-                }
-                part.setDataHandler(new DataHandlerWrapper(dh, cts));
-                part.setHeader("Content-Type", cts);
-            }
-            /*
-             * Check for recursive invocation
-             */
-            if (sanitizer.startsWith("multipart/")) {
-                final Object o = dh.getContent();
-                if (o instanceof MimeMultipart) {
-                    final MimeMultipart mm = (MimeMultipart) o;
-                    final int count = mm.getCount();
-                    for (int i = 0; i < count; i++) {
-                        sanitizeContentTypeHeaders(mm.getBodyPart(i), sanitizer);
-                    }
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
     }
 
 }
