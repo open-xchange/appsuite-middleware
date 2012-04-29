@@ -50,8 +50,11 @@
 package com.openexchange.imap.threadsort;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +139,65 @@ public final class ThreadSortUtil {
             final List<ThreadSortNode> childs = threadSortNode.getChilds();
             if (null != childs) {
                 recThreadResponse(childs, list);
+            }
+        }
+    }
+
+    /**
+     * Extracts sequence numbers from specified thread list
+     * 
+     * @param threadList The thread list
+     * @return The extracted sequence numbers
+     */
+    public static TIntList extractSeqNumsAsList(final List<ThreadSortNode> threadList) {
+        if (null == threadList || threadList.isEmpty()) {
+            return new TIntArrayList(0);
+        }
+        final int initialCapacity = threadList.size() << 1;
+        final TIntList l = new TIntArrayList(initialCapacity);
+        recSeqNumsAsList(threadList, l, initialCapacity);
+        return l;
+    }
+
+    private static void recSeqNumsAsList(final List<ThreadSortNode> threadList, final TIntList l, final int initialCapacity) {
+        for (final ThreadSortNode threadSortNode : threadList) {
+            l.add(threadSortNode.msgId.getMessageNumber());
+            final List<ThreadSortNode> childs = threadSortNode.getChilds();
+            if (null != childs) {
+                recSeqNumsAsList(childs, l, initialCapacity);
+            }
+        }
+    }
+
+    /**
+     * Extracts sequence numbers from specified thread list
+     * 
+     * @param threadList The thread list
+     * @return The extracted sequence numbers
+     */
+    public static Map<String, TIntList> extractSeqNumsAsMap(final List<ThreadSortNode> threadList) {
+        if (null == threadList || threadList.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final int initialCapacity = threadList.size() << 1;
+        final Map<String, TIntList> m = new HashMap<String, TIntList>(initialCapacity);
+        recSeqNumsAsMap(threadList, m, initialCapacity);
+        return m;
+    }
+
+    private static void recSeqNumsAsMap(final List<ThreadSortNode> threadList, final Map<String, TIntList> m, final int initialCapacity) {
+        for (final ThreadSortNode threadSortNode : threadList) {
+            final MessageId messageId = threadSortNode.msgId;
+            final String fn = messageId.getFullName();
+            TIntList list = m.get(fn);
+            if (null == list) {
+                list = new TIntArrayList(initialCapacity);
+                m.put(fn, list);
+            }
+            list.add(messageId.getMessageNumber());
+            final List<ThreadSortNode> childs = threadSortNode.getChilds();
+            if (null != childs) {
+                recSeqNumsAsMap(childs, m, initialCapacity);
             }
         }
     }
