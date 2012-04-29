@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.threadsort;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -231,9 +232,11 @@ public final class ThreadSortUtil {
                 final Response[] r;
                 {
                     final String commandStart = "THREAD REFERENCES UTF-8 ";
+                    final long start = System.currentTimeMillis();
                     r = p.command(
                         new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString(),
                         null);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 }
                 final Response response = r[r.length - 1];
                 String retval = null;

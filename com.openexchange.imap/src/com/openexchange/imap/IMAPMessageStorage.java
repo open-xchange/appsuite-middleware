@@ -1001,9 +1001,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             List<ThreadSortNode> threadList = null;
             if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
-                final long start = System.currentTimeMillis();
                 final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */

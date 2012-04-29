@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.thread;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.set.TIntSet;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -70,6 +71,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.threadsort.MessageId;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.BadCommandException;
@@ -90,6 +92,11 @@ import com.sun.mail.imap.protocol.RFC822DATA;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Threadable {
+
+    /**
+     * The logger constant.
+     */
+    static final org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
 
     Threadable next;
 
@@ -583,6 +590,9 @@ public final class Threadable {
                 cur = cur.next;
             }
         }
+        if (list.isEmpty()) {
+            return t;
+        }
         // Filter
         for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
             final Threadable cur = iterator.next();
@@ -639,18 +649,26 @@ public final class Threadable {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final StringBuilder command;
+                final String command;
                 final Response[] r;
                 {
-                    command = new StringBuilder(128).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
                     final boolean rev1 = protocol.isREV1();
                     if (rev1) {
-                        command.append("BODY.PEEK[HEADER.FIELDS (Subject Message-Id Reference In-Reply-To)]");
+                        sb.append("BODY.PEEK[HEADER.FIELDS (Subject Message-Id Reference In-Reply-To)]");
                     } else {
-                        command.append("RFC822.HEADER.LINES (Subject Message-Id Reference In-Reply-To)");
+                        sb.append("RFC822.HEADER.LINES (Subject Message-Id Reference In-Reply-To)");
                     }
-                    command.append(')');
-                    r = protocol.command(command.toString(), null);
+                    sb.append(')');
+                    command = sb.toString();
+                    sb = null;
+                    final long start = System.currentTimeMillis();
+                    r = protocol.command(command, null);
+                    final long dur = System.currentTimeMillis() - start;
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" took " + dur + "msec.");
+                    }
+                    mailInterfaceMonitor.addUseTime(dur);
                 }
                 final int len = r.length - 1;
                 final Response response = r[len];
