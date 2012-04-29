@@ -74,7 +74,7 @@ public class PropertiesAppendingLogWrapper implements Log {
      * 
      * @param delegate The delegate logger
      */
-    public PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
+    protected PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
         this.delegate = delegate;
     }
 
