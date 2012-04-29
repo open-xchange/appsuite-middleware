@@ -51,19 +51,12 @@ package com.openexchange.log.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
-import com.openexchange.log.LogPropertyName.LogLevel;
 import com.openexchange.log.Loggable;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -286,7 +279,5 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         return sb.toString();
     }
-    
-   
 
 }
