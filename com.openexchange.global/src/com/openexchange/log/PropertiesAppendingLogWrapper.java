@@ -61,158 +61,167 @@ import com.openexchange.log.LogPropertyName.LogLevel;
 
 /**
  * {@link PropertiesAppendingLogWrapper}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PropertiesAppendingLogWrapper implements Log {
 
-	private final org.apache.commons.logging.Log delegate;
+    private final org.apache.commons.logging.Log delegate;
 
-	public PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
-		this.delegate = delegate;
-	}
+    /**
+     * Initializes a new {@link PropertiesAppendingLogWrapper}.
+     * 
+     * @param delegate The delegate logger
+     */
+    public PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
+        this.delegate = delegate;
+    }
 
-	@Override
-    public void debug(final Object arg0, final Throwable arg1) {
-		delegate.debug(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.DEBUG), arg1);
-	}
+    @Override
+    public void debug(final Object message, final Throwable t) {
+        delegate.debug(appendProperties(message == null ? null : message.toString(), LogLevel.DEBUG), t);
+    }
 
-	@Override
-    public void debug(final Object arg0) {
-		delegate.debug(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.DEBUG));
-	}
+    @Override
+    public void debug(final Object message) {
+        delegate.debug(appendProperties(message == null ? null : message.toString(), LogLevel.DEBUG));
+    }
 
-	@Override
-    public void error(final Object arg0, final Throwable arg1) {
-		delegate.error(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.ERROR), arg1);
-	}
+    @Override
+    public void error(final Object message, final Throwable t) {
+        delegate.error(appendProperties(message == null ? null : message.toString(), LogLevel.ERROR), t);
+    }
 
-	@Override
-    public void error(final Object arg0) {
-		delegate.error(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.ERROR));
-	}
+    @Override
+    public void error(final Object message) {
+        delegate.error(appendProperties(message == null ? null : message.toString(), LogLevel.ERROR));
+    }
 
-	@Override
-    public void fatal(final Object arg0, final Throwable arg1) {
-		delegate.fatal(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.FATAL), arg1);
-	}
+    @Override
+    public void fatal(final Object message, final Throwable t) {
+        delegate.fatal(appendProperties(message == null ? null : message.toString(), LogLevel.FATAL), t);
+    }
 
-	@Override
-    public void fatal(final Object arg0) {
-		delegate.fatal(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.FATAL));
-	}
+    @Override
+    public void fatal(final Object message) {
+        delegate.fatal(appendProperties(message == null ? null : message.toString(), LogLevel.FATAL));
+    }
 
-	@Override
-    public void info(final Object arg0, final Throwable arg1) {
-		delegate.info(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.INFO), arg1);
-	}
+    @Override
+    public void info(final Object message, final Throwable t) {
+        delegate.info(appendProperties(message == null ? null : message.toString(), LogLevel.INFO), t);
+    }
 
-	@Override
-    public void info(final Object arg0) {
-		delegate.info(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.INFO));
-	}
-	
-	@Override
-    public void trace(final Object arg0, final Throwable arg1) {
-		delegate.trace(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.TRACE), arg1);
-	}
+    @Override
+    public void info(final Object message) {
+        delegate.info(appendProperties(message == null ? null : message.toString(), LogLevel.INFO));
+    }
 
-	@Override
-    public void trace(final Object arg0) {
-		delegate.trace(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.TRACE));
-	}
+    @Override
+    public void trace(final Object message, final Throwable t) {
+        delegate.trace(appendProperties(message == null ? null : message.toString(), LogLevel.TRACE), t);
+    }
 
-	@Override
-    public void warn(final Object arg0, final Throwable arg1) {
-		delegate.warn(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.WARNING), arg1);
-	}
+    @Override
+    public void trace(final Object message) {
+        delegate.trace(appendProperties(message == null ? null : message.toString(), LogLevel.TRACE));
+    }
 
-	@Override
-    public void warn(final Object arg0) {
-		delegate.warn(appendProperties(arg0 == null ? null : arg0.toString(), LogLevel.WARNING));
-	}
+    @Override
+    public void warn(final Object message, final Throwable t) {
+        delegate.warn(appendProperties(message == null ? null : message.toString(), LogLevel.WARNING), t);
+    }
 
-	@Override
+    @Override
+    public void warn(final Object message) {
+        delegate.warn(appendProperties(message == null ? null : message.toString(), LogLevel.WARNING));
+    }
+
+    @Override
     public boolean isDebugEnabled() {
-		return delegate.isDebugEnabled();
-	}
+        return delegate.isDebugEnabled();
+    }
 
-	@Override
+    @Override
     public boolean isErrorEnabled() {
-		return delegate.isErrorEnabled();
-	}
+        return delegate.isErrorEnabled();
+    }
 
-	@Override
+    @Override
     public boolean isFatalEnabled() {
-		return delegate.isFatalEnabled();
-	}
+        return delegate.isFatalEnabled();
+    }
 
-	@Override
+    @Override
     public boolean isInfoEnabled() {
-		return delegate.isInfoEnabled();
-	}
+        return delegate.isInfoEnabled();
+    }
 
-	@Override
+    @Override
     public boolean isTraceEnabled() {
-		return delegate.isTraceEnabled();
-	}
+        return delegate.isTraceEnabled();
+    }
 
-	@Override
+    @Override
     public boolean isWarnEnabled() {
-		return delegate.isWarnEnabled();
-	}
+        return delegate.isWarnEnabled();
+    }
 
-	
-	public String appendProperties(final String message,
-			final LogLevel logLevel) {
-		if (!LogProperties.isEnabled()) {
-			return message;
-		}
-		final Props logProps = LogProperties.optLogProperties();
-		if (logProps == null) {
-			return message;
-		}
-		final StringBuilder sb = new StringBuilder(message);
-		final Map<String, Object> properties = logProps.getMap();
-		if (properties == null) {
-			return message;
-		}
-		if (null != properties) {
-			final Map<String, String> sorted = new TreeMap<String, String>();
-			final List<LogPropertyName> names = LogProperties
-					.getPropertyNames();
-			final Set<String> alreadyLogged;
-			if (names.isEmpty()) {
-				alreadyLogged = Collections.emptySet();
-			} else {
-				alreadyLogged = new HashSet<String>(names.size());
-				for (final LogPropertyName name : names) {
-					if (name.implies(logLevel)) {
-						final String propertyName = name.getPropertyName();
-						alreadyLogged.add(propertyName);
-						final Object value = properties.get(propertyName);
-						if (null != value) {
-							sorted.put(propertyName, value.toString());
-						}
-					}
-				}
-			}
-			for (final Entry<String, Object> entry : properties.entrySet()) {
-				final String propertyName = entry.getKey();
-				if (!alreadyLogged.contains(propertyName)) {
-					final Object value = entry.getValue();
-					if (value instanceof ForceLog) {
-						sorted.put(propertyName, value.toString());
-					}
-				}
-			}
-			for (final Entry<String, String> entry : sorted.entrySet()) {
-				sb.append('\n').append(entry.getKey()).append('=')
-						.append(entry.getValue());
-			}
-		}
-		return sb.toString();
-	}
+    /**
+     * Append properties to specified message (if available).
+     * 
+     * @param message The message to append to
+     * @param logLevel The log level
+     * @return The message with properties appended
+     */
+    public String appendProperties(final String message, final LogLevel logLevel) {
+        if (!LogProperties.isEnabled()) {
+            return message;
+        }
+        final Props logProps = LogProperties.optLogProperties();
+        if (logProps == null) {
+            return message;
+        }
+        final StringBuilder sb = new StringBuilder(message == null ? "null" : message);
+        final Map<String, Object> properties = logProps.getMap();
+        if (properties == null) {
+            return message;
+        }
+        /*
+         * Properties available
+         */
+        final Map<String, String> sorted = new TreeMap<String, String>();
+        final List<LogPropertyName> names = LogProperties.getPropertyNames();
+        final Set<String> alreadyLogged;
+        if (names.isEmpty()) {
+            alreadyLogged = Collections.emptySet();
+        } else {
+            alreadyLogged = new HashSet<String>(names.size());
+            for (final LogPropertyName name : names) {
+                if (name.implies(logLevel)) {
+                    final String propertyName = name.getPropertyName();
+                    alreadyLogged.add(propertyName);
+                    final Object value = properties.get(propertyName);
+                    if (null != value) {
+                        sorted.put(propertyName, value.toString());
+                    }
+                }
+            }
+        }
+        for (final Entry<String, Object> entry : properties.entrySet()) {
+            final String propertyName = entry.getKey();
+            if (!alreadyLogged.contains(propertyName)) {
+                final Object value = entry.getValue();
+                if (value instanceof ForceLog) {
+                    sorted.put(propertyName, value.toString());
+                }
+            }
+        }
+        for (final Entry<String, String> entry : sorted.entrySet()) {
+            sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+        }
+        return sb.toString();
+    }
 
 }
