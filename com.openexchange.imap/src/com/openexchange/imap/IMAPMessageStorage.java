@@ -1083,7 +1083,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     // Sort them by thread reference
                     threadable = new Threader().thread(threadable);
                     threadable = Threadable.filterFullName(sentFullName, threadable);
-                    // final String threadResp = Threadable.toThreadReferences(threadable, null);
                     threadList = Threadable.toNodeList(threadable);
                     ThreadSortNode.filterFullName(sentFullName, threadList);
                     if (logIt) {
@@ -1092,7 +1091,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } else {
                     final Threadable threadable = getThreadableFor(imapFolder, true);
-                    // final String threadResp = Threadable.toThreadReferences(threadable, null);
                     threadList = Threadable.toNodeList(threadable);
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
