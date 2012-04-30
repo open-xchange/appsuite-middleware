@@ -31,5 +31,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-unifiedmail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-indexing"/>
 </provider>
 </psf>
