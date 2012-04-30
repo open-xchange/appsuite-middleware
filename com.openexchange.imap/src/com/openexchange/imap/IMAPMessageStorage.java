@@ -79,6 +79,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
@@ -160,6 +162,8 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.sun.mail.iap.BadCommandException;
@@ -1000,7 +1004,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The <tt>Threadable</tt> either from cache or newly generated
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
-    private Threadable getThreadableFor(final IMAPFolder f, final boolean sorted) throws MessagingException {
+    protected Threadable getThreadableFor(final IMAPFolder f, final boolean sorted) throws MessagingException {
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(f.getFullName(), accountId, session);
         synchronized (entry) {
             final boolean logIt = INFO; // TODO: Switch to DEBUG
@@ -1063,8 +1067,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final boolean logIt = INFO; // TODO: Switch to DEBUG
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 if (mergeWithSent) {
+                    final Future<Threadable> future;
+                    {
+                        final IMAPFolder sent = sentFolder;
+                        future = ThreadPools.getThreadPool().submit(new AbstractTask<Threadable>() {
+    
+                            @Override
+                            public Threadable call() throws Exception {
+                                return getThreadableFor(sent, false);
+                            }
+                        });
+                    }
                     Threadable threadable = getThreadableFor(imapFolder, false);
-                    Threadable.append(threadable, getThreadableFor(sentFolder, false));
+                    Threadable.append(threadable, getFrom(future));
                     // Sort them by thread reference
                     threadable = new Threader().thread(threadable);
                     threadable = Threadable.filterFullName(sentFullName, threadable);
@@ -3020,6 +3035,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return true;
         }
         return fullName.charAt(length) == separator;
+    }
+
+    private static <T> T getFrom(final Future<T> f) throws OXException {
+        if (null == f) {
+            return null;
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt(); // Keep interrupted state
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        }
+        
     }
 
     private static void closeSafe(final IMAPFolder sentFolder) {
