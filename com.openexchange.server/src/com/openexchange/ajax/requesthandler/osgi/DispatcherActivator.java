@@ -167,7 +167,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
-
+        registerSessionServlet("/ajax", servlet);
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
             @Override
@@ -176,7 +176,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
                     servlets.add(module);
-                    registerSessionServlet("/ajax/" + module, servlet);
+                    //registerSessionServlet("/ajax/" + module, servlet);
                 }
             }
 
@@ -184,7 +184,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void removed(ServiceReference<AJAXActionServiceFactory> ref, AJAXActionServiceFactory service) {
                 String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
-                    unregisterServlet("/ajax/" + module);
+                    //unregisterServlet("/ajax/" + module);
                     servlets.remove(module);
                 }
             }
@@ -216,6 +216,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         DispatcherServlet.setPrefix(null);
+        unregisterServlet("/ajax");
         Multiple.setDispatcher(null);
     }
 

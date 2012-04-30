@@ -61,8 +61,8 @@ import com.openexchange.publish.json.types.EntityMap;
 
 public class ServletActivator extends AbstractSessionServletActivator {
 
-    private static final String TARGET_ALIAS = "ajax/publicationTargets";
-    private static final String PUB_ALIAS = "ajax/publications";
+    private static final String TARGET_ALIAS = "/ajax/publicationTargets";
+    private static final String PUB_ALIAS = "/ajax/publications";
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
