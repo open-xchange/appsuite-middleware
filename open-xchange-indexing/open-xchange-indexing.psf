@@ -13,6 +13,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.langdetect"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.indexing.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.solr"/>
