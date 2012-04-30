@@ -395,6 +395,21 @@ public interface ContactService {
      */
     SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
     
+	/**
+     * Gets all user contacts with specified fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
     /**
      * Gets the value of the <code>ContactField.COMPANY</code> field from the
      * contact representing the current context's mail admin.
@@ -404,4 +419,16 @@ public interface ContactService {
      * @throws OXException
      */
     String getOrganization(Session session) throws OXException;
+
+    /**
+     * Searches for users.
+     * 
+     * @param session the session
+     * @param term the search term
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the user contacts found with the search
+     * @throws OXException
+     */
+	<O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
 }

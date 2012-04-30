@@ -9,5 +9,5 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-log4j
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-osgi (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@)
 Description: log4j library bundle and xml configuration file

@@ -116,7 +116,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class JSONMessageHandler implements MailMessageHandler {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JSONMessageHandler.class));
 
     private static final String VIRTUAL = "___VIRTUAL___";
 
@@ -179,6 +179,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private final int ttlMillis;
 
+    private final boolean embedded;
+
     private boolean attachHTMLAlternativePart;
 
     /**
@@ -192,8 +194,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
      *            it is ignored.
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
+    public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
+        this.embedded = embedded;
         attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.accountId = accountId;
         modified = new boolean[1];
@@ -221,8 +224,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
      * @param ttlMillis The tokens' timeout
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, session, usm, getContext(session), token, ttlMillis);
+    public JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
+        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -235,8 +238,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JSONMessageHandler} for internal usage
      */
-    private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
+    private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
+        this.embedded = embedded;
         attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
         this.token = token;
@@ -751,7 +755,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 mailPath,
                 usm,
                 modified,
-                displayMode);
+                displayMode,
+                embedded);
         }
         // Causes SWING library being loaded...
         // else if (baseType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
@@ -826,6 +831,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
             asRawContent(plainText.id, plainText.contentType, plainText.content);
         }
         try {
+            final String headersKey = MailJSONField.HEADERS.getKey();
+            if (!jsonObject.hasAndNotNull(headersKey)) {
+                jsonObject.put(headersKey, new JSONObject());
+            }
             final String attachKey = MailJSONField.ATTACHMENTS.getKey();
             final String dispKey = MailJSONField.DISPOSITION.getKey();
             if (jsonObject.hasAndNotNull(attachKey)) {
@@ -910,7 +919,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 return true;
             }
             final JSONMessageHandler msgHandler =
-                new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
+                new JSONMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis);
             msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
             msgHandler.tokenFolder = tokenFolder;
             msgHandler.tokenMailId = tokenMailId;
@@ -1179,7 +1188,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
-            final String content = HTMLProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm, modified, displayMode);
+            final String content = HTMLProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm, modified, displayMode, embedded);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);

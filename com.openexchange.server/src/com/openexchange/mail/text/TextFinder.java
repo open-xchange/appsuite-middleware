@@ -92,7 +92,7 @@ import com.openexchange.tools.tnef.TNEF2ICal;
 public final class TextFinder {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TextFinder.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TextFinder.class));
 
     private boolean textIsHtml = false;
 

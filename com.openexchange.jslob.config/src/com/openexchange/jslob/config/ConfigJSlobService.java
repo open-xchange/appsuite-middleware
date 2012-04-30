@@ -49,19 +49,21 @@
 
 package com.openexchange.jslob.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
+import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -74,6 +76,7 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -149,7 +152,21 @@ public final class ConfigJSlobService implements JSlobService {
 
     @Override
     public Collection<JSlob> get(final int userId, final int contextId) throws OXException {
-        return getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
+        final Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
+        final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
+        for (final JSlob jSlob : list) {
+            ret.add(get(jSlob.getId().getId(), userId, contextId));
+        }
+        final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+        for (final Entry<String,Map<String,AttributedProperty>> entry : preferenceItems.entrySet()) {
+            final JSlob jSlob = new JSlob(new JSONObject());
+            jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
+            for (final Entry<String,AttributedProperty> entry2 : entry.getValue().entrySet()) {
+                add2JSlob(entry2.getValue(), jSlob, view);
+            }
+            ret.add(jSlob);
+        }
+        return ret;
     }
 
     @Override
@@ -247,9 +264,10 @@ public final class ConfigJSlobService implements JSlobService {
             final List<JSONPathElement> path = jsonUpdate.getPath();
             if (path.isEmpty()) {
                 /*
-                 * Update whole object
+                 * Merge whole object
                  */
-                set(id, jsonJSlob.setJsonObject((JSONObject) jsonUpdate.getValue()), user, context);
+                final JSONObject merged = JSONUtil.merge(storageObject, (JSONObject) jsonUpdate.getValue());
+                set(id, jsonJSlob.setJsonObject(merged), user, context);
                 return;
             }
             /*

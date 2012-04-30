@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class GetUpdatesAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetUpdatesAction.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetUpdatesAction.class));
 
     /**
      * Initializes a new {@link GetUpdatesAction}.

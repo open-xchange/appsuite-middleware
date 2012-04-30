@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class SolrUtils {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SolrUtils.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(SolrUtils.class);
     
     private static final Locale DEFAULT_LOCALE = LanguageDetectionService.DEFAULT_LOCALE;
 

@@ -17,4 +17,3 @@ Import-Package: com.openexchange.admin.plugins,
 Require-Bundle: com.openexchange.server,
  com.openexchange.admin,
  com.openexchange.admin.plugin.hosting
-

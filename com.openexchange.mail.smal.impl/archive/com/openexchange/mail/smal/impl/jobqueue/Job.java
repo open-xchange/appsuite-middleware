@@ -52,7 +52,7 @@ package com.openexchange.mail.smal.impl.jobqueue;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.Log;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;

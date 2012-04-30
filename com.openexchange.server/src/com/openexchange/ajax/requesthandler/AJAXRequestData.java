@@ -132,6 +132,8 @@ public class AJAXRequestData {
 
     private long expires;
 
+    private String pathInfo;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -220,8 +222,32 @@ public class AJAXRequestData {
     }
 
     /**
+     * Returns any extra path information associated with the URL the client sent when it made this request. The extra path information
+     * follows the servlet path but precedes the query string and will start with a "/" character.
+     * <p>
+     * This method returns <code>null</code> if there was no extra path information.
+     * <p>
+     * Same as the value of the CGI variable PATH_INFO.
+     * 
+     * @return a <code>String</code>, decoded by the web container, specifying extra path information that comes after the servlet path but
+     *         before the query string in the request URL; or <code>null</code> if the URL does not have any extra path information
+     */
+    public String getPathInfo() {
+        return pathInfo;
+    }
+
+    /**
+     * Sets the extra path information.
+     * 
+     * @param pathInfo The extra path information to set
+     */
+    public void setPathInfo(final String pathInfo) {
+        this.pathInfo = pathInfo;
+    }
+
+    /**
      * Sets the URI part after path to the Servlet.
-     *
+     * 
      * @param servletRequestUri The URI part
      */
     public void setServletRequestURI(final String servletRequestUri) {

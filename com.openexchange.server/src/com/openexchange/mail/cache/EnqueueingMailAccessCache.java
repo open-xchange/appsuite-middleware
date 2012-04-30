@@ -84,7 +84,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     /**
      * The logger instance.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(EnqueueingMailAccessCache.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EnqueueingMailAccessCache.class));
 
     /**
      * The flag whether debug logging is enabled.

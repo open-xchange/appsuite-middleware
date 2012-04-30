@@ -79,7 +79,7 @@ import com.openexchange.user.json.field.UserField;
  */
 public final class UserWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserWriter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserWriter.class));
 
     private static final boolean WARN = LOG.isWarnEnabled();
 

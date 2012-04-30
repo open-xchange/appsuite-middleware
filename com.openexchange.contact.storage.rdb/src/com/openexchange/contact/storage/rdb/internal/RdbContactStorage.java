@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
@@ -197,7 +197,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         	committed = true;
         } catch (final DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.truncation(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -250,7 +250,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             final Contact contact = new Contact();
             contact.setLastModified(new Date());
             contact.setModifiedBy(userID);
-            executor.update(connection, Table.CONTACTS, contextID, objectID, minLastModified, contact, new ContactField[] { 
+            executor.update(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified, contact, new ContactField[] { 
             		ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
             /*
              * commit
@@ -289,6 +289,20 @@ public class RdbContactStorage extends DefaultContactStorage {
             contact.setLastModified(now);
             final QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
             /*
+             * insert copied record to 'deleted' table when parent folder changes
+             */
+            if (contact.containsParentFolderID() && false == Integer.toString(contact.getParentFolderID()).equals(folderId)) {
+	            executor.delete(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified);
+	            if (0 == executor.insertFrom(connection, Table.CONTACTS, Table.DELETED_CONTACTS, contextID, objectID, minLastModified)) {
+	                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
+	            }
+	            final Contact deletedContact = new Contact();
+	            deletedContact.setLastModified(now);
+	            deletedContact.setModifiedBy(contact.getModifiedBy());
+	            executor.update(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified, deletedContact, new ContactField[] { 
+	            		ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
+            }
+            /*
              * update image data if needed
              */
             if (queryFields.hasImageData()) {
@@ -296,13 +310,13 @@ public class RdbContactStorage extends DefaultContactStorage {
                 queryFields.update(Mappers.CONTACT.getAssignedFields(contact));
                 if (null == contact.getImage1()) {
                     // delete previous image if exists
-                    executor.delete(connection, Table.IMAGES, contextID, objectID, now.getTime());
+                    executor.delete(connection, Table.IMAGES, contextID, objectID, minLastModified);
                 } else {
                     if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { 
                     		ContactField.OBJECT_ID })) {
                         // update previous image
-                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, now.getTime(), contact, 
-                        		queryFields.getImageDataFields())) {
+                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, minLastModified, contact, 
+                        		queryFields.getImageDataFields(true))) {
                         	throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
                         }
                     } else {
@@ -345,7 +359,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         	committed = true;
         } catch (final DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.truncation(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
         } finally {

@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class UpdatesAction extends AbstractAttachmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdatesAction.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
 
     /**
      * Initializes a new {@link UpdatesAction}.

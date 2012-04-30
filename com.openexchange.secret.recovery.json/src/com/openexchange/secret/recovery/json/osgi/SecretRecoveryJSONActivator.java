@@ -50,7 +50,7 @@
 package com.openexchange.secret.recovery.json.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.secret.SecretService;

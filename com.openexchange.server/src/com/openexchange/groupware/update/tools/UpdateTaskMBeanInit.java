@@ -61,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public final class UpdateTaskMBeanInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateTaskMBeanInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateTaskMBeanInit.class));
 
     private final ManagementService managementService;
 

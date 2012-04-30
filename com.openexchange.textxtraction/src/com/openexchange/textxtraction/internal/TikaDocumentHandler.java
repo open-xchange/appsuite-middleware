@@ -91,7 +91,7 @@ import com.openexchange.java.Streams;
 public final class TikaDocumentHandler {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaDocumentHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TikaDocumentHandler.class));
 
     protected final Detector detector;
 

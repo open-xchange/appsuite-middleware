@@ -57,7 +57,7 @@ import java.util.Set;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;

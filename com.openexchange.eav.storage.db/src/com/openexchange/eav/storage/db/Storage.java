@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.eav.EAVContainerType;
 import com.openexchange.eav.EAVException;
 import com.openexchange.eav.EAVNode;

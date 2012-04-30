@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.config.ConfigurationService;

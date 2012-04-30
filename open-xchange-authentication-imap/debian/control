@@ -8,7 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-authentication-imap
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-ldap
 Provides: open-xchange-authentication
 Description: The Open-Xchange IMAP authentication

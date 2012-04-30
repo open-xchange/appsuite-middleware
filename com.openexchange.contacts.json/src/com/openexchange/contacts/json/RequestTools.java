@@ -55,7 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,6 +82,9 @@ public class RequestTools {
 
     public static int[] getColumnsAsIntArray(final AJAXRequestData request, final String parameter) throws OXException {
         final String valueStr = request.getParameter("columns");
+        if (null == valueStr) {
+        	return null;
+        }
         if (valueStr.equals("all")) {
             return ContactAction.COLUMNS_ALIAS_ALL;
         }

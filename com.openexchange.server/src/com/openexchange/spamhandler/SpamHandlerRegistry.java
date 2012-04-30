@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public final class SpamHandlerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpamHandlerRegistry.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamHandlerRegistry.class));
 
     /**
      * Dummy value to associate with an Object in the backing Map.

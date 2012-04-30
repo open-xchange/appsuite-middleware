@@ -65,19 +65,24 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
@@ -85,6 +90,7 @@ import com.openexchange.user.json.writer.UserWriter;
  * {@link ListAction} - Maps the action to a <tt>list</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of users.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -114,6 +120,112 @@ public final class ListAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        int[] userIDs = parseUserIDs(request, session.getUserId());
+        int[] columnIDs = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        /*
+         * Get users/contacts
+         */
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        final List<Contact> contacts = new ArrayList<Contact>();
+        SearchIterator<Contact> searchIterator = null;
+        try {
+        	searchIterator = contactService.getUsers(session, userIDs, 
+            		ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
+            while (searchIterator.hasNext()) {
+                contacts.add(searchIterator.next());
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+        }
+        /*
+         * Map user to contact information
+         */
+        Date lastModified = new Date(0);
+        User[] users = getUsers(session, userIDs);
+        List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
+        for (User user : users) {
+        	for (Contact contact : contacts) {
+        		if (user.getId() == contact.getInternalUserId()) {
+        			userContacts.add(new UserContact(contact, user));
+                	if (contact.getLastModified().after(lastModified)) {
+                		lastModified = contact.getLastModified();
+                	}
+        			break;
+        		}
+			}
+		}
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(userContacts, lastModified, "usercontact");
+    }
+
+	private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
+	    final JSONArray jsonArray = (JSONArray)request.getData();
+	    if (null == jsonArray) {
+	        throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
+	    }
+	    final int length = jsonArray.length();
+	    final int[] userIDs = new int[length];
+    	try {
+		    for (int i = 0; i < length; i++) {
+					userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
+		    }
+		} catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+		}
+		return userIDs;
+	}
+
+	private User[] getUsers(final ServerSession session, final int[] userIDs) throws OXException {
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+		try {
+		    return userService.getUser(session.getContext(), userIDs);
+		} catch (final OXException e) {
+		    if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+		        throw e;
+		    }
+		    final Context context = session.getContext();
+		    {
+		        final Object[] excArgs = e.getLogArgs();
+		        if (excArgs != null && excArgs.length >= 2) {
+		            try {
+		                userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
+		            } catch (final Exception ignore) {
+		                // Ignore
+		            }
+		        } else {
+		            for (final int userId : userIDs) {
+		                try {
+		                    userService.invalidateUser(context, userId);
+		                } catch (final Exception ignore) {
+		                    // Ignore
+		                }
+		            }
+		        }
+		    }
+		    // Load one-by-one
+		    final int length = userIDs.length;
+		    final List<User> list = new ArrayList<User>(length);
+		    for (int i = 0; i < length; i++) {
+		        try {
+		            list.add(userService.getUser(userIDs[i], context));
+		        } catch (final OXException ue) {
+		            if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
+		                throw ue;
+		            }
+		        }
+		    }
+		    return list.toArray(new User[list.size()]);
+		}
+	}
+
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters

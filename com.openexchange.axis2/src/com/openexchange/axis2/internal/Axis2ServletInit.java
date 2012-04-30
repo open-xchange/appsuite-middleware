@@ -86,7 +86,7 @@ public class Axis2ServletInit implements Initialization {
      */
     private static final String AXIS2_REPOSITORY_PATH_PROPERTY = "axis2.repository.path";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Axis2ServletInit.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Axis2ServletInit.class);
 
     private static final Axis2ServletInit instance = new Axis2ServletInit();
 

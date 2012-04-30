@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -86,11 +88,66 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+            int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
             final String sort = req.getParameter(Mail.PARAMETER_SORT);
             final String order = req.getParameter(Mail.PARAMETER_ORDER);
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_ORDER);
+            }
+            final int[] fromToIndices;
+            {
+                final String s = req.getParameter("limit");
+                if (null == s) {
+                    final int leftHandLimit = req.optInt(Mail.LEFT_HAND_LIMIT);
+                    final int rightHandLimit = req.optInt(Mail.RIGHT_HAND_LIMIT);
+                    if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
+                        fromToIndices = null;
+                    } else {
+                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit};
+                        if (fromToIndices[0] >= fromToIndices[1]) {
+                            return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>>emptyList()), "mail");
+                        }
+                    }
+                } else {
+                    int start;
+                    int end;
+                    try {
+                        final int pos = s.indexOf(',');
+                        if (pos < 0) {
+                            start = 0;
+                            final int i = Integer.parseInt(s.trim());
+                            end = i < 0 ? 0 : i;
+                        } else {
+                            int i = Integer.parseInt(s.substring(0, pos).trim());
+                            start = i < 0 ? 0 : i;
+                            i = Integer.parseInt(s.substring(pos+1).trim());
+                            end = i < 0 ? 0 : i;
+                        }
+                    } catch (final NumberFormatException e) {
+                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
+                    }
+                    if (start >= end) {
+                        return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>>emptyList()), "mail");
+                    }
+                    fromToIndices = new int[] {start,end};
+                }
+            }
+            final boolean includeSent = req.optBool("includeSent", false);
+            final boolean unseen = req.optBool("unseen", false);
+            final boolean ignoreDeleted = !req.optBool("deleted", true);
+            if (unseen || ignoreDeleted) {
+                // Ensure flags is contained in provided columns
+                final int fieldFlags = MailListField.FLAGS.getField();
+                boolean found = false;
+                for (int i = 0; !found && i < columns.length; i++) {
+                   found = fieldFlags == columns[i];
+                }
+                if (!found) {
+                    final int[] tmp = columns;
+                    columns = new int[columns.length + 1];
+                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
+                    columns[tmp.length] = fieldFlags;
+                }
             }
             /*
              * Get mail interface
@@ -110,7 +167,48 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              * Start response
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-            final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns);
+            if (!unseen && !ignoreDeleted) {
+                final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, sortCol, orderDir, columns, fromToIndices);
+                return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+            }
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, sortCol, orderDir, columns, null);
+            boolean foundUnseen;
+            for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
+                final List<MailMessage> list = iterator.next();
+                foundUnseen = false;
+                for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext(); ) {
+                    final MailMessage message = tmp.next();
+                    if (ignoreDeleted && message.isDeleted()) {
+                        // Ignore mail marked for deletion
+                        tmp.remove();
+                    } else {
+                        // Check if unseen
+                        foundUnseen |= !message.isSeen();
+                    }
+                }
+                if (unseen && !foundUnseen) {
+                    iterator.remove();
+                }
+            }
+            if (null != fromToIndices) {
+                final int fromIndex = fromToIndices[0];
+                int toIndex = fromToIndices[1];
+                final int sz = mails.size();
+                if ((fromIndex) > sz) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    mails = Collections.emptyList();
+                } else {
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= sz) {
+                        toIndex = sz;
+                    }
+                    mails = mails.subList(fromIndex, toIndex);
+                }
+            }
             return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());

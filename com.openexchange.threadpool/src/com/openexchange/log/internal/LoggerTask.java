@@ -51,17 +51,11 @@ package com.openexchange.log.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
 import com.openexchange.threadpool.AbstractTask;
@@ -181,9 +175,9 @@ final class LoggerTask extends AbstractTask<Object> {
                         case FATAL:
                             if (log.isFatalEnabled()) {
                                 if (null == t) {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
+                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
                                 } else {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
+                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
                                 }
                             }
                             break;
@@ -226,9 +220,9 @@ final class LoggerTask extends AbstractTask<Object> {
                         case TRACE:
                             if (log.isTraceEnabled()) {
                                 if (null == t) {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
+                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
                                 } else {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
+                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
                                 }
                             }
                             break;
@@ -282,39 +276,6 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         if (null != message) {
             sb.append(message);
-        }
-        final Map<String, Object> properties = loggable.properties();
-        if (null != properties) {
-            final Map<String, String> sorted = new TreeMap<String, String>();
-            final List<LogPropertyName> names = LogProperties.getPropertyNames();
-            final Set<String> alreadyLogged;
-            if (names.isEmpty()) {
-                alreadyLogged = Collections.emptySet();
-            } else {
-                alreadyLogged = new HashSet<String>(names.size());
-                for (final LogPropertyName name : names) {
-                    if (name.implies(logLevel)) {
-                        final String propertyName = name.getPropertyName();
-                        alreadyLogged.add(propertyName);
-                        final Object value = properties.get(propertyName);
-                        if (null != value) {
-                            sorted.put(propertyName, value.toString());
-                        }
-                    }
-                }
-            }
-            for (final Entry<String, Object> entry : properties.entrySet()) {
-                final String propertyName = entry.getKey();
-                if (!alreadyLogged.contains(propertyName)) {
-                    final Object value = entry.getValue();
-                    if (value instanceof ForceLog) {
-                        sorted.put(propertyName, value.toString());
-                    }
-                }
-            }
-            for (final Entry<String, String> entry : sorted.entrySet()) {
-                sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
-            }
         }
         return sb.toString();
     }

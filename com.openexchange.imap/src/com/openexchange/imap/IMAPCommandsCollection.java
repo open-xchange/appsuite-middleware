@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
@@ -141,7 +142,7 @@ public final class IMAPCommandsCollection {
 
     private static final String STR_FETCH = "FETCH";
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPCommandsCollection.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPCommandsCollection.class));
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -1309,7 +1310,11 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
-                    r = p.command(command, null);
+                    {
+                        final long start = System.currentTimeMillis();
+                        r = p.command(command, null);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    }
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         p.notifyResponseHandlers(r);
@@ -1368,7 +1373,11 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(format, args[i], "+", colorLabelFlag);
-                    r = p.command(command, null);
+                    {
+                        final long start = System.currentTimeMillis();
+                        r = p.command(command, null);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    }
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         p.notifyResponseHandlers(r);
@@ -1603,7 +1612,12 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
+                final Response[] r;
+                {
+                    final long start = System.currentTimeMillis();
+                    r = p.command(COMMAND_SEARCH_UNSEEN, null);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                }
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */

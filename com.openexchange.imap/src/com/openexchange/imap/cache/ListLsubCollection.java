@@ -90,7 +90,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 final class ListLsubCollection {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -396,7 +396,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "STATUS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }
@@ -432,7 +432,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed ACL command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }
@@ -1182,7 +1182,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "STATUS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }
@@ -1202,7 +1202,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed ACL command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }

@@ -52,7 +52,7 @@ package com.openexchange.subscribe.crawler.commandline;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.osgi.Activator;

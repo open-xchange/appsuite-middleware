@@ -42,7 +42,7 @@ CREATE TABLE prg_date_rights (
     id INT4 NOT NULL,
     type INT4 UNSIGNED NOT NULL,
     ma VARCHAR(286),
-    dn VARCHAR(64),
+    dn VARCHAR(320),
     PRIMARY KEY (cid, object_id, id, type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -52,7 +52,7 @@ CREATE TABLE del_date_rights (
     id INT4 NOT NULL,
     type INT4 UNSIGNED NOT NULL,
     ma VARCHAR(286),
-    dn VARCHAR(64),
+    dn VARCHAR(320),
     PRIMARY KEY (cid, object_id, id, type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

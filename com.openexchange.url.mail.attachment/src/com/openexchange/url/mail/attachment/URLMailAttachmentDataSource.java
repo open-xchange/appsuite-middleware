@@ -227,7 +227,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                     stream.close();
                 }
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(URLMailAttachmentDataSource.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(URLMailAttachmentDataSource.class)).error(e.getMessage(), e);
             }
         }
     }

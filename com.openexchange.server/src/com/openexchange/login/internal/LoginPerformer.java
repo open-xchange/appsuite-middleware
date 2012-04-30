@@ -60,7 +60,7 @@ import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -262,7 +262,7 @@ public final class LoginPerformer {
             triggerLoginHandlers(retval);
             return retval;
         } catch (final RuntimeException e) {
-            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+        	throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {
             logLoginRequest(request, retval);
         }

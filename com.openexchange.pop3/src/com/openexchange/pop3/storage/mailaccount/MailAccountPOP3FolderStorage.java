@@ -93,7 +93,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountPOP3FolderStorage.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountPOP3FolderStorage.class));
 
     private final IMailFolderStorage delegatee;
 

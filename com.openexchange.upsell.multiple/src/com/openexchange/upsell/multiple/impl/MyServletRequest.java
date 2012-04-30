@@ -19,7 +19,7 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceException;

@@ -9,4 +9,7 @@ Export-Package: com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.tools.mappings.database,
  com.openexchange.groupware.tools.mappings.json
 Import-Package: com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.session,
+ org.apache.commons.logging;version="1.0.4",
  org.json

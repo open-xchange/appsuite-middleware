@@ -61,7 +61,7 @@ import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.html.internal.parser.HtmlHandler;
 
 /**
@@ -132,7 +132,7 @@ public final class JerichoParser {
             /*
              * Handle current segment
              */
-            handleSegment(handler, segment, true);
+            handleSegment(handler, segment, false);
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;

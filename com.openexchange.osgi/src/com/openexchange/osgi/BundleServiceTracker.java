@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceHolder;
 public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(BundleServiceTracker.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(BundleServiceTracker.class));
 
     protected final BundleContext context;
 

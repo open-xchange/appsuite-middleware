@@ -76,12 +76,4 @@ public abstract class IntegerMapping<O> extends DefaultJsonMapping<Integer, O> {
 		this.set(to, Integer.valueOf(intValue));
 	}
 
-	@Override
-	public void serialize(final O from, final JSONObject to) throws JSONException {
-		final Integer value = this.get(from);
-		if (null != value) {
-			to.put(getAjaxName(), value.longValue());
-        }
-	}
-
 }

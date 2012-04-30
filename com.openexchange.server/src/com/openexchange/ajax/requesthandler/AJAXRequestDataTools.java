@@ -91,7 +91,7 @@ public class AJAXRequestDataTools {
     /*-
      * ----------------------- Member stuff -----------------------
      */
-    
+
     /**
      * Initializes a new {@link AJAXRequestDataTools}.
      */
@@ -118,11 +118,12 @@ public class AJAXRequestDataTools {
          * Set the module
          */
         retval.setModule(getModule(prefix, req));
-        
+
         /*
          * Set request URI
          */
         retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
+        retval.setPathInfo(req.getPathInfo());
         retval.setAction(getAction(req));
         /*
          * Set the format
@@ -196,14 +197,45 @@ public class AJAXRequestDataTools {
         return retval;
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "on")));
-
     private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
-        final String parameter = req.getParameter(name);
+        return parseBoolParameter(req.getParameter(name));
+    }
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified request data.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     * 
+     * @param name The parameter's name
+     * @param requestData The request data to parse from
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String name, final AJAXRequestData requestData) {
+        return parseBoolParameter(requestData.getParameter(name));
+    }
+
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "true",
+        "1",
+        "yes",
+        "y",
+        "on")));
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     * 
+     * @param parameter The parameter
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String parameter) {
         if (null == parameter) {
             return false;
         }
-        return BOOL_VALS.contains(parameter.toLowerCase(Locale.ENGLISH));
+        return BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
     }
 
     /**
@@ -248,34 +280,34 @@ public class AJAXRequestDataTools {
         return startingChar == toCheck.charAt(i);
     }
 
-	/**
-	 * Gets the module from specified HTTP request.
-	 * 
-	 * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
-	 * @param req The HTTP request
-	 * @return The determined module
-	 */
-	public String getModule(final String prefix, final HttpServletRequest req) {
-		 String pathInfo = req.getRequestURI();
-         final int lastIndex = pathInfo.lastIndexOf(';');
-         if (lastIndex > 0) {
-        	 pathInfo = pathInfo.substring(0, lastIndex);
-         }
-         return pathInfo.substring(prefix.length());
-	}
+    /**
+     * Gets the module from specified HTTP request.
+     * 
+     * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
+     * @param req The HTTP request
+     * @return The determined module
+     */
+    public String getModule(final String prefix, final HttpServletRequest req) {
+        String pathInfo = req.getRequestURI();
+        final int lastIndex = pathInfo.lastIndexOf(';');
+        if (lastIndex > 0) {
+            pathInfo = pathInfo.substring(0, lastIndex);
+        }
+        return pathInfo.substring(prefix.length());
+    }
 
-	/**
-	 * Gets the action from specified HTTP request.
-	 * 
-	 * @param req The HTTP request
-	 * @return The determined action
-	 */
-	public String getAction(final HttpServletRequest req) {
-		final String action = req.getParameter("action");
-		if (null == action) {
-			return req.getMethod().toUpperCase(Locale.US);
-		}
+    /**
+     * Gets the action from specified HTTP request.
+     * 
+     * @param req The HTTP request
+     * @return The determined action
+     */
+    public String getAction(final HttpServletRequest req) {
+        final String action = req.getParameter("action");
+        if (null == action) {
+            return req.getMethod().toUpperCase(Locale.US);
+        }
         return action;
-        
-	}
+
+    }
 }

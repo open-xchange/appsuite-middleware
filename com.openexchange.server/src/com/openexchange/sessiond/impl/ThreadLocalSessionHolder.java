@@ -49,10 +49,14 @@
 
 package com.openexchange.sessiond.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
 
 
@@ -86,6 +90,15 @@ public class ThreadLocalSessionHolder implements SessionHolder {
 
     public void setSession(final ServerSession serverSession) {
         session.set(serverSession);
+        if (LogProperties.isEnabled() && serverSession != null) {
+            final Props properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.session.sessionId", serverSession.getSessionID());
+            properties.put("com.openexchange.session.userId", Integer.valueOf(serverSession.getUserId()));
+            properties.put("com.openexchange.session.contextId", Integer.valueOf(serverSession.getContextId()));
+            final String client  = serverSession.getClient();
+            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
+            properties.put("com.openexchange.session.session", session);
+        }
     }
 
     public void clear() {
@@ -94,17 +107,29 @@ public class ThreadLocalSessionHolder implements SessionHolder {
 
     @Override
     public Context getContext() {
-        return session.get().getContext();
+        return getSessionObject().getContext();
     }
 
     @Override
-    public Session getSessionObject() {
-        return session.get();
+    public ServerSession getSessionObject() {
+        ServerSession serverSession = session.get();
+        if (serverSession == null) {
+        	if (LogProperties.isEnabled()) {
+        		final Props properties = LogProperties.getLogProperties();
+        		Session session = properties.get("com.openexchange.session.session");
+        		try {
+					return ServerSessionAdapter.valueOf(session);
+				} catch (OXException e) {
+					return null;
+				}
+        	}
+        }
+        return serverSession;
     }
 
     @Override
     public User getUser() {
-        return session.get().getUser();
+        return getSessionObject().getUser();
     }
 
 }

@@ -137,7 +137,7 @@ import com.openexchange.tools.sql.DBUtils;
 public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolderStorage.class));
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 
@@ -229,6 +229,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
          */
     }
 
+    private static final int MAX = 3;
+
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
@@ -254,11 +256,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final Context context = session.getContext();
             int[] nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
+            /*
+             * Some variables
+             */
             final TIntSet shared = new TIntHashSet();
             final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
             final OXFolderAccess folderAccess = getFolderAccess(context, con);
             final int userId = session.getUserId();
             final long now = System.currentTimeMillis();
+            /*
+             * Iterate folders
+             */
+            int runCount = 0;
+            final TIntSet tmp = new TIntHashSet();
             do {
                 for (final int folderId : nonExistingParents) {
                     if (folderId >= FolderObject.MIN_FOLDER_ID) {
@@ -269,13 +279,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
-                final TIntSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(context, con));
-                tmp.removeAll(shared.toArray());
-                for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
-                    tmp.remove(i);
+                tmp.clear();
+                tmp.addAll(OXFolderSQL.getNonExistingParents(context, con));
+                if (tmp.isEmpty()) {
+                    nonExistingParents = null;
+                } else {
+                    tmp.removeAll(shared.toArray());
+                    for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
+                        tmp.remove(i);
+                    }
+                    nonExistingParents = tmp.toArray();
                 }
-                nonExistingParents = tmp.toArray();
-            } while (null != nonExistingParents && nonExistingParents.length > 0);
+            } while (++runCount <= MAX && null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
             if (null != con && close) {
                 databaseService.backWritable(contextId, con);

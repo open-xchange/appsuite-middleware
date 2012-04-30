@@ -282,7 +282,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail cancel(final NotificationParticipant recipient) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(organizer);
+        mail.setSender(recipient.isExternal() ? organizer : actor);
         initMail(mail);
         
         final ITipMessage message = new ITipMessage();
@@ -314,7 +314,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final Appointment appointmentToReport = (override != null) ? override : this.appointment;
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(organizer);
+        mail.setSender(recipient.isExternal() ? organizer : actor);
         mail.setStateType(type);
         initMail(mail);
         initAttachments(mail);
@@ -339,7 +339,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail add(final NotificationParticipant recipient) throws OXException {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(organizer);
+        mail.setSender(recipient.isExternal() ? organizer : actor);
         mail.setStateType(State.Type.NEW);
         initMail(mail);
         initAttachments(mail);

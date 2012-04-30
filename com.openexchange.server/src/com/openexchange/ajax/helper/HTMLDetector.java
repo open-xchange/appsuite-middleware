@@ -58,7 +58,7 @@ import com.openexchange.java.Charsets;
  */
 public final class HTMLDetector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLDetector.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLDetector.class));
 
     /**
      * Initializes a new {@link HTMLDetector}.

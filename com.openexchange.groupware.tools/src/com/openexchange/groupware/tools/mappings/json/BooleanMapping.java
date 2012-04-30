@@ -71,12 +71,4 @@ public abstract class BooleanMapping<O> extends DefaultJsonMapping<Boolean, O> {
 		this.set(to, Boolean.valueOf(from.getBoolean(getAjaxName())));
 	}
 
-	@Override
-	public void serialize(final O from, final JSONObject to) throws JSONException {
-		final Boolean value = this.get(from);
-		if (null != value) {
-			to.put(getAjaxName(), value.booleanValue());
-        }
-	}
-
 }

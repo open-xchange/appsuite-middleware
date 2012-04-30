@@ -67,6 +67,8 @@ public final class ByteArrayFileHolder implements IFileHolder {
 
     private String disposition;
 
+    private String delivery;
+
     /**
      * Initializes a new {@link ByteArrayFileHolder}.
      */
@@ -131,5 +133,19 @@ public final class ByteArrayFileHolder implements IFileHolder {
      */
     public void setName(final String name) {
         this.name = name;
+    }
+        
+    /**
+     * Sets the delivery
+     *
+     * @param delivery The delivery to set
+     */
+    public void setDelivery(String delivery) {
+        this.delivery = delivery;
+    }
+
+    @Override
+    public String getDelivery() {
+        return delivery;
     }
 }

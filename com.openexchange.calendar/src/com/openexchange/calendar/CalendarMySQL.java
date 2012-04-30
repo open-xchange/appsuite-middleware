@@ -74,7 +74,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -4563,9 +4563,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
                         update.setObjectID(edao.getRecurrenceID());
-                        List<Date> asList = Arrays.asList(deleted_exceptions);
-                        asList.remove(calculated_exception);
-                        update.setDeleteExceptions(asList);
+                        if (deleted_exceptions != null) {
+                            List<Date> asList = Arrays.asList(deleted_exceptions);
+                            asList.remove(calculated_exception);
+                            update.setDeleteExceptions(asList);
+                        } else {
+                            update.setDeleteExceptions((Date[]) null);
+                        }
                         update.setModifiedBy(uid);
                         try {
                             final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid, writecon);

@@ -180,6 +180,19 @@ public class AppointmentDiff {
         }
         return copy.isEmpty();
     }
+    
+    public boolean exactlyTheseChanged(String... fields) {
+        if (!onlyTheseChanged(fields)) {
+            return false;
+        }
+
+        for (String field : fields) {
+            if (!differingFieldNames.contains(field)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     
     public FieldUpdate getUpdateFor(final String field) {

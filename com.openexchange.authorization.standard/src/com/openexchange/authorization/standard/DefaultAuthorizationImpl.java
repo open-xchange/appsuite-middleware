@@ -51,7 +51,7 @@ package com.openexchange.authorization.standard;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;

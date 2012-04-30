@@ -84,7 +84,7 @@ import com.openexchange.tools.regex.RFC2616Regex;
  */
 public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ForwardRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13ForwardRequest.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -101,7 +101,7 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
         try {
             md = MessageDigest.getInstance("SHA-1");
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
             return raw;
         }
 
@@ -114,9 +114,9 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
         try {
             return Charset.forName("US-ASCII").decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
         } catch (final IllegalCharsetNameException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
         } catch (final UnsupportedCharsetException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
         }
 
         return null;

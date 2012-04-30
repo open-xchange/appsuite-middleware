@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -80,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class CreatePerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreatePerformer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreatePerformer.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
@@ -332,6 +333,7 @@ public final class CreatePerformer extends AbstractPerformer {
                             }
                             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
+                        OutlookFolderStorage.clearTCM();
                         return toCreate.getID();
                     }
                 }

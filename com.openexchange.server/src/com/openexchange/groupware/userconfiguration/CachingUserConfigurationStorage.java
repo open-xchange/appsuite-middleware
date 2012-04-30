@@ -71,7 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CachingUserConfigurationStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CachingUserConfigurationStorage.class));
 
     private static final String CACHE_REGION_NAME = "UserConfiguration";
 

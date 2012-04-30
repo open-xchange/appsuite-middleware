@@ -118,7 +118,11 @@ public final class LogProperties {
      * @see #isEnabled()
      */
     public static Props optLogProperties() {
-        return THREAD_LOCAL.get(Thread.currentThread());
+        Props props = THREAD_LOCAL.get(Thread.currentThread());
+        if (props == null) {
+        	return null;
+        }
+        return props.copy();
     }
 
     /**
@@ -167,7 +171,6 @@ public final class LogProperties {
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
-    @SuppressWarnings("unchecked")
     public static <V> V getLogProperty(final String name) {
         final Thread thread = Thread.currentThread();
         final Props props = THREAD_LOCAL.get(thread);

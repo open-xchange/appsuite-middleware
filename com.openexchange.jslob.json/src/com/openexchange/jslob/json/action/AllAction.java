@@ -50,9 +50,9 @@
 package com.openexchange.jslob.json.action;
 
 import java.util.Collection;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
@@ -82,8 +82,8 @@ public final class AllAction extends JSlobAction {
      * 
      * @param services The service look-up
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public AllAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
     }
 
     @Override

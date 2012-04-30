@@ -67,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -109,7 +110,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
@@ -131,7 +132,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageParser.class));
 
     /**
      * No instantiation
@@ -462,15 +463,19 @@ public final class MessageParser {
         }
     }
 
+    private static final Pattern PATTERN_ID_ATTRIBUTE = Pattern.compile("id=\"((?:\\\\\\\"|[^\"])+?)\"");
+
     private static Set<String> extractContentIds(final String htmlContent) {
-        final Matcher m = MimeMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
+        final ImageMatcher m = ImageMatcher.matcher(htmlContent);
         if (!m.find()) {
             return Collections.emptySet();
         }
         final Set<String> set = new HashSet<String>(4);
         do {
-            if (MimeMessageUtility.isValidImageUri(m.group())) {
-                set.add(m.group(5));
+            final String imageTag = m.group();
+            final Matcher tmp = PATTERN_ID_ATTRIBUTE.matcher(imageTag);
+            if (tmp.find()) {
+                set.add(tmp.group(1));
             }
         } while (m.find());
         return set;

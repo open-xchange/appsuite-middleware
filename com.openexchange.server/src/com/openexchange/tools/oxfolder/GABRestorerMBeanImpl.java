@@ -77,7 +77,7 @@ public final class GABRestorerMBeanImpl extends StandardMBean implements GABRest
             new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, OXFolderProperties.isEnableInternalUsersEdit());
         } catch (final OXException e) {
             final String message = e.getMessage();
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GABRestorerMBeanImpl.class)).error(message, e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GABRestorerMBeanImpl.class)).error(message, e);
             final Exception wrapMe = new Exception(message);
             wrapMe.setStackTrace(e.getStackTrace());
             throw new MBeanException(wrapMe, message);

@@ -54,7 +54,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contact.mappers.PropertyDrivenContactFieldMapper;
 import com.openexchange.groupware.importexport.Importer;

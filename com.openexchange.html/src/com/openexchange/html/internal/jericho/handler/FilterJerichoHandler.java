@@ -75,7 +75,7 @@ import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
@@ -336,7 +336,13 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 if (content.isWhiteSpace()) {
                     htmlBuilder.append(content);
                 } else {
-                    htmlBuilder.append(CharacterReference.reencode(content));
+                    /*-
+                     * Should we re-encode prior to appending?
+                     * E.g. "<" ==> "&lt;"
+                     * 
+                     * htmlBuilder.append(CharacterReference.reencode(content));
+                     */
+                    htmlBuilder.append(content);
                 }
             }
         }
@@ -612,7 +618,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class));
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLURLReplacerHandler.class));
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);

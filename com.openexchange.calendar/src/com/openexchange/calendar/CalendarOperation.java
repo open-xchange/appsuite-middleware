@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -86,11 +85,12 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -1130,7 +1130,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 setAttachmentLastModified(readcon, c, cdao);
                             }
                         } else {
-                            throw SearchIteratorException.Code.NOT_IMPLEMENTED.create("APP", I(cols[a]));
+                            throw SearchIteratorExceptionCodes.NOT_IMPLEMENTED.create(I(cols[a])).setPrefix("APP");
                         }
                     } else {
                         ff.fillField(cdao, g++, co_rs);

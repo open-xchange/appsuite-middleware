@@ -1,3 +1,45 @@
+* 2012-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22042: Guaranteed termination for check for non-existing parents
+
+* 2012-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22047: Sanitizing possibly corrupt/broken Content-Type header
+
+* 2012-04-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21647: Clearing cache for Outlook folder tree
+ - Fix for bug 22029: Ignoring heading header name during Content-Type parsing
+ - Fix for bug 21908: Support for SMS-specific compose type
+
+* 2012-04-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22015: Fixed unfolding of folded encoded-words as per RFC 2047
+ - Fix for bug 22018: Checking for possible table existence prior to create attempt
+
+* 2012-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21997: Denied mail access for admin user now leads to a better understandable message
+ - Fix for bug 21965: Ignoring mails marked as \Deleted during action=all request
+
+* 2012-04-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21858: Introduced parameter to drop reply/forward prefix (which might incompatible with external clients)
+
+* 2012-04-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21875: Extends Display Name Field for external participants.
+ - Fix for bug 22006: Throw Data Truncation error.
+
+* 2012-04-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21982: NullPointer Fix.
+ - Fix for bug 21992: NullPointer Fix.
+
+* 2012-04-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21995: Fixed image handling throughout reply/forward sequences
+
 * 2012-04-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 21966: Correct error category for IMAP-2015 to let its message being properly displayed in web UI

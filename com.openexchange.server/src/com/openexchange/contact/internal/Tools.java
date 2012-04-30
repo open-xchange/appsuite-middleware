@@ -51,15 +51,12 @@ package com.openexchange.contact.internal;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -83,6 +80,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -104,83 +102,6 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 public final class Tools {
 	
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
-	
-	/**
-	 * Performs validation checks prior performing write operations on the 
-	 * global address book, throwing appropriate exceptions if checks fail.
-	 * 
-	 * @param contextID the context ID
-	 * @param userID the user ID
-	 * @param folderID the folder ID
-	 * @param update the contact to be written
-	 * @throws OXException
-	 */
-	public static void checkWriteInGAB(final ContactStorage storage, final int contextID, final int userID,
-			final String folderID, final Contact update) throws OXException {
-		/*
-		 * check display name
-		 */
-		if (update.containsDisplayName()) {
-			if (isEmpty(update.getDisplayName())) {
-				throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();				
-			}
-			/*
-			 * check if display name is already in use
-			 */
-	    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-			folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
-			folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
-			andTerm.addSearchTerm(folderIDTerm);
-			final SingleSearchTerm displayNameTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-			displayNameTerm.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME)); 
-			displayNameTerm.addOperand(new ConstantOperand<String>(update.getDisplayName()));
-			andTerm.addSearchTerm(displayNameTerm);
-			final SearchIterator<Contact> contacts = storage.search(contextID, andTerm, new ContactField[] { 
-					ContactField.OBJECT_ID });
-			if (null != contacts && 0 < contacts.size()) {
-				throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(contextID, update.getObjectID());
-			}
-		}
-		/*
-		 * further checks for mandatory properties
-		 */
-        if (update.containsSurName() && isEmpty(update.getSurName())) {
-        	throw ContactExceptionCodes.LAST_NAME_MANDATORY.create();
-        } else if (update.containsGivenName() && isEmpty(update.getGivenName())) {
-        	throw ContactExceptionCodes.FIRST_NAME_MANDATORY.create();
-        } 
-        /*
-         * check primary mail address
-         */
-        if (update.containsEmail1()) {
-        	final Context context = getContext(contextID);
-        	if (context.getMailadmin() != userID) {
-        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(contextID, update.getObjectID(), userID);        		
-        	}
-        }        
-	}			
-	
-	/**
-	 * Filters the supplied contact collection in respect to personal object 
-	 * permissions of the user. Assumes the contacts in the collection having
-	 * the "private flag" and "created by" properties set.
-	 * 
-	 * @param contacts the contacts to filter
-	 * @param userID the user ID
-	 * @param permission the effective permissions for the user on the folder
-	 */
-	public static void filterByObjectPermissions(final Collection<Contact> contacts, final int userID, 
-			final EffectivePermission permission) {
-		final Iterator<Contact> iterator = contacts.iterator();
-		final boolean filterForeignContacts = false == permission.canReadAllObjects();
-		while (iterator.hasNext()) {
-			final Contact contact = iterator.next();
-			if (contact.getCreatedBy() != userID && (filterForeignContacts || contact.getPrivateFlag())) {
-				iterator.remove();
-			} 
-		}
-	}	
 	
 	/**
 	 * Gets a comparator for contacts based on the supplied sort options. 
@@ -222,7 +143,7 @@ public final class Tools {
 	public static ContactStorage getStorage(final int contextID, final String folderID) throws OXException {
 		final ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(contextID, folderID);
         if (null == storage) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage available for folder '" + folderID + "'");
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("'Contact storage for folder " + folderID + "'");
         }
         return storage;
 	}
@@ -294,12 +215,13 @@ public final class Tools {
 	
 	/**
 	 * Adds the date of the last modification to attachments of the given 
-	 * contact when needed. 
+	 * contact when needed, i.e. the information is not already present.
 	 * 
 	 * @param contact the contact to add the attachment information for
+	 * @param contextID the context ID
 	 * @throws OXException
 	 */
-	public static void addAttachmentInformation(final Contact contact, final int contextID) throws OXException {
+	public static void addAttachmentInformation(Contact contact, int contextID) throws OXException {
 		if (false == contact.containsLastModifiedOfNewestAttachment() && 0 < contact.getNumberOfAttachments()) {
 			contact.setLastModifiedOfNewestAttachment(Attachments.getInstance().getNewestCreationDate(
 					Tools.getContext(contextID), Types.CONTACT, contact.getObjectID()));
@@ -467,6 +389,36 @@ public final class Tools {
 			return Integer.parseInt(id);
 		} catch (final NumberFormatException e) {
 			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+		}
+	}
+	
+	/**
+	 * Invalidates the address properties of the given contact if one of the 
+	 * corresponding parts of the address is set, e.g. sets the "Business
+	 * Address" to <code>null</code>, when the "Postal Code Business" is set.
+	 * 
+	 * Necessary for Outlook, see bug #19827 for details
+	 * 
+	 * @param contact the contact to invalidate the addresses for
+	 */
+	public static void invalidateAddressesIfNeeded(final Contact contact) {
+		if (false == contact.containsAddressBusiness()) {
+			if (contact.containsStreetBusiness() || contact.containsPostalCodeBusiness() || contact.containsCityBusiness() ||
+					contact.containsStateBusiness() || contact.containsCountryBusiness()) {
+				contact.setAddressBusiness(null);
+			}
+		}
+		if (false == contact.containsAddressHome()) {
+			if (contact.containsStreetHome() || contact.containsPostalCodeHome() || contact.containsCityHome() ||
+					contact.containsStateHome() || contact.containsCountryHome()) {
+				contact.setAddressHome(null);
+			}
+		}
+		if (false == contact.containsAddressOther()) {
+			if (contact.containsStreetOther() || contact.containsPostalCodeOther() || contact.containsCityOther() ||
+					contact.containsStateOther() || contact.containsCountryOther()) {
+				contact.setAddressOther(null);
+			}
 		}
 	}
 	

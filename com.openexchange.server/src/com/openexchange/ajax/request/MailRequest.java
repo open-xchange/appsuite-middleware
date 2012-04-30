@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public final class MailRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailRequest.class));
 
     private static enum CollectableOperation {
         MOVE, COPY, STORE_FLAG, COLOR_LABEL;

@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -304,5 +305,19 @@ public class SimContactService implements ContactService {
         return null;
     }
 
+	@Override
+	public SearchIterator<Contact> getAllUsers(Session session,
+			ContactField[] fields, SortOptions sortOptions) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    /* (non-Javadoc)
+     * @see com.openexchange.contact.ContactService#searchUsers(com.openexchange.session.Session, com.openexchange.search.SearchTerm, com.openexchange.groupware.contact.helpers.ContactField[], com.openexchange.contact.SortOptions)
+     */
+    @Override
+    public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return null;
+    }
 
 }

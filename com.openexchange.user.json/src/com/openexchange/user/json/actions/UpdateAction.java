@@ -52,12 +52,15 @@ package com.openexchange.user.json.actions;
 import java.util.Date;
 import java.util.Locale;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
@@ -66,10 +69,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.Utility;
+import com.openexchange.user.json.field.UserField;
+import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.parser.ParsedUser;
 import com.openexchange.user.json.parser.UserParser;
 import com.openexchange.user.json.services.ServiceRegistry;
@@ -78,6 +84,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * {@link UpdateAction} - Maps the action to an <tt>update</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a user.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -101,6 +108,56 @@ public final class UpdateAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
+        /*
+         * Get user service to get contact ID
+         */
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final User storageUser = userService.getUser(id, session.getContext());
+        final int contactId = storageUser.getContactId();
+        /*
+         * Parse user & contact data
+         */
+        final JSONObject jData = (JSONObject) request.getData();
+        Contact parsedUserContact;
+        User parsedUser;
+		try {
+			parsedUserContact = ContactMapper.getInstance().deserialize(jData, ContactMapper.getInstance().getAllFields());
+			parsedUser = UserMapper.getInstance().deserialize(jData, UserMapper.getInstance().getAllFields());
+		} catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+		}
+        /*
+         * Update contact
+         */
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
+        		parsedUserContact, clientLastModified);
+        /*
+         * Update user if necessary, too
+         */
+        final String parsedTimeZone = parsedUser.getTimeZone();
+        final Locale parsedLocale = parsedUser.getLocale();
+        if ((null != parsedTimeZone) || (null != parsedLocale)) {
+            if (null == parsedTimeZone) {
+            	UserMapper.getInstance().get(UserField.TIME_ZONE).copy(storageUser, parsedUser);
+            }
+            if (null == parsedLocale) {
+            	UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
+            }
+            userService.updateUser(parsedUser, session.getContext());
+        }
+        /*
+         * Return contact last-modified from server
+         */
+        return new AJAXRequestResult(new JSONObject(), parsedUserContact.getLastModified());
+    }
+
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */

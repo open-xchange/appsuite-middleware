@@ -50,7 +50,7 @@
 package com.openexchange.carddav.mixins;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;

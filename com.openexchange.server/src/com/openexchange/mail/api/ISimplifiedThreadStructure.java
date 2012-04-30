@@ -51,6 +51,7 @@ package com.openexchange.mail.api;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -73,12 +74,14 @@ public interface ISimplifiedThreadStructure {
      * command should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES".
      *
      * @param folder The folder full name
+     * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
+     * @param indexRange The optional index range
      * @param sortField The sort field applied to thread root elements
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws OXException If messages cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, boolean includeSent, IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
     
 }

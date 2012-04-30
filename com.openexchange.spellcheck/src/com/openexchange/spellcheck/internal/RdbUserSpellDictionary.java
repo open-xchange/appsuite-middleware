@@ -84,7 +84,7 @@ import com.swabunga.spell.engine.SpellDictionary;
  */
 public final class RdbUserSpellDictionary implements SpellDictionary {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RdbUserSpellDictionary.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RdbUserSpellDictionary.class));
 
     private static final class Key implements Serializable {
 

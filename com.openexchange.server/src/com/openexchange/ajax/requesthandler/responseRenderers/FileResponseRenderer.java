@@ -59,7 +59,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -130,6 +130,9 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         String delivery = req.getParameter(DELIVERY);
+        if (delivery == null) {
+            delivery = file.getDelivery();
+        }
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();

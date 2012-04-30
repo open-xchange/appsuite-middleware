@@ -63,7 +63,7 @@ import com.openexchange.upsell.multiple.api.UpsellURLService;
  */
 public class UrlServiceInstallationServiceListener implements ServiceTrackerCustomizer<UpsellURLService,UpsellURLService> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UrlServiceInstallationServiceListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UrlServiceInstallationServiceListener.class));
 
     private final BundleContext context;
 

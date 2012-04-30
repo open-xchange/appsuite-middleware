@@ -118,7 +118,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class MimeReply {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeReply.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeReply.class));
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -555,7 +555,7 @@ public final class MimeReply {
             }
             found = true;
         }
-        if (found) {
+        if (found && !usm.isDropReplyForwardPrefix()) {
             final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
             String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
             {

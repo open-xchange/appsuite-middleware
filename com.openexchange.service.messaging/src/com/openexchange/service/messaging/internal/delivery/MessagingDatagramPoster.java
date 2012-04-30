@@ -87,7 +87,7 @@ public final class MessagingDatagramPoster {
     /**
      * The logger instance for this class.
      */
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingDatagramPoster.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingDatagramPoster.class));
 
     private static final int MAX_INT_VALUE = 0xFFFF;
 

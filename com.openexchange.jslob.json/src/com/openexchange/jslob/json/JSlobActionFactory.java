@@ -50,6 +50,7 @@
 package com.openexchange.jslob.json;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -57,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.json.action.JSlobAction;
+import com.openexchange.jslob.json.action.Method;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -77,15 +79,21 @@ public class JSlobActionFactory implements AJAXActionServiceFactory {
      */
     public JSlobActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, JSlobAction>(4);
-        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services));
-        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services));
+        actions = new ConcurrentHashMap<String, JSlobAction>(10);
+        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.ListAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services, actions));
+        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services, actions));
     }
 
     private void addJSlobAction(final JSlobAction jslobAction) {
+        final List<Method> restMethods = jslobAction.getRESTMethods();
+        if (null != restMethods && !restMethods.isEmpty()) {
+            for (final Method method : restMethods) {
+                actions.put(method.toString(), jslobAction);
+            }
+        }
         actions.put(jslobAction.getAction(), jslobAction);
     }
 

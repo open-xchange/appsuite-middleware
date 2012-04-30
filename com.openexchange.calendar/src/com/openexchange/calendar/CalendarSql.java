@@ -51,6 +51,7 @@ package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -61,7 +62,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -568,22 +569,13 @@ public class CalendarSql implements AppointmentSQLInterface {
                     }
                     return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);
                 } catch(final DataTruncation dt) {
-                    final String fields[] = DBUtils.parseTruncatedFields(dt);
-                    final int fid[] = new int[fields.length];
-                    final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
-                    int id = -1;
-                    for (int a = 0; a < fid.length; a++) {
-                        id = recColl.getFieldId(fields[a]);
-                        final String value = recColl.getString(cdao, id);
-                        if(value == null) {
-                            oxe.addTruncatedId(id);
-                        } else {
-                            final int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
-                            final int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
-                            oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
-                        }
+                    throwTruncationError(cdao, writecon, dt);
+                } catch(BatchUpdateException bue) {
+                    if (bue.getCause() instanceof DataTruncation) {
+                        throwTruncationError(cdao, writecon, (DataTruncation) bue.getCause());
+                    } else {
+                        throw bue;
                     }
-                    throw oxe;
                 } catch(final SQLException sqle) {
                     try {
                         if (writecon != null) {
@@ -635,6 +627,32 @@ public class CalendarSql implements AppointmentSQLInterface {
                 DBPool.pushWrite(ctx, writecon);
             }
         }
+    }
+
+    /**
+     * @param cdao
+     * @param writecon
+     * @param dt
+     * @throws SQLException
+     * @throws OXException
+     */
+    private void throwTruncationError(final CalendarDataObject cdao, Connection writecon, final DataTruncation dt) throws SQLException, OXException {
+        final String fields[] = DBUtils.parseTruncatedFields(dt);
+        final int fid[] = new int[fields.length];
+        final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
+        int id = -1;
+        for (int a = 0; a < fid.length; a++) {
+            id = recColl.getFieldId(fields[a]);
+            final String value = recColl.getString(cdao, id);
+            if(value == null) {
+                oxe.addTruncatedId(id);
+            } else {
+                final int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
+                final int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
+                oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
+            }
+        }
+        throw oxe;
     }
 
     public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {

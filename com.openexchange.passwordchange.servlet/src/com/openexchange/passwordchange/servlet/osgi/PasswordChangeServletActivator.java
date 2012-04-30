@@ -67,7 +67,7 @@ import com.openexchange.passwordchange.servlet.PasswordChangeServlet;
  */
 public final class PasswordChangeServletActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasswordChangeServletActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasswordChangeServletActivator.class));
 
     private static final String PWC_SRVLT_ALIAS = "ajax/passwordchange";
 

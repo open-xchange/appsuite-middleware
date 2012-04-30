@@ -71,7 +71,7 @@ import com.openexchange.server.Initialization;
 public final class AJPv13Config implements Initialization {
 
     // Final static fields
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Config.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Config.class));
 
     private static final String AJP_PROP_FILE = "AJPPROPERTIES";
 

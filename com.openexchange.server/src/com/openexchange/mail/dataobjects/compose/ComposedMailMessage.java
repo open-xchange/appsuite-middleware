@@ -77,7 +77,7 @@ import com.openexchange.session.Session;
  */
 public abstract class ComposedMailMessage extends MailMessage {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ComposedMailMessage.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ComposedMailMessage.class));
 
     /**
      * Serial version UID

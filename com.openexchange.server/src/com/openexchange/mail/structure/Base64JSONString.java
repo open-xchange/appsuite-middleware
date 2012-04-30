@@ -98,7 +98,7 @@ public final class Base64JSONString implements JSONString {
             try {
                 in.close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Base64JSONString.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Base64JSONString.class)).error(e.getMessage(), e);
             }
         }
         value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), com.openexchange.java.Charsets.US_ASCII));

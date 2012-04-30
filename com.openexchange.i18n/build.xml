@@ -29,25 +29,7 @@
     </target>
 
     <target name="postInstall" description="Installs the language files.">
-        <antcall target="installLanguages"/>
-    </target>
-
-    <target name="installLanguages">
         <mkdir dir="${destDir}/${i18nDir}"/>
-        <antcall target="installLanguage">
-            <param name="language" value="de_DE"/>
-        </antcall>
-        <antcall target="installLanguage">
-            <param name="language" value="fr_FR"/>
-        </antcall>
-    </target>
-
-    <target name="installLanguage">
-        <copy todir="${destDir}/${i18nDir}">
-            <fileset dir="${language}">
-                <include name="server.${language}.po"/>
-            </fileset>
-        </copy>
     </target>
 
 </project>

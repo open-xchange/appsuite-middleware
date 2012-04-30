@@ -49,12 +49,15 @@
 
 package com.openexchange.user.json.osgi;
 
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
 import com.openexchange.user.json.services.ServiceRegistry;
 
@@ -85,6 +88,10 @@ public class UserJSONActivator extends AJAXModuleActivator {
              */
             registerModule(UserActionFactory.getInstance(), Constants.MODULE);
             /*
+             * Register result converter
+             */
+            registerService(ResultConverter.class, new UserContactResultConverter());
+            /*
              * User service tracker
              */
             track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(
@@ -92,19 +99,26 @@ public class UserJSONActivator extends AJAXModuleActivator {
                 ServiceRegistry.getInstance(),
                 UserService.class));
             /*
+             * Contact service tracker
+             */
+            track(ContactService.class, new RegistryServiceTrackerCustomizer<ContactService>(
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ContactService.class));
+            /*
              * Contact interface factory tracker
              */
             track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                context,
-                ServiceRegistry.getInstance(),
-                ContactInterfaceFactory.class));
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ContactInterfaceFactory.class));
             track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
                 context,
                 ServiceRegistry.getInstance(),
                 ContactInterfaceDiscoveryService.class));
             openTrackers();
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserJSONActivator.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserJSONActivator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }

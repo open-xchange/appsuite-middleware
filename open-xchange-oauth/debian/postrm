@@ -19,15 +19,8 @@ set -e
 # the debian-policy package
 
 
-CONFFILES="contacts_hcard_censored.tmpl contacts_hcard_uncensored.tmpl contacts_oxmf_censored.tmpl contacts_oxmf_uncensored.tmpl contacts.tmpl infostore.tmpl publish.microformats.properties"
-
 case "$1" in
     remove|abort-install|disappear)
-        for FILE in ${CONFFILES}; do
-            dpkg-divert --package open-xchange-publish --remove --rename --divert /opt/open-xchange/templates/${FILE}.dpkg-bak \
-                /opt/open-xchange/templates/${FILE}
-            rm -f /opt/open-xchange/templates/${FILE}
-        done
     ;;
 
     purge|upgrade|failed-upgrade|abort-upgrade)

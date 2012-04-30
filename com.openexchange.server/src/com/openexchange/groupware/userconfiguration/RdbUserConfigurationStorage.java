@@ -73,7 +73,7 @@ import com.openexchange.server.impl.DBPool;
 public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(RdbUserConfigurationStorage.class);
+        com.openexchange.log.LogFactory.getLog(RdbUserConfigurationStorage.class);
 
     /**
      * Initializes a new {@link RdbUserConfigurationStorage}

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.Mail;
@@ -98,7 +99,7 @@ public final class AllAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+            int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
             final String sort = req.getParameter(Mail.PARAMETER_SORT);
             final String order = req.getParameter(Mail.PARAMETER_ORDER);
             if (sort != null && order == null) {
@@ -106,12 +107,57 @@ public final class AllAction extends AbstractMailAction {
             }
             final int[] fromToIndices;
             {
-                final int leftHandLimit = req.optInt(Mail.LEFT_HAND_LIMIT);
-                final int rightHandLimit = req.optInt(Mail.RIGHT_HAND_LIMIT);
-                if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
-                    fromToIndices = null;
+                final String s = req.getParameter("limit");
+                if (null == s) {
+                    final int leftHandLimit = req.optInt(Mail.LEFT_HAND_LIMIT);
+                    final int rightHandLimit = req.optInt(Mail.RIGHT_HAND_LIMIT);
+                    if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
+                        fromToIndices = null;
+                    } else {
+                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit};
+                        if (fromToIndices[0] >= fromToIndices[1]) {
+                            return new AJAXRequestResult(Collections.<MailMessage>emptyList(), "mail");
+                        }
+                    }
                 } else {
-                    fromToIndices = new int[] { leftHandLimit, rightHandLimit };
+                    int start;
+                    int end;
+                    try {
+                        final int pos = s.indexOf(',');
+                        if (pos < 0) {
+                            start = 0;
+                            final int i = Integer.parseInt(s.trim());
+                            end = i < 0 ? 0 : i;
+                        } else {
+                            int i = Integer.parseInt(s.substring(0, pos).trim());
+                            start = i < 0 ? 0 : i;
+                            i = Integer.parseInt(s.substring(pos+1).trim());
+                            end = i < 0 ? 0 : i;
+                        }
+                    } catch (final NumberFormatException e) {
+                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
+                    }
+                    if (start >= end) {
+                        return new AJAXRequestResult(Collections.<MailMessage>emptyList(), "mail");
+                    }
+                    fromToIndices = new int[] {start,end};
+                }
+            }
+            final boolean unseen = req.optBool("unseen");
+            final boolean ignoreDeleted = !req.optBool("deleted", true);
+            final boolean filterApplied = (unseen || ignoreDeleted);
+            if (filterApplied) {
+                // Ensure flags is contained in provided columns
+                final int fieldFlags = MailListField.FLAGS.getField();
+                boolean found = false;
+                for (int i = 0; !found && i < columns.length; i++) {
+                   found = fieldFlags == columns[i];
+                }
+                if (!found) {
+                    final int[] tmp = columns;
+                    columns = new int[columns.length + 1];
+                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
+                    columns[tmp.length] = fieldFlags;
                 }
             }
             /*
@@ -131,7 +177,7 @@ public final class AllAction extends AbstractMailAction {
             /*
              * Start response
              */
-            final List<MailMessage> mails = new LinkedList<MailMessage>();
+            List<MailMessage> mails = new LinkedList<MailMessage>();
             SearchIterator<MailMessage> it = null;
             try {
                 /*
@@ -144,11 +190,11 @@ public final class AllAction extends AbstractMailAction {
                             MailSortField.RECEIVED_DATE.getField(),
                             orderDir,
                             columns,
-                            fromToIndices);
+                            filterApplied ? null : fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm) {
+                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
                             mm.setAccountId(mailInterface.getAccountID());
                             mails.add(mm);
                         }
@@ -158,11 +204,11 @@ public final class AllAction extends AbstractMailAction {
                     /*
                      * Get iterator
                      */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices);
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm) {
+                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
                             mm.setAccountId(mailInterface.getAccountID());
                             mails.add(mm);
                         }
@@ -171,6 +217,25 @@ public final class AllAction extends AbstractMailAction {
             } finally {
                 if (null != it) {
                     it.close();
+                }
+            }
+            if (filterApplied && (null != fromToIndices)) {
+                final int fromIndex = fromToIndices[0];
+                int toIndex = fromToIndices[1];
+                final int sz = mails.size();
+                if ((fromIndex) > sz) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    mails = Collections.emptyList();
+                } else {
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= sz) {
+                        toIndex = sz;
+                    }
+                    mails = mails.subList(fromIndex, toIndex);
                 }
             }
             return new AJAXRequestResult(mails, "mail");

@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.eav.EAVNode;

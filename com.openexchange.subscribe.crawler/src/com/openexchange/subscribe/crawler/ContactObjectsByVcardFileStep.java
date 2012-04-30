@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;

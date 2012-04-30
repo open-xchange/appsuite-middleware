@@ -61,7 +61,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public abstract class UserConfigurationStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
             .getLog(UserConfigurationStorage.class);
 
     private static UserConfigurationStorage singleton;

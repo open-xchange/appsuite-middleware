@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractReminderAction implements AJAXActionService {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractReminderAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractReminderAction.class));
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 

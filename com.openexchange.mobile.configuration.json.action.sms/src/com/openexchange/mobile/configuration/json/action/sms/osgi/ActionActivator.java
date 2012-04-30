@@ -52,7 +52,7 @@ package com.openexchange.mobile.configuration.json.action.sms.osgi;
 import static com.openexchange.mobile.configuration.json.action.sms.osgi.ActionServiceRegistry.getServiceRegistry;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;

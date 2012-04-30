@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -445,6 +445,9 @@ public final class InternalList {
 
         // Drops useless foreign keys from 'malPollHash' table
         new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask(),
+        
+        // Extends dn fields in calendar tables to 320 chars.
+        new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2(),
 
     };
 }

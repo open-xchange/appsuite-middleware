@@ -61,7 +61,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -69,12 +69,17 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
@@ -82,8 +87,10 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.comparator.Comparators;
 import com.openexchange.user.json.field.UserField;
+import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
@@ -91,6 +98,7 @@ import com.openexchange.user.json.writer.UserWriter;
  * {@link AllAction} - Maps the action to an <tt>all</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all users.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -127,6 +135,80 @@ public final class AllAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        try {
+            /*
+             * Parse parameters
+             */
+            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+            final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
+            final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
+            final int leftHandLimit = parseIntParameter(AJAXServlet.LEFT_HAND_LIMIT, request);
+            final int rightHandLimit = parseIntParameter(AJAXServlet.RIGHT_HAND_LIMIT, request);
+            /*
+             * Determine sort options
+             */
+            final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
+            final int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
+            final SortOptions sortOptions = new SortOptions(lhl,  rhl - lhl);
+            final UserField orderByUserField = UserMapper.getInstance().getMappedField(orderBy);
+        	if (null == orderByUserField) {
+        		final ContactField orderByContactField = ContactMapper.getInstance().getMappedField(orderBy);
+        		if (null != orderByContactField) {        			
+            		// Sort field is a contact field: pass as it is
+        			sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(orderByContactField, order) });
+        		}
+        	}
+        	/*
+        	 * Get contacts and users
+        	 */        	
+        	Date lastModified = new Date(0);
+        	final List<UserContact> userContacts = new ArrayList<UserContact>();
+            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
+            final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns, 
+            		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);            
+            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            SearchIterator<Contact> searchIterator = null;
+            try {
+            	searchIterator = contactService.getAllUsers(session, contactFields, sortOptions);
+            	/*
+            	 * Process results
+            	 */
+                while (searchIterator.hasNext()) {
+                	final Contact contact = searchIterator.next();
+                	/*
+                	 * Check last modified
+                	 */
+                	if (contact.getLastModified().after(lastModified)) {
+                		lastModified = contact.getLastModified();
+                	}                	
+                	/*
+                	 * Get corresponding user
+                	 */
+                	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
+                	userContacts.add(new UserContact(contact, user));
+                }
+            } finally {
+            	if (null != searchIterator) {
+            		searchIterator.close();
+            	}
+            }
+            /*
+             * Sort by users if a user field was denoted by sort field
+             */
+            if (1 < userContacts.size() && null != orderByUserField) {
+        		Collections.sort(userContacts, UserContact.getComparator(
+        				orderByUserField, session.getUser().getLocale(), Order.DESCENDING.equals(order)));
+            }
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(userContacts, lastModified, "usercontact");
+        } catch (final OXException e) {
+            throw new OXException(e);
+        }
+    }
+    
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters

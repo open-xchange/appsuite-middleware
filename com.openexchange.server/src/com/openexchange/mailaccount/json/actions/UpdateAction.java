@@ -87,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 

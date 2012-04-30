@@ -51,7 +51,7 @@ package com.openexchange.upsell.multiple.osgi;
 
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;

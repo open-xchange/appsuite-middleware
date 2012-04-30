@@ -129,7 +129,6 @@ public class ListUserAction extends ContactAction {
         for (final int userID : userIDs) {
             final Contact contact = contactService.getUser(request.getSession(), userID, fields);
             lastModified = getLatestModified(lastModified, contact);
-            applyTimezoneOffset(contact, request.getTimeZone());
             contacts.add(contact);
         }
         return new AJAXRequestResult(contacts, lastModified, "contact");

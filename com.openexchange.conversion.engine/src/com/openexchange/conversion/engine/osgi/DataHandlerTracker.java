@@ -66,7 +66,7 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
     private static final String PROP_IDENTIFIER = "identifier";
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DataHandlerTracker.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DataHandlerTracker.class));
 
     private final BundleContext context;
 
