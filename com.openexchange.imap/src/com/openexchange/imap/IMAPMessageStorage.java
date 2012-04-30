@@ -992,8 +992,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
+    /**
+     * Gets the <tt>Threadable</tt> with cache look-up.
+     * 
+     * @param f The IMAP folder
+     * @param sorted Whether the returned <tt>Threadable</tt> is supposed to be thread-sorted
+     * @return The <tt>Threadable</tt> either from cache or newly generated
+     * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
+     */
     private Threadable getThreadableFor(final IMAPFolder f, final boolean sorted) throws MessagingException {
-        final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(accountId, f.getFullName(), session);
+        final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(f.getFullName(), accountId, session);
         synchronized (entry) {
             final boolean logIt = INFO; // TODO: Switch to DEBUG
             final long st = logIt ? System.currentTimeMillis() : 0L;

@@ -56,7 +56,6 @@ import gnu.trove.set.hash.TLongHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.imap.cache.util.LockedConcurrentMap;
@@ -74,7 +73,7 @@ public final class ThreadableCache {
 
     /**
      * Gets the instance
-     *
+     * 
      * @return The instance
      */
     public static ThreadableCache getInstance() {
@@ -82,9 +81,9 @@ public final class ThreadableCache {
     }
 
     /**
-     * Drops the session-bound thread cache.
+     * Drops the cache associated with specified user.
      * 
-     * @param session The session whose thread cache shall be dropped
+     * @param session The session providing user information
      */
     public static void dropFor(final Session session) {
         INSTANCE.userMap.remove(new UserKey(session.getUserId(), session.getContextId()));
@@ -105,14 +104,17 @@ public final class ThreadableCache {
     }
 
     /**
-     * Clears this session-bound cache.
+     * Clears this cache completely.
      */
     public void clear() {
         userMap.clear();
     }
 
     /**
-     * Clears this session-bound cache.
+     * Clears the cache associated with specified user.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
     public void clear(final int userId, final int contextId) {
         userMap.remove(new UserKey(userId, contextId));
@@ -121,16 +123,17 @@ public final class ThreadableCache {
     /**
      * Gets the associated cache entry.
      * 
-     * @param accountId The account identifier
      * @param fullName The full name
+     * @param accountId The account identifier
      * @param uids The UIDs
      * @return The cache entry (never <code>null</code>)
      */
-    public ThreadableCacheEntry getEntry(final int accountId, final String fullName, final Session session) {
+    public ThreadableCacheEntry getEntry(final String fullName, final int accountId, final Session session) {
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());
         ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> accountMap = userMap.get(key);
         if (null == accountMap) {
-            final ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> newAccMap = new ConcurrentTIntObjectHashMap<ConcurrentMap<String,ThreadableCacheEntry>>(8);
+            final ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> newAccMap =
+                new ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>(8);
             accountMap = userMap.putIfAbsent(key, newAccMap);
             if (null == accountMap) {
                 accountMap = newAccMap;
@@ -139,10 +142,12 @@ public final class ThreadableCache {
         ConcurrentMap<String, ThreadableCacheEntry> map = accountMap.get(accountId);
         if (null == map) {
             final ReadWriteLock rwl = new ReentrantReadWriteLock();
-            final MaxCapacityLinkedHashMap<String, ThreadableCacheEntry> maxCapacityMap = new MaxCapacityLinkedHashMap<String, ThreadableCacheEntry>(32);
-            final ConcurrentMap<String, ThreadableCacheEntry> newmap = new LockedConcurrentMap<String, ThreadableCacheEntry>(rwl.readLock(), rwl.writeLock(), maxCapacityMap);
+            final MaxCapacityLinkedHashMap<String, ThreadableCacheEntry> maxCapacityMap =
+                new MaxCapacityLinkedHashMap<String, ThreadableCacheEntry>(32);
+            final ConcurrentMap<String, ThreadableCacheEntry> newmap =
+                new LockedConcurrentMap<String, ThreadableCacheEntry>(rwl.readLock(), rwl.writeLock(), maxCapacityMap);
             map = accountMap.putIfAbsent(accountId, newmap);
-            if (null == map) {         
+            if (null == map) {
                 map = newmap;
             }
         }
@@ -160,12 +165,13 @@ public final class ThreadableCache {
     /**
      * (Optionally) Gets the associated cache entry.
      * 
-     * @param accountId The account identifier
      * @param fullName The full name
+     * @param accountId The account identifier
      * @return The cache entry or <code>null</code>
      */
-    public ThreadableCacheEntry optEntry(final int accountId, final String fullName, final Session session) {
-        final ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> accountMap = userMap.get(new UserKey(session.getUserId(), session.getContextId()));
+    public ThreadableCacheEntry optEntry(final String fullName, final int accountId, final Session session) {
+        final ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> accountMap =
+            userMap.get(new UserKey(session.getUserId(), session.getContextId()));
         if (null == accountMap) {
             return null;
         }
@@ -176,21 +182,22 @@ public final class ThreadableCache {
         return map.get(fullName);
     }
 
+    /**
+     * The cache entry holding the <tt>Threadable</tt>.
+     */
     public static final class ThreadableCacheEntry {
 
-        private final AtomicReference<TLongSet> uidsRef;
+        private TLongSet uids;
 
-        private final AtomicReference<Threadable> threadableRef;
+        private Threadable threadable;
 
-        private volatile boolean sorted;
+        private boolean sorted;
 
         /**
          * Initializes a new {@link ThreadableCacheEntry}.
          */
         protected ThreadableCacheEntry() {
             super();
-            uidsRef = new AtomicReference<TLongSet>();
-            threadableRef = new AtomicReference<Threadable>();
         }
 
         /**
@@ -199,7 +206,7 @@ public final class ThreadableCache {
          * @return The cached thread
          */
         public Threadable getThreadable() {
-            return threadableRef.get();
+            return threadable;
         }
 
         /**
@@ -219,8 +226,8 @@ public final class ThreadableCache {
          * @return This entry with thread applied
          */
         public ThreadableCacheEntry set(final TLongSet uids, final Threadable threadable, final boolean sorted) {
-            uidsRef.set(uids);
-            threadableRef.set(threadable);
+            this.uids = uids;
+            this.threadable = threadable;
             this.sorted = sorted;
             return this;
         }
@@ -245,7 +252,7 @@ public final class ThreadableCache {
             if (null == currentUids) {
                 return false;
             }
-            final TLongSet thisUids = uidsRef.get();
+            final TLongSet thisUids = uids;
             if (null == thisUids) {
                 return true;
             }
@@ -263,7 +270,7 @@ public final class ThreadableCache {
             if (!deletedUids.isEmpty()) {
                 // Deleted ones may be silently updated without a reconstruct
                 thisUids.removeAll(deletedUids);
-                removeDeleted(deletedUids, this.threadableRef.get());
+                removeDeleted(deletedUids, this.threadable);
             }
             return false;
         }
@@ -302,8 +309,11 @@ public final class ThreadableCache {
     } // End of ThreadSortCacheEntry class
 
     private static final class UserKey {
+
         private final int userId;
+
         private final int contextId;
+
         private final int hash;
 
         protected UserKey(final int userId, final int contextId) {
