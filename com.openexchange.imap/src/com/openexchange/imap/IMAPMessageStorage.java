@@ -995,7 +995,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private Threadable getThreadableFor(final IMAPFolder f, final boolean sorted) throws MessagingException {
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(accountId, f.getFullName(), session);
         synchronized (entry) {
-            final long st = INFO ? System.currentTimeMillis() : 0L;
+            final boolean logIt = INFO; // TODO: Switch to DEBUG
+            final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted() || entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
@@ -1003,7 +1004,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     threadable = new Threader().thread(threadable);
                 }
                 entry.set(new TLongHashSet(null == uids ? IMAPCommandsCollection.getUIDCollection(imapFolder) : uids), threadable, sorted);
-                if (INFO) {
+                if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
                     LOG.info("\tNew ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec");
                 }
