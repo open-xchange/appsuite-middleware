@@ -103,7 +103,6 @@ public class SolrIndexActivator extends HousekeepingActivator {
          * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
          */
     }
-    
 //    public class UtilCommandProvider implements CommandProvider {
 //
 //        public UtilCommandProvider() {
@@ -121,5 +120,4 @@ public class SolrIndexActivator extends HousekeepingActivator {
 //            jUnit.run(SolrIndexFacadeTest.class);
 //        }
 //    }
-
 }
