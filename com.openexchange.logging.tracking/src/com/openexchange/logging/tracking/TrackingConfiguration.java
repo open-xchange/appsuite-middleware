@@ -100,8 +100,8 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	public void setLogLevel(String className, int cid, int uid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
-		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.putIfAbsent(cid, new ConcurrentHashMap<Integer, ConcurrentMap<String, LogLevel>>());
-		ConcurrentMap<String, LogLevel> clazzMap = userMap.putIfAbsent(uid, new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.putIfAbsent(Integer.valueOf(cid), new ConcurrentHashMap<Integer, ConcurrentMap<String, LogLevel>>());
+		ConcurrentMap<String, LogLevel> clazzMap = userMap.putIfAbsent(Integer.valueOf(uid), new ConcurrentHashMap<String, LogLevel>());
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -112,7 +112,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	public void setLogLevel(String className, int cid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
-		ConcurrentMap<String, LogLevel> clazzMap = cidLevels.putIfAbsent(cid, new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<String, LogLevel> clazzMap = cidLevels.putIfAbsent(Integer.valueOf(cid), new ConcurrentHashMap<String, LogLevel>());
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -144,11 +144,11 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 	
 	public void clearTracking(int cid, int uid) {
-		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.get(cid);
+		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.get(Integer.valueOf(cid));
 		if (userMap != null) {
-			userMap.remove(uid);
+			userMap.remove(Integer.valueOf(uid));
 			if (userMap.isEmpty()) {
-				userLevels.remove(cid);
+				userLevels.remove(Integer.valueOf(cid));
 			}
 		}
 	}
@@ -158,7 +158,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 
 	public void clearTracking(int cid) {
-		cidLevels.remove(cid);
+		cidLevels.remove(Integer.valueOf(cid));
 	}
 
 	public boolean clearTracking(int cid, String userName) {
@@ -319,13 +319,13 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 		ConcurrentMap<String, LogLevel> clazzMap = sessionLevels.get(sessionObject.getSessionID());
 		LogLevel sessionLevel = getLowestLevel(clazzMap, className);
 
-		clazzMap = cidLevels.get(sessionObject.getContextId());
+		clazzMap = cidLevels.get(Integer.valueOf(sessionObject.getContextId()));
 		LogLevel cidLevel = getLowestLevel(clazzMap, className);
 
 		LogLevel userLevel = LogLevel.OFF;
-		ConcurrentMap<Integer,ConcurrentMap<String,LogLevel>> map = userLevels.get(sessionObject.getContextId());
+		ConcurrentMap<Integer,ConcurrentMap<String,LogLevel>> map = userLevels.get(Integer.valueOf(sessionObject.getContextId()));
 		if (map != null) {
-			clazzMap = map.get(sessionObject.getUserId());
+			clazzMap = map.get(Integer.valueOf(sessionObject.getUserId()));
 			userLevel = getLowestLevel(clazzMap, className);
 		}
 		return getLowestLevel(sessionLevel, cidLevel, userLevel);
