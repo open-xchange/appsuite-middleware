@@ -89,9 +89,10 @@ import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link Threadable}
+ * {@link Threadable} - An element within thread-sorted structure holding needed message information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see Threader
  */
 public final class Threadable implements Cloneable {
 
