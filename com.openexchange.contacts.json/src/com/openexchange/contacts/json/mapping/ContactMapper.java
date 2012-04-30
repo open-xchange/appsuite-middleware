@@ -142,6 +142,9 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             } else if (Contact.IMAGE1_URL == columnID) {
             	// query NUMBER_OF_IMAGES to set image URL afterwards
             	fields.add(ContactField.NUMBER_OF_IMAGES);
+            	// also query IMAGE_LAST_MODIFIED, since old implementation didn't reset NUMBER_OF_IMAGES on image removal, so that 
+            	// there may be contacts with NUMBER_OF_IMAGES = 1, but actually without image data.
+            	fields.add(ContactField.IMAGE_LAST_MODIFIED);
             } else if (Contact.LAST_MODIFIED_UTC == columnID) {
             	// query LAST_MODIFIED to set last modified utc afterwards
             	fields.add(ContactField.LAST_MODIFIED);
@@ -2768,7 +2771,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             
             @Override
         	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
-            	if (0 < from.getNumberOfImages()) {
+            	if (0 < from.getNumberOfImages() && from.containsImageLastModified() && null != from.getImageLastModified()) {
     				ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
     						String.valueOf(from.getObjectID())).build();
 					try {
@@ -3105,7 +3108,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
+            	// correcting the image count here if there is no image data present
+            	if (0 < contact.getNumberOfImages() && null == contact.getImageLastModified()) {
+            		return 0;
+            	}            	
                 return contact.getNumberOfImages();
             }
 
