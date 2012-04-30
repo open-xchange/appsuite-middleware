@@ -1065,7 +1065,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     ThreadSortNode.filterFullName(sentFullName, threadList);
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tIn-application threader (incl. sent messages) took " + dur + "msec for folder " + fullName);
+                        LOG.info("\tIn-application thread-sort (incl. sent messages) took " + dur + "msec for folder " + fullName);
                     }
                 } else {
                     final Threadable threadable = getThreadableFor(imapFolder, true);
@@ -1073,7 +1073,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     threadList = Threadable.toNodeList(threadable);
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tIn-application threader took " + dur + "msec for folder " + fullName);
+                        LOG.info("\tIn-application thread-sort took " + dur + "msec for folder " + fullName);
                     }
                 }
             }
