@@ -86,13 +86,14 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
+import com.sun.mail.imap.protocol.UID;
 
 /**
  * {@link Threadable}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Threadable {
+public final class Threadable implements Cloneable {
 
     /**
      * The logger constant.
@@ -117,6 +118,8 @@ public final class Threadable {
 
     int messageNumber;
 
+    long uid;
+
     String id;
 
     private String subject2;
@@ -128,6 +131,7 @@ public final class Threadable {
      */
     public Threadable() {
         subject = null; // this means "dummy".
+        uid = -1L;
     }
 
     /**
@@ -143,10 +147,30 @@ public final class Threadable {
         this.subject = subject;
         this.messageId = id;
         this.refs = references;
+        uid = -1L;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            final Threadable clone = (Threadable) super.clone();
+            final Threadable next = clone.next;
+            clone.next = (Threadable) (next == null ? null : next.clone());
+            final Threadable kid = clone.kid;
+            clone.kid = (Threadable) (kid == null ? null : kid.clone());
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            // Cannot occur
+            throw new InternalError("Clone failed although Cloneable: " + e.getMessage());
+        }
     }
 
     public MessageId toMessageId() {
         return new MessageId(messageNumber).setFullName(fullName);
+    }
+
+    public long getUid() {
+        return uid;
     }
 
     @Override
@@ -561,7 +585,7 @@ public final class Threadable {
     private static void fillInList(final Threadable t, final List<ThreadSortNode> list) {
         Threadable cur = t;
         while (null != cur) {
-            final ThreadSortNode node = new ThreadSortNode(cur.toMessageId());
+            final ThreadSortNode node = new ThreadSortNode(cur.toMessageId(), cur.uid);
             list.add(node);
             // Check kids
             final Threadable kid = cur.kid;
@@ -583,14 +607,7 @@ public final class Threadable {
      * @param t The <tt>Threadable</tt> instance
      */
     public static Threadable filterFullName(final String fullName, final Threadable t) {
-        final List<Threadable> list = new LinkedList<Threadable>();
-        {
-            Threadable cur = t;
-            while (null != cur) {
-                list.add(cur);
-                cur = cur.next;
-            }
-        }
+        final List<Threadable> list = unfold(t);
         if (list.isEmpty()) {
             return t;
         }
@@ -602,14 +619,43 @@ public final class Threadable {
             }
         }
         // Fold
-        final Threadable first = list.remove(0);
-        {
-            Threadable cur = first;
-            for (final Threadable threadable : list) {
-                cur.next = threadable;
-                cur = threadable;
-            }
+        return fold(list);
+    }
+
+    /**
+     * Unfolds specified <tt>Threadable</tt>.
+     * 
+     * @param t The <tt>Threadable</tt> to unfold
+     * @return The resulting list
+     */
+    public static List<Threadable> unfold(final Threadable t) {
+        final List<Threadable> list = new LinkedList<Threadable>();
+        Threadable cur = t;
+        while (null != cur) {
+            list.add(cur);
+            cur = cur.next;
         }
+        return list;
+    }
+
+    /**
+     * Folds specified list to returned <tt>Threadable</tt>.
+     * 
+     * @param list The list to fold
+     * @return The folded <tt>Threadable</tt> instance
+     */
+    public static Threadable fold(final List<Threadable> list) {
+        if (null == list) {
+            return null;
+        }
+        final Threadable first = list.remove(0);
+
+        Threadable cur = first;
+        for (final Threadable threadable : list) {
+            cur.next = threadable;
+            cur = threadable;
+        }
+
         return first;
     }
 
@@ -678,12 +724,12 @@ public final class Threadable {
                     final boolean rev1 = protocol.isREV1();
                     if (fetchSingleFields) {
                         if (rev1) {
-                            sb.append("BODY.PEEK[HEADER.FIELDS (Subject Message-Id References In-Reply-To)]");
+                            sb.append("UID BODY.PEEK[HEADER.FIELDS (Subject Message-Id References In-Reply-To)]");
                         } else {
-                            sb.append("RFC822.HEADER.LINES (Subject Message-Id References In-Reply-To)");
+                            sb.append("UID RFC822.HEADER.LINES (Subject Message-Id References In-Reply-To)");
                         }                        
                     } else {
-                        sb.append("ENVELOPE");
+                        sb.append("UID ENVELOPE");
                         if (includeReferences()) {
                             if (rev1) {
                                 sb.append(" BODY.PEEK[HEADER.FIELDS (References)]");
@@ -721,6 +767,11 @@ public final class Threadable {
                                     t.subject = MimeMessageUtility.decodeEnvelopeSubject(envelope.subject);
                                     t.messageId = envelope.messageId;
                                     t.inReplyTo = envelope.inReplyTo;
+                                    // Check for UID
+                                    final UID uid = getItemOf(UID.class, fetchResponse);
+                                    if (null != uid) {
+                                        t.uid = uid.uid;
+                                    }
                                 } else {
                                     // Check for BODY resp. RFC822DATA
                                     final InternetHeaders h;
@@ -751,6 +802,11 @@ public final class Threadable {
                                             if (null != headerHandler) {
                                                 headerHandler.handle(hdr, t);
                                             }
+                                        }
+                                        // Check for UID
+                                        final UID uid = getItemOf(UID.class, fetchResponse);
+                                        if (null != uid) {
+                                            t.uid = uid.uid;
                                         }
                                     }
                                 }

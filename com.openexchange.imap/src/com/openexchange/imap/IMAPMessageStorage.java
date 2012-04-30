@@ -53,6 +53,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
+import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -62,6 +63,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.procedure.TLongObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -114,6 +116,8 @@ import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.thread.Threadable;
+import com.openexchange.imap.thread.ThreadableCache;
+import com.openexchange.imap.thread.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.thread.Threader;
 import com.openexchange.imap.threadsort.MessageId;
 import com.openexchange.imap.threadsort.ThreadSortNode;
@@ -988,6 +992,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
+    private Threadable getThreadableFor(final IMAPFolder f, final boolean sorted) throws MessagingException {
+        final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(accountId, f.getFullName(), session);
+        synchronized (entry) {
+            final long st = INFO ? System.currentTimeMillis() : 0L;
+            TLongCollection uids = null;
+            if (null == entry.getThreadable() || sorted != entry.isSorted() || entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
+                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
+                if (sorted) {
+                    threadable = new Threader().thread(threadable);
+                }
+                entry.set(new TLongHashSet(null == uids ? IMAPCommandsCollection.getUIDCollection(imapFolder) : uids), threadable, sorted);
+                if (INFO) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec");
+                }
+            } else if (INFO) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.info("\tExisting ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec");
+            }
+        }
+        return (Threadable) entry.getThreadable().clone();
+    }
+
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         IMAPFolder sentFolder = null;
@@ -1020,9 +1047,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final boolean logIt = INFO; // TODO: Switch to DEBUG
                 final long st = logIt ? System.currentTimeMillis() : 0L;
-                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
                 if (mergeWithSent) {
-                    Threadable.append(threadable, Threadable.getAllThreadablesFrom(sentFolder));
+                    Threadable threadable = getThreadableFor(imapFolder, false);
+                    Threadable.append(threadable, getThreadableFor(sentFolder, false));
                     // Sort them by thread reference
                     threadable = new Threader().thread(threadable);
                     threadable = Threadable.filterFullName(sentFullName, threadable);
@@ -1034,7 +1061,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.info("\tIn-application threader (incl. sent messages) took " + dur + "msec for folder " + fullName);
                     }
                 } else {
-                    threadable = new Threader().thread(threadable);
+                    final Threadable threadable = getThreadableFor(imapFolder, true);
                     // final String threadResp = Threadable.toThreadReferences(threadable, null);
                     threadList = Threadable.toNodeList(threadable);
                     if (logIt) {

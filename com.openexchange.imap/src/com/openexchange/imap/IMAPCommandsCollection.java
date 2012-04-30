@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
@@ -2192,14 +2193,25 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static long[] getUIDs(final IMAPFolder imapFolder) throws MessagingException {
+        return getUIDCollection(imapFolder).toArray();
+    }
+
+    /**
+     * Detects the corresponding UIDs from given folder
+     *
+     * @param imapFolder The IMAP folder
+     * @return The corresponding UIDs
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static TLongCollection getUIDCollection(final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
              * Empty folder...
              */
-            return new long[0];
+            return new TLongArrayList(0);
         }
-        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongList) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -2223,8 +2235,7 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                            uids.add(uidItem.uid);
+                            uids.add(getItemOf(UID.class, (FetchResponse) r[j], STR_UID).uid);
                             r[j] = null;
                         }
                     }
@@ -2245,7 +2256,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return uids.toArray();
+                return uids;
             }
 
         }));
