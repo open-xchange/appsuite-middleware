@@ -180,6 +180,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final boolean INFO = LOG.isInfoEnabled();
+
+    private static final int READ_ONLY = Folder.READ_ONLY;
+
+    private static final int READ_WRITE = Folder.READ_WRITE;
+
     /*-
      * Flag constants
      */
@@ -292,7 +298,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return super.getPrimaryContentsLong(fullName, mailIds);
         }
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             final BODYSTRUCTURE[] bodystructures = new BodystructureFetchIMAPCommand(imapFolder, mailIds).doCommand();
             final String[] retval = new String[mailIds.length];
 
@@ -483,7 +489,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Get messages with given fields filled
          */
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             /*
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
@@ -646,7 +652,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final int length = messageIDs.length;
             int count = 0;
             final MailMessage[] retval = new MailMessage[length];
-            imapFolder = setAndOpenFolder(imapFolder, "INBOX", Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, "INBOX", READ_ONLY);
             final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
             for (int i = 0; i < uids.length; i++) {
                 final long uid = uids[i];
@@ -675,7 +681,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final Folder[] folders = parentFolder.list();
         for (int i = 0; count >= 0 && i < folders.length; i++) {
             final String fullName = folders[i].getFullName();
-            final IMAPFolder imapFolder = setAndOpenFolder(fullName, Folder.READ_ONLY);
+            final IMAPFolder imapFolder = setAndOpenFolder(fullName, READ_ONLY);
             final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
             for (int k = 0; k < uids.length; k++) {
                 final long uid = uids[k];
@@ -695,7 +701,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         try {
-            final int desiredMode = markSeen ? Folder.READ_WRITE : Folder.READ_ONLY;
+            final int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
             imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
             if (0 >= imapFolder.getMessageCount()) {
                 return null;
@@ -813,7 +819,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             if (imapFolder.getMessageCount() <= 0) {
                 return EMPTY_RETVAL;
             }
@@ -987,14 +993,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
             final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
             if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
-                sentFolder.open(IMAPFolder.READ_ONLY);
+                sentFolder.open(READ_ONLY);
                 addOpenedFolder(sentFolder);
             }
             /*
@@ -1012,6 +1018,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Need to use in-application Threader because of missing capability or merging with sent messages
                  */
+                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final long st = logIt ? System.currentTimeMillis() : 0L;
                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
                 if (mergeWithSent) {
                     Threadable.append(threadable, Threadable.getAllThreadablesFrom(sentFolder));
@@ -1021,10 +1029,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     // final String threadResp = Threadable.toThreadReferences(threadable, null);
                     threadList = Threadable.toNodeList(threadable);
                     ThreadSortNode.filterFullName(sentFullName, threadList);
+                    if (logIt) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.info("\tIn-application threader (incl. sent messages) took " + dur + "msec for folder " + fullName);
+                    }
                 } else {
                     threadable = new Threader().thread(threadable);
                     // final String threadResp = Threadable.toThreadReferences(threadable, null);
                     threadList = Threadable.toNodeList(threadable);
+                    if (logIt) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.info("\tIn-application threader took " + dur + "msec for folder " + fullName);
+                    }
                 }
             }
             if (null == threadList) {
@@ -1049,6 +1065,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
+                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final long st = logIt ? System.currentTimeMillis() : 0L;
                 final Map<MessageId, MailMessage> mapping;
                 if (mergeWithSent) {
                     final Map<String, TIntList> m = ThreadSortUtil.extractSeqNumsAsMap(threadList);
@@ -1092,6 +1110,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             return true;
                         }
                     });
+                }
+                if (logIt) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.info("\tMessage fetch took " + dur + "msec for folder " + fullName);
                 }
                 /*
                  * Apply account identifier
@@ -1239,7 +1261,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             if (0 >= imapFolder.getMessageCount()) {
                 return EMPTY_RETVAL;
             }
@@ -1429,7 +1451,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] getUnreadMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final int limit) throws OXException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             MailMessage[] mails;
             {
                 /*
@@ -1475,7 +1497,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public void deleteMessagesLong(final String fullName, final long[] msgUIDs, final boolean hardDelete) throws OXException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1692,7 +1714,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Open and check user rights on source folder
              */
-            imapFolder = setAndOpenFolder(imapFolder, sourceFullName, move ? Folder.READ_WRITE : Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, sourceFullName, move ? READ_WRITE : READ_ONLY);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -1781,7 +1803,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * A copy/move to drafts folder. Ensure to set \Draft flag.
                  */
-                final IMAPFolder destFolder = setAndOpenFolder(destFullName, Folder.READ_WRITE);
+                final IMAPFolder destFolder = setAndOpenFolder(destFullName, READ_WRITE);
                 try {
                     if (destFolder.getMessageCount() > 0) {
                         if (DEBUG) {
@@ -1802,7 +1824,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * A copy/move from drafts folder. Ensure to unset \Draft flag.
                  */
-                final IMAPFolder destFolder = setAndOpenFolder(destFullName, Folder.READ_WRITE);
+                final IMAPFolder destFolder = setAndOpenFolder(destFullName, READ_WRITE);
                 try {
                     if (DEBUG) {
                         final long start = System.currentTimeMillis();
@@ -1958,7 +1980,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Open and check user rights on source folder
              */
-            imapFolder = setAndOpenFolder(imapFolder, destFullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, destFullName, READ_WRITE);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -2090,7 +2112,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return;
         }
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             /*
              * Remove non user-alterable system flags
              */
@@ -2189,7 +2211,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Check for spam action
              */
             if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
-                handleSpamByUID(msgUIDs, set, true, fullName, Folder.READ_WRITE);
+                handleSpamByUID(msgUIDs, set, true, fullName, READ_WRITE);
             } else {
                 /*
                  * Force JavaMail's cache update through folder closure
@@ -2211,7 +2233,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return;
         }
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             /*
              * Remove non user-alterable system flags
              */
@@ -2310,7 +2332,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
                 final long[] uids = IMAPCommandsCollection.getUIDs(imapFolder);
-                handleSpamByUID(uids, set, true, fullName, Folder.READ_WRITE);
+                handleSpamByUID(uids, set, true, fullName, READ_WRITE);
             } else {
                 /*
                  * Force JavaMail's cache update through folder closure
@@ -2341,7 +2363,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 return;
             }
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -2405,7 +2427,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 return;
             }
-            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -2533,7 +2555,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private MailMessage[] getChangedMessages(final String folder, final MailField[] fields, final int index) throws OXException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, folder, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, folder, READ_ONLY);
             if (!holdsMessages()) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
             }
@@ -2726,7 +2748,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          */
         final long[] retval = new long[msgUIDs.length];
         Arrays.fill(retval, -1L);
-        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullName, Folder.READ_ONLY)) {
+        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullName, READ_ONLY)) {
             // No look-up possible
             return retval;
         }
@@ -2752,7 +2774,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         if (messageId != null) {
             final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
-            destFolder.open(Folder.READ_ONLY);
+            destFolder.open(READ_ONLY);
             try {
                 /*
                  * Find this message ID in destination folder
