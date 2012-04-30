@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.thread;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.set.TIntSet;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Header;
 import javax.mail.MessagingException;
@@ -69,6 +71,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.threadsort.MessageId;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.BadCommandException;
@@ -89,6 +92,11 @@ import com.sun.mail.imap.protocol.RFC822DATA;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Threadable {
+
+    /**
+     * The logger constant.
+     */
+    static final org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
 
     Threadable next;
 
@@ -112,7 +120,7 @@ public final class Threadable {
 
     private String subject2;
 
-    private boolean has_re;
+    private boolean hasRe;
 
     /**
      * Initializes a new {@link Threadable}.
@@ -158,30 +166,40 @@ public final class Threadable {
         return s + " ) ]";
     }
 
+    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private void simplifySubject() {
         if (isEmpty(subject)) {
             subject2 = "";
             return;
         }
+
+        // Try by RegEx
+        {
+            final Matcher m = PATTERN_SUBJECT.matcher(subject);
+            if (m.matches()) {
+                subject2 = m.group(2);
+                return;
+            }
+        }
+
         // Start position
         int start = 0;
+        final String subject = this.subject.trim();
         final int len = subject.length();
-        boolean done = false;
-        while (!done) {
-            done = true;
-            // skip whitespace.
-            while (subject.charAt(start) <= ' ') {
-                start++;
-                if (start >= len) {
-                    subject2 = "";
-                    return;
-                }
-            }
+        if (len <= 2) {
+            subject2 = subject;
+            return;
+        }
 
-            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e' || subject.charAt(start + 1) == 'e')) {
+        boolean done = false;
+        while (!done && (start < len)) {
+            done = true;
+
+            if (start < (len - 2) && (subject.charAt(start) == 'r' || subject.charAt(start) == 'R') && (subject.charAt(start + 1) == 'e' || subject.charAt(start + 1) == 'E')) {
                 if (subject.charAt(start + 2) == ':') {
                     start += 3; // Skip over "Re:"
-                    has_re = true; // yes, we found it.
+                    hasRe = true; // yes, we found it.
                     done = false; // keep going.
                 } else if (start < (len - 2) && (subject.charAt(start + 2) == '[' || subject.charAt(start + 2) == '(')) {
                     int i = start + 3; // skip over "Re[" or "Re("
@@ -195,7 +213,7 @@ public final class Threadable {
                     // Only if it is do we alter `start'.
                     if (i < (len - 1) && (subject.charAt(i) == ']' || subject.charAt(i) == ')') && subject.charAt(i + 1) == ':') {
                         start = i + 2; // Skip over "]:"
-                        has_re = true; // yes, we found it.
+                        hasRe = true; // yes, we found it.
                         done = false; // keep going.
                     }
                 }
@@ -206,16 +224,10 @@ public final class Threadable {
             }
         }
 
-        int end = len;
-        // Strip trailing whitespace.
-        while (end > start && subject.charAt(end - 1) < ' ') {
-            end--;
-        }
-
-        if (start == 0 && end == len) {
+        if (start == 0) {
             subject2 = subject;
         } else {
-            subject2 = subject.substring(start, end);
+            subject2 = subject.substring(start).trim();
         }
     }
 
@@ -280,7 +292,7 @@ public final class Threadable {
         if (subject2 == null) {
             simplifySubject();
         }
-        return has_re;
+        return hasRe;
     }
 
     /**
@@ -578,6 +590,9 @@ public final class Threadable {
                 cur = cur.next;
             }
         }
+        if (list.isEmpty()) {
+            return t;
+        }
         // Filter
         for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
             final Threadable cur = iterator.next();
@@ -634,18 +649,26 @@ public final class Threadable {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final StringBuilder command;
+                final String command;
                 final Response[] r;
                 {
-                    command = new StringBuilder(128).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
                     final boolean rev1 = protocol.isREV1();
                     if (rev1) {
-                        command.append("BODY.PEEK[HEADER.FIELDS (Subject Message-Id Reference In-Reply-To)]");
+                        sb.append("BODY.PEEK[HEADER.FIELDS (Subject Message-Id Reference In-Reply-To)]");
                     } else {
-                        command.append("RFC822.HEADER.LINES (Subject Message-Id Reference In-Reply-To)");
+                        sb.append("RFC822.HEADER.LINES (Subject Message-Id Reference In-Reply-To)");
                     }
-                    command.append(')');
-                    r = protocol.command(command.toString(), null);
+                    sb.append(')');
+                    command = sb.toString();
+                    sb = null;
+                    final long start = System.currentTimeMillis();
+                    r = protocol.command(command, null);
+                    final long dur = System.currentTimeMillis() - start;
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" took " + dur + "msec.");
+                    }
+                    mailInterfaceMonitor.addUseTime(dur);
                 }
                 final int len = r.length - 1;
                 final Response response = r[len];

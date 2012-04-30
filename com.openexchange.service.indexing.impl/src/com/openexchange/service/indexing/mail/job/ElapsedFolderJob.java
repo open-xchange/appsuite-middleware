@@ -131,7 +131,7 @@ public final class ElapsedFolderJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         runner = Thread.currentThread();
         try {
             final List<String> exceededFolders = getElapsedFolders(System.currentTimeMillis());

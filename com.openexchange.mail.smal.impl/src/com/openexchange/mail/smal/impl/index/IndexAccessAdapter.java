@@ -61,12 +61,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailConstants;
-import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -75,9 +78,11 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.AbstractSearchTermVisitor;
+import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
-import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -138,8 +143,10 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         }
         IndexAccess<MailMessage> indexAccess = null;
         try {
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            return exists(accountId, fullName, indexAccess);
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+            indexAccess = facade.acquireIndexAccess(Types.EMAIL, userId, contextId);
+            return exists(userId, contextId, accountId, fullName, indexAccess);
         } finally {
             releaseAccess(facade, indexAccess);
         }
@@ -154,87 +161,54 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         IndexAccess<MailMessage> indexAccess = null;
         try {
             indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-            if (accountId >= 0) {
-                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-            }
-            if (null != fullName) {
-                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-            }
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
             /*
              * Delete whole folder?
              */
             if (null == optMailIds || 0 == optMailIds.length) {
-                indexAccess.deleteByQuery(queryBuilder.toString());
+                final Map<String, Object> params = new HashMap<String, Object>();
+                params.put("accountId", accountId);
+                final QueryParameters query = new QueryParameters.Builder(params)
+                .setHandler(SearchHandler.ALL_REQUEST)
+                .setType(Type.MAIL)
+                .setFolder(fullName).build();
+                
+                indexAccess.deleteByQuery(query);
                 return;
             }
             /*
              * Delete by identifier
              */
-            final int resetLen = queryBuilder.length();
-            final int size = optMailIds.length;
-            final String fieldId = FIELD_ID;
-            int off = 0;
-            while (off < size) {
-                if (Thread.interrupted()) {
-                    throw new InterruptedException("Thread interrupted while deleting documents.");
-                }
-                int endIndex = off + GET_ROWS;
-                if (endIndex >= size) {
-                    endIndex = size;
-                }
-                final int len = endIndex - off;
-                final String[] ids = new String[len];
-                System.arraycopy(optMailIds, off, ids, 0, len);
-                queryBuilder.setLength(resetLen);
-                queryBuilder.append(" AND (").append(fieldId).append(':').append(ids[0]);
-                for (int i = 1; i < len; i++) {
-                    queryBuilder.append(" OR ").append(fieldId).append(':').append(ids[i]);
-                }
-                queryBuilder.append(')');
-                indexAccess.deleteByQuery(queryBuilder.toString());
-                off = endIndex;
+            for (final String id : optMailIds) {
+                final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
+                indexAccess.deleteById(indexId.getUUID());
             }
         } finally {
             releaseAccess(facade, indexAccess);
         }
     }
 
-    /**
-     * Performs the query derived from given search term.
-     * 
-     * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
-     * @param optFullName The optional full name to restrict search results to specified folder
-     * @param sortField The sort field
-     * @param order The order direction
-     * @param fields The fields to pre-fill in returned {@link MailMessage} instances; if <code>null</code> all available fields are filled
-     * @param session The session
-     * @return The search result
-     * @throws OXException If search fails
-     * @throws InterruptedException If processing is interrupted
-     */
-    public List<MailMessage> all(final int optAccountId, final String optFullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final Session session) throws OXException, InterruptedException {
-        return search(optAccountId, optFullName, null, sortField, order, fields, null, session);
-    }
+    // /**
+    // * Performs the query derived from given search term.
+    // *
+    // * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
+    // * @param optFullName The optional full name to restrict search results to specified folder
+    // * @param sortField The sort field
+    // * @param order The order direction
+    // * @param fields The fields to pre-fill in returned {@link MailMessage} instances; if <code>null</code> all available fields are
+    // filled
+    // * @param session The session
+    // * @return The search result
+    // * @throws OXException If search fails
+    // * @throws InterruptedException If processing is interrupted
+    // */
+    // public List<MailMessage> all(final int optAccountId, final String optFullName, final MailSortField sortField, final OrderDirection
+    // order, final MailField[] fields, final Session session) throws OXException, InterruptedException {
+    // return search(optAccountId, optFullName, null, sortField, order, fields, null, session);
+    // }
 
-    /**
-     * Performs the query derived from given search term.
-     * 
-     * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
-     * @param optFullName The optional full name to restrict search results to specified folder
-     * @param searchTerm The search term
-     * @param sortField The sort field
-     * @param order The order direction
-     * @param fields The fields to pre-fill in returned {@link MailMessage} instances; if <code>null</code> all available fields are filled
-     * @param indexRange The index range
-     * @param session The session
-     * @return The search result
-     * @throws OXException If search fails
-     * @throws InterruptedException If processing is interrupted
-     */
-    public List<MailMessage> search(final int optAccountId, final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final IndexRange indexRange, final Session session) throws OXException, InterruptedException {
+    public List<MailMessage> search(final int accountId, final String fullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final IndexRange indexRange, final Session session) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
             // Index service missing
@@ -246,8 +220,10 @@ public final class IndexAccessAdapter implements SolrMailConstants {
             /*
              * Check folder existence in index
              */
-            if ((optAccountId >= 0) && (null != optFullName) && !exists(optAccountId, optFullName, indexAccess)) {
-                throw MailExceptionCode.FOLDER_NOT_FOUND.create(optFullName);
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+            if ((accountId >= 0) && (null != fullName) && !exists(userId, contextId, accountId, fullName, indexAccess)) {
+                throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
             }
             final MailFields mailFields = new MailFields(fields);
             if (null != sortField) {
@@ -256,33 +232,41 @@ public final class IndexAccessAdapter implements SolrMailConstants {
                     mailFields.add(sf);
                 }
             }
-            final QueryParameters.Builder builder;
-            {
-                final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                if (optAccountId >= 0) {
-                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(optAccountId).append(')');
-                }
-                if (null != optFullName) {
-                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(optFullName).append("\")");
-                }
-                if (null != searchTerm) {
-                    queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(searchTerm)).append(')');
-                }
-                builder = new QueryParameters.Builder(queryBuilder.toString());
-            }
+
+            /*
+             * search
+             */            
+            final Map<String, Object> params = new HashMap<String, Object>(1);
+            params.put("accountId", accountId);
+            final QueryParameters.Builder builder = new QueryParameters.Builder(params)
+                                                        .setOffset(0)
+                                                        .setLength(Integer.MAX_VALUE)
+                                                        .setType(IndexDocument.Type.MAIL)
+                                                        .setFolder(fullName);
+            
+            
             if (null != sortField) {
-                final Map<String, Object> params = new HashMap<String, Object>(2);
                 final MailField field = MailField.getField(sortField.getField());
-                final List<String> list = SolrMailUtility.getField2NameMap().get(field);
-                if (null != list && !list.isEmpty()) {
-                    params.put("sort", list.get(0));
-                    params.put("order", OrderDirection.DESC.equals(order) ? "desc" : "asc");
-                    builder.setParameters(params);
+                final MailIndexField indexSortField = MailIndexField.getFor(field);
+                if (indexSortField != null) {
+                    builder.setSortField(indexSortField);
+                    builder.setOrder(OrderDirection.DESC.equals(order) ? "desc" : "asc");
                 }
             }
-            final QueryParameters parameters = builder.setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).build();
+            
+            final QueryParameters parameters;
+            if (searchTerm == null) {
+                parameters = builder.setHandler(SearchHandler.ALL_REQUEST).build();
+            } else {
+                final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
+                searchTerm.accept(visitor);
+                if (visitor.simple) {
+                    parameters = builder.setHandler(SearchHandler.SIMPLE).setPattern(searchTerm.getPattern().toString()).build();
+                } else {
+                    parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
+                }
+            }
+
             final IndexResult<MailMessage> result = indexAccess.query(parameters);
             List<IndexDocument<MailMessage>> documents = result.getResults();
             if (indexRange != null) {
@@ -311,14 +295,108 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         }
     }
 
-    private boolean exists(final int optAccountId, final String optFullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
-        // Compose query string
-        final StringBuilder sb = new StringBuilder(128);
-        sb.append('(').append(FIELD_ACCOUNT).append(':').append(optAccountId).append(')');
-        sb.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(optFullName).append("\")");
+    // /**
+    // * Performs the query derived from given search term.
+    // *
+    // * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
+    // * @param optFullName The optional full name to restrict search results to specified folder
+    // * @param searchTerm The search term
+    // * @param sortField The sort field
+    // * @param order The order direction
+    // * @param fields The fields to pre-fill in returned {@link MailMessage} instances; if <code>null</code> all available fields are
+    // filled
+    // * @param indexRange The index range
+    // * @param session The session
+    // * @return The search result
+    // * @throws OXException If search fails
+    // * @throws InterruptedException If processing is interrupted
+    // */
+    // public List<MailMessage> search(final int optAccountId, final String optFullName, final SearchTerm<?> searchTerm, final MailSortField
+    // sortField, final OrderDirection order, final MailField[] fields, final IndexRange indexRange, final Session session) throws
+    // OXException, InterruptedException {
+    // final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+    // if (null == facade) {
+    // // Index service missing
+    // return Collections.emptyList();
+    // }
+    // IndexAccess<MailMessage> indexAccess = null;
+    // try {
+    // indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+    // /*
+    // * Check folder existence in index
+    // */
+    // if ((optAccountId >= 0) && (null != optFullName) && !exists(optAccountId, optFullName, indexAccess)) {
+    // throw MailExceptionCode.FOLDER_NOT_FOUND.create(optFullName);
+    // }
+    // final MailFields mailFields = new MailFields(fields);
+    // if (null != sortField) {
+    // final MailField sf = MailField.getField(sortField.getField());
+    // if (null != sf) {
+    // mailFields.add(sf);
+    // }
+    // }
+    // final QueryParameters.Builder builder;
+    // {
+    // final StringBuilder queryBuilder = new StringBuilder(128);
+    // queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+    // queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+    // if (optAccountId >= 0) {
+    // queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(optAccountId).append(')');
+    // }
+    // if (null != optFullName) {
+    // queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(optFullName).append("\")");
+    // }
+    // if (null != searchTerm) {
+    // queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(searchTerm)).append(')');
+    // }
+    // builder = new QueryParameters.Builder(queryBuilder.toString());
+    // }
+    // if (null != sortField) {
+    // final Map<String, Object> params = new HashMap<String, Object>(2);
+    // final MailField field = MailField.getField(sortField.getField());
+    // final List<String> list = SolrMailUtility.getField2NameMap().get(field);
+    // if (null != list && !list.isEmpty()) {
+    // params.put("sort", list.get(0));
+    // params.put("order", OrderDirection.DESC.equals(order) ? "desc" : "asc");
+    // builder.setParameters(params);
+    // }
+    // }
+    // final QueryParameters parameters = builder.setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).build();
+    // final IndexResult<MailMessage> result = indexAccess.query(parameters);
+    // List<IndexDocument<MailMessage>> documents = result.getResults();
+    // if (indexRange != null) {
+    // final int fromIndex = indexRange.start;
+    // int toIndex = indexRange.end;
+    // if ((documents == null) || documents.isEmpty()) {
+    // return Collections.emptyList();
+    // }
+    // if ((fromIndex) > documents.size()) {
+    // /*
+    // * Return empty iterator if start is out of range
+    // */
+    // return Collections.emptyList();
+    // }
+    // /*
+    // * Reset end index if out of range
+    // */
+    // if (toIndex >= documents.size()) {
+    // toIndex = documents.size();
+    // }
+    // documents = documents.subList(fromIndex, toIndex);
+    // }
+    // return IndexDocumentHelper.messagesFrom(documents);
+    // } finally {
+    // releaseAccess(facade, indexAccess);
+    // }
+    // }
+
+    private boolean exists(final int userId, final int contextId, final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
         // Query parameters
+        final Map<String, Object> params = new HashMap<String, Object>();
+        params.put("accountId", accountId);
         final QueryParameters qp =
-            new QueryParameters.Builder(sb.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).build();
+            new QueryParameters.Builder(params).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setHandler(
+                SearchHandler.ALL_REQUEST).setFolder(fullName).build();
         return indexAccess.query(qp).getNumFound() > 0L;
     }
 
@@ -347,86 +425,130 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         }
     }
 
-    /**
-     * Gets the denoted messages by specified identifiers.
-     * 
-     * @param accountId The account identifier
-     * @param fullName The full name of the folder holding the messages
-     * @param optMailIds The mail identifiers; if <code>null</code> all folder's messages are retrieved
-     * @param sortField The sort field
-     * @param order The sort order
-     * @param fields The fields
-     * @param session The session providing user information
-     * @return The queried messages
-     * @throws OXException If messages cannot be returned
-     * @throws InterruptedException If querying messages is interrupted
-     */
-    public List<MailMessage> getMessages(final int accountId, final String fullName, final String[] optMailIds, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final Session session) throws OXException, InterruptedException {
-        if (null == optMailIds || 0 == optMailIds.length) {
-            return search(accountId, fullName, null, sortField, order, fields, null, session);
-        }
+    public List<MailMessage> getMessages(final int accountId, final String fullName, final Session session, final MailSortField sortField, final OrderDirection order) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
             // Index service missing
             return Collections.emptyList();
         }
+
         IndexAccess<MailMessage> indexAccess = null;
         try {
             indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
             /*
              * Check folder existence in index
              */
-            if ((accountId >= 0) && (null != fullName) && !exists(accountId, fullName, indexAccess)) {
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+            if ((accountId >= 0) && (null != fullName) && !exists(userId, contextId, accountId, fullName, indexAccess)) {
                 throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
             }
-            final StringBuilder queryBuilder = new StringBuilder(128);
-            {
-                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                if (accountId >= 0) {
-                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-                }
-                if (null != fullName) {
-                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                }
-            }
-            final int size = optMailIds.length;
-            final List<MailMessage> mails = new ArrayList<MailMessage>(size);
-            final String fieldId = FIELD_ID;
-            final int resetLen = queryBuilder.length();
-            int off = 0;
-            while (off < size) {
-                if (Thread.interrupted()) {
-                    throw new InterruptedException("Thread interrupted while getting documents.");
-                }
-                int endIndex = off + GET_ROWS;
-                if (endIndex >= size) {
-                    endIndex = size;
-                }
-                final int len = endIndex - off;
-                final String[] ids = new String[len];
-                System.arraycopy(optMailIds, off, ids, 0, len);
-                queryBuilder.setLength(resetLen);
-                queryBuilder.append(" AND (").append(fieldId).append(':').append(ids[0]);
-                for (int i = 1; i < len; i++) {
-                    queryBuilder.append(" OR ").append(fieldId).append(':').append(ids[i]);
-                }
-                queryBuilder.append(')');
-                final QueryParameters queryParameters =
-                    new QueryParameters.Builder(queryBuilder.toString()).setLength(endIndex - off).setOffset(0).setType(
-                        IndexDocument.Type.MAIL).setParameters(Collections.<String, Object> emptyMap()).build();
-                final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
-                mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));
-                off = endIndex;
-            }
+
+            final Map<String, Object> params = new HashMap<String, Object>();
+            params.put("accountId", accountId);
             if (null != sortField) {
-                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocale(session)));
+                final MailField field = MailField.getField(sortField.getField());
+                final MailIndexField indexSortField = MailIndexField.getFor(field);
+                if (indexSortField != null) {
+                    params.put("sort", indexSortField);
+                }
+
+                if (order != null) {
+                    params.put("order", OrderDirection.DESC.equals(order) ? "desc" : "asc");
+                }
             }
+            final QueryParameters query =
+                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolder(fullName).setType(Type.MAIL).build();
+            final IndexResult<MailMessage> result = indexAccess.query(query);
+            final List<MailMessage> mails = new ArrayList<MailMessage>();
+            mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));
+
             return mails;
         } finally {
             releaseAccess(facade, indexAccess);
         }
     }
+
+    // /**
+    // * Gets the denoted messages by specified identifiers.
+    // *
+    // * @param accountId The account identifier
+    // * @param fullName The full name of the folder holding the messages
+    // * @param optMailIds The mail identifiers; if <code>null</code> all folder's messages are retrieved
+    // * @param sortField The sort field
+    // * @param order The sort order
+    // * @param fields The fields
+    // * @param session The session providing user information
+    // * @return The queried messages
+    // * @throws OXException If messages cannot be returned
+    // * @throws InterruptedException If querying messages is interrupted
+    // */
+    // public List<MailMessage> getMessages(final int accountId, final String fullName, final String[] optMailIds, final MailSortField
+    // sortField, final OrderDirection order, final MailField[] fields, final Session session) throws OXException, InterruptedException {
+    // if (null == optMailIds || 0 == optMailIds.length) {
+    // return search(accountId, fullName, null, sortField, order, fields, null, session);
+    // }
+    // final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+    // if (null == facade) {
+    // // Index service missing
+    // return Collections.emptyList();
+    // }
+    // IndexAccess<MailMessage> indexAccess = null;
+    // try {
+    // indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+    // /*
+    // * Check folder existence in index
+    // */
+    // if ((accountId >= 0) && (null != fullName) && !exists(accountId, fullName, indexAccess)) {
+    // throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
+    // }
+    // final StringBuilder queryBuilder = new StringBuilder(128);
+    // {
+    // queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+    // queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+    // if (accountId >= 0) {
+    // queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+    // }
+    // if (null != fullName) {
+    // queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+    // }
+    // }
+    // final int size = optMailIds.length;
+    // final List<MailMessage> mails = new ArrayList<MailMessage>(size);
+    // final String fieldId = FIELD_ID;
+    // final int resetLen = queryBuilder.length();
+    // int off = 0;
+    // while (off < size) {
+    // if (Thread.interrupted()) {
+    // throw new InterruptedException("Thread interrupted while getting documents.");
+    // }
+    // int endIndex = off + GET_ROWS;
+    // if (endIndex >= size) {
+    // endIndex = size;
+    // }
+    // final int len = endIndex - off;
+    // final String[] ids = new String[len];
+    // System.arraycopy(optMailIds, off, ids, 0, len);
+    // queryBuilder.setLength(resetLen);
+    // queryBuilder.append(" AND (").append(fieldId).append(':').append(ids[0]);
+    // for (int i = 1; i < len; i++) {
+    // queryBuilder.append(" OR ").append(fieldId).append(':').append(ids[i]);
+    // }
+    // queryBuilder.append(')');
+    // final QueryParameters queryParameters = new QueryParameters.Builder(queryBuilder.toString()).setLength(endIndex - off).setOffset(
+    // 0).setType(IndexDocument.Type.MAIL).setParameters(Collections.<String, Object> emptyMap()).build();
+    // final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
+    // mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));
+    // off = endIndex;
+    // }
+    // if (null != sortField) {
+    // Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocale(session)));
+    // }
+    // return mails;
+    // } finally {
+    // releaseAccess(facade, indexAccess);
+    // }
+    // }
 
     private Locale getUserLocale(final Session session) {
         if (session instanceof ServerSession) {
@@ -442,6 +564,29 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         } catch (final OXException e) {
             return LanguageDetectionService.DEFAULT_LOCALE;
         }
+    }
+
+    private static final class SimpleSearchTermVisitor extends AbstractSearchTermVisitor {
+
+        boolean simple = true;
+
+        /**
+         * Initializes a new {@link IndexAccessAdapter.SimpleSearchTermVisitor}.
+         */
+        SimpleSearchTermVisitor() {
+            super();
+        }
+
+        @Override
+        public void visit(final ANDTerm term) {
+            simple = false;
+        }
+
+        @Override
+        public void visit(final ORTerm term) {
+            simple = false;
+        }
+
     }
 
 }

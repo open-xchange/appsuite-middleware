@@ -89,6 +89,7 @@ import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalExceptionCodes;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.MailJobInfo;
@@ -266,58 +267,63 @@ public final class Processor implements SolrMailConstants {
                     /*
                      * Acquire exclusive flag
                      */
-                    if (!acquire(fullName, accountId, userId, contextId)) {
-                        // Another thread already running
-                        processingProgress.setFirstTime(false).setProcessType(ProcessType.NONE);
-                        if (DEBUG) {
-                            LOG.debug("\tAnother thread processes \"" + fullName + "\" " + new DebugInfo(accountId, userId, contextId));
-                        }
-                        return null;
-                    }
-                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                    IndexAccess<MailMessage> indexAccess = null;
                     try {
-                        indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-                        final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
-                        mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
-                        mailAccess.connect(false);
-                        if (initial) {
-                            /*-
-                             * 
-                             * Denoted folder has not been added to index before
-                             * 
-                             */
-                            processingProgress.setFirstTime(true);
-                            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
-                            final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
-                            process(
-                                new MailFolderInfo(fullName, messageCount),
-                                processingProgress,
-                                mailAccess,
-                                indexAccess,
-                                storageMails,
-                                indexMails);
-                        } else {
-                            /*-
-                             * 
-                             * Denoted folder has already been added to index before
-                             * 
-                             */
-                            processingProgress.setProcessType(ProcessType.JOB);
-                            submitAsJob(folderInfo, mailAccess, Collections.<String, Object>emptyMap());
+                        if (!acquire(fullName, accountId, userId, contextId)) {
+                            // Another thread already running
+                            processingProgress.setFirstTime(false).setProcessType(ProcessType.NONE);
                             if (DEBUG) {
-                                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                                LOG.debug("\tAnother thread processes \"" + fullName + "\" " + new DebugInfo(accountId, userId, contextId));
                             }
+                            return null;
                         }
-                        return null;
-                    } finally {
-                        if (processingProgress.countDown) {
-                            processingProgress.latch.countDown();
-                            processingProgress.countDown = false;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        IndexAccess<MailMessage> indexAccess = null;
+                        try {
+                            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+                            final boolean initial = !containsFolder(accountId, fullName, indexAccess, session);
+                            mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
+                            mailAccess.connect(false);
+                            if (initial) {
+                                /*-
+                                 * 
+                                 * Denoted folder has not been added to index before
+                                 * 
+                                 */
+                                processingProgress.setFirstTime(true);
+                                final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+                                final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
+                                process(
+                                    new MailFolderInfo(fullName, messageCount),
+                                    processingProgress,
+                                    mailAccess,
+                                    indexAccess,
+                                    storageMails,
+                                    indexMails);
+                            } else {
+                                /*-
+                                 * 
+                                 * Denoted folder has already been added to index before
+                                 * 
+                                 */
+                                processingProgress.setProcessType(ProcessType.JOB);
+                                submitAsJob(folderInfo, mailAccess, Collections.<String, Object>emptyMap());
+                                if (DEBUG) {
+                                    LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                                }
+                            }
+                            return null;
+                        } finally {
+                            if (processingProgress.countDown) {
+                                processingProgress.latch.countDown();
+                                processingProgress.countDown = false;
+                            }
+                            SmalMailAccess.closeUnwrappedInstance(mailAccess);
+                            releaseAccess(facade, indexAccess);
+                            release(fullName, accountId, userId, contextId);
                         }
-                        SmalMailAccess.closeUnwrappedInstance(mailAccess);
-                        releaseAccess(facade, indexAccess);
-                        release(fullName, accountId, userId, contextId);
+                    } catch (final Exception e) {
+                        LOG.error(e.getMessage(), e);
+                        throw e;
                     }
                 }
 
@@ -431,17 +437,8 @@ public final class Processor implements SolrMailConstants {
         if (null == fullName || accountId < 0) {
             return false;
         }
-        // Compose query string
-        final StringBuilder queryBuilder = new StringBuilder(128);
-        queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-        queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-        queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-        queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-        // Query parameters
-        final QueryParameters queryParameters =
-            new QueryParameters.Builder(queryBuilder.toString()).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).build();
-        final IndexResult<MailMessage> result = indexAccess.query(queryParameters);
-        return result.getNumFound() > 0;
+        
+        return IndexAccessAdapter.getInstance().containsFolder(accountId, fullName, session);
     }
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
@@ -477,36 +474,38 @@ public final class Processor implements SolrMailConstants {
          */
         final Map<String, MailMessage> indexMap;
         {
-            final String queryString;
-            {
-                final Session session = mailAccess.getSession();
-                final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(mailAccess.getAccountId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                queryString = queryBuilder.toString();
-            }
-            final Map<String, Object> params = new HashMap<String, Object>(4);
-            // TODO: params.put("fields", mailFields);
-            params.put("sort", FIELD_RECEIVED_DATE);
-            params.put("order", "desc");
-            params.put("fields", FIELD_ID);
-            final QueryParameters queryParameter =
-                new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
-                    params).build();
-            final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
-            final List<MailMessage> indexedMails;
-            if (0 >= indexResult.getNumFound()) {
-                indexedMails = Collections.emptyList();
-            } else {
-                final List<IndexDocument<MailMessage>> results = indexResult.getResults();
-                final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
-                for (final IndexDocument<MailMessage> indexDocument : results) {
-                    mails.add(indexDocument.getObject());
-                }
-                indexedMails = mails;
-            }
+//            final String queryString;
+//            {
+//                final Session session = mailAccess.getSession();
+//                final StringBuilder queryBuilder = new StringBuilder(128);
+//                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+//                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+//                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(mailAccess.getAccountId()).append(')');
+//                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+//                queryString = queryBuilder.toString();
+//            }
+//            final Map<String, Object> params = new HashMap<String, Object>(4);
+//            // TODO: params.put("fields", mailFields);
+//            params.put("sort", FIELD_RECEIVED_DATE);
+//            params.put("order", "desc");
+//            params.put("fields", FIELD_ID);
+//            final QueryParameters queryParameter =
+//                new QueryParameters.Builder(queryString).setOffset(0).setLength(Integer.MAX_VALUE).setType(IndexDocument.Type.MAIL).setParameters(
+//                    params).build();
+//            final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+//            final List<MailMessage> indexedMails;
+//            if (0 >= indexResult.getNumFound()) {
+//                indexedMails = Collections.emptyList();
+//            } else {
+//                final List<IndexDocument<MailMessage>> results = indexResult.getResults();
+//                final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+//                for (final IndexDocument<MailMessage> indexDocument : results) {
+//                    mails.add(indexDocument.getObject());
+//                }
+//                indexedMails = mails;
+//            }
+            
+            final List<MailMessage> indexedMails = IndexAccessAdapter.getInstance().getMessages(mailAccess.getAccountId(), fullName, mailAccess.getSession(), MailSortField.RECEIVED_DATE, OrderDirection.DESC);
             if (indexedMails.isEmpty()) {
                 indexMap = Collections.emptyMap();
             } else {

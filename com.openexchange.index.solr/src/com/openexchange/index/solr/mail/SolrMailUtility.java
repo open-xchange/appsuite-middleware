@@ -49,12 +49,9 @@
 
 package com.openexchange.index.solr.mail;
 
-import java.util.EnumMap;
-import java.util.List;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
-import com.openexchange.mail.MailField;
+import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -72,14 +69,14 @@ public final class SolrMailUtility {
         super();
     }
 
-    /**
-     * Gets the field2name mapping.
-     * 
-     * @return The field2name mapping
-     */
-    public static EnumMap<MailField, List<String>> getField2NameMap() {
-        return MailSolrIndexAccess.getField2name();
-    }
+    // /**
+    // * Gets the field2name mapping.
+    // *
+    // * @return The field2name mapping
+    // */
+    // public static EnumMap<MailField, List<String>> getField2NameMap() {
+    // return MailSolrIndexAccess.getField2name();
+    // }
 
     /**
      * Gets the indexable fields.
@@ -87,7 +84,7 @@ public final class SolrMailUtility {
      * @return The indexable fields
      */
     public static MailFields getIndexableFields() {
-        return MailSolrIndexAccess.getIndexableFields();
+        return new MailFields(MailIndexField.getIndexableMailFields());
     }
 
     /**

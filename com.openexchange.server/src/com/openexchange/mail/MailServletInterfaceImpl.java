@@ -622,6 +622,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
+        final boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(fullname);
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         if (messageStorage instanceof ISimplifiedThreadStructure) {
@@ -633,7 +634,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             try {
                 return simplifiedThreadStructure.getThreadSortedMessages(
                     fullname,
-                    includeSent,
+                    mergeWithSent,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
                     MailSortField.getField(sortCol),
                     OrderDirection.getOrderDirection(order), mailFields.toArray());

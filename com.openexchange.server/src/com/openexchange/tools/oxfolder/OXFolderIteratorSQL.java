@@ -93,6 +93,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
@@ -1187,7 +1188,7 @@ public final class OXFolderIteratorSQL {
             throw e;
         } catch (final Exception e) {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
-            throw SearchIteratorException.Code.UNEXPECTED_ERROR.create("FLD", e, e.getMessage());
+            throw SearchIteratorExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("FLD");
         }
     }
 

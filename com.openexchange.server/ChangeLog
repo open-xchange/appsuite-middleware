@@ -1,3 +1,11 @@
+* 2012-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22042: Guaranteed termination for check for non-existing parents
+
+* 2012-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22047: Sanitizing possibly corrupt/broken Content-Type header
+
 * 2012-04-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 21647: Clearing cache for Outlook folder tree

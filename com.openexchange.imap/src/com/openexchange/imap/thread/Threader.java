@@ -552,16 +552,43 @@ public class Threader {
         }
 
         // Copy the ThreadContainer tree structure down into the underlying
-        // IThreadable objects (that is, make the IThreadable tree look like
+        // Threadable objects (that is, make the Threadable tree look like
         // the ThreadContainer tree.)
         //
+        @SuppressWarnings("null")
         void flush() {
-            if (parent != null && threadable == null) {
-                // Only the root_node is allowed to not have a threadable.
-                throw new Error("no threadable in " + this.toString());
+            ThreadContainer tc = this;
+            while (tc != null) {
+                final Threadable threadable = tc.threadable;
+                final boolean hasThreadable = threadable != null;
+                if (tc.parent != null && !hasThreadable) {
+                    // Only the rootNode is allowed to not have a threadable.
+                    throw new Error("no threadable in " + this.toString());
+                }
+                // Drop parent reference
+                tc.parent = null;
+                // Handle child
+                final ThreadContainer childContainer = tc.child;
+                if (hasThreadable) {
+                    threadable.setChild(childContainer == null ? null : childContainer.threadable);
+                }
+                if (childContainer != null) {
+                    childContainer.flush();
+                    tc.child = null;
+                }
+                // Handle next
+                final ThreadContainer nextContainer = tc.next;
+                if (hasThreadable) {
+                    threadable.setNext(nextContainer == null ? null : nextContainer.threadable);
+                }
+                // Drop next reference & point to next sibling
+                tc.next = null;
+                tc.threadable = null;
+                tc = nextContainer;
             }
-
-            parent = null;
+            /*-
+             * 
+             * 
 
             if (threadable != null) {
                 threadable.setChild(child == null ? null : child.threadable);
@@ -582,6 +609,8 @@ public class Threader {
             }
 
             threadable = null;
+             * 
+             */
         }
 
         // Returns true if child is under self's tree. This is used for

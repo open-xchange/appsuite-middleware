@@ -49,10 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SearchIteratorException} - The xception for {@link SearchIterator}.
@@ -66,110 +63,4 @@ public class SearchIteratorException extends OXException {
     private SearchIteratorException() {
         super();
     }
-
-    public static enum Code implements OXExceptionCode {
-
-        /**
-         * A SQL error occurred: %1$s
-         */
-        SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 1),
-        /**
-         * A DBPool error occurred: %1$s
-         */
-        DBPOOLING_ERROR("A DBPool error occurred: 1$%s", Category.CATEGORY_ERROR, 2),
-        /**
-         * Operation not allowed on a closed SearchIterator
-         */
-        CLOSED("Operation not allowed on a closed SearchIterator", Category.CATEGORY_ERROR, 3),
-        /**
-         * Mapping for %1$d not implemented
-         */
-        NOT_IMPLEMENTED("Mapping for %1$d not implemented", Category.CATEGORY_ERROR, 4),
-
-        /**
-         * FreeBusyResults calculation problem with oid: %1$d
-         */
-        CALCULATION_ERROR("FreeBusyResults calculation problem with oid: %1$d", Category.CATEGORY_ERROR, 5),
-        /**
-         * Invalid constructor argument. Instance of %1$s not supported
-         */
-        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %1$s not supported", Category.CATEGORY_ERROR, 6),
-        /**
-         * No such element.
-         */
-        NO_SUCH_ELEMENT("No such element.", Category.CATEGORY_ERROR, 7),
-        /**
-         * An unexpected error occurred: %1$s
-         */
-        UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 8);
-
-        private final String message;
-
-        private final int detailNumber;
-
-        private final Category category;
-
-        private Code(final String message, final Category category, final int detailNumber) {
-            this.message = message;
-            this.category = category;
-            this.detailNumber = detailNumber;
-        }
-
-        @Override
-        public Category getCategory() {
-            return category;
-        }
-
-        @Override
-        public int getNumber() {
-            return detailNumber;
-        }
-
-        @Override
-        public String getMessage() {
-            return message;
-        }
-
-        @Override
-        public String getPrefix() {
-            return null;
-        }
-
-        @Override
-        public boolean equals(final OXException e) {
-            return OXExceptionFactory.getInstance().equals(this, e);
-        }
-
-        /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         *
-         * @return The newly created {@link OXException} instance
-         */
-        public OXException create() {
-            return OXExceptionFactory.getInstance().create(this, new Object[0]);
-        }
-
-        /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         *
-         * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link OXException} instance
-         */
-        public OXException create(final Object... args) {
-            return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
-        }
-
-        /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         *
-         * @param cause The optional initial cause
-         * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link OXException} instance
-         */
-        public OXException create(final Throwable cause, final Object... args) {
-            return OXExceptionFactory.getInstance().create(this, cause, args);
-        }
-
-    }
-
 }

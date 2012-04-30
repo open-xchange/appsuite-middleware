@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -340,7 +341,12 @@ public final class AllFetch {
                 final SBOutputStream sbout = DEBUG ? new SBOutputStream() : null;
                 final IMAPTracer.TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
                 try {
-                    final Response[] r = protocol.command(command, null);
+                    final Response[] r;
+                    {
+                        final long start = System.currentTimeMillis();
+                        r = protocol.command(command, null);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    }
                     final int len = r.length - 1;
                     final Response response = r[len];
                     final List<MailMessage> l = new ArrayList<MailMessage>(len);

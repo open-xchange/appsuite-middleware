@@ -58,6 +58,8 @@ package com.openexchange.solr;
 public class SolrProperties {
     
     public static final String SOLR_HOME = "com.openexchange.solr.solrHome";
+    
+    public static final String LIB_DIR = "com.openexchange.solr.libDir";
         
     public static final String SCHEMA_FILE_MAIL = "com.openexchange.solr.schemaMail";
     
