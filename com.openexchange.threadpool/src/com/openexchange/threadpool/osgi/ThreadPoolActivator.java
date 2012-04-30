@@ -125,9 +125,9 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             openTrackers();
             /*
              * Register
-             */
-            registerService(ThreadPoolService.class, threadPool);
+             */            
             REF.set(threadPool);
+            registerService(ThreadPoolService.class, threadPool);            
             registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()));
             registerService(LogService.class, logService);
             // Register SessionThreadCounter service

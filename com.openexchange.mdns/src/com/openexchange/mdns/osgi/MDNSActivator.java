@@ -95,6 +95,7 @@ public final class MDNSActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
+        final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         log.info("Starting bundle: com.openexchange.mdns");
         final Runnable starter = new Runnable() {
 
@@ -140,7 +141,7 @@ public final class MDNSActivator extends HousekeepingActivator {
                 }
             }
         };
-        ThreadPools.getThreadPool().submit(ThreadPools.task(starter));
+        threadPoolService.submit(ThreadPools.task(starter));
     }
 
     protected String getHostName() {
