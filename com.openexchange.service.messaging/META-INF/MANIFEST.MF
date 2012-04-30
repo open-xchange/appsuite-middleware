@@ -20,6 +20,7 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.xml.sax
 Export-Package: com.openexchange.service.messaging
 Bundle-Activator: com.openexchange.service.messaging.osgi.MessagingServiceActivator
