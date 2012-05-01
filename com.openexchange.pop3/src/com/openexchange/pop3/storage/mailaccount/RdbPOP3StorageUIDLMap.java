@@ -151,15 +151,19 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             for (int i = 0; i < uidls.length; i++) {
                 final String uidl = uidls[i];
                 if (uidl != null) {
-                    pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, user);
-                    stmt.setInt(pos++, accountId);
-                    stmt.setString(pos++, uidl);
                     final FullnameUIDPair pair = fullnameUIDPairs[i];
-                    stmt.setString(pos++, pair.getFullname());
-                    stmt.setString(pos++, pair.getMailId());
-                    stmt.addBatch();
+                    final String fullname = pair.getFullname();
+                    final String mailId = pair.getMailId();
+                    if (null != fullname && null != mailId) {
+                        pos = 1;
+                        stmt.setInt(pos++, cid);
+                        stmt.setInt(pos++, user);
+                        stmt.setInt(pos++, accountId);
+                        stmt.setString(pos++, uidl);
+                        stmt.setString(pos++, fullname);
+                        stmt.setString(pos++, mailId);
+                        stmt.addBatch();
+                    }
                 }
             }
             stmt.executeBatch();
