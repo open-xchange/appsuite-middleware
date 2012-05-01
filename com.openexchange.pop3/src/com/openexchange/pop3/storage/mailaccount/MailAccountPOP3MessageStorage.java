@@ -151,17 +151,29 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
      * @throws OXException
      */
     public void appendPOP3Messages(final MailMessage[] pop3Messages) throws OXException {
+        final MailMessage[] pop3Msgs;
+        {
+            final int length = pop3Messages.length;
+            final List<MailMessage> tmp = new ArrayList<MailMessage>(length);
+            for (int i = 0; i < length; i++) {
+                final MailMessage m = pop3Messages[i];
+                if (null != m && null != m.getMailId()) {
+                    tmp.add(m);
+                }
+            }
+            pop3Msgs = tmp.toArray(new MailMessage[tmp.size()]);
+        }
         /*
          * This method has a special meaning since it's called during synchronization of actual POP3 content with storage content
          */
-        final String[] uidls = new String[pop3Messages.length];
+        final String[] uidls = new String[pop3Msgs.length];
         for (int i = 0; i < uidls.length; i++) {
-            uidls[i] = pop3Messages[i].getMailId();
+            uidls[i] = pop3Msgs[i].getMailId();
         }
         /*
          * Append to mail account storage
          */
-        final String[] uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Messages);
+        final String[] uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Msgs);
         /*
          * Add mappings
          */
