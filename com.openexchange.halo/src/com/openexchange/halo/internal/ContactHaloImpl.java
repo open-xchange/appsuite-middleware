@@ -102,6 +102,7 @@ public class ContactHaloImpl implements ContactHalo {
 		if (user != null) {
 			// Load the associated contact
 			contact = contactService.getUser(session, user.getId());
+			contactsToMerge.add(contact);
 		} else {
 			// Try to find a contact
 			final ContactField[] searchFields = { ContactField.EMAIL1, ContactField.EMAIL1, ContactField.EMAIL3 };
