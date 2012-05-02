@@ -112,14 +112,14 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSONMessageHandler} - Generates a JSON message representation considering user-sensitive data.
+ * {@link JsonMessageHandlerTmp} - Generates a JSON message representation considering user-sensitive data.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JSONMessageHandler implements MailMessageHandler {
+public final class JsonMessageHandlerTmp implements MailMessageHandler {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JSONMessageHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JsonMessageHandlerTmp.class));
 
     private static final String VIRTUAL = "___VIRTUAL___";
 
@@ -189,7 +189,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
     private boolean attachHTMLAlternativePart;
 
     /**
-     * Initializes a new {@link JSONMessageHandler}
+     * Initializes a new {@link JsonMessageHandlerTmp}
      *
      * @param accountId The account ID
      * @param mailPath The unique mail path
@@ -199,7 +199,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      *            it is ignored.
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
+    public JsonMessageHandlerTmp(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
         multiparts = new LinkedList<String>();
         this.embedded = embedded;
@@ -217,7 +217,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Initializes a new {@link JSONMessageHandler}
+     * Initializes a new {@link JsonMessageHandlerTmp}
      *
      * @param accountId The account ID
      * @param mailPath The unique mail path
@@ -230,7 +230,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      * @param ttlMillis The tokens' timeout
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
+    public JsonMessageHandlerTmp(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis);
     }
 
@@ -242,9 +242,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Initializes a new {@link JSONMessageHandler} for internal usage
+     * Initializes a new {@link JsonMessageHandlerTmp} for internal usage
      */
-    private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
+    private JsonMessageHandlerTmp(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
         multiparts = new LinkedList<String>();
         this.embedded = embedded;
@@ -293,9 +293,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
      * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
      *
      * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
-     * @return The {@link JSONMessageHandler} with new behavior applied
+     * @return The {@link JsonMessageHandlerTmp} with new behavior applied
      */
-    public JSONMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
+    public JsonMessageHandlerTmp setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
         this.attachHTMLAlternativePart = attachHTMLAlternativePart;
         return this;
     }
@@ -788,12 +788,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
                                 b = false;
                             }
                         }
-                        /*
-                         * Append inline text as an attachment, too
-                         */
-                        final JSONObject textObject =
-                            asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
-                        textObject.put("plain_text", plainTextContentArg);
                     } else {
                         /*
                          * Append inline text as an attachment, too
@@ -996,8 +990,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 LOG.error(sb.toString());
                 return true;
             }
-            final JSONMessageHandler msgHandler =
-                new JSONMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis);
+            final JsonMessageHandlerTmp msgHandler =
+                new JsonMessageHandlerTmp(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis);
             msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
             msgHandler.tokenFolder = tokenFolder;
             msgHandler.tokenMailId = tokenMailId;
