@@ -13,11 +13,11 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    SQL_ERROR(DowngradeFailedExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * An error occurred: %1$s
      */
-    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 2);
+    ERROR(DowngradeFailedExceptionMessage.ERROR_MSG, Category.CATEGORY_ERROR, 2);
 
     private final String message;
 

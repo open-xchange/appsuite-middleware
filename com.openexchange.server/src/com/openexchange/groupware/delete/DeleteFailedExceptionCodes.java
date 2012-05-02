@@ -14,15 +14,15 @@ public enum DeleteFailedExceptionCodes implements OXExceptionCode {
     /**
      * Unknown delete event type: %1$d
      */
-    UNKNOWN_TYPE("Unknown delete event type: %1$d", Category.CATEGORY_ERROR, 1),
+    UNKNOWN_TYPE(DeleteFailedExceptionMessage.UNKNOWN_TYPE_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 2),
+    SQL_ERROR(DeleteFailedExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * An error occurred: %1$s
      */
-    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 3);
+    ERROR(DeleteFailedExceptionMessage.ERROR_MSG, Category.CATEGORY_ERROR, 3);
 
     private final String message;
 

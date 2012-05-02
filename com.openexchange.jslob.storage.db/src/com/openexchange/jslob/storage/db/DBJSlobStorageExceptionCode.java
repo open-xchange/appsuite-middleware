@@ -65,27 +65,27 @@ public enum DBJSlobStorageExceptionCode implements OXExceptionCode {
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(DBJSlobStorageExceptionMessages.UNEXPECTED_ERROR, EnumCategory.ERROR, 1),
+    UNEXPECTED_ERROR(DBJSlobStorageExceptionMessages.UNEXPECTED_ERROR_MSG, EnumCategory.ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(DBJSlobStorageExceptionMessages.SQL_ERROR, EnumCategory.ERROR, 2),
+    SQL_ERROR(DBJSlobStorageExceptionMessages.SQL_ERROR_MSG, EnumCategory.ERROR, 2),
     /**
      * No entry available for identifier: %1$s
      */
-    NO_ENTRY(DBJSlobStorageExceptionMessages.NO_ENTRY, EnumCategory.ERROR, 3),
+    NO_ENTRY(DBJSlobStorageExceptionMessages.NO_ENTRY_MSG, EnumCategory.ERROR, 3),
     /**
      * Entry already locked for identifier: %1$s
      */
-    ALREADY_LOCKED(DBJSlobStorageExceptionMessages.ALREADY_LOCKED, EnumCategory.ERROR, 4),
+    ALREADY_LOCKED(DBJSlobStorageExceptionMessages.ALREADY_LOCKED_MSG, EnumCategory.ERROR, 4),
     /**
      * Lock failed for entry with identifier: %1$s
      */
-    LOCK_FAILED(DBJSlobStorageExceptionMessages.LOCK_FAILED, EnumCategory.ERROR, 5),
+    LOCK_FAILED(DBJSlobStorageExceptionMessages.LOCK_FAILED_MSG, EnumCategory.ERROR, 5),
     /**
      * Unlock failed for entry with identifier: %1$s
      */
-    UNLOCK_FAILED(DBJSlobStorageExceptionMessages.UNLOCK_FAILED, EnumCategory.ERROR, 6), ;
+    UNLOCK_FAILED(DBJSlobStorageExceptionMessages.UNLOCK_FAILED_MSG, EnumCategory.ERROR, 6), ;
 
     /**
      * The error code prefix for JSlob exceptions.

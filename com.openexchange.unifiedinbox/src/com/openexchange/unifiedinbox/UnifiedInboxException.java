@@ -73,47 +73,47 @@ public final class UnifiedInboxException extends OXException {
         /**
          * Unified Mail does not support to create folders.
          */
-        CREATE_DENIED("Unified Mail does not support to create folders.", Category.CATEGORY_ERROR, 2001),
+        CREATE_DENIED(UnifiedInboxExceptionMessage.CREATE_DENIED_MSG, Category.CATEGORY_ERROR, 2001),
         /**
          * Unified Mail does not support to delete folders.
          */
-        DELETE_DENIED("Unified Mail does not support to delete folders.", Category.CATEGORY_ERROR, 2002),
+        DELETE_DENIED(UnifiedInboxExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 2002),
         /**
          * Unified Mail does not support to update folders.
          */
-        UPDATE_DENIED("Unified Mail does not support to update folders.", Category.CATEGORY_ERROR, 2003),
+        UPDATE_DENIED(UnifiedInboxExceptionMessage.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 2003),
         /**
          * Unified Mail does not support to move messages.
          */
-        MOVE_MSGS_DENIED("Unified Mail does not support to move messages.", Category.CATEGORY_ERROR, 2004),
+        MOVE_MSGS_DENIED(UnifiedInboxExceptionMessage.MOVE_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2004),
         /**
          * Unified Mail does not support to copy messages.
          */
-        COPY_MSGS_DENIED("Unified Mail does not support to copy messages.", Category.CATEGORY_ERROR, 2005),
+        COPY_MSGS_DENIED(UnifiedInboxExceptionMessage.COPY_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2005),
         /**
          * Append messages failed.
          */
-        APPEND_MSGS_DENIED("Append messages failed.", Category.CATEGORY_ERROR, 2006),
+        APPEND_MSGS_DENIED(UnifiedInboxExceptionMessage.APPEND_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2006),
         /**
          * Unified Mail does not support draft messages.
          */
-        DRAFTS_NOT_SUPPORTED("Unified Mail does not support draft messages.", Category.CATEGORY_ERROR, 2007),
+        DRAFTS_NOT_SUPPORTED(UnifiedInboxExceptionMessage.DRAFTS_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 2007),
         /**
          * Unified Mail does not support to move folders.
          */
-        MOVE_DENIED("Unified Mail does not support to move folders.", Category.CATEGORY_ERROR, 2008),
+        MOVE_DENIED(UnifiedInboxExceptionMessage.MOVE_DENIED_MSG, Category.CATEGORY_ERROR, 2008),
         /**
          * Unified Mail does not support mail folder creation
          */
-        FOLDER_CREATION_FAILED("Unified Mail does not support mail folder creation", Category.CATEGORY_ERROR, 2009),
+        FOLDER_CREATION_FAILED(UnifiedInboxExceptionMessage.FOLDER_CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 2009),
         /**
          * Unified Mail does not support to clear INBOX folder.
          */
-        CLEAR_NOT_SUPPORTED("Unified Mail does not support to clear INBOX folder.", Category.CATEGORY_ERROR, 2010),
+        CLEAR_NOT_SUPPORTED(UnifiedInboxExceptionMessage.CLEAR_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 2010),
         /**
          * No connection available to access mailbox
          */
-        NOT_CONNECTED("No connection available to access mailbox", Category.CATEGORY_ERROR, 2011),
+        NOT_CONNECTED(UnifiedInboxExceptionMessage.NOT_CONNECTED_MSG, Category.CATEGORY_ERROR, 2011),
         /**
          * Folder %1$s does not hold messages and is therefore not selectable.
          */
@@ -125,19 +125,19 @@ public final class UnifiedInboxException extends OXException {
         /**
          * Unknown default folder fullname: %1$s.
          */
-        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", Category.CATEGORY_ERROR, 2012),
+        UNKNOWN_DEFAULT_FOLDER_INDEX(UnifiedInboxExceptionMessage.UNKNOWN_DEFAULT_FOLDER_INDEX_MSG, Category.CATEGORY_ERROR, 2012),
         /**
          * Move operation aborted. Source and destination folder are equal.
          */
-        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", Category.CATEGORY_ERROR, 2013),
+        NO_EQUAL_MOVE(UnifiedInboxExceptionMessage.NO_EQUAL_MOVE_MSG, Category.CATEGORY_ERROR, 2013),
         /**
          * Request aborted due to timeout of %1$s %2$s.
          */
-        TIMEOUT("Request aborted due to timeout of %1$s %2$s.", Category.CATEGORY_ERROR, 2014),
+        TIMEOUT(UnifiedInboxExceptionMessage.TIMEOUT_MSG, Category.CATEGORY_ERROR, 2014),
         /**
          * Invalid destination folder. Don't know where to append the mails.
          */
-        INVALID_DESTINATION_FOLDER("Invalid destination folder. Don't know where to append the mails.", Category.CATEGORY_USER_INPUT, 2015),
+        INVALID_DESTINATION_FOLDER(UnifiedInboxExceptionMessage.INVALID_DESTINATION_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 2015),
         ;
 
         private final String message;
@@ -169,22 +169,27 @@ public final class UnifiedInboxException extends OXException {
             prefix = code.getPrefix();
         }
 
+        @Override
         public String getPrefix() {
             return prefix;
         }
 
+        @Override
         public Category getCategory() {
             return category;
         }
 
+        @Override
         public int getNumber() {
             return detailNumber;
         }
 
+        @Override
         public String getMessage() {
             return message;
         }
 
+        @Override
         public boolean equals(final OXException e) {
             return OXExceptionFactory.getInstance().equals(this, e);
         }

@@ -20,127 +20,127 @@ public enum MailExceptionCode implements OXExceptionCode {
     /**
      * Unexpected error: %1$s
      */
-    UNEXPECTED_ERROR("Unexpected error: %1$s", Category.CATEGORY_ERROR, 0),
+    UNEXPECTED_ERROR(MailExceptionStrings.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 0),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAMETER("Missing parameter %1$s", Category.CATEGORY_ERROR, 1),
+    MISSING_PARAMETER(MailExceptionStrings.MISSING_PARAMETER_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
      */
-    INVALID_PERMISSION("Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s", Category.CATEGORY_ERROR, 2),
+    INVALID_PERMISSION(MailExceptionStrings.INVALID_PERMISSION_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 3),
+    JSON_ERROR(MailExceptionStrings.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * Missing parameter in user's mail config: %1$s
      */
-    MISSING_CONNECT_PARAM("Missing parameter in user's mail config: %1$s", Category.CATEGORY_ERROR, 4),
+    MISSING_CONNECT_PARAM(MailExceptionStrings.MISSING_CONNECT_PARAM_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * Configuration error: %1$s
      */
-    CONFIG_ERROR("Configuration error: %1$s", Category.CATEGORY_CONFIGURATION, 5),
+    CONFIG_ERROR(MailExceptionStrings.CONFIG_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 5),
     /**
      * Invalid multipart content. Number of enclosed contents is 0
      */
-    INVALID_MULTIPART_CONTENT("Invalid multipart content. Number of enclosed contents is 0", Category.CATEGORY_ERROR, 6),
+    INVALID_MULTIPART_CONTENT(MailExceptionStrings.INVALID_MULTIPART_CONTENT_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * A part's content could not be read from message %1$s in mail folder %2$s
      */
-    UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s", Category.CATEGORY_ERROR, 7),
+    UNREADBALE_PART_CONTENT(MailExceptionStrings.UNREADBALE_PART_CONTENT_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 8),
+    IO_ERROR(MailExceptionStrings.IO_ERROR_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Invalid message path: %1$s
      */
-    INVALID_MAIL_IDENTIFIER("Invalid message path: %1$s", Category.CATEGORY_ERROR, 9),
+    INVALID_MAIL_IDENTIFIER(MailExceptionStrings.INVALID_MAIL_IDENTIFIER_MSG, Category.CATEGORY_ERROR, 9),
     /**
      * Unknown color label index: %1$s
      */
-    UNKNOWN_COLOR_LABEL("Unknown color label: %1$s", Category.CATEGORY_ERROR, 10),
+    UNKNOWN_COLOR_LABEL(MailExceptionStrings.UNKNOWN_COLOR_LABEL_MSG, Category.CATEGORY_ERROR, 10),
     /**
      * Cannot instantiate class %1$s.
      */
-    INSTANTIATION_PROBLEM("Cannot instantiate class %1$s.", Category.CATEGORY_CONFIGURATION, 11),
+    INSTANTIATION_PROBLEM(MailExceptionStrings.INSTANTIATION_PROBLEM_MSG, Category.CATEGORY_CONFIGURATION, 11),
     /**
      * Cannot initialize mail module
      */
-    INITIALIZATION_PROBLEM("Cannot initialize mail module", Category.CATEGORY_CONFIGURATION, 12),
+    INITIALIZATION_PROBLEM(MailExceptionStrings.INITIALIZATION_PROBLEM_MSG, Category.CATEGORY_CONFIGURATION, 12),
     /**
      * No mail module access permitted
      */
-    NO_MAIL_ACCESS("No mail module access permitted", Category.CATEGORY_PERMISSION_DENIED, 13),
+    NO_MAIL_ACCESS(MailExceptionStrings.NO_MAIL_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 13),
     /**
      * Mail account is disabled for admin user in context %1$s
      */
-    ACCOUNT_DOES_NOT_EXIST("Mail account is disabled for admin user in context %1$s", Category.CATEGORY_CONFIGURATION, 14),
+    ACCOUNT_DOES_NOT_EXIST(MailExceptionStrings.ACCOUNT_DOES_NOT_EXIST_MSG, Category.CATEGORY_CONFIGURATION, 14),
     /**
      * Process was interrupted. Please try again.
      */
-    INTERRUPT_ERROR("Process was interrupted. Please try again.", Category.CATEGORY_TRY_AGAIN, 15),
+    INTERRUPT_ERROR(MailExceptionStrings.INTERRUPT_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 15),
     /**
      * Unsupported charset-encoding: %1$s
      */
-    ENCODING_ERROR("Unsupported charset-encoding: %1$s", Category.CATEGORY_ERROR, 16),
+    ENCODING_ERROR(MailExceptionStrings.ENCODING_ERROR_MSG, Category.CATEGORY_ERROR, 16),
     /**
      * Header %1$s could not be properly parsed
      */
-    HEADER_PARSE_ERROR("Header %1$s could not be properly parsed", Category.CATEGORY_ERROR, 17),
+    HEADER_PARSE_ERROR(MailExceptionStrings.HEADER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 17),
     /**
      * Missing default %1$s folder in user mail settings
      */
-    MISSING_DEFAULT_FOLDER_NAME("Missing default %1$s folder in user mail settings", Category.CATEGORY_ERROR, 18),
+    MISSING_DEFAULT_FOLDER_NAME(MailExceptionStrings.MISSING_DEFAULT_FOLDER_NAME_MSG, Category.CATEGORY_ERROR, 18),
     /**
      * Spam handler initialization failed: %1$s
      */
-    SPAM_HANDLER_INIT_FAILED("Spam handler initialization failed: %1$s", Category.CATEGORY_CONFIGURATION, 19),
+    SPAM_HANDLER_INIT_FAILED(MailExceptionStrings.SPAM_HANDLER_INIT_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 19),
     /**
      * Invalid Content-Type value: %1$s
      */
-    INVALID_CONTENT_TYPE("Invalid Content-Type value: %1$s", Category.CATEGORY_ERROR, 20),
+    INVALID_CONTENT_TYPE(MailExceptionStrings.INVALID_CONTENT_TYPE_MSG, Category.CATEGORY_ERROR, 20),
     /**
      * Messaging error: %1$s. TODO: Maybe change to: Broken/Bad message
      */
-    MESSAGING_ERROR("Messaging error: %1$s", Category.CATEGORY_ERROR, 21),
+    MESSAGING_ERROR(MailExceptionStrings.MESSAGING_ERROR_MSG, Category.CATEGORY_ERROR, 21),
     /**
      * Message field %1$s cannot be handled
      */
-    INVALID_FIELD("Message field %1$s cannot be handled", Category.CATEGORY_ERROR, 22),
+    INVALID_FIELD(MailExceptionStrings.INVALID_FIELD_MSG, Category.CATEGORY_ERROR, 22),
     /**
      * Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4$s, context=%5$s)
      */
-    INVALID_FIELD_EXT("Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.CATEGORY_ERROR, 22),
+    INVALID_FIELD_EXT(MailExceptionStrings.INVALID_FIELD_EXT_MSG, Category.CATEGORY_ERROR, 22),
     /**
      * Versit error: %1$s
      */
-    VERSIT_ERROR("Versit error: %1$s", Category.CATEGORY_ERROR, 23),
+    VERSIT_ERROR(MailExceptionStrings.VERSIT_ERROR_MSG, Category.CATEGORY_ERROR, 23),
     /**
      * No attachment was found with id %1$s in message
      */
-    NO_ATTACHMENT_FOUND("No attachment was found with id %1$s in message", Category.CATEGORY_USER_INPUT, 24),
+    NO_ATTACHMENT_FOUND(MailExceptionStrings.NO_ATTACHMENT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 24),
     /**
      * Versit attachment could not be saved due to an unsupported MIME type: %1$s
      */
-    UNSUPPORTED_VERSIT_ATTACHMENT("Versit attachment could not be saved due to an unsupported MIME type: %1$s", Category.CATEGORY_USER_INPUT, 25),
+    UNSUPPORTED_VERSIT_ATTACHMENT(MailExceptionStrings.UNSUPPORTED_VERSIT_ATTACHMENT_MSG, Category.CATEGORY_USER_INPUT, 25),
     /**
      * Invalid parameter name: %1$s
      */
-    INVALID_PARAMETER("Invalid parameter name: %1$s", Category.CATEGORY_ERROR, 26),
+    INVALID_PARAMETER(MailExceptionStrings.INVALID_PARAMETER_MSG, Category.CATEGORY_ERROR, 26),
     /**
      * Could not create a PartModifier instance from name %1$s
      */
-    PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %1$s", Category.CATEGORY_ERROR, 27),
+    PART_MODIFIER_CREATION_FAILED(MailExceptionStrings.PART_MODIFIER_CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 27),
     /**
      * Upload quota (%1$s) exceeded for file %2$s (size=%3$s)
      */
-    UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", Category.CATEGORY_USER_INPUT, 28),
+    UPLOAD_QUOTA_EXCEEDED_FOR_FILE(MailExceptionStrings.UPLOAD_QUOTA_EXCEEDED_FOR_FILE_MSG, Category.CATEGORY_USER_INPUT, 28),
     /**
      * Upload quota (%1$s) exceeded
      */
-    UPLOAD_QUOTA_EXCEEDED("Upload quota (%1$s) exceeded", Category.CATEGORY_USER_INPUT, 29),
+    UPLOAD_QUOTA_EXCEEDED(MailExceptionStrings.UPLOAD_QUOTA_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 29),
     /**
      * Missing parameter %1$s
      */
@@ -148,238 +148,238 @@ public enum MailExceptionCode implements OXExceptionCode {
     /**
      * Invalid integer value %1$s
      */
-    INVALID_INT_VALUE("Invalid integer value %1$s", Category.CATEGORY_ERROR, 31),
+    INVALID_INT_VALUE(MailExceptionStrings.INVALID_INT_VALUE_MSG, Category.CATEGORY_ERROR, 31),
     /**
      * Mail(s) %1$s could not be found in folder %2$s
      */
-    MAIL_NOT_FOUND("Mail(s) %1$s could not be found in folder %2$s", Category.CATEGORY_ERROR, 32),
+    MAIL_NOT_FOUND(MailExceptionStrings.MAIL_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 32),
     /**
      * Action %1$s is not supported by %2$s
      */
-    UNSUPPORTED_ACTION("Action %1$s is not supported by %2$s", Category.CATEGORY_ERROR, 33),
+    UNSUPPORTED_ACTION(MailExceptionStrings.UNSUPPORTED_ACTION_MSG, Category.CATEGORY_ERROR, 33),
     /**
      * Message could not be sent
      */
-    SEND_FAILED_UNKNOWN("Message could not be sent", Category.CATEGORY_ERROR, 35),
+    SEND_FAILED_UNKNOWN(MailExceptionStrings.SEND_FAILED_UNKNOWN_MSG, Category.CATEGORY_ERROR, 35),
     /**
      * Unknown action: %1$s
      */
-    UNKNOWN_ACTION("Unknown or unsupported action: %1$s", Category.CATEGORY_ERROR, 36),
+    UNKNOWN_ACTION(MailExceptionStrings.UNKNOWN_ACTION_MSG, Category.CATEGORY_ERROR, 36),
     /**
      * Missing field %1$s
      */
-    MISSING_FIELD("Missing field %1$s", Category.CATEGORY_ERROR, 37),
+    MISSING_FIELD(MailExceptionStrings.MISSING_FIELD_MSG, Category.CATEGORY_ERROR, 37),
     /**
      * Unsupported MIME type %1$s
      */
-    UNSUPPORTED_MIME_TYPE("Unsupported MIME type %1$s", Category.CATEGORY_ERROR, 38),
+    UNSUPPORTED_MIME_TYPE(MailExceptionStrings.UNSUPPORTED_MIME_TYPE_MSG, Category.CATEGORY_ERROR, 38),
     /**
      * Mail could not be moved to trash folder. Quota exceeded
      */
-    DELETE_FAILED_OVER_QUOTA("Mail could not be moved to trash folder. Quota exceeded", Category.CATEGORY_CAPACITY, 39),
+    DELETE_FAILED_OVER_QUOTA(MailExceptionStrings.DELETE_FAILED_OVER_QUOTA_MSG, Category.CATEGORY_CAPACITY, 39),
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
      */
-    PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s", Category.CATEGORY_ERROR, 40),
+    PART_NOT_FOUND(MailExceptionStrings.PART_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 40),
     /**
      * No content available in mail part
      */
-    NO_CONTENT("No content available in mail part", Category.CATEGORY_ERROR, 41),
+    NO_CONTENT(MailExceptionStrings.NO_CONTENT_MSG, Category.CATEGORY_ERROR, 41),
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.
      */
-    COPY_TO_SENT_FOLDER_FAILED_QUOTA("Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.", Category.CATEGORY_CAPACITY, 42),
+    COPY_TO_SENT_FOLDER_FAILED_QUOTA(MailExceptionStrings.COPY_TO_SENT_FOLDER_FAILED_QUOTA_MSG, Category.CATEGORY_CAPACITY, 42),
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder
      */
-    COPY_TO_SENT_FOLDER_FAILED("Message has been successfully sent, but a copy could not be placed in your sent folder.", Category.CATEGORY_WARNING, 43),
+    COPY_TO_SENT_FOLDER_FAILED(MailExceptionStrings.COPY_TO_SENT_FOLDER_FAILED_MSG, Category.CATEGORY_WARNING, 43),
     /**
      * No provider could be found for protocol/URL "%1$s"
      */
-    UNKNOWN_PROTOCOL("No provider could be found for protocol/URL \"%1$s\"", Category.CATEGORY_CONFIGURATION, 44),
+    UNKNOWN_PROTOCOL(MailExceptionStrings.UNKNOWN_PROTOCOL_MSG, Category.CATEGORY_CONFIGURATION, 44),
     /**
      * Protocol cannot be parsed: %1$s
      */
-    PROTOCOL_PARSE_ERROR("Protocol cannot be parsed: %1$s", Category.CATEGORY_ERROR, 45),
+    PROTOCOL_PARSE_ERROR(MailExceptionStrings.PROTOCOL_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 45),
     /**
      * Bad value %1$s in parameter %2$s
      */
-    BAD_PARAM_VALUE("Bad value %1$s in parameter %2$s", Category.CATEGORY_USER_INPUT, 46),
+    BAD_PARAM_VALUE(MailExceptionStrings.BAD_PARAM_VALUE_MSG, Category.CATEGORY_USER_INPUT, 46),
     /**
      * No reply on multiple message possible
      */
-    NO_MULTIPLE_REPLY("No reply on multiple message possible", Category.CATEGORY_USER_INPUT, 47),
+    NO_MULTIPLE_REPLY(MailExceptionStrings.NO_MULTIPLE_REPLY_MSG, Category.CATEGORY_USER_INPUT, 47),
     /**
      * legal system flag argument %1$s. Flag must be to the power of 2
      */
-    ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %1$s. Flag must be to the power of 2", Category.CATEGORY_ERROR, 48),
+    ILLEGAL_FLAG_ARGUMENT(MailExceptionStrings.ILLEGAL_FLAG_ARGUMENT_MSG, Category.CATEGORY_ERROR, 48),
     /**
      * Attachment %1$s not found inside mail %2$s of mail folder %3$s
      */
-    ATTACHMENT_NOT_FOUND("Attachment %1$s not found inside mail %2$s of mail folder %3$s", Category.CATEGORY_ERROR, 49),
+    ATTACHMENT_NOT_FOUND(MailExceptionStrings.ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 49),
     /**
      * Folder %1$s does not hold messages and is therefore not selectable
      */
-    FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %1$s does not hold messages and is therefore not selectable", Category.CATEGORY_PERMISSION_DENIED, 50),
+    FOLDER_DOES_NOT_HOLD_MESSAGES(MailExceptionStrings.FOLDER_DOES_NOT_HOLD_MESSAGES_MSG, Category.CATEGORY_PERMISSION_DENIED, 50),
     /**
      * Folder %1$s does not hold messages and is therefore not selectable on server %2$s with login %3$s (user=%4$s, context=%5$s)
      */
-    FOLDER_DOES_NOT_HOLD_MESSAGES_EXT("Folder %1$s does not hold messages and is therefore not selectable on server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.CATEGORY_PERMISSION_DENIED, 50),
+    FOLDER_DOES_NOT_HOLD_MESSAGES_EXT(MailExceptionStrings.FOLDER_DOES_NOT_HOLD_MESSAGES_EXT_MSG, Category.CATEGORY_PERMISSION_DENIED, 50),
     /**
      * Insufficient folder attributes: Either existence status or fullname have to be present to determine if a mail folder create or
      * update shall be performed
      */
-    INSUFFICIENT_FOLDER_ATTR("Insufficient folder attributes: Either existence status " + "or fullname have to be present to determine if a " + "mail folder create or update shall be performed", Category.CATEGORY_ERROR, 51),
+    INSUFFICIENT_FOLDER_ATTR(MailExceptionStrings.INSUFFICIENT_FOLDER_ATTR_MSG, Category.CATEGORY_ERROR, 51),
     /**
      * Root folder must not be modified or deleted
      */
-    NO_ROOT_FOLDER_MODIFY_DELETE("Root folder must not be modified or deleted", Category.CATEGORY_ERROR, 52),
+    NO_ROOT_FOLDER_MODIFY_DELETE(MailExceptionStrings.NO_ROOT_FOLDER_MODIFY_DELETE_MSG, Category.CATEGORY_ERROR, 52),
     /**
      * No transport provider could be found for protocol/URL "%1$s"
      */
-    UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%1$s\"", Category.CATEGORY_CONFIGURATION, 53),
+    UNKNOWN_TRANSPORT_PROTOCOL(MailExceptionStrings.UNKNOWN_TRANSPORT_PROTOCOL_MSG, Category.CATEGORY_CONFIGURATION, 53),
     /**
      * Missing mail folder fullname
      */
-    MISSING_FULLNAME("Missing mail folder fullname", Category.CATEGORY_ERROR, 54),
+    MISSING_FULLNAME(MailExceptionStrings.MISSING_FULLNAME_MSG, Category.CATEGORY_ERROR, 54),
     /**
      * Image attachment with Content-Id "%1$s" not found inside mail %2$s of mail folder %3$s
      */
-    IMAGE_ATTACHMENT_NOT_FOUND("Image attachment with Content-Id \"%1$s\" not found inside mail %2$s of mail folder %3$s", Category.CATEGORY_ERROR, 55),
+    IMAGE_ATTACHMENT_NOT_FOUND(MailExceptionStrings.IMAGE_ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 55),
     /**
      * The specified email address %1$s is not covered by allowed email address aliases
      */
-    INVALID_SENDER("The specified email address %1$s is not covered by allowed email address aliases", Category.CATEGORY_USER_INPUT, 56),
+    INVALID_SENDER(MailExceptionStrings.INVALID_SENDER_MSG, Category.CATEGORY_USER_INPUT, 56),
     /**
      * Checking default folders on server %1$s for user %2$s (%3$s) in context on %4$s failed: %5$s
      */
-    DEFAULT_FOLDER_CHECK_FAILED("Checking default folders on server %1$s for user %2$s (%3$s) in context on %4$s failed: %5$s", Category.CATEGORY_ERROR, 57),
+    DEFAULT_FOLDER_CHECK_FAILED(MailExceptionStrings.DEFAULT_FOLDER_CHECK_FAILED_MSG, Category.CATEGORY_ERROR, 57),
     /**
      * The types of specified data source are not supported
      */
-    UNSUPPORTED_DATASOURCE("The types of specified data source are not supported", Category.CATEGORY_ERROR, 58),
+    UNSUPPORTED_DATASOURCE(MailExceptionStrings.UNSUPPORTED_DATASOURCE_MSG, Category.CATEGORY_ERROR, 58),
     /**
      * Mail cannot be parsed. Invalid or incomplete mail data.
      */
-    UNPARSEABLE_MESSAGE("Mail cannot be parsed. Invalid or incomplete mail data.", Category.CATEGORY_ERROR, 59),
+    UNPARSEABLE_MESSAGE(MailExceptionStrings.UNPARSEABLE_MESSAGE_MSG, Category.CATEGORY_ERROR, 59),
     /**
      * Mail folder cannot be created/renamed. Empty folder name.
      */
-    INVALID_FOLDER_NAME_EMPTY("Mail folder cannot be created/renamed. Empty folder name.", Category.CATEGORY_USER_INPUT, 60),
+    INVALID_FOLDER_NAME_EMPTY(MailExceptionStrings.INVALID_FOLDER_NAME_EMPTY_MSG, Category.CATEGORY_USER_INPUT, 60),
     /**
      * Mail folder cannot be created/rename. Name must not contain character '%1$s'
      */
-    INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'", Category.CATEGORY_USER_INPUT, 61),
+    INVALID_FOLDER_NAME(MailExceptionStrings.INVALID_FOLDER_NAME_MSG, Category.CATEGORY_USER_INPUT, 61),
     /**
      * Invalid Content-Disposition value: %1$s
      */
-    INVALID_CONTENT_DISPOSITION("Invalid Content-Disposition value: %1$s", Category.CATEGORY_ERROR, 62),
+    INVALID_CONTENT_DISPOSITION(MailExceptionStrings.INVALID_CONTENT_DISPOSITION_MSG, Category.CATEGORY_ERROR, 62),
     /**
      * A folder named %1$s already exists.
      */
-    DUPLICATE_FOLDER("A folder named %1$s already exists.", Category.CATEGORY_PERMISSION_DENIED, 63),
+    DUPLICATE_FOLDER(MailExceptionStrings.DUPLICATE_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
     /**
      * A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, context=%5$s).
      */
-    DUPLICATE_FOLDER_EXT("A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CATEGORY_PERMISSION_DENIED, 63),
+    DUPLICATE_FOLDER_EXT(MailExceptionStrings.DUPLICATE_FOLDER_EXT_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
     /**
      * No create access on mail folder %1$s.
      */
-    NO_CREATE_ACCESS("No create access on mail folder %1$s.", Category.CATEGORY_PERMISSION_DENIED, 64),
+    NO_CREATE_ACCESS(MailExceptionStrings.NO_CREATE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 64),
     /**
      * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
      */
-    NO_CREATE_ACCESS_EXT("No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CATEGORY_PERMISSION_DENIED, 64),
+    NO_CREATE_ACCESS_EXT(MailExceptionStrings.NO_CREATE_ACCESS_EXT_MSG, Category.CATEGORY_PERMISSION_DENIED, 64),
     /**
      * Mail account %1$s with ID %2$s does not support mail transport.
      */
-    NO_TRANSPORT_SUPPORT("Mail account %1$s with ID %2$s does not support mail transport.", Category.CATEGORY_ERROR, 65),
+    NO_TRANSPORT_SUPPORT(MailExceptionStrings.NO_TRANSPORT_SUPPORT_MSG, Category.CATEGORY_ERROR, 65),
     /**
      * Mail folder could not be found: %1$s.
      */
-    FOLDER_NOT_FOUND("Mail folder could not be found: %1$s.", Category.CATEGORY_ERROR, 66),
+    FOLDER_NOT_FOUND(MailExceptionStrings.FOLDER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 66),
     /**
      * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
      */
-    REFERENCED_MAIL_NOT_FOUND("Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.", Category.CATEGORY_ERROR, 67),
+    REFERENCED_MAIL_NOT_FOUND(MailExceptionStrings.REFERENCED_MAIL_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 67),
     /**
      * In order to accomplish the search, %1$d or more characters are required.
      */
-    PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.CATEGORY_USER_INPUT, 68),
+    PATTERN_TOO_SHORT(MailExceptionStrings.PATTERN_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 68),
     /**
      * Mail folder must not be deleted: %1$s.
      */
-    FOLDER_DELETION_DENIED("Mail folder must not be deleted: %1$s.", Category.CATEGORY_ERROR, 69),
+    FOLDER_DELETION_DENIED(MailExceptionStrings.FOLDER_DELETION_DENIED_MSG, Category.CATEGORY_ERROR, 69),
     /**
      * No delete access on mail folder: %1$s.
      */
-    NO_DELETE_ACCESS("No delete access on mail folder: %1$s.", Category.CATEGORY_PERMISSION_DENIED, 70),
+    NO_DELETE_ACCESS(MailExceptionStrings.NO_DELETE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 70),
     /**
      * Mail folder must not be moved: %1$s.
      */
-    FOLDER_MOVE_DENIED("Mail folder must not be moved: %1$s.", Category.CATEGORY_ERROR, 71),
+    FOLDER_MOVE_DENIED(MailExceptionStrings.FOLDER_MOVE_DENIED_MSG, Category.CATEGORY_ERROR, 71),
     /**
      * Mail folder must not be updated: %1$s.
      */
-    FOLDER_UPDATE_DENIED("Mail folder must not be updated: %1$s.", Category.CATEGORY_ERROR, 72),
+    FOLDER_UPDATE_DENIED(MailExceptionStrings.FOLDER_UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 72),
     /**
      * No write access on mail folder: %1$s.
      */
-    NO_WRITE_ACCESS("No write access on mail folder: %1$s.", Category.CATEGORY_PERMISSION_DENIED, 73),
+    NO_WRITE_ACCESS(MailExceptionStrings.NO_WRITE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 73),
     /**
      * No connection available to access mailbox
      */
-    NOT_CONNECTED("No connection available to access mailbox", Category.CATEGORY_ERROR, 74),
+    NOT_CONNECTED(MailExceptionStrings.NOT_CONNECTED_MSG, Category.CATEGORY_ERROR, 74),
     /**
      * Mail could not be found in folder %1$s for Message-Id: %2$s
      */
-    MAIL_NOT_FOUN_BY_MESSAGE_ID("Mail could not be found in folder %1$s for Message-Id: %2$s", Category.CATEGORY_ERROR, 32),
+    MAIL_NOT_FOUN_BY_MESSAGE_ID(MailExceptionStrings.MAIL_NOT_FOUN_BY_MESSAGE_ID_MSG, Category.CATEGORY_ERROR, 32),
 
     /**
      * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
      */
-    SENT_QUOTA_EXCEEDED("Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds.", Category.CATEGORY_ERROR, 75),
+    SENT_QUOTA_EXCEEDED(MailExceptionStrings.SENT_QUOTA_EXCEEDED_MSG, Category.CATEGORY_ERROR, 75),
 
     /**
      * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
      */
-    RECIPIENTS_EXCEEDED("Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' again.", Category.CATEGORY_ERROR, 76),
+    RECIPIENTS_EXCEEDED(MailExceptionStrings.RECIPIENTS_EXCEEDED_MSG, Category.CATEGORY_ERROR, 76),
     /**
      * Unable to parse mail server URI "%1$s".
      */
-    URI_PARSE_FAILED("Unable to parse mail server URI \"%1$s\".", Category.CATEGORY_USER_INPUT, 77),
+    URI_PARSE_FAILED(MailExceptionStrings.URI_PARSE_FAILED_MSG, Category.CATEGORY_USER_INPUT, 77),
     /**
      * Mail attachment expired or absent.
      */
-    ATTACHMENT_EXPIRED("Mail attachment expired or absent.", Category.CATEGORY_USER_INPUT, 78),
+    ATTACHMENT_EXPIRED(MailExceptionStrings.ATTACHMENT_EXPIRED_MSG, Category.CATEGORY_USER_INPUT, 78),
     /**
      * Account has been checked successfully but with a non-secure connection.
      */
-    NON_SECURE_WARNING("Account has been checked successfully but with a non-secure connection.", Category.CATEGORY_WARNING, 79),
+    NON_SECURE_WARNING(MailExceptionStrings.NON_SECURE_WARNING_MSG, Category.CATEGORY_WARNING, 79),
     /**
      * Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.
      */
-    TOO_MANY_FORWARD_MAILS("Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.", Category.CATEGORY_USER_INPUT, 80),
+    TOO_MANY_FORWARD_MAILS(MailExceptionStrings.TOO_MANY_FORWARD_MAILS_MSG, Category.CATEGORY_USER_INPUT, 80),
     /**
      * Your account has been created but will not use a secure connection.
      */
-    NON_SECURE_CREATION("Your account has been created but will not use a secure connection.", Category.CATEGORY_WARNING, 81),
+    NON_SECURE_CREATION(MailExceptionStrings.NON_SECURE_CREATION_MSG, Category.CATEGORY_WARNING, 81),
     /**
      * Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as "replied" and/or "forwarded".
      */
-    FLAG_FAIL("Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as \"replied\" and/or \"forwarded\".", Category.CATEGORY_WARNING, 82),
+    FLAG_FAIL(MailExceptionStrings.FLAG_FAIL_MSG, Category.CATEGORY_WARNING, 82),
     /**
      * Invalid folder name: "%1$s"
      */
-    INVALID_FOLDER_NAME2("Invalid folder name: \"%1$s\"", INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
+    INVALID_FOLDER_NAME2(MailExceptionStrings.INVALID_FOLDER_NAME2_MSG, INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
     /**
      * Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.
      */
-    INVALID_FOLDER_NAME_TOO_LONG("Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.", Category.CATEGORY_USER_INPUT, 83),
+    INVALID_FOLDER_NAME_TOO_LONG(MailExceptionStrings.INVALID_FOLDER_NAME_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 83),
     /**
      * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
-    USED_PUBLISHING_FEATURE("The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.",  Category.CATEGORY_WARNING, 84),
+    USED_PUBLISHING_FEATURE(MailExceptionStrings.USED_PUBLISHING_FEATURE_MSG,  Category.CATEGORY_WARNING, 84),
     
     ;
 
