@@ -995,7 +995,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
+    private static final MailMessageComparator COMPARATOR_ASC = new MailMessageComparator(MailSortField.RECEIVED_DATE, false, null);
+
+    private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     protected static final class ThreadableResult {
         protected final Threadable threadable;
@@ -1235,7 +1237,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Generate structure
                  */
                 final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, mapping);
-                List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
+                List<List<MailMessage>> list;
+                if (MailSortField.RECEIVED_DATE.equals(sortField)) {
+                    list = ThreadSortUtil.toSimplifiedStructure(structuredList, OrderDirection.DESC.equals(order) ? COMPARATOR_DESC : COMPARATOR_ASC);
+                } else {
+                    list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR_DESC);
+                }
                 /*
                  * Sort according to order direction
                  */
@@ -1328,7 +1335,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Sort according to order direction
              */
-            List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
+            List<List<MailMessage>> list;
+            if (MailSortField.RECEIVED_DATE.equals(sortField)) {
+                list = ThreadSortUtil.toSimplifiedStructure(structuredList, OrderDirection.DESC.equals(order) ? COMPARATOR_DESC : COMPARATOR_ASC);
+            } else {
+                list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR_DESC);
+            }
             /*
              * Sort according to order direction
              */
