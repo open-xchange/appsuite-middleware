@@ -59,6 +59,7 @@ import com.openexchange.ajax.writer.DataWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.tools.session.ServerSession;
 
