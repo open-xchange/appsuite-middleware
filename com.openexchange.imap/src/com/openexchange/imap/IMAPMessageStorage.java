@@ -1036,6 +1036,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
                 final TLongHashSet uidsSet = new TLongHashSet(uids);
                 if (cache) {
+                    // Immediately return cached state & reconstruct ansynchronously
                     final Threadable retval = (Threadable) entry.getThreadable().clone();
                     // Runnable instance
                     final Runnable task = new Runnable() {
@@ -1056,7 +1057,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     ThreadPools.getThreadPool().submit(ThreadPools.task(task));
                     if (INFO) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tExisting ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec. Reconstruct in separate thread.");
+                        LOG.info("\tExisting ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec. Reconstruct performed ansynchronously separate thread.");
                     }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
