@@ -571,7 +571,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
-                            final String imgTag = "<br><img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" id=\"" + fileName + "\">";
+                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
                             final String content = jObject.getString(keyContent);
                             final String newContent = content + imgTag;
                             jObject.put(keyContent, newContent);
