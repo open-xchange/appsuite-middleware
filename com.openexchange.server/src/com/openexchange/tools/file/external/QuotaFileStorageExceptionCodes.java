@@ -12,17 +12,17 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
     /** Couldn't reach the filestore */
-    INSTANTIATIONERROR("Couldn't reach the filestore", Category.CATEGORY_SERVICE_DOWN, 21),
+    INSTANTIATIONERROR(QuotaFileStorageExceptionMessage.INSTANTIATIONERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 21),
     /** Database Query could not be realized */
-    SQLSTATEMENTERROR("Database Query could not be realized", Category.CATEGORY_ERROR, 23),
+    SQLSTATEMENTERROR(QuotaFileStorageExceptionMessage.SQLSTATEMENTERROR_MSG, Category.CATEGORY_ERROR, 23),
     /** The allowed Quota is reached. */
-    STORE_FULL("The allowed Quota is reached.", Category.CATEGORY_USER_INPUT, 24),
+    STORE_FULL(QuotaFileStorageExceptionMessage.STORE_FULL_MSG, Category.CATEGORY_USER_INPUT, 24),
     /** Quota seems to be inconsistent. Please use consistency tool on context %1$d. */
-    QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", Category.CATEGORY_TRUNCATED, 25),
+    QUOTA_UNDERRUN(QuotaFileStorageExceptionMessage.QUOTA_UNDERRUN_MSG, Category.CATEGORY_TRUNCATED, 25),
     /** Quota usage is missing for context %1$d. */
-    NO_USAGE("Quota usage is missing for context %1$d.", Category.CATEGORY_ERROR, 26),
+    NO_USAGE(QuotaFileStorageExceptionMessage.NO_USAGE_MSG, Category.CATEGORY_ERROR, 26),
     /** Update of quota usage for context %1$d failed. */
-    UPDATE_FAILED("Update of quota usage for context %1$d failed.", Category.CATEGORY_ERROR, 27);
+    UPDATE_FAILED(QuotaFileStorageExceptionMessage.UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 27);
 
     /**
      * Message of the exception.

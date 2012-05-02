@@ -12,35 +12,35 @@ public enum ConfigJumpExceptionCode implements OXExceptionCode {
     /**
      * Unknown problem: "%s".
      */
-    UNKNOWN("Unknown problem: \"%s\".", CATEGORY_ERROR, 1),
+    UNKNOWN(ConfigJumpExceptionMessage.UNKNOWN_MSG, CATEGORY_ERROR, 1),
     /**
      * Too few (%d) login attributes.
      */
-    MISSING_ATTRIBUTES("Too few (%d) login attributes.", CATEGORY_USER_INPUT, 2),
+    MISSING_ATTRIBUTES(ConfigJumpExceptionMessage.MISSING_ATTRIBUTES_MSG, CATEGORY_USER_INPUT, 2),
     /**
      * Problem while communicating with external authorization.
      */
-    COMMUNICATION("Problem while communicating with external " + "authorization.", CATEGORY_SERVICE_DOWN, 3),
+    COMMUNICATION(ConfigJumpExceptionMessage.COMMUNICATION_MSG, CATEGORY_SERVICE_DOWN, 3),
     /**
      * Instantiating the class failed.
      */
-    INSTANTIATION_FAILED("Instantiating the class failed.", CATEGORY_ERROR, 4),
+    INSTANTIATION_FAILED(ConfigJumpExceptionMessage.INSTANTIATION_FAILED_MSG, CATEGORY_ERROR, 4),
     /**
      * Class %1$s can not be found.
      */
-    CLASS_NOT_FOUND("Class %1$s can not be found.", CATEGORY_CONFIGURATION, 5),
+    CLASS_NOT_FOUND(ConfigJumpExceptionMessage.CLASS_NOT_FOUND_MSG, CATEGORY_CONFIGURATION, 5),
     /**
      * Missing property %1$s in system.properties.
      */
-    MISSING_SETTING("Missing property %1$s in system.properties.", CATEGORY_CONFIGURATION, 6),
+    MISSING_SETTING(ConfigJumpExceptionMessage.MISSING_SETTING_MSG, CATEGORY_CONFIGURATION, 6),
     /**
      * URL "%s" is malformed.
      */
-    MALFORMED_URL("URL \"%s\" is malformed.", CATEGORY_ERROR, 7),
+    MALFORMED_URL(ConfigJumpExceptionMessage.MALFORMED_URL_MSG, CATEGORY_ERROR, 7),
     /**
      * Link is not implemented.
      */
-    NOT_IMPLEMENTED("Extras link is not implemented.", CATEGORY_CONFIGURATION, 8);
+    NOT_IMPLEMENTED(ConfigJumpExceptionMessage.NOT_IMPLEMENTED_MSG, CATEGORY_CONFIGURATION, 8);
 
     /**
      * Message of the exception.

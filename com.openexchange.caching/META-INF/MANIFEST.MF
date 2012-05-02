@@ -9,6 +9,7 @@ Eclipse-BuddyPolicy: registered
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.management,
  com.openexchange.osgi,

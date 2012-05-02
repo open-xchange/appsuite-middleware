@@ -1,3 +1,4 @@
+
 package com.openexchange.spamhandler.spamassassin.exceptions;
 
 import com.openexchange.exception.Category;
@@ -9,30 +10,27 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
     /**
      * Spamd returned wrong exit code "%s"
      */
-    WRONG_SPAMD_EXIT("Spamd returned wrong exit code \"%s\"", CATEGORY_ERROR, 3000),
+    WRONG_SPAMD_EXIT(SpamhandlerSpamassassinExceptionMessage.WRONG_SPAMD_EXIT_MSG, CATEGORY_ERROR, 3000),
 
     /**
      * Internal error: Wrong arguments are given to the tell command: "%s"
      */
-    WRONG_TELL_CMD_ARGS("Internal error: Wrong arguments are given to the tell command: \"%s\"", CATEGORY_ERROR, 3001),
+    WRONG_TELL_CMD_ARGS(SpamhandlerSpamassassinExceptionMessage.WRONG_TELL_CMD_ARGS_MSG, CATEGORY_ERROR, 3001),
 
     /**
      * Error during communication with spamd: "%s"
      */
-    COMMUNICATION_ERROR("Error during communication with spamd: \"%s\"", CATEGORY_ERROR, 3002),
+    COMMUNICATION_ERROR(SpamhandlerSpamassassinExceptionMessage.COMMUNICATION_ERROR_MSG, CATEGORY_ERROR, 3002),
 
     /**
      * Can't handle spam because MailService isn't available
      */
-    MAILSERVICE_MISSING("Can't handle spam because MailService isn't available", CATEGORY_ERROR, 3003),
+    MAILSERVICE_MISSING(SpamhandlerSpamassassinExceptionMessage.MAILSERVICE_MISSING_MSG, CATEGORY_ERROR, 3003),
 
     /**
      * Error while getting spamd provider from service: "%s"
      */
-    ERROR_GETTING_SPAMD_PROVIDER("Error while getting spamd provider from service: \"%s\"", CATEGORY_ERROR, 3004);
-
-
-
+    ERROR_GETTING_SPAMD_PROVIDER(SpamhandlerSpamassassinExceptionMessage.ERROR_GETTING_SPAMD_PROVIDER_MSG, CATEGORY_ERROR, 3004);
 
     final Category category;
 
@@ -73,7 +71,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -82,7 +80,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -92,7 +90,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

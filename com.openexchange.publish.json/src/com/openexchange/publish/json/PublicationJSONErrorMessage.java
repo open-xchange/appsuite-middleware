@@ -63,12 +63,12 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  */
 public enum PublicationJSONErrorMessage implements OXExceptionCode {
-    THROWABLE(CATEGORY_ERROR, 1, "Please try again later.", "An unexpected error occurred: %s"),
-    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, "Please correct the client program", "Missing value for parameter %s"),
-    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, "Please correct the client program","Unknown Action: %s"),
-    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, "Please use only entity modules known to the server", "Unknown entity module: %s"),
-    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, "Please ask only for columns known to the server", "Unknown column: %s"),
-    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, "Please check the spelling of the id, or load a list of known targets", "Unknown Target: %s");
+    THROWABLE(CATEGORY_ERROR, 1, "Please try again later.", PublicationJSONExceptionMessage.THROWABLE_MSG),
+    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, "Please correct the client program", PublicationJSONExceptionMessage.MISSING_PARAMETER_MSG),
+    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, "Please correct the client program", PublicationJSONExceptionMessage.UNKNOWN_ACTION_MSG),
+    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, "Please use only entity modules known to the server", PublicationJSONExceptionMessage.UNKOWN_ENTITY_MODULE_MSG),
+    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, "Please ask only for columns known to the server", PublicationJSONExceptionMessage.UNKNOWN_COLUMN_MSG),
+    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, "Please check the spelling of the id, or load a list of known targets", PublicationJSONExceptionMessage.UNKNOWN_TARGET_MSG);
 
     private Category category;
     private int errorCode;
