@@ -1029,7 +1029,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
@@ -1037,7 +1037,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
-            final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
+            final boolean mergeWithSent = true; //includeSent && !sentFullName.equals(fullName);
             if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
                 sentFolder.open(READ_ONLY);
@@ -1107,6 +1107,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     order,
                     mailFields)));
             }
+            // TODO: Apply IndexRange here
             /*
              * Fetch messages
              */
