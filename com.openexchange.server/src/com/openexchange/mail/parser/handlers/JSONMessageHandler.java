@@ -561,7 +561,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     final String keyContentType = MailJSONField.CONTENT_TYPE.getKey();
                     final String keyContent = MailJSONField.CONTENT.getKey();
                     final String keySize = MailJSONField.SIZE.getKey();
-                    for (int i = len-1; i >= 0; i--) {
+                    boolean b = true;
+                    for (int i = len-1; b && i >= 0; i--) {
                         final JSONObject jObject = attachments.getJSONObject(i);
                         if (jObject.getString(keyContentType).startsWith("text/plain")) {
                             final String imageURL;
@@ -575,6 +576,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                             final String newContent = content + imgTag;
                             jObject.put(keyContent, newContent);
                             jObject.put(keySize, newContent.length());
+                            b = false;
                         }
                     }
                     return handleAttachment(part, false, baseContentType, fileName, id);
@@ -773,7 +775,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                         final String keyContentType = MailJSONField.CONTENT_TYPE.getKey();
                         final String keyContent = MailJSONField.CONTENT.getKey();
                         final String keySize = MailJSONField.SIZE.getKey();
-                        for (int i = len-1; i >= 0; i--) {
+                        boolean b = true;
+                        for (int i = len-1; b && i >= 0; i--) {
                             final JSONObject jObject = attachments.getJSONObject(i);
                             if (jObject.getString(keyContentType).startsWith("text/plain")) {
                                 final String newContent = jObject.getString(keyContent) + content;
@@ -782,6 +785,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                                 if (jObject.hasAndNotNull("plain_text")) {
                                     jObject.put("plain_text", jObject.getString("plain_text") + plainTextContentArg);
                                 }
+                                b = false;
                             }
                         }
                         /*
