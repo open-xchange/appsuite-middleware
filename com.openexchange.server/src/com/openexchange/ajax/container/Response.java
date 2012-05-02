@@ -123,11 +123,8 @@ public final class Response {
      * @param response the response JSON object.
      */
     public Response(final JSONObject response) {
-        super();
-        warnings = new LinkedList<OXException>();
-        properties = new HashMap<String, Object>(8);
+        this(DEFAULT_LOCALE);
         this.json = response;
-        this.locale = DEFAULT_LOCALE;
     }
 
     /**
@@ -153,11 +150,7 @@ public final class Response {
      * Constructor for generating responses.
      */
     public Response() {
-        super();
-        warnings = new LinkedList<OXException>();
-        properties = new HashMap<String, Object>(8);
-        this.json = null;
-        this.locale = DEFAULT_LOCALE;
+        this(DEFAULT_LOCALE);
     }
 
     /**

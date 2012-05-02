@@ -164,6 +164,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.sun.mail.iap.BadCommandException;
@@ -996,6 +997,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
+    protected static final class ThreadableResult {
+        protected final Threadable threadable;
+        protected final boolean cached;
+
+        protected ThreadableResult(final Threadable threadable, final boolean cached) {
+            super();
+            this.threadable = threadable;
+            this.cached = cached;
+        }
+    }
+
     /**
      * Gets the <tt>Threadable</tt> with cache look-up.
      * 
@@ -1005,7 +1017,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The <tt>Threadable</tt> either from cache or newly generated
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
-    protected Threadable getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache) throws MessagingException {
+    protected ThreadableResult getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache) throws MessagingException {
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(f.getFullName(), accountId, session);
         synchronized (entry) {
             final boolean logIt = INFO; // TODO: Switch to DEBUG
@@ -1046,7 +1058,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         final long dur = System.currentTimeMillis() - st;
                         LOG.info("\tExisting ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec. Reconstruct in separate thread.");
                     }
-                    return retval;
+                    return new ThreadableResult((Threadable) retval.clone(), true);
                 }
                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
                 if (sorted) {
@@ -1062,7 +1074,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 LOG.info("\tExisting ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec");
             }
         }
-        return (Threadable) entry.getThreadable().clone();
+        return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
     }
 
     @Override
@@ -1083,6 +1095,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Sort messages by thread reference
              */
+            boolean cached = false;
             List<ThreadSortNode> threadList = null;
             if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
                 final boolean logIt = INFO; // TODO: Switch to DEBUG
@@ -1104,31 +1117,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final boolean logIt = INFO; // TODO: Switch to DEBUG
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 if (mergeWithSent) {
-                    final Future<Threadable> future;
+                    final Future<ThreadableResult> future;
                     {
                         final IMAPFolder sent = sentFolder;
-                        future = ThreadPools.getThreadPool().submit(new AbstractTask<Threadable>() {
+                        future = ThreadPools.getThreadPool().submit(new AbstractTask<ThreadableResult>() {
     
                             @Override
-                            public Threadable call() throws Exception {
+                            public ThreadableResult call() throws Exception {
                                 return getThreadableFor(sent, false, cache);
                             }
                         });
                     }
-                    Threadable threadable = getThreadableFor(imapFolder, false, cache);
-                    Threadable.append(threadable, getFrom(future));
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache);
+                    final ThreadableResult sentThreadableResult = getFrom(future);
+                    Threadable threadable = threadableResult.threadable;
+                    Threadable.append(threadable, sentThreadableResult.threadable);
                     // Sort them by thread reference
                     threadable = new Threader().thread(threadable);
                     threadable = Threadable.filterFullName(sentFullName, threadable);
                     threadList = Threadable.toNodeList(threadable);
                     ThreadSortNode.filterFullName(sentFullName, threadList);
+                    cached = threadableResult.cached || sentThreadableResult.cached;
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
                         LOG.info("\tIn-application thread-sort (incl. sent messages) took " + dur + "msec for folder " + fullName);
                     }
                 } else {
-                    final Threadable threadable = getThreadableFor(imapFolder, true, cache);
-                    threadList = Threadable.toNodeList(threadable);
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, true, cache);
+                    cached = threadableResult.cached;
+                    threadList = Threadable.toNodeList(threadableResult.threadable);
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
                         LOG.info("\tIn-application thread-sort took " + dur + "msec for folder " + fullName);
@@ -1249,7 +1266,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     list = list.subList(fromIndex, toIndex);
                 }
-                return list;
+                return new PropertizedList<List<MailMessage>>(list).setProperty("cached", Boolean.valueOf(cache));
             }
             /*
              * Include body

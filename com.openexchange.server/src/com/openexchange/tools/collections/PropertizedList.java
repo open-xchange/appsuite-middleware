@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.tools.collections;
 
 import java.util.Collection;
 import java.util.HashMap;
