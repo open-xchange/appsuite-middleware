@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,6 +159,29 @@ public final class ResponseWriter {
          * Add warnings
          */
         addWarnings(json, warnings, locale);
+        /*
+         * Add properties
+         */
+        addProperties(json, response.getProperties());
+    }
+
+    /**
+     * Writes given properties to specified JSON object.
+     * 
+     * @param json The JSON object
+     * @param properties The properties
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addProperties(final JSONObject json, final Map<String, Object> properties) throws JSONException {
+        if (null == properties || properties.isEmpty()) {
+            return;
+        }
+        for (final Entry<String,Object> entry : properties.entrySet()) {
+            final Object value = entry.getValue();
+            if (null != value) {
+                json.put(entry.getKey(), value);
+            }
+        }
     }
 
     /**
