@@ -560,6 +560,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     final int len = attachments.length();
                     final String keyContentType = MailJSONField.CONTENT_TYPE.getKey();
                     final String keyContent = MailJSONField.CONTENT.getKey();
+                    final String keySize = MailJSONField.SIZE.getKey();
                     for (int i = len-1; i >= 0; i--) {
                         final JSONObject jObject = attachments.getJSONObject(i);
                         if (jObject.getString(keyContentType).startsWith("text/plain")) {
@@ -571,7 +572,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
                             }
                             final String imgTag = "<br><img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" id=\"" + fileName + "\">";
                             final String content = jObject.getString(keyContent);
-                            jObject.put(keyContent, content + imgTag);
+                            final String newContent = content + imgTag;
+                            jObject.put(keyContent, newContent);
+                            jObject.put(keySize, newContent.length());
                         }
                     }
                     return handleAttachment(part, false, baseContentType, fileName, id);
@@ -769,11 +772,16 @@ public final class JSONMessageHandler implements MailMessageHandler {
                         final int len = attachments.length();
                         final String keyContentType = MailJSONField.CONTENT_TYPE.getKey();
                         final String keyContent = MailJSONField.CONTENT.getKey();
+                        final String keySize = MailJSONField.SIZE.getKey();
                         for (int i = len-1; i >= 0; i--) {
                             final JSONObject jObject = attachments.getJSONObject(i);
                             if (jObject.getString(keyContentType).startsWith("text/plain")) {
-                                final String content0 = jObject.getString(keyContent);
-                                jObject.put(keyContent, content0 + content);
+                                final String newContent = jObject.getString(keyContent) + content;
+                                jObject.put(keyContent, newContent);
+                                jObject.put(keySize, newContent.length());
+                                if (jObject.hasAndNotNull("plain_text")) {
+                                    jObject.put("plain_text", jObject.getString("plain_text") + plainTextContentArg);
+                                }
                             }
                         }
                         /*
