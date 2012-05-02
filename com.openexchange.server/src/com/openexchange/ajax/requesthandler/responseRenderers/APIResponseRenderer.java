@@ -55,20 +55,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
@@ -84,6 +81,8 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(APIResponseRenderer.class));
 
 	private static final String JSONP = "jsonp";
+
+	private static final String CALLBACK = "callback";
 
     /**
      * Initializes a new {@link APIResponseRenderer}.
@@ -124,22 +123,22 @@ public class APIResponseRenderer implements ResponseRenderer {
      */
     public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || isRespondWithHTML(req) || req.getParameter("callback") != null) {
+            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                String callback = req.getParameter("callback");
+                String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
                     callback = action;
                 }
                 final Writer w = new UnsynchronizedStringWriter();
                 ResponseWriter.write(response, w);
                 resp.getWriter().print(substituteJS(w.toString(), callback));
-            } else if (req.getParameter("jsonp") != null) {
-                String call = req.getParameter(JSONP);
+            } else if (req.getParameter(JSONP) != null) {
+                final String call = req.getParameter(JSONP);
 
                 final Writer w = new UnsynchronizedStringWriter();
                 ResponseWriter.write(response, w);
 
-                StringBuilder sb = new StringBuilder(call);
+                final StringBuilder sb = new StringBuilder(call);
                 sb.append('(');
                 sb.append(w.toString());
                 sb.append(");");

@@ -195,6 +195,11 @@ public interface MailMessageHandler {
     public boolean handleMultipart(MailPart mp, int bodyPartCount, String id) throws OXException;
 
     /**
+     * Handle end of a multipart (<code>multipart/*</code>)
+     */
+    public boolean handleMultipartEnd(MailPart mp, String id) throws OXException;
+
+    /**
      * Handle a nested message (<code>message/rfc822</code>)
      * <p>
      * Get the message via:

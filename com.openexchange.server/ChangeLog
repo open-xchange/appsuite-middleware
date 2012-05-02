@@ -1,3 +1,8 @@
+* 2012-05-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20947: Adapt to common yahoo.com naming for standard folders
+ - Fix for bug 22079: Checking IMAP server response on folder creation
+
 * 2012-04-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 22042: Guaranteed termination for check for non-existing parents

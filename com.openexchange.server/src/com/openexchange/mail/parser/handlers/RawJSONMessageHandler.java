@@ -214,6 +214,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     }
 
     @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
+    }
+
+    @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
