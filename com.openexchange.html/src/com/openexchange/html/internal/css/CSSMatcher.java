@@ -171,7 +171,7 @@ public final class CSSMatcher {
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
 
-        PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}+\\s*\\{)([^\\}]+)\\}");
+        PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}[\\p{Print}\r\n]+\\s*\\{)([^\\}]+)\\}");
 
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
