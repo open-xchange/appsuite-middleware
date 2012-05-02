@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -1245,6 +1246,9 @@ public final class IMAPCommandsCollection {
                         command,
                         response.toString() + " ("+newFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
+                    if (response.toString().toLowerCase(Locale.US).indexOf("already exists") > 0) {
+                        return Boolean.TRUE;
+                    }
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
