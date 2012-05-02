@@ -185,6 +185,11 @@ public final class MailPartHandler implements MailMessageHandler {
         mailPart = null;
     }
 
+    @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
+    }
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com. openexchange.mail.dataobjects.MailContent, boolean,

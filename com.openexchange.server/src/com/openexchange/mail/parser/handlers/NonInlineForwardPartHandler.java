@@ -64,9 +64,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
@@ -117,6 +117,11 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     public void setImageContentIds(final Collection<String> imageContentIds) {
         this.imageContentIds.clear();
         this.imageContentIds.addAll(imageContentIds);
+    }
+
+    @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
     }
 
     private static final String APPLICATION = "application/";
