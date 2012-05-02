@@ -12,27 +12,27 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum FileStorageCodes implements OXExceptionCode {
     /** An IO error occurred: %s */
-    IOERROR("An IO error occurred: %s", Category.CATEGORY_SERVICE_DOWN, 3),
+    IOERROR(FileStorageExceptionMessage.IOERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
-    INSTANTIATIONERROR("Couldn't reach the filestore: %s", Category.CATEGORY_SERVICE_DOWN, 4),
+    INSTANTIATIONERROR(FileStorageExceptionMessage.INSTANTIATIONERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 4),
     /** Cannot create directory \"%1$s\" for FileStorage. */
-    CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.", Category.CATEGORY_CONFIGURATION, 6),
+    CREATE_DIR_FAILED(FileStorageExceptionMessage.CREATE_DIR_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 6),
     /** Unsupported encoding. */
-    ENCODING("Unsupported encoding.", Category.CATEGORY_ERROR, 9),
+    ENCODING(FileStorageExceptionMessage.ENCODING_MSG, Category.CATEGORY_ERROR, 9),
     /** Number parsing problem. */
-    NO_NUMBER("Number parsing problem.", Category.CATEGORY_ERROR, 10),
+    NO_NUMBER(FileStorageExceptionMessage.NO_NUMBER_MSG, Category.CATEGORY_ERROR, 10),
     /** File storage is full. */
-    STORE_FULL("File storage is full.", Category.CATEGORY_CAPACITY, 11),
+    STORE_FULL(FileStorageExceptionMessage.STORE_FULL_MSG, Category.CATEGORY_CAPACITY, 11),
     /** Depth mismatch while computing next entry. */
-    DEPTH_MISMATCH("'Depth' mismatch while computing next entry.", Category.CATEGORY_ERROR, 12),
+    DEPTH_MISMATCH(FileStorageExceptionMessage.DEPTH_MISMATCH_MSG, Category.CATEGORY_ERROR, 12),
     /** Cannot remove lock file. */
-    UNLOCK("Cannot remove lock file.", Category.CATEGORY_SERVICE_DOWN, 13),
+    UNLOCK(FileStorageExceptionMessage.UNLOCK_MSG, Category.CATEGORY_SERVICE_DOWN, 13),
     /** Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore. */
-    LOCK("Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.", Category.CATEGORY_SERVICE_DOWN, 14),
+    LOCK(FileStorageExceptionMessage.LOCK_MSG, Category.CATEGORY_SERVICE_DOWN, 14),
     /** Eliminating the FileStorage failed. */
-    NOT_ELIMINATED("Eliminating the FileStorage failed.", Category.CATEGORY_SERVICE_DOWN, 16),
+    NOT_ELIMINATED(FileStorageExceptionMessage.NOT_ELIMINATED_MSG, Category.CATEGORY_SERVICE_DOWN, 16),
     /** File does not exist in filestore \"%1$s\". Consider running consistency tool. */
-    FILE_NOT_FOUND("File does not exist in filestore \"%1$s\". Consider running consistency tool.", Category.CATEGORY_SERVICE_DOWN, 17);
+    FILE_NOT_FOUND(FileStorageExceptionMessage.FILE_NOT_FOUND_MSG, Category.CATEGORY_SERVICE_DOWN, 17);
 
     /**
      * Message of the exception.
