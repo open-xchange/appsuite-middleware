@@ -47,88 +47,26 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.groupware.importexport.csv;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.openexchange.i18n.LocalizableStrings;
 
-/**
- * Defines a wrapper for an InputStream that also contains the size of this
- * InputStream. This is necessary to be able to set the correct size when
- * returning a HTTP-response - else the whole connection might be cancelled
- * either too early (resulting in corrupt data) or to late (resulting in
- * a lot of waiting).
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-public class SizedInputStream extends InputStream{
 
-	private final InputStream in;
-	private final long size;
-	private final Format format;
+public class CsvExceptionMessages implements LocalizableStrings {
 
-	public SizedInputStream(final InputStream in, final long size, final Format format){
-		this.size = size;
-		this.in = in;
-		this.format = format;
-	}
+    public static final String BROKEN_CSV_MSG = "Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?";
 
-	public long getSize() {
-		return this.size;
-	}
+    public static final String DATA_AFTER_LAST_LINE_MSG = "Illegal state: Found data after presumed last line.";
 
-	public Format getFormat(){
-		return this.format;
-	}
+    public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s";
+    
+    public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
 
-	@Override
-	public int read() throws IOException {
-		return in.read();
-	}
+    public static final String IOEXCEPTION_WHILE_CONVERTING_MSG = "Encountered IO error while trying to read stream";
+    
+    public static final String NUMBER_FAILED_MSG = "Parsing %1$s to a number failed.";
 
-	@Override
-	public int available() throws IOException {
-		return in.available();
-	}
-
-	@Override
-	public void close() throws IOException {
-		in.close();
-	}
-
-	@Override
-	public void mark(final int readlimit) {
-		synchronized (this) {
-			in.mark(readlimit);
-		}
-	}
-
-	@Override
-	public boolean markSupported() {
-		return in.markSupported();
-	}
-
-	@Override
-	public int read(final byte[] b, final int off, final int len) throws IOException {
-		return in.read(b, off, len);
-	}
-
-	@Override
-	public int read(final byte[] b) throws IOException {
-		return in.read(b);
-	}
-
-	@Override
-	public void reset() throws IOException {
-		synchronized (this) {
-			in.reset();
-		}
-	}
-
-	@Override
-	public long skip(final long n) throws IOException {
-		return in.skip(n);
-	}
-
+    private CsvExceptionMessages() {
+        super();
+    }
 }

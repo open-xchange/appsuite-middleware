@@ -114,10 +114,6 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String IOEXCEPTION_MSG = "Could not read InputStream as string";
 
-    public static final String BROKEN_CSV_MSG = "Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?";
-
-    public static final String DATA_AFTER_LAST_LINE_MSG = "Illegal state: Found data after presumed last line.";
-
     public static final String NO_IMPORTER_MSG = "Cannot find an importer for format %s into folders %s";
 
     public static final String NO_EXPORTER_MSG = "Cannot find an exporter for folder %s to format %s";

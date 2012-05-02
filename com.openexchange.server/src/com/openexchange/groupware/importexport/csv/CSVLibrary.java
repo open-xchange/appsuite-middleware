@@ -57,12 +57,13 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,7 +98,7 @@ public final class CSVLibrary {
         try {
             fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
         } catch (final OXException e) {
-            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folder);
+            throw CsvExceptionCodes.LOADING_FOLDER_FAILED.create(e, folder);
         }
         return fo;
     }
@@ -113,7 +114,7 @@ public final class CSVLibrary {
         try{
             return Integer.parseInt(folderString);
         } catch (final NumberFormatException e) {
-            throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folderString);
+            throw CsvExceptionCodes.NUMBER_FAILED.create(e, folderString);
         }
     }
 
@@ -161,7 +162,7 @@ public final class CSVLibrary {
             isr = new InputStreamReader(is, encoding);
         } catch (final UnsupportedEncodingException e) {
             LOG.fatal(e);
-            throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
+            throw CsvExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         }
         final StringBuilder bob = new StringBuilder();
         boolean firstPartSpecialTreatment = isUTF8;
@@ -178,7 +179,7 @@ public final class CSVLibrary {
             	}
             }
         } catch (final IOException e) {
-            throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
+            throw CsvExceptionCodes.IOEXCEPTION_WHILE_CONVERTING.create(e);
         } finally {
             try {
                 isr.close();
