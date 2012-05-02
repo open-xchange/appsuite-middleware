@@ -49,8 +49,8 @@
 
 package com.openexchange.importexport.importers;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
+import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -83,7 +83,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.CSVParser;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;

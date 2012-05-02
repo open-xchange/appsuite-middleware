@@ -61,7 +61,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.CSVParser;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
 import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;

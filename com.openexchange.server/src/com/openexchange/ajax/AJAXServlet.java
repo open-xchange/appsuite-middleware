@@ -856,7 +856,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static boolean mayUpload(final String action) {
-        return !UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action);
+        return !UPLOAD_ACTIONS.contains(action) ;
     }
 
     private static boolean isEmpty(final String string) {
