@@ -30,15 +30,12 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade.context"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contacts.ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging.generic"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mobile.configuration.generator"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.msn"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.plugin.hosting"/>
 </provider>
 </psf>
