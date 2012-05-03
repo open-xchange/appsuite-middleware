@@ -90,7 +90,6 @@ import com.openexchange.tools.images.ImageScalingService;
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
-    private static final Log LOG = LogFactory.getLog(DispatcherActivator.class);
 
     @Override
     protected void startBundle() throws Exception {
@@ -170,7 +169,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
-//        registerSessionServlet("/ajax", servlet);
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
             @Override
@@ -180,7 +178,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 if (!servlets.contains(module)) {
                     servlets.add(module);
                     registerSessionServlet("/ajax/" + module, servlet);
-                    //LOG.info(String.format("wanted to register SessionServlet %s%s %s ", "/ajax/", module, servlet));
                 }
             }
 
@@ -189,7 +186,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
                     unregisterServlet("/ajax/" + module);
-                    //LOG.info(String.format("wanted to UNregister SessionServlet %s%s %s ", "/ajax/", module, servlet));
                     servlets.remove(module);
                 }
             }
