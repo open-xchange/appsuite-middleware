@@ -59,15 +59,16 @@ import com.mortennobel.imagescaling.DimensionConstrain;
  */
 public class ContainDimensionConstrain extends DimensionConstrain {
 
-    private int maxWidth;
+    private final int maxWidth;
 
-    private int maxHeight;
+    private final int maxHeight;
 
     public ContainDimensionConstrain(int maxWidth, int maxHeight) {
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
     }
 
+    @Override
     public Dimension getDimension(Dimension dimension) {
         if (maxWidth <= 0 && maxHeight <= 0) {
             return dimension;

@@ -105,6 +105,7 @@ public class BinaryValueDefinition extends ValueDefinition {
         fw.writeln(value);
     }
     
+    @Override
     public Object parse(final Scanner s, final Property property) throws IOException {
         final StringBuilder sb = new StringBuilder();
         while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {

@@ -73,7 +73,7 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 
 	private static final Log LOG = LogFactory.getLog(AppointmentSqlFactory.class);
 	
-    private List<CalendarFeature> features = new ArrayList<CalendarFeature>();
+    private final List<CalendarFeature> features = new ArrayList<CalendarFeature>();
     
     public AppointmentSQLInterface createAppointmentSqlOmittingFeatures(Session session, String...omitFeatures) {
         Set<String> skip = new HashSet<String>(Arrays.asList(omitFeatures));

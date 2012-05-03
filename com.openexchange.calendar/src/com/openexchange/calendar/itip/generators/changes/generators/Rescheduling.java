@@ -79,8 +79,9 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         SAME_DAY, DIFFERENT_DAYS
     }
 
-    private String[] FIELDS = new String[] { "start_date", "end_date" };
+    private final String[] FIELDS = new String[] { "start_date", "end_date" };
     
+    @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         String msg = Messages.HAS_RESCHEDULED;
       
@@ -208,6 +209,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
     }
 
 
+    @Override
     public String[] getFields() {
         return FIELDS;
     }

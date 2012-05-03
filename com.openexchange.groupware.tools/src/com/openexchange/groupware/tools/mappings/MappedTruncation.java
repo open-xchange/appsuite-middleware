@@ -118,9 +118,9 @@ public class MappedTruncation<O> implements Truncated {
 		}
 	}	
 
-	private int maxSize;
-	private int length;
-	private Mapping<?, O> mapping;	
+	private final int maxSize;
+	private final int length;
+	private final Mapping<?, O> mapping;	
 
 	/**
 	 * Initializes a new {@link MappedTruncation}.

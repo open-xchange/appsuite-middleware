@@ -57,9 +57,9 @@ import com.openexchange.tools.session.SessionHolder;
 
 public class SessionBasedTrackingConfiguration implements ScopedTrackingConfiguration {
 	
-	private SessionHolder sh;
-	private TrackingConfiguration config;
-	private String[] className;
+	private final SessionHolder sh;
+	private final TrackingConfiguration config;
+	private final String[] className;
 	
 	public SessionBasedTrackingConfiguration(String className, TrackingConfiguration config, SessionHolder sh) {
 		this.sh = sh;

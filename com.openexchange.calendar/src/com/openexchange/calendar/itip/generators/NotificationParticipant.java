@@ -290,7 +290,8 @@ public class NotificationParticipant {
 		this.folderId = folderId;
 	}
 	
-	public NotificationParticipant clone() {
+	@Override
+    public NotificationParticipant clone() {
 		NotificationParticipant clone = new NotificationParticipant(roles, external, comment);
 		clone.roles = new HashSet<ITipRole>(this.roles);
 		clone.external = this.external;

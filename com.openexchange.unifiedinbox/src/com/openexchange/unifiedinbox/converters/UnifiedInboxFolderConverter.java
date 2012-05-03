@@ -277,6 +277,7 @@ public final class UnifiedInboxFolderConverter {
                 sb.setLength(0);
                 completionService.submit(new LoggingCallable<int[]>(session) {
 
+                    @Override
                     public int[] call() throws Exception {
                         MailAccess<?, ?> mailAccess = null;
                         try {

@@ -122,14 +122,17 @@ public abstract class LoggingCallable<V> implements Task<V> {
         return accountId;
     }
 
+    @Override
     public void afterExecute(final Throwable t) {
         // NOP
     }
 
+    @Override
     public void beforeExecute(final Thread t) {
         // NOP
     }
 
+    @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         // NOP
     }

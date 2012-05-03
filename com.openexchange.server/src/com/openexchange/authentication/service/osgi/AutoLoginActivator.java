@@ -67,11 +67,13 @@ public final class AutoLoginActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker(context, AutoLoginAuthenticationService.class.getName(), new AutoLoginAuthenticationCustomizer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         tracker.close();
     }

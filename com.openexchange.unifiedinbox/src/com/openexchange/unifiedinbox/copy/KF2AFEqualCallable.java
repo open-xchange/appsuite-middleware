@@ -97,6 +97,7 @@ final class KF2AFEqualCallable implements Task<Object> {
         indexList.add(index);
     }
 
+    @Override
     public Object call() throws Exception {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -122,14 +123,17 @@ final class KF2AFEqualCallable implements Task<Object> {
         return null;
     }
 
+    @Override
     public void afterExecute(final Throwable t) {
         // Nothing to do
     }
 
+    @Override
     public void beforeExecute(final Thread t) {
         // Nothing to do
     }
 
+    @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         // Nothing to do
     }

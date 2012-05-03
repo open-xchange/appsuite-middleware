@@ -76,7 +76,7 @@ public class ResultIterator implements SearchIterator<Contact> {
     private final int contextID;
     private Contact next;
 	private final Map<String, Boolean> canReadAllMap;
-	private Boolean canReadAll;
+	private final Boolean canReadAll;
 
 	/**
 	 * Initializes a new {@link ResultIterator} where the 'can read all' 

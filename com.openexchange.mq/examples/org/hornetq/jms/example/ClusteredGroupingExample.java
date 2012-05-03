@@ -37,7 +37,8 @@ public class ClusteredGroupingExample extends HornetQExample
       new ClusteredGroupingExample().run(args);
    }
 
-   public boolean runExample() throws Exception
+   @Override
+public boolean runExample() throws Exception
    {
       Connection connection0 = null;
 

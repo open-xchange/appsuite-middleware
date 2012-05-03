@@ -73,10 +73,10 @@ public class DateHelper {
     private DateFormat dateFormat;
     private DateFormat weekdayFormat;
     
-    private Appointment appointment;
+    private final Appointment appointment;
     private Locale locale;
 	private TimeZone timezone;
-	private TimeZone utc = TimeZone.getTimeZone("UTC");
+	private final TimeZone utc = TimeZone.getTimeZone("UTC");
     
 
     public DateHelper(Appointment appointment, Locale locale, TimeZone tz) {

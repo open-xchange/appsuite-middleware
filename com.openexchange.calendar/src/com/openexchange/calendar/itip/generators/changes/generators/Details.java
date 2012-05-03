@@ -84,6 +84,7 @@ public class Details implements ChangeDescriptionGenerator {
         put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
     }};
         
+    @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         List<Sentence> changes = new ArrayList<Sentence>();
         add(TITLE, diff, changes, true);
@@ -108,6 +109,7 @@ public class Details implements ChangeDescriptionGenerator {
         changes.add(changeDescription);
     }
 
+    @Override
     public String[] getFields() {
         return FIELDS;
     }

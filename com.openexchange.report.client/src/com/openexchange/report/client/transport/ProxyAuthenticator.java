@@ -53,14 +53,15 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
 public class ProxyAuthenticator extends Authenticator { 
-    private String proxyUsername;
-    private String proxyPassword;
+    private final String proxyUsername;
+    private final String proxyPassword;
     
     public ProxyAuthenticator(String proxyUsername, String proxyPassword) { 
         this.proxyUsername = proxyUsername; 
         this.proxyPassword = proxyPassword; 
     } 
     
+    @Override
     protected PasswordAuthentication getPasswordAuthentication() { 
         return new PasswordAuthentication(proxyUsername, proxyPassword.toCharArray()); 
     } 

@@ -69,9 +69,9 @@ public class ContactAggregator {
 
     private static final Log LOG = LogFactory.getLog(ContactAggregator.class);
 
-    private List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
+    private final List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
 
-    private List<ContactSource> sources = new ArrayList<ContactSource>();
+    private final List<ContactSource> sources = new ArrayList<ContactSource>();
     
     private ConfigViewFactory configViews = null;
 

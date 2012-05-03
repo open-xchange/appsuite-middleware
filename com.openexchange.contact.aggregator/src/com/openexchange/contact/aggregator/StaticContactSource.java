@@ -61,9 +61,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class StaticContactSource implements ContactSource {
 
-    private List<Contact> contacts;
-    private Speed speed;
-    private Type type;
+    private final List<Contact> contacts;
+    private final Speed speed;
+    private final Type type;
 
     public StaticContactSource(List<Contact> contacts, Speed speed, Type type) {
         super();

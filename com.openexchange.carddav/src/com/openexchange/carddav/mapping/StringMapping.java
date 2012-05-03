@@ -62,7 +62,8 @@ import com.openexchange.groupware.tools.mappings.DefaultMapping;
  */
 public abstract class StringMapping extends DefaultMapping<String, Contact> {
 
-	public boolean truncate(Contact contact, int length) throws OXException {
+	@Override
+    public boolean truncate(Contact contact, int length) throws OXException {
 		final String value = this.get(contact);
 		if (null != value && length < value.length()) {
 			this.set(contact, value.substring(0, length));

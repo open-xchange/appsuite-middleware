@@ -112,12 +112,12 @@ public class TransformationObservationTask extends AbstractTask<List<String>> im
     private final AtomicBoolean pageRendered;
     
     
-    private List<String> content;
+    private final List<String> content;
 
     private OXException exception;
-	private int pages;
-	private IConversionJob transformer;
-	private File file;
+	private final int pages;
+	private final IConversionJob transformer;
+	private final File file;
 	private IContentIterator contentIterator;
 
 

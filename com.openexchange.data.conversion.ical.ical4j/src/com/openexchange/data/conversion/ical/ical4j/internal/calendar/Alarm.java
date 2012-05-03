@@ -78,10 +78,12 @@ import com.openexchange.groupware.tasks.Task;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Alarm<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    @Override
     public boolean isSet(final U calendar) {
         return true;
     }
 
+    @Override
     public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
@@ -134,10 +136,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
 
+    @Override
     public boolean hasProperty(final T t) {
         return true; // Not strictly true, but to inlcude the warning we have to enter #parse always
     }
 
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
        final VAlarm alarm = getAlarm(index, component, warnings);
        boolean useDuration = false;

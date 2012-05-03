@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
  */
 public class PassthroughWrapper implements TypeWrapper {
 
+    @Override
     public String none(Object argument) {
         if (argument != null) {
             return argument.toString();
@@ -67,27 +68,33 @@ public class PassthroughWrapper implements TypeWrapper {
         return "";
     }
 
+    @Override
     public String original(Object argument) {
         return none(argument);
     }
 
+    @Override
     public String participant(Object argument) {
         return none(argument);
     }
 
+    @Override
     public String state(Object argument, ConfirmStatus status) {
         return none(argument);
     }
 
+    @Override
     public String updated(Object argument) {
         return none(argument);
     }
 
-	public String emphasiszed(Object argument) {
+	@Override
+    public String emphasiszed(Object argument) {
 		return none(argument);
 	}
 	
-	public String reference(Object argument) {
+	@Override
+    public String reference(Object argument) {
 		return none(argument);
 	}
 

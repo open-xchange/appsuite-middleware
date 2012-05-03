@@ -92,7 +92,8 @@ public class ContactServiceImpl extends DefaultContactService {
     	super();
     }
 
-	protected Contact doGetContact(Session session, String folderID, String id, ContactField[] fields) throws OXException {
+	@Override
+    protected Contact doGetContact(Session session, String folderID, String id, ContactField[] fields) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
@@ -134,7 +135,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		return contact;
 	}
 	
-	protected void doCreateContact(Session session, String folderID, Contact contact) throws OXException {
+	@Override
+    protected void doCreateContact(Session session, String folderID, Contact contact) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
@@ -192,7 +194,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).create(contact, folder);
 	}
 	
-	protected void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID, 
+	@Override
+    protected void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID, 
 			Contact contact, Date lastRead) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
@@ -298,7 +301,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 	
-	protected void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) throws OXException {
+	@Override
+    protected void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
@@ -379,7 +383,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, folder);
 	}
 	
-	protected void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException {
+	@Override
+    protected void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
@@ -416,7 +421,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).delete(storedContact, folder);
 	}
 	
-	protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, final String folderID, 
+	@Override
+    protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, final String folderID, 
 			final String[] ids, final ContactField[] fields, final SortOptions sortOptions, 
 			final Date since) throws OXException {
 		int userID = session.getUserId();
@@ -457,7 +463,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), contextID, userID, permission.canReadAllObjects());	
 	}
 	
-	protected <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
+	@Override
+    protected <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
 			SortOptions sortOptions) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
@@ -508,7 +515,8 @@ public class ContactServiceImpl extends DefaultContactService {
 			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
 	}
 	
-	protected String doGetOrganization(int contextID) throws OXException {
+	@Override
+    protected String doGetOrganization(int contextID) throws OXException {
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final int userID = Tools.getContext(contextID).getMailadmin();
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
@@ -517,7 +525,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		return contact.getCompany();
 	}
 	
-	protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
+	@Override
+    protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
 			ContactField[] fields, SortOptions sortOptions) throws OXException {
 		int currentUserID = session.getUserId();
 		int contextID = session.getContextId();

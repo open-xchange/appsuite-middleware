@@ -68,7 +68,7 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
 
     private final InputStream thumbnail;
 
-    private Boolean moreAvailable;
+    private final Boolean moreAvailable;
 
     /**
      * Initializes a new {@link ThirdwingPreviewDocument}.
@@ -105,6 +105,7 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
         return thumbnail;
     }
 
+    @Override
     public Boolean isMoreAvailable() {
         return moreAvailable;
     }

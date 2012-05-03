@@ -78,10 +78,12 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
         this.order = order;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL),
@@ -94,10 +96,12 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
         };
     }
 
+    @Override
     public AbstractAJAXParser<? extends AllResponse> getParser() {
         return new AllParser(true);
     }
 
+    @Override
     public Object getBody() throws IOException, JSONException {
         return null;
     }

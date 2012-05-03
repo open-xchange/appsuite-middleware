@@ -118,6 +118,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
      * final, because these services are always needed to register Session Servlets. Additional needed Services are provided by
      * <code>getAdditionalNeededServices()</code>
      */
+    @Override
     protected final Class<?>[] getNeededServices() {
         Set<Class<?>> neededServices = new HashSet<Class<?>>();
         neededServices.add(HttpService.class);

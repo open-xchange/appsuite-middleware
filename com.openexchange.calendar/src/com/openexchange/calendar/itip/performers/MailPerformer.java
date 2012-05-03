@@ -77,10 +77,12 @@ public class MailPerformer extends AbstrakterDingeMacher {
         super(util, sender, generators);
     }
 
+    @Override
     public Collection<ITipAction> getSupportedActions() {
         return EnumSet.of(ITipAction.DECLINECOUNTER, ITipAction.REFRESH, ITipAction.SEND_APPOINTMENT);
     }
 
+    @Override
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         for (ITipChange change : changes) {

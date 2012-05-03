@@ -66,10 +66,10 @@ import com.openexchange.session.Session;
 public class NotifyFeature implements CalendarFeature {
 
     private static final String NOTIFICATIONS = "notifications";
-    private ITipMailGeneratorFactory generators;
-    private MailSenderService sender;
-    private ServiceLookup services;
-	private AttachmentMemory attachmentMemory;
+    private final ITipMailGeneratorFactory generators;
+    private final MailSenderService sender;
+    private final ServiceLookup services;
+	private final AttachmentMemory attachmentMemory;
 
     public NotifyFeature(ITipMailGeneratorFactory generators, MailSenderService sender, AttachmentMemory attachmentMemory, ServiceLookup services) {
         super();
@@ -79,10 +79,12 @@ public class NotifyFeature implements CalendarFeature {
         this.attachmentMemory = attachmentMemory;
     }
 
+    @Override
     public String getId() {
         return NOTIFICATIONS;
     }
 
+    @Override
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) {
         return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
     }

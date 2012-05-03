@@ -115,6 +115,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
             super();
         }
 
+        @Override
         public String getHelp() {
             final StringBuilder help = new StringBuilder();
             help.append("\tstartTest - Start SolrIndexFacadeTest.\n");

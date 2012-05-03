@@ -74,6 +74,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
 
+    @Override
     public String writeMessage(ITipMessage message, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
         initCalendar(calendar);

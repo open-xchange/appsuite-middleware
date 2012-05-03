@@ -62,7 +62,7 @@ import com.openexchange.user.UserService;
 
 public class TrackingActivator extends HousekeepingActivator {
 
-	private TrackingJMXActivator trackingJMXActivator;
+	private final TrackingJMXActivator trackingJMXActivator;
 	public TrackingActivator(TrackingJMXActivator trackingJMXActivator) {
 		this.trackingJMXActivator = trackingJMXActivator;
 	}

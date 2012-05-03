@@ -53,8 +53,8 @@ import org.apache.commons.logging.Log;
 
 public class TrackingFileLog implements Log {
 
-	private ScopedTrackingConfiguration config;
-	private Log delegate;
+	private final ScopedTrackingConfiguration config;
+	private final Log delegate;
 
 	public TrackingFileLog(ScopedTrackingConfiguration config, Log delegate) {
 		this.config = config;

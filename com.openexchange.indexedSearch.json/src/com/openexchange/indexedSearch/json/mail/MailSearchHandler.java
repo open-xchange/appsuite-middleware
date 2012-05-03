@@ -95,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MailSearchHandler implements SearchHandler, SolrMailConstants {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link MailSearchHandler}.

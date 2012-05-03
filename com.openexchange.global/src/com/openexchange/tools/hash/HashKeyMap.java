@@ -96,34 +96,42 @@ public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>
         return this;
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public boolean containsKey(final Object key) {
         return map.containsKey(newKey(key.toString()));
     }
 
+    @Override
     public boolean containsValue(final Object value) {
         return map.containsValue(value);
     }
 
+    @Override
     public V get(final Object key) {
         return map.get(newKey(key.toString()));
     }
 
+    @Override
     public V put(final String key, final V value) {
         return map.put(newKey(key), value);
     }
 
+    @Override
     public V remove(final Object key) {
         return map.remove(newKey(key.toString()));
     }
 
+    @Override
     public void putAll(final Map<? extends String, ? extends V> m) {
         if (null == m || m.isEmpty()) {
             return;
@@ -134,18 +142,22 @@ public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>
         }
     }
 
+    @Override
     public void clear() {
         map.clear();
     }
 
+    @Override
     public Set<String> keySet() {
         return new HashKeySet(map.keySet()).setGenerator(generatorReference.get());
     }
 
+    @Override
     public Collection<V> values() {
         return map.values();
     }
 
+    @Override
     public Set<java.util.Map.Entry<String, V>> entrySet() {
         return new HashKeyEntrySet<V>(map.entrySet()).setGenerator(generatorReference.get());
     }

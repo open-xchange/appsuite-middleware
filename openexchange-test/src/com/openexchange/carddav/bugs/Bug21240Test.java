@@ -68,6 +68,7 @@ public class Bug21240Test extends CardDAVTest {
 		super(name);
 	}
 	
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 		super.getCardDAVClient().setUserAgent(CardDAVClient.USER_AGENT_10_6_8);

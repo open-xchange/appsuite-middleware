@@ -77,7 +77,7 @@ public class MailFolderDiscoverer {
 
     private static final Log LOG = LogFactory.getLog(MailFolderDiscoverer.class);
     
-    private FolderService folderService;
+    private final FolderService folderService;
 
     public MailFolderDiscoverer(FolderService folderService) {
         super();

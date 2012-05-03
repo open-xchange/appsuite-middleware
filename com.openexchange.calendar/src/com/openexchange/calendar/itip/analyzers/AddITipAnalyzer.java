@@ -83,10 +83,12 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
         return Arrays.asList(ITipMethod.ADD);
     }
 
+    @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
        
 

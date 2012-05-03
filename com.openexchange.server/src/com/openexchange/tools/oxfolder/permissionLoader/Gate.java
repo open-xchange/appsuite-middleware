@@ -84,14 +84,17 @@ public final class Gate {
             super();
         }
 
+        @Override
         public void pass() {
             // Nope
         }
 
+        @Override
         public void signalDone() {
             // Nope
         }
 
+        @Override
         public boolean tryPass() {
             return true;
         }
@@ -109,14 +112,17 @@ public final class Gate {
             semaphore = new Semaphore(permits);
         }
 
+        @Override
         public void pass() throws InterruptedException {
             semaphore.acquire();
         }
 
+        @Override
         public boolean tryPass() {
             return semaphore.tryAcquire();
         }
 
+        @Override
         public void signalDone() {
             semaphore.release();
         }

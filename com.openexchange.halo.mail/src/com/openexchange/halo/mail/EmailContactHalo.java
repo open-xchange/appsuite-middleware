@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class EmailContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public EmailContactHalo(ServiceLookup services) {
 		this.services = services;

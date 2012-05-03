@@ -125,7 +125,8 @@ public class VCardResource {
 		return null != xFeatures && 0 < xFeatures.size() && "group".equals(xFeatures.get(0).getExtensionData());
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		WRITER.setVCard(this.vCard);
 		return WRITER.buildVCardString();		
 	}

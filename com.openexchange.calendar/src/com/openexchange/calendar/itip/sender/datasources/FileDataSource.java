@@ -118,18 +118,22 @@ public final class FileDataSource implements DataSource {
         this(new File(name), contentType); // use the file constructor
     }
 
+    @Override
     public InputStream getInputStream() throws IOException {
         return new FileInputStream(file);
     }
 
+    @Override
     public OutputStream getOutputStream() throws IOException {
         return new FileOutputStream(file);
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getName() {
         return file.getName();
     }

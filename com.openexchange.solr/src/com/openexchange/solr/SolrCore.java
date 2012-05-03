@@ -61,7 +61,7 @@ public class SolrCore {
     
     private int store;
 
-    private SolrCoreIdentifier identifier;
+    private final SolrCoreIdentifier identifier;
     
     private boolean active;
     

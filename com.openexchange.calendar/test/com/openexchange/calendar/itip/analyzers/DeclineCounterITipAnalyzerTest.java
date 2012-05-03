@@ -97,7 +97,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        assertEquals(12, ((Appointment) analysis.getAnnotations().get(0).getAppointment()).getObjectID());
+        assertEquals(12, analysis.getAnnotations().get(0).getAppointment().getObjectID());
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
     
@@ -124,7 +124,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        assertEquals(13, ((Appointment) analysis.getAnnotations().get(0).getAppointment()).getObjectID());
+        assertEquals(13, analysis.getAnnotations().get(0).getAppointment().getObjectID());
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
     

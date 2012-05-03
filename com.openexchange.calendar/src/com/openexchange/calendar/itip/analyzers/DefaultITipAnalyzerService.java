@@ -72,9 +72,9 @@ import com.openexchange.session.Session;
  */
 public class DefaultITipAnalyzerService implements ITipAnalyzerService {
     
-    private Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
+    private final Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
     
-    private ITipAnalyzer internalAnalyzer;
+    private final ITipAnalyzer internalAnalyzer;
     
     public DefaultITipAnalyzerService(ITipIntegrationUtility util, ServiceLookup services) {
         add(new AddITipAnalyzer(util, services));
@@ -94,6 +94,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         }
     }
 
+    @Override
     public List<ITipAnalysis> analyze(List<ITipMessage> messages, String format, Session session, Map<String, String> mailHeader) throws OXException {
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {

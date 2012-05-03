@@ -67,7 +67,7 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ChangeDescriber {
-    private ChangeDescriptionGenerator[] generators;
+    private final ChangeDescriptionGenerator[] generators;
 
     public ChangeDescriber(ChangeDescriptionGenerator...generators) {
         this.generators = generators;

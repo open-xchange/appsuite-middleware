@@ -64,14 +64,17 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class CalendarExtendDNColumnTaskV2 extends CalendarExtendDNColumnTask implements UpdateTaskV2 {
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         super.perform(params.getSchema(), params.getContextId());
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] {};
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }

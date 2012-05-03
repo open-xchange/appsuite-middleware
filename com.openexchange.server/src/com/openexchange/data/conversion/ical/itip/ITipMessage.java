@@ -64,7 +64,7 @@ public class ITipMessage extends AppointmentWithExceptions {
 
     private String comment;
     
-    private Set<Object> features = new HashSet<Object>();
+    private final Set<Object> features = new HashSet<Object>();
 
     public ITipMethod getMethod() {
         return method;

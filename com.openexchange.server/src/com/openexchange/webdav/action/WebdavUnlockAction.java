@@ -54,7 +54,8 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavUnlockAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavProtocolException {
 		req.getResource().unlock(getToken(req.getHeader("Lock-Token")));
 		res.setStatus(HttpServletResponse.SC_OK);

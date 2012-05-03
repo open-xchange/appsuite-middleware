@@ -355,10 +355,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public CalendarDataObject getObjectById(int oid) throws OXException, SQLException {
         return getObjectById(oid, 0, null, false);
     }
 
+    @Override
     public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException {
         return getObjectById(oid, inFolder, null, true);
     }
@@ -511,6 +513,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return updateAppointmentObject(cdao, inFolder, clientLastModified, true);
     }
 
+    @Override
     public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, boolean checkPermissions) throws OXException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
@@ -655,10 +658,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         throw oxe;
     }
 
+    @Override
     public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
         deleteAppointmentObject(cdao, inFolder, clientLastModified, true);
     }
 
+    @Override
     public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, boolean checkPermissions) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
