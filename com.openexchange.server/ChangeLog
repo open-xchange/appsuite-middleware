@@ -2,6 +2,7 @@
 
  - Fix for bug 21292: Allowing a public folder's creator to delete a folder
  - Fix for bug 22074: Improved html2text invocation
+ - Fix for bug 22076: Checking for possible mail-safe encoding
 
 * 2012-05-02 - thorben.betten@open-xchange.com
 
