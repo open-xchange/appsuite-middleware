@@ -87,13 +87,13 @@ import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
- * {@link HTMLProcessing} - Various methods for HTML processing.
+ * {@link HtmlProcessingTmp} - Various methods for HTML processing for mail module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLProcessing {
+public final class HtmlProcessingTmp {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLProcessing.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HtmlProcessingTmp.class));
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 
@@ -233,7 +233,7 @@ public final class HTMLProcessing {
      */
     public static boolean useSanitize() {
         if (null == useSanitize) {
-            synchronized (HTMLProcessing.class) {
+            synchronized (HtmlProcessingTmp.class) {
                 if (null == useSanitize) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     useSanitize = Boolean.valueOf((null == service) || (service.getBoolProperty("com.openexchange.mail.text.useSanitize", true)));
@@ -371,7 +371,7 @@ public final class HTMLProcessing {
             } while (cssClassMatcher.find());
             tmp.setLength(0);
             newCss = tmp.append("<style>").append(newCss).append("</style>").toString();
-            retval = HTMLProcessing.dropStyles(retval);
+            retval = HtmlProcessingTmp.dropStyles(retval);
             final Matcher htmlBodyMatcher = PATTERN_HTML_BODY.matcher(retval);
             if (htmlBodyMatcher.find()) {
                 tmp.setLength(0);
@@ -895,9 +895,9 @@ public final class HTMLProcessing {
     }
 
     /**
-     * Initializes a new {@link HTMLProcessing}.
+     * Initializes a new {@link HtmlProcessingTmp}.
      */
-    private HTMLProcessing() {
+    private HtmlProcessingTmp() {
         super();
     }
 }

@@ -369,7 +369,7 @@ public final class RTF2HTMLConverter {
         final HTMLStateMachine hsm = new HTMLStateMachine();
         final String htmlBody = convertRTFStringToHTML(rtfContent, hsm);
         final StringBuilder docBuilder = new StringBuilder(htmlBody.length() + 26).append("<html><body>");
-        docBuilder.append(HTMLProcessing.formatHrefLinks(htmlBody));
+        docBuilder.append(HtmlProcessingTmp.formatHrefLinks(htmlBody));
         return docBuilder.append("</body></html>").toString();
     }
 
