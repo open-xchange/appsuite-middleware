@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: UWA Widget Management
+Bundle-SymbolicName: com.openexchange.frontend.uwa
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.update,
+ com.openexchange.i18n,
+ com.openexchange.id,
+ com.openexchange.java,
+ com.openexchange.modules.model,
+ com.openexchange.modules.storage.memory,
+ com.openexchange.modules.storage.sql,
+ com.openexchange.modules.storage.sql.engines,
+ com.openexchange.osgi,
+ com.openexchange.sql.builder,
+ com.openexchange.sql.grammar,
+ com.openexchange.sql.schema,
+ com.openexchange.sql.tools,
+ com.openexchange.tools.id,
+ org.apache.commons.logging,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.frontend.uwa.osgi.UWAWidgetActivator
+Export-Package: com.openexchange.frontend.uwa
