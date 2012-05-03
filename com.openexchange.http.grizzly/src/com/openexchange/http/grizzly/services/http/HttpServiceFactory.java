@@ -49,7 +49,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import com.openexchange.http.grizzly.osgi.GrizzlyActivator;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 
@@ -60,33 +59,29 @@ import com.openexchange.log.LogFactory;
  * @since Jan 20, 2009
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HttpServiceFactory implements ServiceFactory {
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(HttpServiceFactory.class));
-    private OSGiMainHandler mainHttpHandler;
+public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
-    public HttpServiceFactory(HttpServer httpServer, Bundle bundle) {
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(HttpServiceFactory.class));
+
+    private final OSGiMainHandler mainHttpHandler;
+
+    public HttpServiceFactory(final HttpServer httpServer, final Bundle bundle) {
         mainHttpHandler = new OSGiMainHandler(bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
     }
 
     @Override
-    public HttpService getService(
-            Bundle bundle, ServiceRegistration serviceRegistration) {
-        LOG.info(new StringBuilder().append("Bundle: ").append(bundle)
-                .append(", is getting HttpService with serviceRegistration: ")
-                    .append(serviceRegistration).toString());
-        
+    public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
+        LOG.info(new StringBuilder().append("Bundle: ").append(bundle).append(", is getting HttpService with serviceRegistration: ").append(
+            serviceRegistration).toString());
+
         return new HttpServiceImpl(bundle);
     }
 
     @Override
-    public void ungetService(
-            Bundle bundle, ServiceRegistration serviceRegistration,
-            Object httpServiceObj) {
-        LOG.info(
-                new StringBuilder().append("Bundle: ").append(bundle)
-                        .append(", is ungetting HttpService with serviceRegistration: ")
-                        .append(serviceRegistration).toString());
+    public void ungetService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration, final HttpService httpServiceObj) {
+        LOG.info(new StringBuilder().append("Bundle: ").append(bundle).append(", is ungetting HttpService with serviceRegistration: ").append(
+            serviceRegistration).toString());
         mainHttpHandler.uregisterAllLocal();
     }
 
