@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.osgi;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
@@ -76,6 +77,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.tools.images.ImageScalingService;
 
@@ -88,6 +90,7 @@ import com.openexchange.tools.images.ImageScalingService;
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
+    private static final Log LOG = LogFactory.getLog(DispatcherActivator.class);
 
     @Override
     protected void startBundle() throws Exception {
@@ -167,7 +170,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
-        registerSessionServlet("/ajax", servlet);
+//        registerSessionServlet("/ajax", servlet);
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
             @Override
@@ -176,7 +179,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
                     servlets.add(module);
-                    //registerSessionServlet("/ajax/" + module, servlet);
+                    registerSessionServlet("/ajax/" + module, servlet);
+                    //LOG.info(String.format("wanted to register SessionServlet %s%s %s ", "/ajax/", module, servlet));
                 }
             }
 
@@ -184,7 +188,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void removed(ServiceReference<AJAXActionServiceFactory> ref, AJAXActionServiceFactory service) {
                 String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
-                    //unregisterServlet("/ajax/" + module);
+                    unregisterServlet("/ajax/" + module);
+                    //LOG.info(String.format("wanted to UNregister SessionServlet %s%s %s ", "/ajax/", module, servlet));
                     servlets.remove(module);
                 }
             }
