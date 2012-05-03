@@ -11,6 +11,7 @@
  - Fix for bug 22083: Provide account information on error
  - Logging for bug 22084: Providing JSON error object returned by FB API
  - Fix for bug 21870: Ensured presence of appropriate warning, rather than an error
+ - Fix for bug 22084: Deny creation of OAuth account if either token or secret is empty/null
 
 * 2012-05-02 - thorben.betten@open-xchange.com
 
