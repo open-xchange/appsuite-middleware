@@ -63,13 +63,13 @@ import javax.swing.text.rtf.RTFEditorKit;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link RTF2HTMLConverter} - Converts RTF to HTML based on <code>javax.swing.text.*</code> package
+ * {@link Rtf2HtmlConverter} - Converts RTF to HTML based on <code>javax.swing.text.*</code> package.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RTF2HTMLConverter {
+public final class Rtf2HtmlConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RTF2HTMLConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Rtf2HtmlConverter.class));
 
     private static final class HTMLStateMachine {
 
@@ -353,9 +353,9 @@ public final class RTF2HTMLConverter {
     }
 
     /**
-     * Initializes a new {@link RTF2HTMLConverter}
+     * Initializes a new {@link Rtf2HtmlConverter}
      */
-    private RTF2HTMLConverter() {
+    private Rtf2HtmlConverter() {
         super();
     }
 

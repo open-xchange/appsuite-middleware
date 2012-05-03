@@ -70,7 +70,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HtmlProcessing;
-import com.openexchange.mail.text.RTF2HTMLConverter;
+import com.openexchange.mail.text.Rtf2HtmlConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -486,7 +486,7 @@ public final class JSONObjectConverter {
                 false);
         } else if (baseType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
             return HtmlProcessing.formatHTMLForDisplay(
-                RTF2HTMLConverter.convertRTFToHTML(src),
+                Rtf2HtmlConverter.convertRTFToHTML(src),
                 contentType.getCharsetParameter(),
                 session,
                 mailPath,
