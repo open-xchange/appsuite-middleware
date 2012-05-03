@@ -50,7 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;

@@ -68,16 +68,16 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.UIDSet;
 
 /**
- * {@link MIMEStorageUtility} - Provides MIME-specific storage utility methods
+ * {@link MimeStorageUtility} - Provides MIME-specific storage utility methods.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MIMEStorageUtility {
+public final class MimeStorageUtility {
 
     /**
-     * No instance
+     * No instantiation.
      */
-    private MIMEStorageUtility() {
+    private MimeStorageUtility() {
         super();
     }
 

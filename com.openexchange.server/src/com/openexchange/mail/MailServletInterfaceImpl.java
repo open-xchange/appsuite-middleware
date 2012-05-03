@@ -1513,7 +1513,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFieldsArray();
+            useFields = com.openexchange.mail.mime.utils.MimeStorageUtility.getCacheFieldsArray();
             onlyFolderAndID = false;
         } else {
             useFields = MailField.getFields(fields);
@@ -1825,7 +1825,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFieldsArray();
+            useFields = com.openexchange.mail.mime.utils.MimeStorageUtility.getCacheFieldsArray();
             onlyFolderAndID = false;
         } else {
             useFields = MailField.toFields(MailListField.getFields(fields));

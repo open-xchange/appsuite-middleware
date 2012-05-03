@@ -51,7 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
 import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
