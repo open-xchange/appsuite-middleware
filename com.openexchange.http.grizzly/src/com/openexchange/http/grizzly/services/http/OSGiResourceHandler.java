@@ -71,10 +71,10 @@ import org.apache.commons.logging.Log;
  */
 public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
     private static final Log LOG = LogFactory.getLog(OSGiResourceHandler.class);
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private String alias;
-    private String prefix;
-    private HttpContext httpContext;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final String alias;
+    private final String prefix;
+    private final HttpContext httpContext;
 
     /**
      * Default constructor.

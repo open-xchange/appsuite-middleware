@@ -73,6 +73,7 @@ public class OSGiAuthFilter implements Filter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         // nothing to do here
     }
@@ -85,6 +86,7 @@ public class OSGiAuthFilter implements Filter {
      * <p/>
      * {@inheritDoc}
      */
+    @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         if (httpContext.handleSecurity((HttpServletRequest) request, (HttpServletResponse) response)) {
@@ -95,6 +97,7 @@ public class OSGiAuthFilter implements Filter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void destroy() {
         // nothing to do here
     }

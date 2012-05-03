@@ -69,7 +69,7 @@ public class OSGiServletContext extends WebappContext {
     /**
      * {@link HttpContext} providing OSGi integration.
      */
-    private HttpContext httpContext;
+    private final HttpContext httpContext;
 
     /**
      * Default constructor.

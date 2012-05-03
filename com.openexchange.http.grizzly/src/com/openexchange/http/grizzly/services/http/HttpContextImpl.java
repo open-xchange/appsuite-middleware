@@ -68,15 +68,18 @@ public class HttpContextImpl implements HttpContext {
         this.bundle = bundle;
     }
 
+    @Override
     public boolean handleSecurity(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         // By default we allow all :)
         return true;
     }
 
+    @Override
     public URL getResource(String s) {
         return bundle.getResource(s);
     }
 
+    @Override
     public String getMimeType(String s) {
         return null;
     }

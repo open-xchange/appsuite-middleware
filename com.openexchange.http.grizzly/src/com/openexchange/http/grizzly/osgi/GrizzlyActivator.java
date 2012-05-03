@@ -50,7 +50,6 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.io.IOException;
-import java.util.Iterator;
 import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.HttpServer;

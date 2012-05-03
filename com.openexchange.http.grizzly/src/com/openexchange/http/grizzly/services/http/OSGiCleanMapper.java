@@ -72,8 +72,8 @@ class OSGiCleanMapper {
     private static final Map<String, HttpHandler> registrations = new HashMap<String, HttpHandler>(16);
     private static final Set<Servlet> registeredServlets = new HashSet<Servlet>(16);
 
-    private Set<String> localAliases = new HashSet<String>(4);
-    private HashMap<HttpContext, ArrayList<OSGiServletHandler>> contextServletHandlerMap =
+    private final Set<String> localAliases = new HashSet<String>(4);
+    private final HashMap<HttpContext, ArrayList<OSGiServletHandler>> contextServletHandlerMap =
             new HashMap<HttpContext, ArrayList<OSGiServletHandler>>(3);
 
     /**

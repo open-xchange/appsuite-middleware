@@ -59,7 +59,6 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
@@ -67,7 +66,6 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.lang.String;
-import java.text.MessageFormat;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +83,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
     private static final Log LOG = LogFactory.getLog(OSGiServletHandler.class);
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private HttpContext httpContext;
     private String servletPath;
     private FilterChainImpl filterChain;
@@ -273,6 +271,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         // ---------------------------------------------------- FilterChain Methods
 
 
+        @Override
         public void invokeFilterChain(final ServletRequest request,
                                       final ServletResponse response)
         throws IOException, ServletException {

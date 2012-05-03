@@ -79,11 +79,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private static final Log LOG = LogFactory.getLog(OSGiMainHandler.class);
 
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private Bundle bundle;
+    private final Bundle bundle;
 
-    private OSGiCleanMapper mapper;
+    private final OSGiCleanMapper mapper;
 
     /**
      * Constructor.
@@ -304,6 +304,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ReentrantReadWriteLock.ReadLock getProcessingLock() {
         return lock.readLock();
     }
@@ -311,6 +312,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ReentrantReadWriteLock.WriteLock getRemovalLock() {
         return lock.writeLock();
     }
