@@ -47,46 +47,50 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.crypto;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link CryptoExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class CryptoExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link CryptoExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    private CryptoExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+    /**
+     * Bad password.
+     */
+    public final static String BAD_PASSWORD_HELP = "Provide correct password.";
 
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+    public final static String BAD_PASSWORD_MSG = "Wrong Password.";
 
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
+    /**
+     * Encoding error.
+     */
+    public final static String ENCODING_ERROR_HELP = "Check the encoding.";
 
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+    public final static String ENCODING_ERROR_MSG = "Error during encoding operation.";
 
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    /**
+     * Security Exception.
+     */
+    public final static String SECURITY_EXCEPTION_HELP = "Check cipher initialization";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    public final static String SECURITY_EXCEPTION_MSG = "General Security Exception occurred.";
 
-    public final static String THROWABLE_HELP = "Please try again later.";
+    /**
+     * No salt given.
+     */
+    public final static String NO_SALT_HELP = "Provide salt";
 
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
-
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
-
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
-
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
-
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    public final static String NO_SALT_MSG = "No salt given.";
 
 }

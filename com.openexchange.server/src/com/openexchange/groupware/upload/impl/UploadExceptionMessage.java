@@ -47,46 +47,82 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link UploadExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class UploadExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link UploadExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    private UploadExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+    /**
+     * File upload failed: %1$s
+     */
+    public final static String UPLOAD_FAILED_MSG = "File upload failed: %1$s";
 
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+    /**
+     * Missing affiliation id
+     */
+    public final static String MISSING_AFFILIATION_ID_MSG = "Missing affiliation id";
 
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
+    /**
+     * Unknown action value: %1$s
+     */
+    public final static String UNKNOWN_ACTION_VALUE_MSG = "Unknown action value: %1$s";
 
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+    /**
+     * Header "content-type" does not indicate multipart content
+     */
+    public final static String NO_MULTIPART_CONTENT_MSG = "Header \"content-type\" does not indicate multipart content";
 
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    /**
+     * Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
+     */
+    public final static String MAX_UPLOAD_SIZE_EXCEEDED_MSG = "Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    /**
+     * Missing parameter %1$s
+     */
+    public final static String MISSING_PARAM_MSG = "Missing parameter %1$s";
 
-    public final static String THROWABLE_HELP = "Please try again later.";
+    /**
+     * Unknown module: %1$d
+     */
+    public final static String UNKNOWN_MODULE_MSG = "Unknown module: %1$d";
 
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
+    /**
+     * An uploaded file referenced by %1$s could not be found
+     */
+    public final static String UPLOAD_FILE_NOT_FOUND_MSG = "An uploaded file referenced by %1$s could not be found";
 
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
+    /**
+     * Invalid action value: %1$s
+     */
+    public final static String INVALID_ACTION_VALUE_MSG = "Invalid action value: %1$s";
 
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
+    /**
+     * Upload file with id %1$s could not be found
+     */
+    public final static String FILE_NOT_FOUND_MSG = "Upload file with id %1$s could not be found";
 
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
+    /**
+     * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
+     */
+    public final static String INVALID_FILE_TYPE_MSG = "Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"";
 
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    /**
+     * An error occurred: %1$s
+     */
+    public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
 }

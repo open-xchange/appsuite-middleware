@@ -47,46 +47,77 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link UserConfigurationExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class UserConfigurationExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link UserConfigurationExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    private UserConfigurationExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+    /**
+     * A SQL error occurred: %1$s
+     */
+    public final static String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
 
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+    /**
+     * A DBPooling error occurred
+     */
+    public final static String DBPOOL_ERROR_MSG = "A DBPooling error occurred";
 
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
+    /**
+     * Configuration for user %1$s could not be found in context %2$d
+     */
+    public final static String NOT_FOUND_MSG = "Configuration for user %1$s could not be found in context %2$d";
 
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+    /**
+     * Missing property %1$s in system.properties.
+     */
+    public final static String MISSING_SETTING_MSG = "Missing property %1$s in system.properties.";
 
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    /**
+     * Class %1$s can not be found.
+     */
+    public final static String CLASS_NOT_FOUND_MSG = "Class %1$s can not be found.";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    /**
+     * Instantiating the class failed.
+     */
+    public final static String INSTANTIATION_FAILED_MSG = "Instantiating the class failed.";
 
-    public final static String THROWABLE_HELP = "Please try again later.";
+    /**
+     * Cache initialization failed. Region: %1$s
+     */
+    public final static String CACHE_INITIALIZATION_FAILED_MSG = "Cache initialization failed. Region: %1$s";
 
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
+    /**
+     * User configuration could not be put into cache: %1$s
+     */
+    public final static String CACHE_PUT_ERROR_MSG = "User configuration could not be put into cache: %1$s";
 
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
+    /**
+     * User configuration cache could not be cleared: %1$s
+     */
+    public final static String CACHE_CLEAR_ERROR_MSG = "User configuration cache could not be cleared: %1$s";
 
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
+    /**
+     * User configuration could not be removed from cache: %1$s
+     */
+    public final static String CACHE_REMOVE_ERROR_MSG = "User configuration could not be removed from cache: %1$s";
 
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
-
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    /**
+     * Mail settings for user %1$s could not be found in context %2$d
+     */
+    public final static String MAIL_SETTING_NOT_FOUND_MSG = "Mail settings for user %1$s could not be found in context %2$d";
 
 }
