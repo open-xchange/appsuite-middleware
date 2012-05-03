@@ -49,13 +49,15 @@
 
 package com.openexchange.tools.servlet;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
  * {@link AjaxExceptionMessages}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AjaxExceptionMessages {
+public final class AjaxExceptionMessages implements LocalizableStrings {
 
     /**
      * Initializes a new {@link AjaxExceptionMessages}
@@ -109,5 +111,20 @@ public final class AjaxExceptionMessages {
 
     // The action "%1$s" is disabled due to server configuration
     public static final String DisabledAction_MSG = "The action \"%1$s\" is disabled due to server configuration";
+    
+    // No permission for module: %1$s.
+    public static final String NO_PERMISSION_FOR_MODULE = "No permission for module: %1$s.";
+    
+    // Object has been changed in the meantime.
+    public static final String CONFLICT = "Object has been changed in the meantime.";
+
+    // Unexpected result. Expected "%1$s", but is "%2$s".
+    public static final String UNEXPECTED_RESULT = "Unexpected result. Expected \"%1$s\", but is \"%2$s\".";
+
+    // Too many concurrent requests. Please try again later.
+    public static final String TOO_MANY_REQUESTS = "Too many concurrent requests. Please try again later.";
+    
+    // Bad request. The server is unable to handle the request.
+    public static final String BAD_REQUEST = "Bad request. The server is unable to handle the request.";
 
 }

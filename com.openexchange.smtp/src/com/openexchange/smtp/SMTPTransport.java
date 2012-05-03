@@ -366,6 +366,7 @@ public final class SMTPTransport extends MailTransport {
 
     @Override
     public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws OXException {
+        SMTPConfig smtpConfig = null;
         try {
             final InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
@@ -413,7 +414,7 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Set common headers
              */
-            final SMTPConfig smtpConfig = getTransportConfig0();
+            smtpConfig = getTransportConfig0();
             new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm).setCommonHeaders(smtpMessage);
             /*
              * Compose body
@@ -487,7 +488,7 @@ public final class SMTPTransport extends MailTransport {
                 transport.close();
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e, smtpConfig);
         }
     }
 
@@ -525,11 +526,11 @@ public final class SMTPTransport extends MailTransport {
                     transport.close();
                 }
             } catch (final MessagingException e) {
-                throw MimeMailException.handleMessagingException(e);
+                throw MimeMailException.handleMessagingException(e, smtpConfig);
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e, smtpConfig);
         }
     }
 
@@ -600,7 +601,7 @@ public final class SMTPTransport extends MailTransport {
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e, smtpConfig);
         } catch (final IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -656,8 +657,8 @@ public final class SMTPTransport extends MailTransport {
             throw MimeMailException.handleMessagingException(e);
         }
         boolean close = false;
+        final SMTPConfig config = getTransportConfig0();
         try {
-            final SMTPConfig config = getTransportConfig0();
             try {
                 if (config.getSMTPProperties().isSmtpAuth()) {
                     final String encPass = encodePassword(config.getPassword());
@@ -670,7 +671,7 @@ public final class SMTPTransport extends MailTransport {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e, config);
         } finally {
             if (close) {
                 try {

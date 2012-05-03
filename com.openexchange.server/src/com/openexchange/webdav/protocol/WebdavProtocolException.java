@@ -50,7 +50,6 @@
 package com.openexchange.webdav.protocol;
 
 import org.apache.webdav.lib.WebdavException;
-
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -74,35 +73,35 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         /**
          * A WebDAV error occurred.
          */
-        GENERAL_ERROR("A WebDAV error occurred.", CATEGORY_ERROR, 1000),
+        GENERAL_ERROR(WebdavProtocolExceptionMessage.GENERAL_ERROR_MSG, CATEGORY_ERROR, 1000),
         /**
          * The folder %s doesn't exist.
          */
-        FOLDER_NOT_FOUND("The folder %s doesn't exist.", CATEGORY_ERROR, 1001),
+        FOLDER_NOT_FOUND(WebdavProtocolExceptionMessage.FOLDER_NOT_FOUND_MSG, CATEGORY_ERROR, 1001),
         /**
          * The directory already exists.
          */
-        DIRECTORY_ALREADY_EXISTS("The directory already exists.", CATEGORY_ERROR, 1002),
+        DIRECTORY_ALREADY_EXISTS(WebdavProtocolExceptionMessage.DIRECTORY_ALREADY_EXISTS_MSG, CATEGORY_ERROR, 1002),
         /**
          * No write permission.
          */
-        NO_WRITE_PERMISSION("No write permission.", CATEGORY_PERMISSION_DENIED, 1003),
+        NO_WRITE_PERMISSION(WebdavProtocolExceptionMessage.NO_WRITE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 1003),
         /**
-         * File &quot;%1$s&quot; already exists
+         * File "%1$s" already exists
          */
-        FILE_ALREADY_EXISTS("File \"%1$s\" already exists.", CATEGORY_ERROR, 1004),
+        FILE_ALREADY_EXISTS(WebdavProtocolExceptionMessage.FILE_ALREADY_EXISTS_MSG, CATEGORY_ERROR, 1004),
         /**
          * Collections must not have bodies.
          */
-        NO_BODIES_ALLOWED("Collections must not have bodies.", CATEGORY_ERROR, 1005),
+        NO_BODIES_ALLOWED(WebdavProtocolExceptionMessage.NO_BODIES_ALLOWED_MSG, CATEGORY_ERROR, 1005),
         /**
          * File "%1$s" does not exist.
          */
-        FILE_NOT_FOUND("File \"%1$s\" does not exist.", CATEGORY_ERROR, 1006),
+        FILE_NOT_FOUND(WebdavProtocolExceptionMessage.FILE_NOT_FOUND_MSG, CATEGORY_ERROR, 1006),
         /**
          * "%1$s" is a directory.
          */
-        FILE_IS_DIRECTORY("\"%1$s\" is a directory.", CATEGORY_ERROR, 1007);
+        FILE_IS_DIRECTORY(WebdavProtocolExceptionMessage.FILE_IS_DIRECTORY_MSG, CATEGORY_ERROR, 1007);
 
         private final String message;
 

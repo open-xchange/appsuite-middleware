@@ -1,3 +1,4 @@
+
 package com.openexchange.smtp;
 
 import com.openexchange.exception.Category;
@@ -7,9 +8,8 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
- *
  * The SMTP error codes.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum SMTPExceptionCode implements OXExceptionCode {
@@ -25,19 +25,19 @@ public enum SMTPExceptionCode implements OXExceptionCode {
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
      */
-    PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s", CATEGORY_ERROR, 3003),
+    PART_NOT_FOUND(SMTPExceptionMessage.PART_NOT_FOUND_MSG, CATEGORY_ERROR, 3003),
     /**
      * Html-2-Text conversion failed: %1$s
      */
-    HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %1$s", CATEGORY_ERROR, 3004),
+    HTML2TEXT_CONVERTER_ERROR(SMTPExceptionMessage.HTML2TEXT_CONVERTER_ERROR_MSG, CATEGORY_ERROR, 3004),
     /**
      * An internal error occurred: %1$s
      */
-    INTERNAL_ERROR("An internal error occurred: %1$s", CATEGORY_ERROR, 3005),
+    INTERNAL_ERROR(SMTPExceptionMessage.INTERNAL_ERROR_MSG, CATEGORY_ERROR, 3005),
     /**
      * No recipient(s) has been defined for new message
      */
-    MISSING_RECIPIENTS("There are no recipient(s) for the new message.", CATEGORY_USER_INPUT, 3006),
+    MISSING_RECIPIENTS(SMTPExceptionMessage.MISSING_RECIPIENTS_MSG, CATEGORY_USER_INPUT, 3006),
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder
      */
@@ -45,15 +45,15 @@ public enum SMTPExceptionCode implements OXExceptionCode {
     /**
      * Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s
      */
-    MISSING_NOTIFICATION_HEADER("Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s", CATEGORY_ERROR, 3008),
+    MISSING_NOTIFICATION_HEADER(SMTPExceptionMessage.MISSING_NOTIFICATION_HEADER_MSG, CATEGORY_ERROR, 3008),
     /**
      * No send address could be found in user configuration
      */
-    NO_SEND_ADDRESS_FOUND("No send address could be found in user configuration", CATEGORY_ERROR, 3009),
+    NO_SEND_ADDRESS_FOUND(SMTPExceptionMessage.NO_SEND_ADDRESS_FOUND_MSG, CATEGORY_ERROR, 3009),
     /**
      * No content available in mail part
      */
-    NO_CONTENT("No content available in mail part", CATEGORY_ERROR, 3010),
+    NO_CONTENT(SMTPExceptionMessage.NO_CONTENT_MSG, CATEGORY_ERROR, 3010),
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.
      */
@@ -61,9 +61,9 @@ public enum SMTPExceptionCode implements OXExceptionCode {
     /**
      * No storage access because mail connection is not connected
      */
-    NOT_CONNECTED("No storage access because mail connection is not connected", CATEGORY_ERROR, 3012),
+    NOT_CONNECTED(SMTPExceptionMessage.NOT_CONNECTED_MSG, CATEGORY_ERROR, 3012),
     /** Unable to parse SMTP server URI "%1$s". */
-    URI_PARSE_FAILED("Unable to parse SMTP server URI \"%1$s\".", CATEGORY_CONFIGURATION, 3013);
+    URI_PARSE_FAILED(SMTPExceptionMessage.URI_PARSE_FAILED_MSG, CATEGORY_CONFIGURATION, 3013);
 
     private final String message;
 
@@ -114,7 +114,7 @@ public enum SMTPExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -123,7 +123,7 @@ public enum SMTPExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -133,7 +133,7 @@ public enum SMTPExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

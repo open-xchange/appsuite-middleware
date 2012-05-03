@@ -791,8 +791,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 }
                 return create(request(participant, null, State.Type.NEW));
             }
+            if (isAboutStateChangesOnly() && participant.isExternal()) {
+            	return null;
+            }
             return update(request(participant, null, State.Type.MODIFIED	));
         }
+        
+        private boolean isAboutStateChangesOnly() {
+			return diff.isAboutStateChangesOnly();
+		}
         
         protected boolean existsInUpdate(NotificationParticipant participant) {
             for (UserParticipant userParticipant : appointment.getUsers()) {
@@ -1045,6 +1052,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 return null;
             } else if (participant.hasRole(ITipRole.ATTENDEE)) {
                 if (onlyMyStateChanged() && confirmStatus != null) {
+                	if (participant.isExternal()) {
+                		return null; // External users don't care about participant state changes unless they are the organizer
+                	}
                     return stateChanged(request(participant, null, getStateTypeForStatus(confirmStatus)), confirmStatus);
                 } 
                 return ORGANIZER.generateUpdateMailFor(participant);

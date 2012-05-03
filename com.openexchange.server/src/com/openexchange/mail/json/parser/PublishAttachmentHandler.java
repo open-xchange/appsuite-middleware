@@ -51,8 +51,8 @@ package com.openexchange.mail.json.parser;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertPart;
-import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
-import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
+import static com.openexchange.mail.text.HtmlProcessing.getConformHTML;
+import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;

@@ -69,8 +69,8 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
-import com.openexchange.mail.text.HTMLProcessing;
-import com.openexchange.mail.text.RTF2HTMLConverter;
+import com.openexchange.mail.text.HtmlProcessing;
+import com.openexchange.mail.text.Rtf2HtmlConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -396,7 +396,7 @@ public final class JSONObjectConverter {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
             final String content =
-                HTMLProcessing.formatHTMLForDisplay(
+                HtmlProcessing.formatHTMLForDisplay(
                     htmlObject.getString(MailJSONField.CONTENT.getKey()),
                     "UTF-8",
                     session,
@@ -441,7 +441,7 @@ public final class JSONObjectConverter {
             {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
-                content = HTMLProcessing.formatTextForDisplay(plainText, usm, displayMode);
+                content = HtmlProcessing.formatTextForDisplay(plainText, usm, displayMode);
             }
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             copyValue(MailJSONField.SIZE.getKey(), htmlObject, jsonObject);
@@ -475,7 +475,7 @@ public final class JSONObjectConverter {
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
-            return HTMLProcessing.formatHTMLForDisplay(
+            return HtmlProcessing.formatHTMLForDisplay(
                 ENRCONV.convert(src),
                 contentType.getCharsetParameter(),
                 session,
@@ -485,8 +485,8 @@ public final class JSONObjectConverter {
                 displayMode,
                 false);
         } else if (baseType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
-            return HTMLProcessing.formatHTMLForDisplay(
-                RTF2HTMLConverter.convertRTFToHTML(src),
+            return HtmlProcessing.formatHTMLForDisplay(
+                Rtf2HtmlConverter.convertRTFToHTML(src),
                 contentType.getCharsetParameter(),
                 session,
                 mailPath,
@@ -495,7 +495,7 @@ public final class JSONObjectConverter {
                 displayMode,
                 false);
         }
-        return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
+        return HtmlProcessing.formatTextForDisplay(src, usm, displayMode);
     }
 
     private static JSONObject extractObject(final JSONArray bodyArr, final String... contentTypes) throws JSONException {

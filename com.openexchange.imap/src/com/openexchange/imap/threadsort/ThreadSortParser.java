@@ -97,7 +97,7 @@ final class ThreadSortParser {
             if (DEBUG) {
                 LOG.debug(new StringBuilder("Found message: ").append(message).toString());
             }
-            final ThreadSortNode actual = new ThreadSortNode(message);
+            final ThreadSortNode actual = new ThreadSortNode(message, -1L);
             recthreads.add(actual);
             // Now thread ends or answers are there.
             final int messageIDLength = message.getSlen();
@@ -135,7 +135,7 @@ final class ThreadSortParser {
                     if (DEBUG) {
                         LOG.debug("Parsing childs of thread with no parent.");
                     }
-                    final ThreadSortNode emptyParent = new ThreadSortNode(MessageId.DUMMY);
+                    final ThreadSortNode emptyParent = new ThreadSortNode(MessageId.DUMMY, -1L);
                     recthreads.add(emptyParent);
                     final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
                     parse(subList, childThreads);

@@ -57,22 +57,22 @@ package com.openexchange.jslob.storage.db;
 public final class DBJSlobStorageExceptionMessages {
 
     // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
+    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
 
     // A SQL error occurred: %1$s
-    public static final String SQL_ERROR = "A SQL error occurred: %1$s";
+    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
 
     // No entry available for identifier: %1$s
-    public static final String NO_ENTRY = "No entry available for identifier: %1$s";
+    public static final String NO_ENTRY_MSG = "No entry available for identifier: %1$s";
 
     // Entry already locked for identifier: %1$s
-    public static final String ALREADY_LOCKED = "Entry already locked for identifier: %1$s";
+    public static final String ALREADY_LOCKED_MSG = "Entry already locked for identifier: %1$s";
 
     // Lock failed for entry with identifier: %1$s
-    public static final String LOCK_FAILED = "Lock failed for entry with identifier: %1$s";
+    public static final String LOCK_FAILED_MSG = "Lock failed for entry with identifier: %1$s";
 
     // Unlock failed for entry with identifier: %1$s
-    public static final String UNLOCK_FAILED = "Unlock failed for entry with identifier: %1$s";
+    public static final String UNLOCK_FAILED_MSG = "Unlock failed for entry with identifier: %1$s";
 
     /**
      * Initializes a new {@link DBJSlobStorageExceptionMessages}.

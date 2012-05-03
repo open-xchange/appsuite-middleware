@@ -97,16 +97,19 @@ public class EffectivePermission extends OCLPermission {
      */
     private int folderModule = -1;
 
+    private final int createdBy;
+
     private boolean userConfigIsValid;
 
     private boolean userConfigAlreadyValidated;
 
     private OCLPermission underlyingPerm;
 
-    public EffectivePermission(final int entity, final int fuid, final int folderType, final int folderModule, final UserConfiguration userConfig) {
+    public EffectivePermission(final int entity, final int fuid, final int folderType, final int folderModule, final int createdBy, final UserConfiguration userConfig) {
         super(entity, fuid);
         this.folderType = folderType;
         this.folderModule = folderModule;
+        this.createdBy = createdBy;
         this.userConfig = userConfig;
         validateUserConfig();
     }
@@ -122,6 +125,9 @@ public class EffectivePermission extends OCLPermission {
         if (!super.equals(ep) && (folderType != ep.folderType) && (folderModule != ep.folderModule)) {
             return false;
         }
+        if (createdBy != ep.createdBy) {
+            return false;
+        }
         if (null != userConfig) {
             return userConfig.equals(ep.userConfig);
         }
@@ -134,6 +140,7 @@ public class EffectivePermission extends OCLPermission {
         hash = 31 * hash + super.hashCode();
         hash = 31 * hash + folderType;
         hash = 31 * hash + folderModule;
+        hash = 31 * hash + createdBy;
         if (null != userConfig) {
             hash = 31 * hash + userConfig.hashCode();
         }
@@ -159,7 +166,7 @@ public class EffectivePermission extends OCLPermission {
              * else if (folderType == FolderObject.SHARED && !userConfig.hasFullSharedFolderAccess()) { return false; }
              */
         }
-        return super.isFolderAdmin();
+        return ((folderType == FolderObject.PUBLIC) && (userConfig.getUserId() == createdBy)) || super.isFolderAdmin();
     }
 
     @Override

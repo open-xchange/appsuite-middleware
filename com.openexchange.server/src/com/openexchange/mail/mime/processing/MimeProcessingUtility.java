@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
+import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;

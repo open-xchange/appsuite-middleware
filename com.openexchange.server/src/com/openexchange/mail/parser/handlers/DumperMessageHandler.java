@@ -97,6 +97,11 @@ public class DumperMessageHandler implements MailMessageHandler {
         return strBuilder.toString();
     }
 
+    @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
+    }
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com.openexchange.mail.dataobjects.MailContent, boolean,

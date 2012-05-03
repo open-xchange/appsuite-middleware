@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
@@ -130,10 +130,10 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                     content = htmlService.dropScriptTagsInHeader(content);
                     if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                         final boolean[] modified = new boolean[1];
-                        final String cssPrefix = "ox-" + HTMLProcessing.getHash(Long.toString(System.currentTimeMillis()));
+                        final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()));
                         final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                         content = htmlService.checkBaseTag(content, externalImagesAllowed);
-                        if (HTMLProcessing.useSanitize()) {
+                        if (HtmlProcessing.useSanitize()) {
                             // No need to generate well-formed HTML
                             if (externalImagesAllowed) {
                                 /*
@@ -167,13 +167,13 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                             final MailMessage mail = (MailMessage) result.getParameter("__mail");
                             if (mail != null) {
                                 final MailPath mailPath = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
-                                content = HTMLProcessing.filterInlineImages(content, session, mailPath);
+                                content = HtmlProcessing.filterInlineImages(content, session, mailPath);
                             }
                         }
                         /*
                          * Replace CSS classes
                          */
-                        content = HTMLProcessing.saneCss(content, htmlService, cssPrefix);
+                        content = HtmlProcessing.saneCss(content, htmlService, cssPrefix);
                         if (asDiv) {
                             content = toDiv(content);
                         }

@@ -58,7 +58,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link UploadException} - Indicates an error during an upload.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UploadException extends OXException {
@@ -72,51 +72,51 @@ public class UploadException extends OXException {
         /**
          * File upload failed: %1$s
          */
-        UPLOAD_FAILED("File upload failed: %1$s", CATEGORY_ERROR, 1),
+        UPLOAD_FAILED(UploadExceptionMessage.UPLOAD_FAILED_MSG, CATEGORY_ERROR, 1),
         /**
          * Missing affiliation id
          */
-        MISSING_AFFILIATION_ID("Missing affiliation id", CATEGORY_ERROR, 2),
+        MISSING_AFFILIATION_ID(UploadExceptionMessage.MISSING_AFFILIATION_ID_MSG, CATEGORY_ERROR, 2),
         /**
          * Unknown action value: %1$s
          */
-        UNKNOWN_ACTION_VALUE("Unknown action value: %1$s", CATEGORY_ERROR, 3),
+        UNKNOWN_ACTION_VALUE(UploadExceptionMessage.UNKNOWN_ACTION_VALUE_MSG, CATEGORY_ERROR, 3),
         /**
          * Header "content-type" does not indicate multipart content
          */
-        NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", CATEGORY_ERROR, 4),
+        NO_MULTIPART_CONTENT(UploadExceptionMessage.NO_MULTIPART_CONTENT_MSG, CATEGORY_ERROR, 4),
         /**
          * Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
          */
-        MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s", CATEGORY_USER_INPUT, 5),
+        MAX_UPLOAD_SIZE_EXCEEDED(UploadExceptionMessage.MAX_UPLOAD_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 5),
         /**
          * Missing parameter %1$s
          */
-        MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, 6),
+        MISSING_PARAM(UploadExceptionMessage.MISSING_PARAM_MSG, CATEGORY_ERROR, 6),
         /**
          * Unknown module: %1$d
          */
-        UNKNOWN_MODULE("Unknown module: %1$d", CATEGORY_ERROR, 7),
+        UNKNOWN_MODULE(UploadExceptionMessage.UNKNOWN_MODULE_MSG, CATEGORY_ERROR, 7),
         /**
          * An uploaded file referenced by %1$s could not be found
          */
-        UPLOAD_FILE_NOT_FOUND("An uploaded file referenced by %1$s could not be found", CATEGORY_USER_INPUT, 8),
+        UPLOAD_FILE_NOT_FOUND(UploadExceptionMessage.UPLOAD_FILE_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 8),
         /**
          * Invalid action value: %1$s
          */
-        INVALID_ACTION_VALUE("Invalid action value: %1$s", CATEGORY_ERROR, 9),
+        INVALID_ACTION_VALUE(UploadExceptionMessage.INVALID_ACTION_VALUE_MSG, CATEGORY_ERROR, 9),
         /**
          * Upload file with id %1$s could not be found
          */
-        FILE_NOT_FOUND("Upload file with id %1$s could not be found", CATEGORY_ERROR, 10),
+        FILE_NOT_FOUND(UploadExceptionMessage.FILE_NOT_FOUND_MSG, CATEGORY_ERROR, 10),
         /**
          * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
          */
-        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", CATEGORY_ERROR, 11),
+        INVALID_FILE_TYPE(UploadExceptionMessage.INVALID_FILE_TYPE_MSG, CATEGORY_ERROR, 11),
         /**
          * An error occurred: %1$s
          */
-        UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 12),
+        UNEXPECTED_ERROR(UploadExceptionMessage.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 12),
 
         ;
 
@@ -159,7 +159,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         *
+         * 
          * @return The newly created {@link UploadException} instance
          */
         public UploadException create() {
@@ -168,7 +168,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         *
+         * 
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link UploadException} instance
          */
@@ -178,7 +178,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         *
+         * 
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link UploadException} instance
@@ -189,12 +189,11 @@ public class UploadException extends OXException {
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 ret = new UploadException(getNumber(), getMessage(), cause, args);
             } else {
-                ret =
-                    new UploadException(
-                        getNumber(),
-                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause,
-                        new Object[0]);
+                ret = new UploadException(
+                    getNumber(),
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    cause,
+                    new Object[0]);
                 ret.setLogMessage(getMessage(), args);
             }
             ret.addCategory(category);
@@ -207,7 +206,7 @@ public class UploadException extends OXException {
 
     /**
      * Initializes a new {@link UploadException}.
-     *
+     * 
      * @param code The code
      * @param displayMessage The display message
      * @param cause The cause
@@ -219,7 +218,7 @@ public class UploadException extends OXException {
 
     /**
      * Sets the action string.
-     *
+     * 
      * @param action The action string
      * @return This exception with action string applied
      */
@@ -230,7 +229,7 @@ public class UploadException extends OXException {
 
     /**
      * Gets the action string.
-     *
+     * 
      * @return The action string
      */
     public String getAction() {

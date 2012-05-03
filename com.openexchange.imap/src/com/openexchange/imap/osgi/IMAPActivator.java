@@ -69,6 +69,7 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.thread.ThreadableCache;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -206,6 +207,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                             if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 ListLsubCache.dropFor(session);
                                 IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
+                                ThreadableCache.dropFor(session);
                             }
                         } catch (final Exception e) {
                             // Failed handling session

@@ -96,7 +96,7 @@ import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -603,7 +603,7 @@ public final class MimeForward {
                 PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : quoteReplacement(decodedSubject));
         }
         if (html) {
-            forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
+            forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);
         }
         final String linebreak = html ? "<br>" : "\r\n";
 

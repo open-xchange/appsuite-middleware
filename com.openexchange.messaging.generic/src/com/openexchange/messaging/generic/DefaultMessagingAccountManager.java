@@ -104,7 +104,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
     /**
      * Initializes a new {@link DefaultMessagingAccountManager}.
      *
-     * @param serviceId The messaging service identifier
+     * @param service The messaging service
      */
     public DefaultMessagingAccountManager(final MessagingService service) {
         super();

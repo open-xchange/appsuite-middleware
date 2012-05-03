@@ -54,24 +54,22 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
-
 /**
  * {@link SubscriptionJSONErrorMessages}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
-    MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID*100+1, "Missing parameter %s", "", CATEGORY_ERROR),
-    UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID*100+2, "Unknown Action: %s", "", CATEGORY_ERROR),
+    MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.MISSING_PARAMETER_MSG, SubscriptionJSONExceptionMessage.MISSING_PARAMETER_HELP, CATEGORY_ERROR),
+    UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.UNKNOWN_ACTION_MSG, SubscriptionJSONExceptionMessage.UNKNOWN_ACTION_HELP, CATEGORY_ERROR),
 
-    JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID*100+1, "Got JSONException", "", CATEGORY_ERROR),
-    MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+2, "Missing Field(s): %s", "", CATEGORY_ERROR),
-    MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+3, "Missing Form Field(s): %s", "", CATEGORY_ERROR),
+    JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.JSONEXCEPTION_MSG, SubscriptionJSONExceptionMessage.JSONEXCEPTION_HELP, CATEGORY_ERROR),
+    MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.MISSING_FIELD_MSG, SubscriptionJSONExceptionMessage.MISSING_FIELD_HELP, CATEGORY_ERROR),
+    MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 3, SubscriptionJSONExceptionMessage.MISSING_FORM_FIELD_MSG, SubscriptionJSONExceptionMessage.MISSING_FORM_FIELD_HELP, CATEGORY_ERROR),
 
-    THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID*100+3, "Got Exception %s", "", CATEGORY_ERROR),
-    UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID*100+1,"Unknown column: %s", "Please ask only for columns the server knows", CATEGORY_USER_INPUT),
+    THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 3, SubscriptionJSONExceptionMessage.THROWABLE_MSG, SubscriptionJSONExceptionMessage.THROWABLE_HELP, CATEGORY_ERROR),
+    UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.UNKNOWN_COLUMN_MSG, SubscriptionJSONExceptionMessage.UNKNOWN_COLUMN_HELP, CATEGORY_USER_INPUT),
 
     ;
 
@@ -124,7 +122,7 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -133,7 +131,7 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -143,7 +141,7 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

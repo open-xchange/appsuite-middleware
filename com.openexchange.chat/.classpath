@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit-addons-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/smack-3.2.1.jar" sourcepath="lib/src/smack-3.2.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/smackx-3.2.1.jar" sourcepath="lib/src/smack-3.2.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>

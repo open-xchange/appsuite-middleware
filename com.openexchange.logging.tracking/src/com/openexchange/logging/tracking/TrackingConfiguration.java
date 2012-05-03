@@ -1,3 +1,52 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.logging.tracking;
 
 import java.util.ArrayList;
@@ -7,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 import org.apache.commons.logging.Log;
@@ -23,14 +73,14 @@ import com.openexchange.user.UserService;
 
 public class TrackingConfiguration implements TrackingConfigurationMBean {
 	
-	private ConcurrentHashMap<String, ConcurrentHashMap<String, LogLevel>> sessionLevels = new ConcurrentHashMap<String, ConcurrentHashMap<String, LogLevel>>();
+	private final ConcurrentMap<String, ConcurrentMap<String, LogLevel>> sessionLevels = new ConcurrentHashMap<String, ConcurrentMap<String, LogLevel>>();
 	
-	private ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>> cidLevels = new ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>>();
+	private final ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> cidLevels = new ConcurrentHashMap<Integer, ConcurrentMap<String, LogLevel>>();
 	
-	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>>> userLevels = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>>>();
+	private final ConcurrentMap<Integer, ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>>> userLevels = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>>>();
 	
-	private UserService users;
-	private ContextService contexts;
+	private final UserService users;
+	private final ContextService contexts;
 	
 	public TrackingConfiguration(UserService users, ContextService contexts) {
 		this.users = users;
@@ -39,7 +89,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	
 	public void setLogLevel(String className, String sessionId, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
-		ConcurrentHashMap<String, LogLevel> clazzMap = sessionLevels.putIfAbsent(sessionId, new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<String, LogLevel> clazzMap = sessionLevels.putIfAbsent(sessionId, new ConcurrentHashMap<String, LogLevel>());
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -50,8 +100,8 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	public void setLogLevel(String className, int cid, int uid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
-		ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>> userMap = userLevels.putIfAbsent(cid, new ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>>());
-		ConcurrentHashMap<String, LogLevel> clazzMap = userMap.putIfAbsent(uid, new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.putIfAbsent(Integer.valueOf(cid), new ConcurrentHashMap<Integer, ConcurrentMap<String, LogLevel>>());
+		ConcurrentMap<String, LogLevel> clazzMap = userMap.putIfAbsent(Integer.valueOf(uid), new ConcurrentHashMap<String, LogLevel>());
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -62,7 +112,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	public void setLogLevel(String className, int cid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
-		ConcurrentHashMap<String, LogLevel> clazzMap = cidLevels.putIfAbsent(cid, new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<String, LogLevel> clazzMap = cidLevels.putIfAbsent(Integer.valueOf(cid), new ConcurrentHashMap<String, LogLevel>());
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -94,11 +144,11 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 	
 	public void clearTracking(int cid, int uid) {
-		ConcurrentHashMap<Integer, ConcurrentHashMap<String, LogLevel>> userMap = userLevels.get(cid);
+		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.get(Integer.valueOf(cid));
 		if (userMap != null) {
-			userMap.remove(uid);
+			userMap.remove(Integer.valueOf(uid));
 			if (userMap.isEmpty()) {
-				userLevels.remove(cid);
+				userLevels.remove(Integer.valueOf(cid));
 			}
 		}
 	}
@@ -108,7 +158,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 
 	public void clearTracking(int cid) {
-		cidLevels.remove(cid);
+		cidLevels.remove(Integer.valueOf(cid));
 	}
 
 	public boolean clearTracking(int cid, String userName) {
@@ -266,16 +316,16 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 		if (sessionObject == null) {
 			return LogLevel.OFF;
 		}
-		ConcurrentHashMap<String, LogLevel> clazzMap = sessionLevels.get(sessionObject.getSessionID());
+		ConcurrentMap<String, LogLevel> clazzMap = sessionLevels.get(sessionObject.getSessionID());
 		LogLevel sessionLevel = getLowestLevel(clazzMap, className);
 
-		clazzMap = cidLevels.get(sessionObject.getContextId());
+		clazzMap = cidLevels.get(Integer.valueOf(sessionObject.getContextId()));
 		LogLevel cidLevel = getLowestLevel(clazzMap, className);
 
 		LogLevel userLevel = LogLevel.OFF;
-		ConcurrentHashMap<Integer,ConcurrentHashMap<String,LogLevel>> map = userLevels.get(sessionObject.getContextId());
+		ConcurrentMap<Integer,ConcurrentMap<String,LogLevel>> map = userLevels.get(Integer.valueOf(sessionObject.getContextId()));
 		if (map != null) {
-			clazzMap = map.get(sessionObject.getUserId());
+			clazzMap = map.get(Integer.valueOf(sessionObject.getUserId()));
 			userLevel = getLowestLevel(clazzMap, className);
 		}
 		return getLowestLevel(sessionLevel, cidLevel, userLevel);
@@ -287,7 +337,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 
 	private LogLevel getLowestLevel(
-			ConcurrentHashMap<String, LogLevel> clazzMap, String[] className) {
+			ConcurrentMap<String, LogLevel> clazzMap, String[] className) {
 		if (clazzMap == null) {
 			return LogLevel.OFF;
 		}

@@ -49,19 +49,31 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.*;
+import static com.openexchange.ajax.fields.ResponseFields.DATA;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
+import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
+import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
+import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
+import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.exception.Category;
@@ -69,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.log.Log;
 
 /**
  * JSON writer for the response container objekt.
@@ -77,6 +90,14 @@ import com.openexchange.exception.OXException.Truncated;
  */
 public final class ResponseWriter {
 
+    /**
+     * A set of reserved identifiers.
+     */
+    private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
+
+    /**
+     * The default locale.
+     */
     private static final Locale DEFAULT_LOCALE = Locale.US;
 
     private ResponseWriter() {
@@ -158,6 +179,34 @@ public final class ResponseWriter {
          * Add warnings
          */
         addWarnings(json, warnings, locale);
+        /*
+         * Add properties
+         */
+        addProperties(json, response.getProperties());
+    }
+
+    /**
+     * Writes given properties to specified JSON object.
+     * 
+     * @param json The JSON object
+     * @param properties The properties
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addProperties(final JSONObject json, final Map<String, Object> properties) throws JSONException {
+        if (null == properties || properties.isEmpty()) {
+            return;
+        }
+        for (final Entry<String, Object> entry : properties.entrySet()) {
+            final String name = entry.getKey();
+            if (null != name && !RESERVED_IDENTIFIERS.contains(name)) {
+                final Object value = entry.getValue();
+                if (null != value) {
+                    json.put(name, value);
+                }
+            } else {
+                Log.loggerFor(ResponseWriter.class).warn("Response property discarded. Illegal property name: " + name == null ? "null" : name);
+            }
+        }
     }
 
     /**

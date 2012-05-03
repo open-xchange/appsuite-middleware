@@ -50,6 +50,7 @@
 package com.openexchange.messaging.facebook.session;
 
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
@@ -77,6 +78,8 @@ import com.openexchange.session.Session;
  * @since Open-Xchange v6.16
  */
 public final class FacebookOAuthAccess {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookOAuthAccess.class);
 
     /**
      * Gets the facebook OAuth access for given facebook messaging account.
@@ -188,7 +191,9 @@ public final class FacebookOAuthAccess {
         if (object.has("error")) {
             final JSONObject error = object.getJSONObject("error");
             if ("OXException".equals(error.opt("type"))) {
-                throw new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
+                final OXException e = new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
+                LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString(2));
+                throw e;
             } else {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }

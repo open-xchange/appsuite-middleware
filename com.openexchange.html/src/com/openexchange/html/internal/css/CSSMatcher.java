@@ -123,7 +123,7 @@ public final class CSSMatcher {
 
         final String strTIME = RegexUtility.group(RegexUtility.concat(strNUMBER, strTIME_UNITS), GroupType.NON_CAPTURING);
 
-        final String strURL = "url\\(\"?\\p{L}+\"?\\)";
+        final String strURL = "url\\(\"?[\\p{ASCII}\\p{L}]+\"?\\)";
 
         final String strCOLOR_KEYWORD = RegexUtility.group(
             "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",
@@ -170,8 +170,10 @@ public final class CSSMatcher {
         PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
-
-        PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}+\\s*\\{)([^\\}]+)\\}");
+        
+        final String token = "[\\S&&[^{}\\*/]]+";
+        
+        PATTERN_STYLE_BLOCK = Pattern.compile("("+token+"(?:(?:\\s*,\\s*|\\s+)"+token+")*\\s*\\{)([^\\}]+)\\}");
 
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
@@ -306,7 +308,8 @@ public final class CSSMatcher {
         return modified;
     }
 
-    private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
+    private static final Pattern SPLIT_LINES = Pattern.compile("\r?\n");
+    private static final Pattern SPLIT_WORDS = Pattern.compile("\\s+");
 
     private static String prefixBlock(final String match, final String cssPrefix) {
         if (isEmpty(match) || isEmpty(cssPrefix)) {
@@ -330,33 +333,57 @@ public final class CSSMatcher {
         if (pos > 0) {
             builder.append(s.substring(0, pos));
         }
-        final int insertPos = builder.length();
-        boolean tagFound = false;
-        for (final String word : SPLIT_WORDS.split(s.substring(pos), 0)) {
-            final char first = word.charAt(0);
-            if ('.' == first) {
-                builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
-            } else if ('#' == first) {
-                if (word.indexOf('.') < 0) { // contains no dots
-                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+        for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
+            final int insertPos = builder.length();
+            boolean tagFound = false;
+            for (final String word : SPLIT_WORDS.split(line, 0)) {
+                if (isEmpty(word)) {
+                    builder.append(word);
                 } else {
-                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                    final char first = word.charAt(0);
+                    if ('.' == first) {
+                        builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                    } else if ('#' == first) {
+                        if (word.indexOf('.') < 0) { // contains no dots
+                            builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                        } else {
+                            builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                        }
+                    } else {
+                        if (!tagFound) {
+                            builder.insert(insertPos, '#' + cssPrefix + ' ');
+                            tagFound = true;
+                        }
+                        builder.append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                    }
                 }
-            } else {
-                if (!tagFound) {
-                    builder.insert(insertPos, '#' + cssPrefix + ' ');
-                    tagFound = true;
-                }
-                builder.append(replaceDots(word, cssPrefix)).append(' ');
             }
+            builder.append('\n');
         }
+        builder.deleteCharAt(builder.length()-1);
         return builder.append('{').toString();
     }
 
-    private static final Pattern DOT = Pattern.compile("\\.");
-
-    private static String replaceDots(final String word, final String cssPrefix) {
-        return DOT.matcher(word).replaceAll('.' + cssPrefix + '-');
+    private static String replaceDotsAndHashes(final String word, final String cssPrefix) {
+        final int length = word.length();
+        final StringBuilder sb = new StringBuilder(length << 1);
+        int prev = 0;
+        for (int i = 0; i < length; i++) {
+            final char c = word.charAt(i);
+            if ('.' == c) {
+                sb.append(prev == i ? "" : word.substring(prev, i));
+                sb.append('.').append(cssPrefix).append('-');
+                prev = i + 1;
+            } else if ('#' == c) {
+                sb.append(prev == i ? "" : word.substring(prev, i));
+                sb.append('#').append(cssPrefix).append('-');
+                prev = i + 1;
+            }
+        }
+        if (prev < length) {
+            sb.append(word.substring(prev));
+        }
+        return sb.toString();
     }
 
     /**

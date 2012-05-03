@@ -54,25 +54,25 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
-
-
 /**
  * {@link PublicationJSONErrorMessage}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public enum PublicationJSONErrorMessage implements OXExceptionCode {
-    THROWABLE(CATEGORY_ERROR, 1, "Please try again later.", "An unexpected error occurred: %s"),
-    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, "Please correct the client program", "Missing value for parameter %s"),
-    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, "Please correct the client program","Unknown Action: %s"),
-    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, "Please use only entity modules known to the server", "Unknown entity module: %s"),
-    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, "Please ask only for columns known to the server", "Unknown column: %s"),
-    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, "Please check the spelling of the id, or load a list of known targets", "Unknown Target: %s");
+    THROWABLE(CATEGORY_ERROR, 1, PublicationJSONExceptionMessage.THROWABLE_HELP, PublicationJSONExceptionMessage.THROWABLE_MSG),
+    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, PublicationJSONExceptionMessage.MISSING_PARAMETER_HELP, PublicationJSONExceptionMessage.MISSING_PARAMETER_MSG),
+    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, PublicationJSONExceptionMessage.UNKNOWN_ACTION_HELP, PublicationJSONExceptionMessage.UNKNOWN_ACTION_MSG),
+    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, PublicationJSONExceptionMessage.UNKOWN_ENTITY_MODULE_HELP, PublicationJSONExceptionMessage.UNKOWN_ENTITY_MODULE_MSG),
+    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, PublicationJSONExceptionMessage.UNKNOWN_COLUMN_HELP, PublicationJSONExceptionMessage.UNKNOWN_COLUMN_MSG),
+    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, PublicationJSONExceptionMessage.UNKNOWN_TARGET_HELP, PublicationJSONExceptionMessage.UNKNOWN_TARGET_MSG);
 
     private Category category;
+
     private int errorCode;
+
     private String help;
+
     private String message;
 
     private PublicationJSONErrorMessage(final Category category, final int errorCode, final String help, final String message) {
@@ -113,7 +113,7 @@ public enum PublicationJSONErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -122,7 +122,7 @@ public enum PublicationJSONErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -132,7 +132,7 @@ public enum PublicationJSONErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

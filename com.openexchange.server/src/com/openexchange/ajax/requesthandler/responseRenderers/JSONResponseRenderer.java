@@ -53,12 +53,12 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JSONResponseRenderer}
@@ -96,6 +96,7 @@ public class JSONResponseRenderer implements ResponseRenderer {
         final Response response = new Response(request.getSession());
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());
+        response.setProperties(result.getResponseProperties());
         final Collection<OXException> warnings = result.getWarnings();
         if (null != warnings && !warnings.isEmpty()) {
             for (final OXException warning : warnings) {

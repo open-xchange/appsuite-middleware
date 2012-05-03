@@ -57,10 +57,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -123,8 +121,11 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Parse parameters
          */
-        int[] userIDs = parseUserIDs(request, session.getUserId());
-        int[] columnIDs = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        final int[] userIDs = parseUserIDs(request, session.getUserId());
+        if (0 == userIDs.length) {
+            return new AJAXRequestResult(new JSONArray());
+        }
+        final int[] columnIDs = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         /*
          * Get users/contacts
          */
@@ -146,10 +147,10 @@ public final class ListAction extends AbstractUserAction {
          * Map user to contact information
          */
         Date lastModified = new Date(0);
-        User[] users = getUsers(session, userIDs);
-        List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
-        for (User user : users) {
-        	for (Contact contact : contacts) {
+        final User[] users = getUsers(session, userIDs);
+        final List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
+        for (final User user : users) {
+        	for (final Contact contact : contacts) {
         		if (user.getId() == contact.getInternalUserId()) {
         			userContacts.add(new UserContact(contact, user));
                 	if (contact.getLastModified().after(lastModified)) {
@@ -165,22 +166,22 @@ public final class ListAction extends AbstractUserAction {
         return new AJAXRequestResult(userContacts, lastModified, "usercontact");
     }
 
-	private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
-	    final JSONArray jsonArray = (JSONArray)request.getData();
-	    if (null == jsonArray) {
-	        throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
-	    }
-	    final int length = jsonArray.length();
-	    final int[] userIDs = new int[length];
-    	try {
-		    for (int i = 0; i < length; i++) {
-					userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
-		    }
-		} catch (final JSONException e) {
+    private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
+        final JSONArray jsonArray = (JSONArray) request.getData();
+        if (null == jsonArray) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("data");
+        }
+        final int length = jsonArray.length();
+        final int[] userIDs = new int[length];
+        try {
+            for (int i = 0; i < length; i++) {
+                userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
+            }
+        } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-		}
-		return userIDs;
-	}
+        }
+        return userIDs;
+    }
 
 	private User[] getUsers(final ServerSession session, final int[] userIDs) throws OXException {
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
