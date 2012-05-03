@@ -1,8 +1,0 @@
-* 2010-01-26 - choeger@open-xchange.com
-
- - Bugfix ID#15262: usm and upsell gui plugins in the wrong directory on centos
-
-* 2009-10-05 - benjamin.otterbach@open-xchange.com
-
- - Enhancement: Changed default upsell text.
-
