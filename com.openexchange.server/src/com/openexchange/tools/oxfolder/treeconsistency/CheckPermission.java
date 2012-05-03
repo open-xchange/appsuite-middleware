@@ -148,6 +148,7 @@ abstract class CheckPermission {
             folder.getObjectID(),
             folder.getType(userId),
             folder.getModule(),
+            folder.getCreatedBy(),
             userConfig);
         maxPerm.setAllPermission(
             OCLPermission.NO_PERMISSIONS,

@@ -490,6 +490,7 @@ public final class OXFolderUtility {
                 folderObj.getObjectID(),
                 folderObj.getType(userConfig.getUserId()),
                 folderObj.getModule(),
+                folderObj.getCreatedBy(),
                 userConfig);
         retval.setFolderAdmin(true);
         retval.setAllPermission(
