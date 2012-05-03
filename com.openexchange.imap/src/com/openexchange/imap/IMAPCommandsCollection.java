@@ -1097,20 +1097,20 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_LSUB = "LSUB";
 
     /**
-     * Checks folder subscription for the folder denoted by specified fullname.
+     * Checks folder subscription for the folder denoted by specified full name.
      * <p>
      * This method imitates the behavior from {@link IMAPFolder#isSubscribed() isSubscribde()} that is a namespace folder's subscription
-     * status is checked with specified separator character appended to fullname.
+     * status is checked with specified separator character appended to full name.
      *
-     * @param fullname The folder's fullname
+     * @param fullName The folder's full name
      * @param separator The separator character
      * @param isNamespace <code>true</code> if denoted folder is a namespace folder; otherwise <code>false</code>
      * @param defaultFolder The IMAP store's default folder
      * @return <code>true</code> if folder is subscribed; otherwise <code>false</code>
      * @throws MessagingException If checking folder subscription fails
      */
-    public static boolean isSubscribed(final String fullname, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
-        final String lfolder = ((isNamespace || (fullname.length() == 0)) && (separator != '\0')) ? fullname + separator : fullname;
+    public static boolean isSubscribed(final String fullName, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
+        final String lfolder = ((isNamespace || (fullName.length() == 0)) && (separator != '\0')) ? fullName + separator : fullName;
         return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1141,7 +1141,7 @@ public final class IMAPCommandsCollection {
             private int parseIMAPResponse(final IMAPResponse ir) throws ParsingException {
                 if (ir.keyEquals(COMMAND_LSUB)) {
                     final ListInfo li = new ListInfo(ir);
-                    if (li.name.equals(fullname)) {
+                    if (li.name.equals(fullName)) {
                         return li.canOpen ? 1 : 0;
                     }
                 }
@@ -1929,16 +1929,16 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode.
+     * Checks if IMAP folder denoted by specified full name is allowed to be opened in desired mode.
      *
      * @param f The IMAP folder providing protocol access
-     * @param fullname The fullname to check
+     * @param fullName The full name to check
      * @param mode The desired open mode
-     * @return <code>true</code> if IMAP folder denoted by specified fullname is allowed to be opened in desired mode; otherwise
+     * @return <code>true</code> if IMAP folder denoted by specified full name is allowed to be opened in desired mode; otherwise
      *         <code>false</code>
      * @throws OXException If an IMAP error occurs
      */
-    public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws OXException {
+    public static boolean canBeOpened(final IMAPFolder f, final String fullName, final int mode) throws OXException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
             IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
         }
@@ -1953,7 +1953,7 @@ public final class IMAPCommandsCollection {
                          * Encode the mbox as per RFC2060
                          */
                         final Argument args = new Argument();
-                        args.writeString(BASE64MailboxEncoder.encode(fullname));
+                        args.writeString(BASE64MailboxEncoder.encode(fullName));
                         /*
                          * Perform command
                          */
@@ -2983,17 +2983,17 @@ public final class IMAPCommandsCollection {
     private final static String REPLACEMENT_BACKSLASH = "\\\\\\\\";
 
     /**
-     * First encodes given fullname by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
+     * First encodes given full name by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
      * encoded string is checked if it needs quoting and escaping of the special characters '"' and '\'.
      *
-     * @param fullname The folder fullname
-     * @return Prepared fullname ready for being used in raw IMAP commands
+     * @param fullName The folder full name
+     * @return Prepared full name ready for being used in raw IMAP commands
      */
-    public static String prepareStringArgument(final String fullname) {
+    public static String prepareStringArgument(final String fullName) {
         /*
          * Ensure to have only ASCII characters
          */
-        final String lfolder = BASE64MailboxEncoder.encode(fullname);
+        final String lfolder = BASE64MailboxEncoder.encode(fullName);
         /*
          * Determine if quoting (and escaping) has to be done
          */
