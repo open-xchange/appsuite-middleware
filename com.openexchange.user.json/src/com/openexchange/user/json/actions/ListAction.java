@@ -166,22 +166,22 @@ public final class ListAction extends AbstractUserAction {
         return new AJAXRequestResult(userContacts, lastModified, "usercontact");
     }
 
-	private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
-	    final JSONArray jsonArray = (JSONArray)request.getData();
-	    if (null == jsonArray) {
-	        throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
-	    }
-	    final int length = jsonArray.length();
-	    final int[] userIDs = new int[length];
-    	try {
-		    for (int i = 0; i < length; i++) {
-					userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
-		    }
-		} catch (final JSONException e) {
+    private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
+        final JSONArray jsonArray = (JSONArray) request.getData();
+        if (null == jsonArray) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("data");
+        }
+        final int length = jsonArray.length();
+        final int[] userIDs = new int[length];
+        try {
+            for (int i = 0; i < length; i++) {
+                userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
+            }
+        } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-		}
-		return userIDs;
-	}
+        }
+        return userIDs;
+    }
 
 	private User[] getUsers(final ServerSession session, final int[] userIDs) throws OXException {
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
