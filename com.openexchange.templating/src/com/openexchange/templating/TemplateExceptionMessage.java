@@ -47,46 +47,38 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.templating;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link TemplateExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class TemplateExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link TemplateExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    public TemplateExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+    public final static String IOException_HELP = "Verify file system and templates.";
 
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+    public final static String IOException_MSG = "An IOException occurred.";
 
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
+    public final static String UnderlyingException_HELP = "Please correct the template";
 
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+    public final static String UnderlyingException_MSG = "The underlying templating system threw an exception: %s";
 
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    public final static String TemplateNotFound_HELP = "Please use an existing template";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    public final static String TemplateNotFound_MSG = "The template %2 does not exist.";
 
-    public final static String THROWABLE_HELP = "Please try again later.";
+    public final static String SQLException_HELP = "An underlying system threw an SQLException";
 
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
-
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
-
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
-
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
-
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    public final static String SQLException_MSG = "Please try again later.";
 
 }

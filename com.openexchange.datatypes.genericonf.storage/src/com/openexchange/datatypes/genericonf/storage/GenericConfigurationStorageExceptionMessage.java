@@ -47,46 +47,26 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.datatypes.genericonf.storage;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link GenericConfigurationStorageExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class GenericConfigurationStorageExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link GenericConfigurationStorageExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    private GenericConfigurationStorageExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+    public final static String SQL_EXCEPTION_MSG = "A SQL Error occurred: %1$s";
 
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
-
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
-
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
-
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
-
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
-
-    public final static String THROWABLE_HELP = "Please try again later.";
-
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
-
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
-
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
-
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
-
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    public final static String UNSUPPORTED_OBJECT_TYPE_MSG = "Object type is not supported: %1$s";
 
 }

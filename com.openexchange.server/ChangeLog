@@ -1,3 +1,7 @@
+* 2012-05-03 - jan.bauerdick@open-xchange.com
+
+ - Refactor error messages moving translatable strings into LocalizableStrings classes
+
 * 2012-05-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 21292: Allowing a public folder's creator to delete a folder

@@ -47,46 +47,82 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.webdav;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link WebdavExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class WebdavExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link WebdavExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    public WebdavExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+    /**
+     * Invalid value in element &quot;%1$s&quot;: %2$s.
+     */
+    public final static String INVALID_VALUE_MSG = "Invalid value in element \"%1$s\": %2$s.";
 
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+    /**
+     * An I/O error occurred.
+     */
+    public final static String IO_ERROR_MSG = "An I/O error occurred.";
 
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
+    /**
+     * Missing field %1$s.
+     */
+    public final static String MISSING_FIELD_MSG = "Missing field %1$s.";
 
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+    /**
+     * Missing header field %1$s.
+     */
+    public final static String MISSING_HEADER_FIELD_MSG = "Missing header field %1$s.";
 
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    /**
+     * Invalid action %1$s.
+     */
+    public final static String INVALID_ACTION_MSG = "Invalid action %1$s.";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    /**
+     * %1$s is not a number.
+     */
+    public final static String NOT_A_NUMBER_MSG = "%1$s is not a number.";
 
-    public final static String THROWABLE_HELP = "Please try again later.";
+    /**
+     * No principal found: %1$s.
+     */
+    public final static String NO_PRINCIPAL_MSG = "No principal found: %1$s.";
 
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
+    /**
+     * Empty passwords are not allowed.
+     */
+    public final static String EMPTY_PASSWORD_MSG = "Empty passwords are not allowed.";
 
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
+    /**
+     * Unsupported authorization mechanism in "Authorization" header: %1$s.
+     */
+    public final static String UNSUPPORTED_AUTH_MECH_MSG = "Unsupported authorization mechanism in \"Authorization\" header: %1$s.";
 
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
+    /**
+     * Resolving user name "%1$s" failed.
+     */
+    public final static String RESOLVING_USER_NAME_FAILED_MSG = "Resolving user name \"%1$s\" failed.";
 
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
+    /**
+     * Authentication failed for user name: %1$s
+     */
+    public final static String AUTH_FAILED_MSG = "Authentication failed for user name: %1$s";
 
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    /**
+     * Unexpected error: %1$s
+     */
+    public final static String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
 }

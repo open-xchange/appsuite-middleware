@@ -47,46 +47,50 @@
  *
  */
 
-package com.openexchange.publish.json;
+package com.openexchange.subscribe.json;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PublicationJSONExceptionMessage}
+ * {@link SubscriptionJSONExceptionMessage}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PublicationJSONExceptionMessage implements LocalizableStrings {
+public class SubscriptionJSONExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link PublicationJSONExceptionMessage}.
+     * Initializes a new {@link SubscriptionJSONExceptionMessage}.
      */
-    private PublicationJSONExceptionMessage() {
+    private SubscriptionJSONExceptionMessage() {
         super();
     }
 
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
-
-    public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+    public final static String MISSING_PARAMETER_MSG = "Missing parameter %s";
 
     public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
 
-    public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+    public final static String JSONEXCEPTION_MSG = "Got JSONException";
+
+    public final static String MISSING_FIELD_MSG = "Missing Field(s): %s";
+
+    public final static String MISSING_FORM_FIELD_MSG = "Missing Form Field(s): %s";
+
+    public final static String THROWABLE_MSG = "Got Exception %s";
 
     public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    
+    public final static String MISSING_PARAMETER_HELP = "";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    public final static String UNKNOWN_ACTION_HELP = "";
 
-    public final static String THROWABLE_HELP = "Please try again later.";
+    public final static String JSONEXCEPTION_HELP = "";
 
-    public final static String MISSING_PARAMETER_HELP = "Please correct the client program";
+    public final static String MISSING_FIELD_HELP = "";
 
-    public final static String UNKNOWN_ACTION_HELP = "Please correct the client program";
+    public final static String MISSING_FORM_FIELD_HELP = "";
 
-    public final static String UNKOWN_ENTITY_MODULE_HELP = "Please use only entity modules known to the server";
+    public final static String THROWABLE_HELP = "";
 
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns known to the server";
-
-    public final static String UNKNOWN_TARGET_HELP = "Please check the spelling of the id, or load a list of known targets";
+    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns the server knows";
 
 }
