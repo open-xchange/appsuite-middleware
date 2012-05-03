@@ -170,8 +170,10 @@ public final class CSSMatcher {
         PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
-
-        PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}[\\p{Print}\r\n]+\\s*\\{)([^\\}]+)\\}");
+        
+        final String token = "[\\S&&[^{}\\*/]]+";
+        
+        PATTERN_STYLE_BLOCK = Pattern.compile("("+token+"(?:(?:\\s*,\\s*|\\s+)"+token+")*\\s*\\{)([^\\}]+)\\}");
 
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
@@ -306,7 +308,7 @@ public final class CSSMatcher {
         return modified;
     }
 
-    private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
+    private static final Pattern SPLIT_WORDS = Pattern.compile("\\s+");
 
     private static String prefixBlock(final String match, final String cssPrefix) {
         if (isEmpty(match) || isEmpty(cssPrefix)) {
