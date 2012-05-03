@@ -102,7 +102,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
-import com.openexchange.mail.text.HtmlProcessingTmp;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -684,7 +684,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                  * Remember plain-text content
                  */
                 plainText =
-                    new PlainTextContent(id, contentType.getBaseType(), HtmlProcessingTmp.formatTextForDisplay(
+                    new PlainTextContent(id, contentType.getBaseType(), HtmlProcessing.formatTextForDisplay(
                         plainTextContentArg,
                         usm,
                         displayMode));
@@ -759,7 +759,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
              */
             if (textAppended) {
                 if (textWasEmpty) {
-                    final String content = HtmlProcessingTmp.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                    final String content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                     final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
                     textObject.put("plain_text", plainTextContentArg);
                     textWasEmpty = (null == content || 0 == content.length());
@@ -767,7 +767,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * A plain text message body has already been detected
                      */
-                    final String content = HtmlProcessingTmp.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                    final String content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                     final String mpId = multiparts.peek();
                     if (null != mpId && (DisplayMode.RAW.getMode() < displayMode.getMode()) && id.startsWith(mpId)) {
                         final JSONArray attachments = getAttachmentsArr();
@@ -798,7 +798,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 }
             } else {
-                final String content = HtmlProcessingTmp.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                final String content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                 final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
                 textObject.put("plain_text", plainTextContentArg);
                 textAppended = true;
@@ -813,7 +813,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
-            return HtmlProcessingTmp.formatHTMLForDisplay(
+            return HtmlProcessing.formatHTMLForDisplay(
                 ENRCONV.convert(src),
                 contentType.getCharsetParameter(),
                 session,
@@ -834,7 +834,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         // modified,
         // displayMode);
         // }
-        return HtmlProcessingTmp.formatTextForDisplay(src, usm, displayMode);
+        return HtmlProcessing.formatTextForDisplay(src, usm, displayMode);
     }
 
     @Override
@@ -1260,7 +1260,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
-            final String content = HtmlProcessingTmp.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm, modified, displayMode, embedded);
+            final String content = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm, modified, displayMode, embedded);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
@@ -1285,7 +1285,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
                 jsonObject.put("plain_text", plainText);
-                content = HtmlProcessingTmp.formatTextForDisplay(plainText, usm, displayMode);
+                content = HtmlProcessing.formatTextForDisplay(plainText, usm, displayMode);
             }
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
