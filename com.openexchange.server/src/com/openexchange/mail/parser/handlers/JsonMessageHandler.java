@@ -637,7 +637,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          * Try to convert the given HTML to regular text
                          */
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                        final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
+                        final String plainText = htmlService.html2text(htmlContent, true);
                         jsonObject.put("plain_text", plainText);
                     } catch (final JSONException e) {
                         throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1283,7 +1283,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final String content;
             {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
+                final String plainText = htmlService.html2text(htmlContent, true);
                 jsonObject.put("plain_text", plainText);
                 content = HtmlProcessing.formatTextForDisplay(plainText, usm, displayMode);
             }
