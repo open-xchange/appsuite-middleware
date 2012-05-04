@@ -55,8 +55,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -74,7 +72,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -83,7 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.encoding.Base64;
+import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
@@ -243,8 +240,6 @@ public final class HtmlProcessing {
         return useSanitize.booleanValue();
     }
 
-    private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
-
     /**
      * Calculates the MD5 for given string.
      * 
@@ -255,14 +250,7 @@ public final class HtmlProcessing {
         if (isEmpty(str)) {
             return str;
         }
-        try {
-            final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(str.getBytes(Charsets.UTF_8));
-            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
-        } catch (final NoSuchAlgorithmException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
-        return str;
+        return HashUtility.calculateHash(null, str);
     }
 
     private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
