@@ -49,6 +49,9 @@
 
 package com.openexchange.html.internal.jericho;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.htmlparser.jericho.CharacterReference;
@@ -61,8 +64,8 @@ import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -116,7 +119,6 @@ public final class JerichoParser {
      * @param handler The HTML handler
      */
     public static void parse(final String html, final JerichoHandler handler) {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final StreamedSource streamedSource = new StreamedSource(checkBody(html));
         streamedSource.setLogger(null);
         int lastSegmentEnd = 0;
@@ -134,9 +136,24 @@ public final class JerichoParser {
              */
             handleSegment(handler, segment, false);
         }
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
+    }
+
+    private static enum EnumTagType {
+        START_TAG, END_TAG, DOCTYPE_DECLARATION, CDATA_SECTION, COMMENT;
+
+        private static final Map<TagType, EnumTagType> MAPPING;
+        static {
+            final Map<TagType, EnumTagType> m = new HashMap<TagType, EnumTagType>(5);
+            m.put(StartTagType.NORMAL, START_TAG);
+            m.put(EndTagType.NORMAL, END_TAG);
+            m.put(StartTagType.DOCTYPE_DECLARATION, DOCTYPE_DECLARATION);
+            m.put(StartTagType.CDATA_SECTION, CDATA_SECTION);
+            m.put(StartTagType.COMMENT, COMMENT);
+            MAPPING = Collections.unmodifiableMap(m);
+        }
+
+        protected static EnumTagType enumFor(final TagType tagType) {
+            return MAPPING.get(tagType);
         }
     }
 
@@ -144,6 +161,35 @@ public final class JerichoParser {
         if (segment instanceof Tag) {
             final Tag tag = (Tag) segment;
             final TagType tagType = tag.getTagType();
+
+            final EnumTagType enumType = EnumTagType.enumFor(tagType);
+            if (null == enumType) {
+                if (!segment.isWhiteSpace()) {
+                    handler.handleUnknownTag(tag);
+                }
+            } else {
+                switch (enumType) {
+                case START_TAG:
+                    handler.handleStartTag((StartTag) tag);
+                    break;
+                case END_TAG:
+                    handler.handleEndTag((EndTag) tag);
+                    break;
+                case DOCTYPE_DECLARATION:
+                    handler.handleDocDeclaration(segment.toString());
+                    break;
+                case CDATA_SECTION:
+                    handler.handleCData(segment.toString());
+                    break;
+                case COMMENT:
+                    handler.handleComment(segment.toString());
+                    break;
+                default:
+                    break;
+                }
+            }
+            /*-
+             * 
             if (tagType == StartTagType.NORMAL) {
                 handler.handleStartTag((StartTag) tag);
             } else if (tagType == EndTagType.NORMAL) {
@@ -159,6 +205,8 @@ public final class JerichoParser {
                     handler.handleUnknownTag(tag);
                 }
             }
+             * 
+             */
         } else if (segment instanceof CharacterReference) {
             final CharacterReference characterReference = (CharacterReference) segment;
             handler.handleCharacterReference(characterReference);

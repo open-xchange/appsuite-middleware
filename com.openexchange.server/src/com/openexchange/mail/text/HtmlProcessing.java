@@ -165,7 +165,7 @@ public final class HtmlProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
-                    final String cssPrefix = embedded ? "ox-" + getHash(Long.toString(System.currentTimeMillis())) : null;
+                    final String cssPrefix = embedded ? "ox-" + getHash(mailPath.toString()) : null;
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
@@ -250,7 +250,7 @@ public final class HtmlProcessing {
         if (isEmpty(str)) {
             return str;
         }
-        return HashUtility.calculateHash(null, str);
+        return HashUtility.getHash(str, "md5", "hex");
     }
 
     private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
