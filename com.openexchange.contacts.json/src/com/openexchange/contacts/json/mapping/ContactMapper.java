@@ -2335,14 +2335,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
 
 			@Override
-			protected DistributionListEntryObject deserialize(final JSONArray array, int index) throws JSONException, OXException {
-	            final JSONObject entry = array.getJSONObject(index);
-	            final DistributionListEntryObject member = new DistributionListEntryObject();
+			protected DistributionListEntryObject deserialize(JSONArray array, int index) throws JSONException, OXException {
+	            JSONObject entry = array.getJSONObject(index);
+	            DistributionListEntryObject member = new DistributionListEntryObject();
                 //FIXME: ui sends wrong values for "id": ===========> Bug #21894
                 // "distribution_list":[{"id":"","mail_field":0,"mail":"otto@example.com","display_name":"otto"},
-                //                      {"id":1,"mail_field":1,"mail":"horst@example.com","display_name":"horst"}] 
+                //                      {"id":1,"mail_field":1,"mail":"horst@example.com","display_name":"horst"}]
                 if (entry.hasAndNotNull(DistributionListFields.ID) && 0 < entry.getString(DistributionListFields.ID).length()) {
                 	member.setEntryID(entry.getInt(DistributionListFields.ID));
+                }
+                if (entry.hasAndNotNull(DistributionListFields.FOLDER_ID)) {
+                	member.setFolderID(entry.getInt(DistributionListFields.FOLDER_ID));
                 }
                 if (entry.hasAndNotNull(DistributionListFields.FIRST_NAME)) {
                 	member.setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
@@ -2369,10 +2372,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 				if (null != distributionList) {
 					jsonArray = new JSONArray();
 			        for (int i = 0; i < distributionList.length; i++) {
-			            final JSONObject entry = new JSONObject();
-			            final int emailField = distributionList[i].getEmailfield();
+			            JSONObject entry = new JSONObject();
+			            int emailField = distributionList[i].getEmailfield();
 			            if (DistributionListEntryObject.INDEPENDENT != emailField) {
 			                entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
+			                entry.put(DistributionListFields.FOLDER_ID, distributionList[i].getFolderID());
 			            }
 			            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
 			            entry.put(DistributionListFields.DISPLAY_NAME, distributionList[i].getDisplayname());
@@ -2382,26 +2386,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		        }
 		        return jsonArray;
 			}
-
-//			@Override
-//			public void serialize(final Contact from, final JSONObject to) throws JSONException {
-//				final DistributionListEntryObject[] distributionList = this.get(from);
-//				if (null != distributionList) {
-//			        final JSONArray jsonArray = new JSONArray();
-//			        for (int i = 0; i < distributionList.length; i++) {
-//			            final JSONObject entry = new JSONObject();
-//			            final int emailField = distributionList[i].getEmailfield();
-//			            if (DistributionListEntryObject.INDEPENDENT != emailField) {
-//			                entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
-//			            }
-//			            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
-//			            entry.put(DistributionListFields.DISPLAY_NAME, distributionList[i].getDisplayname());
-//			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
-//			            jsonArray.put(entry);
-//			        }
-//			        to.put(getAjaxName(), jsonArray);
-//		        }
-//			}
 		});
 
         mappings.put(ContactField.LINKS, new ArrayMapping<LinkEntryObject, Contact>(ContactFields.LINKS, Contact.LINKS) {
