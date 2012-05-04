@@ -1,3 +1,7 @@
+* 2012-05-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20961: Session is destroyed if user is deleted and created again.
+
 * 2012-05-03 - jan.bauerdick@open-xchange.com
 
  - Refactor error messages moving translatable strings into LocalizableStrings classes

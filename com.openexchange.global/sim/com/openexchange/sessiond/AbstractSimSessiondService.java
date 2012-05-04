@@ -101,11 +101,6 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public boolean refreshSession(final String sessionId) {
-        return false;
-    }
-
-    @Override
     public boolean removeSession(final String sessionId) {
         return false;
     }

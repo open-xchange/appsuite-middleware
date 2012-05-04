@@ -61,7 +61,6 @@ import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
 
-
 /**
  * {@link InvalidatedAwareSessiondService}
  *
@@ -117,17 +116,6 @@ public final class InvalidatedAwareSessiondService implements SessiondService {
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         impl.getSession(sessionId); // Invoked to implicitly check for invalidated-marker
         impl.changeSessionPassword(sessionId, newPassword);
-    }
-
-    @Override
-    public boolean refreshSession(final String sessionId) {
-        // Check for refreshed session's validity
-        final Session session = impl.getSession(sessionId);
-        if (null == session || checkInvalidatedAndRemoveIfPresent(session.getContextId())) {
-            // Eh... ?
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -234,11 +222,6 @@ public final class InvalidatedAwareSessiondService implements SessiondService {
 
     @Override
     public String toString() {
-        return impl.toString();
+        return InvalidatedAwareSessiondService.class.getName() + "," + impl.toString();
     }
-
-    
-
-    
-
 }

@@ -267,19 +267,6 @@ public final class SessionHandler {
     }
 
     /**
-     * Refreshes the session's last-accessed time stamp
-     *
-     * @param sessionid The session ID denoting the session
-     * @return <code>true</code> if a refreshing last-accessed time stamp was successful; otherwise <code>false</code>
-     */
-    protected static boolean refreshSession(final String sessionid) {
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("refreshSession <").append(sessionid).append('>').toString());
-        }
-        return sessionData.getSession(sessionid) != null;
-    }
-
-    /**
      * Clears the session denoted by given session ID from session container(s)
      *
      * @param sessionid The session ID
