@@ -299,6 +299,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             // set last modified
             changeLastModifiedOnGroup(ctxId, groupId, con);
             con.commit();
+            log.info("Group " + groupId + " changed!");
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -370,9 +371,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 changeLastModifiedOfGroupMembers(ctx, con, group.getMembers());
             }
             con.commit();
-            if (log.isInfoEnabled()) {
-                log.info("Group " + groupId + " created!");
-            }
+            log.info("Group " + groupId + " created!");
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -426,6 +425,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 stmt2.close();
             }
             con.commit();
+            for (Group group : groups) {
+                log.info("Group " + group.getId() + " deleted!");
+            }
         } catch (SQLException e) {
             log.error("SQL Error", e);
             rollback(con);

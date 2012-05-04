@@ -263,6 +263,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
             // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
             conForConfigDB.commit();
+            LOG.info("Context " + ctx.getId() + " deleted.");
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new StorageException(e);
@@ -1039,7 +1040,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
             contextCommon.fillLogin2ContextTable(ctx, configCon);
             configCon.commit();
-            return writeContext(configCon, ctx, adminUser, access);
+            final Context retval = writeContext(configCon, ctx, adminUser, access);
+            LOG.info("Context " + retval.getId() + " created!");
+            return retval;
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
@@ -1111,7 +1114,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
 
             oxCon.commit();
-            LOG.info("Context " + contextId + " created!");
             // TODO: cutmasta call setters and fill all required fields
             ctx.setEnabled(Boolean.TRUE);
             return ctx;
@@ -2098,6 +2100,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("SQL Error", e);
             }
         }
+        LOG.info("Context " + ctx.getId() + " changed.");
     }
 
     /**
