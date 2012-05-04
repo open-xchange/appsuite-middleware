@@ -122,7 +122,6 @@ public final class JerichoParser {
         final StreamedSource streamedSource = new StreamedSource(checkBody(html));
         streamedSource.setLogger(null);
         int lastSegmentEnd = 0;
-        final long st = System.currentTimeMillis();
         for (final Segment segment : streamedSource) {
             if (segment.getEnd() <= lastSegmentEnd) {
                 /*
@@ -136,10 +135,6 @@ public final class JerichoParser {
              * Handle current segment
              */
             handleSegment(handler, segment, false);
-        }
-        {
-            final long dur = System.currentTimeMillis() - st;
-            System.out.println("\tJerichoParser.parse() took " + dur + "msec.");
         }
     }
 
