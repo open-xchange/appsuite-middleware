@@ -716,6 +716,9 @@ public class IMAPDefaultFolderChecker {
                     if (!retry) {
                         return fullName;
                     }
+                    if (MailAccount.DEFAULT_ID == accountId) {
+                        throw e;
+                    }
                     String prfx;
                     {
                         final ListLsubEntry inboxEntry;
