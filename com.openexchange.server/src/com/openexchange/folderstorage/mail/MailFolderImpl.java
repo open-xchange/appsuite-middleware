@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
@@ -192,7 +193,8 @@ public final class MailFolderImpl extends AbstractFolder {
         contextId = context.getContextId();
         fullName = mailFolder.getFullname();
         id = MailFolderUtility.prepareFullname(accountId, fullName);
-        name = "INBOX".equals(fullName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX) : mailFolder.getName();
+        final String folderName = mailFolder.getName();
+        name = "INBOX".equals(fullName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX) : folderName;
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
             mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(
@@ -245,25 +247,26 @@ public final class MailFolderImpl extends AbstractFolder {
                     pe.setFolderPermission(Permission.READ_FOLDER);
                 }
             }
+            final boolean translateDefaultFolders = MailServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
             if (mailFolder.containsDefaultFolderType()) {
                 switch (mailFolder.getDefaultFolderType()) {
                 case INBOX:
                     mailFolderType = MailFolderType.INBOX;
                     break;
                 case TRASH:
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                    name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
                     mailFolderType = MailFolderType.TRASH;
                     break;
                 case SENT:
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                    name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT) : folderName);
                     mailFolderType = MailFolderType.SENT;
                     break;
                 case SPAM:
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                    name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM) : folderName);
                     mailFolderType = MailFolderType.SPAM;
                     break;
                 case DRAFTS:
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                    name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
                     mailFolderType = MailFolderType.DRAFTS;
                     break;
                 case CONFIRMED_SPAM:
@@ -281,18 +284,18 @@ public final class MailFolderImpl extends AbstractFolder {
                 } else {
                     try {
                         if (fullName.equals(fullnameProvider.getDraftsFolder())) {
-                            name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                            name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
                             mailFolderType = MailFolderType.DRAFTS;
                         } else if (fullName.equals(fullnameProvider.getINBOXFolder())) {
                             mailFolderType = MailFolderType.INBOX;
                         } else if (fullName.equals(fullnameProvider.getSentFolder())) {
-                            name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                            name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT) : folderName);
                             mailFolderType = MailFolderType.SENT;
                         } else if (fullName.equals(fullnameProvider.getSpamFolder())) {
-                            name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                            name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM) : folderName);
                             mailFolderType = MailFolderType.SPAM;
                         } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
-                            name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                            name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
                             mailFolderType = MailFolderType.TRASH;
                         } else if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
                             name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
