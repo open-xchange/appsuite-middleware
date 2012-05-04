@@ -1,0 +1,3 @@
+# The minimum OLOX20 version required for proper interaction with this ox server version.
+# This value is not intended to be changed by customers!
+com.openexchange.outlook.updater.oxtender2.serverRequiredVersion=@oxtender.serverRequiredVersion@

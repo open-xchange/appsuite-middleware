@@ -1,2 +1,17 @@
+# The path of the "files"-directory where the binaries for the updater 
+# and other updatable products will be placed.
 com.openexchange.outlook.updater.path=@oxgroupwaresysconfdir@/../files
+
+# The basic file name of the updater binaries. Without locale information.
 com.openexchange.outlook.updater.baseName=OXUpdater.msi
+
+# This defines the file name of the updater installer.
+# This is the one that can be downloaded from the web gui with sufficient permissions.
+com.openexchange.outlook.updater.downloadName=OXConnector.exe
+
+# Product name of the updater.
+# This defines the name of the installable or updatable updater that will be shown within the updater.
+com.openexchange.outlook.updater.productName=OXUpdater
+
+# Bytecode of an icon that can be displayed in the updater for this product next to the update entry
+com.openexchange.outlook.updater.icon=AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIiIiIiIiAAIiIiIiIiIiIiIiIiIiIiACIiIiIiIiIiIiIiIiIiIgIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiId3d3d3eId3eIiIh3d4iIh3d3d3d3eHd3eIiHd3eIiHd3eIiHd3eHd3eId3d4iIh3d4iIiHd3iHd3d3d3iIiId3eIiIh3d4iHd3d3eIiIiHd3iIiId3eIiHd3d4iIiP+IiP///4iI//+IiIj/////iIj///+IiP/4iIiIj////4iI////iIj/iIiIiIj///+IiI//+IiI+IiI/4iIj///+IiIiIiIj4iIj//4iIj///+IiIiIiP+IiP///4iI/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w////////////////////AP///////////////////wAP//////////////////AAAAAAAAAAAAAAAAAAAAAAD/////wAAAA4AAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAYAAAAHAAAAD/////w
