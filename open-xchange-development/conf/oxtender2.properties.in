@@ -1,0 +1,12 @@
+# The basic file name of the OLOX20 binaries for 32 bit architectures. Without locale information.
+com.openexchange.outlook.updater.oxtender2.baseName32=OXtender_2_for_Microsoft_Outlook.exe
+
+# The basic file name of the OLOX20 binaries for 64 bit architectures. Without locale information.
+com.openexchange.outlook.updater.oxtender2.baseName64=OXtender_2_for_Microsoft_Outlook_x64.exe
+
+# Product name of the oxtender.
+# This defines the name of the installable or updatable OLOX20 that will be shown within the updater.
+com.openexchange.outlook.updater.oxtender2.productName=OXtender 2 for Microsoft Outlook
+
+# Bytecode of an icon that can be displayed in the updater for this product next to the update entry
+com.openexchange.outlook.updater.oxtender2.icon=AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIiIiIiIiAAIiIiIiIiIiIiIiIiIiIiACIiIiIiIiIiIiIiIiIiIgIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiId3d3d3eId3eIiIh3d4iIh3d3d3d3eHd3eIiHd3eIiHd3eIiHd3eHd3eId3d4iIh3d4iIiHd3iHd3d3d3iIiId3eIiIh3d4iHd3d3eIiIiHd3iIiId3eIiHd3d4iIiP+IiP///4iI//+IiIj/////iIj///+IiP/4iIiIj////4iI////iIj/iIiIiIj///+IiI//+IiI+IiI/4iIj///+IiIiIiIj4iIj//4iIj///+IiIiIiP+IiP///4iI/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w////////////////////AP///////////////////wAP//////////////////AAAAAAAAAAAAAAAAAAAAAAD/////wAAAA4AAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAYAAAAHAAAAD/////w
