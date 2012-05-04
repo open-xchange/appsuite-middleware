@@ -210,7 +210,18 @@ public abstract class DefaultContactService implements ContactService {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(folderId, "folderId");
 		Check.argNotNull(id, "id");
-		return this.doGetContact(session, folderId, id, fields);
+		Contact contact = null;
+		SearchIterator<Contact> searchIterator = null;
+		try {
+			searchIterator = this.doGetContacts(false, session, folderId, new String[] { id }, fields, null, null);
+			contact = searchIterator.next();
+		} finally {
+			if (null != searchIterator) {
+				searchIterator.close();
+			}
+		}
+		Check.contactNotNull(contact, session.getContextId(), session.getUserId());
+		return contact;
 	}
 	
 	@Override
@@ -292,9 +303,6 @@ public abstract class DefaultContactService implements ContactService {
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
-	
-	protected abstract Contact doGetContact(Session session, String folderID, String id, ContactField[] fields) 
-			throws OXException;
 	
 	protected abstract void doCreateContact(Session session, String folderID, Contact contact) throws OXException;
 	

@@ -91,49 +91,6 @@ public class ContactServiceImpl extends DefaultContactService {
     public ContactServiceImpl() {
     	super();
     }
-
-	@Override
-    protected Contact doGetContact(Session session, String folderID, String id, ContactField[] fields) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
-		final ContactStorage storage = Tools.getStorage(contextID, folderID);
-		/*
-		 * check folder
-		 */
-		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		Check.isContactFolder(folder, contextID, userID);
-		/*
-		 * check general permissions
-		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canReadAll(permission, contextID, userID, folderID);
-		/*
-		 * prepare fields
-		 */
-		final QueryFields queryFields = new QueryFields(fields);
-		/*
-		 * get contact from storage
-		 */
-		final Contact contact = storage.get(contextID, folderID, id, queryFields.getFields());
-		Check.contactNotNull(contact, contextID, userID);
-		/*
-		 * check further permission restrictions
-		 */
-		if (contact.getCreatedBy() != userID) {
-			Check.canReadAll(permission, contextID, userID, folderID);
-			Check.isNotPrivate(contact, contextID, userID, folderID);
-		}
-		/*
-		 * Add attachment info if needed
-		 */
-		if (queryFields.needsAttachmentInfo()) {
-			Tools.addAttachmentInformation(contact, contextID);
-		}
-		/*
-		 * deliver contact
-		 */
-		return contact;
-	}
 	
 	@Override
     protected void doCreateContact(Session session, String folderID, Contact contact) throws OXException {
@@ -460,7 +417,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * filter results respecting object permission restrictions, adding attachment info as needed
 		 */
-		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), contextID, userID, permission.canReadAllObjects());	
+		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), session, permission.canReadAllObjects());	
 	}
 	
 	@Override
@@ -509,7 +466,7 @@ public class ContactServiceImpl extends DefaultContactService {
 			 */
 			final SearchIterator<Contact> searchIterator = queriedStorage.getKey().search(
 					contextID, searchTerm, queryFields.getFields(), sortOptions);
-			searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), contextID, userID));
+			searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
 		}
 		return 2 > searchIterators.size() ? searchIterators.get(0) : 
 			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
@@ -584,7 +541,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * get user contacts from storage
 		 */
 		return new ResultIterator(storage.search(contextID, searchTerm, queryFields.getFields(), sortOptions), 
-				queryFields.needsAttachmentInfo(), contextID, currentUserID, true);
+				queryFields.needsAttachmentInfo(), session, true);
 	}
 	
 }

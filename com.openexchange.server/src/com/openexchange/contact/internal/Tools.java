@@ -67,8 +67,6 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -213,21 +211,6 @@ public final class Tools {
 		return ContactServiceLookup.getService(FolderService.class, true); 
 	}	
 	
-	/**
-	 * Adds the date of the last modification to attachments of the given 
-	 * contact when needed, i.e. the information is not already present.
-	 * 
-	 * @param contact the contact to add the attachment information for
-	 * @param contextID the context ID
-	 * @throws OXException
-	 */
-	public static void addAttachmentInformation(Contact contact, int contextID) throws OXException {
-		if (false == contact.containsLastModifiedOfNewestAttachment() && 0 < contact.getNumberOfAttachments()) {
-			contact.setLastModifiedOfNewestAttachment(Attachments.getInstance().getNewestCreationDate(
-					Tools.getContext(contextID), Types.CONTACT, contact.getObjectID()));
-		}
-	}
-
 	/**
 	 * Checks whether the supplied string is empty, that is it is either 
 	 * <code>null</code>, or consists of whitespace characters exclusively.

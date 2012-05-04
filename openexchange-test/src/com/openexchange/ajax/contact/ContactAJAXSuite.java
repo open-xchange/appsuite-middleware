@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 
 public class ContactAJAXSuite extends TestSuite {
@@ -80,6 +81,7 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(YomiContactSearchTests.class);
         tests.addTestSuite(ContactSearchTests.class);
         tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
+        tests.addTestSuite(DistListMemberUpdateTest.class);
 
         tests.addTest(ContactBugTestSuite.suite());
         return tests;
