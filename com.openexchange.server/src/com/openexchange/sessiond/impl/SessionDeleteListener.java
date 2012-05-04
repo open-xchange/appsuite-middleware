@@ -47,52 +47,35 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.sessiond.impl;
 
 import java.sql.Connection;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
-import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link FolderStorageDeleteListener}
+ * {@link SessionDeleteListener}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FolderStorageDeleteListener implements DeleteListener {
+public class SessionDeleteListener implements DeleteListener {
 
-    /**
-     * Initializes a new {@link FolderStorageDeleteListener}.
-     */
-    public FolderStorageDeleteListener() {
+    public SessionDeleteListener() {
         super();
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) {
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) {
         if (event.getType() == DeleteEvent.TYPE_USER) {
             final Context context = event.getContext();
-            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                    globalCache.invalidateGroup(String.valueOf(context.getContextId()));
-                } catch (final Exception e) {
-                    // Ignore
-                }
-                try {
-                    final Cache cache = cacheService.getCache("MailAccount");
-                    cache.clear();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
             final int userId = event.getId();
-            FolderMapManagement.getInstance().dropFor(userId, context.getContextId());
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null != sessiondService) {
+                sessiondService.removeUserSessions(userId, context);
+            }
         }
     }
 }

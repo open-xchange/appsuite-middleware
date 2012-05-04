@@ -94,11 +94,6 @@ public class SessiondServiceImpl implements SessiondService {
     }
 
     @Override
-    public boolean refreshSession(final String sessionId) {
-        return SessionHandler.refreshSession(sessionId);
-    }
-
-    @Override
     public boolean removeSession(final String sessionId) {
         return SessionHandler.clearSession(sessionId);
     }

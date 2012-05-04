@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,23 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.caching;
 
-import java.sql.Connection;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
-import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.caching.internal.CacheKeyImplTest;
 
 /**
- * {@link FolderStorageDeleteListener}
+ * Test suite for all integrated unit tests in caching bundle.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FolderStorageDeleteListener implements DeleteListener {
+@RunWith(Suite.class)
+@SuiteClasses({ CacheKeyImplTest.class })
+public class UnitTests {
 
-    /**
-     * Initializes a new {@link FolderStorageDeleteListener}.
-     */
-    public FolderStorageDeleteListener() {
+    public UnitTests() {
         super();
-    }
-
-    @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) {
-        if (event.getType() == DeleteEvent.TYPE_USER) {
-            final Context context = event.getContext();
-            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                    globalCache.invalidateGroup(String.valueOf(context.getContextId()));
-                } catch (final Exception e) {
-                    // Ignore
-                }
-                try {
-                    final Cache cache = cacheService.getCache("MailAccount");
-                    cache.clear();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
-            final int userId = event.getId();
-            FolderMapManagement.getInstance().dropFor(userId, context.getContextId());
-        }
     }
 }

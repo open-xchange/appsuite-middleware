@@ -617,8 +617,8 @@ public class Login extends AJAXServlet {
                         final String cookieName = cookie.getName();
                         if (cookieName.startsWith(sessionCookieName)) {
                             final String sessionId = cookie.getValue();
-                            if (sessiondService.refreshSession(sessionId)) {
-                                session = sessiondService.getSession(sessionId);
+                            session = sessiondService.getSession(sessionId);
+                            if (null != session) {
                                 // IP check if enabled; otherwise update session's IP address if different to request's IP address
                                 // Insecure check is done in updateIPAddress method.
                                 if (!conf.ipCheck) {

@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,11 +59,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
+
 import junit.framework.TestCase;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
@@ -254,7 +258,14 @@ public class ContactTestManager implements TestManager {
      * Updates a contact via HTTP-API and returns the same contact for convenience
      */
     public Contact updateAction(final Contact contact) {
-        final UpdateRequest request = new UpdateRequest(contact);
+    	return this.updateAction(contact.getParentFolderID(), contact);
+    }
+
+    /**
+     * Updates a contact via HTTP-API and returns the same contact for convenience
+     */
+    public Contact updateAction(int inFolder, final Contact contact) {
+        final UpdateRequest request = new UpdateRequest(inFolder, contact, true);
         try {
             lastResponse = getClient().execute(request, getSleep());
             contact.setLastModified(lastResponse.getTimestamp());

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.arrays;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -137,6 +138,10 @@ public final class Arrays {
         return retval;
     }
 
+    public static int[] extract(int[] source, int start) {
+        return extract(source, start, source.length - start);
+    }
+
     public static int[] extract(int[] source, int start, int length) {
         final int realLength = determineRealSize(source.length, start, length);
         final int[] retval = new int[realLength];
@@ -149,5 +154,13 @@ public final class Arrays {
             return size - start;
         }
         return length;
+    }
+
+    public static Serializable[] toSerializable(Integer[] ids) {
+        final Serializable[] retval = new Serializable[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            retval[i] = ids[i];
+        }
+        return retval;
     }
 }

@@ -88,14 +88,6 @@ public interface SessiondService {
     public void changeSessionPassword(String sessionId, String newPassword) throws OXException;
 
     /**
-     * Refreshes the time stamp of the session with the given session identifier.
-     *
-     * @param sessionId The Session identifier
-     * @return <code>true</code> if the session time stamp was updated or <code>false</code> if the session identifier was invalid or expired
-     */
-    public boolean refreshSession(final String sessionId);
-
-    /**
      * Removes the session with the given session identifier.
      *
      * @param sessionId The Session identifier
