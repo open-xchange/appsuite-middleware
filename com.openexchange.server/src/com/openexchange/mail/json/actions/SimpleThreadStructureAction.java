@@ -63,6 +63,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.collections.PropertizedList;
 
 
 /**
@@ -132,6 +133,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     fromToIndices = new int[] {start,end};
                 }
             }
+            final boolean cache = req.optBool("cache", false);
             final boolean includeSent = req.optBool("includeSent", false);
             final boolean unseen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
@@ -168,10 +170,16 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!unseen && !ignoreDeleted) {
-                final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, sortCol, orderDir, columns, fromToIndices);
+                final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, fromToIndices);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, sortCol, orderDir, columns, null);
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null);
+            boolean cached = false;
+            if (mails instanceof PropertizedList) {
+                final PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
+                final Boolean b = (Boolean) propertizedList.getProperty("cached");
+                cached = null != b && b.booleanValue();
+            }
             boolean foundUnseen;
             for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
                 final List<MailMessage> list = iterator.next();
@@ -209,7 +217,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     mails = mails.subList(fromIndex, toIndex);
                 }
             }
-            return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+            final AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+            result.setResponseProperty("cached", Boolean.valueOf(cached));
+            return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

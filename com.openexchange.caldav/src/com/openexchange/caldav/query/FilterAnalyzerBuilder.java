@@ -60,10 +60,10 @@ import java.util.Stack;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilterAnalyzerBuilder {
-    private List<AnalyzerElement> analyzers = new ArrayList<AnalyzerElement>();
+    private final List<AnalyzerElement> analyzers = new ArrayList<AnalyzerElement>();
     
     private AnalyzerElement top;
-    private Stack<AnalyzerElement> stack = new Stack<AnalyzerElement>();
+    private final Stack<AnalyzerElement> stack = new Stack<AnalyzerElement>();
     
     
     public FilterAnalyzerBuilder compFilter(String name) {

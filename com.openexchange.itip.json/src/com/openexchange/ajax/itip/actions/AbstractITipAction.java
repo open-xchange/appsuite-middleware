@@ -99,6 +99,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
     }
 
     
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         List<ConversionError> errors = new ArrayList<ConversionError>();
         List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();

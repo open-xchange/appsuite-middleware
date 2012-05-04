@@ -73,6 +73,7 @@ public class AutoLoginAuthenticationCustomizer implements ServiceTrackerCustomiz
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final AutoLoginAuthenticationService auth = (AutoLoginAuthenticationService) context.getService(reference);
         if (AutoLoginAuthentication.setService(auth)) {
@@ -83,10 +84,12 @@ public class AutoLoginAuthenticationCustomizer implements ServiceTrackerCustomiz
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         final AutoLoginAuthenticationService auth = (AutoLoginAuthenticationService) service;
         if (!AutoLoginAuthentication.dropService(auth)) {

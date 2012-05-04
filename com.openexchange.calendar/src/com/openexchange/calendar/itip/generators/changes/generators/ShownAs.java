@@ -18,11 +18,13 @@ import com.openexchange.groupware.contexts.Context;
 
 public class ShownAs implements ChangeDescriptionGenerator {
 
-	public String[] getFields() {
+	@Override
+    public String[] getFields() {
 		return new String[]{AppointmentFields.SHOW_AS};
 	}
 
-	public List<Sentence> getDescriptions(Context ctx, Appointment original,
+	@Override
+    public List<Sentence> getDescriptions(Context ctx, Appointment original,
 			Appointment updated, AppointmentDiff diff, Locale locale,
 			TimeZone timezone) throws OXException {
 		

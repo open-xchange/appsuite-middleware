@@ -188,14 +188,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             return Boolean.FALSE;
         }
         // Now check transport server URL, if a transport server is present
-        final String transportServer = accountDescription.getTransportServer();
-        if (null != transportServer && transportServer.length() > 0) {
+        if (!isEmpty(accountDescription.getTransportServer())) {
             validated = checkTransportServerURL(accountDescription, session, warnings);
         }
         return Boolean.valueOf(validated);
     }
 
-    private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
         if (null == mailAccess) {
@@ -209,7 +208,11 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return success;
     }
 
-    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+        // Now check transport server URL, if a transport server is present
+        if (isEmpty(accountDescription.getTransportServer())) {
+            return true;
+        }
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
@@ -262,6 +265,18 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
         }
         return validated;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

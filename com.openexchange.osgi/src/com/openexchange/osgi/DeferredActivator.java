@@ -159,6 +159,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             return service;
         }
 
+        @Override
         public void removedService(final org.osgi.framework.ServiceReference<S> reference, final S service) {
             /*
              * Signal unavailability

@@ -6,4 +6,6 @@ Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/json.jar,
- .
+ .,
+ lib/jchronic-0.2.3.jar,
+ lib/junit-4.6.jar

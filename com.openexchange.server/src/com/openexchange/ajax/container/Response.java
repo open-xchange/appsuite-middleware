@@ -55,9 +55,11 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -79,6 +81,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public final class Response {
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
+
+    /**
+     * The optional properties.
+     */
+    private final Map<String, Object> properties;
 
     /**
      * The locale needed for i18n of display message.
@@ -116,10 +123,8 @@ public final class Response {
      * @param response the response JSON object.
      */
     public Response(final JSONObject response) {
-        super();
-        warnings = new LinkedList<OXException>();
+        this(DEFAULT_LOCALE);
         this.json = response;
-        this.locale = DEFAULT_LOCALE;
     }
 
     /**
@@ -145,10 +150,7 @@ public final class Response {
      * Constructor for generating responses.
      */
     public Response() {
-        super();
-        warnings = new LinkedList<OXException>();
-        this.json = null;
-        this.locale = DEFAULT_LOCALE;
+        this(DEFAULT_LOCALE);
     }
 
     /**
@@ -159,8 +161,31 @@ public final class Response {
     public Response(final Locale locale) {
         super();
         warnings = new LinkedList<OXException>();
+        properties = new HashMap<String, Object>(8);
         this.json = null;
         this.locale = locale;
+    }
+
+    /**
+     * Puts specified properties.
+     * 
+     * @param properties The properties to add
+     * @return This response with properties added
+     */
+    public Response setProperties(final Map<String, Object> properties) {
+        if (null != properties) {
+            this.properties.putAll(properties);
+        }
+        return this;
+    }
+
+    /**
+     * Gets the properties
+     *
+     * @return The properties
+     */
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     /**

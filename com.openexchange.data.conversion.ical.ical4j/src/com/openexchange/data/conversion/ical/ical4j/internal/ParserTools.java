@@ -238,7 +238,7 @@ public final class ParserTools {
     		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences; 
     	}
     	//select the most often occurring ones and take the one with the shortest name (probably a generic name)
-    	Integer mostCommonOffset = (Integer) occurrences.getKey((Integer)highestNumberOccurrences);
+    	Integer mostCommonOffset = (Integer) occurrences.getKey(highestNumberOccurrences);
     	int maxlength = Integer.MAX_VALUE;
     	TimeZone candidate = null;
     	for(TimeZone cand: candidates2){

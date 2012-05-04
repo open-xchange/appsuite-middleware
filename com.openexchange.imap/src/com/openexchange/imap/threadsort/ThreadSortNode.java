@@ -66,6 +66,11 @@ public class ThreadSortNode {
      */
     final MessageId msgId;
 
+    /**
+     * The UID.
+     */
+    final long uid;
+
     private final List<ThreadSortNode> childs;
 
     /**
@@ -73,9 +78,10 @@ public class ThreadSortNode {
      *
      * @param msgId The identifier of this tree node's message.
      */
-    public ThreadSortNode(final MessageId msgId) {
+    public ThreadSortNode(final MessageId msgId, final long uid) {
         this.msgId = msgId;
         childs = new ArrayList<ThreadSortNode>();
+        this.uid = uid;
     }
 
     /**
@@ -99,6 +105,15 @@ public class ThreadSortNode {
     @Override
     public String toString() {
         return new StringBuilder().append(msgId).append(' ').append(childs).toString();
+    }
+
+    /**
+     * Gets the UID.
+     *
+     * @return The UID
+     */
+    public long getUid() {
+        return uid;
     }
 
     /**

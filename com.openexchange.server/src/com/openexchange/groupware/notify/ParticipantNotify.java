@@ -398,6 +398,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         taskAccepted(null, taskObj, session);
     }
 
+    @Override
     public void taskAccepted(final Task oldTask, final Task taskObj, final Session session) {
         sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
@@ -411,6 +412,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         taskDeclined(null, taskObj, session);
     }
 
+    @Override
     public void taskDeclined(final Task oldTask, final Task taskObj, final Session session) {
         sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
@@ -424,6 +426,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         taskTentativelyAccepted(null, taskObj, session);
     }
 
+    @Override
     public void taskTentativelyAccepted(final Task oldTask, final Task taskObj, final Session session) {
         sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),

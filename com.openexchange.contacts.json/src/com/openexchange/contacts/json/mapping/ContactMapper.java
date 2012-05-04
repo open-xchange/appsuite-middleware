@@ -130,6 +130,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		return setFields.toArray(newArray(setFields.size()));
 	}
 
+    @Override
     public ContactField[] getFields(int[] columnIDs, EnumSet<ContactField> illegalFields, ContactField... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");

@@ -135,11 +135,11 @@ public class Participants implements ChangeDescriptionGenerator{
     
     
     
-    private UserService users;
-    private GroupService groups;
-    private ResourceService resources;
+    private final UserService users;
+    private final GroupService groups;
+    private final ResourceService resources;
 
-	private boolean stateChanges;
+	private final boolean stateChanges;
     
     
     
@@ -151,6 +151,7 @@ public class Participants implements ChangeDescriptionGenerator{
         this.stateChanges = stateChanges;
     }
 
+    @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
         
         List<Integer> userIds = new ArrayList<Integer>();
@@ -337,6 +338,7 @@ public class Participants implements ChangeDescriptionGenerator{
         }
     }
 
+    @Override
     public String[] getFields() {
         return FIELDS;
     }

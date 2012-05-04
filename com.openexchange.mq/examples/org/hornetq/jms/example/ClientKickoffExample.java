@@ -65,6 +65,7 @@ public class ClientKickoffExample extends HornetQExample
          final AtomicReference<JMSException> exception = new AtomicReference<JMSException>();
          connection.setExceptionListener(new ExceptionListener()
          {
+            @Override
             public void onException(final JMSException e)
             {
                exception.set(e);
@@ -78,7 +79,7 @@ public class ClientKickoffExample extends HornetQExample
          ObjectName on = ObjectNameBuilder.DEFAULT.getHornetQServerObjectName();
          JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL(JMX_URL), new HashMap<String, String>());
          MBeanServerConnection mbsc = connector.getMBeanServerConnection();
-         HornetQServerControl serverControl = (HornetQServerControl)MBeanServerInvocationHandler.newProxyInstance(mbsc,
+         HornetQServerControl serverControl = MBeanServerInvocationHandler.newProxyInstance(mbsc,
                                                                                             on,
                                                                                             HornetQServerControl.class,
                                                                                             false);

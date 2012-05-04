@@ -63,9 +63,9 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipAnalysis {
-    private List<ITipChange> changes = new ArrayList<ITipChange>();
-    private List<ITipAnnotation> annotations = new ArrayList<ITipAnnotation>();
-    private Set<ITipAction> actions = EnumSet.noneOf(ITipAction.class);
+    private final List<ITipChange> changes = new ArrayList<ITipChange>();
+    private final List<ITipAnnotation> annotations = new ArrayList<ITipAnnotation>();
+    private final Set<ITipAction> actions = EnumSet.noneOf(ITipAction.class);
     private ITipMessage message = null;
 	private String uid;
     

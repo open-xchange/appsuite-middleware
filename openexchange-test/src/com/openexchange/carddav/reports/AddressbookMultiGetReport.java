@@ -70,18 +70,22 @@ public class AddressbookMultiGetReport implements Report, DeltaVConstants {
     public static final ReportType ADDRESSBOOK_MULTI_GET = ReportType.register(PropertyNames.ADDRESSBOOK_MULTIGET.getName(), 
     		PropertyNames.ADDRESSBOOK_MULTIGET.getNamespace(), AddressbookMultiGetReport.class); 
 
+    @Override
     public ReportType getType() {
         return ADDRESSBOOK_MULTI_GET;
     }
 
+    @Override
     public boolean isMultiStatusReport() {
         return true;
     }
 
+    @Override
     public void init(DavResource dr, ReportInfo ri) throws DavException {
     }
 
-	public Element toXml(Document arg0) {
+	@Override
+    public Element toXml(Document arg0) {
         throw new UnsupportedOperationException();
 	}
 }

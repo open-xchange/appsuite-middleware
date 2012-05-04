@@ -69,7 +69,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractServletActivator.class));
 
-    private List<String> servlets = new ArrayList<String>();
+    private final List<String> servlets = new ArrayList<String>();
 
     protected void registerServlet(String alias, HttpServlet servlet, HttpService httpService) {
         registerServlet(alias, servlet, null, httpService);

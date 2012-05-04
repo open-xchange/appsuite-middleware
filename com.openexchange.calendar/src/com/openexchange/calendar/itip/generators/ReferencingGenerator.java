@@ -63,13 +63,14 @@ import com.openexchange.session.Session;
  */
 public class ReferencingGenerator implements ITipMessageGenerator {
 
-    private ITipMethod method;
+    private final ITipMethod method;
 
     protected ReferencingGenerator(ITipMethod method) {
         super();
         this.method = method;
     }
 
+    @Override
     public ITipMessage generate(Appointment original, Appointment updated, Session session) {
         ITipMessage message = new ITipMessage();
         message.setMethod(method);

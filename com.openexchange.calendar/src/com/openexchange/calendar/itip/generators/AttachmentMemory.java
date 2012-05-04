@@ -58,14 +58,15 @@ import com.openexchange.timer.TimerService;
  */
 public class AttachmentMemory {
 	
-	private ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
+	private final ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
 	
 	private int purgeInterval;
 	
 	public AttachmentMemory(int purgeInterval, TimerService timer) {
 		timer.scheduleAtFixedRate(new Runnable() {
 
-			public void run() {
+			@Override
+            public void run() {
 				purge();
 			}
 			

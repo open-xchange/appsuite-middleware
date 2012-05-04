@@ -261,6 +261,11 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
     }
 
     @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
+    }
+
+    @Override
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }

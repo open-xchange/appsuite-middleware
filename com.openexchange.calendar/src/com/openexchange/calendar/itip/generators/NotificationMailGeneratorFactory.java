@@ -67,11 +67,11 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactory {
-    private NotificationParticipantResolver resolver;
-    private ITipIntegrationUtility util;
+    private final NotificationParticipantResolver resolver;
+    private final ITipIntegrationUtility util;
     
-    private AttachmentMemory attachmentMemory;
-    private ServiceLookup services;
+    private final AttachmentMemory attachmentMemory;
+    private final ServiceLookup services;
     
     
     
@@ -85,6 +85,7 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
 
 
 
+    @Override
     public ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws OXException {
         Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);

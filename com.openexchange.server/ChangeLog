@@ -1,3 +1,28 @@
+* 2012-05-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20961: Session is destroyed if user is deleted and created again.
+
+* 2012-05-03 - jan.bauerdick@open-xchange.com
+
+ - Refactor error messages moving translatable strings into LocalizableStrings classes
+ - Remove stale bundles from git
+
+* 2012-05-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21292: Allowing a public folder's creator to delete a folder
+ - Fix for bug 22074: Improved html2text invocation
+ - Fix for bug 22076: Checking for possible mail-safe encoding
+ - Fix for bug 22083: Provide account information on error
+ - Logging for bug 22084: Providing JSON error object returned by FB API
+ - Fix for bug 21870: Ensured presence of appropriate warning, rather than an error
+ - Fix for bug 22084: Deny creation of OAuth account if either token or secret is empty/null
+
+* 2012-05-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20947: Adapt to common yahoo.com naming for standard folders
+ - Fix for bug 22079: Checking IMAP server response on folder creation
+ - Fix for bug 22077: Fixed regex to find CSS blocks
+
 * 2012-04-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 22042: Guaranteed termination for check for non-existing parents

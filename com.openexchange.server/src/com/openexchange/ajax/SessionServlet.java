@@ -584,9 +584,7 @@ public abstract class SessionServlet extends AJAXServlet {
             return ServerSessionAdapter.valueOf(session, context, user);
         } catch (final OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                /*
-                 * An outdated session; context absent
-                 */
+                // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
                 if (INFO) {
                     LOG.info("The context associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
@@ -596,9 +594,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
                 final int code = e.getCode();
                 if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
-                    /*
-                     * An outdated session; user absent
-                     */
+                    // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
                     if (INFO) {
                         LOG.info("The user associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");

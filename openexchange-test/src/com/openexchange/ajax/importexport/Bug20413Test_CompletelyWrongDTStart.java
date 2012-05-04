@@ -17,7 +17,7 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
 		super(name);
 	}
 	
-	private String ical = 
+	private final String ical = 
 		"BEGIN:VCALENDAR\n" + 
 		"PRODID:Strato Communicator 3.5\n" + 
 		"VERSION:2.0\n" + 

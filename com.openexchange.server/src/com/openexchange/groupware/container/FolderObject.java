@@ -1163,7 +1163,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * user has on folder and applying the user configuration profile.
      */
     public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, OXException {
-        final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), userConfig);
+        final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userConfig);
         final int[] idArr;
         {
             final int[] groups = userConfig.getGroups();

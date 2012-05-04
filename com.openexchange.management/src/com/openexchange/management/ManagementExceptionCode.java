@@ -13,47 +13,47 @@ public enum ManagementExceptionCode implements OXExceptionCode {
     /**
      * MBean registration denied: ManagementAgent is not running.
      */
-    NOT_RUNNING("MBean registration denied: ManagementAgent is not running.", CATEGORY_CONFIGURATION, 1),
+    NOT_RUNNING(ManagementExceptionMessage.NOT_RUNNING_MSG, CATEGORY_CONFIGURATION, 1),
     /**
      * Malformed object name: %1$s
      */
-    MALFORMED_OBJECT_NAME("Malformed object name: %1$s", CATEGORY_ERROR, 2),
+    MALFORMED_OBJECT_NAME(ManagementExceptionMessage.MALFORMED_OBJECT_NAME_MSG, CATEGORY_ERROR, 2),
     /**
      * Not compliant MBean: %1$s
      */
-    NOT_COMPLIANT_MBEAN("Not compliant MBean: %1$s", CATEGORY_ERROR, 3),
+    NOT_COMPLIANT_MBEAN(ManagementExceptionMessage.NOT_COMPLIANT_MBEAN_MSG, CATEGORY_ERROR, 3),
     /**
      * MBean registration error: %1$s
      */
-    MBEAN_REGISTRATION("MBean registration error: %1$s", CATEGORY_ERROR, 4),
+    MBEAN_REGISTRATION(ManagementExceptionMessage.MBEAN_REGISTRATION_MSG, CATEGORY_ERROR, 4),
     /**
      * MBean already exists: %1$s.
      */
-    ALREADY_EXISTS("MBean already exists: %1$s", CATEGORY_ERROR, 5),
+    ALREADY_EXISTS(ManagementExceptionMessage.ALREADY_EXISTS_MSG, CATEGORY_ERROR, 5),
     /**
      * MBean not found: %1$s.
      */
-    NOT_FOUND("MBean not found: %1$s", CATEGORY_ERROR, 6),
+    NOT_FOUND(ManagementExceptionMessage.NOT_FOUND_MSG, CATEGORY_ERROR, 6),
     /**
      * Malformed URL: %1$s
      */
-    MALFORMED_URL("Malformed URL: %1$s", CATEGORY_ERROR, 7),
+    MALFORMED_URL(ManagementExceptionMessage.MALFORMED_URL_MSG, CATEGORY_ERROR, 7),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 8),
+    IO_ERROR(ManagementExceptionMessage.IO_ERROR_MSG, CATEGORY_ERROR, 8),
     /**
      * Unknown host error: %1$s
      */
-    UNKNOWN_HOST_ERROR("Unknown host error: %1$s", CATEGORY_ERROR, 9),
+    UNKNOWN_HOST_ERROR(ManagementExceptionMessage.UNKNOWN_HOST_ERROR_MSG, CATEGORY_ERROR, 9),
     /**
      * Remote error: %1$s
      */
-    REMOTE_ERROR("Remote error: %1$s", CATEGORY_ERROR, 9),
+    REMOTE_ERROR(ManagementExceptionMessage.REMOTE_ERROR_MSG, CATEGORY_ERROR, 9),
     /**
      * A JMX connector is already bound to URL %1$s.
      */
-    JMX_URL_ALREADY_BOUND("A JMX connector is already bound to URL %1$s.", CATEGORY_ERROR, 10);
+    JMX_URL_ALREADY_BOUND(ManagementExceptionMessage.JMX_URL_ALREADY_BOUND_MSG, CATEGORY_ERROR, 10);
 
     private final String message;
 

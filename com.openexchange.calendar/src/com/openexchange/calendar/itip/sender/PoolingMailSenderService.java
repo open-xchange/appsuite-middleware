@@ -13,15 +13,16 @@ public class PoolingMailSenderService implements MailSenderService {
 	
 	private static final Log LOG = LogFactory.getLog(PoolingMailSenderService.class);
 	
-	private AppointmentNotificationPoolService pool; 
-	private MailSenderService delegate;
+	private final AppointmentNotificationPoolService pool; 
+	private final MailSenderService delegate;
 	
 	public PoolingMailSenderService(AppointmentNotificationPoolService pool, MailSenderService delegate) {
 		this.pool = pool;
 		this.delegate = delegate;
 	}
 	
-	public void sendMail(NotificationMail mail, Session session) {
+	@Override
+    public void sendMail(NotificationMail mail, Session session) {
 		if (!mail.shouldBeSent()) {
 			return;
 		}

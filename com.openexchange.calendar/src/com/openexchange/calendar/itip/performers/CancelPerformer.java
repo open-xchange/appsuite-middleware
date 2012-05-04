@@ -84,11 +84,13 @@ public class CancelPerformer extends AbstrakterDingeMacher {
     }
 
 
+    @Override
     public Collection<ITipAction> getSupportedActions() {
         return EnumSet.of(ITipAction.DELETE);
     }
 
 
+    @Override
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> deleted = new ArrayList<Appointment>();

@@ -95,7 +95,8 @@ public class UndecidedResource extends CarddavResource {
 		return false;
 	}
 
-	public String getETag() throws WebdavProtocolException {
+	@Override
+    public String getETag() throws WebdavProtocolException {
 		return null != delegate ? delegate.getETag() : "";
 	}
 	
@@ -158,7 +159,8 @@ public class UndecidedResource extends CarddavResource {
 		return uid;
 	}
 	
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		if (null != this.delegate) {
 			return this.delegate.getUrl();
 		} else if (null != this.url) {

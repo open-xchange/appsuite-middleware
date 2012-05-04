@@ -14,11 +14,11 @@ public enum ParamContainerExceptionCode implements OXExceptionCode {
 	/**
 	 * Bad value %1$s in parameter %2$s
 	 */
-	BAD_PARAM_VALUE("Bad value %1$s in parameter %2$s", CATEGORY_USER_INPUT, 1),
+	BAD_PARAM_VALUE(ParamContainerExceptionMessage.BAD_PARAM_VALUE_MSG, CATEGORY_USER_INPUT, 1),
 	/**
 	 * Missing parameter %1$s
 	 */
-	MISSING_PARAMETER("Missing parameter %1$s", CATEGORY_ERROR, 2);
+	MISSING_PARAMETER(ParamContainerExceptionMessage.MISSING_PARAMETER_MSG, CATEGORY_ERROR, 2);
 
 	/**
 	 * Message of the exception.

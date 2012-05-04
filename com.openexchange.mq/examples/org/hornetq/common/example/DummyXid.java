@@ -86,17 +86,20 @@ public class DummyXid implements Xid
 
    // Xid implementation ------------------------------------------------------------------
 
-   public byte[] getBranchQualifier()
+   @Override
+public byte[] getBranchQualifier()
    {
       return branchQualifier;
    }
 
-   public int getFormatId()
+   @Override
+public int getFormatId()
    {
       return formatId;
    }
 
-   public byte[] getGlobalTransactionId()
+   @Override
+public byte[] getGlobalTransactionId()
    {
       return globalTransactionId;
    }

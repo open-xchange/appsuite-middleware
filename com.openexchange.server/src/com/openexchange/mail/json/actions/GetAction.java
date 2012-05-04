@@ -50,11 +50,13 @@
 package com.openexchange.mail.json.actions;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,6 +79,7 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
@@ -361,7 +364,11 @@ public final class GetAction extends AbstractMailAction {
                 LOG.error(e.getMessage(), e);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

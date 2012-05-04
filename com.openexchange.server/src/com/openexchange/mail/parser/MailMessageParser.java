@@ -81,11 +81,11 @@ import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.ForceLog;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -389,6 +389,10 @@ public final class MailMessageParser {
                 for (int i = 0; i < count; i++) {
                     final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
                     parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+                }
+                if (!handler.handleMultipartEnd(mailPart, mpId)) {
+                    stop = true;
+                    return;
                 }
             } catch (final RuntimeException rte) {
                 /*

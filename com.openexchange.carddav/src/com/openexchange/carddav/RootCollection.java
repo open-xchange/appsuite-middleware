@@ -70,10 +70,12 @@ public class RootCollection extends AbstractCarddavCollection {
         includeProperties(new DummySyncToken());
     }
 
+    @Override
     public String getDisplayName() throws WebdavProtocolException {
         return "Contacts";
     }
 
+    @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         return Arrays.asList((WebdavResource)new AggregatedCollection(getUrl().dup().append("Contacts"), factory));
     }

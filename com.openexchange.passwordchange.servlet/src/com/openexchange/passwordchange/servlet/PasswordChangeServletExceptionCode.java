@@ -10,19 +10,19 @@ public enum PasswordChangeServletExceptionCode implements OXExceptionCode {
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 1),
+    JSON_ERROR(PasswordChangeServletExceptionMessage.JSON_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * Invalid locale string: %1$s
      */
-    INVALID_LOCALE_STR("Invalid locale string: %1$s", CATEGORY_ERROR, 2),
+    INVALID_LOCALE_STR(PasswordChangeServletExceptionMessage.INVALID_LOCALE_STR_MSG, CATEGORY_ERROR, 2),
     /**
      * Unsupported action %1$s via %2$s request
      */
-    UNSUPPORTED_ACTION("Unsupported action %1$s via %2$s request", CATEGORY_ERROR, 3),
+    UNSUPPORTED_ACTION(PasswordChangeServletExceptionMessage.UNSUPPORTED_ACTION_MSG, CATEGORY_ERROR, 3),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, 4);
+    MISSING_PARAM(PasswordChangeServletExceptionMessage.MISSING_PARAM_MSG, CATEGORY_ERROR, 4);
 
     private final String message;
 

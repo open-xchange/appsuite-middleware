@@ -62,7 +62,7 @@ import com.openexchange.i18n.tools.StringHelper;
  */
 public class HumanReadableRecurrences {
 
-    private CalendarObject cdao;
+    private final CalendarObject cdao;
 
     public HumanReadableRecurrences(CalendarObject cdao) {
         this.cdao = cdao;

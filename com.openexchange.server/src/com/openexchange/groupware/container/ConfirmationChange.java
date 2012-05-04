@@ -65,7 +65,7 @@ public class ConfirmationChange implements Change {
 
     private String newMessage;
 
-    private String identifier;
+    private final String identifier;
 
     public ConfirmationChange(String identifier) {
         this.identifier = identifier;
@@ -113,6 +113,7 @@ public class ConfirmationChange implements Change {
         this.newMessage = newMessage;
     }
 
+    @Override
     public String getIdentifier() {
         return identifier;
     }

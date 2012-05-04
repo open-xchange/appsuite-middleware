@@ -90,6 +90,7 @@ public class AttendeeOfAppointmentWithExternalOrganizerMailGeneratorTest extends
     
     public static final class MockParticipantResolver implements NotificationParticipantResolver {
 
+        @Override
         public List<NotificationParticipant> resolveAllRecipients(Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx) {
             return new ArrayList<NotificationParticipant>(Arrays.asList(
                 new NotificationParticipant(ITipRole.ORGANIZER, true, "organizer@otherdomain.ox"),
@@ -108,10 +109,12 @@ public class AttendeeOfAppointmentWithExternalOrganizerMailGeneratorTest extends
             return new NotificationParticipant(ITipRole.ATTENDEE, false, "internal1@domain.ox", 12);
         }
 
+        @Override
         public List<NotificationParticipant> getAllParticipants(List<NotificationParticipant> allRecipients, Appointment appointment, User user, Context ctx) {
             return allRecipients;
         }
 
+        @Override
         public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws OXException {
             // TODO Auto-generated method stub
             return null;

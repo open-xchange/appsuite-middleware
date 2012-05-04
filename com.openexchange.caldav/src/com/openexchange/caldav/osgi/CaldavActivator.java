@@ -112,6 +112,7 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(PropertyMixin.class, new CalendarHomeSet());
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
+                @Override
                 public PropertyMixin create(SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }

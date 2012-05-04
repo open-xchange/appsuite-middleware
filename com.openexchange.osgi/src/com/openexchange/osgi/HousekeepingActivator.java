@@ -206,7 +206,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         serviceRegistrations.add(context.registerService(clazz.getName(), service, properties));
     }
 
-    /**
+       /**
      * Registers specified service under the specified class.
      *
      * @param clazz The service's class
@@ -214,6 +214,25 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected <S> void registerService(final Class<S> clazz, final S service) {
         registerService(clazz, service, null);
+    }
+    
+    /**
+     * Registers specified Service or {@link org.osgi.framework.ServiceFactory} with the specified properties under the specified classname
+     * @param className The service's class name
+     * @param service The service reference
+     * @param properties The service's properties
+     */
+    protected <S> void registerService (String className, Object service, Dictionary<String, ?> properties) {
+        serviceRegistrations.add(context.registerService(className, service, properties));
+    }
+    
+    /**
+     * Registers specified Service or {@link org.osgi.framework.ServiceFactory} under the specified class name
+     * @param className The service's class name
+     * @param service The service reference
+     */
+    protected <S> void registerService (String className, Object service) {
+        serviceRegistrations.add(context.registerService(className, service, null));
     }
 
     /**

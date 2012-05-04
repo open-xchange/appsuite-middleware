@@ -96,13 +96,7 @@ public class CacheKeyImpl implements CacheKey {
      * @throws IllegalArgumentException If specified key is <code>null</code>
      */
     public CacheKeyImpl(final int contextId, final Serializable key) {
-        super();
-        if (null == key) {
-            throw new IllegalArgumentException("key is null");
-        }
-        this.contextId = contextId;
-        keyObjs = new Serializable[] { key };
-        hash = key.hashCode() ^ contextId;
+        this(contextId, new Serializable[] { key });
     }
 
     /**

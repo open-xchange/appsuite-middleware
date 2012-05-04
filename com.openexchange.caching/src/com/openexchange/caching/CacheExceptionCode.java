@@ -15,51 +15,51 @@ public enum CacheExceptionCode implements OXExceptionCode {
     /**
      * A cache error occurred: %1$s
      */
-    CACHE_ERROR("A cache error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    CACHE_ERROR(CacheExceptionMessage.CACHE_ERROR, Category.CATEGORY_ERROR, 1),
     /**
      * Missing cache configuration file at location: %1$s
      */
-    MISSING_CACHE_CONFIG_FILE("Missing cache configuration file at location: %1$s", Category.CATEGORY_CONFIGURATION, 2),
+    MISSING_CACHE_CONFIG_FILE(CacheExceptionMessage.MISSING_CACHE_CONFIG_FILE, Category.CATEGORY_CONFIGURATION, 2),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
+    IO_ERROR(CacheExceptionMessage.IO_ERROR, Category.CATEGORY_ERROR, 3),
     /**
      * Missing configuration property: %1$s
      */
-    MISSING_CONFIGURATION_PROPERTY("Missing configuration property: %1$s", Category.CATEGORY_CONFIGURATION, 4),
+    MISSING_CONFIGURATION_PROPERTY(CacheExceptionMessage.MISSING_CONFIGURATION_PROPERTY, Category.CATEGORY_CONFIGURATION, 4),
     /**
      * The default element attributes could not be retrieved.
      */
-    FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved.", Category.CATEGORY_ERROR, 5),
+    FAILED_ATTRIBUTE_RETRIEVAL(CacheExceptionMessage.FAILED_ATTRIBUTE_RETRIEVAL, Category.CATEGORY_ERROR, 5),
     /**
      * A put into the cache failed.
      */
-    FAILED_PUT("Put into cache failed.", Category.CATEGORY_ERROR, 6),
+    FAILED_PUT(CacheExceptionMessage.FAILED_PUT, Category.CATEGORY_ERROR, 6),
     /**
      * Safe put into cache failed. An object bound to given key already exists.
      */
-    FAILED_SAFE_PUT("Safe put into cache failed. An object bound to given key already exists.", Category.CATEGORY_ERROR, 7),
+    FAILED_SAFE_PUT(CacheExceptionMessage.FAILED_SAFE_PUT, Category.CATEGORY_ERROR, 7),
     /**
      * Remove on cache failed
      */
-    FAILED_REMOVE("Remove on cache failed", Category.CATEGORY_ERROR, 8),
+    FAILED_REMOVE(CacheExceptionMessage.FAILED_REMOVE, Category.CATEGORY_ERROR, 8),
     /**
      * The default element attributes could not be assigned.
      */
-    FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned.", Category.CATEGORY_ERROR, 9),
+    FAILED_ATTRIBUTE_ASSIGNMENT(CacheExceptionMessage.FAILED_ATTRIBUTE_ASSIGNMENT, Category.CATEGORY_ERROR, 9),
     /**
      * No cache found for region name: %1$s
      */
-    MISSING_CACHE_REGION("No cache found for region name: %1$s", Category.CATEGORY_CONFIGURATION, 10),
+    MISSING_CACHE_REGION(CacheExceptionMessage.MISSING_CACHE_REGION, Category.CATEGORY_CONFIGURATION, 10),
     /**
      * Missing default auxiliary defined by property: jcs.default=<aux-name>
      */
-    MISSING_DEFAULT_AUX("Missing default auxiliary defined by property: jcs.default=<aux-name>", Category.CATEGORY_CONFIGURATION, 11),
+    MISSING_DEFAULT_AUX(CacheExceptionMessage.MISSING_DEFAULT_AUX, Category.CATEGORY_CONFIGURATION, 11),
     /**
      * Invalid cache region name \"%1$s\".
      */
-    INVALID_CACHE_REGION_NAME("Invalid cache region name \"%1$s\".", Category.CATEGORY_ERROR, 12);
+    INVALID_CACHE_REGION_NAME(CacheExceptionMessage.INVALID_CACHE_REGION_NAME, Category.CATEGORY_ERROR, 12);
 
     private final String message;
 

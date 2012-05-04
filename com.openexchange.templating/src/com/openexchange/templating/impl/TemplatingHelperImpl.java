@@ -65,9 +65,9 @@ import com.openexchange.templating.TemplatingHelper;
  */
 public class TemplatingHelperImpl implements TemplatingHelper {
 
-    private Object rootObject;
-    private Session session;
-    private TemplateServiceImpl templateService;
+    private final Object rootObject;
+    private final Session session;
+    private final TemplateServiceImpl templateService;
 
     public TemplatingHelperImpl(Object rootObject, Session session, TemplateServiceImpl templateServiceImpl) {
         super();
@@ -76,6 +76,7 @@ public class TemplatingHelperImpl implements TemplatingHelper {
         this.templateService = templateServiceImpl;
     }
 
+    @Override
     public String include(String templateName) throws OXException {
         OXTemplate template = null;
         if (session != null) {

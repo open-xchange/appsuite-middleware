@@ -252,6 +252,7 @@ public class ICal4JEmitter implements ICalEmitter {
         }
     }
     
+    @Override
     public void flush(final ICalSession session, final OutputStream stream) throws ConversionError {
         final Calendar calendar = getCalendar(session);
         final CalendarOutputter outputter = new CalendarOutputter(false);
@@ -287,7 +288,8 @@ public class ICal4JEmitter implements ICalEmitter {
 			.matcher(string).replaceAll("");
 	}
 
-	public ICalItem writeTask(final ICalSession session, final Task task,
+	@Override
+    public ICalItem writeTask(final ICalSession session, final Task task,
         final Context context, final List<ConversionError> errors,
         final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = getCalendar(session);

@@ -59,15 +59,16 @@ import com.mortennobel.imagescaling.DimensionConstrain;
  */
 public class CoverDimensionConstrain extends DimensionConstrain {
 
-    private int minWidth;
+    private final int minWidth;
 
-    private int minHeight;
+    private final int minHeight;
 
     public CoverDimensionConstrain(int minWidth, int minHeight) {
         this.minWidth = minWidth;
         this.minHeight = minHeight;
     }
 
+    @Override
     public Dimension getDimension(Dimension dimension) {
         if (minWidth <= 0 && minHeight <= 0) {
             return dimension;

@@ -255,6 +255,7 @@ public class CarddavPerformer implements SessionHolder {
         return lifeCycle;
     }
 
+    @Override
     public ServerSession getSessionObject() {
         sessionNotNull();
         return session.get();
@@ -267,10 +268,12 @@ public class CarddavPerformer implements SessionHolder {
         }
     }
 
+    @Override
     public Context getContext() {
         return session.get().getContext();
     }
 
+    @Override
     public User getUser() {
         return session.get().getUser();
     }

@@ -68,7 +68,7 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.User;
@@ -140,7 +140,7 @@ public final class TwitterStatusConverter {
                  */
                 {
                     String htmlContent =
-                        HTMLProcessing.getConformHTML(HTMLProcessing.formatHrefLinks(HTMLProcessing.htmlFormat(text)), "UTF-8");
+                        HtmlProcessing.getConformHTML(HtmlProcessing.formatHrefLinks(HtmlProcessing.htmlFormat(text)), "UTF-8");
 
                     {
                         final Matcher userMat = PATTERN_USERREF.matcher(htmlContent);

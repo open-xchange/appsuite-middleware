@@ -68,8 +68,8 @@ public final class Bug21619Test extends AbstractAJAXSession {
     @SuppressWarnings("hiding")
     private AJAXClient client;
     private String origValue;
-    private ValueWriter[] writers = new ValueWriter[2];
-    private Thread[] threads = new Thread[writers.length];
+    private final ValueWriter[] writers = new ValueWriter[2];
+    private final Thread[] threads = new Thread[writers.length];
 
     public Bug21619Test(final String name) {
         super(name);

@@ -1,3 +1,4 @@
+
 package com.openexchange.spamhandler.spamassassin.exceptions;
 
 import com.openexchange.exception.Category;
@@ -7,44 +8,44 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Error codes for permission exceptions.
+ * 
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
 public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExceptionCode {
     /**
      * The given value for mode "%s" is not a possible one
      */
-    MODE_TYPE_WRONG("The given value for mode \"%s\" is not a possible one", CATEGORY_CONFIGURATION, 1),
+    MODE_TYPE_WRONG(SpamhandlerSpamassassinExceptionMessage.MODE_TYPE_WRONG_MSG, CATEGORY_CONFIGURATION, 1),
 
     /**
      * The parameter "%s" is not set in the property file
      */
-    PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file", CATEGORY_CONFIGURATION, 2),
+    PARAMETER_NOT_SET(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NOT_SET_MSG, CATEGORY_CONFIGURATION, 2),
 
     /**
      * The parameter "%s" must be set in the property file if spamd is true
      */
-    PARAMETER_NOT_SET_SPAMD("The parameter \"%s\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 3),
+    PARAMETER_NOT_SET_SPAMD(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NOT_SET_SPAMD_MSG, CATEGORY_CONFIGURATION, 3),
 
     /**
      * The parameter "%s" must be an integer value but is "%s"
      */
-    PARAMETER_NO_INTEGER("The parameter \"%s\" must be an integer value but is \"%s\"", CATEGORY_CONFIGURATION, 4),
+    PARAMETER_NO_INTEGER(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NO_INTEGER_MSG, CATEGORY_CONFIGURATION, 4),
 
     /**
      * The parameter "userSource" must be set in the property file if spamd is true
      */
-    USERSOURCE_NOT_SET("The parameter \"userSource\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 5),
+    USERSOURCE_NOT_SET(SpamhandlerSpamassassinExceptionMessage.USERSOURCE_NOT_SET_MSG, CATEGORY_CONFIGURATION, 5),
 
     /**
      * The given value for userSource "%s" is not a possible one
      */
-    USERSOURCE_WRONG("The given value for userSource \"%s\" is not a possible one", CATEGORY_CONFIGURATION, 6),
+    USERSOURCE_WRONG(SpamhandlerSpamassassinExceptionMessage.USERSOURCE_WRONG_MSG, CATEGORY_CONFIGURATION, 6),
 
     /**
      * The parameter "%s" must be an long value but is "%s"
      */
-    PARAMETER_NO_LONG("The parameter \"%s\" must be an long value but is \"%s\"", CATEGORY_CONFIGURATION, 7);
-
+    PARAMETER_NO_LONG(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NO_LONG_MSG, CATEGORY_CONFIGURATION, 7);
 
     /**
      * Message of the exception.
@@ -63,12 +64,12 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
 
     /**
      * Default constructor.
+     * 
      * @param message message.
      * @param category category.
      * @param detailNumber detail number.
      */
-    private SpamhandlerSpamassassinConfigurationExceptionCode(final String message, final Category category,
-        final int detailNumber) {
+    private SpamhandlerSpamassassinConfigurationExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         this.number = detailNumber;
@@ -101,7 +102,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -110,7 +111,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -120,7 +121,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

@@ -81,6 +81,7 @@ public final class DefaultHashKeyGenerator implements HashKeyGenerator {
         this.hashStart = hashStart;
     }
 
+    @Override
     public HashKey newHashKey(final String key) {
         return HashKey.valueOf(key, hashStart, salt);
     }

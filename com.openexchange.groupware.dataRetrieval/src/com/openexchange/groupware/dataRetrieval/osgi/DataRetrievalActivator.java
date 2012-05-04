@@ -72,6 +72,7 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     private OSGIDataProviderRegistry dataProviderRegistry;
 
+    @Override
     protected void startBundle() throws Exception {
         Services.SERVICE_LOOKUP = this;
         dataProviderRegistry = new OSGIDataProviderRegistry(context);

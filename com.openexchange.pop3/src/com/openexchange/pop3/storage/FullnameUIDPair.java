@@ -59,38 +59,38 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
     private static final String INBOX = "INBOX";
 
     /**
-     * Creates a new {@link FullnameUIDPair} with fullname set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID.
+     * Creates a new {@link FullnameUIDPair} with full name set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID.
      *
      * @param mailId The mail ID
-     * @return A new {@link FullnameUIDPair} with fullname set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID
+     * @return A new {@link FullnameUIDPair} with full name set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID
      */
     public static FullnameUIDPair newINBOXInstance(final String mailId) {
         return new FullnameUIDPair(INBOX, mailId);
     }
 
-    private final String fullname;
+    private final String fullName;
 
     private final String mailId;
 
     /**
      * Initializes a new {@link FullnameUIDPair}.
      *
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param mailId The mail ID
      */
-    public FullnameUIDPair(final String fullname, final String mailId) {
+    public FullnameUIDPair(final String fullName, final String mailId) {
         super();
-        this.fullname = fullname;
+        this.fullName = fullName;
         this.mailId = mailId;
     }
 
     /**
-     * Gets the fullname.
+     * Gets the full name.
      *
-     * @return The fullname
+     * @return The full name
      */
     public String getFullname() {
-        return fullname;
+        return fullName;
     }
 
     /**
@@ -106,7 +106,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
         result = prime * result + ((mailId == null) ? 0 : mailId.hashCode());
         return result;
     }
@@ -123,11 +123,11 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
             return false;
         }
         final FullnameUIDPair other = (FullnameUIDPair) obj;
-        if (fullname == null) {
-            if (other.fullname != null) {
+        if (fullName == null) {
+            if (other.fullName != null) {
                 return false;
             }
-        } else if (!fullname.equals(other.fullname)) {
+        } else if (!fullName.equals(other.fullName)) {
             return false;
         }
         if (mailId == null) {
@@ -142,15 +142,15 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     @Override
     public int compareTo(final FullnameUIDPair other) {
-        if (fullname == null) {
-            if (other.fullname != null) {
+        if (fullName == null) {
+            if (other.fullName != null) {
                 return -1;
             }
             return 0;
-        } else if (other.fullname == null) {
+        } else if (other.fullName == null) {
             return 1;
         }
-        final int folderComp = fullname.compareTo(other.fullname);
+        final int folderComp = fullName.compareTo(other.fullName);
         if (folderComp != 0) {
             return folderComp;
         }
@@ -167,6 +167,6 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("Fullname=").append(fullname).append(" Mail-ID=").append(mailId).toString();
+        return new StringBuilder().append("Fullname=").append(fullName).append(" Mail-ID=").append(mailId).toString();
     }
 }

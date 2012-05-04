@@ -758,18 +758,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         oxu.delete(ctx, users);
 
-
         // JCS
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                CacheService.class);
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache usercCache = cacheService.getCache("User");
                 final Cache ucCache = cacheService.getCache("UserConfiguration");
                 final Cache usmCache = cacheService.getCache("UserSettingMail");
                 for (final User user : users) {
-                    final CacheKey key = cacheService.newCacheKey(ctx.getId().intValue(), user.getId());
+                    final CacheKey key = cacheService.newCacheKey(i(ctx.getId()), user.getId());
                     usercCache.remove(key);
+                    usercCache.remove(cacheService.newCacheKey(i(ctx.getId()), user.getName()));
                     ucCache.remove(key);
                     usmCache.remove(key);
                     try {

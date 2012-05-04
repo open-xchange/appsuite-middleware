@@ -97,12 +97,12 @@ public class AppointmentNotificationPool implements
 	private int stateChangeInterval = 10 *MINUTES;
 	private int priorityInterval = 15 *MINUTES;
 	
-	private NotificationMailGeneratorFactory generatorFactory;
-	private MailSenderService notificationMailer;
+	private final NotificationMailGeneratorFactory generatorFactory;
+	private final MailSenderService notificationMailer;
 	
-	private ReentrantLock lock = new ReentrantLock();
+	private final ReentrantLock lock = new ReentrantLock();
 	
-	private Map<Integer, Map<Integer, QueueItem>> items = new HashMap<Integer, Map<Integer, QueueItem>>();
+	private final Map<Integer, Map<Integer, QueueItem>> items = new HashMap<Integer, Map<Integer, QueueItem>>();
 	
 	public AppointmentNotificationPool(TimerService timer,
 			NotificationMailGeneratorFactory generatorFactory,
@@ -117,7 +117,8 @@ public class AppointmentNotificationPool implements
 		timer.scheduleAtFixedRate(this, 1000, Math.min(stateChangeInterval, Math.min(detailChangeInterval, priorityInterval))/2);
 	}
 	
-	public void run() {
+	@Override
+    public void run() {
 		try {
 			lock.lock();
 			
@@ -131,7 +132,8 @@ public class AppointmentNotificationPool implements
 		}
 	}
 
-	public void enqueue(Appointment original, Appointment newAppointment,
+	@Override
+    public void enqueue(Appointment original, Appointment newAppointment,
 			Session session, int sharedFolderOwner) throws OXException {
 		if (original == null) {
 			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
@@ -154,7 +156,8 @@ public class AppointmentNotificationPool implements
 	}
 
 
-	public void fasttrack(Appointment appointment, Session session)
+	@Override
+    public void fasttrack(Appointment appointment, Session session)
 			throws OXException {
 		try {
 			lock.lock();
@@ -176,7 +179,8 @@ public class AppointmentNotificationPool implements
 		}
 	}
 
-	public void drop(Appointment appointment, Session session)
+	@Override
+    public void drop(Appointment appointment, Session session)
 			throws OXException {
 		drop(session.getContextId(), appointment.getObjectID());
 	}
@@ -218,10 +222,10 @@ public class AppointmentNotificationPool implements
 	}
 
 	private static final class Update {
-		private Appointment oldAppointment;
-		private Appointment newAppointment;
-		private Session session;
-		private long timestamp;
+		private final Appointment oldAppointment;
+		private final Appointment newAppointment;
+		private final Session session;
+		private final long timestamp;
 		private AppointmentDiff diff;
 		private int sharedFolderOwner = -1;
 		
@@ -276,7 +280,7 @@ public class AppointmentNotificationPool implements
 		private long lastKnownStartDateForNextOccurrence;
 		private Session session;
 		
-		private LinkedList<Update> updates = new LinkedList<Update>();
+		private final LinkedList<Update> updates = new LinkedList<Update>();
 	
 		public void remember(Appointment original, Appointment newAppointment, Session session, int sharedFolderOwner) {
 			if (this.original == null) {
@@ -390,7 +394,8 @@ public class AppointmentNotificationPool implements
 			List<Update[]> userScopedUpdates = new ArrayList<Update[]>(partitions.values());
 			Collections.sort(userScopedUpdates, new Comparator<Update[]>() {
 
-				public int compare(Update[] o1, Update[] o2) {
+				@Override
+                public int compare(Update[] o1, Update[] o2) {
 					return (int) (o1[1].getTimestamp() - o2[1].getTimestamp());
 				}
 			});

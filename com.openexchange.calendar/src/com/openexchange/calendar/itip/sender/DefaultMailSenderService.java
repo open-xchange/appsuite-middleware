@@ -107,13 +107,13 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private final HtmlService htmlService;
 
-	private AttachmentBase attachments;
+	private final AttachmentBase attachments;
 
-	private ContextService contexts;
+	private final ContextService contexts;
 
-	private UserService users;
+	private final UserService users;
 
-	private UserConfigurationStorage userConfigurations;
+	private final UserConfigurationStorage userConfigurations;
 
     public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
         this.iTipEmitter = iTipEmitter;
@@ -124,6 +124,7 @@ public class DefaultMailSenderService implements MailSenderService {
         this.userConfigurations = userConfigs;
     }
 
+    @Override
     public void sendMail(NotificationMail mail, Session session) {
         if (!mail.shouldBeSent()) {
             return;

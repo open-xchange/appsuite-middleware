@@ -82,10 +82,12 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
         return Arrays.asList(ITipMethod.DECLINECOUNTER);
     }
 
+    @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
@@ -115,7 +117,7 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
         }
         
         if (isException) {
-            List<Appointment> exceptions = util.getExceptions((CalendarDataObject)declinedFor, session);
+            List<Appointment> exceptions = util.getExceptions(declinedFor, session);
             declinedFor = findAndRemoveMatchingException(appointment, exceptions);
             if (declinedFor == null) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.DECLINED_FOR_UNKNOWN, locale));

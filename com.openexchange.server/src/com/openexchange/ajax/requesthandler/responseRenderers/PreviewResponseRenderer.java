@@ -53,16 +53,15 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.preview.PreviewDocument;
 
 /**
@@ -89,32 +88,33 @@ public class PreviewResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
         //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
-            PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
+            final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
 
-            JSONArray jsonArray = new JSONArray();
-            for (String previewPage : previewDocument.getContent()) {
+            final JSONArray jsonArray = new JSONArray();
+            for (final String previewPage : previewDocument.getContent()) {
                 jsonArray.put(previewPage);
             }
 
-            JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject();
             if (previewDocument.isMoreAvailable() != null) {
                 jsonObject.put("moreAvailable", previewDocument.isMoreAvailable());
             }
             jsonObject.put("document", jsonArray);
 
-            Response response = new Response(request.getSession());
+            final Response response = new Response(request.getSession());
             response.setTimestamp(result.getTimestamp());
             response.setData(jsonObject);
+            response.setProperties(result.getResponseProperties());
 
-            Collection<OXException> warnings = result.getWarnings();
+            final Collection<OXException> warnings = result.getWarnings();
             if (warnings != null && !warnings.isEmpty()) {
-                for (OXException warning : warnings) {
+                for (final OXException warning : warnings) {
                     response.addWarning(warning);
                 }
             }
 
             APIResponseRenderer.writeResponse(response, request.getAction(), httpReq, httpResp);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error("JSON Error", e);
         }
     }

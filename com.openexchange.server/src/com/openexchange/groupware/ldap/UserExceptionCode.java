@@ -1,3 +1,4 @@
+
 package com.openexchange.groupware.ldap;
 
 import com.openexchange.exception.Category;
@@ -7,115 +8,102 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link UserExceptionCode} - The user error codes.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum UserExceptionCode implements OXExceptionCode {
     /**
      * A property from the ldap.properties file is missing.
      */
-    PROPERTY_MISSING("Cannot find property %s.", Category.CATEGORY_CONFIGURATION,
-        1),
+    PROPERTY_MISSING(UserExceptionMessage.PROPERTY_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 1),
     /**
      * A problem with distinguished names occurred.
      */
-    DN_PROBLEM("Cannot build distinguished name from %s.",
-        Category.CATEGORY_ERROR, 2),
+    DN_PROBLEM(UserExceptionMessage.DN_PROBLEM_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Class can not be found.
      */
-    CLASS_NOT_FOUND("Class %s can not be loaded.", Category.CATEGORY_CONFIGURATION,
-        3),
+    CLASS_NOT_FOUND(UserExceptionMessage.CLASS_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
     /**
      * An implementation can not be instantiated.
      */
-    INSTANTIATION_PROBLEM("Cannot instantiate class %s.",
-        Category.CATEGORY_CONFIGURATION, 4),
+    INSTANTIATION_PROBLEM(UserExceptionMessage.INSTANTIATION_PROBLEM_MSG, Category.CATEGORY_CONFIGURATION, 4),
     /**
      * A database connection cannot be obtained.
      */
-    NO_CONNECTION("Cannot get database connection.",
-        Category.CATEGORY_SERVICE_DOWN, 5),
+    NO_CONNECTION(UserExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
     /**
      * Cannot clone object %1$s.
      */
-    NOT_CLONEABLE("Cannot clone object %1$s.", Category.CATEGORY_ERROR,
-        6),
+    NOT_CLONEABLE(UserExceptionMessage.NOT_CLONEABLE_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * SQL Problem: \"%s\".
      */
-    SQL_ERROR("SQL Problem: \"%s\".", Category.CATEGORY_ERROR,
-        7),
+    SQL_ERROR(UserExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * Hash algorithm %s isn't found.
      */
-    HASHING("Hash algorithm %s isn't found.", Category.CATEGORY_ERROR, 8),
+    HASHING(UserExceptionMessage.HASHING_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Encoding %s cannot be used.
      */
-    UNSUPPORTED_ENCODING("Encoding %s cannot be used.", Category.CATEGORY_ERROR,
-        9),
+    UNSUPPORTED_ENCODING(UserExceptionMessage.UNSUPPORTED_ENCODING_MSG, Category.CATEGORY_ERROR, 9),
     /**
      * Cannot find user with identifier %1$s in context %2$d.
      */
-    USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.",
-        Category.CATEGORY_ERROR, 10),
+    USER_NOT_FOUND(UserExceptionMessage.USER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
     /**
      * Found two user with same identifier %1$s in context %2$d.
      */
-    USER_CONFLICT("Found two user with same identifier %1$s in context "
-        + "%2$d.", Category.CATEGORY_ERROR, 11),
+    USER_CONFLICT(UserExceptionMessage.USER_CONFLICT_MSG, Category.CATEGORY_ERROR, 11),
     /**
      * Problem putting an object into the cache.
      */
-    CACHE_PROBLEM("Problem putting/removing an object into/from the cache.",
-        Category.CATEGORY_ERROR, 12),
+    CACHE_PROBLEM(UserExceptionMessage.CACHE_PROBLEM_MSG, Category.CATEGORY_ERROR, 12),
     /**
      * No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s
      */
-     PERMISSION("No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s",
-        Category.CATEGORY_PERMISSION_DENIED, 13),
-     /**
-      * Missing or unknown password mechanism %1$s
-      */
-     MISSING_PASSWORD_MECH("Missing or unknown password mechanism %1$s", Category.CATEGORY_ERROR, 14),
-     /**
-      * New password contains invalid characters
-      */
-     INVALID_PASSWORD("New password contains invalid characters", Category.CATEGORY_USER_INPUT, 15),
-     /**
-      * Attributes of user %1$d in context %2$d have been erased.
-      */
-     ERASED_ATTRIBUTES("Attributes of user %1$d in context %2$d have been erased.", Category.CATEGORY_WARNING, 16),
-     /**
-      * Loading one or more users failed.
-      */
-     LOAD_FAILED("Loading one or more users failed.", Category.CATEGORY_ERROR, 17),
-     /** Alias entries are missing for user %1$d in context %2$d. */
-     ALIASES_MISSING("Alias entries are missing for user %1$d in context %2$d.", Category.CATEGORY_CONFIGURATION, 18),
-     /** Updating attributes failed in context %1$d for user %2$d. */
-     UPDATE_ATTRIBUTES_FAILED("Updating attributes failed in context %1$d for user %2$d.", Category.CATEGORY_ERROR, 19),
-     /**
-      * Invalid password length. The password must be of minimum length %1$d.
-      */
-     INVALID_MIN_LENGTH("Invalid password length. The password must be of minimum length %1$d.", Category.CATEGORY_USER_INPUT, 20),
-     /**
-      * Invalid password length. The password must be of maximum length %1$d.
-      */
-     INVALID_MAX_LENGTH("Invalid password length. The password must be of maximum length %1$d.", Category.CATEGORY_USER_INPUT, 21),
-     /**
-      * The parameter %s for this user is missing.
-      */
-     MISSING_PARAMETER("The parameter %s for this user is missing.", Category.CATEGORY_USER_INPUT, 22),
-     /**
-      * %s is not a valid locale.
-      */
-     INVALID_LOCALE("%s is not a valid locale.", Category.CATEGORY_USER_INPUT, 23),
-     /**
-      * %s is not a valid time zone.
-      */
-     INVALID_TIMEZONE("%s is not a valid time zone.", Category.CATEGORY_USER_INPUT, 24)
-     ;
+    PERMISSION(UserExceptionMessage.PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 13),
+    /**
+     * Missing or unknown password mechanism %1$s
+     */
+    MISSING_PASSWORD_MECH(UserExceptionMessage.MISSING_PASSWORD_MECH_MSG, Category.CATEGORY_ERROR, 14),
+    /**
+     * New password contains invalid characters
+     */
+    INVALID_PASSWORD(UserExceptionMessage.INVALID_PASSWORD_MSG, Category.CATEGORY_USER_INPUT, 15),
+    /**
+     * Attributes of user %1$d in context %2$d have been erased.
+     */
+    ERASED_ATTRIBUTES(UserExceptionMessage.ERASED_ATTRIBUTES_MSG, Category.CATEGORY_WARNING, 16),
+    /**
+     * Loading one or more users failed.
+     */
+    LOAD_FAILED(UserExceptionMessage.LOAD_FAILED_MSG, Category.CATEGORY_ERROR, 17),
+    /** Alias entries are missing for user %1$d in context %2$d. */
+    ALIASES_MISSING(UserExceptionMessage.ALIASES_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 18),
+    /** Updating attributes failed in context %1$d for user %2$d. */
+    UPDATE_ATTRIBUTES_FAILED(UserExceptionMessage.UPDATE_ATTRIBUTES_FAILED_MSG, Category.CATEGORY_ERROR, 19),
+    /**
+     * Invalid password length. The password must be of minimum length %1$d.
+     */
+    INVALID_MIN_LENGTH(UserExceptionMessage.INVALID_MIN_LENGTH_MSG, Category.CATEGORY_USER_INPUT, 20),
+    /**
+     * Invalid password length. The password must be of maximum length %1$d.
+     */
+    INVALID_MAX_LENGTH(UserExceptionMessage.INVALID_MAX_LENGTH_MSG, Category.CATEGORY_USER_INPUT, 21),
+    /**
+     * The parameter %s for this user is missing.
+     */
+    MISSING_PARAMETER(UserExceptionMessage.MISSING_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 22),
+    /**
+     * %s is not a valid locale.
+     */
+    INVALID_LOCALE(UserExceptionMessage.INVALID_LOCALE_MSG, Category.CATEGORY_USER_INPUT, 23),
+    /**
+     * %s is not a valid time zone.
+     */
+    INVALID_TIMEZONE(UserExceptionMessage.INVALID_TIMEZONE_MSG, Category.CATEGORY_USER_INPUT, 24);
 
     private static final String PREFIX = "USR";
 
@@ -136,12 +124,12 @@ public enum UserExceptionCode implements OXExceptionCode {
 
     /**
      * Default constructor.
+     * 
      * @param message message.
      * @param category category.
      * @param detailNumber detail number.
      */
-    private UserExceptionCode(final String message, final Category category,
-        final int detailNumber) {
+    private UserExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
@@ -174,7 +162,7 @@ public enum UserExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -183,7 +171,7 @@ public enum UserExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -193,7 +181,7 @@ public enum UserExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

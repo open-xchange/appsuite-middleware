@@ -75,6 +75,7 @@ public interface ISimplifiedThreadStructure {
      *
      * @param folder The folder full name
      * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
+     * @param cache TODO
      * @param indexRange The optional index range
      * @param sortField The sort field applied to thread root elements
      * @param order Whether ascending or descending sort order
@@ -82,6 +83,6 @@ public interface ISimplifiedThreadStructure {
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws OXException If messages cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, boolean includeSent, IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, boolean includeSent, boolean cache, IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
     
 }

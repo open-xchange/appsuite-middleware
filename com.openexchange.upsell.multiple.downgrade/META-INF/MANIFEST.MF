@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Downgrade UI layer bundle
-Bundle-SymbolicName: com.openexchange.upsell.multiple.downgrade
-Bundle-Version: 6.20.0.0
-Bundle-Vendor: Open-Xchange Inc.

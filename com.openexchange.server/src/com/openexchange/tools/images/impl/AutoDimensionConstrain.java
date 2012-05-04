@@ -60,15 +60,16 @@ import com.mortennobel.imagescaling.DimensionConstrain;
  */
 public class AutoDimensionConstrain extends DimensionConstrain {
 
-    private int width;
+    private final int width;
 
-    private int height;
+    private final int height;
 
     public AutoDimensionConstrain(int width, int height) {
         this.width = width;
         this.height = height;
     }
 
+    @Override
     public Dimension getDimension(Dimension dimension) {
         if (width <= 0 && height <= 0) {
             return dimension;

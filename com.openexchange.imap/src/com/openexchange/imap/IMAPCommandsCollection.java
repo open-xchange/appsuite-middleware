@@ -50,7 +50,8 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
+import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
@@ -70,6 +71,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -1095,20 +1097,20 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_LSUB = "LSUB";
 
     /**
-     * Checks folder subscription for the folder denoted by specified fullname.
+     * Checks folder subscription for the folder denoted by specified full name.
      * <p>
      * This method imitates the behavior from {@link IMAPFolder#isSubscribed() isSubscribde()} that is a namespace folder's subscription
-     * status is checked with specified separator character appended to fullname.
+     * status is checked with specified separator character appended to full name.
      *
-     * @param fullname The folder's fullname
+     * @param fullName The folder's full name
      * @param separator The separator character
      * @param isNamespace <code>true</code> if denoted folder is a namespace folder; otherwise <code>false</code>
      * @param defaultFolder The IMAP store's default folder
      * @return <code>true</code> if folder is subscribed; otherwise <code>false</code>
      * @throws MessagingException If checking folder subscription fails
      */
-    public static boolean isSubscribed(final String fullname, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
-        final String lfolder = ((isNamespace || (fullname.length() == 0)) && (separator != '\0')) ? fullname + separator : fullname;
+    public static boolean isSubscribed(final String fullName, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
+        final String lfolder = ((isNamespace || (fullName.length() == 0)) && (separator != '\0')) ? fullName + separator : fullName;
         return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1139,7 +1141,7 @@ public final class IMAPCommandsCollection {
             private int parseIMAPResponse(final IMAPResponse ir) throws ParsingException {
                 if (ir.keyEquals(COMMAND_LSUB)) {
                     final ListInfo li = new ListInfo(ir);
-                    if (li.name.equals(fullname)) {
+                    if (li.name.equals(fullName)) {
                         return li.canOpen ? 1 : 0;
                     }
                 }
@@ -1244,6 +1246,9 @@ public final class IMAPCommandsCollection {
                         command,
                         response.toString() + " ("+newFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
+                    if (response.toString().toLowerCase(Locale.US).indexOf("already exists") > 0) {
+                        return Boolean.TRUE;
+                    }
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
@@ -1924,16 +1929,16 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode.
+     * Checks if IMAP folder denoted by specified full name is allowed to be opened in desired mode.
      *
      * @param f The IMAP folder providing protocol access
-     * @param fullname The fullname to check
+     * @param fullName The full name to check
      * @param mode The desired open mode
-     * @return <code>true</code> if IMAP folder denoted by specified fullname is allowed to be opened in desired mode; otherwise
+     * @return <code>true</code> if IMAP folder denoted by specified full name is allowed to be opened in desired mode; otherwise
      *         <code>false</code>
      * @throws OXException If an IMAP error occurs
      */
-    public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws OXException {
+    public static boolean canBeOpened(final IMAPFolder f, final String fullName, final int mode) throws OXException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
             IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
         }
@@ -1948,7 +1953,7 @@ public final class IMAPCommandsCollection {
                          * Encode the mbox as per RFC2060
                          */
                         final Argument args = new Argument();
-                        args.writeString(BASE64MailboxEncoder.encode(fullname));
+                        args.writeString(BASE64MailboxEncoder.encode(fullName));
                         /*
                          * Perform command
                          */
@@ -2192,14 +2197,25 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static long[] getUIDs(final IMAPFolder imapFolder) throws MessagingException {
+        return getUIDCollection(imapFolder).toArray();
+    }
+
+    /**
+     * Detects the corresponding UIDs from given folder
+     *
+     * @param imapFolder The IMAP folder
+     * @return The corresponding UIDs
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static TLongCollection getUIDCollection(final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
              * Empty folder...
              */
-            return new long[0];
+            return new TLongArrayList(0);
         }
-        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongList) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -2223,8 +2239,7 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                            uids.add(uidItem.uid);
+                            uids.add(getItemOf(UID.class, (FetchResponse) r[j], STR_UID).uid);
                             r[j] = null;
                         }
                     }
@@ -2245,7 +2260,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return uids.toArray();
+                return uids;
             }
 
         }));
@@ -2968,17 +2983,17 @@ public final class IMAPCommandsCollection {
     private final static String REPLACEMENT_BACKSLASH = "\\\\\\\\";
 
     /**
-     * First encodes given fullname by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
+     * First encodes given full name by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
      * encoded string is checked if it needs quoting and escaping of the special characters '"' and '\'.
      *
-     * @param fullname The folder fullname
-     * @return Prepared fullname ready for being used in raw IMAP commands
+     * @param fullName The folder full name
+     * @return Prepared full name ready for being used in raw IMAP commands
      */
-    public static String prepareStringArgument(final String fullname) {
+    public static String prepareStringArgument(final String fullName) {
         /*
          * Ensure to have only ASCII characters
          */
-        final String lfolder = BASE64MailboxEncoder.encode(fullname);
+        final String lfolder = BASE64MailboxEncoder.encode(fullName);
         /*
          * Determine if quoting (and escaping) has to be done
          */

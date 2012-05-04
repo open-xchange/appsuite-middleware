@@ -95,7 +95,7 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
      */
     MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CATEGORY_ERROR, 8),
     /**
-     * Token has expired
+     * Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
      */
     TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 9),
     /**

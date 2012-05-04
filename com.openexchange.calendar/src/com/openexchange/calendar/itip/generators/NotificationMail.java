@@ -101,7 +101,7 @@ public class NotificationMail {
 
     private NotificationParticipant actor;
     
-    private List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+    private final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 
 	private Type stateType;
 	
@@ -248,7 +248,8 @@ public class NotificationMail {
     	if (!sortedParticipants) {
     		Collections.sort(participants, new Comparator<NotificationParticipant>() {
 
-				public int compare(NotificationParticipant p1,
+				@Override
+                public int compare(NotificationParticipant p1,
 						NotificationParticipant p2) {
 					return p1.getDisplayName().compareTo(p2.getDisplayName());
 				}

@@ -128,7 +128,7 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Missing argument: %1$s
     public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";
 
-    // OAuth Token has expired. Please authorize this account and try again.
+    // Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
     public static final String TOKEN_EXPIRED_MSG = "Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
 
     // An OAuth error occurred: %1$s

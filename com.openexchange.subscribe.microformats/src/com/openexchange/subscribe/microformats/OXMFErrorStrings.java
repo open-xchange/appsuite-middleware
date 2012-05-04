@@ -60,17 +60,22 @@ public class OXMFErrorStrings implements LocalizableStrings{
 
     // A parsing error occurred: %1$s.
     public static final String PARSE_EXCEPTION = "A parsing error occurred: %1$s.";
+    public static final String PARSE_EXCEPTION_HELP = "Provide well-formed HTML.";
 
     // An IOException occurred: %1$s. Was trying to get the service at %2$s.
     public static final String IOException = "An IOException occurred: %1$s. Was trying to get the service at %2$s.";
+    public static final String IOException_HELP = "Try again later.";
 
     // A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
     public static final String HttpException = "A HTTPException occurred: %1$s. Was trying to get the service at %2$s.";
+    public static final String HttpException_HELP = "Try again later.";
 
     // Can only post to external subscription sources.
     public static final String CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES = "Can only post to external subscription sources.";
+    public static final String CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES_HELP = "Try again later.";
 
     // Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
     public static final String ERROR_LOADING_SUBSCRIPTION = "Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.";
+    public static final String ERROR_LOADING_SUBSCRIPTION_HELP = "Try again later.";
 
 }

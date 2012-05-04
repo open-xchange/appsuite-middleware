@@ -65,9 +65,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactFolderContactSource implements ContactSource {
 
-    private int id;
-    private ContactSQLInterface contacts;
-    private Type type;
+    private final int id;
+    private final ContactSQLInterface contacts;
+    private final Type type;
 
     public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts, Type type) {
         this.id = folder.getObjectID();

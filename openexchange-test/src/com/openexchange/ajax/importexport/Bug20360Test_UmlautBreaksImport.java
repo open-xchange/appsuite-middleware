@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.Contact;
 
 public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest {
 
-	private String vcard = 
+	private final String vcard = 
 		"BEGIN:VCARD\n" + 
 		"VERSION:3.0\n" + 
 		"N;CHARSET=UTF-8:Täst;Üser\n" + 

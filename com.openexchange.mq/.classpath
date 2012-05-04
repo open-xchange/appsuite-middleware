@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/netty-3.3.1.Final.jar" sourcepath="sources/netty-3.3.1.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-3.4.2.Final.jar" sourcepath="sources/netty-3.4.2.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jnp-client.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hornetq-bootstrap.jar" sourcepath="sources/hornetq-2.2.5-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/hornetq-bootstrap.jar" sourcepath="sources/hornetq-2.2.14.Final-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="sources/jboss-jms-api-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hornetq-logging.jar" sourcepath="sources/hornetq-2.2.5-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/hornetq-core.jar" sourcepath="sources/hornetq-2.2.5-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/hornetq-jms.jar" sourcepath="sources/hornetq-2.2.5-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/hornetq-logging.jar" sourcepath="sources/hornetq-2.2.14.Final-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/hornetq-core.jar" sourcepath="sources/hornetq-2.2.14.Final-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/hornetq-jms.jar" sourcepath="sources/hornetq-2.2.14.Final-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>

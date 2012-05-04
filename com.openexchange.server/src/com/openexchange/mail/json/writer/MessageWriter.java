@@ -75,7 +75,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.JSONMessageHandler;
+import com.openexchange.mail.parser.handlers.JsonMessageHandler;
 import com.openexchange.mail.parser.handlers.RawJSONMessageHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
@@ -193,7 +193,7 @@ public final class MessageWriter {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
+        final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
         final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
         parser.parseMailMessage(mail, handler);
         if (null != warnings) {

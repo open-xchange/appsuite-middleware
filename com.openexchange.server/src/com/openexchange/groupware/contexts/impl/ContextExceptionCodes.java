@@ -13,35 +13,35 @@ public enum ContextExceptionCodes implements OXExceptionCode {
     /**
      * Mailadmin for a context is missing.
      */
-    NO_MAILADMIN("Cannot resolve mailadmin for context %d.", Category.CATEGORY_CONFIGURATION, 1),
+    NO_MAILADMIN(ContextExceptionMessage.NO_MAILADMIN_MSG, Category.CATEGORY_CONFIGURATION, 1),
     /**
      * Cannot find context %d.
      */
-    NOT_FOUND("Cannot find context %d.", Category.CATEGORY_CONFIGURATION, 2),
+    NOT_FOUND(ContextExceptionMessage.NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 2),
     /**
      * No connection to database.
      */
-    NO_CONNECTION("Cannot get connection to database.", Category.CATEGORY_SERVICE_DOWN, 5),
+    NO_CONNECTION(ContextExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
     /**
      * SQL problem: %1$s.
      */
-    SQL_ERROR("SQL problem: %1$s.", Category.CATEGORY_ERROR, 6),
+    SQL_ERROR(ContextExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Updating database ... Try again later.
      */
-    UPDATE("Updating database ... Try again later.", Category.CATEGORY_TRY_AGAIN, 7),
+    UPDATE(ContextExceptionMessage.UPDATE_MSG, Category.CATEGORY_TRY_AGAIN, 7),
     /**
      * Problem initializing the cache.
      */
-    CACHE_INIT("Problem initializing the cache.", Category.CATEGORY_CONFIGURATION, 8),
+    CACHE_INIT(ContextExceptionMessage.CACHE_INIT_MSG, Category.CATEGORY_CONFIGURATION, 8),
     /**
      * Cannot remove object %s from cache.
      */
-    CACHE_REMOVE("Cannot remove object %s from cache.", Category.CATEGORY_ERROR, 9),
+    CACHE_REMOVE(ContextExceptionMessage.CACHE_REMOVE_MSG, Category.CATEGORY_ERROR, 9),
     /**
      * Cannot find context "%s".
      */
-    NO_MAPPING("Cannot find context \"%s\".", Category.CATEGORY_ERROR, 10);
+    NO_MAPPING(ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_ERROR, 10);
 
     /**
      * Message of the exception.

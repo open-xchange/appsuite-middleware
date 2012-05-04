@@ -69,7 +69,7 @@ import com.openexchange.groupware.importexport.ImportResult;
  */
 public final class Bug20738Test extends AbstractAJAXSession {
 
-	private List<DeleteRequest> toDelete = new ArrayList<DeleteRequest>();
+	private final List<DeleteRequest> toDelete = new ArrayList<DeleteRequest>();
 	
     /**
      * Default constructor.

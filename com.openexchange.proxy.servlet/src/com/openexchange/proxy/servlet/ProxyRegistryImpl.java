@@ -100,7 +100,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
          */
         try {
             final SessiondService sessiondService = ServiceRegistry.getInstance().getService(SessiondService.class, true);
-            if (!sessiondService.refreshSession(sessionId)) {
+            if (null == sessiondService.getSession(sessionId)) {
                 throw ProxyExceptionCodes.INVALID_SESSION_ID.create(sessionId);
             }
         } catch (final OXException e) {

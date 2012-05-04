@@ -58,7 +58,7 @@ import java.util.Properties;
 
 public class ReportConfiguration {
 	
-	private Properties properties;
+	private final Properties properties;
 	
 	public ReportConfiguration() throws IOException {
 		properties = new Properties();

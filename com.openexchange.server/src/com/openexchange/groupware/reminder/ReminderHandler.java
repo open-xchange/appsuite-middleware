@@ -456,6 +456,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
     
+    @Override
     public ReminderObject[] loadReminders(final int[] targetIds, final int userId, final int module, final Connection connection) throws OXException {
         Connection con = null;
         boolean externalConnection = false;

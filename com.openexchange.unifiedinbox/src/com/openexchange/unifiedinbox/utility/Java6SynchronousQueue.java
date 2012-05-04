@@ -843,6 +843,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
+    @Override
     public void put(final E o) throws InterruptedException {
         if (o == null) {
             throw new NullPointerException();
@@ -862,6 +863,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
+    @Override
     public boolean offer(final E o, final long timeout, final TimeUnit unit)
         throws InterruptedException {
         if (o == null) {
@@ -885,6 +887,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      *         <tt>false</tt>
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean offer(final E e) {
         if (e == null) {
             throw new NullPointerException();
@@ -899,6 +902,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * @return the head of this queue
      * @throws InterruptedException {@inheritDoc}
      */
+    @Override
     public E take() throws InterruptedException {
         final Object e = transferer.transfer(null, false, 0);
         if (e != null) {
@@ -917,6 +921,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      *         specified waiting time elapses before an element is present.
      * @throws InterruptedException {@inheritDoc}
      */
+    @Override
     public E poll(final long timeout, final TimeUnit unit) throws InterruptedException {
         final Object e = transferer.transfer(null, true, unit.toNanos(timeout));
         if (e != null || !Thread.interrupted()) {
@@ -932,6 +937,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * @return the head of this queue, or <tt>null</tt> if no
      *         element is available.
      */
+    @Override
     public E poll() {
         return (E)transferer.transfer(null, true, 0);
     }
@@ -964,6 +970,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      *
      * @return zero.
      */
+    @Override
     public int remainingCapacity() {
         return 0;
     }
@@ -1043,17 +1050,21 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      *
      * @return <tt>null</tt>
      */
+    @Override
     public E peek() {
         return null;
     }
 
     static class EmptyIterator<E> implements Iterator<E> {
+        @Override
         public boolean hasNext() {
             return false;
         }
+        @Override
         public E next() {
             throw new NoSuchElementException();
         }
+        @Override
         public void remove() {
             throw new IllegalStateException();
         }
@@ -1101,6 +1112,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
+    @Override
     public int drainTo(final Collection<? super E> c) {
         if (c == null) {
             throw new NullPointerException();
@@ -1123,6 +1135,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
+    @Override
     public int drainTo(final Collection<? super E> c, final int maxElements) {
         if (c == null) {
             throw new NullPointerException();

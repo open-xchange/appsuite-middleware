@@ -89,7 +89,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setColorLabel(2);
         message.setFlags(12);
         message.setReceivedDate(1337);
-        message.setUserFlags(Arrays.asList("eins", "zwo", "drei", "vier", "f�nf"));
+        message.setUserFlags(Arrays.asList("eins", "zwo", "drei", "vier", "f\u00fcnf"));
         message.setSize(13);
         message.setThreadLevel(15);
         message.setDisposition(MessagingMessage.INLINE);
@@ -101,7 +101,7 @@ public class MessagingMessageWriterTest extends TestCase {
         final JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
-            "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f�nf").inAnyOrder().hasKey(
+            "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f\u00fcnf").inAnyOrder().hasKey(
             "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
             "com.openexchange.test2://account/folder/subfolder/niceFolder17").hasKey("picture").withValue("http://www.somesite.invalid/somepic.png").hasKey("url").withValue("http://www.somesite.invalid/messageid");
 

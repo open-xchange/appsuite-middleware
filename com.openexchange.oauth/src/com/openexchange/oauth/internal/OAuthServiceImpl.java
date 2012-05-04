@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
@@ -85,6 +84,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -362,13 +362,19 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             obtainToken(type, arguments, account);
             /*
-             * Crypt tokens
+             * Encrypt token & secret
              */
             final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
             if (null == session) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
             }
+            if (isEmpty(account.getToken())) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
+            }
             account.setToken(encrypt(account.getToken(), session));
+            if (isEmpty(account.getSecret())) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
+            }
             account.setSecret(encrypt(account.getSecret(), session));
             /*
              * Create INSERT command

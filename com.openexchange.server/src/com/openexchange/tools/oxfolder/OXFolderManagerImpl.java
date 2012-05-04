@@ -1276,24 +1276,28 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     @Override
     public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
-        if (fo.getObjectID() <= 0) {
+        final int folderId = fo.getObjectID();
+        if (folderId <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(OXFolderUtility.getFolderName(fo));
         }
-        if (fo.getObjectID() < FolderObject.MIN_FOLDER_ID) {
+        if (folderId < FolderObject.MIN_FOLDER_ID) {
             throw OXFolderExceptionCode.NO_SYSTEM_FOLDER_MOVE.create(OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+        }
+        if (!fo.containsCreatedBy() || fo.getCreatedBy() <= 0) {
+            fo.setCreatedBy(getOXFolderAccess().getFolderOwner(folderId));
         }
         if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
             /*
              * Incomplete, whereby its existence is checked
              */
-            fo.setParentFolderID(getOXFolderAccess().getParentFolderID(fo.getObjectID()));
+            fo.setParentFolderID(getOXFolderAccess().getParentFolderID(folderId));
         } else {
             /*
              * Check existence
              */
             try {
-                if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                if (!OXFolderSQL.exists(folderId, readCon, ctx)) {
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
                 }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1303,15 +1307,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Check permissions
              */
-            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
+            final EffectivePermission p = getOXFolderAccess().getFolderPermission(folderId, user.getId(), userConfig);
             if (!p.isFolderVisible()) {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()),
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId),
                         OXFolderUtility.getUserName(user.getId(), ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED,
-                    Integer.valueOf(fo.getObjectID()),
+                    Integer.valueOf(folderId),
                     OXFolderUtility.getUserName(user.getId(), ctx),
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -1336,7 +1340,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final TIntObjectMap<TIntObjectMap<?>> deleteableFolders;
         try {
             deleteableFolders = gatherDeleteableFolders(
-                fo.getObjectID(),
+                folderId,
                 user.getId(),
                 userConfig,
                 StringCollection.getSqlInString(user.getId(), user.getGroups()));
@@ -1346,7 +1350,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Remember folder type
          */
-        final int type = getOXFolderAccess().getFolderType(fo.getObjectID());
+        final int type = getOXFolderAccess().getFolderType(folderId);
         /*
          * Delete folders
          */
@@ -1386,7 +1390,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                  * Load return value
                  */
                 fo.fill(FolderObject.loadFolderObjectFromDB(
-                    fo.getObjectID(),
+                    folderId,
                     ctx,
                     wc,
                     true,

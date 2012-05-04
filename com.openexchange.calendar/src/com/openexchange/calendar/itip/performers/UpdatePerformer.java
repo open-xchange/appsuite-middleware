@@ -87,10 +87,12 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         super(util, sender, generators);
     }
 
+    @Override
     public Collection<ITipAction> getSupportedActions() {
         return EnumSet.of(ITipAction.ACCEPT, ITipAction.ACCEPT_AND_IGNORE_CONFLICTS, ITipAction.ACCEPT_PARTY_CRASHER, ITipAction.ACCEPT_AND_REPLACE, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.UPDATE, ITipAction.CREATE, ITipAction.COUNTER);
     }
 
+    @Override
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> result = new ArrayList<Appointment>(changes.size());

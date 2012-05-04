@@ -90,6 +90,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JITipParser.class));
 
+    @Override
     public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
@@ -99,6 +100,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
         return Collections.emptyList();
     }
 
+    @Override
     public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();

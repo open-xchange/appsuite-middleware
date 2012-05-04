@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
-
 /**
  * The error code enumeration for service errors.
  */
@@ -63,15 +62,15 @@ public enum ServiceExceptionCode implements OXExceptionCode {
     /**
      * The required service %1$s is temporary not available. Please try again later.
      */
-    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 1),
+    SERVICE_UNAVAILABLE(ServiceExceptionMessage.SERVICE_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 1),
     /**
      * An I/O error occurred
      */
-    IO_ERROR("An I/O error occurred", Category.CATEGORY_ERROR, 2),
+    IO_ERROR(ServiceExceptionMessage.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Service initialization failed
      */
-    SERVICE_INITIALIZATION_FAILED("Service initialization failed", Category.CATEGORY_ERROR, 3);
+    SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3);
 
     private final String message;
 
@@ -112,7 +111,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -121,7 +120,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -131,7 +130,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

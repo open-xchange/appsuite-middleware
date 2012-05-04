@@ -165,6 +165,8 @@ public class AJAXRequestResult {
 
     private final Map<String, Object> parameters;
 
+    private final Map<String, Object> responseProperties;
+
     private String format;
 
     private long expires;
@@ -218,6 +220,7 @@ public class AJAXRequestResult {
         super();
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(4);
+        responseProperties = new HashMap<String, Object>(4);
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         if (format == null) {
@@ -445,7 +448,7 @@ public class AJAXRequestResult {
      * @return The associated value or <code>null</code> if there is no such parameter
      */
     public Object getParameter(final String name) {
-        return headers.get(name);
+        return parameters.get(name);
     }
 
     /**
@@ -455,6 +458,39 @@ public class AJAXRequestResult {
      */
     public Map<String, Object> getParameters() {
         return new HashMap<String, Object>(parameters);
+    }
+
+    /**
+     * Sets a response property.
+     * 
+     * @param name The property name
+     * @param value The value; if <code>null</code> a remove is performed
+     */
+    public void setResponseProperty(final String name, final Object value) {
+        if (null == value) {
+            responseProperties.remove(name);
+        } else {
+            responseProperties.put(name, value);
+        }
+    }
+
+    /**
+     * Gets the associated response property.
+     * 
+     * @param name The parameter name
+     * @return The associated response property or <code>null</code> if there is no such parameter
+     */
+    public Object getResponseProperty(final String name) {
+        return responseProperties.get(name);
+    }
+
+    /**
+     * Gets the response properties.
+     * 
+     * @return The response properties
+     */
+    public Map<String, Object> getResponseProperties() {
+        return responseProperties;
     }
 
     @Override

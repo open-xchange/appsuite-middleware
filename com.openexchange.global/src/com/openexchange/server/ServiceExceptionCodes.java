@@ -1,3 +1,4 @@
+
 package com.openexchange.server;
 
 import com.openexchange.exception.Category;
@@ -13,15 +14,15 @@ public enum ServiceExceptionCodes implements OXExceptionCode {
     /**
      * The required service %1$s is temporary not available. Please try again later.
      */
-    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 1),
+    SERVICE_UNAVAILABLE(ServiceExceptionMessage.SERVICE_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 1),
     /**
      * An I/O error occurred
      */
-    IO_ERROR("An I/O error occurred", Category.CATEGORY_ERROR, 2),
+    IO_ERROR(ServiceExceptionMessage.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Service initialization failed
      */
-    SERVICE_INITIALIZATION_FAILED("Service initialization failed", Category.CATEGORY_ERROR, 3);
+    SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3);
 
     private final String message;
 
@@ -64,7 +65,7 @@ public enum ServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     *
+     * 
      * @return The newly created {@link OXException} instance.
      */
     public OXException create() {
@@ -73,7 +74,7 @@ public enum ServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     *
+     * 
      * @param logArguments The arguments for log message.
      * @return The newly created {@link OXException} instance.
      */
@@ -83,7 +84,7 @@ public enum ServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     *
+     * 
      * @param cause The initial cause for {@link OXException}
      * @param arguments The arguments for message.
      * @return The newly created {@link OXException} instance.
