@@ -49,22 +49,33 @@
 
 package com.openexchange.logging.tracking;
 
-import java.io.PrintWriter;
-
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.tools.session.SessionHolderExtended;
 
+/**
+ * {@link SessionBasedTrackingConfiguration}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class SessionBasedTrackingConfiguration implements ScopedTrackingConfiguration {
-	
-	private final SessionHolder sh;
+
+    private static final Pattern SPLIT = Pattern.compile("\\.");
+
+	private final SessionHolderExtended sh;
 	private final TrackingConfiguration config;
 	private final String[] className;
 	
-	public SessionBasedTrackingConfiguration(String className, TrackingConfiguration config, SessionHolder sh) {
-		this.sh = sh;
+	public SessionBasedTrackingConfiguration(final String className, final TrackingConfiguration config, final SessionHolder sh) {
+	    super();
+		this.sh = (sh instanceof SessionHolderExtended ? (SessionHolderExtended) sh : new DelegateSessionHolder(sh));
 		this.config = config;
-		this.className = className.split("\\.");
+		this.className = SPLIT.split(className, 0);
 	}
 
 	public boolean isDebugEnabled() {
@@ -92,6 +103,34 @@ public class SessionBasedTrackingConfiguration implements ScopedTrackingConfigur
 	}
 
 	public Log getLog() {
-		return config.getLog(sh.getSessionObject());
+		return config.getLog(sh.optSessionObject());
 	}
+
+	private static final class DelegateSessionHolder implements SessionHolderExtended {
+	    
+	    private final SessionHolder sessionHolder;
+
+        protected DelegateSessionHolder(final SessionHolder sessionHolder) {
+            super();
+            this.sessionHolder = sessionHolder;
+        }
+
+        public Session getSessionObject() {
+            return sessionHolder.getSessionObject();
+        }
+
+        public Context getContext() {
+            return sessionHolder.getContext();
+        }
+
+        public User getUser() {
+            return sessionHolder.getUser();
+        }
+
+        public Session optSessionObject() {
+            return sessionHolder.getSessionObject();
+        }
+
+	} // End of class DelegateSessionHolder
+
 }

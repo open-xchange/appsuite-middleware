@@ -49,36 +49,20 @@
 
 package com.openexchange.tools.session;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionHolder} - Provides a {@link Session} instance.
+ * {@link SessionHolderExtended} - Extends the {@link SessionHolder} interface by {@link #optSessionObject()} method.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessionHolder {
+public interface SessionHolderExtended extends SessionHolder {
 
-	/**
-	 * Gets the <tt>Session</tt> instance.
-	 * 
-	 * @return The <tt>Session</tt> instance
-	 */
-	public Session getSessionObject();
-
-	/**
-	 * Gets the context reference.
-	 * 
-	 * @return The context reference
-	 */
-	public Context getContext();
-
-	/**
-     * Gets the user reference.
+    /**
+     * Optionally gets the {@link Session session}.
      * 
-     * @return The user reference
+     * @return The session or <code>null</code>
      */
-	public User getUser();
+    public Session optSessionObject();
+
 }
