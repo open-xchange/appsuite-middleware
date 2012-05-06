@@ -118,10 +118,8 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
     @Override
     public Session optSessionObject() {
         final ServerSession serverSession = session.get();
-        if (serverSession == null) {
-            if (LogProperties.isEnabled()) {
-                return LogProperties.getLogProperty("com.openexchange.session.session");
-            }
+        if (serverSession == null && LogProperties.isEnabled()) {
+            return LogProperties.getLogProperty("com.openexchange.session.session");
         }
         return serverSession;
     }
