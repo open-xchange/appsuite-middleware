@@ -56,13 +56,14 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.ImportExport;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ContactTestData;
-import com.openexchange.groupware.importexport.Format;
+import com.openexchange.importexport.formats.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
 
@@ -116,17 +117,17 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		bob.append(servlet);
 		bob.append("?session=");
 		bob.append(getSessionId());
-		addParam(bob, ImportExport.PARAMETER_FOLDERID, folderId ) ;
-		addParam(bob, ImportExport.PARAMETER_ACTION, format.getConstantName());
+		addParam(bob, AJAXServlet.PARAMETER_FOLDERID, folderId ) ;
+		addParam(bob, AJAXServlet.PARAMETER_ACTION, format.getConstantName());
 		return bob.toString();
 	}
 
 	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException{
 		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 
-		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
-		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
-		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.DISPLAY_NAME.getNumber());
+		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
+		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
+		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.DISPLAY_NAME.getNumber());
 		return bob.toString();
 	}
 

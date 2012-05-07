@@ -58,7 +58,8 @@ public class ExportActionFactory  extends AbstractIEActionFactory{
     @Override
     protected Map<Format, AJAXActionService> getActions(){
     	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CsvImportAction());
+//    		put(Format.CSV, new CsvExportAction());
+//    		put(Format.VCARD, new VcardExportAction());
     	}};
     }
 

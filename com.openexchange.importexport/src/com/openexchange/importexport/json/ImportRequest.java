@@ -1,12 +1,15 @@
 package com.openexchange.importexport.json;
 
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -36,7 +39,7 @@ public class ImportRequest {
 	public ImportRequest(AJAXRequestData request, ServerSession session) throws OXException {
 		this.session = session;
 		this.request = request;
-		//TODO check or fail:
+
 		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
 			throw new OXException(); //TODO
 		}
@@ -48,10 +51,12 @@ public class ImportRequest {
 		if(request.getFiles().size() > 1){
 			throw ImportExportExceptionCodes.ONLY_ONE_FILE.create();
 		}
+		UploadFile uploadFile = request.getFiles().get(0);
+		//TODO check allowed upload size
 		try {
-			this.inputStream = request.getUploadStream();
-		} catch (IOException e) {
-			throw ImportExportExceptionCodes.IOEXCEPTION.create();
+			inputStream = new FileInputStream(uploadFile.getTmpFile());
+		} catch (FileNotFoundException e) {
+			throw ImportExportExceptionCodes.TEMP_FILE_NOT_FOUND.create();
 		}
 	}
 

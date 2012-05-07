@@ -148,7 +148,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
      * class.
      */
     @Override
-    protected boolean checkFields(final List<String> fields) {
+	public boolean checkFields(final List<String> fields) {
         int highestAmountOfMappedFields = 0;
 
         for (ContactFieldMapper mapper : getFieldMappers()) {
@@ -168,7 +168,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     }
 
     @Override
-    protected ContactSwitcher getContactSwitcher() {
+	public ContactSwitcher getContactSwitcher() {
         final ContactSwitcherForSimpleDateFormat dateSwitcher = new ContactSwitcherForSimpleDateFormat();
         dateSwitcher.addDateFormat(getGermanDateNotation());
         dateSwitcher.addDateFormat(getAmericanDateNotation());

@@ -57,7 +57,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.Format;
+import com.openexchange.importexport.formats.Format;
 import com.openexchange.test.OXTestToolkit;
 
 /**

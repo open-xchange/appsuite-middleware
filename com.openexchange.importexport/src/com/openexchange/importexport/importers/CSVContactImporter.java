@@ -238,7 +238,7 @@ public class CSVContactImporter extends AbstractImporter {
         return new CSVParser();
     }
 
-    protected boolean checkFields(final List<String> fields) {
+    public boolean checkFields(final List<String> fields) {
         for (final String fieldname : fields) {
             if (getRelevantField(fieldname) != null) {
                 return true;
@@ -375,7 +375,7 @@ public class CSVContactImporter extends AbstractImporter {
         return ContactField.getByDisplayName(name);
     }
 
-    protected ContactSwitcher getContactSwitcher() {
+    public ContactSwitcher getContactSwitcher() {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
 

@@ -11,6 +11,7 @@ public class ImportActionFactory extends AbstractIEActionFactory{
     protected Map<Format, AJAXActionService> getActions(){
     	return new HashMap<Format, AJAXActionService>(){{
     		put(Format.CSV, new CsvImportAction());
+    		//put(Format.VCARD, new VCardImportAction());
     	}};
     }
 

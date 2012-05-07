@@ -143,6 +143,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     NO_FILE_UPLOADED(NO_FILE_UPLOADED_MSG, Category.CATEGORY_ERROR, 1309),
     COULD_NOT_CREATE(COULD_NOT_CREATE_MSG, Category.CATEGORY_ERROR, 1309),
     TRUNCATION(TRUNCATION_MSG, Category.CATEGORY_TRUNCATED, 1310),
+    TEMP_FILE_NOT_FOUND(TEMP_FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1311),
     ;
 
     private String message;

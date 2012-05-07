@@ -66,7 +66,8 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.CSVContactImporter;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>

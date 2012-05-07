@@ -57,6 +57,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.importers.OutlookCSVContactImporter;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
