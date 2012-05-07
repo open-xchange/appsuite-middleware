@@ -1,3 +1,6 @@
+* 2012-05-07 - tobias.friedrich@open-xchange.com
+ - Fix for bug 22094: Use original folder ID when applying patches during move operations
+ 
 * 2012-05-04 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22085: Ghost Location Changes.

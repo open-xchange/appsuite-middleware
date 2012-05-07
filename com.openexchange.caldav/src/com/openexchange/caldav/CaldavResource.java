@@ -73,7 +73,6 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -93,6 +92,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -377,7 +377,7 @@ public class CaldavResource extends AbstractResource {
             if (create) {
                 appointmentSQLInterface.insertAppointmentObject(toSave);
             } else {
-                final Appointment oldAppointment = factory.getState().get(appointment.getObjectID(), appointment.getParentFolderID());
+                Appointment oldAppointment = factory.getState().get(appointment.getObjectID(), parent.getId());
             	if (false == Patches.Incoming.tryRestoreParticipants(factory.getState().getUnpatched(oldAppointment), toSave)) {
                     patchResources(oldAppointment, toSave);
                     patchParticipantListRemovingAliases(toSave);
