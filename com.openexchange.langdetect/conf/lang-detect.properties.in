@@ -4,4 +4,4 @@
 com.openexchange.langdetect.languageModelsDir=@prefix@/languageModels
 
 # Maps language to their code
-com.openexchange.langdetect.languageCodesFile=language-codes.properties
+com.openexchange.langdetect.languageCodesFile=@prefix@/etc/language-codes.properties

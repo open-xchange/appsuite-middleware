@@ -183,7 +183,7 @@ public class TrackingFileLog implements Log {
 	}
 
 	public boolean isDebugEnabled() {
-		return config.isDebugEnabled();
+		return config.isDebugEnabled() || delegate.isDebugEnabled();
 	}
 
 	public boolean isErrorEnabled() {
