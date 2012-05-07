@@ -166,7 +166,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			req.selectFile("file", "empty.vcs", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+			assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
 		} finally {
 			removeFolder(folderId);
 		}

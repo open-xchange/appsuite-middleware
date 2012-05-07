@@ -71,24 +71,24 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ImportExportWriter extends DataWriter {
+public class ImportWriter extends DataWriter {
 
     private final ServerSession session;
 
 	/**
-	 * Initializes a new {@link ImportExportWriter}
+	 * Initializes a new {@link ImportWriter}
 	 */
-	public ImportExportWriter(final ServerSession session) {
+	public ImportWriter(final ServerSession session) {
 		this(new OXJSONWriter(), session);
 	}
 
 	/**
-	 * Initializes a new {@link ImportExportWriter}
+	 * Initializes a new {@link ImportWriter}
 	 *
 	 * @param jsonwriter
 	 *            The JSON writer to write to
 	 */
-	public ImportExportWriter(final OXJSONWriter jsonwriter, final ServerSession session) {
+	public ImportWriter(final OXJSONWriter jsonwriter, final ServerSession session) {
 		super(null, jsonwriter);
 		this.session = session;
 	}
