@@ -49,6 +49,8 @@
 
 package com.openexchange.service.indexing.mail;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,7 +88,12 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class StorageAccess {
+public final class StorageAccess implements Serializable {
+
+    /**
+     * The serial version UID.
+     */
+    private static final long serialVersionUID = -9004934781962232958L;
 
     /**
      * ID, FLAGS, and COLOR_LABEL
@@ -100,9 +107,9 @@ public final class StorageAccess {
 
     private final MailJobInfo info;
 
-    private volatile IndexAccess<MailMessage> indexAccess;
+    private transient volatile IndexAccess<MailMessage> indexAccess;
 
-    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+    private transient MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
 
     /**
      * Initializes a new {@link StorageAccess}.
@@ -112,6 +119,42 @@ public final class StorageAccess {
     public StorageAccess(final MailJobInfo info) {
         super();
         this.info = info;
+    }
+
+    /**
+     * The writeObject method is responsible for writing the state of the object for its particular class so that the corresponding
+     * readObject method can restore it. The default mechanism for saving the Object's fields can be invoked by calling
+     * out.defaultWriteObject. The method does not need to concern itself with the state belonging to its superclasses or subclasses. State
+     * is saved by writing the individual fields to the ObjectOutputStream using the writeObject method or by using the methods for
+     * primitive data types supported by DataOutput.
+     * 
+     * @param out The object output stream
+     * @throws IOException If an I/O error occurs
+     */
+    private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+        close();
+        out.defaultWriteObject();
+    }
+
+    /**
+     * The readObject method is responsible for reading from the stream and restoring the
+     * classes fields. It may call in.defaultReadObject to invoke the default mechanism for restoring the object's non-static and
+     * non-transient fields. The defaultReadObject method uses information in the stream to assign the fields of the object saved in the
+     * stream with the correspondingly named fields in the current object. This handles the case when the class has evolved to add new
+     * fields. The method does not need to concern itself with the state belonging to its superclasses or subclasses. State is saved by
+     * writing the individual fields to the ObjectOutputStream using the writeObject method or by using the methods for primitive data types
+     * supported by DataOutput.
+     * 
+     * @param in The object input stream
+     * @throws IOException If an I/O error occurs
+     * @throws ClassNotFoundException If a class cast error occurs
+     */
+    private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        /*
+         * Restore common fields
+         */
+        in.defaultReadObject();
+        close();
     }
 
     /**
