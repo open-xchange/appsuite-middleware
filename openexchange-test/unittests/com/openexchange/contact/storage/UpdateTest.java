@@ -51,10 +51,8 @@ package com.openexchange.contact.storage;
 
 import java.util.Arrays;
 import java.util.UUID;
-
 import org.junit.Test;
-
-import com.openexchange.ajax.ContactTest;
+import com.openexchange.contact.Data;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 
@@ -64,11 +62,11 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UpdateTest extends ContactStorageTest {
-    
+
     @Test
     public void testUpdateSimple() throws Exception {
         /*
-         * create contact        
+         * create contact
          */
         final String folderId = "500002";
         final Contact contact = new Contact();
@@ -91,7 +89,7 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("givenname wrong", contact.getGivenName(), savedContact.getGivenName());
         assertEquals("email1 wrong", contact.getEmail1(), savedContact.getEmail1());
         /*
-         * update contact        
+         * update contact
          */
         savedContact.setDisplayName("Otto2 Maier2");
         savedContact.setGivenName("Otto2");
@@ -109,11 +107,11 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("givenname wrong", updatedContact.getGivenName(), savedContact.getGivenName());
         assertEquals("email1 wrong", updatedContact.getEmail1(), savedContact.getEmail1());
     }
-    
+
     @Test
     public void testUpdateImage() throws Exception {
         /*
-         * create contact        
+         * create contact
          */
         final String folderId = "500004";
         final Contact contact = new Contact();
@@ -123,8 +121,8 @@ public class UpdateTest extends ContactStorageTest {
         contact.setSurName("Dampf");
         contact.setEmail1("dirk.dampf@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        contact.setImage1(ContactTest.image);
-        contact.setImageContentType(ContactTest.CONTENT_TYPE);
+        contact.setImage1(Data.image);
+        contact.setImageContentType(Data.CONTENT_TYPE);
         getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
@@ -138,9 +136,9 @@ public class UpdateTest extends ContactStorageTest {
         assertTrue("image wrong", Arrays.equals(contact.getImage1(), savedContact.getImage1()));
         assertEquals("image content type wrong", contact.getImageContentType(), savedContact.getImageContentType());
         /*
-         * update contact        
+         * update contact
          */
-        Arrays.sort(savedContact.getImage1());        
+        Arrays.sort(savedContact.getImage1());
         getStorage().update(getContextID(), folderId, objectID, savedContact, savedContact.getLastModified());
         super.rememberForCleanUp(contact);
         /*
@@ -153,10 +151,10 @@ public class UpdateTest extends ContactStorageTest {
         assertTrue("image wrong", Arrays.equals(savedContact.getImage1(), updatedContact.getImage1()));
         assertEquals("image content type wrong", savedContact.getImageContentType(), updatedContact.getImageContentType());
     }
-    
+
     public void testUpdateDistList() throws Exception {
         /*
-         * create contact        
+         * create contact
          */
         final String folderId = "500003";
         final Contact contact = new Contact();
@@ -164,11 +162,11 @@ public class UpdateTest extends ContactStorageTest {
         contact.setSurName("Distributionlist 52");
         contact.setUid(UUID.randomUUID().toString());
         contact.setDistributionList(new DistributionListEntryObject[] {
-            new DistributionListEntryObject("Horst Hund", "horst.hund@example.com", 0),            
-            new DistributionListEntryObject("Werner Hund", "werner.hund@example.com", 0),            
-            new DistributionListEntryObject("Dieter Hund", "dieter.hund@example.com", 0),            
-            new DistributionListEntryObject("Klaus Hund", "klaus.hund@example.com", 0),            
-            new DistributionListEntryObject("Kurt Hund", "kurt.hund@example.com", 0),            
+            new DistributionListEntryObject("Horst Hund", "horst.hund@example.com", 0),
+            new DistributionListEntryObject("Werner Hund", "werner.hund@example.com", 0),
+            new DistributionListEntryObject("Dieter Hund", "dieter.hund@example.com", 0),
+            new DistributionListEntryObject("Klaus Hund", "klaus.hund@example.com", 0),
+            new DistributionListEntryObject("Kurt Hund", "kurt.hund@example.com", 0),
         });
         getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
@@ -184,13 +182,13 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("number of distribution list members wrong", 5, savedContact.getDistributionList().length);
         assertTrue("distribution list wrong", Arrays.equals(contact.getDistributionList(), savedContact.getDistributionList()));
         /*
-         * update contact        
+         * update contact
          */
         savedContact.setDistributionList(new DistributionListEntryObject[] {
-                new DistributionListEntryObject("Horst Klotz", "horst.klotz@example.com", 0),            
-                new DistributionListEntryObject("Werner Klotz", "werner.klotz@example.com", 0),            
-                new DistributionListEntryObject("Klaus Klotz", "klaus.klotz@example.com", 0),            
-                new DistributionListEntryObject("Kurt Klotz", "kurt.klotz@example.com", 0),            
+                new DistributionListEntryObject("Horst Klotz", "horst.klotz@example.com", 0),
+                new DistributionListEntryObject("Werner Klotz", "werner.klotz@example.com", 0),
+                new DistributionListEntryObject("Klaus Klotz", "klaus.klotz@example.com", 0),
+                new DistributionListEntryObject("Kurt Klotz", "kurt.klotz@example.com", 0),
             });
         getStorage().update(getContextID(), folderId, objectID, savedContact, savedContact.getLastModified());
         super.rememberForCleanUp(contact);
@@ -205,10 +203,10 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("number of distribution list members wrong", 4, updatedContact.getDistributionList().length);
         assertTrue("distribution list wrong", Arrays.equals(savedContact.getDistributionList(), updatedContact.getDistributionList()));
     }
-    
+
     public void testAddImage() throws Exception {
         /*
-         * create contact        
+         * create contact
          */
         final String folderId = "500007";
         final Contact contact = new Contact();
@@ -231,10 +229,10 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("givenname wrong", contact.getGivenName(), savedContact.getGivenName());
         assertEquals("email1 wrong", contact.getEmail1(), savedContact.getEmail1());
         /*
-         * update contact        
+         * update contact
          */
-        savedContact.setImage1(ContactTest.image);
-        savedContact.setImageContentType(ContactTest.CONTENT_TYPE);
+        savedContact.setImage1(Data.image);
+        savedContact.setImageContentType(Data.CONTENT_TYPE);
         getStorage().update(getContextID(), folderId, objectID, savedContact, savedContact.getLastModified());
         super.rememberForCleanUp(contact);
         /*
@@ -247,10 +245,10 @@ public class UpdateTest extends ContactStorageTest {
         assertTrue("image wrong", Arrays.equals(savedContact.getImage1(), updatedContact.getImage1()));
         assertEquals("image content type wrong", savedContact.getImageContentType(), updatedContact.getImageContentType());
     }
-    
+
     public void testRemoveImage() throws Exception {
         /*
-         * create contact        
+         * create contact
          */
         final String folderId = "500004";
         final Contact contact = new Contact();
@@ -260,8 +258,8 @@ public class UpdateTest extends ContactStorageTest {
         contact.setSurName("Dampf");
         contact.setEmail1("dirk.dampf@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        contact.setImage1(ContactTest.image);
-        contact.setImageContentType(ContactTest.CONTENT_TYPE);
+        contact.setImage1(Data.image);
+        contact.setImageContentType(Data.CONTENT_TYPE);
         getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
@@ -291,5 +289,5 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("number of images wrong", 0, updatedContact.getNumberOfImages());
         assertNull("image content type wrong", updatedContact.getImageContentType());
     }
-        
+
 }

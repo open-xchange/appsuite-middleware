@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
-import com.openexchange.ajax.ContactTest;
+import com.openexchange.contact.Data;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -107,8 +107,8 @@ public class CreateTest extends ContactStorageTest {
         contact.setSurName("Dampf");
         contact.setEmail1("dirk.dampf@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        contact.setImage1(ContactTest.image);
-        contact.setImageContentType(ContactTest.CONTENT_TYPE);
+        contact.setImage1(Data.image);
+        contact.setImageContentType(Data.CONTENT_TYPE);
         getStorage().create(getContextID(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
