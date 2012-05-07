@@ -244,6 +244,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         if (!folderObj.containsType()) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.TYPE, "", Integer.valueOf(ctx.getContextId()));
+        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderObj.getParentFolderID()) {
+            folderObj.setType(FolderObject.PUBLIC);
         }
         if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.PERMISSIONS,

@@ -515,7 +515,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     private static final int[] PUBLIC_FOLDER_IDS =
         {
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
-            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
+            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID };
 
     private static int getFolderType(final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
         int type = -1;
