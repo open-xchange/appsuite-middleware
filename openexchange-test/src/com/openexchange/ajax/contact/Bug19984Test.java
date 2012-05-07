@@ -64,8 +64,8 @@ public class Bug19984Test extends ManagedAppointmentTest {
 			"DTEND:20110726T200000\n" + 
 			"LOCATION;ENCODING=QUOTED-PRINTABLE:DLRG-Heim\n" + 
 			"CATEGORIES;ENCODING=QUOTED-PRINTABLE:DLRG WRD\n" + 
-			"DESCRIPTION;CHARSET=ISO-8859-1;ENCODING=QUOTED-PRINTABLE:Liebe Einsatzkräfte,=0A=0Awir laden ein zum Wasserretter-Treff. Dieser findet alle vier Wochen statt. Neben der Einteilung für den Wachdienst werden auch aktuelle Themen, wie Einsätze, abgearbeitet oder auch nur kleine Ausbildungsinhalte aus dem Bereich Fachausbildung Wasserrettung vermittelt.=0A=0AWir freuen uns daher über eine zahlreiche Teilnahme!=0A=0AEingeladen sind alle ab Rettungsschwimmabzeichen Bronze!!!\n" + 
-			"SUMMARY;ENCODING=QUOTED-PRINTABLE:Wasserretter-Treff [OG Hirschaid]\n" + 
+			"DESCRIPTION;CHARSET=ISO-8859-1;ENCODING=QUOTED-PRINTABLE:Liebe Einsatzkr\u00e4fte,=0A=0Awir laden ein zum Wasserretter-Treff. Dieser findet alle vier Wochen statt. Neben der Einteilung f\u00fcr den Wachdienst werden auch aktuelle Themen, wie Eins\u00e4tze, abgearbeitet oder auch nur kleine Ausbildungsinhalte aus dem Bereich Fachausbildung Wasserrettung vermittelt.=0A=0AWir freuen uns daher \u00fcber eine zahlreiche Teilnahme!=0A=0AEingeladen sind alle ab Rettungsschwimmabzeichen Bronze!!!\n" + 
+			"SUMMARY;ENCODING=QUOTED-PRINTABLE:Wasserretter-Treff [OG\u00a0Hirschaid]\n" + 
 			"PRIORITY:3\n" + 
 			"END:VEVENT\n" + 
 			"END:VCALENDAR";

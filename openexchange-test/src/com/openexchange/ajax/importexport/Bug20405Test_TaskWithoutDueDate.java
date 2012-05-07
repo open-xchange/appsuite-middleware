@@ -18,7 +18,7 @@ public class Bug20405Test_TaskWithoutDueDate extends ManagedTaskTest {
 			"PRODID:-//ABC Corporation//NONSGML My Product//EN\n" +
 			"BEGIN:VTODO\n" +
 			"DTSTAMP:20110919T120516Z\n" +
-			"SUMMARY:2 Beginn heute\\, Fällig offen\n" +
+			"SUMMARY:2 Beginn heute\\, F\u00e4llig offen\n" +
 			"CLASS:PRIVATE\n" +
 			"LAST-MODIFIED:20110919T115459Z\n" +
 			"STATUS:IN-PROCESS\n" +
