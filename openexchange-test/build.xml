@@ -2,56 +2,60 @@
 <project name="openexchange-test" default="default" basedir=".">
 
     <!-- Customizable values -->
-    <property name="bundlesdir" value="bundles"/>
+    <property name="bundlesDir" value="bundles"/>
+    <property name="testBundlesDir" value="testBundles"/>
 
     <!-- Constants -->
     <property name="conf.dir" value="conf"/>
-    <property name="tmp.dir" value="tmp"/>
+    <property name="tmpDir" value="tmp"/>
 
        <!-- Compile Constants -->
-    <property name="src.common" value="common"/>
-    <property name="src.iface" value="src"/>
-    <property name="src.unit" value="unittests"/>
+    <property name="srcCommon" value="common"/>
+    <property name="srcIface" value="src"/>
+    <property name="srcUnit" value="unittests"/>
     <property name="build" value="build"/>
     <property name="lib" value="lib"/>
 
     <!-- Runtime constants -->
-    <property name="test.xml.dir" location="test-results"/>
+    <property name="testXmlDir" location="test-results"/>
 
     <!-- Classpath -->
-    <path id="project.classpath">
-        <fileset dir="${bundlesdir}">
+    <path id="classpath">
+        <fileset dir="${bundlesDir}">
             <include name="**/*.jar"/>
             <exclude name="**/xerces.jar"/>
+        </fileset>
+        <fileset dir="${testBundlesDir}">
+            <include name="*.jar"/>
         </fileset>
         <fileset dir="${lib}">
             <include name="*.jar"/>
         </fileset>
     </path>
 
-    <target name="default" depends="interface-jar, unit-jar"/>
+    <target name="default" depends="interface-jar,unit-jar"/>
 
     <target name="clean">
         <delete dir="${build}"/>
-        <delete dir="${test.xml.dir}"/>
+        <delete dir="${testXmlDir}"/>
         <delete file="open-xchange-iface-tests.jar"/>
         <delete file="open-xchange-unit-tests.jar"/>
     </target>
 
     <target name="compile-common">
         <mkdir dir="${build}"/>
-        <javac srcdir="${src.common}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${srcCommon}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.6" compiler="javac1.6" target="1.6">
             <classpath>
-                <path refid="project.classpath"/>
+                <path refid="classpath"/>
             </classpath>
         </javac>
     </target>
 
     <target name="compile-specific">
         <mkdir dir="${build}"/>
-        <javac srcdir="${test.src}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${testSrc}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.6" compiler="javac1.6" target="1.6">
             <classpath>
-                <path refid="project.classpath"/>
+                <path refid="classpath"/>
                 <pathelement location="${build}"/>
             </classpath>
         </javac>
@@ -59,13 +63,13 @@
 
     <target name="compile-interface-tests" depends="compile-common">
         <antcall target="compile-specific">
-            <param name="test.src" value="${src.iface}"/>
+            <param name="testSrc" value="${srcIface}"/>
         </antcall>
     </target>
 
     <target name="compile-unit-tests" depends="compile-common">
         <antcall target="compile-specific">
-            <param name="test.src" value="${src.unit}"/>
+            <param name="testSrc" value="${srcUnit}"/>
         </antcall>
     </target>
 
@@ -81,36 +85,36 @@
 
     <target name="run-interface-tests">
         <antcall target="run-tests">
-            <param name="test.jar" value="open-xchange-iface-tests.jar"/>
-            <param name="test.class" value="com.openexchange.test.InterfaceTests"/>
+            <param name="testJar" value="open-xchange-iface-tests.jar"/>
+            <param name="testClass" value="com.openexchange.test.InterfaceTests"/>
         </antcall>
     </target>
 
     <target name="run-unit-tests">
         <antcall target="run-tests">
-            <param name="test.jar" value="open-xchange-unit-tests.jar"/>
-            <param name="test.class" value="com.openexchange.test.UnitTests"/>
+            <param name="testJar" value="open-xchange-unit-tests.jar"/>
+            <param name="testClass" value="com.openexchange.test.UnitTests"/>
         </antcall>
     </target>
 
     <target name="run-i18n-tests">
         <antcall target="run-tests">
-            <param name="test.jar" value="open-xchange-unit-tests.jar"/>
-            <param name="test.class" value="com.openexchange.test.I18nTests"/>
+            <param name="testJar" value="open-xchange-unit-tests.jar"/>
+            <param name="testClass" value="com.openexchange.test.I18nTests"/>
         </antcall>
     </target>
 
     <target name="run-tests">
-        <delete dir="${test.xml.dir}"/>
-        <mkdir dir="${test.xml.dir}"/>
+        <delete dir="${testXmlDir}"/>
+        <mkdir dir="${testXmlDir}"/>
         <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="yes">
             <classpath>
-                <path refid="project.classpath"/>
-                <pathelement location="${test.jar}"/>
+                <path refid="classpath"/>
+                <pathelement location="${testJar}"/>
                 <pathelement location="test-common.jar"/>
             </classpath>
 
-            <test name="${test.class}" todir="${test.xml.dir}"/>
+            <test name="${testClass}" todir="${testXmlDir}"/>
 
             <formatter type="xml"/>
             <sysproperty key="test.propfile" value="${conf.dir}/test.properties"/>
