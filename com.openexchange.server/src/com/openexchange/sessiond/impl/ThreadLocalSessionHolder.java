@@ -102,7 +102,7 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
             properties.put("com.openexchange.session.contextId", Integer.valueOf(serverSession.getContextId()));
             final String client = serverSession.getClient();
             properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            properties.put("com.openexchange.session.session", session);
+            properties.put("com.openexchange.session.session", session.get());
         }
     }
 
