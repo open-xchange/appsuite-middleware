@@ -79,27 +79,27 @@ public class SessionBasedTrackingConfiguration implements ScopedTrackingConfigur
 	}
 
 	public boolean isDebugEnabled() {
-		return config.isDebugEnabled(className, sh.getSessionObject());
+		return config.isDebugEnabled(className, sh.optSessionObject());
 	}
 
 	public boolean isErrorEnabled() {
-		return config.isErrorEnabled(className, sh.getSessionObject());
+		return config.isErrorEnabled(className, sh.optSessionObject());
 	}
 
 	public boolean isFatalEnabled() {
-		return config.isFatalEnabled(className, sh.getSessionObject());
+		return config.isFatalEnabled(className, sh.optSessionObject());
 	}
 
 	public boolean isInfoEnabled() {
-		return config.isInfoEnabled(className, sh.getSessionObject());
+		return config.isInfoEnabled(className, sh.optSessionObject());
 	}
 
 	public boolean isTraceEnabled() {
-		return config.isTraceEnabled(className, sh.getSessionObject());
+		return config.isTraceEnabled(className, sh.optSessionObject());
 	}
 
 	public boolean isWarnEnabled() {
-		return config.isWarnEnabled(className, sh.getSessionObject());
+		return config.isWarnEnabled(className, sh.optSessionObject());
 	}
 
 	public Log getLog() {
