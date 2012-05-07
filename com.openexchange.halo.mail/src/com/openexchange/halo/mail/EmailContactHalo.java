@@ -110,7 +110,13 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		
 		MailService mailService = services.getService(MailService.class);
 		MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
-		MailAccount[] userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
+		
+		MailAccount[] userMailAccounts;
+		if(searchingExternalMailboxesIsFast()){
+			userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
+		} else {
+			userMailAccounts = new MailAccount[]{mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId())};
+		}
 
 
 		List<MailMessage> messages = new LinkedList<MailMessage>();
@@ -178,5 +184,9 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		if (queries.size() == 2)
 			return new ORTerm(queries.get(0), queries.get(1));
 		return queries.get(0);
+	}
+	
+	protected boolean searchingExternalMailboxesIsFast(){
+		return false; //TODO: once indexing is implemented, this should check whether it is turned on. 
 	}
 }
