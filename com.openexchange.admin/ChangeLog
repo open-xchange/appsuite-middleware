@@ -1,3 +1,7 @@
+* 2012-05-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21826: Logging every create, change and delete operation of contexts, users, groups and resources.
+
 * 2012-04-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 21903/21904: Ensure IDN presentation of obtained E-Mail address

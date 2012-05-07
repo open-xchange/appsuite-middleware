@@ -352,12 +352,18 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static void appendAnchor(final String url, final StringBuilder builder) throws MalformedURLException, IDNAException {
-        builder.append("<a href=\"");
-        if (url.startsWith("www") || url.startsWith("news")) {
-            builder.append("http://");
+    private static void appendAnchor(final String url, final StringBuilder builder) throws IDNAException {
+        try {
+            final String checkedUrl = checkURL(url);
+            builder.append("<a href=\"");
+            if (url.startsWith("www") || url.startsWith("news")) {
+                builder.append("http://");
+            }
+            builder.append(checkedUrl).append("\" target=\"_blank\">").append(url).append("</a>");
+        } catch (final MalformedURLException e) {
+            // Append as-is
+            builder.append(url);
         }
-        builder.append(checkURL(url)).append("\" target=\"_blank\">").append(url).append("</a>");
     }
 
     /**

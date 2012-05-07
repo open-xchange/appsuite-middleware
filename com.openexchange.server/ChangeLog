@@ -1,3 +1,11 @@
+* 2012-05-04 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22085: Ghost Location Changes.
+
+* 2012-05-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21633: Property to enable/disable possible translation of default folders
+
 * 2012-05-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 20961: Session is destroyed if user is deleted and created again.

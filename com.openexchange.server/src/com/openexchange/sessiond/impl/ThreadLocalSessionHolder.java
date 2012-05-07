@@ -57,15 +57,15 @@ import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.tools.session.SessionHolderExtended;
 
 
 /**
- * {@link ThreadLocalSessionHolder} - The session holder usimg a {@link ThreadLocal} instance.
+ * {@link ThreadLocalSessionHolder} - The session holder using a {@link ThreadLocal} instance.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ThreadLocalSessionHolder implements SessionHolder {
+public class ThreadLocalSessionHolder implements SessionHolderExtended {
 
     private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
 
@@ -88,6 +88,11 @@ public class ThreadLocalSessionHolder implements SessionHolder {
         session = new ThreadLocal<ServerSession>();
     }
 
+    /**
+     * Sets the specified <tt>ServerSession</tt> instance.
+     * 
+     * @param serverSession The <tt>ServerSession</tt> instance
+     */
     public void setSession(final ServerSession serverSession) {
         session.set(serverSession);
         if (LogProperties.isEnabled() && serverSession != null) {
@@ -95,7 +100,7 @@ public class ThreadLocalSessionHolder implements SessionHolder {
             properties.put("com.openexchange.session.sessionId", serverSession.getSessionID());
             properties.put("com.openexchange.session.userId", Integer.valueOf(serverSession.getUserId()));
             properties.put("com.openexchange.session.contextId", Integer.valueOf(serverSession.getContextId()));
-            final String client  = serverSession.getClient();
+            final String client = serverSession.getClient();
             properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
             properties.put("com.openexchange.session.session", session);
         }
@@ -111,15 +116,23 @@ public class ThreadLocalSessionHolder implements SessionHolder {
     }
 
     @Override
+    public Session optSessionObject() {
+        final ServerSession serverSession = session.get();
+        if (serverSession == null && LogProperties.isEnabled()) {
+            return LogProperties.getLogProperty("com.openexchange.session.session");
+        }
+        return serverSession;
+    }
+
+    @Override
     public ServerSession getSessionObject() {
-        ServerSession serverSession = session.get();
+        final ServerSession serverSession = session.get();
         if (serverSession == null) {
         	if (LogProperties.isEnabled()) {
-        		final Props properties = LogProperties.getLogProperties();
-        		Session session = properties.get("com.openexchange.session.session");
+        		final Session session = LogProperties.getLogProperty("com.openexchange.session.session");
         		try {
 					return ServerSessionAdapter.valueOf(session);
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					return null;
 				}
         	}

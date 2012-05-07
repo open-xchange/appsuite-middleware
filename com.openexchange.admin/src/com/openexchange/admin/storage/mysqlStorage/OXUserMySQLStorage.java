@@ -792,6 +792,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // fire up
             con.commit();
+            log.info("User " + userId + " changed!");
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -1323,9 +1324,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             storeUISettings(ctx, con, usrdata, userId);
             // Set wanted folder tree.
             storeFolderTree(ctx, con, usrdata, userId);
-            if (log.isInfoEnabled()) {
-                log.info("User " + userId + " created!");
-            }
             return userId;
         } catch (final ServiceException e) {
             log.error("Required service not found.", e);
@@ -1498,7 +1496,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final int retval = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
 
             write_ox_con.commit();
-
+            log.info("User " + retval + " created!");
             return retval;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -2129,6 +2127,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             con.setAutoCommit(false);
             delete(ctx, users, con);
+            for (User user : users) {
+                log.info("User " + user.getId() + " deleted!");
+            }
             con.commit();
         } catch (final StorageException st) {
             log.error("Storage Error", st);
