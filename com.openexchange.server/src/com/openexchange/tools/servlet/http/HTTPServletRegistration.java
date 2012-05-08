@@ -52,12 +52,12 @@ package com.openexchange.tools.servlet.http;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.log.LogFactory;
 
 
 /**
@@ -66,7 +66,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class HTTPServletRegistration extends ServiceTracker{
+public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
 
@@ -74,29 +74,29 @@ public class HTTPServletRegistration extends ServiceTracker{
     private final String alias;
 
 
-    public HTTPServletRegistration(BundleContext context, String alias, Servlet servlet) {
-        super(context, HttpService.class.getName(), null);
+    public HTTPServletRegistration(final BundleContext context, final String alias, final Servlet servlet) {
+        super(context, HttpService.class, null);
         this.alias = alias;
         this.servlet = servlet;
         open();
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        HttpService service = (HttpService) super.addingService(reference);
+    public HttpService addingService(final ServiceReference<HttpService> reference) {
+        final HttpService service = super.addingService(reference);
         try {
             service.registerServlet(alias, servlet, null, null);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             LOG.fatal(e.getMessage(), e);
-        } catch (NamespaceException e) {
+        } catch (final NamespaceException e) {
             LOG.fatal(e.getMessage(), e);
         }
         return service;
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        HttpService httpService = (HttpService)service;
+    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
+        final HttpService httpService = service;
         httpService.unregister(alias);
         super.removedService(reference, service);
     }
@@ -104,7 +104,7 @@ public class HTTPServletRegistration extends ServiceTracker{
     public void unregister() {
         close();
         if(getService() != null) {
-            HttpService service = (HttpService) getService();
+            final HttpService service = getService();
             service.unregister(alias);
         }
     }
