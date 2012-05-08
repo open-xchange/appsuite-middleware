@@ -47,53 +47,34 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.authentication.service.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.service.Authentication;
 
 /**
- * Authentication service tracker putting the service into the static authentication class.
+ * Activator to start {@link ServiceTracker} to listen for {@link AutoLoginAuthenticationService}.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AuthenticationCustomizer implements ServiceTrackerCustomizer<AuthenticationService, AuthenticationService> {
+public final class AuthenticationActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthenticationCustomizer.class));
+    private ServiceTracker<AuthenticationService, AuthenticationService> tracker;
 
-    private final BundleContext context;
-
-    public AuthenticationCustomizer(final BundleContext context) {
+    public AuthenticationActivator() {
         super();
-        this.context = context;
     }
 
     @Override
-    public AuthenticationService addingService(final ServiceReference<AuthenticationService> reference) {
-        final AuthenticationService auth = context.getService(reference);
-        if (Authentication.setService(auth)) {
-            return auth;
-        }
-        LOG.error("Several authentication services found. Remove all except one!");
-        return null;
+    public void start(final BundleContext context) {
+        tracker = new ServiceTracker<AuthenticationService, AuthenticationService>(context, AuthenticationService.class.getName(), new AuthenticationCustomizer(context));
+        tracker.open();
     }
 
     @Override
-    public void modifiedService(final ServiceReference<AuthenticationService> reference, final AuthenticationService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<AuthenticationService> reference, final AuthenticationService service) {
-        final AuthenticationService auth = service;
-        if (!Authentication.dropService(auth)) {
-            LOG.error("Removed authentication services was not active!");
-        }
-        context.ungetService(reference);
+    public void stop(BundleContext context) {
+        tracker.close();
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,74 @@
  *
  */
 
-package com.openexchange.authentication.service.osgi;
+package com.openexchange.messaging.sms.service;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.authentication.AutoLoginAuthenticationService;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * Activator to start {@link ServiceTracker} to listen for {@link AutoLoginAuthenticationService}.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link SMSMessagingExceptionCodes} - Enumeration of all {@link SMSMessagingException}s.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
-public final class AutoLoginActivator implements BundleActivator {
+public enum SMSMessagingExceptionCodes implements OXErrorMessage {
 
-    private ServiceTracker tracker;
+    /**
+     * An error occurred: %1$s
+     */
+    UNEXPECTED_ERROR(SMSMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    
+    
+    ;
+    
 
-    public AutoLoginActivator() {
-        super();
+    private final Category category;
+
+    private final int detailNumber;
+
+    private final String message;
+
+    private SMSMessagingExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.detailNumber = detailNumber;
+        this.category = category;
     }
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, AutoLoginAuthenticationService.class.getName(), new AutoLoginAuthenticationCustomizer(context));
-        tracker.open();
+    public Category getCategory() {
+        return category;
     }
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        tracker.close();
+    public String getMessage() {
+        return message;
+    }
+
+    public int getDetailNumber() {
+        return detailNumber;
+    }
+
+    public String getHelp() {
+        return null;
+    }
+
+    /**
+     * Creates a new messaging exception of this error type with specified message arguments.
+     * 
+     * @param messageArgs The message arguments
+     * @return A new twitter exception
+     */
+    public SMSMessagingException create(final Object... messageArgs) {
+        return SMSMessagingExceptionFactory.getInstance().create(this, messageArgs);
+    }
+
+    /**
+     * Creates a new messaging exception of this error type with specified cause and message arguments.
+     * 
+     * @param cause The cause
+     * @param messageArgs The message arguments
+     * @return A new twitter exception
+     */
+    public SMSMessagingException create(final Throwable cause, final Object... messageArgs) {
+        return SMSMessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }

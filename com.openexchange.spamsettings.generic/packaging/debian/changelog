@@ -1,0 +1,191 @@
+open-xchange-spamsettings-generic (6.20.4.0-0) unstable; urgency=low
+
+  * prepare for 6.20.4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Apr 2012 14:45:20 +0000
+
+open-xchange-spamsettings-generic (6.20.4.0-0) unstable; urgency=low
+
+  * prepare for 6.20.4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Apr 2012 14:45:03 +0000
+
+open-xchange-spamsettings-generic (6.20.3.0-3) unstable; urgency=low
+
+  * build for 6.20.3-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Apr 2012 11:40:27 +0000
+
+open-xchange-spamsettings-generic (6.20.3.0-2) unstable; urgency=low
+
+  * build for 6.20.3-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Apr 2012 11:40:10 +0000
+
+open-xchange-spamsettings-generic (6.20.3.0-1) unstable; urgency=low
+
+  * build for 6.20.3-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 16 Apr 2012 08:23:23 +0000
+
+open-xchange-spamsettings-generic (6.20.3.0-0) unstable; urgency=low
+
+  * prepare for 6.20.3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 15 Mar 2012 10:28:00 +0000
+
+open-xchange-spamsettings-generic (6.20.2.0-4) unstable; urgency=low
+
+  * build for 6.20.2-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 08 Mar 2012 15:51:26 +0000
+
+open-xchange-spamsettings-generic (6.20.2.0-3) unstable; urgency=low
+
+  * build for 6.20.2-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 08 Mar 2012 15:51:07 +0000
+
+open-xchange-spamsettings-generic (6.20.2.0-2) unstable; urgency=low
+
+  * build for 6.20.2-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 05 Mar 2012 09:20:26 +0000
+
+open-xchange-spamsettings-generic (6.20.2.0-1) unstable; urgency=low
+
+  * build for 6.20.2-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 05 Mar 2012 09:20:09 +0000
+
+open-xchange-spamsettings-generic (6.20.2.0-0) unstable; urgency=low
+
+  * prepare for 6.20.2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 23 Feb 2012 13:24:09 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-11) unstable; urgency=low
+
+  * build for public ptf 2012-02-20
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Mon, 20 Feb 2012 11:23:12 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-10) unstable; urgency=low
+
+  * build for public ptf 2012-02-20
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Mon, 20 Feb 2012 11:22:55 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-9) unstable; urgency=low
+
+  * build for ptf 2012020210000148, 2012020110000373
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 10 Feb 2012 10:47:28 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-8) unstable; urgency=low
+
+  * build for 6.20.1-rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 26 Jan 2012 17:26:37 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-7) unstable; urgency=low
+
+  * build for 6.20.1-rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 26 Jan 2012 17:26:19 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-6) unstable; urgency=low
+
+  * build for 6.20.1-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Jan 2012 15:31:59 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-5) unstable; urgency=low
+
+  * build for 6.20.1-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Jan 2012 15:31:39 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-4) unstable; urgency=low
+
+  * build for 6.20.1-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Jan 2012 13:45:40 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-3) unstable; urgency=low
+
+  * build for 6.20.1-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Jan 2012 13:45:23 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-2) unstable; urgency=low
+
+  * build for 6.20.1-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 Jan 2012 14:14:31 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-1) unstable; urgency=low
+
+  * build for 6.20.1-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Jan 2012 14:30:02 +0000
+
+open-xchange-spamsettings-generic (6.20.1.0-0) unstable; urgency=low
+
+  * 6.20.1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 22 Nov 2011 08:02:14 +0000
+
+open-xchange-spamsettings-generic (6.20.1-0) unstable; urgency=low
+
+  * 6.20.1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 22 Nov 2011 07:20:04 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-8) unstable; urgency=low
+
+  * build for public ptf 2011-11-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 14 Nov 2011 09:35:53 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-7) unstable; urgency=low
+
+  * build for public ptf 2011-10-20
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 17 Oct 2011 13:02:42 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-6) unstable; urgency=low
+
+  * build for public ptf 2011-10-06
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 05 Oct 2011 06:57:59 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-5) unstable; urgency=low
+
+  * second build for public ptf 2011-09-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 20 Sep 2011 15:13:23 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-4) unstable; urgency=low
+
+  * build for public ptf 2011-09-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 16 Sep 2011 15:06:16 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-3) unstable; urgency=low
+
+  * build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Jul 2011 07:10:13 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-2) unstable; urgency=low
+
+  * build for public ptf 2011-06-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Jun 2011 14:53:01 +0000
+
+open-xchange-spamsettings-generic (6.20.0.0-1) unstable; urgency=low
+
+  * initial
+
+ -- Dennis Sieben <dennis.sieben@open-xchange.com>  Mon, 28 Mar 2011 19:59:00 +0200

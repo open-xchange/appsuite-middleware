@@ -1,0 +1,177 @@
+# Antje Faber, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2012-02-29 12:36+0100\n"
+"PO-Revision-Date: 2011-07-22 09:17+0200\n"
+"Last-Translator: Antje Faber\n"
+"Language-Team: American English <kde-i18n-de@kde.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.0\n"
+
+msgid "From"
+msgstr "Von"
+
+msgid "To"
+msgstr "An"
+
+msgid "Send SMS"
+msgstr "SMS senden"
+
+msgid "Send"
+msgstr "Senden"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#. Character count status
+#. %d is the number of used characters
+#, fuzzy
+msgid "%d character"
+msgid_plural "%d characters"
+msgstr[0] "%d Zeichen"
+msgstr[1] "%d Zeichen"
+
+#. Limited message count status
+#. %1$d is the number of messages
+#. %2$d is the maximum number of messages
+#, fuzzy
+msgid "%1$d / %2$d messages"
+msgstr "%1$d / %2$d Nachrichten"
+
+#. Unlimited message count status
+#. %d is the number of messages
+msgid "%d message"
+msgid_plural "%d messages"
+msgstr[0] "%d Nachricht"
+msgstr[1] "%d Nachrichten"
+
+#. Character count status
+#. %1$d is the number of used characters
+#. %2$d is the number of remaining characters
+#. %3$d is the total number of available characters
+msgid "%1$d / %3$d"
+msgstr "%1$d / %3$d"
+
+msgid ""
+"Multiple recipients can be specified by separating them with a semicolon."
+msgstr "Sie können mehrere Empfänger mit Semikolon getrennt einfügen."
+
+msgid "MMS"
+msgstr "MMS"
+
+#. cellular_telephone1
+msgid "Mobile"
+msgstr "Mobiltelefon"
+
+#. cellular_telephone2
+msgid "Mobile 2"
+msgstr "Mobiltelefon 2"
+
+#. telephone_ip
+msgid "IP phone"
+msgstr "IP Telefon"
+
+#. telephone_business1
+msgid "Business"
+msgstr "Geschäftlich"
+
+#. telephone_business2
+msgid "Business 2"
+msgstr "Geschäftlich 2"
+
+#. telephone_callback
+msgid "Callback"
+msgstr "Rückruf"
+
+#. telephone_car
+msgid "Car phone"
+msgstr "Autotelefon"
+
+#. telephone_company
+msgid "Company"
+msgstr "Firma"
+
+#. telephone_home1
+msgid "Private"
+msgstr "Privat"
+
+#. telephone_home2
+msgid "Private 2"
+msgstr "Privat 2"
+
+#. telephone_other
+msgid "Other"
+msgstr "Andere"
+
+#. telephone_isdn
+msgid "ISDN"
+msgstr "ISDN"
+
+#. telephone_pager
+msgid "Pager"
+msgstr "Pager"
+
+#. telephone_primary
+msgid "Primary"
+msgstr "Primäranschluß"
+
+#. telephone_radio
+msgid "Radio"
+msgstr "Funk"
+
+#. telephone_telex
+msgid "Telex"
+msgstr "Telex"
+
+#. telephone_ttytdd
+msgid "TTY/TDD"
+msgstr "Texttelefon"
+
+#. telephone_assistant
+msgid "Assistant"
+msgstr "Assistent"
+
+#. %s is the email address used as signature
+msgid "Add signature: %s"
+msgstr "Signatur hinzufügen: %s"
+
+#. %1$s is the phone number
+#. %2$s is the type of phone number (mobile/private/...)
+#, fuzzy
+msgid "%1$s (%2$s)"
+msgstr "%1$d (%2$s)"
+
+msgid "The selected contact has no phone number."
+msgstr "Der ausgewählte Kontakt hat keine Telefonnummer."
+
+#. %s is the invalid phone number
+msgid "Invalid phone number: '%s'. Special numbers are not allowed."
+msgstr "Ungültige Telefonnummer: '%s'. Sonderrufnummern sind als Zielrufnummer "
+"gesperrt."
+
+msgid "Please specify a recipient number."
+msgstr "Bitte geben Sie eine Zielrufnummer an."
+
+msgid "Multiple recipients are not supported."
+msgstr "Mehrere Zielrufnummern werden nicht unterstützt."
+
+#. %d is the maximum number of recipients.
+msgid ""
+"More than %d recipients are not supported. Please remove some recipients."
+msgstr ""
+"Mehr als %d Zielrufnummern werden nicht utnerstützt. Bitte entfernen Sie "
+"einige Zielrufnummern."
+
+msgid "Invalid CAPTCHA, please try again."
+msgstr "Ungültiger CAPTCHA, bitte erneut versuchen."
+
+msgid "New SMS"
+msgstr "Neue SMS"
+
+msgid "SMS"
+msgstr "SMS"

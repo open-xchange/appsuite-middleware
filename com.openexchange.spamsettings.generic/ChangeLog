@@ -1,0 +1,11 @@
+* 2011-06-17 - holger.achtziger@open-xchange.com
+
+  - fix for Bug 19520 - ExtendedFormElement.java does not honor the attributes order
+    
+* 2011-06-16 - wolfgang.rosenauer@open-xchange.com
+
+  - Remove superfluous headline in the page
+  
+* 2011-03-14 - benjamin.otterbach@open-xchange.com
+
+  - Initial

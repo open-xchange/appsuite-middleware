@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,47 @@
  *
  */
 
-package com.openexchange.authentication.service.osgi;
+package com.openexchange.messaging.sms.impl;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.authentication.AutoLoginAuthenticationService;
-import com.openexchange.authentication.service.AutoLoginAuthentication;
+import static com.openexchange.java.Autoboxing.B;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.sms.osgi.MessagingSMSServiceRegistry;
+import com.openexchange.messaging.sms.service.MessagingNewService;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
 
-/**
- * {@link AutoLoginAuthenticationService} tracker putting the service into the static authentication class.
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public class AutoLoginAuthenticationCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AutoLoginAuthenticationCustomizer.class));
+public class SMSPreferencesItem implements PreferencesItemService {
 
-    private final BundleContext context;
-
-    public AutoLoginAuthenticationCustomizer(final BundleContext context) {
-        super();
-        this.context = context;
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.messaging.sms" };
     }
 
-    @Override
-    public Object addingService(final ServiceReference reference) {
-        final AutoLoginAuthenticationService auth = (AutoLoginAuthenticationService) context.getService(reference);
-        if (AutoLoginAuthentication.setService(auth)) {
-            return auth;
-        }
-        context.ungetService(reference);
-        LOG.error("Several authentication services found. Remove all except one!");
-        return null;
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                try {
+                    final MessagingNewService service = MessagingSMSServiceRegistry.getServiceRegistry().getService(MessagingNewService.class, true);
+                    setting.setSingleValue(B(service.getUserConfiguration(session).isEnabled()));
+                } catch (final ServiceException e) {
+                    throw new SettingException(e); 
+                } catch (MessagingException e) {
+                    throw new SettingException(e); 
+                }
+            }
+
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
     }
 
-    @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        final AutoLoginAuthenticationService auth = (AutoLoginAuthenticationService) service;
-        if (!AutoLoginAuthentication.dropService(auth)) {
-            LOG.error("Removed authentication services was not active!");
-        }
-        context.ungetService(reference);
-    }
 }
