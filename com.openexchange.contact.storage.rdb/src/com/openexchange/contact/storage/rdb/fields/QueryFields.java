@@ -115,6 +115,7 @@ public class QueryFields {
         	imageDataFieldsSet.add(ContactField.OBJECT_ID);
         	this.hasImageData = true;
         	this.imageDataFields = imageDataFieldsSet.toArray(new ContactField[imageDataFieldsSet.size()]);
+        	contactDataFieldsSet.add(ContactField.OBJECT_ID);
         	contactDataFieldsSet.add(ContactField.NUMBER_OF_IMAGES);        	
         }
         /*
