@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: General Messaging SMS Backend Bundle
+Bundle-SymbolicName: com.openexchange.messaging.sms
+Bundle-Version: 6.20.4.0
+Bundle-Activator: com.openexchange.messaging.sms.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.fields,
+ com.openexchange.ajax.writer,
+ com.openexchange.exceptions,
+ com.openexchange.exceptions.osgi,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.java,
+ com.openexchange.messaging,
+ com.openexchange.messaging.generic.internet,
+ com.openexchange.messaging.registry,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http
+Export-Package: com.openexchange.messaging.sms.service
+
