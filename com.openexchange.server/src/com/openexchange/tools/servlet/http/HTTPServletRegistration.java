@@ -91,18 +91,20 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
         final HttpService service = super.addingService(reference);
         try {
             service.registerServlet(alias, servlet, null, null);
+            return service;
         } catch (final ServletException e) {
             LOG.fatal(e.getMessage(), e);
+            context.ungetService(reference);
         } catch (final NamespaceException e) {
             LOG.fatal(e.getMessage(), e);
+            context.ungetService(reference);
         }
-        return service;
+        return null;
     }
 
     @Override
     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
-        final HttpService httpService = service;
-        httpService.unregister(alias);
+        service.unregister(alias);
         super.removedService(reference, service);
     }
 
