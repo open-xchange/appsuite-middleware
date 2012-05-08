@@ -520,7 +520,7 @@ public static class Parser {
 
         final Parser parser = new Parser();
         LOG.info("Context: " + ctx);
-        LOG.info("Filenames: " + Arrays.toString(filenames));
+        LOG.info("Filenames: " + java.util.Arrays.toString(filenames));
         
         try {
             VersionInformation versionInfo = null;
