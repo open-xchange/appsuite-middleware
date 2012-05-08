@@ -14,6 +14,7 @@ Import-Package: com.openexchange.admin.plugins,
  com.openexchange.groupware.impl,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
+ com.openexchange.log,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.3.0"
 Require-Bundle: com.openexchange.server,
