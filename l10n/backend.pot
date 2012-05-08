@@ -1854,6 +1854,12 @@ msgstr ""
 msgid "No session found."
 msgstr ""
 
+#. Thrown when an AuthenticationService implementation does not support the auto login method.
+#. %s is replaced with the implementations name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:121
+msgid "%s does not support an auto login authentication."
+msgstr ""
+
 #. *
 #. * The default element attributes could not be retrieved
 #.
