@@ -88,8 +88,8 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
 
     @Override
     public HttpService addingService(final ServiceReference<HttpService> reference) {
-        final HttpService service = super.addingService(reference);
         try {
+            final HttpService service = super.addingService(reference);
             service.registerServlet(alias, servlet, null, null);
             return service;
         } catch (final ServletException e) {
