@@ -20,13 +20,15 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.exception.OXException;
+
 /**
  * 
  * Authentication Plugin for the UCS Server Product.
@@ -59,8 +61,7 @@ public class UCSAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo)
-    throws LoginException {
+    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
 
         DirContext ctx = null;
 
@@ -262,7 +263,7 @@ public class UCSAuthentication implements AuthenticationService {
 
     }
 
-    private static void initConfig() throws  LoginException{
+    private static void initConfig() throws OXException {
         synchronized (UCSAuthentication.class) {
 
             if (null == props) {
@@ -299,7 +300,7 @@ public class UCSAuthentication implements AuthenticationService {
      * @throws LoginException
      *             if no seperator is found.
      */
-    private String[] split(final String loginInfo) throws LoginException {
+    private String[] split(final String loginInfo) {
         return split(loginInfo, '@');
     }
 
@@ -325,6 +326,10 @@ public class UCSAuthentication implements AuthenticationService {
             splitted[0] = loginInfo.substring(pos + 1);
         }
         return splitted;
+    }
+
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
     }
 
 }
