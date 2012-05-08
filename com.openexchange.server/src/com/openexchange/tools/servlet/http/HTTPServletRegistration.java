@@ -52,59 +52,69 @@ package com.openexchange.tools.servlet.http;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
-
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link HTTPServletRegistration}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class HTTPServletRegistration extends ServiceTracker{
+public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
 
     private final Servlet servlet;
+
     private final String alias;
 
-
-    public HTTPServletRegistration(BundleContext context, String alias, Servlet servlet) {
-        super(context, HttpService.class.getName(), null);
+    /**
+     * Initializes a new {@link HTTPServletRegistration}.
+     * 
+     * @param context The bundle context
+     * @param alias The Servlet's alias
+     * @param servlet The Servlet instance to register/de-register on {@link HttpService} presence/absence
+     */
+    public HTTPServletRegistration(final BundleContext context, final String alias, final Servlet servlet) {
+        super(context, HttpService.class, null);
         this.alias = alias;
         this.servlet = servlet;
         open();
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        HttpService service = (HttpService) super.addingService(reference);
+    public HttpService addingService(final ServiceReference<HttpService> reference) {
         try {
+            final HttpService service = super.addingService(reference);
             service.registerServlet(alias, servlet, null, null);
-        } catch (ServletException e) {
+            return service;
+        } catch (final ServletException e) {
             LOG.fatal(e.getMessage(), e);
-        } catch (NamespaceException e) {
+            context.ungetService(reference);
+        } catch (final NamespaceException e) {
             LOG.fatal(e.getMessage(), e);
+            context.ungetService(reference);
         }
-        return service;
+        return null;
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        HttpService httpService = (HttpService)service;
-        httpService.unregister(alias);
+    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
+        service.unregister(alias);
         super.removedService(reference, service);
     }
 
+    /**
+     * Unregisters the Servlet manually.
+     */
     public void unregister() {
         close();
-        if(getService() != null) {
-            HttpService service = (HttpService) getService();
+        if (getService() != null) {
+            final HttpService service = getService();
             service.unregister(alias);
         }
     }

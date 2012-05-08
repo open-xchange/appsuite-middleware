@@ -59,8 +59,6 @@ public interface SolrMailConstants {
 
     public static final int ADD_ROWS = 2000;
 
-    public static final int QUERY_ROWS = 1000;
-
     public static final int ALL_ROWS = 4000;
 
     public static final int DELETE_ROWS = 25;
@@ -68,89 +66,5 @@ public interface SolrMailConstants {
     public static final int CHANGE_ROWS = 25;
 
     public static final int GET_ROWS = 25;
-
-//    public static final String FIELD_TIMESTAMP = "timestamp";
-//
-//    public static final String FIELD_UUID = "uuid";
-//
-//    public static final String FIELD_CONTEXT = "context";
-//
-//    public static final String FIELD_USER = "user";
-//
-//    public static final String FIELD_ACCOUNT = "account";
-//
-//    public static final String FIELD_FULL_NAME = "full_name";
-//
-//    public static final String FIELD_ID = "id";
-//
-//    public static final String FIELD_FROM_PERSONAL = "from_personal";
-//
-//    public static final String FIELD_FROM_ADDR = "from_addr";
-//
-//    public static final String FIELD_FROM_PLAIN = "from_plain";
-//
-//    public static final String FIELD_SENDER_PERSONAL = "sender_personal";
-//
-//    public static final String FIELD_SENDER_ADDR = "sender_addr";
-//
-//    public static final String FIELD_SENDER_PLAIN = "sender_plain";
-//
-//    public static final String FIELD_TO_PERSONAL = "to_personal";
-//
-//    public static final String FIELD_TO_ADDR = "to_addr";
-//
-//    public static final String FIELD_TO_PLAIN = "to_plain";
-//
-//    public static final String FIELD_CC_PERSONAL = "cc_personal";
-//
-//    public static final String FIELD_CC_ADDR = "cc_addr";
-//
-//    public static final String FIELD_CC_PLAIN = "cc_plain";
-//
-//    public static final String FIELD_BCC_PERSONAL = "bcc_personal";
-//
-//    public static final String FIELD_BCC_ADDR = "bcc_addr";
-//
-//    public static final String FIELD_BCC_PLAIN = "bcc_plain";
-//
-//    public static final String FIELD_ATTACHMENT = "attachment";
-//
-//    public static final String FIELD_COLOR_LABEL = "color_label";
-//
-//    public static final String FIELD_SIZE = "size";
-//
-//    public static final String FIELD_RECEIVED_DATE = "received_date";
-//
-//    public static final String FIELD_SENT_DATE = "sent_date";
-//
-//    public static final String FIELD_FLAG_ANSWERED = "flag_answered";
-//
-//    public static final String FIELD_FLAG_DELETED = "flag_deleted";
-//
-//    public static final String FIELD_FLAG_DRAFT = "flag_draft";
-//
-//    public static final String FIELD_FLAG_FLAGGED = "flag_flagged";
-//
-//    public static final String FIELD_FLAG_RECENT = "flag_recent";
-//
-//    public static final String FIELD_FLAG_SEEN = "flag_seen";
-//
-//    public static final String FIELD_FLAG_USER = "flag_user";
-//
-//    public static final String FIELD_FLAG_SPAM = "flag_spam";
-//
-//    public static final String FIELD_FLAG_FORWARDED = "flag_forwarded";
-//
-//    public static final String FIELD_FLAG_READ_ACK = "flag_read_ack";
-//
-//    public static final String FIELD_USER_FLAGS = "user_flags";
-//
-//    public static final String FIELD_SUBJECT_PREFIX = "subject_";
-//
-//    public static final String FIELD_SUBJECT_PLAIN = "subject_plain";
-//
-//    public static final String FIELD_CONTENT_PREFIX = "content_";
-//
-//    public static final String FIELD_CONTENT_FLAG = "content_flag";
 
 }

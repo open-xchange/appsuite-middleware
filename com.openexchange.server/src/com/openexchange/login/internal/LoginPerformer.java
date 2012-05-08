@@ -68,7 +68,6 @@ import com.openexchange.authentication.ResponseEnhancement;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.service.Authentication;
-import com.openexchange.authentication.service.AutoLoginAuthentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.exception.OXException;
@@ -163,7 +162,7 @@ public final class LoginPerformer {
         return doLogin(request, properties, new LoginPerformerClosure() {
             @Override
             public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                return AutoLoginAuthentication.login(request.getLogin(), request.getPassword(), properties);
+                return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
             }
         });
     }

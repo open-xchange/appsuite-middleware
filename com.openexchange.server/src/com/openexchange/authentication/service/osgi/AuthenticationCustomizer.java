@@ -47,30 +47,53 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.authentication.service.osgi;
 
-import com.openexchange.exception.OXException;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.service.Authentication;
 
 /**
- * This service is called when the UI does an autologin request and the login servlet is not able to find OX session cookies. Therefore the
- * {@link LoginInfo} will not contain login and password. Only header and cookies can be investigated to find a global web services session.
- * Use that information to return the necessary {@link Authenticated} data. If the {@link LoginInfo} does not contain a session, through a
- * {@link LoginException}.
- * 
- * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
+ * Authentication service tracker putting the service into the static authentication class.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface AutoLoginAuthenticationService {
+public class AuthenticationCustomizer implements ServiceTrackerCustomizer<AuthenticationService, AuthenticationService> {
 
-    /**
-     * This method authenticates a user using a global web services session which is useful in single sign on scenarios. If no such global
-     * web services session exists either throw a {@link LoginException} or redirect the browser to some global login site with
-     * {@link ResultCode#REDIRECT}. This method should never return <code>null</code>.
-     *
-     * @param loginInfo the complete login information from the autologin request. It does never contain login and password.
-     * @return an {@link Authenticated} containing context information to resolve the context and user information to resolve the user.
-     * This return type can be enhanced with {@link SessionEnhancement} and/or {@link ResponseEnhancement}.
-     * @throws OXException if something with the login info is wrong and no {@link Authenticated} can be returned.
-     */
-    Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthenticationCustomizer.class));
 
+    private final BundleContext context;
+
+    public AuthenticationCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    @Override
+    public AuthenticationService addingService(final ServiceReference<AuthenticationService> reference) {
+        final AuthenticationService auth = context.getService(reference);
+        if (Authentication.setService(auth)) {
+            return auth;
+        }
+        LOG.error("Several authentication services found. Remove all except one!");
+        return null;
+    }
+
+    @Override
+    public void modifiedService(final ServiceReference<AuthenticationService> reference, final AuthenticationService service) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(final ServiceReference<AuthenticationService> reference, final AuthenticationService service) {
+        final AuthenticationService auth = service;
+        if (!Authentication.dropService(auth)) {
+            LOG.error("Removed authentication services was not active!");
+        }
+        context.ungetService(reference);
+    }
 }

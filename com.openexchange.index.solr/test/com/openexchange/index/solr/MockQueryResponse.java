@@ -47,34 +47,44 @@
  *
  */
 
-package com.openexchange.authentication.service.osgi;
+package com.openexchange.index.solr;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.authentication.AutoLoginAuthenticationService;
+import java.util.Map;
+import java.util.Set;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+
 
 /**
- * Activator to start {@link ServiceTracker} to listen for {@link AutoLoginAuthenticationService}.
+ * {@link MockQueryResponse}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class AutoLoginActivator implements BundleActivator {
-
-    private ServiceTracker tracker;
-
-    public AutoLoginActivator() {
+public class MockQueryResponse extends QueryResponse {
+    
+    private static final long serialVersionUID = -2792639362830739756L;
+    
+    private final Set<Map<String, Object>> entries;
+    
+    
+    public MockQueryResponse(Set<Map<String, Object>> entries) {
         super();
+        this.entries = entries;
     }
-
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, AutoLoginAuthenticationService.class.getName(), new AutoLoginAuthenticationCustomizer(context));
-        tracker.open();
+    
+    public SolrDocumentList getResults() {
+        SolrDocumentList documents = new SolrDocumentList();
+        for (Map<String, Object> entry : entries) {
+            SolrDocument document = new SolrDocument();
+            for (String key : entry.keySet()) {
+                Object value = entry.get(key);
+                document.addField(key, value);
+            }
+            documents.add(document);
+        }
+        
+        return documents;
     }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        tracker.close();
-    }
+    
 }

@@ -127,7 +127,7 @@ public interface IndexAccess<V> {
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
      */
-    void change(IndexDocument<V> document, IndexField[] fields) throws OXException, InterruptedException;
+    void change(IndexDocument<V> document, Set<? extends IndexField> fields) throws OXException, InterruptedException;
 
     /**
      * Changes the denoted fields of already existing documents according to specified input documents.
@@ -137,7 +137,7 @@ public interface IndexAccess<V> {
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
      */
-    void change(Collection<IndexDocument<V>> documents, IndexField[] fields) throws OXException, InterruptedException;
+    void change(Collection<IndexDocument<V>> documents, Set<? extends IndexField> fields) throws OXException, InterruptedException;
 
     /**
      * Deletes a document by identifier.
