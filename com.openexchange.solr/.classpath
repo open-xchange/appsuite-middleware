@@ -13,7 +13,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/apache-solr-core-3.3.0.jar" sourcepath="sources/embedded"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-solr-solrj-3.3.0.jar" sourcepath="sources/apache-solr-solrj-3.3.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/solrext.jar" sourcepath="/development/git/ox7_backend/com.openexchange.solr/sources/kippdata"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>

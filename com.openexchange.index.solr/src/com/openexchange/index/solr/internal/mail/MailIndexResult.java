@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class MailIndexResult implements IndexResult<MailMessage> {
 
-    private long numFound;
+    private int numFound;
 
     private List<IndexDocument<MailMessage>> mails;
 
@@ -69,7 +69,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      * Initializes a new {@link MailIndexResult}.
      */
     public MailIndexResult() {
-        this(0L);
+        this(0);
     }
 
     /**
@@ -77,13 +77,13 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      * 
      * @param numFound The <code>numFound</code> to set
      */
-    public MailIndexResult(final long numFound) {
+    public MailIndexResult(final int numFound) {
         super();
         this.numFound = numFound;
     }
 
     @Override
-    public long getNumFound() {
+    public int getNumFound() {
         return numFound;
     }
 
@@ -92,7 +92,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      * 
      * @param numFound The <code>numFound</code> to set
      */
-    public void setNumFound(final long numFound) {
+    public void setNumFound(final int numFound) {
         this.numFound = numFound;
     }
 
