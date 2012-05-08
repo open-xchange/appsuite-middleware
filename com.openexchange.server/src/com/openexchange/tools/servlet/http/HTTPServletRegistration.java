@@ -108,6 +108,9 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
         super.removedService(reference, service);
     }
 
+    /**
+     * Unregisters the Servlet manually.
+     */
     public void unregister() {
         close();
         if (getService() != null) {
