@@ -126,7 +126,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error.", "I_E-1000", response.optString("code"));
+			assertEquals("Must contain error.", "CSV-1000", response.optString("code"));
 		} finally {
 			removeFolder(folderId);
 		}

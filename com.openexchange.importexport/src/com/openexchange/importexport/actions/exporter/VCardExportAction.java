@@ -46,38 +46,28 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.importexport.actions.exporter;
 
-package com.openexchange.importexport.exporters;
-
-import static com.openexchange.java.Autoboxing.I2i;
-
-import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.exporters.VCardExporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.SizedInputStream;
-import com.openexchange.importexport.json.ExportRequest;
-import com.openexchange.tools.session.ServerSession;
 
-public abstract class AbstractExportAction implements AJAXActionService {
+@DispatcherNotes(defaultFormat="file")
+public class VCardExportAction extends AbstractExportAction {
+
+	private Exporter exporter;
 
 	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-		return perform(new ExportRequest(requestData, session));
+	public Format getFormat() {
+		return Format.VCARD;
 	}
 
-	public abstract Format getFormat();
-
-	public abstract Exporter getExporter();
-
-	private AJAXRequestResult perform(ExportRequest req) throws OXException {
-		SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), I2i(req.getColumns()), null);
-				
-		AJAXRequestResult result = new AJAXRequestResult();
-		result.setResultObject(new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export."+sis.getFormat().getExtension()), "file");
-		return result;
+	@Override
+	public Exporter getExporter() {
+		if(this.exporter == null)
+			exporter = new VCardExporter();
+		return exporter;
 	}
+
 }

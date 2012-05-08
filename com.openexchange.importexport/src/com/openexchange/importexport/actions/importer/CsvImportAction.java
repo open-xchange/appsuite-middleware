@@ -1,4 +1,4 @@
-package com.openexchange.importexport.actions;
+package com.openexchange.importexport.actions.importer;
 
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.CSVContactImporter;
