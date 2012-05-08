@@ -1,0 +1,66 @@
+<html>
+<head>
+
+<script>
+
+
+	function $(id) {
+		return document.getElementById(id);
+	}
+
+	function login() {
+          try {
+              var xmlhttp = null;
+              try {
+                  xmlhttp = new XMLHttpRequest();
+              } catch (e) {
+                  try {
+                      xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+                  } catch (e) {
+                      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                  }
+              }
+		       // ask server for credentials
+              xmlhttp.open("GET", "/ajax/iframe_info?session="+parent.session, false);             
+             
+              xmlhttp.send("");
+              var error;
+              if (xmlhttp.status == 200) {
+                  var reply = Function("return " + xmlhttp.responseText)();
+                  if (!reply.error) {
+                  var username_data =  reply.data.login ; // web999p1@sigma
+                  username_data = username_data.split("@");
+                  var username =  username_data[0];
+                  //username = username.match(/web\d+(p.*)/)[1];
+                   var password =  reply.data.password ;
+				   var tmp_data =  reply.data.context_name ; // web999_sigma
+                   // now we need sigma as server name for the http post url and web999 for the login username
+                   var ctx_data = tmp_data.split("_");
+                   //final_username = ctx_data[0]+""+username; // web999p1
+                   var server_name = ctx_data[1]; // sigma
+                   $("username").value=username;
+                   $("password").value=password;
+                   $("loginform").action="https://"+server_name+".ibone.ch/login.php?redirect=passwd";
+                   $("loginform").submit();
+                  } else error = reply.error;
+              } else error = xmlhttp.statusText;
+          } catch (e) {
+              error = e.message;
+          }          
+          
+      }
+
+      
+
+
+</script>
+</head>
+<body onload="login();">
+<FORM name="loginform" action="https://sigma.ibone.ch/login.php" method="POST" id="loginform">
+<input type="hidden" id="username" name="username" value="">
+<input type="hidden" id="password" name="password" value="">
+<input type="hidden" id="redirect" name="redirect" value="passwd">
+</FORM>
+</body>
+
+</html>

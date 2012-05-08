@@ -1,0 +1,137 @@
+<html>
+  <script>
+
+
+      
+      function gup( name )
+      {
+          name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+          var regexS = "[\\?&]"+name+"=([^&#]*)";
+          var regex = new RegExp( regexS );
+          var results = regex.exec( window.location.href );
+          if( results == null )
+              return "";
+          else
+              return results[1];
+      }
+
+
+      // Actual Login 
+      function login(login_type) {
+          try {
+          
+              var xmlhttp = null;
+              try {
+                  xmlhttp = new XMLHttpRequest();
+              } catch (e) {
+                  try {
+                      xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+                  } catch (e) {
+                      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                  }
+              }
+              if(login_type=="auto"){
+              	xmlhttp.open("GET", "/ajax/login?action=autologin", false);
+              	xmlhttp.send("");
+              }else{
+              	xmlhttp.open("POST", "/ajax/login?action=login", false);
+              	xmlhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");              	
+              	var username_ = document.getElementById("username").value+"@"+gup("server");
+                xmlhttp.send("name="+ encodeURIComponent(username_)+ "&password="+ encodeURIComponent(document.getElementById("password").value));
+              }
+
+              
+              var error;
+              if (xmlhttp.status == 200) {
+                  var reply = Function("return " + xmlhttp.responseText)();
+                  if (!reply.error) {                     
+                      top.location="/"+location.hash;
+                      return false;
+                  } else {
+                    if(reply.error == "Invalid credentials."){
+                        error = "Anmeldung fehlgeschlagen!";
+                    } else if(reply.error == "Updating database ... Try again later."){
+                        error = "Datenbank wird aktualisiert. Bitte später versuchen!";
+                    } else{
+                        error = reply.error;
+                    }
+                        
+        
+                  }
+              } else{
+                  if (xmlhttp.statusText == "Service Temporarily Unavailable"){
+                        error = "Service nicht erreichbar. Bitte Administrator benachrichtigen!"        
+                  }else{
+                        error = xmlhttp.statusText;
+                  }
+              }
+              
+              
+          } catch (e) {
+              error = e.message;
+          }
+          
+          if(login_type!="auto"){
+          	document.getElementById("error").firstChild.data = error;
+          	document.getElementById("error").style.display = "block";
+          }
+          return false;
+      }
+
+
+  </script>
+  <head>
+    <style type="text/css">
+
+     body {
+        background-color: #f5f4f0;
+        font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+        font-size: 11px;
+        padding: 10px;
+     }
+
+
+     input {
+        font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+        font-size: 11px;
+     }
+     
+     td {
+       font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+       font-size: 11px;
+     }
+     
+
+    </style>  
+    <title>Dynamic Net & Open-Xchange </title>
+  </head>
+  <body onload="login('auto')">
+  <TABLE border=0 cellPadding=2 cellSpacing=2 align="center" width="100%">
+    <form onsubmit="return login()">
+      <tr>
+       <td width="20%">&nbsp;</TD>
+       <td width="80%" align="left">
+        <div id="error" style="display: none; color: red">&nbsp;</div>
+       </td>
+      </tr>
+      <TR>
+        <TD width="20%" align="right">Login:</TD>
+        <TD width="80%"><input type="text" id="username" name="username" value=""></TD>
+      </TR>
+      <TR>
+        <TD width="20%" align="right">Passwort:</TD>
+        <TD width="80%"><input type="password" name="password" id="password" maxlength="12"></TD>
+      </TR>
+      <TR>
+       <TD width="20%">
+       &nbsp;
+       </TD>
+        <TD width="80%" align="left">
+        <input name="loginbutton" value="Login" type="submit">
+       </TD>
+      </TR>
+    </form>
+     </TABLE>
+</body>
+
+</html>

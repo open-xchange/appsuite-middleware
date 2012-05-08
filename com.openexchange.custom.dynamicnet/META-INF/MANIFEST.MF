@@ -1,0 +1,43 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Dynamic Net Authentication
+Bundle-SymbolicName: com.openexchange.custom.dynamicnet
+Bundle-Version: 6.20.4.0
+Bundle-Activator: com.openexchange.custom.dynamicnet.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.writer,
+ com.openexchange.authentication,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.notify.hostname,
+ com.openexchange.log,
+ com.openexchange.mail,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.sessiond.event,
+ com.openexchange.tools.service,
+ com.openexchange.tools.servlet.http,
+ com.openexchange.tools.session,
+ com.openexchange.tools.ssl,
+ com.openexchange.tools.stream,
+ javax.mail,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.apache.commons.logging.impl,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker
+
