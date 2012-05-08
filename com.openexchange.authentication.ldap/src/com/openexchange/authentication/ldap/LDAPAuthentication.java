@@ -50,7 +50,6 @@
 package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
-
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
@@ -63,15 +62,13 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -146,6 +143,11 @@ public class LDAPAuthentication implements AuthenticationService {
                 return null == returnstring ? splitted[1] : returnstring;
             }
         };
+    }
+
+    @Override
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.NOT_SUPPORTED.create(LDAPAuthentication.class.getName());
     }
 
     /**

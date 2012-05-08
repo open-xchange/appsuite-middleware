@@ -431,8 +431,6 @@ public final class ServerActivator extends HousekeepingActivator {
          *     new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
          */
 
-        // Search for AuthenticationService
-        track(AuthenticationService.class, new AuthenticationCustomizer(context));
         // Search for ConfigJumpService
         track(
             ConfigJumpService.class,
