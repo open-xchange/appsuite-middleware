@@ -53,9 +53,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
@@ -69,7 +69,7 @@ import com.openexchange.i18n.LocaleTools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserizedFolderImpl implements UserizedFolder {
+public final class UserizedFolderImpl implements UserizedFolder, FolderExtension {
 
     private static final long serialVersionUID = 5090343231211791986L;
 
@@ -354,6 +354,14 @@ public final class UserizedFolderImpl implements UserizedFolder {
     @Override
     public String getSummary() {
         return folder.getSummary();
+    }
+
+    @Override
+    public int[] getTotalAndUnread() {
+        if (folder instanceof FolderExtension) {
+            return ((FolderExtension) folder).getTotalAndUnread();
+        }
+        return null;
     }
 
     @Override

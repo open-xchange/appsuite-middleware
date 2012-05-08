@@ -1,6 +1,7 @@
 * 2012-05-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 21766: Fixed parsing of IMAP STATUS response if folder full name contains an opening parenthesis
+ - Fix for bug 21891: Simultaneously execute STATUS for MESSAGE and UNREAD
 
 * 2012-05-07 - tobias.friedrich@open-xchange.com
 
