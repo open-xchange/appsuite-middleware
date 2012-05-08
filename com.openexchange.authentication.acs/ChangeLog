@@ -1,0 +1,11 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2008-07-03 - benjamin.otterbach@open-xchange.com
+
+  - Upgraded ACS LoginImpl to SP4 OSGi architecture.
+
+* 2007-08-06 - marcus.klein@open-xchange.com
+
+  - Initial Implementation.
