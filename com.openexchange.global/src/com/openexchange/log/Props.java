@@ -51,6 +51,7 @@ package com.openexchange.log;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 
 /**
  * {@link Props} - The log properties associated with a certain {@link Thread thread}.
@@ -58,6 +59,8 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Props {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Props.class);
 
     private final Map<String, Object> map;
 
@@ -98,7 +101,13 @@ public final class Props {
      */
     @SuppressWarnings("unchecked")
     public <V> V get(final String name) {
-        return (V) map.get(name);
+        final Object val = map.get(name);
+        try {
+            return (V) val;
+        } catch (final ClassCastException e) {
+            LOG.warn("Type mismatch", e);
+            return null;
+        }
     }
 
     /**
