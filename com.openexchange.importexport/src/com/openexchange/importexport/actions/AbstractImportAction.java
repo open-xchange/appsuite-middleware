@@ -10,10 +10,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.importexport.ImportWriter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.json.ImportRequest;
+import com.openexchange.importexport.json.ImportWriter;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.tools.session.ServerSession;
 

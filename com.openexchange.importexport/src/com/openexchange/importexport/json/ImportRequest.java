@@ -41,7 +41,7 @@ public class ImportRequest {
 		this.request = request;
 
 		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
-			throw new OXException(); //TODO
+			throw ImportExportExceptionCodes.NEED_FOLDER.create();
 		}
 		this.folders = Arrays.asList(request.getParameter(AJAXServlet.PARAMETER_FOLDERID).split(","));
 

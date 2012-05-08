@@ -46,21 +46,77 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.importexport.actions;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.importexport.formats.Format;
+package com.openexchange.importexport.json;
 
-public class ExportActionFactory  extends AbstractIEActionFactory{
+import java.util.LinkedList;
+import java.util.List;
 
-    @Override
-    protected Map<Format, AJAXActionService> getActions(){
-    	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CsvExportAction());
-//    		put(Format.VCARD, new VcardExportAction());
-    	}};
-    }
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
+public class ExportRequest {
+	
+	private ServerSession session;
+	private AJAXRequestData request;
+	private String folder;
+	private List<Integer> columns;
+
+	public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
+		this.setSession(session);
+		this.setRequest(request);
+
+		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
+			throw ImportExportExceptionCodes.NEED_FOLDER.create();
+		}
+		String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+		if(colStr != null){
+			String[] split = colStr.split(",");
+			setColumns(new LinkedList<Integer>());
+			for(String s: split){
+				try {
+					getColumns().add(Integer.parseInt(s));
+				} catch (NumberFormatException e) {
+					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(s);
+				}
+			}
+		}
+		this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+
+	}
+
+	public String getFolder() {
+		return folder;
+	}
+
+	public void setFolder(String folder) {
+		this.folder = folder;
+	}
+
+	public AJAXRequestData getRequest() {
+		return request;
+	}
+
+	public void setRequest(AJAXRequestData request) {
+		this.request = request;
+	}
+
+	public ServerSession getSession() {
+		return session;
+	}
+
+	public void setSession(ServerSession session) {
+		this.session = session;
+	}
+
+	public List<Integer> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(List<Integer> columns) {
+		this.columns = columns;
+	}
 }

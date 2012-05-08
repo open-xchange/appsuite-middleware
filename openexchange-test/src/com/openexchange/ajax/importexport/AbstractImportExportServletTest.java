@@ -125,9 +125,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException{
 		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 
-		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
-		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
-		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.DISPLAY_NAME.getNumber());
+		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber()+","+ContactField.EMAIL1.getNumber()+","+ContactField.DISPLAY_NAME.getNumber());
 		return bob.toString();
 	}
 

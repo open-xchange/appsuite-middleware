@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.importexport;
+package com.openexchange.importexport.json;
 
 import java.util.Iterator;
 import java.util.List;

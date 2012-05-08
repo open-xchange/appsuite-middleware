@@ -46,21 +46,33 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.importexport.actions;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.importexport.exporters.AbstractExportAction;
+import com.openexchange.importexport.exporters.CSVContactExporter;
+import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 
-public class ExportActionFactory  extends AbstractIEActionFactory{
+@DispatcherNotes(defaultFormat="file")
+public class CsvExportAction extends AbstractExportAction implements
+		AJAXActionService {
 
-    @Override
-    protected Map<Format, AJAXActionService> getActions(){
-    	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CsvExportAction());
-//    		put(Format.VCARD, new VcardExportAction());
-    	}};
-    }
+	private Exporter exporter;
+
+	@Override
+	public Format getFormat() {
+		return Format.CSV;
+	}
+
+	@Override
+	public Exporter getExporter() {
+		if(this.exporter == null){
+			exporter = new CSVContactExporter();
+		}
+		return exporter;
+	}
 
 }

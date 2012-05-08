@@ -148,6 +148,10 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 	
 	public static final String TEMP_FILE_NOT_FOUND_MSG = "Could not find the temp file needed for the conversion.";
 
+	public static final String NEED_FOLDER_MSG = "Missing parameter for folder";
+	
+	public static final String IRREGULAR_COLUMN_ID_MSG ="Columns should be numbers, could not convert %s into number";
+	
     private ImportExportExceptionMessages() {
         super();
     }
