@@ -140,8 +140,8 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
         this.info = info;
         this.accountId = info.accountId;
         this.userId = info.userId;
-        this.contextId = info.contextId;
-        storageAccess = new StorageAccess(info);
+        this.contextId = info.contextId;        
+        this.storageAccess = new StorageAccess(info);
     }
 
     @Override
@@ -150,7 +150,7 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
     }
 
     @Override
-    public final void performJob() throws OXException, InterruptedException {
+    public final void performJob() throws OXException, InterruptedException {        
         try {
             performMailJob();
         } finally {

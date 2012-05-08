@@ -1,3 +1,15 @@
+open-xchange-indexing (6.21.0-3) unstable; urgency=low
+
+  * Build for Rev. 3
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 07 May 2012 15:45:00 +0100
+
+open-xchange-indexing (6.21.0-2) unstable; urgency=low
+
+  * Build for Rev. 2
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 07 May 2012 15:00:00 +0100
+
 open-xchange-indexing (6.21.0-1) unstable; urgency=low
 
   * Initial release

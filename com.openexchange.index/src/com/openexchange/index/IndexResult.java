@@ -64,7 +64,7 @@ public interface IndexResult<V> {
 	 * 
 	 * @return The total number of results.
 	 */
-	long getNumFound();
+	int getNumFound();
 	
 	/**
 	 * Gets the requested results as specified by {@link QueryParameters}'s paging.

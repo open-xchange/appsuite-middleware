@@ -2,10 +2,16 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.langdetect"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index.solr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.indexedSearch.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.langdetect"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.smal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.smal.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.messaging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.solr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mdns"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mq"/>
 </provider>
 </psf>

@@ -47,67 +47,44 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.index.solr;
 
-import java.util.List;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexResult;
-import com.openexchange.mail.dataobjects.MailMessage;
+import java.util.Map;
+import java.util.Set;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+
 
 /**
- * {@link MailIndexResult} - The mail <code>IndexResult</code>.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link MockQueryResponse}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class MailIndexResult implements IndexResult<MailMessage> {
-
-    private int numFound;
-
-    private List<IndexDocument<MailMessage>> mails;
-
-    /**
-     * Initializes a new {@link MailIndexResult}.
-     */
-    public MailIndexResult() {
-        this(0);
-    }
-
-    /**
-     * Initializes a new {@link MailIndexResult}.
-     * 
-     * @param numFound The <code>numFound</code> to set
-     */
-    public MailIndexResult(final int numFound) {
+public class MockQueryResponse extends QueryResponse {
+    
+    private static final long serialVersionUID = -2792639362830739756L;
+    
+    private final Set<Map<String, Object>> entries;
+    
+    
+    public MockQueryResponse(Set<Map<String, Object>> entries) {
         super();
-        this.numFound = numFound;
+        this.entries = entries;
     }
-
-    @Override
-    public int getNumFound() {
-        return numFound;
+    
+    public SolrDocumentList getResults() {
+        SolrDocumentList documents = new SolrDocumentList();
+        for (Map<String, Object> entry : entries) {
+            SolrDocument document = new SolrDocument();
+            for (String key : entry.keySet()) {
+                Object value = entry.get(key);
+                document.addField(key, value);
+            }
+            documents.add(document);
+        }
+        
+        return documents;
     }
-
-    /**
-     * Sets the <code>numFound</code>
-     * 
-     * @param numFound The <code>numFound</code> to set
-     */
-    public void setNumFound(final int numFound) {
-        this.numFound = numFound;
-    }
-
-    @Override
-    public List<IndexDocument<MailMessage>> getResults() {
-        return mails;
-    }
-
-    /**
-     * Sets the mails
-     * 
-     * @param mails The mails to set
-     */
-    public void setResults(final List<IndexDocument<MailMessage>> mails) {
-        this.mails = mails;
-    }
-
+    
 }

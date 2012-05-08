@@ -473,10 +473,12 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
 
         try {
-            stopCore(identifier);
-        } catch (final OXException e) {
+            if (hasActiveCore(identifier)) {
+                stopCore(identifier);
+            }
+        } catch (OXException e) {
             LOG.error("Could not stop core " + identifier.toString(), e);
-        }
+        }        
     }
 
     private String getConfigFileByModule(final int module) throws OXException {

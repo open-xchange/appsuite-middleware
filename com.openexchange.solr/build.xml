@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.solr overrides">
+    <description>
+        Creates the necessary solr directory within the ox home directory.
+    </description>
+
+    <import file="build-project.xml"/>
+	
+	<property name="solrDir" value="solr" />
+	
+	<target name="prepare">
+		<antcall target="createSolrDir" />
+	</target>
+	
+	<target name="createSolrDir">
+		<copydir src="${solrDir}" dest="${destDir}/${prefix}/${solrDir}" />
+	</target>
+</project>

@@ -1,5 +1,0 @@
-opt/open-xchange/bundles
-opt/open-xchange/etc/groupware/osgi/bundle.d
-opt/open-xchange/etc/groupware/settings
-var/www/ox6/plugins/com.openexchange.custom.dynamicnet
-var/www/ox6
