@@ -59,21 +59,26 @@ import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.log.LogFactory;
 
-
 /**
  * {@link HTTPServletRegistration}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
 
     private final Servlet servlet;
+
     private final String alias;
 
-
+    /**
+     * Initializes a new {@link HTTPServletRegistration}.
+     * 
+     * @param context The bundle context
+     * @param alias The Servlet's alias
+     * @param servlet The Servlet instance to register/de-register on {@link HttpService} presence/absence
+     */
     public HTTPServletRegistration(final BundleContext context, final String alias, final Servlet servlet) {
         super(context, HttpService.class, null);
         this.alias = alias;
@@ -103,7 +108,7 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
 
     public void unregister() {
         close();
-        if(getService() != null) {
+        if (getService() != null) {
             final HttpService service = getService();
             service.unregister(alias);
         }
