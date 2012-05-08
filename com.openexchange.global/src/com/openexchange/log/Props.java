@@ -101,9 +101,8 @@ public final class Props {
      */
     @SuppressWarnings("unchecked")
     public <V> V get(final String name) {
-        final Object val = map.get(name);
         try {
-            return (V) val;
+            return (V) map.get(name);
         } catch (final ClassCastException e) {
             LOG.warn("Type mismatch", e);
             return null;
