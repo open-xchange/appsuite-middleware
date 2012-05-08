@@ -464,7 +464,7 @@ public final class FolderWriter {
                     }
                 }
                 final int obj = folder.getUnread();
-                jsonPutter.put(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
+                jsonPutter.putIfAbsent(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
         m.put(FolderField.DELETED.getColumn(), new FolderFieldWriter() {
