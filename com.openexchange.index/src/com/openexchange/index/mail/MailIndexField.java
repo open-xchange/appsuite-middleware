@@ -52,6 +52,7 @@ package com.openexchange.index.mail;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.index.IndexField;
 import com.openexchange.mail.MailField;
@@ -119,7 +120,7 @@ public enum MailIndexField implements IndexField {
         return indexableMailFields.toArray(new MailField[indexableMailFields.size()]);
     }
     
-    public static MailIndexField[] getFor(final MailField[] mailFields) {
+    public static Set<MailIndexField> getFor(final MailField[] mailFields) {
         final EnumSet<MailIndexField> indexFields = EnumSet.noneOf(MailIndexField.class);
         for (final MailField mailField : mailFields) {
             final EnumSet<MailIndexField> enumSet = reverseMap.get(mailField);
@@ -128,7 +129,7 @@ public enum MailIndexField implements IndexField {
             }
         }
         
-        return indexFields.toArray(new MailIndexField[indexFields.size()]);
+        return indexFields;
     }
     
     public static MailIndexField getFor(final MailField mailField) {

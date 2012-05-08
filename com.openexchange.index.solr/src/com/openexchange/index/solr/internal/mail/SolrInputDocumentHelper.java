@@ -228,6 +228,7 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
     public static void setFieldInDocument(final SolrInputDocument inputDocument, final SolrMailField field, final Object value) {
         final String fieldName = field.solrName();
         if (fieldName != null) {
+            inputDocument.remove(fieldName);
             inputDocument.addField(field.solrName(), value);
         }
     }

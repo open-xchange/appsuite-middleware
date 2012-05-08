@@ -112,8 +112,8 @@ readProp() {
     fi
 }
 
-CACHECCF=$OXPREFIX/etc/groupware/cache.ccf
-SESSIONCACHECCF=$OXPREFIX/etc/groupware/sessioncache.ccf
+CACHECCF=$OXPREFIX/etc/cache.ccf
+SESSIONCACHECCF=$OXPREFIX/etc/sessioncache.ccf
 
 
 
@@ -159,16 +159,16 @@ if [ -n "$SESSIONLPORT" ] && [ -n "$SERVERLPORT" ] && \
       echo
 fi
 
-ADMINCACHECCF=$OXPREFIX/etc/admindaemon/cache.ccf
-ADMINSYSTEMPROPS=$OXPREFIX/etc/admindaemon/system.properties
+ADMINCACHECCF=$OXPREFIX/etc/cache.ccf
+ADMINSYSTEMPROPS=$OXPREFIX/etc/system.properties
 
 if [ -s $ADMINSYSTEMPROPS ]; then
     ADMINCACHECCFPATH=$(readProp com.openexchange.caching.configfile $ADMINSYSTEMPROPS)
     if [ -z "$ADMINCACHECCFPATH" ] || \
-	[ "$ADMINCACHECCFPATH" != "etc/admindaemon/cache.ccf" ]; then
+	[ "$ADMINCACHECCFPATH" != "etc/cache.ccf" ]; then
 	warn "com.openexchange.caching.configfile in $ADMINSYSTEMPROPS is either empty"
 	warn "or contains the wrong path."
-	warn "correct path must be etc/admindaemon/cache.ccf"
+	warn "correct path must be etc/cache.ccf"
     fi
 fi
 

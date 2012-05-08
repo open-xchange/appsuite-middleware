@@ -51,8 +51,6 @@ package com.openexchange.index.solr.internal;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -69,8 +67,6 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSolrIndexAccess.class));
 
     protected final int contextId;
 
@@ -142,11 +138,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     protected UpdateResponse addDocument(final SolrInputDocument document, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.add(identifier, document, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
-        }
-        
+        final UpdateResponse response = accessService.add(identifier, document, commit);        
         return response;
     }
     
@@ -154,32 +146,20 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         final UpdateResponse response = accessService.add(identifier, documents, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
-        }
-        
         return response;
     }
     
     protected UpdateResponse commit() throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.commit(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
-        }
-        
+        final UpdateResponse response = accessService.commit(identifier);        
         return response;
     }
     
     protected UpdateResponse optimize() throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.optimize(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
-        }
-        
+        final UpdateResponse response = accessService.optimize(identifier);        
         return response;
     }
     
@@ -187,21 +167,13 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
         final UpdateResponse response = accessService.deleteById(identifier, id, true);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete by id took " + response.getElapsedTime() + "ms.");
-        }
-        
         return response;
     }
     
     protected SolrResponse deleteDocumentsByQuery(final String query) throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.deleteByQuery(identifier, query, true);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete by query took " + response.getElapsedTime() + "ms.");
-        }
-        
+        final UpdateResponse response = accessService.deleteByQuery(identifier, query, true);        
         return response;
     }
     
@@ -209,10 +181,6 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
         final QueryResponse response = accessService.query(identifier, query);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Query took " + response.getElapsedTime() + "ms.");
-        }
-        
         return response;
     }
 

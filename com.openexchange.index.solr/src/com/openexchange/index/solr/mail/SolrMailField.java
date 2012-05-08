@@ -179,7 +179,7 @@ public enum SolrMailField {
         return solrField;
     }
 
-    public static SolrMailField[] solrMailFieldsFor(final MailIndexField[] indexFields) {
+    public static SolrMailField[] solrMailFieldsFor(final Set<MailIndexField> indexFields) {
         final List<SolrMailField> solrFields = new ArrayList<SolrMailField>();
         for (final MailIndexField indexField : indexFields) {
             final SolrMailField solrField = fieldMapping.get(indexField);
