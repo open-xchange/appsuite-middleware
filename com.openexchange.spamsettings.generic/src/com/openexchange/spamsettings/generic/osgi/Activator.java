@@ -2,7 +2,7 @@
 package com.openexchange.spamsettings.generic.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
  * {@link Activator}
@@ -13,7 +13,6 @@ public class Activator extends CompositeBundleActivator {
 
     private static final BundleActivator[] ACTIVATORS = { new PreferencesActivator(), new ServletActivator() };
 
-    @Override
     protected BundleActivator[] getActivators() {
         return ACTIVATORS;
     }

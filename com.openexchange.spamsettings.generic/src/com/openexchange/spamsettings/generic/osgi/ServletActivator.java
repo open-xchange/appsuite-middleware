@@ -4,12 +4,9 @@ package com.openexchange.spamsettings.generic.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spamsettings.generic.preferences.SpamSettingsModulePreferences;
-import com.openexchange.spamsettings.generic.service.SpamSettingExceptionFactory;
 import com.openexchange.spamsettings.generic.service.SpamSettingService;
 
 /**
@@ -19,10 +16,6 @@ public class ServletActivator extends DeferredActivator {
 
     private static transient final Log LOG = LogFactory.getLog(ServletActivator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SpamSettingService.class };
-
-    private ComponentRegistration componentRegistration;
-
     private SpamSettingsServletRegisterer servletRegisterer;
 
     public ServletActivator() {
@@ -31,7 +24,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, SpamSettingService.class };
     }
 
     @Override
@@ -58,8 +51,6 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        componentRegistration = new ComponentRegistration(context, new StringComponent("SSG"), "com.openexchange.spamsetting.generic", SpamSettingExceptionFactory.getInstance());
-
         final ServiceRegistry registry = SpamSettingsServiceRegistry.getServiceRegistry();
         registry.clearRegistry();
         final Class<?>[] classes = getNeededServices();
@@ -71,16 +62,10 @@ public class ServletActivator extends DeferredActivator {
         }
         servletRegisterer = new SpamSettingsServletRegisterer();
         servletRegisterer.registerServlet();
-
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if(componentRegistration != null) {
-            componentRegistration.unregister();
-        }
-
-
         servletRegisterer.unregisterServlet();
         servletRegisterer = null;
         SpamSettingsModulePreferences.setModule(false);

@@ -15,12 +15,14 @@ import com.openexchange.spamsettings.generic.preferences.SpamSettingsModulePrefe
  */
 public class PreferencesActivator implements BundleActivator {
 
-    private ServiceRegistration userConfigFlagRegistration;
+    private ServiceRegistration<PreferencesItemService> userConfigFlagRegistration;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
-        userConfigFlagRegistration = context.registerService(PreferencesItemService.class.getName(), new SpamSettingsModulePreferences(), null);
+        userConfigFlagRegistration = context.registerService(PreferencesItemService.class, new SpamSettingsModulePreferences(), null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         userConfigFlagRegistration.unregister();
         userConfigFlagRegistration = null;

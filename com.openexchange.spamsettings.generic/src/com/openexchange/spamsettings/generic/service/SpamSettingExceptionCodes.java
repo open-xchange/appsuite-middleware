@@ -1,23 +1,25 @@
 
 package com.openexchange.spamsettings.generic.service;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SpamSettingExceptionCodes} - Enumeration of all {@link SpamSettingException}s.
  * 
  * @author francisco.laguna@open-xchange.com
  */
-public enum SpamSettingExceptionCodes implements OXErrorMessage {
+public enum SpamSettingExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SpamSettingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
-    COULD_NOT_COERCE_VALUE(SpamSettingExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, Category.CODE_ERROR, 2),
-    CAN_NOT_DEFINE_METADATA(SpamSettingExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, Category.CODE_ERROR, 3),
-    CAN_NOT_SET_PROPERTY(SpamSettingExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CODE_ERROR, 4),
+    UNEXPECTED_ERROR(SpamSettingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    COULD_NOT_COERCE_VALUE(SpamSettingExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, CATEGORY_ERROR, 2),
+    CAN_NOT_DEFINE_METADATA(SpamSettingExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, CATEGORY_ERROR, 3),
+    CAN_NOT_SET_PROPERTY(SpamSettingExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, CATEGORY_ERROR, 4),
     ;
 
     private final Category category;
@@ -32,51 +34,60 @@ public enum SpamSettingExceptionCodes implements OXErrorMessage {
         this.category = category;
     }
 
+    private static final String PREFIX = "SPAM_SETTING"; // aka "SSG"
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
-    public int getDetailNumber() {
+    @Override
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
-    private static final Object[] EMPTY = new Object[0];
-
-    /**
-     * Creates a new file storage exception of this error type with no message arguments.
-     * 
-     * @return A new twitter exception
-     */
-    public SpamSettingException create() {
-        return SpamSettingExceptionFactory.getInstance().create(this, EMPTY);
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified message arguments.
+     * Creates an {@link OXException} instance using this error code.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance.
      */
-    public SpamSettingException create(final Object... messageArgs) {
-        return SpamSettingExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return create(new Object[0]);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified cause and message arguments.
+     * Creates an {@link OXException} instance using this error code.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param logArguments The arguments for log message.
+     * @return The newly created {@link OXException} instance.
      */
-    public SpamSettingException create(final Throwable cause, final Object... messageArgs) {
-        return SpamSettingExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... logArguments) {
+        return create(null, logArguments);
+    }
+
+    /**
+     * Creates an {@link OXException} instance using this error code.
+     * 
+     * @param cause The initial cause for {@link OXException}
+     * @param arguments The arguments for message.
+     * @return The newly created {@link OXException} instance.
+     */
+    public OXException create(final Throwable cause, final Object... arguments) {
+        return OXExceptionFactory.getInstance().create(this, cause, arguments);
     }
 }

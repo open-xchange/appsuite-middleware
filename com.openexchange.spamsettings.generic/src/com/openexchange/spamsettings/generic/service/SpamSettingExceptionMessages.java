@@ -1,7 +1,7 @@
 
 package com.openexchange.spamsettings.generic.service;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SpamSettingExceptionMessages} - Exception messages for {@link SpamSettingException} that needs to be translated.

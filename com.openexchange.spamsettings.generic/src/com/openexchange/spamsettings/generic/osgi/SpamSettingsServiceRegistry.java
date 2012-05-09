@@ -1,7 +1,7 @@
 
 package com.openexchange.spamsettings.generic.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link SpamSettingsServiceRegistry} - A registry for services

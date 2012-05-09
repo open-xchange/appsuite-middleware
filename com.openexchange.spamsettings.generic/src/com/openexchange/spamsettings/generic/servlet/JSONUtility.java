@@ -2,7 +2,8 @@
 package com.openexchange.spamsettings.generic.servlet;
 
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * 
@@ -17,12 +18,12 @@ public class JSONUtility {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>String</code> value
-     * @throws AjaxException If parameter is not present or invalid in given request
+     * @throws OXException If parameter is not present or invalid in given request
      */
-    protected static String checkStringParameter(final HttpServletRequest request, final String parameterName) throws AjaxException {
+    protected static String checkStringParameter(final HttpServletRequest request, final String parameterName) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp || 0 == tmp.length()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameterName);
         }
         return tmp;
     }
