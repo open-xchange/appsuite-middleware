@@ -179,6 +179,7 @@ public final class FolderWriter {
         @Override
         public void put(final String key, final Object value) throws JSONException {
             jsonArray.put(value);
+            keys.add(key);
         }
 
         @Override
