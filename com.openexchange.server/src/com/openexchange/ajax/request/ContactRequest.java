@@ -613,10 +613,7 @@ public class ContactRequest {
         }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
-        int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
-        if (rightHandLimit == 0) {
-            rightHandLimit = 50000;
-        }
+        final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 
         timestamp = new Date(0);
 
