@@ -58,16 +58,14 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.sms.osgi.MessagingSMSServiceRegistry;
 import com.openexchange.messaging.sms.service.MessagingNewService;
 import com.openexchange.messaging.sms.service.MessagingUserConfigurationInterface;
-import com.openexchange.messaging.sms.service.SMSMessagingException;
 import com.openexchange.messaging.sms.service.SMSMessagingExceptionCodes;
 import com.openexchange.messaging.sms.service.SMSMessagingMessage;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -75,16 +73,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MessagingSMSServlet extends PermissionServlet {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1541427953784271108L;
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessagingSMSServlet.class);
 
-    /**
-     * Initializes
-     */
     public MessagingSMSServlet() {
         super();
     }
@@ -128,19 +120,16 @@ public final class MessagingSMSServlet extends PermissionServlet {
 
                 obj.put("display_string", userConfig.getDisplayString());
             }
-        } catch (final AjaxException e) {
+        } catch (final OXException e) {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
         } catch (final JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
-            response.setException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e));
+            response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         } catch (final RuntimeException e) {
-            final SMSMessagingException create = SMSMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            LOG.error(create.getLocalizedMessage(), create);
+            final OXException create = SMSMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            LOG.error(create.getMessage(), create);
             response.setException(create);
-        } catch (MessagingException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
         }
 
         response.setData(obj);
@@ -191,15 +180,12 @@ public final class MessagingSMSServlet extends PermissionServlet {
                     response.setException(SMSMessagingExceptionCodes.UNEXPECTED_ERROR.create("Error while getting MessagingAccountTransport"));
                 }
             }
-        } catch (MessagingException e) {
-            LOG.error("Error during transmit of sms message", e);
-            response.setException(e);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
         } catch (final JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
-            response.setException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e));
+            response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         }
         // Close response and flush print writer
         try {

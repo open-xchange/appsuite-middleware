@@ -49,31 +49,20 @@
 
 package com.openexchange.messaging.sms.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * 
  * {@link MessagingSMSServiceRegistry} - A registry for services 
- * 
-*/
+ */
 public final class MessagingSMSServiceRegistry {
 
 	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
-	/**
-	 * Gets the service registry
-	 * 
-	 * @return The service registry
-	 */
 	public static ServiceRegistry getServiceRegistry() {
 		return REGISTRY;
 	}
 
-	/**
-	 * Initializes a new {@link MessagingSMSServiceRegistry}
-	 */
 	private MessagingSMSServiceRegistry() {
 		super();
 	}
-
 }

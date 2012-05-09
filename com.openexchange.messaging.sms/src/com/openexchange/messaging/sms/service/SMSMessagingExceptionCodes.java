@@ -49,52 +49,43 @@
 
 package com.openexchange.messaging.sms.service;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SMSMessagingExceptionCodes} - Enumeration of all {@link SMSMessagingException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public enum SMSMessagingExceptionCodes implements OXErrorMessage {
+public enum SMSMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SMSMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
-    
-    
-    ;
-    
+    UNEXPECTED_ERROR(SMSMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1);
 
     private final Category category;
 
-    private final int detailNumber;
+    private final int number;
 
     private final String message;
 
-    private SMSMessagingExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SMSMessagingExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
-        this.detailNumber = detailNumber;
+        this.number = number;
         this.category = category;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
-    }
-
-    public int getDetailNumber() {
-        return detailNumber;
-    }
-
-    public String getHelp() {
-        return null;
     }
 
     /**
@@ -103,8 +94,8 @@ public enum SMSMessagingExceptionCodes implements OXErrorMessage {
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
-    public SMSMessagingException create(final Object... messageArgs) {
-        return SMSMessagingExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create(final Object... messageArgs) {
+        return OXExceptionFactory.getInstance().create(this, messageArgs);
     }
 
     /**
@@ -114,7 +105,22 @@ public enum SMSMessagingExceptionCodes implements OXErrorMessage {
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
-    public SMSMessagingException create(final Throwable cause, final Object... messageArgs) {
-        return SMSMessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Throwable cause, final Object... messageArgs) {
+        return OXExceptionFactory.getInstance().create(this, cause, messageArgs);
+    }
+
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public String getPrefix() {
+        return "SMS-MSG";
     }
 }
