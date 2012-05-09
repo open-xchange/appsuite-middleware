@@ -436,7 +436,7 @@ public final class FolderWriter {
                     }
                 }
                 final int obj = folder.getTotal();
-                jsonPutter.putIfAbsent(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
+                jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
         m.put(FolderField.NEW.getColumn(), new FolderFieldWriter() {
@@ -464,7 +464,7 @@ public final class FolderWriter {
                     }
                 }
                 final int obj = folder.getUnread();
-                jsonPutter.putIfAbsent(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
+                jsonPutter.put(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
         m.put(FolderField.DELETED.getColumn(), new FolderFieldWriter() {
