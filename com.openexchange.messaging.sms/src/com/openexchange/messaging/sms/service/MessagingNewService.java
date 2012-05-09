@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.sms.service;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,9 +68,9 @@ public interface MessagingNewService {
      * 
      * @param session can't be null
      * @return An implementation of MessagingUserConfigurationInterface
-     * @throws MessagingException if creating the configuration fails in some way.
+     * @throws OXException if creating the configuration fails in some way.
      */
-    public MessagingUserConfigurationInterface getUserConfiguration(final Session session) throws MessagingException;
+    public MessagingUserConfigurationInterface getUserConfiguration(final Session session) throws OXException;
     
     /**
      * Gets the account transport for specified account identifier.
@@ -78,8 +78,8 @@ public interface MessagingNewService {
      * @param accountId The account identifier (not used now
      * @param session The session providing needed user data
      * @return The account transport for specified account identifier
-     * @throws MessagingException If account transport cannot be returned for given account identifier
+     * @throws OXException If account transport cannot be returned for given account identifier
      */
-    public MessagingAccountTransport getAccountTransport(int accountId, final ServerSession session) throws MessagingException;
+    public MessagingAccountTransport getAccountTransport(int accountId, final ServerSession session) throws OXException;
 
 }
