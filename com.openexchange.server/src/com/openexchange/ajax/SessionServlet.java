@@ -96,6 +96,7 @@ import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -140,6 +141,8 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final Lock RANGE_LOCK = new ReentrantLock();
 
+    private static SubnetMask allowedSubnet;
+
     protected SessionServlet() {
         super();
     }
@@ -151,6 +154,9 @@ public abstract class SessionServlet extends AJAXServlet {
             checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
             hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
             clientWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
+            String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
+            String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
+            allowedSubnet = new SubnetMask(ipMaskV4, ipMaskV6);
         }
         initRanges(config);
     }
@@ -442,7 +448,7 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void checkIP(final boolean doCheck, final Queue<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             // IP is missing or changed
-            if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
+            if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
                 // kick client with changed IP address
                 if (INFO) {
                     final StringBuilder sb = new StringBuilder(96);
@@ -452,7 +458,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     sb.append(session.getLocalIp());
                     sb.append(" to ");
                     sb.append((null == actual ? "<missing>" : actual));
-                    sb.append(" and is not covered by IP white-list.");
+                    sb.append(" and is not covered by IP white-list or netmask.");
                     LOG.info(sb.toString());
                 }
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create();

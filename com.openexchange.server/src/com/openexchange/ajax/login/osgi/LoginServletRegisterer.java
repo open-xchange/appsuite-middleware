@@ -115,6 +115,8 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, Property.COOKIE_FORCE_HTTPS);
             addProperty(params, Property.FORCE_HTTPS);
             addProperty(params, Property.IP_CHECK);
+            addProperty(params, Property.IP_MASK_V4);
+            addProperty(params, Property.IP_MASK_V6);
             final String tmp = configService.getText("noipcheck.cnf");
             if (null != tmp) {
                 params.put(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName(), tmp);
