@@ -50,18 +50,16 @@
 package com.openexchange.messaging.sms.impl;
 
 import static com.openexchange.java.Autoboxing.B;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.sms.osgi.MessagingSMSServiceRegistry;
 import com.openexchange.messaging.sms.service.MessagingNewService;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
 
@@ -73,15 +71,9 @@ public class SMSPreferencesItem implements PreferencesItemService {
 
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                try {
-                    final MessagingNewService service = MessagingSMSServiceRegistry.getServiceRegistry().getService(MessagingNewService.class, true);
-                    setting.setSingleValue(B(service.getUserConfiguration(session).isEnabled()));
-                } catch (final ServiceException e) {
-                    throw new SettingException(e); 
-                } catch (MessagingException e) {
-                    throw new SettingException(e); 
-                }
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                final MessagingNewService service = MessagingSMSServiceRegistry.getServiceRegistry().getService(MessagingNewService.class, true);
+                setting.setSingleValue(B(service.getUserConfiguration(session).isEnabled()));
             }
 
             public boolean isAvailable(final UserConfiguration userConfig) {
@@ -89,5 +81,4 @@ public class SMSPreferencesItem implements PreferencesItemService {
             }
         };
     }
-
 }

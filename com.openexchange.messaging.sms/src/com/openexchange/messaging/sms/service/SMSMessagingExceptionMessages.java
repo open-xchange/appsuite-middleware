@@ -49,13 +49,12 @@
 
 package com.openexchange.messaging.sms.service;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SMSMessagingExceptionMessages} - Exception messages for {@link TwitterMessagingException} that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
 public final class SMSMessagingExceptionMessages implements LocalizableStrings {
 
@@ -68,5 +67,4 @@ public final class SMSMessagingExceptionMessages implements LocalizableStrings {
     private SMSMessagingExceptionMessages() {
         super();
     }
-
 }

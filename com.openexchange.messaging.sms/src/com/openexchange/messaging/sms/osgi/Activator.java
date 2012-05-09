@@ -54,15 +54,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.messaging.sms.impl.SMSPreferencesItem;
 import com.openexchange.messaging.sms.service.MessagingNewService;
-import com.openexchange.messaging.sms.service.SMSMessagingExceptionFactory;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach
@@ -72,13 +68,11 @@ public class Activator extends DeferredActivator {
     
     private static transient final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, MessagingNewService.class, MessagingServiceRegistry.class };
-    
-    private ComponentRegistration componentRegistration;
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, MessagingNewService.class };
     
     private ServletRegisterer servletRegisterer;
     
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<PreferencesItemService> serviceRegistration;
         
     public Activator() {
         super();        
@@ -94,7 +88,6 @@ public class Activator extends DeferredActivator {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
-        
         getServiceRegistry().addService(clazz, getService(clazz));
         if (HttpService.class.equals(clazz)) {
             servletRegisterer.registerServlet();
@@ -110,12 +103,10 @@ public class Activator extends DeferredActivator {
             servletRegisterer.unregisterServlet();
         }
         getServiceRegistry().removeService(clazz);
-        
     }
 
     @Override
     protected void startBundle() throws Exception {
-        componentRegistration = new ComponentRegistration(context, new StringComponent("SMS-MSG"), "com.openexchange.messaging.sms", SMSMessagingExceptionFactory.getInstance());
         try {
             {
                 final ServiceRegistry registry = getServiceRegistry();
@@ -124,30 +115,21 @@ public class Activator extends DeferredActivator {
                 for (int i = 0; i < classes.length; i++) {
                     final Object service = getService(classes[i]);
                     if (null != service) {
-//                        if (service instanceof MessagingServiceRegistry) {
-//                            final MessagingService messagingService = ((MessagingServiceRegistry)service).getMessagingService("com.openexchange.messaging.sms");
-//                            registry.addService(MessagingService.class, messagingService);
-//                        }
                          registry.addService(classes[i], service);
                     }
                 }
             }
             servletRegisterer = new ServletRegisterer();
             servletRegisterer.registerServlet();
-            serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new SMSPreferencesItem(), null);
+            serviceRegistration = context.registerService(PreferencesItemService.class, new SMSPreferencesItem(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
-        
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if(componentRegistration != null) {
-            componentRegistration.unregister();
-        }
-
         try {
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();

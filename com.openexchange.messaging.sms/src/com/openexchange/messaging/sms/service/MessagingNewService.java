@@ -54,7 +54,6 @@ import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * A service needed to provide some user configuration data needed
  *

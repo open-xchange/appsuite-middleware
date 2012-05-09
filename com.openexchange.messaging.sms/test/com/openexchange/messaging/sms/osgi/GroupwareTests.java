@@ -25,6 +25,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.LoginFields;
 
+/**
+ * TODO needs to be refactored to an interface test.
+ */
 public class GroupwareTests {
 
     private static final String AUTHPASSWORD = "secret";

@@ -47,65 +47,56 @@
 *
 */
 
-/**
- * 
- */
 package com.openexchange.messaging.sms.osgi;
 
 import javax.servlet.ServletException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
 
 /**
- * 
+ *
  * @author Benjamin Otterbach
  *
  */
 public class ServletRegisterer {
 
-	private static final Log LOG = LogFactory.getLog(ServletRegisterer.class);
+    private static final Log LOG = LogFactory.getLog(ServletRegisterer.class);
 
-	// friend to be able to test
-	final static String SERVLET_PATH = "/ajax/messaging/sms";
-	
-	public ServletRegisterer (){
-		super();
-	}
-	
-	
-	public void registerServlet() {
-		final HttpService http_service;
-		try {
-			http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
-		} catch (ServiceException e) {
-			LOG.error("Error registering messaging sms servlet!", e);
-			return;
-		}
-		try {
-			http_service.registerServlet(SERVLET_PATH, new com.openexchange.messaging.sms.servlet.MessagingSMSServlet(), null, null);
-		} catch (ServletException e) {
-			LOG.error("Error registering messaging sms servlet!", e);
-		} catch (NamespaceException e) {
-			LOG.error("Error registering messaging sms servlet!", e);
-		}
-	}
+    // friend to be able to test
+    final static String SERVLET_PATH = "/ajax/messaging/sms";
 
-	
-	public void unregisterServlet() {
-		final HttpService http_service;
-		try {
-			http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
-		} catch (ServiceException e) {
-			LOG.error("Error unregistering messaging sms servlet!", e);
-			return;
-		}
-		http_service.unregister(SERVLET_PATH);
-	}
+    public ServletRegisterer (){
+        super();
+    }
 
+    public void registerServlet() {
+        final HttpService http_service;
+        try {
+            http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
+        } catch (OXException e) {
+            LOG.error("Error registering messaging sms servlet!", e);
+            return;
+        }
+        try {
+            http_service.registerServlet(SERVLET_PATH, new com.openexchange.messaging.sms.servlet.MessagingSMSServlet(), null, null);
+        } catch (ServletException e) {
+            LOG.error("Error registering messaging sms servlet!", e);
+        } catch (NamespaceException e) {
+            LOG.error("Error registering messaging sms servlet!", e);
+        }
+    }
 
+    public void unregisterServlet() {
+        final HttpService http_service;
+        try {
+            http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
+        } catch (OXException e) {
+            LOG.error("Error unregistering messaging sms servlet!", e);
+            return;
+        }
+        http_service.unregister(SERVLET_PATH);
+    }
 }
