@@ -1,0 +1,12 @@
+* 2011-03-16 - choeger@open-xchange.com
+
+  - Bugfix #18662 - Mobile configuration packages cant be installed on debian squeeze
+
+* 2010-06-26 - manuel.kraft@open-xchange.com
+
+  - adding SMS implementation and fixed libs in build file
+
+
+* 2010-06-25 - benjamin.otterbach@open-xchange.com
+
+  - Initial import
