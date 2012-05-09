@@ -49,21 +49,27 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-
-
 /**
  * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Dispatcher {
 
     /**
+     * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
+     * <p>
+     * All requests starting with this prefix are directed to dispatcher framework.
+     */
+    public static final AtomicReference<String> PREFIX = new AtomicReference<String>("/ajax/");
+
+    /**
      * Performs given request.
-     *
+     * 
      * @param requestData The request data to perform
      * @param state The state
      * @param session The session providing needed user data
@@ -74,7 +80,7 @@ public interface Dispatcher {
 
     /**
      * Begins a dispatcher cycle.
-     *
+     * 
      * @return The state
      * @throws OXException If start-up fails
      */
@@ -82,13 +88,14 @@ public interface Dispatcher {
 
     /**
      * Ends a dispatcher cycle.
-     *
+     * 
      * @param state The state
      */
     void end(AJAXState state);
 
     /**
      * Returns whether the dispatcher knows about the given module.
+     * 
      * @param module
      * @return true if it can handle the module request, false otherwise
      */
@@ -96,7 +103,8 @@ public interface Dispatcher {
 
     /**
      * Indicates whether the fallback session may be used for this action
-     * @throws OXException 
+     * 
+     * @throws OXException
      */
-	boolean mayUseFallbackSession(String module, String action) throws OXException;
+    boolean mayUseFallbackSession(String module, String action) throws OXException;
 }

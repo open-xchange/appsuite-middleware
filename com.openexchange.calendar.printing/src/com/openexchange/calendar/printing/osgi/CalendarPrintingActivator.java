@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing.osgi;
 
 import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
+import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
@@ -69,11 +70,6 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CalendarPrintingActivator extends AbstractSessionServletActivator {
-
-    /**
-     * The servlet path.
-     */
-    public static final String ALIAS = "/ajax/printCalendar";
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
@@ -103,11 +99,11 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         CPServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
         CPServlet.setCalendarTools(collectionService);
 
-        registerSessionServlet(ALIAS, new CPServlet());
+        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"printCalendar", new CPServlet());
     }
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
+        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, DispatcherPrefixService.class };
     }
 }

@@ -47,37 +47,22 @@
  *
  */
 
-package com.openexchange.config.objects.json.osgi;
-
-import com.openexchange.ajax.DispatcherPrefixService;
-import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
-import com.openexchange.config.objects.ConfigObjectRegistryFactory;
-import com.openexchange.config.objects.json.ConfigObjectActionFactory;
-import com.openexchange.config.objects.json.ConfigObjectServlet;
-import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-
+package com.openexchange.ajax;
 
 /**
- * {@link ConfigObjectsJSONActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link DispatcherPrefixService} - Provides the dispatcher prefix
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ConfigObjectsJSONActivator extends AbstractSessionServletActivator {
+public interface DispatcherPrefixService {
 
-    @Override
-    protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[]{ConfigObjectRegistryFactory.class,DispatcherPrefixService.class};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final ConfigObjectActionFactory factory = new ConfigObjectActionFactory(getService(ConfigObjectRegistryFactory.class));
-        ConfigObjectServlet.ACTIONS = factory;
-
-        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));
-        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"cobjects", new ConfigObjectServlet());
-
-    }
+    /**
+     * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
+     * <p>
+     * All requests starting with this prefix are directed to dispatcher framework.
+     * 
+     * @return The prefix
+     */
+    public String getPrefix();
 
 }

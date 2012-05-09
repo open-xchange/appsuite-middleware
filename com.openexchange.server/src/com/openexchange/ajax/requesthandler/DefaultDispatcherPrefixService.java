@@ -47,37 +47,42 @@
  *
  */
 
-package com.openexchange.config.objects.json.osgi;
+package com.openexchange.ajax.requesthandler;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.DispatcherPrefixService;
-import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
-import com.openexchange.config.objects.ConfigObjectRegistryFactory;
-import com.openexchange.config.objects.json.ConfigObjectActionFactory;
-import com.openexchange.config.objects.json.ConfigObjectServlet;
-import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-
 
 /**
- * {@link ConfigObjectsJSONActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link DefaultDispatcherPrefixService} - The default {@link DispatcherPrefixService}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ConfigObjectsJSONActivator extends AbstractSessionServletActivator {
+public final class DefaultDispatcherPrefixService implements DispatcherPrefixService {
 
-    @Override
-    protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[]{ConfigObjectRegistryFactory.class,DispatcherPrefixService.class};
+    private static final DefaultDispatcherPrefixService INSTANCE = new DefaultDispatcherPrefixService();
+
+    /**
+     * Gets the instance
+     * 
+     * @return The instance
+     */
+    public static DefaultDispatcherPrefixService getInstance() {
+        return INSTANCE;
+    }
+
+    private final AtomicReference<String> prefixRef;
+
+    /**
+     * Initializes a new {@link DefaultDispatcherPrefixService}.
+     */
+    private DefaultDispatcherPrefixService() {
+        super();
+        prefixRef = Dispatcher.PREFIX;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final ConfigObjectActionFactory factory = new ConfigObjectActionFactory(getService(ConfigObjectRegistryFactory.class));
-        ConfigObjectServlet.ACTIONS = factory;
-
-        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));
-        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"cobjects", new ConfigObjectServlet());
-
+    public String getPrefix() {
+        return prefixRef.get();
     }
 
 }

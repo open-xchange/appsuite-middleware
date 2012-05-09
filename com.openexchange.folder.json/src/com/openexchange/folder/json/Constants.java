@@ -49,7 +49,9 @@
 
 package com.openexchange.folder.json;
 
+import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
+import com.openexchange.folder.json.services.ServiceRegistry;
 
 /**
  * {@link Constants} for the HTTP JSON interface of the folder component.
@@ -96,8 +98,9 @@ public final class Constants {
      * @param module The module string
      */
     public static void setModule(final String module) {
-        Constants.module = module;
-        Constants.servletPath = "/ajax/" + module;
+        final String m = null == module ? Constants.module : module;
+        Constants.module = m;
+        Constants.servletPath = ServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + m;
     }
 
     /**
