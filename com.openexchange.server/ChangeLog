@@ -1,3 +1,7 @@
+* 2012-05-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug #21985: Log appropriate error if 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress' property is missing
+
 * 2012-05-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 21766: Fixed parsing of IMAP STATUS response if folder full name contains an opening parenthesis
