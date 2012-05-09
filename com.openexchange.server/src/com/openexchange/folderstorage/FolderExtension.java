@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 
 /**
- * {@link FolderExtension} - A folder extension.
+ * {@link FolderExtension} - A {@link Folder folder} extension.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
