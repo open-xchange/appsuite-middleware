@@ -49,10 +49,12 @@
 
 package com.openexchange.osgi;
 
+import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * {@link Tools}
@@ -78,6 +80,12 @@ public class Tools {
         }
         sb.setCharAt(sb.length() - 1, ')');
         return context.createFilter(sb.toString());
+    }
+
+    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
+        for (ServiceTracker<?,?> tracker : trackers) {
+            tracker.open();
+        }
     }
 
     private Tools() {
