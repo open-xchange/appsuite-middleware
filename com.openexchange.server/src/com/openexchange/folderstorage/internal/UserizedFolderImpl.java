@@ -69,7 +69,7 @@ import com.openexchange.i18n.LocaleTools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserizedFolderImpl implements UserizedFolder, FolderExtension {
+public final class UserizedFolderImpl implements UserizedFolder {
 
     private static final long serialVersionUID = 5090343231211791986L;
 
@@ -100,6 +100,8 @@ public final class UserizedFolderImpl implements UserizedFolder, FolderExtension
     private Date lastModified;
 
     private volatile Map<FolderField, FolderProperty> properties;
+
+    private int[] totalAndUnread;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
@@ -357,20 +359,32 @@ public final class UserizedFolderImpl implements UserizedFolder, FolderExtension
     }
 
     @Override
-    public int[] getTotalAndUnread() {
-        if (folder instanceof FolderExtension) {
-            return ((FolderExtension) folder).getTotalAndUnread();
-        }
-        return null;
-    }
-
-    @Override
     public int getTotal() {
+        if (null == totalAndUnread) {
+            if (folder instanceof FolderExtension) {
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
+                if (null != totalAndUnread) {
+                    return totalAndUnread[0];
+                }
+            }
+        } else {
+            return totalAndUnread[0];
+        }
         return folder.getTotal();
     }
 
     @Override
     public int getUnread() {
+        if (null == totalAndUnread) {
+            if (folder instanceof FolderExtension) {
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
+                if (null != totalAndUnread) {
+                    return totalAndUnread[1];
+                }
+            }
+        } else {
+            return totalAndUnread[1];
+        }
         return folder.getUnread();
     }
 

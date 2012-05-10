@@ -58,10 +58,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +71,6 @@ import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
@@ -144,21 +141,14 @@ public final class FolderWriter {
     private static interface JSONValuePutter {
 
         void put(String key, Object value) throws JSONException;
-
-        void putIfAbsent(String key, Object value) throws JSONException;
-
-        Set<String> keys();
     }
 
     private static final class JSONArrayPutter implements JSONValuePutter {
 
         private JSONArray jsonArray;
 
-        private final Set<String> keys;
-
         public JSONArrayPutter() {
             super();
-            keys = new HashSet<String>(32);
         }
 
         public JSONArrayPutter(final JSONArray jsonArray) {
@@ -166,25 +156,13 @@ public final class FolderWriter {
             this.jsonArray = jsonArray;
         }
 
-        @Override
-        public Set<String> keys() {
-            return keys;
-        }
-
         public void setJSONArray(final JSONArray jsonArray) {
             this.jsonArray = jsonArray;
-            keys.clear();
         }
 
         @Override
         public void put(final String key, final Object value) throws JSONException {
             jsonArray.put(value);
-            keys.add(key);
-        }
-
-        @Override
-        public void putIfAbsent(final String key, final Object value) throws JSONException {
-            put(key, value);
         }
 
     }
@@ -202,11 +180,6 @@ public final class FolderWriter {
             this.jsonObject = jsonObject;
         }
 
-        @Override
-        public Set<String> keys() {
-            return jsonObject.keySet();
-        }
-
         public void setJSONObject(final JSONObject jsonObject) {
             this.jsonObject = jsonObject;
         }
@@ -214,15 +187,6 @@ public final class FolderWriter {
         @Override
         public void put(final String key, final Object value) throws JSONException {
             if (null == value || JSONObject.NULL.equals(value)) {
-                // Don't write NULL value
-                return;
-            }
-            jsonObject.put(key, value);
-        }
-
-        @Override
-        public void putIfAbsent(final String key, final Object value) throws JSONException {
-            if (null == value || JSONObject.NULL.equals(value) || jsonObject.hasAndNotNull(key)) {
                 // Don't write NULL value
                 return;
             }
@@ -424,18 +388,6 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                if (jsonPutter.keys().contains(FolderField.TOTAL.getName())) {
-                    return;
-                }
-                if (folder instanceof FolderExtension) {
-                    final FolderExtension folderExtension = (FolderExtension) folder;
-                    final int[] totalAndUnread = folderExtension.getTotalAndUnread();
-                    if (null != totalAndUnread) {
-                        jsonPutter.putIfAbsent(FolderField.TOTAL.getName(), Integer.valueOf(totalAndUnread[0]));
-                        jsonPutter.putIfAbsent(FolderField.UNREAD.getName(), Integer.valueOf(totalAndUnread[1]));
-                        return;
-                    }
-                }
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -452,18 +404,6 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                if (jsonPutter.keys().contains(FolderField.UNREAD.getName())) {
-                    return;
-                }
-                if (folder instanceof FolderExtension) {
-                    final FolderExtension folderExtension = (FolderExtension) folder;
-                    final int[] totalAndUnread = folderExtension.getTotalAndUnread();
-                    if (null != totalAndUnread) {
-                        jsonPutter.putIfAbsent(FolderField.TOTAL.getName(), Integer.valueOf(totalAndUnread[0]));
-                        jsonPutter.putIfAbsent(FolderField.UNREAD.getName(), Integer.valueOf(totalAndUnread[1]));
-                        return;
-                    }
-                }
                 final int obj = folder.getUnread();
                 jsonPutter.put(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
