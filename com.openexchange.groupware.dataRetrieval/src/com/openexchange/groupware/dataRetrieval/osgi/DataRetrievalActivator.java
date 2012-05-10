@@ -61,7 +61,6 @@ import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
-nge.session.SessionSpecificContainerRetrievalService;
 
 /**
  * {@link DataRetrievalActivator}
