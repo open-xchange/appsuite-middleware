@@ -50,11 +50,11 @@
 package com.openexchange.calendar.printing.osgi;
 
 import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
-import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;

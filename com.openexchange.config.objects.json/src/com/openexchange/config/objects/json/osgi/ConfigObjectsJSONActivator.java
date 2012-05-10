@@ -49,11 +49,11 @@
 
 package com.openexchange.config.objects.json.osgi;
 
-import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.config.objects.json.ConfigObjectActionFactory;
 import com.openexchange.config.objects.json.ConfigObjectServlet;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 

@@ -51,9 +51,10 @@ package com.openexchange.mobile.configuration.json.osgi;
 
 import static com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,7 +67,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class MobilityProvisioningActivator extends HousekeepingActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
-    private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
+    private final static String SERVLET_PATH_APPENDIX = "mobilityprovisioning";
 
 	public MobilityProvisioningActivator() {
 		super();
@@ -74,7 +75,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class,HttpService.class };
+		return new Class<?>[] { ConfigurationService.class,HttpService.class, DispatcherPrefixService.class };
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 				}
 			}
  
-			getService(HttpService.class).registerServlet(SERVLET_PATH, new MobilityProvisioningServlet(), null, null);
+			getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX, new MobilityProvisioningServlet(), null, null);
 
             track(ActionService.class, new ActionServiceListener(context));
             openTrackers();
@@ -125,7 +126,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-		    getService(HttpService.class).unregister(SERVLET_PATH);
+		    getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX);
             /*
              * Close service trackers
              */

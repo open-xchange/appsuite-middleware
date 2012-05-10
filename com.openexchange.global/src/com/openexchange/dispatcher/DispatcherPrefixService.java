@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.dispatcher;
 
 /**
  * {@link DispatcherPrefixService} - Provides the dispatcher prefix
@@ -55,6 +55,11 @@ package com.openexchange.ajax;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DispatcherPrefixService {
+
+    /**
+     * The default prefix <tt>"/ajax/"</tt>.
+     */
+    public static final String DEFAULT_PREFIX = "/ajax/";
 
     /**
      * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).

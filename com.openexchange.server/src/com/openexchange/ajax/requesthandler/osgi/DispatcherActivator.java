@@ -53,7 +53,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -78,6 +77,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageScalingService;

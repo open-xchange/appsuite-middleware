@@ -50,7 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.ajax.DispatcherPrefixService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 
 /**
  * {@link DefaultDispatcherPrefixService} - The default {@link DispatcherPrefixService}.
