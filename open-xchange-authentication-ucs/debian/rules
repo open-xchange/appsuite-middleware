@@ -1,39 +1,36 @@
 #!/usr/bin/make -f
-# Build open-xchange-authentication-ucs
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-authentication-ucs
-instprefix=/opt/open-xchange
+pname=open-xchange-authentication-ucs
+installroot=$(CURDIR)/debian/$(pname)
 
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	# Nothing to do to configure the package
 	touch configure-stamp
 
 build: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
-	ant -Dprefix=$(instprefix) compile
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	ant clean
-	dh_clean 
+	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
+	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
-	ant -Ddestdir=$(oxroot) -Dprefix=$(instprefix) install
-	
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=$(pname) -f build/build.xml build
+
 # Build architecture-independent files here.
 binary-indep: build install
 # We have nothing to do by default.
@@ -42,7 +39,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-#	dh_installchangelogs ChangeLog
+	dh_installchangelogs
 	dh_installdocs
 	dh_installexamples
 #	dh_install
