@@ -180,7 +180,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
-            unregister.unregister(SERVLET_PATH);
+            unregister.unregister(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX);
         }
         context.ungetService(reference);
     }
