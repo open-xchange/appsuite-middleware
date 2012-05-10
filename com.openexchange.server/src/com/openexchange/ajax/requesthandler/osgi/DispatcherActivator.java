@@ -77,6 +77,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -92,6 +93,8 @@ import com.openexchange.tools.images.ImageScalingService;
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
+
+    private volatile String prefix;
 
     @Override
     protected void startBundle() throws Exception {
@@ -148,7 +151,18 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
-        final String prefix = "/ajax/";
+        final String prefix;
+        {
+            String tmp = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
+            if (tmp.charAt(0) != '/') {
+                tmp = '/' + tmp;
+            }
+            if (!tmp.endsWith("/")) {
+                tmp = tmp + '/';
+            }
+            prefix = tmp;
+        }
+        this.prefix = prefix;
         DispatcherServlet.setPrefix(prefix);
         final DispatcherPrefixService prefixService = DefaultDispatcherPrefixService.getInstance();
         registerService(DispatcherPrefixService.class, prefixService);
@@ -224,7 +238,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         DispatcherServlet.setPrefix(null);
-        unregisterServlet("/ajax");
+        unregisterServlet(this.prefix);
+        this.prefix = null;
         ServerServiceRegistry.getInstance().removeService(DispatcherPrefixService.class);
         ImageMatcher.setPrefixService(null);
         Multiple.setDispatcher(null);
