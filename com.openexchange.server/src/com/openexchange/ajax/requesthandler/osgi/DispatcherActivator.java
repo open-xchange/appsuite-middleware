@@ -78,6 +78,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageScalingService;
@@ -147,9 +148,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
-        DispatcherServlet.setPrefix("/ajax/");
-        registerService(DispatcherPrefixService.class, DefaultDispatcherPrefixService.getInstance());
-        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, DefaultDispatcherPrefixService.getInstance());
+        final String prefix = "/ajax/";
+        DispatcherServlet.setPrefix(prefix);
+        final DispatcherPrefixService prefixService = DefaultDispatcherPrefixService.getInstance();
+        registerService(DispatcherPrefixService.class, prefixService);
+        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
+        ImageMatcher.setPrefixService(prefixService);
         Multiple.setDispatcher(dispatcher);
 
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
@@ -180,7 +184,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
                     servlets.add(module);
-                    registerSessionServlet("/ajax/" + module, servlet);
+                    registerSessionServlet(prefix + module, servlet);
                 }
             }
 
@@ -188,7 +192,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
-                    unregisterServlet("/ajax/" + module);
+                    unregisterServlet(prefix + module);
                     servlets.remove(module);
                 }
             }
@@ -221,6 +225,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.setDispatcher(null);
         DispatcherServlet.setPrefix(null);
         unregisterServlet("/ajax");
+        ServerServiceRegistry.getInstance().removeService(DispatcherPrefixService.class);
+        ImageMatcher.setPrefixService(null);
         Multiple.setDispatcher(null);
     }
 

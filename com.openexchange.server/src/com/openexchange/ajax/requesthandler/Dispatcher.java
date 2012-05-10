@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -65,7 +66,7 @@ public interface Dispatcher {
      * <p>
      * All requests starting with this prefix are directed to dispatcher framework.
      */
-    public static final AtomicReference<String> PREFIX = new AtomicReference<String>("/ajax/");
+    public static final AtomicReference<String> PREFIX = new AtomicReference<String>(DispatcherPrefixService.DEFAULT_PREFIX);
 
     /**
      * Performs given request.
