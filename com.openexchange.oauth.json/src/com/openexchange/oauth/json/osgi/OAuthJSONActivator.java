@@ -50,9 +50,10 @@
 package com.openexchange.oauth.json.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
@@ -76,7 +77,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -110,16 +111,11 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                     registry.addService(classe, service);
                 }
             }
+            AbstractOAuthAJAXActionService.PREFIX.set(getService(DispatcherPrefixService.class));
             /*
              * Service trackers
              */
             track(OAuthService.class, new RegistryServiceTrackerCustomizer<OAuthService>(context, registry, OAuthService.class));
-            /*
-             * Tracker for HTTPService to register servlets
-             */
-            // trackers.add(new SessionServletRegistration(context, new AccountServlet(), "/ajax/" + AccountMultipleHandlerFactory.MODULE));
-            // trackers.add(new SessionServletRegistration(context,new MetaDataServlet(), "/ajax/" +
-            // MetaDataMultipleHandlerFactory.MODULE));
             /*
              * Open trackers
              */
@@ -156,6 +152,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                 oAuthService = null;
             }
             AbstractOAuthAJAXActionService.setOAuthService(null);
+            AbstractOAuthAJAXActionService.PREFIX.set(null);
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthJSONActivator.class)).error(e.getMessage(), e);
