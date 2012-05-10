@@ -3,7 +3,7 @@ package com.openexchange.http.client.xml.osgi;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.xml.DOMProcessor;
 import com.openexchange.http.client.xml.JOOXProcessor;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 public class DOMBasedProcessorsActivator extends HousekeepingActivator {
 

@@ -2,7 +2,7 @@ package com.openexchange.http.client.xml.osgi;
 
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.xml.JDOMProcessor;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.xml.jdom.JDOMParser;
 
 public class JDomBasedProcessorActivator extends HousekeepingActivator {

@@ -3,7 +3,7 @@ package com.openexchange.http.client.json.osgi;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.json.JSONArrayResponseProcessor;
 import com.openexchange.http.client.json.JSONObjectResponseProcessor;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 public class HTTPJSONActivator extends HousekeepingActivator {
 

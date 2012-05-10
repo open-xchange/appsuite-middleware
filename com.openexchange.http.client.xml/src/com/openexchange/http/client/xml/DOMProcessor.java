@@ -6,10 +6,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.builder.HTTPResponseWrapper;
+import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class DOMProcessor implements HTTPResponseProcessor<InputStream, Document> {
 
@@ -17,14 +18,12 @@ public class DOMProcessor implements HTTPResponseProcessor<InputStream, Document
 		return new Class[]{InputStream.class, Document.class};
 	}
 
-	public HTTPResponse<Document> process(HTTPResponse<InputStream> response) throws AbstractOXException {
+	public HTTPResponse<Document> process(HTTPResponse<InputStream> response) throws OXException {
 		try {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(response.getPayload(), "UTF-8");
 			return new HTTPResponseWrapper<Document>(response, document);
-		} catch (AbstractOXException e) {
-			throw e;
 		} catch (Exception e) {
-			throw new AbstractOXException(e.getMessage(), e);
+			throw OxHttpClientExceptionCodes.CATCH_ALL.create(e.getMessage(), e);
 		}
 	}
 
