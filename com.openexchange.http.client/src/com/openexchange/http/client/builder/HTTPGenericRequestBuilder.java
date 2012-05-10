@@ -2,7 +2,7 @@ package com.openexchange.http.client.builder;
 
 import java.util.Map;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 public interface HTTPGenericRequestBuilder<T extends HTTPGenericRequestBuilder<T, R>, R> {
 	public T url(String url);
@@ -14,5 +14,5 @@ public interface HTTPGenericRequestBuilder<T extends HTTPGenericRequestBuilder<T
 	public T header(String header, String value);
 	public T headers(Map<String, String> cookies);
 	
-	public HTTPRequest<R> build() throws AbstractOXException;
+	public HTTPRequest<R> build() throws OXException;
 }

@@ -2,10 +2,8 @@ package com.openexchange.http.client.internal;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.Reader;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.http.client.builder.HTTPMulitpartPostRequestBuilder;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPMulitpartPostRequestBuilder;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 
@@ -19,31 +17,31 @@ HTTPMulitpartPostRequestBuilder<R> {
 		super(put, processor);
 	}
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, File file) throws AbstractOXException {
+	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, File file) throws OXException {
 		delegate.part(fieldName, file);
 		return this;
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName,
-			InputStream is, String contentType, String filename) throws AbstractOXException {
+			InputStream is, String contentType, String filename) throws OXException {
 		delegate.part(fieldName, is, contentType, filename);
 		return this;
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName,
-			InputStream is, String contentType) throws AbstractOXException {
+			InputStream is, String contentType) throws OXException {
 		delegate.part(fieldName, is, contentType);
 		return this;
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s,
-			String contentType, String filename) throws AbstractOXException {
+			String contentType, String filename) throws OXException {
 		delegate.part(fieldName, s, contentType, filename);
 		return this;
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s,
-			String contentType) throws AbstractOXException {
+			String contentType) throws OXException {
 		delegate.part(fieldName, s, contentType);
 		return this;
 	}

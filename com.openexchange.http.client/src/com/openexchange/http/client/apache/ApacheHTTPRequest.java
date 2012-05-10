@@ -8,10 +8,11 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
+import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class ApacheHTTPRequest<R> implements HTTPRequest<R> {
 
@@ -36,7 +37,7 @@ public class ApacheHTTPRequest<R> implements HTTPRequest<R> {
 		this.reqBuilder = builder;
 	}
 
-	public HTTPResponse<R> execute() throws AbstractOXException {
+	public HTTPResponse<R> execute() throws OXException {
 		try {
 			HttpState state = coreBuilder.getState();
 			if (state != null) {
@@ -52,9 +53,9 @@ public class ApacheHTTPRequest<R> implements HTTPRequest<R> {
 			}
 			return new ApacheHTTPResponse<R>(method, client, coreBuilder);
 		} catch (HttpException e) {
-			throw new AbstractOXException(e.getMessage(), e);
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		} catch (IOException e) {
-			throw new AbstractOXException(e.getMessage(), e);
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		} finally {
 			reqBuilder.done();
 		}

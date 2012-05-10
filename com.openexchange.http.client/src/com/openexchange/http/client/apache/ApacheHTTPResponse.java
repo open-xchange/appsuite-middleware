@@ -8,7 +8,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 
 public class ApacheHTTPResponse<R> implements HTTPResponse<R> {
@@ -25,7 +25,7 @@ public class ApacheHTTPResponse<R> implements HTTPResponse<R> {
 		this.coreBuilder = coreBuilder;
 	}
 
-	public R getPayload() throws AbstractOXException {
+	public R getPayload() throws OXException {
 		if (payload != null) {
 			return payload;
 		}

@@ -3,8 +3,6 @@ package com.openexchange.http.client.apache;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +16,11 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.PartSource;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.http.client.builder.HTTPMulitpartPostRequestBuilder;
+import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPMulitpartPostRequestBuilder<R>, R> implements
 		HTTPMulitpartPostRequestBuilder<R> {
@@ -39,7 +37,7 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 		
 	}
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, File file) throws AbstractOXException {
+	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, File file) throws OXException {
 		try {
 			parts.add(new FilePart(fieldName, file));
 		} catch (FileNotFoundException e) {
@@ -48,20 +46,20 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName,
-			InputStream is, String contentType, String filename) throws AbstractOXException {
+			InputStream is, String contentType, String filename) throws OXException {
 		parts.add(new FilePart(fieldName, partSource(filename, is), contentType, "UTF-8"));
 		return this;
 	}
 
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName,
-			InputStream is, String contentType) throws AbstractOXException {
+			InputStream is, String contentType) throws OXException {
 		parts.add(new FilePart(fieldName, partSource("data.bin", is), contentType, "UTF-8"));
 		return this;
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s,
-			String contentType, String filename) throws AbstractOXException {
+			String contentType, String filename) throws OXException {
 		try {
 			parts.add(new FilePart(fieldName, new ByteArrayPartSource(filename, s.getBytes("UTF-8")), contentType, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
@@ -70,7 +68,7 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 	}
 
 	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s,
-			String contentType) throws AbstractOXException {
+			String contentType) throws OXException {
 		try {
 			parts.add(new FilePart(fieldName, new ByteArrayPartSource("data.txt", s.getBytes("UTF-8")), contentType, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
@@ -88,15 +86,13 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 		return m;
 	}
 	
-	private PartSource partSource(String filename, InputStream is) throws AbstractOXException {
+	private PartSource partSource(String filename, InputStream is) throws OXException {
 		try {
 			ManagedFile managedFile = fileManager.createManagedFile(is);
 			managedFiles.add(managedFile);
 			return new FilePartSource(filename, managedFile.getFile());
-		} catch (ManagedFileException e) {
-			throw e;
 		} catch (FileNotFoundException e) {
-			throw new AbstractOXException(e.getMessage(), e);
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		}
 	}
 	

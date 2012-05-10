@@ -2,7 +2,8 @@ package com.openexchange.http.client.builder;
 
 import java.util.Map;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
+
 
 public class HTTPResponseWrapper<R> implements HTTPResponse<R> {
 
@@ -14,7 +15,7 @@ public class HTTPResponseWrapper<R> implements HTTPResponse<R> {
 		this.payload = payload;
 	}
 	
-	public R getPayload() throws AbstractOXException {
+	public R getPayload() throws OXException {
 		return payload;
 	}
 

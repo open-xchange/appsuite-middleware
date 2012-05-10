@@ -3,7 +3,7 @@ package com.openexchange.http.client.internal;
 import java.util.Map;
 
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
@@ -50,7 +50,7 @@ public abstract class ChainedGenericRequestBuilder<T extends ChainedGenericReque
 		return (T) this;
 	}
 
-	public HTTPRequest<R> build() throws AbstractOXException {
+	public HTTPRequest<R> build() throws OXException {
 		return new ChainedRequest<O, R>(delegate.build(), processor);
 	}
 

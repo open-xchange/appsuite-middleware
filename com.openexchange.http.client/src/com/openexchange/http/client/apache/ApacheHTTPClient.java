@@ -11,12 +11,12 @@ import java.util.Map;
 
 import org.apache.commons.httpclient.HttpMethodBase;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.http.client.HTTPClient;
 import com.openexchange.http.client.builder.HTTPRequestBuilder;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
-import com.openexchange.http.client.builder.HTTPStrategy;
+import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class ApacheHTTPClient implements HTTPClient {
 	
@@ -33,11 +33,11 @@ public class ApacheHTTPClient implements HTTPClient {
 			return (HTTPRequestBuilder<R>) new ApacheClientRequestBuilder<String>(fileManager) {
 
 				@Override
-				String extractPayload(HttpMethodBase method) throws AbstractOXException {
+				String extractPayload(HttpMethodBase method) throws OXException {
 					try {
 						return method.getResponseBodyAsString();
 					} catch (IOException e) {
-						throw new AbstractOXException(e.getMessage(), e);
+						throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 					}
 				}
 			};
@@ -45,11 +45,11 @@ public class ApacheHTTPClient implements HTTPClient {
 			return (HTTPRequestBuilder<R>) new ApacheClientRequestBuilder<InputStream>(fileManager) {
 
 				@Override
-				InputStream extractPayload(HttpMethodBase method) throws AbstractOXException {
+				InputStream extractPayload(HttpMethodBase method) throws OXException {
 					try {
 						return method.getResponseBodyAsStream();
 					} catch (IOException e) {
-						throw new AbstractOXException(e.getMessage(), e);
+						throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 					}
 				}
 			};
@@ -57,11 +57,11 @@ public class ApacheHTTPClient implements HTTPClient {
 			return (HTTPRequestBuilder<R>) new ApacheClientRequestBuilder<Reader>(fileManager) {
 
 				@Override
-				Reader extractPayload(HttpMethodBase method) throws AbstractOXException {
+				Reader extractPayload(HttpMethodBase method) throws OXException {
 					try {
 						return new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet());
 					} catch (IOException e) {
-						throw new AbstractOXException(e.getMessage(), e);
+						throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 					}
 				}
 			};

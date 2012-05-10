@@ -19,9 +19,10 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.util.URIUtil;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
+import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilder<T, R>, R> {
 
@@ -71,7 +72,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 		return (T) this;
 	}
 
-	public HTTPRequest<R> build() throws AbstractOXException {
+	public HTTPRequest<R> build() throws OXException {
 		try {
 			final HttpClient client = new HttpClient();
 			final int timeout = 10000;
@@ -125,9 +126,9 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 			return new ApacheHTTPRequest<R>(headers, parameters, m, client,
 					coreBuilder, this);
 		} catch (URIException x) {
-			throw new AbstractOXException(x.getMessage(), x);
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(x.getMessage(), x);
 		} catch (MalformedURLException e) {
-			throw new AbstractOXException(e.getMessage(), e);
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		}
 	}
 

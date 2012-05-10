@@ -6,9 +6,11 @@ Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.http.client.osgi.HTTPClientActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.filemanagement,
+Import-Package: com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.groupware,
- com.openexchange.server.osgiservice,
+ com.openexchange.i18n,
+ com.openexchange.osgi,
  com.openexchange.tools.ssl,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.auth,

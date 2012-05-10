@@ -2,7 +2,7 @@ package com.openexchange.http.client.internal;
 
 import java.util.Map;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
@@ -18,7 +18,7 @@ public class ChainedRequest<O, R> implements HTTPRequest<R> {
 		this.processor = processor;
 	}
 
-	public HTTPResponse<R> execute() throws AbstractOXException {
+	public HTTPResponse<R> execute() throws OXException {
 		HTTPResponse<O> response = delegate.execute();
 		return processor.process(response);
 	}
