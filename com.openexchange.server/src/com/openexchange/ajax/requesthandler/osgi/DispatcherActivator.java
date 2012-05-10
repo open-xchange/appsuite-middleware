@@ -153,7 +153,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.setDispatcher(dispatcher);
         final String prefix;
         {
-            String tmp = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
+            String tmp = getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
             if (tmp.charAt(0) != '/') {
                 tmp = '/' + tmp;
             }
@@ -257,7 +257,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
 }
