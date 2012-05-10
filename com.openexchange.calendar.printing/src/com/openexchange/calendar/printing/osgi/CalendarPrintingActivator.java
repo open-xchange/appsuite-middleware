@@ -54,6 +54,7 @@ import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -77,10 +78,11 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected void startBundle() {
         track(I18nService.class, new I18nCustomizer(context));
         track(UserService.class, new RegistryCustomizer<UserService>(context, UserService.class, getInstance()));
         track(GroupService.class, new RegistryCustomizer<GroupService>(context, GroupService.class, getInstance()));
+        track(ConfigViewFactory.class, new RegistryCustomizer<ConfigViewFactory>(context, ConfigViewFactory.class, getInstance()));
         openTrackers();
         register();
         registerService(PreferencesItemService.class, new CalendarPrintingEnabled());

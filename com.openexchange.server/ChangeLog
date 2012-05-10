@@ -1,3 +1,7 @@
+* 2012-05-10 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20893: Using ui/product/name from ui.properties for calendar printing templates title.
+
 * 2012-05-09 - marcus.klein@open-xchange.com
 
  - Fix for bug #21695: Due date for tasks must not be corrected to one day earlier as for full day appointments.
