@@ -111,7 +111,6 @@
             <classpath>
                 <path refid="classpath"/>
                 <pathelement location="${testJar}"/>
-                <pathelement location="test-common.jar"/>
             </classpath>
 
             <test name="${testClass}" todir="${testXmlDir}"/>
