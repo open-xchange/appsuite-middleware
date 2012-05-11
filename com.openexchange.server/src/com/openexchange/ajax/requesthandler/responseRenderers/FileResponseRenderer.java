@@ -140,6 +140,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         InputStream documentData = null;
         try {
+            file = rotateIfImage(file);
             file = scaleIfImage(request, file);
             documentData = new BufferedInputStream(file.getStream());
             final String userAgent = req.getHeader("user-agent");
@@ -214,6 +215,21 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
+    private IFileHolder rotateIfImage(IFileHolder file) throws IOException, OXException {
+        final ImageScalingService scaler = this.scaler;
+        if (scaler == null) {
+            return file;
+        }
+
+        if (!isImage(file)) {
+            return file;
+        }
+
+        InputStream rotated = scaler.rotateAccordingExif(file.getStream(), file.getContentType());
+        file = new FileHolder(rotated, -1, file.getContentType(), "");
+        return file;
+    }
+
     /**
      * Scale possible image data.
      *
@@ -228,16 +244,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (scaler == null) {
             return file;
         }
-        /*
-         * Check content type
-         */
-        String contentType = file.getContentType();
-        if (!contentType.startsWith("image/")) {
-            final String fileName = file.getName();
-            if (fileName == null || !(contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
-                return file;
-            }
+
+        if (!isImage(file)) {
+            return file;
         }
+
         /*
          * Start scaling if appropriate parameters are present
          */
@@ -260,6 +271,17 @@ public class FileResponseRenderer implements ResponseRenderer {
         } finally {
             Streams.close(file);
         }
+    }
+    
+    private boolean isImage(IFileHolder file) {
+        String contentType = file.getContentType();
+        if (!contentType.startsWith("image/")) {
+            String fileName = file.getName();
+            if (fileName == null || !(contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

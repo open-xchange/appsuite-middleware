@@ -296,5 +296,6 @@ Bundle-ClassPath: .,
  lib/jacksum.jar,
  lib/java-image-scaling-0.8.5.jar,
  lib/jericho-3.2.jar,
- lib/commons-net-3.1.jar
+ lib/commons-net-3.1.jar,
+ lib/metadata-extractor-2.5.0-RC2.jar
 

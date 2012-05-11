@@ -49,24 +49,51 @@
 
 package com.openexchange.tools.images.impl;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
+import org.apache.commons.logging.Log;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.jpeg.JpegDirectory;
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleOp;
+import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
-
 /**
  * {@link JavaImageScalingService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JavaImageScalingService implements ImageScalingService {
+
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JavaImageScalingService.class));
+
+    private static final String CT_JPEG = "image/jpeg";
+
+    private static final String CT_JPG = "image/jpg";
+
+    private static final String CT_TIFF = "image/tiff";
 
     @Override
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
@@ -94,11 +121,137 @@ public class JavaImageScalingService implements ImageScalingService {
             throw new IOException("Couldn't scale image");
         }
 
-        
-
         return new ByteArrayInputStream(baos.toByteArray());
     }
 
+    public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException {
+        String fileType;
+        if (contentType.startsWith(CT_JPEG)) {
+            fileType = "jpeg";
+        } else if (contentType.startsWith(CT_JPG)) {
+            fileType = "jpg";
+        } else if (contentType.startsWith(CT_TIFF)) {
+            fileType = "tiff";
+        } else {
+            return pictureData;
+        }
 
+        ManagedFile managedFile = null;
+        try {
+            ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            managedFile = mfm.createManagedFile(pictureData);
+            ImageInformation imageInformation = readImageInformation(managedFile.getInputStream());
+            if (imageInformation == null) {
+                return Streams.newByteArrayInputStream(managedFile.getInputStream());
+            }
+
+            AffineTransform exifTransformation = getExifTransformation(imageInformation);
+            if (exifTransformation == null) {
+                return Streams.newByteArrayInputStream(managedFile.getInputStream());
+            }
+
+            AffineTransformOp op = new AffineTransformOp(exifTransformation, AffineTransformOp.TYPE_BICUBIC);
+            BufferedImage image = ImageIO.read(managedFile.getInputStream());
+            ColorModel cm = (image.getType() == BufferedImage.TYPE_BYTE_GRAY) ? image.getColorModel() : null;
+            BufferedImage destinationImage = op.createCompatibleDestImage(image, cm);
+            Graphics2D g = destinationImage.createGraphics();
+            g.setBackground(Color.WHITE);
+            g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
+            destinationImage = op.filter(image, destinationImage);
+
+            UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+            if (!ImageIO.write(destinationImage, fileType, baos)) {
+                throw new IOException("Couldn't rotate image");
+            }
+
+            return new ByteArrayInputStream(baos.toByteArray());
+        } finally {
+            if (managedFile != null) {
+                managedFile.delete();
+            }
+        }
+    }
+
+    private AffineTransform getExifTransformation(ImageInformation info) {
+        AffineTransform t = new AffineTransform();
+
+        switch (info.orientation) {
+        default:
+        case 1:
+            return null;
+        case 2:
+            t.scale(-1.0, 1.0);
+            t.translate(-info.width, 0);
+            break;
+        case 3:
+            t.translate(info.width, info.height);
+            t.rotate(Math.PI);
+            break;
+        case 4:
+            t.scale(1.0, -1.0);
+            t.translate(0, -info.height);
+            break;
+        case 5:
+            t.rotate(-Math.PI / 2);
+            t.scale(-1.0, 1.0);
+            break;
+        case 6:
+            t.translate(info.height, 0);
+            t.rotate(Math.PI / 2);
+            break;
+        case 7:
+            t.scale(-1.0, 1.0);
+            t.translate(-info.height, 0);
+            t.translate(0, info.width);
+            t.rotate(3 * Math.PI / 2);
+            break;
+        case 8:
+            t.translate(0, info.width);
+            t.rotate(3 * Math.PI / 2);
+            break;
+        }
+        return t;
+    }
+
+    public ImageInformation readImageInformation(InputStream imageFile) throws IOException {
+        int orientation = 1;
+        int width = 0;
+        int height = 0;
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile), false);
+            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            JpegDirectory jpegDirectory = (JpegDirectory) metadata.getDirectory(JpegDirectory.class);
+            orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            width = jpegDirectory.getImageWidth();
+            height = jpegDirectory.getImageHeight();
+        } catch (MetadataException e) {
+            LOG.debug("Unable to retrieve image information.", e);
+            return null;
+        } catch (ImageProcessingException e) {
+            LOG.debug("Unable to retrieve image information.", e);
+            return null;
+        }
+
+        return new ImageInformation(orientation, width, height);
+    }
+
+    private class ImageInformation {
+
+        public final int orientation;
+
+        public final int width;
+
+        public final int height;
+
+        public ImageInformation(int orientation, int width, int height) {
+            this.orientation = orientation;
+            this.width = width;
+            this.height = height;
+        }
+
+        public String toString() {
+            return String.format("%dx%d,%d", this.width, this.height, this.orientation);
+        }
+    }
 
 }
