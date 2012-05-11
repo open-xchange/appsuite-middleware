@@ -76,10 +76,10 @@ public interface AJAXResultDecorator {
     /**
      * Decorates passed {@link AJAXRequestResult result}.
      * 
-     * @param request The request data
+     * @param requestData The request data
      * @param result The result of {@link AJAXActionService#perform(AJAXRequestData, ServerSession)} invocation
      * @param session The associated session
      * @throws OXException If decorating the result fails
      */
-    void decorate(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException;
+    void decorate(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException;
 }

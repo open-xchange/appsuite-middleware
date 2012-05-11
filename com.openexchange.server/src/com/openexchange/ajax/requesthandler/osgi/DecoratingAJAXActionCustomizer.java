@@ -90,25 +90,25 @@ public final class DecoratingAJAXActionCustomizer implements AJAXActionCustomize
     }
 
     @Override
-    public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestData incoming(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         // Return unchanged
-        return request;
+        return requestData;
     }
 
     @Override
-    public AJAXRequestResult outgoing(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
+    public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
         final AJAXResultDecoratorRegistry registry = REGISTRY_REF.get();
         if (null == registry) {
             return result;
         }
-        final Collection<String> decoratorIds = request.getDecoratorIds();
+        final Collection<String> decoratorIds = requestData.getDecoratorIds();
         if (null == decoratorIds || decoratorIds.isEmpty()) {
             return result;
         }
         for (final String decoratorId : decoratorIds) {
             final AJAXResultDecorator decorator = registry.getDecorator(decoratorId);
             if (null != decorator && decorator.getFormat().equals(result.getFormat())) {
-                decorator.decorate(request, result, session);
+                decorator.decorate(requestData, result, session);
             }
         }
         return result;

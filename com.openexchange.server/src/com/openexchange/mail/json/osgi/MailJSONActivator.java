@@ -49,12 +49,20 @@
 
 package com.openexchange.mail.json.osgi;
 
+import org.apache.commons.logging.Log;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -63,6 +71,8 @@ import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailJSONActivator extends AJAXModuleActivator {
+
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(MailJSONActivator.class);
 
     /**
      * Initializes a new {@link MailJSONActivator}.
@@ -82,6 +92,35 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         final MailConverter converter = new MailConverter();
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
+
+        registerService(AJAXResultDecorator.class, new AJAXResultDecorator() {
+            
+            @Override
+            public String getIdentifier() {
+                return "com.openexchange.mail.senderImageUrl";
+            }
+            
+            @Override
+            public String getFormat() {
+                return "mail";
+            }
+            
+            @Override
+            public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+                final Object resultObject = result.getResultObject();
+                if (null == resultObject) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Result object is null.");
+                    }
+                    result.setResultObject(JSONObject.NULL, "json");
+                    return;
+                }
+                final String action = requestData.getParameter("action");
+                if ("get".equals(action) && resultObject instanceof MailMessage) {
+                    
+                }
+            }
+        });
     }
 
 }
