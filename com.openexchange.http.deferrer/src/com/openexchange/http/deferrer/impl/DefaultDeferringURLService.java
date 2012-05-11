@@ -51,6 +51,7 @@ package com.openexchange.http.deferrer.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
 
 /**
@@ -60,18 +61,23 @@ import com.openexchange.http.deferrer.DeferringURLService;
  */
 public abstract class DefaultDeferringURLService implements DeferringURLService {
 
+    /**
+     * The {@link DefaultDeferringURLService} reference.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
+
     @Override
-    public String getDeferredURL(String url) {
+    public String getDeferredURL(final String url) {
         if (url == null) {
             return null;
         }
         try {
-            String deferrerURL = getDeferrerURL();
+            final String deferrerURL = getDeferrerURL();
             if (deferrerURL == null) {
                 return url;
             }
-            return deferrerURL + "/ajax/defer?redirect=" + URLEncoder.encode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+            return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + URLEncoder.encode(url, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
             throw new IllegalStateException("UTF-8 seems to be unavailable");
         }
     }

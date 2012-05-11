@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 
@@ -82,6 +83,11 @@ import com.openexchange.html.internal.parser.HtmlHandler;
 public class HTMLImageFilterHandler implements HtmlHandler {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLImageFilterHandler.class));
+
+    /**
+     * The {@link DefaultDeferringURLService} reference.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
     private static final String BLANK = "";
 
@@ -197,7 +203,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
         }
         try {
             final URI uri = new URI(lcSrc);
-            return (null == uri.getHost()) && uri.getPath().startsWith("/ajax/image");
+            return (null == uri.getHost()) && uri.getPath().startsWith(PREFIX.get().getPrefix()+"image");
         } catch (final URISyntaxException e) {
             // Invalid image URI; return false
             return false;

@@ -1,0 +1,24 @@
+# Robert Krátký <kratky@rob.cz>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2011-05-04 12:37+0200\n"
+"PO-Revision-Date: 2011-05-29 17:52+0200\n"
+"Last-Translator: Robert Krátký <kratky@rob.cz>\n"
+"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"Language: cs\n"
+"X-Generator: Lokalize 1.2\n"
+
+msgid "Spam settings"
+msgstr "Nastavení spamu"
+
+msgid "Change spam settings"
+msgstr "Změnit nastavení spamu"
+
+msgid "Modify your spam configuration."
+msgstr "Upravit nastavení spamu."
+

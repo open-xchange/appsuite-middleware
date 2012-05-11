@@ -55,6 +55,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.StorageParameters;
@@ -77,6 +78,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -93,7 +95,7 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderImpl extends AbstractFolder {
+public final class MailFolderImpl extends AbstractFolder implements FolderExtension {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
@@ -485,6 +487,44 @@ public final class MailFolderImpl extends AbstractFolder {
                 LOG.debug("Cannot return up-to-date total counter.", e);
             }
             return super.getTotal();
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
+        }
+    }
+
+    @Override
+    public int[] getTotalAndUnread() {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+            mailAccess.connect(false);
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+                return ((IMailFolderStorageEnhanced2) folderStorage).getTotalAndUnreadCounter(ensureFullName(fullName));
+            }
+            final String ensuredFullName = ensureFullName(fullName);
+            int unread, total;
+            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+                unread = storageEnhanced.getUnreadCounter(ensuredFullName);
+                total = storageEnhanced.getTotalCounter(ensuredFullName);
+            } else {
+                unread = mailAccess.getMessageStorage().getUnreadMessages(ensuredFullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+                total = mailAccess.getMessageStorage().searchMessages(ensuredFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+            }
+            return new int[] {total,unread};
+        } catch (final OXException e) {
+            if (DEBUG) {
+                LOG.debug("Cannot return up-to-date total counter.", e);
+            }
+            return null;
+        } catch (final Exception e) {
+            if (DEBUG) {
+                LOG.debug("Cannot return up-to-date total counter.", e);
+            }
+            return null;
         } finally {
             if (null != mailAccess) {
                 mailAccess.close(true);

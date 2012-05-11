@@ -49,10 +49,12 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.math.LongRange;
+import org.apache.commons.lang.math.Range;
 import com.openexchange.java.Autoboxing;
 
 
@@ -64,20 +66,20 @@ import com.openexchange.java.Autoboxing;
  */
 public class IPRange {
 
-    private final LongRange ipv4Range;
-    private final LongRange ipv6Range;
+    private final Range ipv4Range;
+    private final Range ipv6Range;
 
-    public IPRange(final LongRange ipv4Range, final LongRange ipv6Range) {
+    public IPRange(final Range ipv4Range, final Range ipv6Range) {
         super();
         this.ipv4Range = ipv4Range;
         this.ipv6Range = ipv6Range;
     }
 
-    public LongRange getIpv4Range() {
+    public Range getIpv4Range() {
         return ipv4Range;
     }
 
-    public LongRange getIpv6Range() {
+    public Range getIpv6Range() {
         return ipv6Range;
     }
 
@@ -96,7 +98,7 @@ public class IPRange {
         if (null == octets) {
             throw new IllegalArgumentException("Not an IP address: " + ipAddress);
         }
-        return null != ipv6Range && ipv6Range.containsLong(ipToLong(octets));
+        return null != ipv6Range && ipv6Range.containsNumber(ipToBigInteger(octets));
     }
 
     @Override
@@ -153,7 +155,7 @@ public class IPRange {
                 if (null == octetsEnd) {
                     throw new IllegalArgumentException("Not an IPv6 address: " + addresses[1]);
                 }
-                final LongRange ipv6Range = new LongRange(ipToLong(octetsStart), ipToLong(octetsEnd));
+                final LongRange ipv6Range = new LongRange(ipToBigInteger(octetsStart), ipToBigInteger(octetsEnd));
                 return new IPRange(null, ipv6Range);
             }
             // IPv4
@@ -184,18 +186,29 @@ public class IPRange {
             while (i < octetsEnd.length) {
                 octetsEnd[i++] = (byte) 255;
             }
-            return new IPRange(null, new LongRange(ipToLong(octets), ipToLong(octetsEnd)));
+            return new IPRange(null, new LongRange(ipToBigInteger(octets), ipToBigInteger(octetsEnd)));
         }
         // IPv4
         return new IPRange(new LongRange(ipToLong(octets), ipToLong(octets)), null);
     }
-
+    
     private static long ipToLong(final byte[] octets) {
         long result = 0;
         for (int i = 0; i < octets.length; i++) {
             result |= octets[i] & 0xff;
             if (i < octets.length - 1) {
                 result <<= 8;
+            }
+        }
+        return result;
+    }
+
+    private static BigInteger ipToBigInteger(final byte[] octets) {
+        BigInteger result = BigInteger.ZERO;
+        for (int i = 0; i < octets.length; i++) {
+            result = result.or(BigInteger.valueOf(octets[i]).and(BigInteger.valueOf(0xff)));
+            if (i < octets.length - 1) {
+                result = result.shiftLeft(8);
             }
         }
         return result;

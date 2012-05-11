@@ -701,8 +701,6 @@ public final class HtmlProcessing {
         "src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?",
         Pattern.CASE_INSENSITIVE);
 
-    // private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
-
     private static final String STR_SRC = "src=";
 
     // private static final String CHARSET_ISO8859 = "ISO-8859-1";

@@ -51,6 +51,7 @@ package com.openexchange.groupware.dataRetrieval.osgi;
 
 import java.util.Map;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.dataRetrieval.actions.RetrievalActions;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.FileDeliveryServlet;
@@ -92,8 +93,9 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
         final AJAXActionServiceAdapterHandler actionService = new AJAXActionServiceAdapterHandler(retrievalActions, Paths.MODULE);
 
-        registerSessionServlet("/ajax/" + Paths.MODULE, new RetrievalServlet());
-        registerServlet(Paths.FILE_DELIVERY_PATH, new FileDeliveryServlet());
+        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        registerSessionServlet(prefix + Paths.MODULE, new RetrievalServlet());
+        registerServlet(prefix + Paths.FILE_DELIVERY_PATH_APPENDIX, new FileDeliveryServlet());
         registerService(MultipleHandlerFactoryService.class, actionService, null);
 
     }
@@ -113,7 +115,7 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { SessionSpecificContainerRetrievalService.class };
+        return new Class<?>[] { SessionSpecificContainerRetrievalService.class, DispatcherPrefixService.class };
     }
 
 }

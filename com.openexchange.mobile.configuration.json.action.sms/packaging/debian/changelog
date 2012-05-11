@@ -1,0 +1,137 @@
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-18) unstable; urgency=low
+
+  * another build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 22 Jul 2011 10:03:27 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-17) unstable; urgency=low
+
+  * build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 20 Jul 2011 15:09:38 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-16) unstable; urgency=low
+
+  * build for public ptf 2011-07-06
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jul 2011 14:22:20 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-15) unstable; urgency=low
+
+  * build for PTF 2011070410000182
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jul 2011 13:35:52 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-14) unstable; urgency=low
+
+  * build for PTF 2011062710000382
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 01 Jul 2011 07:08:59 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-13) unstable; urgency=low
+
+  * Public PTF 2011-06-22
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue, 21 Jun 2011 14:42:09 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-12) unstable; urgency=low
+
+  * build for public ptf 2011-06-22
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Jun 2011 13:42:12 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-11) unstable; urgency=low
+
+  * Public PTF 2011-05-31
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 27 May 2011 16:26:55 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-10) unstable; urgency=low
+
+  * build for public ptf 2011-05-18
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 May 2011 14:40:49 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-9) unstable; urgency=low
+
+  * another build for PTF 2011050310000419
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 10 May 2011 07:31:29 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-8) unstable; urgency=low
+
+  * Build for PTF 2011050310000419
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Sat, 07 May 2011 10:55:37 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-7) unstable; urgency=low
+
+  * build for public ptf 2011-04-21
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Apr 2011 14:24:16 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-6) unstable; urgency=low
+
+  * another build for public ptf 2011-04-04 (2011-04-13)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 05 Apr 2011 13:46:12 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-5) unstable; urgency=low
+
+  * build for public ptf 2011-04-13
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Apr 2011 13:19:56 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-4) unstable; urgency=low
+
+  * build for public ptf 2011-03-30
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 28 Mar 2011 14:01:16 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-3) unstable; urgency=low
+
+  * build for 6.20.0-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 21 Mar 2011 15:12:05 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-2) unstable; urgency=low
+
+  * build for 6.20.0-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 17 Mar 2011 13:13:53 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.20.0.0-1) unstable; urgency=low
+
+  * build for 6.20.0-rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 16 Mar 2011 15:00:15 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.19.0.0-1) unstable; urgency=low
+
+  * build for 6.19.0-rev9
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Mar 2011 14:51:33 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.19.0.0-0) unstable; urgency=low
+
+  * initial build in 6.19 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Mar 2011 08:54:01 +0000
+
+open-xchange-mobile-configuration-json-action-sms (6.18.1.0-0) unstable; urgency=low
+
+  * 6.18.1 cycle
+  
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Mon, 23 Aug 2010 11:30:00 +0200
+  
+open-xchange-mobile-configuration-json-action-sms (6.18.0.0-0) unstable; urgency=low
+
+  * 6.18.0 cycle
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Mon, 23 Aug 2010 11:30:00 +0200
+
+open-xchange-mobile-configuration-json-action-sms (6.17.0.0-0) unstable; urgency=low
+
+  * initial
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Fri, 25 Jun 2010 11:30:00 +0200

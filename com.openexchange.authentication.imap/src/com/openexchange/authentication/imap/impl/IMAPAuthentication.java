@@ -64,7 +64,6 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -74,6 +73,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -352,6 +352,11 @@ public class IMAPAuthentication implements AuthenticationService {
                 throw LoginExceptionCodes.COMMUNICATION.create(e);
             }
         }
+    }
+
+    @Override
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.NOT_SUPPORTED.create(IMAPAuthentication.class.getName());
     }
 
     private static void initConfig() throws OXException {

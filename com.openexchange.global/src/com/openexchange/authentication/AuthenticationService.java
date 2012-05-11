@@ -71,4 +71,16 @@ public interface AuthenticationService {
      */
     Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
 
+    /**
+     * This method authenticates a user using a global web services session which is useful in single sign on scenarios. If no such global
+     * web services session exists either throw a {@link LoginException} or redirect the browser to some global login site with
+     * {@link ResultCode#REDIRECT}. This method should never return <code>null</code>.
+     *
+     * @param loginInfo the complete login information from the autologin request. It does never contain login and password.
+     * @return an {@link Authenticated} containing context information to resolve the context and user information to resolve the user.
+     * This return type can be enhanced with {@link SessionEnhancement} and/or {@link ResponseEnhancement}.
+     * @throws OXException if something with the login info is wrong and no {@link Authenticated} can be returned.
+     */
+    Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException;
+
 }

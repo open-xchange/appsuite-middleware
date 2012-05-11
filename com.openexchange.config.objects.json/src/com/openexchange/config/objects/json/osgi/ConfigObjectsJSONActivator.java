@@ -53,6 +53,7 @@ import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.config.objects.json.ConfigObjectActionFactory;
 import com.openexchange.config.objects.json.ConfigObjectServlet;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 
@@ -66,7 +67,7 @@ public class ConfigObjectsJSONActivator extends AbstractSessionServletActivator 
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[]{ConfigObjectRegistryFactory.class};
+        return new Class<?>[]{ConfigObjectRegistryFactory.class,DispatcherPrefixService.class};
     }
 
     @Override
@@ -75,7 +76,7 @@ public class ConfigObjectsJSONActivator extends AbstractSessionServletActivator 
         ConfigObjectServlet.ACTIONS = factory;
 
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));
-        registerSessionServlet("/ajax/cobjects", new ConfigObjectServlet());
+        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"cobjects", new ConfigObjectServlet());
 
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.authentication.database.impl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -125,6 +126,11 @@ public class DatabaseAuthentication implements AuthenticationService {
                 return splitted[1];
             }
         };
+    }
+
+    @Override
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.NOT_SUPPORTED.create(DatabaseAuthentication.class.getName());
     }
 
     /**

@@ -1,0 +1,68 @@
+# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: messaging-sms\n"
+"POT-Creation-Date: 2011-07-22 08:55+0200\n"
+"PO-Revision-Date: 2011-07-23 15:41+0200\n"
+"Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
+"Language-Team: Italian <it@bureau-cornavin.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: it\n"
+"X-Generator: Lokalize 1.0\n"
+
+msgid "From"
+msgstr "Da"
+
+msgid "To"
+msgstr "A"
+
+msgid "Send SMS"
+msgstr "Invia SMS"
+
+msgid "Send"
+msgstr "Invia"
+
+msgid "Cancel"
+msgstr "Annulla"
+
+#. Character and message count status
+#. %1$d is the number of used characters
+#. %2$s is the number of corresponding messages as text
+msgid "%1$d character (%2$s)"
+msgid_plural "%1$d characters (%2$s)"
+msgstr[0] "%1$d carattere (%2$s)"
+msgstr[1] "%1$d caratteri (%2$s)"
+
+#. Message count status
+#. %d is the number of messages
+msgid "%d message"
+msgid_plural "%d messages"
+msgstr[0] "%d messaggio"
+msgstr[1] "%d messaggi"
+
+#. Character count status
+#. %1$d is the number of used characters
+#. %2$d is the number of remaining characters
+#. %3$d is the total number of available characters
+msgid "%1$d / %3$d"
+msgstr "%1$d / %3$d"
+
+msgid "MMS"
+msgstr "MMS"
+
+#. %s is the email address used as signature
+msgid "Add signature: %s"
+msgstr "Aggiungi firma: %s"
+
+msgid "Invalid CAPTCHA, please try again."
+msgstr "CAPTCHA non valido, prova ancora."
+
+msgid "New SMS"
+msgstr "Nuovo SMS"
+
+msgid "SMS"
+msgstr "SMS"
+

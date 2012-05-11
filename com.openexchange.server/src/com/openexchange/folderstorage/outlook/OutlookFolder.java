@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.i18n.LocaleTools;
@@ -63,7 +64,7 @@ import com.openexchange.i18n.tools.StringHelper;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolder implements Folder {
+public final class OutlookFolder implements FolderExtension {
 
     private static final long serialVersionUID = 1076412172524386127L;
 
@@ -352,6 +353,14 @@ public final class OutlookFolder implements Folder {
     @Override
     public String getSummary() {
         return realFolder.getSummary();
+    }
+
+    @Override
+    public int[] getTotalAndUnread() {
+        if (realFolder instanceof FolderExtension) {
+            return ((FolderExtension) realFolder).getTotalAndUnread();
+        }
+        return null;
     }
 
     @Override

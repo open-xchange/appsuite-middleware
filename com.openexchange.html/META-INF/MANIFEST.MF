@@ -13,6 +13,7 @@ Bundle-ClassPath: .,
  lib/kxml2-2.3.0.jar,
  lib/org.apache.log4j_1.2.13.v200806030600.jar
 Import-Package: com.openexchange.config,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.log,

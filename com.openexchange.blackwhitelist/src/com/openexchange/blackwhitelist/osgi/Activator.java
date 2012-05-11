@@ -50,12 +50,13 @@
 package com.openexchange.blackwhitelist.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.blackwhitelist.BlackWhiteListInterface;
 import com.openexchange.blackwhitelist.BlackWhiteListServlet;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link Activator}
@@ -66,32 +67,30 @@ public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final String ALIAS = "/ajax/blackwhitelist";
-
     private BlackWhiteListServlet servlet;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, BlackWhiteListInterface.class };
+        return new Class<?>[] { HttpService.class, BlackWhiteListInterface.class, DispatcherPrefixService.class };
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         registerServlet();
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         unregisterServlet();
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ServiceRegistry registry = ServletServiceRegistry.getInstance();
+        final ServiceRegistry registry = ServletServiceRegistry.getInstance();
         registry.clearRegistry();
-        Class<?>[] classes = getNeededServices();
+        final Class<?>[] classes = getNeededServices();
         for (int i = 0; i < classes.length; i++) {
-            Object service = getService(classes[i]);
+            final Object service = getService(classes[i]);
             if (service != null) {
                 registry.addService(classes[i], service);
             }
@@ -107,22 +106,22 @@ public class Activator extends DeferredActivator {
     }
 
     private void registerServlet() {
-        ServiceRegistry registry = ServletServiceRegistry.getInstance();
-        HttpService httpService = registry.getService(HttpService.class);
+        final ServiceRegistry registry = ServletServiceRegistry.getInstance();
+        final HttpService httpService = registry.getService(HttpService.class);
         if (servlet == null) {
             try {
-                httpService.registerServlet(ALIAS, servlet = new BlackWhiteListServlet(), null, null);
+                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist", servlet = new BlackWhiteListServlet(), null, null);
                 LOG.info("Black-/Whitelist Servlet registered.");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
     }
 
     private void unregisterServlet() {
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         if (httpService != null && servlet != null) {
-            httpService.unregister(ALIAS);
+            httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist");
             servlet = null;
             LOG.info("Black-/Whitelist Servlet unregistered.");
         }
