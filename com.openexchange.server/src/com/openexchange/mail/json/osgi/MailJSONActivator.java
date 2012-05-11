@@ -98,7 +98,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             
             @Override
             public String getIdentifier() {
-                return "com.openexchange.mail.senderImageUrl";
+                return "mail.senderImageUrl";
             }
             
             @Override
