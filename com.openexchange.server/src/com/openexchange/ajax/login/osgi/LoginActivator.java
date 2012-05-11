@@ -56,6 +56,7 @@ import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 
 /**
  * {@link LoginActivator}
@@ -72,7 +73,7 @@ public class LoginActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + "))");
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
         tracker = new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context));
         tracker.open();
     }
