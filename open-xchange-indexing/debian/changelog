@@ -1,3 +1,7 @@
+open-xchange-indexing (6.21.0-4) unstable; urgency=low
+
+  * Build for Rev. 4
+  
 open-xchange-indexing (6.21.0-3) unstable; urgency=low
 
   * Build for Rev. 3
