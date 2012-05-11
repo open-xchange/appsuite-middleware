@@ -17,7 +17,7 @@ public class Activator implements BundleActivator {
     /**
      * Reference to the service registration.
      */
-    private ServiceRegistration registration;
+    private ServiceRegistration<AuthenticationService> registration;
 
     /**
      * {@inheritDoc}
@@ -26,7 +26,7 @@ public class Activator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.authentication.ucs");
 
-        registration = context.registerService(AuthenticationService.class.getName(),
+        registration = context.registerService(AuthenticationService.class,
             new UCSAuthentication(), null);
     }
 
