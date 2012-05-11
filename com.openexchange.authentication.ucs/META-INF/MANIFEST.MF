@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.authentication.ucs
 Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.authentication.ucs.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.authentication,
  com.openexchange.configuration,
  com.openexchange.exception,
