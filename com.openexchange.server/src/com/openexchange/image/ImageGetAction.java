@@ -52,7 +52,6 @@ package com.openexchange.image;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;

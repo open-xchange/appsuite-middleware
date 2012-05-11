@@ -1,8 +1,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.Calendar;
-import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 

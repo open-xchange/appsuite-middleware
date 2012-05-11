@@ -65,7 +65,6 @@ import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;

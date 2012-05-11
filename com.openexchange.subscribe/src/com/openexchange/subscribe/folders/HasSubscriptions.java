@@ -62,7 +62,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.tools.session.ServerSession;
 
 /**

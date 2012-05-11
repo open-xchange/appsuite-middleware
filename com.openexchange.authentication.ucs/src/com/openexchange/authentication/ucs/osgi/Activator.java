@@ -22,6 +22,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.authentication.ucs");
 
@@ -32,6 +33,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.authentication.ucs");
 

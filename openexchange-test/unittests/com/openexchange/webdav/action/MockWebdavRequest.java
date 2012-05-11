@@ -10,7 +10,6 @@ import java.util.Map;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;

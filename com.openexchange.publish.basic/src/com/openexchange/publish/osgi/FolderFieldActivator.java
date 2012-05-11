@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.publish.folders.IsPublished;
-import com.openexchange.publish.helpers.AbstractPublicationService;
 
 
 /**

@@ -1,7 +1,6 @@
 package com.openexchange.scripting.rhino.libs;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;

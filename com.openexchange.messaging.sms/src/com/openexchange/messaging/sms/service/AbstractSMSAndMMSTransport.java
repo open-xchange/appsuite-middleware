@@ -62,14 +62,17 @@ public abstract class AbstractSMSAndMMSTransport implements MessagingAccountTran
         super();
     }
 
+    @Override
     public final boolean isConnected() {
         return false;
     }
 
+    @Override
     public final boolean ping() {
         return false;
     }
 
+    @Override
     public final boolean cacheable() {
         return false;
     }

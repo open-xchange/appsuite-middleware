@@ -71,8 +71,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.IndexResult;
-import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;

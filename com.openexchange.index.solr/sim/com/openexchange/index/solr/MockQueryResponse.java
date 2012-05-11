@@ -73,6 +73,7 @@ public class MockQueryResponse extends QueryResponse {
         this.entries = entries;
     }
     
+    @Override
     public SolrDocumentList getResults() {
         SolrDocumentList documents = new SolrDocumentList();
         for (Map<String, Object> entry : entries) {

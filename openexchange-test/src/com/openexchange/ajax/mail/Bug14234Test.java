@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import java.io.IOException;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;

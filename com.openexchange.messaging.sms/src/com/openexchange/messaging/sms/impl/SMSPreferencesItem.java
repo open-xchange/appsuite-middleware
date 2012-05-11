@@ -65,17 +65,21 @@ import com.openexchange.session.Session;
 
 public class SMSPreferencesItem implements PreferencesItemService {
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.messaging.sms" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final MessagingNewService service = MessagingSMSServiceRegistry.getServiceRegistry().getService(MessagingNewService.class, true);
                 setting.setSingleValue(B(service.getUserConfiguration(session).isEnabled()));
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

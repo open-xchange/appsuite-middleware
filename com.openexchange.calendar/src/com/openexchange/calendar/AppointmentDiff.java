@@ -60,7 +60,6 @@ import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Differ;
 import com.openexchange.groupware.container.Difference;
 
