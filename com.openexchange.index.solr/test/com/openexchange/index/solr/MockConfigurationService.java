@@ -52,6 +52,7 @@ package com.openexchange.index.solr;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.solr.SolrProperties;
@@ -65,7 +66,7 @@ import com.openexchange.solr.SolrProperties;
 public class MockConfigurationService implements ConfigurationService {
 
     @Override
-    public String getProperty(String name) {
+    public String getProperty(final String name) {
         if (name.equals(SolrProperties.CONFIG_DIR)) {
             return "/development/git/backend/open-xchange-development/solr/conf";
         }
@@ -74,55 +75,54 @@ public class MockConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public String getProperty(String name, String defaultValue) {
+    public String getProperty(final String name, final String defaultValue) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String getProperty(String name, PropertyListener listener) {
+    public String getProperty(final String name, final PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String getProperty(String name, String defaultValue, PropertyListener listener) {
+    public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void removePropertyListener(String name, PropertyListener listener) {
+    public void removePropertyListener(final String name, final PropertyListener listener) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public Properties getFile(String filename) {
-        // TODO Auto-generated method stub
-        return null;
+    public Properties getFile(final String filename) {
+        return new Properties();
     }
 
     @Override
-    public String getText(String filename) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Properties getPropertiesInFolder(String folderName) {
+    public String getText(final String filename) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean getBoolProperty(String name, boolean defaultValue) {
+    public Properties getPropertiesInFolder(final String folderName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean getBoolProperty(final String name, final boolean defaultValue) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public int getIntProperty(String name, int defaultValue) {
+    public int getIntProperty(final String name, final int defaultValue) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -140,13 +140,13 @@ public class MockConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public Object getYaml(String filename) {
+    public Object getYaml(final String filename) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Map<String, Object> getYamlInFolder(String dirName) {
+    public Map<String, Object> getYamlInFolder(final String dirName) {
         // TODO Auto-generated method stub
         return null;
     }
