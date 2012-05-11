@@ -52,7 +52,6 @@ package com.openexchange.admin.autocontextid;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -61,38 +60,39 @@ import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.log.LogFactory;
 
 public class Activator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         try {
             initCache();
 
-            Hashtable<String, String> props = new Hashtable<String, String>();
+            final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
-            ServiceRegistration  reg = context.registerService(OXContextPluginInterface.class.getName(), new OXAutoCIDContextImpl(), props);
+            final ServiceRegistration<OXContextPluginInterface> reg = context.registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
             }
 
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw e;
-        } catch (OXGenericException e) {
+        } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
             throw e;
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
     }
 
     private void initCache() throws SQLException, OXGenericException {
-        AdminCacheExtended cache = new AdminCacheExtended();
+        final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         cache.initCacheExtended();
         cache.initIDGenerator();
