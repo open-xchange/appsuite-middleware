@@ -83,6 +83,8 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private ConfigurationService configService;
     private HttpService httpService;
+    private DispatcherPrefixService prefixService;
+    
     private Login login;
 
     public LoginServletRegisterer(final BundleContext context) {
@@ -102,7 +104,11 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (obj instanceof HttpService) {
                 httpService = (HttpService) obj;
             }
-            needsRegistration = null != configService && null != httpService && login == null;
+            if (obj instanceof DispatcherPrefixService) {
+            	prefixService = (DispatcherPrefixService) obj;
+            }
+
+            needsRegistration = null != configService && null != httpService && login == null && prefixService != null;
             if (needsRegistration) {
                 login = new Login();
             }
@@ -132,7 +138,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED);
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX, new Login(), params, null);
+                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new Login(), params, null);
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {

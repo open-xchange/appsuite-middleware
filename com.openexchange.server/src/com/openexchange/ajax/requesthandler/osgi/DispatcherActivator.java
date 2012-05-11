@@ -62,7 +62,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
@@ -81,7 +80,6 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -105,7 +103,10 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final DefaultDispatcher dispatcher = new DefaultDispatcher();
+
+    	prefix = getService(DispatcherPrefixService.class).getPrefix();
+    	
+    	final DefaultDispatcher dispatcher = new DefaultDispatcher();
         /*
          * Specify default converters
          */
@@ -172,23 +173,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
-        final String prefix;
-        {
-            String tmp = getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
-            if (tmp.charAt(0) != '/') {
-                tmp = '/' + tmp;
-            }
-            if (!tmp.endsWith("/")) {
-                tmp = tmp + '/';
-            }
-            prefix = tmp;
-        }
-        this.prefix = prefix;
-        DispatcherServlet.setPrefix(prefix);
-        final DispatcherPrefixService prefixService = DefaultDispatcherPrefixService.getInstance();
-        registerService(DispatcherPrefixService.class, prefixService);
-        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
-        ImageMatcher.setPrefixService(prefixService);
+        
         Multiple.setDispatcher(dispatcher);
 
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
@@ -285,7 +270,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { DispatcherPrefixService.class };
     }
 
 }
