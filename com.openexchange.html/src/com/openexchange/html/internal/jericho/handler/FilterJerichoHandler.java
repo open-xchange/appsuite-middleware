@@ -71,17 +71,18 @@ import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link FilterJerichoHandler}
@@ -91,6 +92,8 @@ import com.openexchange.html.services.ServiceRegistry;
 public final class FilterJerichoHandler implements JerichoHandler {
 
     private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
+
+    private static final Set<String> ALL = Collections.unmodifiableSet(new HashSet<String>(HTMLElements.getElementNames()));
 
     private static volatile Map<String, Map<String, Set<String>>> staticHTMLMap;
 
@@ -397,7 +400,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
                 addStartTag(startTag, false, htmlMap.get(tagName));
             } else {
-                if (!body || isRemoveWholeTag(startTag)) {
+                if (!body) {
+                    /*
+                     * Remove whole tag incl. subsequent content and tags
+                     */
+                    skipLevel++;
+                } else if (isMSTag(startTag)) {
+                    /*
+                     * Just remove tag definition: "<tag>text<subtag>text</subtag></tag>" would be "text<subtag>text</subtag>"
+                     */
+                    mark();
+                } else if (isRemoveWholeTag(startTag)) {
                     /*
                      * Remove whole tag incl. subsequent content and tags
                      */
@@ -412,7 +425,16 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
     }
 
-    private boolean isRemoveWholeTag(final Tag tag) {
+    private static boolean isMSTag(final Tag tag) {
+        final String check = tag.getName();
+        final char c;
+        if (check.length() < 2 || ':' != check.charAt(1) || (('w' != (c = check.charAt(0))) && ('W' != c) && ('o' != c) && ('O' != c))) {
+            return false;
+        }
+        return ALL.contains(check.substring(2));
+    }
+
+    private static boolean isRemoveWholeTag(final Tag tag) {
         final String check = tag.getName();
         return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
     }
