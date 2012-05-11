@@ -162,6 +162,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         ServerServiceRegistry.getInstance().addService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
         DecoratingAJAXActionCustomizer.REGISTRY_REF.set(decoratorRegistry);
 
+        // Keep this order!!!
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
         dispatcher.addCustomizer(new AJAXActionCustomizerFactory() {
             
