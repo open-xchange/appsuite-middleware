@@ -25,6 +25,7 @@ Import-Package: com.davekoelle,
  com.openexchange.database,
  com.openexchange.dataretention,
  com.openexchange.datatypes.genericonf,
+ com.openexchange.dispatcher,
  com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.event,
@@ -295,5 +296,6 @@ Bundle-ClassPath: .,
  lib/xSocket-2.7.1.jar,
  lib/jacksum.jar,
  lib/java-image-scaling-0.8.5.jar,
- lib/jericho-3.2.jar
+ lib/jericho-3.2.jar,
+ lib/commons-net-3.1.jar
 

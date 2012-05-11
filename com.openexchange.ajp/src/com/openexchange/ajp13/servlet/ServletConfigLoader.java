@@ -269,6 +269,8 @@ public final class ServletConfigLoader {
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
         globalProps.put(Property.IP_CHECK.getPropertyName(), ServerConfig.getProperty(Property.IP_CHECK));
+        globalProps.put(Property.IP_MASK_V4.getPropertyName(), ServerConfig.getProperty(Property.IP_MASK_V4));
+        globalProps.put(Property.IP_MASK_V6.getPropertyName(), ServerConfig.getProperty(Property.IP_MASK_V6));
     }
 
     /**
@@ -289,6 +291,8 @@ public final class ServletConfigLoader {
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
         globalProps.put(Property.IP_CHECK.getPropertyName(),  AJPv13Config.getServerProperty(Property.IP_CHECK));
+        globalProps.put(Property.IP_MASK_V4.getPropertyName(),  AJPv13Config.getServerProperty(Property.IP_MASK_V4));
+        globalProps.put(Property.IP_MASK_V6.getPropertyName(),  AJPv13Config.getServerProperty(Property.IP_MASK_V6));
         globalProps.put(Property.UI_WEB_PATH.getPropertyName(), AJPv13Config.getServerProperty(Property.UI_WEB_PATH));
         globalProps.put(Property.COOKIE_HASH.getPropertyName(), AJPv13Config.getServerProperty(Property.COOKIE_HASH));
     }

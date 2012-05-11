@@ -213,7 +213,7 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarMonth li .text                           { font-weight: normal }
     </style>
     <#assign middleDay = days[days?size / 2]>
-    <title>Open-Xchange - ${i18n.tr("Calendar")} - ${middleDay.format("MMMM", middleDay.time)}</title>
+    <title>${documentTitle} - ${i18n.tr("Calendar")} - ${middleDay.format("MMMM", middleDay.time)}</title>
   </head>
   <body onload="window.print()">
     <div id="layout" class="flexChilds">

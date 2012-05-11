@@ -493,7 +493,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return retval;
     }
 
-    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n) +");
+    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
 
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {

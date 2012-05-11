@@ -434,7 +434,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            final QueryFields queryFields = new QueryFields(fields);
+            final QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }

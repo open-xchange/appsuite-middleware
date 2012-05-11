@@ -79,8 +79,8 @@ public class QueryFields {
      * 
      * @param fields
      */
-    public QueryFields(final ContactField[] fields) {
-        this.update(fields);
+    public QueryFields(final ContactField[] fields, ContactField...mandatoryFields) {
+        this.update(fields, mandatoryFields);
     }
     
     /**
@@ -88,7 +88,7 @@ public class QueryFields {
      * 
      * @param fields
      */
-    public void update(final ContactField[] fields) {
+    public void update(final ContactField[] fields, ContactField...mandatoryFields) {
         if (null == fields) {
             throw new IllegalArgumentException("fields");
         }
@@ -108,6 +108,19 @@ public class QueryFields {
         		this.hasAttachmentData = true;
         	}
 		}
+        if (null != mandatoryFields) {
+	        for (final ContactField field : mandatoryFields) {
+	        	if (Fields.CONTACT_DATABASE.contains(field)) {
+	        		contactDataFieldsSet.add(field);
+	        	} else if (Fields.IMAGE_DATABASE_ADDITIONAL.contains(field)) {
+	        		imageDataFieldsSet.add(field);
+	        	} else if (ContactField.DISTRIBUTIONLIST.equals(field)) {
+	                this.hasDistListData = true;
+	        	} else if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
+	        		this.hasAttachmentData = true;
+	        	}
+			}
+        }
         /*
          * check image data fields
          */
@@ -115,7 +128,6 @@ public class QueryFields {
         	imageDataFieldsSet.add(ContactField.OBJECT_ID);
         	this.hasImageData = true;
         	this.imageDataFields = imageDataFieldsSet.toArray(new ContactField[imageDataFieldsSet.size()]);
-        	contactDataFieldsSet.add(ContactField.OBJECT_ID);
         	contactDataFieldsSet.add(ContactField.NUMBER_OF_IMAGES);        	
         }
         /*
@@ -165,6 +177,20 @@ public class QueryFields {
      * @return the fields
      */
     public ContactField[] getImageDataFields(boolean forUpdate) {
+    	if (forUpdate) {
+    		List<ContactField> updateFields = new ArrayList<ContactField>();
+    		for (ContactField field : imageDataFields) {
+				if (false == ContactField.OBJECT_ID.equals(field) && false == ContactField.CONTEXTID.equals(field)) {
+					updateFields.add(field);
+				}
+			}
+    		return updateFields.toArray(new ContactField[updateFields.size()]);
+    	} else {
+    		return this.imageDataFields;
+    	}
+    }
+    
+    public ContactField[] getContactDataFields(boolean forUpdate) {
     	if (forUpdate) {
     		List<ContactField> updateFields = new ArrayList<ContactField>();
     		for (ContactField field : imageDataFields) {

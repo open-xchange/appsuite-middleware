@@ -862,14 +862,34 @@ public final class IMAPCommandsCollection {
      * @throws ParsingException If parsing STATUS response fails
      */
     protected static int[] parseStatusResponse(final Response statusResponse) throws ParsingException {
+        if (null == statusResponse) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
+        int cnt = 0;
+        {
+            final String resp = statusResponse.toString();
+            if (isEmpty(resp)) {
+                throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+            }
+            int pos = -1;
+            while ((pos = resp.indexOf('(', pos+1)) > 0) {
+                cnt++;
+            }
+        }
+        if (cnt <= 0) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
         /*
          * Read until opening parenthesis or EOF
          */
         byte b = 0;
         do {
             b = statusResponse.readByte();
+            if (b == '(' && --cnt > 0) {
+                b = statusResponse.readByte();
+            }
         } while (b != 0 && b != '(');
-        if (0 == b) {
+        if (0 == b || cnt > 0) {
             // EOF
             throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
         }
@@ -905,14 +925,34 @@ public final class IMAPCommandsCollection {
         if (null == counterTypes || counterTypes.length == 0) {
             return new int[0];
         }
+        if (null == statusResponse) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
+        int cnt = 0;
+        {
+            final String resp = statusResponse.toString();
+            if (isEmpty(resp)) {
+                throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+            }
+            int pos = -1;
+            while ((pos = resp.indexOf('(', pos+1)) > 0) {
+                cnt++;
+            }
+        }
+        if (cnt <= 0) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
         /*
          * Read until opening parenthesis or EOF
          */
         byte b = 0;
         do {
             b = statusResponse.readByte();
+            if (b == '(' && --cnt > 0) {
+                b = statusResponse.readByte();
+            }
         } while (b != 0 && b != '(');
-        if (0 == b) {
+        if (0 == b || cnt > 0) {
             // EOF
             throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
         }
@@ -938,6 +978,18 @@ public final class IMAPCommandsCollection {
             }
         }
         return -1;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

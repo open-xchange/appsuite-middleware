@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -107,11 +108,6 @@ public class DispatcherServlet extends SessionServlet {
     public static Dispatcher getDispatcher() {
         return DISPATCHER.get();
     }
-
-    /**
-     * The prefix reference.
-     */
-    protected static final AtomicReference<String> PREFIX = new AtomicReference<String>();
 
     /**
      * Sets the prefix.

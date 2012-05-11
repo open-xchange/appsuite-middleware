@@ -60,11 +60,13 @@ import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -225,7 +227,7 @@ public final class ImageUtility {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        sb.append(prefix).append('/').append(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();
         if (null != alias) {
             sb.append(alias);

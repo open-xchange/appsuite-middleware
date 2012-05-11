@@ -55,6 +55,7 @@ import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -69,7 +70,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasswordChangeServletActivator.class));
 
-    private static final String PWC_SRVLT_ALIAS = "ajax/passwordchange";
+    private static final String PWC_SRVLT_ALIAS_APPENDIX = "passwordchange";
 
     private final AtomicBoolean registered;
 
@@ -81,11 +82,9 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
         registered = new AtomicBoolean();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PasswordChangeService.class, ContextService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, PasswordChangeService.class, ContextService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -94,7 +93,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
          * Add available service to registry
          */
         getServiceRegistry().addService(clazz, getService(clazz));
-        if (getServiceRegistry().size() == NEEDED_SERVICES.length) {
+        if (getServiceRegistry().size() == new Class<?>[] { HttpService.class, PasswordChangeService.class, ContextService.class, DispatcherPrefixService.class }.length) {
             /*
              * All needed services available: Register servlet
              */
@@ -172,7 +171,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
                 /*
                  * Register servlet
                  */
-                httpService.registerServlet(PWC_SRVLT_ALIAS, new PasswordChangeServlet(), null, null);
+                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX, new PasswordChangeServlet(), null, null);
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Password change servlet successfully registered");
                 }
@@ -192,7 +191,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
                 /*
                  * Unregister servlet
                  */
-                httpService.unregister(PWC_SRVLT_ALIAS);
+                httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX);
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Password change servlet successfully unregistered");
                 }

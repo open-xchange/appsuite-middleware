@@ -1,0 +1,68 @@
+# Kalman Kemenczy <kkemenczy@opensuse.org>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2011-07-22 08:55+0200\n"
+"PO-Revision-Date: 2011-07-23 16:22+0200\n"
+"Last-Translator: Kalman Kemenczy <kkemenczy@opensuse.org>\n"
+"Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+"Language: hu\n"
+"X-Generator: Lokalize 1.2\n"
+
+msgid "From"
+msgstr "Feladó"
+
+msgid "To"
+msgstr "Címzett"
+
+msgid "Send SMS"
+msgstr "SMS küldése"
+
+msgid "Send"
+msgstr "Küldés"
+
+msgid "Cancel"
+msgstr "Mégse"
+
+#. Character and message count status
+#. %1$d is the number of used characters
+#. %2$s is the number of corresponding messages as text
+msgid "%1$d character (%2$s)"
+msgid_plural "%1$d characters (%2$s)"
+msgstr[0] "%1$d karakter (%2$s)"
+msgstr[1] "%1$d karakter (%2$s)"
+
+#. Message count status
+#. %d is the number of messages
+msgid "%d message"
+msgid_plural "%d messages"
+msgstr[0] "%d üzenet"
+msgstr[1] "%d üzenet"
+
+#. Character count status
+#. %1$d is the number of used characters
+#. %2$d is the number of remaining characters
+#. %3$d is the total number of available characters
+msgid "%1$d / %3$d"
+msgstr "%1$d / %3$d"
+
+msgid "MMS"
+msgstr "MMS"
+
+#. %s is the email address used as signature
+msgid "Add signature: %s"
+msgstr "%s aláírás hozzáadása"
+
+msgid "Invalid CAPTCHA, please try again."
+msgstr "Hibás CAPTCHA, próbálja meg újra."
+
+msgid "New SMS"
+msgstr "Új SMS"
+
+msgid "SMS"
+msgstr "SMS"
+

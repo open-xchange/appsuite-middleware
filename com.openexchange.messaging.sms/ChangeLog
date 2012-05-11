@@ -1,0 +1,84 @@
+* 2012-04-11 - stefan.preuss@open-xchange.com
+
+  - Fixed bug #21897 : [L3] SMS receiver number not checked
+
+* 2012-03-27 - viktor.pracht@open-xchange.com
+
+  - Implemented story 27072265 : Feature drop-down in SMS dialog's From field
+
+* 2012-03-26 - viktor.pracht@open-xchange.com
+
+  - Fixed bug #21846 : [L3] sending SMS not possible
+
+* 2012-03-21 - viktor.pracht@open-xchange.com
+
+  - Fixed bug #21817 : [L3] sms textinput area can be resized without limit
+
+* 2012-03-20 - choeger@open-xchange.com
+
+  - Fixed bug #21816 : [L3] smslimit feature does not work
+  
+* 2012-02-29 - choeger@open-xchange.com
+
+  - SCR973: optionally limit number of sms and/or recipients
+
+* 2012-02-28 - choeger@open-xchange.com
+
+  - SCR970: optionally disable the signature option
+
+* 2012-02-28 - viktor.pracht@open-xchange.com
+
+  - Implemented story 24694921 : extensions of the recipient field
+  - Implemented story 24695101 : layout extensions
+
+* 2012-01-13 - viktor.pracht@open-xchange.com
+
+  - Fixed bug #20965 : [L3] sms: pull down available even if there are no choices
+
+* 2011-12-20 - viktor.pracht@open-xchange.com
+
+  - Fixed bug #21032 : [L3] sms text aera not limited to max allowed chars
+
+* 2011-10-14 - stefan.preuss@open-xchange.com
+
+  - Fixed bug #20589 : [IE8][L3] messaging sms not working if https is in use and captcha enabled
+
+* 2011-09-23 - dennis.sieben@open-xchange.com
+
+  - Fixed bug #20451 : Wrong RPM tags for open-xchange-messaging-sms-gui-theme-default
+
+* 2011-07-25 - viktor.pracht@open-xchange.com
+
+  - Fixed stale character count when opening the SMS window multiple times
+
+* 2011-07-21 - dennis.sieben@open-xchange.com
+
+  - Package split to support different icons
+
+* 2011-07-20 - viktor.pracht@open-xchange.com
+
+  - TA7478 for US6645 : Add MMS functionality to the SMS plugin
+
+* 2011-07-12 - viktor.pracht@open-xchange.com
+
+  - Added support for built-in reCAPTCHA languages
+
+* 2011-06-29 - viktor.pracht@open-xchange.com
+
+  - Added SMS icons
+
+* 2011-06-28 - viktor.pracht@open-xchange.com
+
+  - Added reCAPTCHA support
+
+* 2011-05-17 - viktor.pracht@open-xchange.com
+
+  - Fixed bug #19244 : IE7: Login hangs at 90%
+
+* 2011-05-10 - viktor.pracht@open-xchange.com
+
+  - Fixed bug #19177 : SMS Plugin should not show "sender dropdown" when empty
+
+* 2011-03-14 - benjamin.otterbach@open-xchange.com
+
+  - Initial

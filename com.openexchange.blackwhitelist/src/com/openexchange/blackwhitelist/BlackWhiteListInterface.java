@@ -2,7 +2,7 @@
 package com.openexchange.blackwhitelist;
 
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /*
@@ -68,7 +68,7 @@ public interface BlackWhiteListInterface {
      * @param type The list type (black/white).
      * @param list The list entries.
      */
-    public void setList(ServerSession session, ListType type, List<String> list) throws AbstractOXException;
+    public void setList(ServerSession session, ListType type, List<String> list) throws OXException;
 
     /**
      * Adds list entries.
@@ -77,7 +77,7 @@ public interface BlackWhiteListInterface {
      * @param type The list type (black/white).
      * @param entries The entries to add.
      */
-    public void addListEntries(ServerSession session, ListType type, List<String> entries) throws AbstractOXException;
+    public void addListEntries(ServerSession session, ListType type, List<String> entries) throws OXException;
 
     /**
      * Removes list entries.
@@ -86,7 +86,7 @@ public interface BlackWhiteListInterface {
      * @param type The list type (black/white).
      * @param entries The entries to remove.
      */
-    public void removeListEntries(ServerSession session, ListType type, List<String> entries) throws AbstractOXException;
+    public void removeListEntries(ServerSession session, ListType type, List<String> entries) throws OXException;
 
     /**
      * Returns all entries of the given list type.
@@ -95,5 +95,5 @@ public interface BlackWhiteListInterface {
      * @param type The list type (black/white).
      * @return A List of entries.
      */
-    public List<String> getList(ServerSession session, ListType type) throws AbstractOXException;
+    public List<String> getList(ServerSession session, ListType type) throws OXException;
 }

@@ -1,4 +1,23 @@
+* 2012-05-10 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20893: Using ui/product/name from ui.properties for calendar printing templates title.
+
+* 2012-05-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug #21695: Due date for tasks must not be corrected to one day earlier as for full day appointments.
+ - Fix for bug #21174: Removed hardcoded limit of 50,000 for contacts.
+
+* 2012-05-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug #21985: Log appropriate error if 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress' property is missing
+
+* 2012-05-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21766: Fixed parsing of IMAP STATUS response if folder full name contains an opening parenthesis
+ - Fix for bug 21891: Simultaneously execute STATUS for MESSAGE and UNREAD
+
 * 2012-05-07 - tobias.friedrich@open-xchange.com
+
  - Fix for bug 22094: Use original folder ID when applying patches during move operations
  
 * 2012-05-04 - martin.herfurth@open-xchange.com

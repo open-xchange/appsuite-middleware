@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JSON Http Response Parsers
+Bundle-SymbolicName: com.openexchange.http.client.json
+Bundle-Version: 6.20.0.0
+Bundle-Activator: com.openexchange.http.client.json.osgi.HTTPJSONActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.http.client,
+ com.openexchange.http.client.builder,
+ com.openexchange.http.client.exceptions,
+ com.openexchange.osgi,
+ org.json,
+ org.osgi.framework;version="1.3.0"

@@ -51,7 +51,9 @@ package com.openexchange.mail.mime.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageMatcher}
@@ -74,11 +76,9 @@ public final class ImageMatcher {
 
     private static final int GROUP_IMG_ID = 13;
 
-    private static final String REGEX_IMAGE_URL =
-        "(<img[^>]*?)(src=\")(?:.*?)" + ImageActionFactory.ALIAS + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+    private static String REGEX_IMAGE_URL = null;
 
-    private static final String REGEX_FILE_URL =
-        "(<img[^>]*?)(src=\")(?:.*?)ajax/file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+    private static String REGEX_FILE_URL = null;
 
     /**
      * The pattern to look-up Open-Xchange image URLs inside HTML content.
@@ -91,9 +91,32 @@ public final class ImageMatcher {
      * }
      * </pre>
      */
-    private static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(?:" + REGEX_FILE_URL + ")|(?:" + REGEX_IMAGE_URL + ')',
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static Pattern PATTERN_REF_IMG = null;
+
+    /**
+     * Sets the prefix service.
+     * 
+     * @param prefixService The prefix service to set
+     */
+    public static void setPrefixService(final DispatcherPrefixService prefixService) {
+        if (null == prefixService) {
+            REGEX_IMAGE_URL = null;
+            REGEX_FILE_URL = null;
+            PATTERN_REF_IMG = null;
+        } else {
+            String prefix = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix();
+            if (prefix.charAt(0) == '/') {
+                prefix = prefix.substring(1);
+            }
+            REGEX_IMAGE_URL =
+                "(<img[^>]*?)(src=\")(?:.*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+            REGEX_FILE_URL =
+                "(<img[^>]*?)(src=\")(?:.*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+
+            PATTERN_REF_IMG =
+                Pattern.compile("(?:" + REGEX_FILE_URL + ")|(?:" + REGEX_IMAGE_URL + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        }
+    }
 
     private final Matcher matcher;
 
@@ -102,7 +125,11 @@ public final class ImageMatcher {
      */
     private ImageMatcher(final CharSequence content) {
         super();
-        matcher = PATTERN_REF_IMG.matcher(content);
+        final Pattern pattern = PATTERN_REF_IMG;
+        if (null == pattern) {
+            throw new IllegalStateException(ImageMatcher.class.getSimpleName()+" not initialized, yet.");
+        }
+        matcher = pattern.matcher(content);
     }
 
     /**

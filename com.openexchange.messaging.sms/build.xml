@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.messaging.sms" basedir=".">
+
+	<!-- Customizable values -->
+    <property name="htdoc" value="/var/www"/>
+	
+	<!-- Install Constants -->
+    <property name="guiPluginsDir" value="${htdoc}/ox6/plugins" />
+
+    <import file="build-project.xml"/>
+
+    <target name="installGui">
+        <mkdir dir="${destDir}/${guiPluginsDir}/${Bundle-SymbolicName}" />
+        <copy todir="${destDir}/${guiPluginsDir}/${Bundle-SymbolicName}" overwrite="true">
+            <fileset dir="gui">
+                <exclude name="**/*.png"/>
+                <exclude name="build.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="installGuiTheme">
+        <mkdir dir="${destDir}/${guiPluginsDir}/${Bundle-SymbolicName}" />
+        <copy todir="${destDir}/${guiPluginsDir}/${Bundle-SymbolicName}" overwrite="true">
+            <fileset dir="gui" >
+                <include name="**/*.png"/>
+                <exclude name="build.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+</project>

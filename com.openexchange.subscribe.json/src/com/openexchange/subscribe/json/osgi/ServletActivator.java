@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -67,11 +68,11 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletActivator.class));
 
-    private static final String SUBSCRIPTION_ALIAS = "ajax/subscriptions";
+    private static final String SUBSCRIPTION_ALIAS_APPENDIX = "subscriptions";
 
-    private static final String SUBSCRIPTION_SOURCES_ALIAS = "ajax/subscriptionSources";
+    private static final String SUBSCRIPTION_SOURCES_ALIAS_APPENDIX = "subscriptionSources";
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class };
 
     private WhiteboardSubscriptionSourceDiscoveryService discoverer;
 
@@ -90,7 +91,7 @@ public class ServletActivator extends AbstractSessionServletActivator {
     private void registerServlets() {
         try {
             //servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
-            registerSessionServlet(SUBSCRIPTION_ALIAS, new SubscriptionServlet());
+            registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + SUBSCRIPTION_ALIAS_APPENDIX, new SubscriptionServlet());
             LOG.info("Registered Servlets for Subscriptions");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
