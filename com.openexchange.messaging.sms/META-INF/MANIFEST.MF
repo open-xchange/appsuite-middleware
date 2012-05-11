@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.writer,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,

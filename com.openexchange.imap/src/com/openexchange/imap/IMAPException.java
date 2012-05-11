@@ -882,7 +882,7 @@ public final class IMAPException extends OXException {
 
         private final int detailNumber;
 
-        private final String prefix = IMAPProvider.PROTOCOL_IMAP.getName().toUpperCase();
+        private static final String PREFIX = IMAPProvider.PROTOCOL_IMAP.getName().toUpperCase();
 
         private final Category category;
         
@@ -927,7 +927,7 @@ public final class IMAPException extends OXException {
         }
 
         public String getPrefix() {
-            return prefix;
+            return PREFIX;
         }
 
         private static final Map<IMAPCode, IMAPCode> EXT_MAP;
@@ -988,7 +988,7 @@ public final class IMAPException extends OXException {
             } else {
                 ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]).setLogMessage(message, args);
             }
-            return ret.addCategory(category).setPrefix(prefix);
+            return ret.addCategory(category).setPrefix(PREFIX);
         }
     }
 

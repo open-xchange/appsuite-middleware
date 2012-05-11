@@ -80,6 +80,7 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
@@ -333,9 +334,9 @@ public final class MimeMessageUtility {
         return false;
     }
 
-    private static final String IMAGE_ALIAS = ImageActionFactory.ALIAS;
+    private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;
 
-    private static final String FILE_ALIAS = "ajax/file";
+    private static final String FILE_ALIAS_APPENDIX = "file";
 
     /**
      * Checks if specified &lt;image&gt; tag's <code>src</code> attribute seems to point to OX image Servlet.
@@ -354,7 +355,11 @@ public final class MimeMessageUtility {
         if (fromIndex < 0) {
             fromIndex = 0;
         }
-        return tmp.indexOf(IMAGE_ALIAS, fromIndex) >= 0 || tmp.indexOf(FILE_ALIAS, fromIndex) >= 0;
+        String prefix = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix();
+        if (prefix.charAt(0) == '/') {
+            prefix = prefix.substring(1);
+        }
+        return tmp.indexOf(prefix+IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix+FILE_ALIAS_APPENDIX, fromIndex) >= 0;
     }
 
     /**

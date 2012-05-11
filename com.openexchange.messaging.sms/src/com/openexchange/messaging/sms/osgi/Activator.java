@@ -54,6 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.messaging.sms.impl.SMSPreferencesItem;
 import com.openexchange.messaging.sms.service.MessagingNewService;
@@ -68,8 +69,6 @@ public class Activator extends DeferredActivator {
     
     private static transient final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, MessagingNewService.class };
-    
     private ServletRegisterer servletRegisterer;
     
     private ServiceRegistration<PreferencesItemService> serviceRegistration;
@@ -80,11 +79,11 @@ public class Activator extends DeferredActivator {
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, MessagingNewService.class, DispatcherPrefixService.class };
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
@@ -95,7 +94,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
@@ -119,6 +118,7 @@ public class Activator extends DeferredActivator {
                     }
                 }
             }
+            ServletRegisterer.PREFIX.set(getService(DispatcherPrefixService.class));
             servletRegisterer = new ServletRegisterer();
             servletRegisterer.registerServlet();
             serviceRegistration = context.registerService(PreferencesItemService.class, new SMSPreferencesItem(), null);
@@ -139,6 +139,7 @@ public class Activator extends DeferredActivator {
             servletRegisterer.unregisterServlet();
             servletRegisterer = null;
             getServiceRegistry().clearRegistry();
+            ServletRegisterer.PREFIX.set(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

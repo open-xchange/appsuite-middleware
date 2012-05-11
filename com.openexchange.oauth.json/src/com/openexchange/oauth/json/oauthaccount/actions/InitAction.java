@@ -132,7 +132,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final StringBuilder callbackUrlBuilder = new StringBuilder(256);
         callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
         callbackUrlBuilder.append(request.getHostname());
-        callbackUrlBuilder.append("/ajax/").append("oauth/accounts");
+        callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
         callbackUrlBuilder.append("?action=create");
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
         {
@@ -183,7 +183,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final StringBuilder callbackUrlBuilder = new StringBuilder(256);
         callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
         callbackUrlBuilder.append(request.getHostname());
-        callbackUrlBuilder.append("/ajax/").append("oauth/accounts");
+        callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
         callbackUrlBuilder.append("?action=reauthorize");
         callbackUrlBuilder.append("&id=").append(account.getId());
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());

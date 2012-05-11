@@ -60,6 +60,7 @@ import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
@@ -138,18 +139,18 @@ public final class ImageUtility {
         return il;
     }
     
-    public static ImageLocation parseImageLocationFrom(AJAXRequestData requestData) {
+    public static ImageLocation parseImageLocationFrom(final AJAXRequestData requestData) {
         if (requestData == null) {
             return null;
         }
 
-        String accountId = requestData.getParameter("accountId");
-        String folder = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
-        String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
+        final String accountId = requestData.getParameter("accountId");
+        final String folder = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
+        final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
         String registrationName = requestData.getParameter("source");
 
-        ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(requestData.getSerlvetRequestURI());
             if (null == registrationName) {
@@ -225,7 +226,9 @@ public final class ImageUtility {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        sb.append(prefix);
+        sb.append(DefaultDispatcherPrefixService.getInstance().getPrefix());
+        sb.append(ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();
         if (null != alias) {
             sb.append(alias);

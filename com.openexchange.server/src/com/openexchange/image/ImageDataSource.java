@@ -65,7 +65,7 @@ public interface ImageDataSource extends DataSource {
     /**
      * The image servlet's alias
      */
-    public static final String ALIAS = "ajax/image";
+    public static final String ALIAS_APPENDIX = "image";
 
     public static final long SECOND_IN_MILLIS = 1000;
 

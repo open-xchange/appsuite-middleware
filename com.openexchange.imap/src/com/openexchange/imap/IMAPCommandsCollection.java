@@ -871,10 +871,9 @@ public final class IMAPCommandsCollection {
             if (isEmpty(resp)) {
                 throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
             }
-            int pos = 0;
-            while ((pos = resp.indexOf('(', pos)) > 0) {
+            int pos = -1;
+            while ((pos = resp.indexOf('(', pos+1)) > 0) {
                 cnt++;
-                pos++;
             }
         }
         if (cnt <= 0) {
@@ -935,10 +934,9 @@ public final class IMAPCommandsCollection {
             if (isEmpty(resp)) {
                 throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
             }
-            int pos = 0;
-            while ((pos = resp.indexOf('(', pos)) > 0) {
+            int pos = -1;
+            while ((pos = resp.indexOf('(', pos+1)) > 0) {
                 cnt++;
-                pos++;
             }
         }
         if (cnt <= 0) {

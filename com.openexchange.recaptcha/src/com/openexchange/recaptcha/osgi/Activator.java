@@ -2,9 +2,10 @@ package com.openexchange.recaptcha.osgi;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.recaptcha.ReCaptchaService;
@@ -15,13 +16,13 @@ public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final String ALIAS = "/ajax/recaptcha";
+    private static final String ALIAS_APPENDIX = "recaptcha";
 
     private ReCaptchaServlet servlet;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HttpService.class };
+        return new Class<?>[] { ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -70,7 +71,7 @@ public class Activator extends HousekeepingActivator {
         final HttpService httpService = registry.getService(HttpService.class);
         if(servlet == null) {
             try {
-                httpService.registerServlet(ALIAS, servlet = new ReCaptchaServlet(), null, null);
+                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX, servlet = new ReCaptchaServlet(), null, null);
                 LOG.info("reCAPTCHA Servlet registered.");
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
@@ -81,7 +82,7 @@ public class Activator extends HousekeepingActivator {
     private void unregisterServlet() {
         final HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
-            httpService.unregister(ALIAS);
+            httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX);
             servlet = null;
             LOG.info("reCAPTCHA Servlet unregistered.");
         }

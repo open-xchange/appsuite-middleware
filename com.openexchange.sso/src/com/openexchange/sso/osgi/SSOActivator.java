@@ -50,8 +50,10 @@
 package com.openexchange.sso.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.sso.SSOConstants;
 import com.openexchange.sso.action.SSOActionFactory;
+import com.openexchange.sso.services.SSOServiceRegistry;
 
 /**
  * {@link SSOActivator} - Activator for JSON single sign-on interface.
@@ -62,11 +64,12 @@ public class SSOActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        SSOServiceRegistry.getInstance().addService(DispatcherPrefixService.class, getService(DispatcherPrefixService.class));
         registerModule(SSOActionFactory.getInstance(), SSOConstants.MODULE);
     }
 

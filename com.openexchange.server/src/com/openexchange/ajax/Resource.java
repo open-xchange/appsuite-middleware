@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Resource} - The servlet handling requests to "/ajax/resource"
+ * {@link Resource} - The servlet handling requests to "resource"
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *

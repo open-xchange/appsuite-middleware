@@ -51,6 +51,7 @@ package com.openexchange.http.deferrer.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
@@ -63,16 +64,16 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class HTTPDeferrerActivator extends HousekeepingActivator {
 
-    private static final String SERVLET_PATH = "/ajax/defer";
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HttpService.class };
+        return new Class<?>[] { ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        getService(HttpService.class).registerServlet(SERVLET_PATH, new DeferrerServlet(), null, null);
+        final DispatcherPrefixService prefixService = getService(DispatcherPrefixService.class);
+        DefaultDeferringURLService.PREFIX.set(prefixService);
+        getService(HttpService.class).registerServlet(prefixService.getPrefix() + "defer", new DeferrerServlet(), null, null);
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {
 
             @Override
@@ -83,11 +84,6 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
         });
 
         openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() {
-
     }
 
 }

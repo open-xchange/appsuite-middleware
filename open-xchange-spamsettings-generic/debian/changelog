@@ -1,0 +1,5 @@
+open-xchange-spamsettings-generic (6.21.0-0) unstable; urgency=low
+
+  * prepare for 6.21.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 10 May 2012 11:58:59 +0200

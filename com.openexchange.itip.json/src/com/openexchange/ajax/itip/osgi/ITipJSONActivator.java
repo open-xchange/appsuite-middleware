@@ -50,6 +50,7 @@
 package com.openexchange.ajax.itip.osgi;
 
 import org.osgi.service.http.HttpService;
+
 import com.openexchange.ajax.itip.ITipActionFactory;
 import com.openexchange.ajax.itip.servlet.ITipJSONServlet;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
@@ -57,6 +58,7 @@ import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -72,7 +74,7 @@ public class ITipJSONActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ITipAnalyzerService.class, ITipParser.class, ConversionService.class, ITipDingeMacherFactoryService.class,
-            ITipMailGeneratorFactory.class, HttpService.class };
+            ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -83,7 +85,7 @@ public class ITipJSONActivator extends HousekeepingActivator {
             ITipActionFactory.INSTANCE,
             "calendar/itip"));
 
-        getService(HttpService.class).registerServlet("ajax/calendar/itip", new ITipJSONServlet(), null, null);
+        getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "calendar/itip", new ITipJSONServlet(), null, null);
 
         openTrackers();
     }

@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.blackwhitelist.BlackWhiteListInterface;
 import com.openexchange.blackwhitelist.BlackWhiteListServlet;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -66,13 +67,11 @@ public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final String ALIAS = "/ajax/blackwhitelist";
-
     private BlackWhiteListServlet servlet;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, BlackWhiteListInterface.class };
+        return new Class<?>[] { HttpService.class, BlackWhiteListInterface.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -111,7 +110,7 @@ public class Activator extends DeferredActivator {
         final HttpService httpService = registry.getService(HttpService.class);
         if (servlet == null) {
             try {
-                httpService.registerServlet(ALIAS, servlet = new BlackWhiteListServlet(), null, null);
+                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist", servlet = new BlackWhiteListServlet(), null, null);
                 LOG.info("Black-/Whitelist Servlet registered.");
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
@@ -122,7 +121,7 @@ public class Activator extends DeferredActivator {
     private void unregisterServlet() {
         final HttpService httpService = getService(HttpService.class);
         if (httpService != null && servlet != null) {
-            httpService.unregister(ALIAS);
+            httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist");
             servlet = null;
             LOG.info("Black-/Whitelist Servlet unregistered.");
         }
