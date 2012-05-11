@@ -51,6 +51,7 @@ package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
 
+import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
 import com.openexchange.image.osgi.ImageActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
 
@@ -63,6 +64,7 @@ import com.openexchange.osgi.CompositeBundleActivator;
 public class ServerCompositeActivator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
+    	new PrefixServiceActivator(),
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
         new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
