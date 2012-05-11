@@ -153,9 +153,8 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
     }
     
     private static String createAddressHeader(final InternetAddress[] addrs) {
-        String line;
-        if (addrs == null || addrs.length <= 0) {
-            line = null;
+        if (addrs == null || addrs.length == 0) {
+            return null;
         } else {
             final StringBuilder lineBuilder = new StringBuilder(256);
             for (int i = 0; i < addrs.length; i++) {
@@ -163,10 +162,8 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
                 lineBuilder.append(", ").append(address.toString());
             }
             lineBuilder.delete(0, 2);
-            line = lineBuilder.toString();
+            return lineBuilder.toString();
         }
-        
-        return line;
     }
 
     private static SolrInputDocument createDocument(final String uuid, final MailMessage mail, final int accountId, final int userId, final int contextId, final long stamp) {
@@ -191,8 +188,8 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
         setFieldInDocument(inputDocument, SolrMailField.ATTACHMENT, mail.hasAttachment());
         setFieldInDocument(inputDocument, SolrMailField.COLOR_LABEL, mail.getColorLabel());
         setFieldInDocument(inputDocument, SolrMailField.SIZE, mail.getSize());
-        setFieldInDocument(inputDocument, SolrMailField.RECEIVED_DATE, mail.getReceivedDate().getTime());
-        setFieldInDocument(inputDocument, SolrMailField.SENT_DATE, mail.getSentDate().getTime());
+        setFieldInDocument(inputDocument, SolrMailField.RECEIVED_DATE, mail.getReceivedDate() == null ? null : mail.getReceivedDate().getTime());
+        setFieldInDocument(inputDocument, SolrMailField.SENT_DATE, mail.getSentDate() == null ? null : mail.getSentDate().getTime());
 
         /*
          * Flags
@@ -227,7 +224,7 @@ public final class SolrInputDocumentHelper implements SolrMailConstants {
 
     public static void setFieldInDocument(final SolrInputDocument inputDocument, final SolrMailField field, final Object value) {
         final String fieldName = field.solrName();
-        if (fieldName != null) {
+        if (fieldName != null && value != null) {
             inputDocument.remove(fieldName);
             inputDocument.addField(field.solrName(), value);
         }
