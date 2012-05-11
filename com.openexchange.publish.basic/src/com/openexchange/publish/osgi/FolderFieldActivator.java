@@ -64,11 +64,11 @@ import com.openexchange.publish.folders.IsPublished;
  */
 public class FolderFieldActivator implements BundleActivator {
 
-	private ServiceRegistration registerService;
+	private ServiceRegistration<AdditionalFolderField> registerService;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        registerService = context.registerService(AdditionalFolderField.class.getName(), new IsPublished(), null);
+        registerService = context.registerService(AdditionalFolderField.class, new IsPublished(), null);
     }
 
     @Override

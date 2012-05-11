@@ -89,6 +89,7 @@ public class Activator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 
     private void initCache() throws SQLException, OXGenericException {
