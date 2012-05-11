@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.osgi;
 
+import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -117,7 +118,12 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 }
                 final String action = requestData.getParameter("action");
                 if ("get".equals(action) && resultObject instanceof MailMessage) {
-                    
+                    final MailMessage mailMessage = (MailMessage) resultObject;
+                    final InternetAddress[] from = mailMessage.getFrom();
+                    if (null == from || 0 == from.length) {
+                        return;
+                    }
+                    // TODO: Lookup contact by address
                 }
             }
         });
