@@ -50,6 +50,7 @@
 package com.openexchange.ajax.itip.osgi;
 
 import org.osgi.service.http.HttpService;
+
 import com.openexchange.ajax.itip.ITipActionFactory;
 import com.openexchange.ajax.itip.servlet.ITipJSONServlet;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
@@ -73,7 +74,7 @@ public class ITipJSONActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ITipAnalyzerService.class, ITipParser.class, ConversionService.class, ITipDingeMacherFactoryService.class,
-            ITipMailGeneratorFactory.class, HttpService.class };
+            ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
