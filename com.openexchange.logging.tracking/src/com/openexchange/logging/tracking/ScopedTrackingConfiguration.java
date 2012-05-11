@@ -49,8 +49,6 @@
 
 package com.openexchange.logging.tracking;
 
-import java.io.PrintWriter;
-
 import org.apache.commons.logging.Log;
 
 public interface ScopedTrackingConfiguration {

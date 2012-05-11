@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -134,6 +135,8 @@ public class AJAXRequestData {
 
     private String pathInfo;
 
+    private final List<String> decoratorIds;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -162,7 +165,42 @@ public class AJAXRequestData {
         super();
         params = new LinkedHashMap<String, String>();
         headers = new LinkedHashMap<String, String>();
+        decoratorIds = new LinkedList<String>();
         expires = -1;
+    }
+
+    /**
+     * Adds specified decorator identifier.
+     * 
+     * @param decoratorId The decorator identifier
+     * @return This AJAX request data instance with decorator identifier added
+     */
+    public AJAXRequestData addDecoratorId(final String decoratorId) {
+        decoratorIds.add(decoratorId);
+        return this;
+    }
+
+    /**
+     * Adds specified decorator identifiers.
+     * 
+     * @param decoratorId The decorator identifiers
+     * @return This AJAX request data instance with decorator identifiers added
+     */
+    public AJAXRequestData addDecoratorIds(final Collection<String> decoratorIds) {
+        final List<String> thisDecoratorIds = this.decoratorIds;
+        for (final String decoratorId : decoratorIds) {
+            thisDecoratorIds.add(decoratorId);
+        }
+        return this;
+    }
+
+    /**
+     * Gets the decorator identifiers
+     *
+     * @return The decorator identifiers
+     */
+    public List<String> getDecoratorIds() {
+        return decoratorIds;
     }
 
     /**

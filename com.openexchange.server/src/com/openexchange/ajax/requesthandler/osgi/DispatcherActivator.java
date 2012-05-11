@@ -53,13 +53,15 @@ import java.util.HashSet;
 import java.util.Set;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
+import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
@@ -78,9 +80,12 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -92,9 +97,16 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
 
+    private volatile OSGiAJAXResultDecoratorRegistry decoratorRegistry;
+
+    private volatile String prefix;
+
     @Override
     protected void startBundle() throws Exception {
-        final DefaultDispatcher dispatcher = new DefaultDispatcher();
+
+    	prefix = getService(DispatcherPrefixService.class).getPrefix();
+    	
+    	final DefaultDispatcher dispatcher = new DefaultDispatcher();
         /*
          * Specify default converters
          */
@@ -143,13 +155,26 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
+        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = new OSGiAJAXResultDecoratorRegistry();
+        decoratorRegistry.start(context);
+        this.decoratorRegistry = decoratorRegistry;
+        registerService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
+        ServerServiceRegistry.getInstance().addService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
+        DecoratingAJAXActionCustomizer.REGISTRY_REF.set(decoratorRegistry);
+
+        // Keep this order!!!
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
+        dispatcher.addCustomizer(new AJAXActionCustomizerFactory() {
+            
+            @Override
+            public AJAXActionCustomizer createCustomizer(final AJAXRequestData request, final ServerSession session) {
+                return DecoratingAJAXActionCustomizer.getInstance();
+            }
+        });
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
-        DispatcherServlet.setPrefix("/ajax/");
-        registerService(DispatcherPrefixService.class, DefaultDispatcherPrefixService.getInstance());
-        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, DefaultDispatcherPrefixService.getInstance());
+        
         Multiple.setDispatcher(dispatcher);
 
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
@@ -180,7 +205,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
                     servlets.add(module);
-                    registerSessionServlet("/ajax/" + module, servlet);
+                    registerSessionServlet(prefix + module, servlet);
                 }
             }
 
@@ -188,7 +213,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
-                    unregisterServlet("/ajax/" + module);
+                    unregisterServlet(prefix + module);
                     servlets.remove(module);
                 }
             }
@@ -220,7 +245,17 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         DispatcherServlet.setPrefix(null);
-        unregisterServlet("/ajax");
+        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = this.decoratorRegistry;
+        if (null != decoratorRegistry) {
+            decoratorRegistry.stop();
+            this.decoratorRegistry = null;
+        }
+        ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
+        DecoratingAJAXActionCustomizer.REGISTRY_REF.set(null);
+        unregisterServlet(this.prefix);
+        this.prefix = null;
+        ServerServiceRegistry.getInstance().removeService(DispatcherPrefixService.class);
+        ImageMatcher.setPrefixService(null);
         Multiple.setDispatcher(null);
     }
 
@@ -236,7 +271,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { DispatcherPrefixService.class };
     }
 
 }

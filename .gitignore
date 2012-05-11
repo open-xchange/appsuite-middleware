@@ -5,6 +5,7 @@ openexchange-test/conf/test.properties
 open-xchange-development/tmp
 open-xchange-development/adminTmp
 open-xchange-development/commonTmp
+open-xchange-development/local
 com.openexchange.axis2/conf/axis2.properties
 com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*

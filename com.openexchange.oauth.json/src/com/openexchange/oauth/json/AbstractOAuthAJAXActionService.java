@@ -50,6 +50,7 @@
 package com.openexchange.oauth.json;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
@@ -60,6 +61,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
+
+    /**
+     * The {@link DefaultDeferringURLService} reference.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
     private static volatile OAuthService oAuthService;
     private static volatile SecretService secretService;
@@ -82,11 +88,11 @@ public abstract class AbstractOAuthAJAXActionService implements AJAXActionServic
         return oAuthService;
     }
 
-    public static void setSecretService(SecretService secretService) {
+    public static void setSecretService(final SecretService secretService) {
         AbstractOAuthAJAXActionService.secretService = secretService;
     }
 
-    public static String secret(Session session) {
+    public static String secret(final Session session) {
         return secretService.getSecret(session);
     }
 

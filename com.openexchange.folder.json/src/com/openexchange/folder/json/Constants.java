@@ -49,8 +49,8 @@
 
 package com.openexchange.folder.json;
 
-import com.openexchange.ajax.DispatcherPrefixService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.folder.json.services.ServiceRegistry;
 
 /**
@@ -69,7 +69,7 @@ public final class Constants {
     /**
      * The folder servlet path.
      */
-    private static volatile String servletPath = "/ajax/" + module;
+    private static volatile String servletPath = DispatcherPrefixService.DEFAULT_PREFIX + module;
 
     /**
      * The list for additional folder fields.

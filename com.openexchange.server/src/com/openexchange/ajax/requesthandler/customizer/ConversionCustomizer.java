@@ -73,18 +73,18 @@ public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCus
     }
 
     @Override
-    public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
-        return request;
+    public AJAXRequestData incoming(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        return requestData;
     }
 
     @Override
-    public AJAXRequestResult outgoing(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
-        final String requestedFormat = request.getFormat();
+    public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        final String requestedFormat = requestData.getFormat();
         final String currentFormat = result.getFormat();
         if (currentFormat.equals(requestedFormat)) {
             return result;
         }
-        converter.convert(currentFormat, requestedFormat, request, result, session);
+        converter.convert(currentFormat, requestedFormat, requestData, result, session);
         return result;
     }
 

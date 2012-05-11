@@ -232,7 +232,7 @@ public class CPServlet extends PermissionServlet {
 
     private String getDocumentTitle(Session session) {
         ConfigViewFactory configViewFactory = CPServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        String retval = "Open-Xchange";
+        String retval = null;
         if (null != configViewFactory) {
             ConfigView configView;
             try {
@@ -241,6 +241,9 @@ public class CPServlet extends PermissionServlet {
             } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+        if (null == retval) {
+            retval = "Open-Xchange";
         }
         return retval;
     }

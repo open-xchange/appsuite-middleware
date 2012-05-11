@@ -51,8 +51,6 @@ package com.openexchange.preview.thirdwing;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,13 +60,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import net.thirdwing.common.ConversionJobfactory;
-import net.thirdwing.common.IContentIterator;
 import net.thirdwing.common.IConversionJob;
-import net.thirdwing.exception.XHTMLConversionException;
-import net.thirdwing.io.IOUnit;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
@@ -82,8 +75,6 @@ import com.openexchange.preview.PreviewPolicy;
 import com.openexchange.preview.Quality;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 
 /**

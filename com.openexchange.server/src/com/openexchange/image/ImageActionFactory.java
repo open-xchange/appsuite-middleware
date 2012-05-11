@@ -56,8 +56,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageActionFactory}
@@ -75,7 +77,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
     /**
      * The image servlet's alias
      */
-    public static final String ALIAS = ImageDataSource.ALIAS;
+    public static final String ALIAS_APPENDIX = ImageDataSource.ALIAS_APPENDIX;
 
     /**
      * Adds specified mapping
@@ -83,7 +85,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
      * @param registrationName The registration name
      * @param alias The alias
      */
-    public static void addMapping(String registrationName, String alias) {
+    public static void addMapping(final String registrationName, final String alias) {
         regName2Alias.put(registrationName, alias);
         alias2regName.put(alias, registrationName);
     }
@@ -98,6 +100,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
         if (null == url) {
             return null;
         }
+        final String ALIAS = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX;
         String s = url;
         final int pos = s.indexOf(ALIAS);
         if (pos > 0) {
@@ -115,7 +118,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
     /**
      * Initializes a new {@link ImageActionFactory}.
      */
-    public ImageActionFactory(ServiceLookup services) {
+    public ImageActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>();
         actions.put("GET", new ImageGetAction(services));

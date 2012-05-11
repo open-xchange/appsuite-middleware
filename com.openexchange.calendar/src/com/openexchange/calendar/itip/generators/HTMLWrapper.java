@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar.itip.generators;
 
-import com.openexchange.calendar.itip.Messages;
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.participants.ConfirmStatus;

@@ -55,9 +55,11 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sso.SSOConstants;
+import com.openexchange.sso.services.SSOServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,7 +89,7 @@ public final class GetAction implements AJAXActionService {
              * Ensure a secure connection to not transfer sensitive data in plain text
              */
             if (!requestData.isSecure()) {
-                throw AjaxExceptionCodes.NON_SECURE_DENIED.create( ACTION, SSOConstants.SERVLET_PATH);
+                throw AjaxExceptionCodes.NON_SECURE_DENIED.create( ACTION, SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX);
             }
             /*
              * Create & fill JSON object

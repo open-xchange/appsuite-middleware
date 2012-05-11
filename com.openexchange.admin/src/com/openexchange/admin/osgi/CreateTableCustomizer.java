@@ -59,28 +59,28 @@ import com.openexchange.database.CreateTableService;
  * Remember {@link CreateTableService} instances in the according registry.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class CreateTableCustomizer implements ServiceTrackerCustomizer {
+public class CreateTableCustomizer implements ServiceTrackerCustomizer<CreateTableService,CreateTableService> {
 
     private final BundleContext context;
 
-    public CreateTableCustomizer(BundleContext context) {
+    public CreateTableCustomizer(final BundleContext context) {
         super();
         this.context = context;
 
     }
 
-    public Object addingService(ServiceReference reference) {
-        CreateTableService service = (CreateTableService) context.getService(reference);
+    public CreateTableService addingService(final ServiceReference<CreateTableService> reference) {
+        final CreateTableService service = context.getService(reference);
         CreateTableRegistry.getInstance().addCreateTable(service);
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<CreateTableService> reference, final CreateTableService service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
-        CreateTableRegistry.getInstance().removeCreateTable((CreateTableService) service);
+    public void removedService(final ServiceReference<CreateTableService> reference, final CreateTableService service) {
+        CreateTableRegistry.getInstance().removeCreateTable(service);
         context.ungetService(reference);
     }
 }

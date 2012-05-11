@@ -94,7 +94,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             openTrackers();
 
             // create addons based on given configuration
-            ConfigurationService configService = getService(ConfigurationService.class);
+            final ConfigurationService configService = getService(ConfigurationService.class);
             if (configService == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
             }
@@ -109,7 +109,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             // create, configure and start server
             grizzly = new HttpServer();
-            NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
+            final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
             
             if(hasJMXEnabled) {
                 if (LOG.isInfoEnabled()) {
@@ -133,7 +133,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
             
             if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Registering Grizzly HttpNetworkListener on host: %s and port: %d", httpHost, httpPort));
+                LOG.info(String.format("Registering Grizzly HttpNetworkListener on host: %s and port: %d", httpHost, Integer.valueOf(httpPort)));
             }
             
             grizzly.addListener(networkListener);
@@ -146,7 +146,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw GrizzlyExceptionCode.SERVER_NOT_STARTED.create(e, new Object[] {});
         }
 

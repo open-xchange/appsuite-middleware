@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.spamsettings.generic.preferences.SpamSettingsModulePreferences;
 import com.openexchange.spamsettings.generic.servlet.SpamSettingsServlet;
@@ -17,8 +18,13 @@ public class SpamSettingsServletRegisterer {
 
     private static final Log LOG = LogFactory.getLog(SpamSettingsServletRegisterer.class);
 
+    /**
+     * The {@link DefaultDeferringURLService} reference.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
+
     // friend to be able to test
-    final static String SERVLET_PATH = "/ajax/spamsettings";
+    final static String SERVLET_PATH_APPENDIX = "spamsettings";
 
     public SpamSettingsServletRegisterer() {
         super();
@@ -33,8 +39,9 @@ public class SpamSettingsServletRegisterer {
             return;
         }
         try {
-            http_service.registerServlet(SERVLET_PATH, new SpamSettingsServlet(), null, null);
-            LOG.info("Servlet " + SERVLET_PATH + " registered.");
+            final String alias = PREFIX.get().getPrefix() + SERVLET_PATH_APPENDIX;
+            http_service.registerServlet(alias, new SpamSettingsServlet(), null, null);
+            LOG.info("Servlet " + alias + " registered.");
             SpamSettingsModulePreferences.setModule(true);
         } catch (final ServletException e) {
             LOG.error("Error registering spam settings servlet!", e);
@@ -51,8 +58,9 @@ public class SpamSettingsServletRegisterer {
             LOG.error("Error unregistering spam settings servlet!", e);
             return;
         }
-        http_service.unregister(SERVLET_PATH);
-        LOG.info("Servlet " + SERVLET_PATH + "unregistered.");
+        final String alias = PREFIX.get().getPrefix() + SERVLET_PATH_APPENDIX;
+        http_service.unregister(alias);
+        LOG.info("Servlet " + alias + "unregistered.");
     }
 
 }

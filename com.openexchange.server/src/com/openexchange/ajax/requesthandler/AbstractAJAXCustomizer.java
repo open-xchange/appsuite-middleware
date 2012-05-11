@@ -61,12 +61,12 @@ import com.openexchange.tools.session.ServerSession;
 public class AbstractAJAXCustomizer implements AJAXActionCustomizer {
 
     @Override
-    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
-        return request;
+    public AJAXRequestData incoming(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return requestData;
     }
 
     @Override
-    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
+    public AJAXRequestResult outgoing(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
         return result;
     }
 

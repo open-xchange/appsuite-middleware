@@ -127,6 +127,7 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
         // IMAPConnection def = null;
 
@@ -320,10 +321,12 @@ public class IMAPAuthentication implements AuthenticationService {
             }
             return new Authenticated() {
 
+                @Override
                 public String getContextInfo() {
                     return splitted[0];
                 }
 
+                @Override
                 public String getUserInfo() {
                     return splitted[1];
                 }

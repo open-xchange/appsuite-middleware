@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.publish.folders.IsPublished;
-import com.openexchange.publish.helpers.AbstractPublicationService;
 
 
 /**
@@ -65,11 +64,11 @@ import com.openexchange.publish.helpers.AbstractPublicationService;
  */
 public class FolderFieldActivator implements BundleActivator {
 
-	private ServiceRegistration registerService;
+	private ServiceRegistration<AdditionalFolderField> registerService;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        registerService = context.registerService(AdditionalFolderField.class.getName(), new IsPublished(), null);
+        registerService = context.registerService(AdditionalFolderField.class, new IsPublished(), null);
     }
 
     @Override

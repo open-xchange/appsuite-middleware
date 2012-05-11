@@ -63,21 +63,21 @@ public interface AJAXActionCustomizer {
     /**
      * Invoked prior to handling the request data with {@link AJAXActionService#perform(AJAXRequestData, ServerSession)}.
      *
-     * @param request The request data
+     * @param requestData The request data
      * @param session The associated session
      * @return The possibly modified request data which is then passed to {@link AJAXActionService#perform(AJAXRequestData, ServerSession)}
      * @throws OXException If modifying the request data fails
      */
-    AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException;
+    AJAXRequestData incoming(AJAXRequestData requestData, ServerSession session) throws OXException;
 
     /**
      * Invoked after {@link AJAXActionService#perform(AJAXRequestData, ServerSession)} is performed.
      *
-     * @param request The request data
+     * @param requestData The request data
      * @param result The result of {@link AJAXActionService#perform(AJAXRequestData, ServerSession)} invocation
      * @param session The associated session
      * @return The possibly modified request result
      * @throws OXException If modifying the result fails
      */
-    AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException;
+    AJAXRequestResult outgoing(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException;
 }

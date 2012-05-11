@@ -56,26 +56,32 @@ package com.openexchange.messaging.sms.service;
  */
 public abstract class AbstractMessagingUserConfigurationInterface implements MessagingUserConfigurationInterface {
 
+    @Override
     public boolean isSignatureOption() {
         return true;
     }
 
+    @Override
     public boolean isCaptcha() {
         return false;
     }
 
+    @Override
     public String getUpsellLink() {
         return null;
     }
 
+    @Override
     public int getRecipientLimit() {
         return 0;
     }
     
+    @Override
     public int getSmsLimit() {
         return 0;
     }
     
+    @Override
     public String getNumCleanRegEx() {
         return null;
     }

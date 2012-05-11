@@ -60,32 +60,32 @@ import com.openexchange.i18n.I18nService;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer, StringTranslator {
+public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService>, StringTranslator {
 
     private final Map<Locale, I18nService> services;
 
     private final BundleContext context;
 
-    public I18nServiceTrackerCustomizer(BundleContext context) {
+    public I18nServiceTrackerCustomizer(final BundleContext context) {
         this.context = context;
         services = new ConcurrentHashMap<Locale, I18nService>();
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        I18nService tmp = (I18nService) context.getService(reference);
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService tmp = context.getService(reference);
         services.put(tmp.getLocale(), tmp );
         return tmp;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
-        // TODO Auto-generated method stub
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        // Nope
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        Locale locale = ((I18nService) service).getLocale();
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        final Locale locale = service.getLocale();
         if(services.containsKey(locale)){
             services.remove(locale);
             context.ungetService(reference);
@@ -93,7 +93,7 @@ public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer, S
     }
 
     @Override
-    public String translate(Locale locale, String translateMe) {
+    public String translate(final Locale locale, final String translateMe) {
         if(services.containsKey(locale)) {
             return services.get(locale).getLocalized(translateMe);
         }

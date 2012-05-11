@@ -61,6 +61,7 @@ public class UCSAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
 
         DirContext ctx = null;
@@ -201,9 +202,11 @@ public class UCSAuthentication implements AuthenticationService {
                         LOG.debug("Returning "+Arrays.toString(splitted)+" to OX API!");
                         // return username AND context-name to the OX API
                         return new Authenticated() {
+                            @Override
                             public String getContextInfo() {
                                 return splitted[0];
                             }
+                            @Override
                             public String getUserInfo() {
                                 return splitted[1];
                             }
@@ -328,6 +331,7 @@ public class UCSAuthentication implements AuthenticationService {
         return splitted;
     }
 
+    @Override
     public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
         throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
     }

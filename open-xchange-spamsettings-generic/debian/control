@@ -1,0 +1,17 @@
+Source: open-xchange-spamsettings-generic
+Section: web
+Priority: optional
+Maintainer: Dennis Sieben <dennis.sieben@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-spamsettings-generic
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: This bundle provides a generic interface for spam settings
+
+Package: open-xchange-spamsettings-generic-gui
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-gui
+Description: General Messaging SMS GUI Bundle.

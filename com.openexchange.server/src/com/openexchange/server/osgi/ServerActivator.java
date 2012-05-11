@@ -76,9 +76,9 @@ import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
-import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -683,26 +683,27 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
-//        http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
-//        http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
-//        http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+//        http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
+//        http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
+//        http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
 
-        http.registerServlet("/ajax/mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
-        // http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
-        // http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
-        // http.registerServlet("/ajax/attachment", new com.openexchange.ajax.Attachment(), null, null);
-        // http.registerServlet("/ajax/reminder", new com.openexchange.ajax.Reminder(), null, null);
-        // http.registerServlet("/ajax/group", new com.openexchange.ajax.Group(), null, null);
-        // http.registerServlet("/ajax/resource", new com.openexchange.ajax.Resource(), null, null);
-        http.registerServlet("/ajax/link", new com.openexchange.ajax.Link(), null, null);
-        http.registerServlet("/ajax/multiple", new com.openexchange.ajax.Multiple(), null, null);
-        // http.registerServlet("/ajax/quota", new com.openexchange.ajax.Quota(), null, null);
-        http.registerServlet("/ajax/control", new com.openexchange.ajax.ConfigJump(), null, null);
-        // http.registerServlet("/ajax/file", new com.openexchange.ajax.AJAXFile(), null, null);
-        // http.registerServlet("/ajax/import", new com.openexchange.ajax.ImportServlet(), null, null);
-        // http.registerServlet("/ajax/export", new com.openexchange.ajax.ExportServlet(), null, null);
-        //http.registerServlet("/ajax/image", new com.openexchange.image.servlet.ImageServlet(), null, null);
-        http.registerServlet("/ajax/sync", new com.openexchange.ajax.SyncServlet(), null, null);
+        final String prefix = Dispatcher.PREFIX.get();
+        http.registerServlet(prefix+"mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
+        // http.registerServlet(prefix+"calendar", new com.openexchange.ajax.Appointment(), null, null);
+        // http.registerServlet(prefix+"config", new com.openexchange.ajax.ConfigMenu(), null, null);
+        // http.registerServlet(prefix+"attachment", new com.openexchange.ajax.Attachment(), null, null);
+        // http.registerServlet(prefix+"reminder", new com.openexchange.ajax.Reminder(), null, null);
+        // http.registerServlet(prefix+"group", new com.openexchange.ajax.Group(), null, null);
+        // http.registerServlet(prefix+"resource", new com.openexchange.ajax.Resource(), null, null);
+        http.registerServlet(prefix+"link", new com.openexchange.ajax.Link(), null, null);
+        http.registerServlet(prefix+"multiple", new com.openexchange.ajax.Multiple(), null, null);
+        // http.registerServlet(prefix+"quota", new com.openexchange.ajax.Quota(), null, null);
+        http.registerServlet(prefix+"control", new com.openexchange.ajax.ConfigJump(), null, null);
+        // http.registerServlet(prefix+"file", new com.openexchange.ajax.AJAXFile(), null, null);
+        // http.registerServlet(prefix+"import", new com.openexchange.ajax.ImportServlet(), null, null);
+        // http.registerServlet(prefix+"export", new com.openexchange.ajax.ExportServlet(), null, null);
+        //http.registerServlet(prefix+"image", new com.openexchange.image.servlet.ImageServlet(), null, null);
+        http.registerServlet(prefix+"sync", new com.openexchange.ajax.SyncServlet(), null, null);
     }
 
 }

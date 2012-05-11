@@ -50,6 +50,7 @@
 package com.openexchange.sso;
 
 
+
 /**
  * {@link SSOConstants} for the HTTP JSON interface of the single sign-on component.
  *
@@ -65,7 +66,7 @@ public final class SSOConstants {
     /**
      * The folder servlet path.
      */
-    public static final String SERVLET_PATH = "/ajax/" + MODULE;
+    public static final String SERVLET_PATH_APPENDIX = MODULE;
 
     /**
      * No instantiation.

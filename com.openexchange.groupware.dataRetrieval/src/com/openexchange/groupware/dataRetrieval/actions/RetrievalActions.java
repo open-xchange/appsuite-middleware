@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
@@ -136,7 +137,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
         private String getURI(final String token, final AJAXRequestData request) {
             final Configuration configuration = Services.getConfiguration();
-            return request.constructURL(configuration.getForcedProtocol() , Paths.FILE_DELIVERY_PATH, true, "token=" + token).toString();
+            return request.constructURL(configuration.getForcedProtocol() , Services.SERVICE_LOOKUP.getService(DispatcherPrefixService.class).getPrefix()+Paths.FILE_DELIVERY_PATH_APPENDIX, true, "token=" + token).toString();
         }
 
         private JSONObject toJSON(final FileMetadata metadata, final String uri) throws OXException {

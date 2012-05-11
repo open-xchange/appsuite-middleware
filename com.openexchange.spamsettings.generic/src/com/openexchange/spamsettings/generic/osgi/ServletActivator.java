@@ -4,6 +4,7 @@ package com.openexchange.spamsettings.generic.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spamsettings.generic.preferences.SpamSettingsModulePreferences;
@@ -24,7 +25,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, SpamSettingService.class };
+        return new Class<?>[] { HttpService.class, SpamSettingService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -51,6 +52,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        SpamSettingsServletRegisterer.PREFIX.set(getService(DispatcherPrefixService.class));
         final ServiceRegistry registry = SpamSettingsServiceRegistry.getServiceRegistry();
         registry.clearRegistry();
         final Class<?>[] classes = getNeededServices();
@@ -70,5 +72,6 @@ public class ServletActivator extends DeferredActivator {
         servletRegisterer = null;
         SpamSettingsModulePreferences.setModule(false);
         SpamSettingsServiceRegistry.getServiceRegistry().clearRegistry();
+        SpamSettingsServletRegisterer.PREFIX.set(null);
     }
 }

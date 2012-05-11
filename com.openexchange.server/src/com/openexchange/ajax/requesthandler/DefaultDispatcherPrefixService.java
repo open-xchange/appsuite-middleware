@@ -50,7 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.ajax.DispatcherPrefixService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 
 /**
  * {@link DefaultDispatcherPrefixService} - The default {@link DispatcherPrefixService}.
@@ -58,7 +58,7 @@ import com.openexchange.ajax.DispatcherPrefixService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultDispatcherPrefixService implements DispatcherPrefixService {
-
+	
     private static final DefaultDispatcherPrefixService INSTANCE = new DefaultDispatcherPrefixService();
 
     /**

@@ -53,7 +53,6 @@ import java.rmi.registry.Registry;
 import java.util.Dictionary;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -65,6 +64,7 @@ import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -72,11 +72,11 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static Log log = LogFactory.getLog(AdminDaemon.class);
+    static Log log = LogFactory.getLog(AdminDaemon.class);
 
     private AdminDaemon daemon = null;
 
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
     @Override
     public void startBundle() throws Exception {
@@ -149,7 +149,7 @@ public class Activator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         closeTrackers();
         while (!trackers.isEmpty()) {
-            final ServiceTracker tracker = trackers.pop();
+            final ServiceTracker<?,?> tracker = trackers.pop();
             tracker.close();
         }
         log.info("Stopping RMI...");

@@ -52,7 +52,6 @@ package com.openexchange.calendar.osgi;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarMySQL;
@@ -76,11 +75,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class CoreCalendarActivator extends HousekeepingActivator {
 
-    private ServiceRegistration appointmentSqlFactoryRegistration;
-    private ServiceRegistration calendarCollectionRegistration;
-    private ServiceRegistration calendarAdministrationRegistration;
-    private ServiceRegistration calendarReminderDeleteRegistration;
-
     /**
      * Initializes a new {@link CoreCalendarActivator}.
      */
@@ -96,16 +90,16 @@ public class CoreCalendarActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        AppointmentSqlFactory factory = new AppointmentSqlFactory();
+        final AppointmentSqlFactory factory = new AppointmentSqlFactory();
         ITipActivator.initFeatures(factory);
         CalendarMySQL.setApppointmentSqlFactory(factory);
         
-        appointmentSqlFactoryRegistration = context.registerService(AppointmentSqlFactoryService.class.getName(), factory, null);
-        calendarCollectionRegistration = context.registerService(CalendarCollectionService.class.getName(), new CalendarCollection(), null);
-        calendarAdministrationRegistration = context.registerService(CalendarAdministrationService.class.getName(), new CalendarAdministration(), null);
+        registerService(AppointmentSqlFactoryService.class, factory, null);
+        registerService(CalendarCollectionService.class, new CalendarCollection(), null);
+        registerService(CalendarAdministrationService.class, new CalendarAdministration(), null);
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        calendarReminderDeleteRegistration = context.registerService(TargetService.class.getName(), new CalendarReminderDelete(), props);
+        registerService(TargetService.class, new CalendarReminderDelete(), props);
         registerCacheRegion();
     }
 
