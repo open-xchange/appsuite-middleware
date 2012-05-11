@@ -82,4 +82,5 @@ public interface AJAXResultDecorator {
      * @throws OXException If decorating the result fails
      */
     void decorate(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException;
+
 }
