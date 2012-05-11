@@ -55,7 +55,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
+import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
@@ -83,6 +87,7 @@ import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -93,6 +98,8 @@ import com.openexchange.tools.images.ImageScalingService;
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
+
+    private volatile OSGiAJAXResultDecoratorRegistry decoratorRegistry;
 
     private volatile String prefix;
 
@@ -147,7 +154,21 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
+        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = new OSGiAJAXResultDecoratorRegistry();
+        decoratorRegistry.start(context);
+        this.decoratorRegistry = decoratorRegistry;
+        registerService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
+        ServerServiceRegistry.getInstance().addService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
+        DecoratingAJAXActionCustomizer.REGISTRY_REF.set(decoratorRegistry);
+
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
+        dispatcher.addCustomizer(new AJAXActionCustomizerFactory() {
+            
+            @Override
+            public AJAXActionCustomizer createCustomizer(final AJAXRequestData request, final ServerSession session) {
+                return DecoratingAJAXActionCustomizer.getInstance();
+            }
+        });
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
@@ -238,6 +259,13 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         DispatcherServlet.setPrefix(null);
+        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = this.decoratorRegistry;
+        if (null != decoratorRegistry) {
+            decoratorRegistry.stop();
+            this.decoratorRegistry = null;
+        }
+        ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
+        DecoratingAJAXActionCustomizer.REGISTRY_REF.set(null);
         unregisterServlet(this.prefix);
         this.prefix = null;
         ServerServiceRegistry.getInstance().removeService(DispatcherPrefixService.class);

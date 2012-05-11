@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -98,6 +99,11 @@ public class AJAXRequestDataTools {
     protected AJAXRequestDataTools() {
         super();
     }
+
+    /**
+     * The pattern to split by commas.
+     */
+    protected static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
@@ -145,6 +151,17 @@ public class AJAXRequestDataTools {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag) {
                 retval.setETag(eTag);
+            }
+        }
+        /*
+         * Check for decorators
+         */
+        {
+            final String parameter = req.getParameter("decorators");
+            if (null != parameter) {
+                for (final String id : SPLIT_CSV.split(parameter, 0)) {
+                    retval.addDecoratorId(id.trim());
+                }
             }
         }
         /*
