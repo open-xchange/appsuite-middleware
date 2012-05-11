@@ -99,7 +99,7 @@
 
     <target name="run-i18n-tests">
         <antcall target="run-tests">
-            <param name="testJar" value="open-xchange-unit-tests.jar"/>
+            <param name="testJar" value="${basedir}/open-xchange-unit-tests.jar"/>
             <param name="testClass" value="com.openexchange.test.I18nTests"/>
         </antcall>
     </target>
