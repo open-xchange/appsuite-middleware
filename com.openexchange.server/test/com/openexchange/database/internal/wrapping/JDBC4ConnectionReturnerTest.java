@@ -47,39 +47,27 @@
  *
  */
 
-package com.openexchange;
+package com.openexchange.database.internal.wrapping;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
-import com.openexchange.ajax.parser.TaskLastModifiedTest;
-import com.openexchange.groupware.ldap.UserAttributeDiffTest;
-import com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest;
-import com.openexchange.tools.collections.OXCollectionsTest;
-import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
-import com.openexchange.tools.net.URIParserTest;
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.junit.Test;
 
 /**
- * {@link UnitTests}
+ * Tests methods in class {@link JDBC3ConnectionReturner}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UnitTests {
+public class JDBC4ConnectionReturnerTest {
 
-    private UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(TaskLastModifiedTest.class);
-        tests.addTest(new JUnit4TestAdapter(TaskEndDateReplacementTest.class));
-        tests.addTestSuite(SearchIteratorDelegatorTest.class);
-        tests.addTestSuite(OXCollectionsTest.class);
-        tests.addTestSuite(ContactSearchtermSqlConverterTest.class);
-        tests.addTest(new JUnit4TestAdapter(URIParserTest.class));
-        tests.addTest(new JUnit4TestAdapter(UserAttributeDiffTest.class));
-        return tests;
+    /**
+     * The delegate is null if a connection is returned 2 times to the pool. The second return should give an SQLException to detect coding
+     * problems.
+     */
+    @Test(expected = SQLException.class)
+    public final void testForBug22113() throws SQLException {
+        Connection delegate = null;
+        Connection con = new JDBC4ConnectionReturner(null, null, delegate, false, false, false);
+        con.close();
     }
 }

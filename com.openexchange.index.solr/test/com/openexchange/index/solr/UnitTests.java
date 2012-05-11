@@ -47,26 +47,27 @@
  *
  */
 
-package com.openexchange.consistency;
+package com.openexchange.index.solr;
 
-import com.openexchange.i18n.LocalizableStrings;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 /**
- * {@link ConsistencyExceptionMessages}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class ConsistencyExceptionMessages implements LocalizableStrings {
-
-    public static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
-
-    public static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
-
-    public static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
+public class UnitTests {
     
-    public static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
-    
-    private ConsistencyExceptionMessages() {
+    public UnitTests() {
         super();
     }
+    
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(MailSolrIndexAccessTest.class);
+        return tests;
+    }
+
 }

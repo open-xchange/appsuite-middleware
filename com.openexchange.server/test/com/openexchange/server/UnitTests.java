@@ -47,26 +47,41 @@
  *
  */
 
-package com.openexchange.consistency;
+package com.openexchange.server;
 
-import com.openexchange.i18n.LocalizableStrings;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
+import com.openexchange.ajax.parser.TaskLastModifiedTest;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
+import com.openexchange.groupware.ldap.UserAttributeDiffTest;
+import com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest;
+import com.openexchange.tools.collections.OXCollectionsTest;
+import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
+import com.openexchange.tools.net.URIParserTest;
 
 /**
- * {@link ConsistencyExceptionMessages}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ConsistencyExceptionMessages implements LocalizableStrings {
+public class UnitTests {
 
-    public static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
-
-    public static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
-
-    public static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
-    
-    public static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
-    
-    private ConsistencyExceptionMessages() {
+    private UnitTests() {
         super();
+    }
+
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(ContactSearchtermSqlConverterTest.class);
+        tests.addTestSuite(TaskLastModifiedTest.class);
+        tests.addTest(new JUnit4TestAdapter(UserAttributeDiffTest.class));
+        tests.addTest(new JUnit4TestAdapter(JDBC4ConnectionReturnerTest.class));
+        tests.addTest(new JUnit4TestAdapter(TaskEndDateReplacementTest.class));
+        tests.addTestSuite(OXCollectionsTest.class);
+        tests.addTestSuite(SearchIteratorDelegatorTest.class);
+        tests.addTest(new JUnit4TestAdapter(URIParserTest.class));
+        return tests;
     }
 }
