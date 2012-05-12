@@ -49,12 +49,8 @@
 
 package com.openexchange.mail.json.osgi;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
@@ -190,20 +186,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         });
     }
 
-    protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {
-        if (date == null) {
-            return null;
-        }
-
-        final int offset = timeZone.getOffset(date.getTime());
-        final Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.add(Calendar.MILLISECOND, offset);
-
-        return calendar.getTime();
-    }
-
-    protected static ContactSearchObject createContactSearchObject(final InternetAddress from) throws OXException {
+    protected static ContactSearchObject createContactSearchObject(final InternetAddress from) {
         final ContactSearchObject searchObject = new ContactSearchObject();
         // searchObject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID); // Global address book
         searchObject.setOrSearch(true);
