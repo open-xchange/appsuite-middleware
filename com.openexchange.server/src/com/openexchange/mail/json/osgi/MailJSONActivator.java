@@ -131,7 +131,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     result.setResultObject(JSONObject.NULL, "json");
                     return;
                 }
-                final String action = requestData.getParameter("action");
+                final String action = requestData.getAction();
                 if ("get".equals(action) && resultObject instanceof MailMessage) {
                     try {
                         final MailMessage mailMessage = (MailMessage) resultObject;
