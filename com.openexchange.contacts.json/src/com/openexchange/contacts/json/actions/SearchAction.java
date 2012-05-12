@@ -51,13 +51,12 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
@@ -117,7 +116,7 @@ public class SearchAction extends ContactAction {
         final ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
         SearchIterator<Contact> it = null;
-        final List<Contact> contacts = new ArrayList<Contact>();
+        final List<Contact> contacts = new LinkedList<Contact>();
         try {
             it = multiplexer.extendedSearch(session, searchObject, sort, order, collation, columns);
             while (it.hasNext()) {

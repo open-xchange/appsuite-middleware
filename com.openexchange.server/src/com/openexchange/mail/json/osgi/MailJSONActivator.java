@@ -49,26 +49,44 @@
 
 package com.openexchange.mail.json.osgi;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.ajax.writer.ContactWriter;
+import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.ContactSearchMultiplexer;
+import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link MailJSONActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailJSONActivator extends AJAXModuleActivator {
@@ -84,28 +102,29 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ContactInterfaceDiscoveryService.class, ContactStorage.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
-        final MailConverter converter = new MailConverter();
+        final MailConverter converter = MailConverter.getInstance();
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
+        final int[] columns = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.IMAGE1 };
         registerService(AJAXResultDecorator.class, new AJAXResultDecorator() {
-            
+
             @Override
             public String getIdentifier() {
                 return "mail.senderImageUrl";
             }
-            
+
             @Override
             public String getFormat() {
                 return "mail";
             }
-            
+
             @Override
             public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
                 final Object resultObject = result.getResultObject();
@@ -118,15 +137,81 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 }
                 final String action = requestData.getParameter("action");
                 if ("get".equals(action) && resultObject instanceof MailMessage) {
-                    final MailMessage mailMessage = (MailMessage) resultObject;
-                    final InternetAddress[] from = mailMessage.getFrom();
-                    if (null == from || 0 == from.length) {
-                        return;
+                    try {
+                        final MailMessage mailMessage = (MailMessage) resultObject;
+                        final InternetAddress[] from = mailMessage.getFrom();
+                        if (null == from || 0 == from.length) {
+                            return;
+                        }
+                        final ContactSearchObject searchObject = createContactSearchObject(from[0]);
+                        final ContactSearchMultiplexer multiplexer =
+                            new ContactSearchMultiplexer(getService(ContactInterfaceDiscoveryService.class));
+                        SearchIterator<Contact> it = null;
+                        final List<Contact> contacts = new LinkedList<Contact>();
+                        try {
+                            it = multiplexer.extendedSearch(session, searchObject, Contact.DISPLAY_NAME, Order.ASCENDING, "utf-8", columns);
+                            while (it.hasNext()) {
+                                contacts.add(it.next());
+                            }
+                        } finally {
+                            if (it != null) {
+                                it.close();
+                            }
+                        }
+                        converter.convert2JSON(requestData, result, session);
+                        final JSONObject jObject = (JSONObject) result.getResultObject();
+                        final JSONArray jArray = new JSONArray();
+                        for (final Contact contact : contacts) {
+
+                            if (contact.containsImage1()) {
+                                final byte[] imageData = contact.getImage1();
+                                if (imageData != null) {
+                                    try {
+                                        final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
+                                        final ImageLocation imageLocation =
+                                            new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
+                                                Integer.toString(contact.getObjectID())).build();
+                                        final String imageURL = imgSource.generateUrl(imageLocation, session);
+                                        jArray.put(imageURL);
+                                    } catch (final OXException e) {
+                                        com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn(
+                                            "Contact image URL could not be generated.",
+                                            e);
+                                    }
+                                }
+                            }
+                        }
+                        jObject.put("from_image_urls", jArray);
+                    } catch (final JSONException e) {
+                        throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                     }
-                    // TODO: Lookup contact by address
                 }
             }
         });
+    }
+
+    protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {
+        if (date == null) {
+            return null;
+        }
+
+        final int offset = timeZone.getOffset(date.getTime());
+        final Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.MILLISECOND, offset);
+
+        return calendar.getTime();
+    }
+
+    protected static ContactSearchObject createContactSearchObject(final InternetAddress from) throws OXException {
+        final ContactSearchObject searchObject = new ContactSearchObject();
+        // searchObject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID); // Global address book
+        searchObject.setOrSearch(true);
+        final String address = from.getAddress();
+        searchObject.setEmail1(address);
+        searchObject.setEmail2(address);
+        searchObject.setEmail3(address);
+        return searchObject;
     }
 
 }
