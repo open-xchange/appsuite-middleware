@@ -81,7 +81,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MailJSONActivator}
+ * {@link MailJSONActivator} - The activator for mail module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -109,92 +109,107 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
         final int[] columns = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.IMAGE1 };
-        registerService(AJAXResultDecorator.class, new AJAXResultDecorator() {
+        registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, columns));
+    }
 
-            @Override
-            public String getIdentifier() {
-                return "mail.senderImageUrl";
-            }
+    private final class DecoratorImpl implements AJAXResultDecorator {
 
-            @Override
-            public String getFormat() {
-                return "mail";
-            }
+        private final MailConverter converter;
 
-            @Override
-            public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
-                final Object resultObject = result.getResultObject();
-                if (null == resultObject) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Result object is null.");
-                    }
-                    result.setResultObject(JSONObject.NULL, "json");
-                    return;
+        private final int[] columns;
+
+        /**
+         * Initializes a new {@link DecoratorImpl}.
+         */
+        protected DecoratorImpl(final MailConverter converter, final int[] columns) {
+            this.converter = converter;
+            this.columns = columns;
+        }
+
+        @Override
+        public String getIdentifier() {
+            return "mail.senderImageUrl";
+        }
+
+        @Override
+        public String getFormat() {
+            return "mail";
+        }
+
+        @Override
+        public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+            final Object resultObject = result.getResultObject();
+            if (null == resultObject) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Result object is null.");
                 }
-                final String action = requestData.getAction();
-                if ("get".equals(action) && resultObject instanceof MailMessage) {
+                result.setResultObject(JSONObject.NULL, "json");
+                return;
+            }
+            final String action = requestData.getAction();
+            if ("get".equals(action) && resultObject instanceof MailMessage) {
+                try {
+                    final MailMessage mailMessage = (MailMessage) resultObject;
+                    final InternetAddress[] from = mailMessage.getFrom();
+                    if (null == from || 0 == from.length) {
+                        return;
+                    }
+                    final ContactSearchObject searchObject = createContactSearchObject(from[0]);
+                    final ContactSearchMultiplexer multiplexer =
+                        new ContactSearchMultiplexer(getService(ContactInterfaceDiscoveryService.class));
+                    SearchIterator<Contact> it = null;
+                    final List<Contact> contacts = new LinkedList<Contact>();
                     try {
-                        final MailMessage mailMessage = (MailMessage) resultObject;
-                        final InternetAddress[] from = mailMessage.getFrom();
-                        if (null == from || 0 == from.length) {
-                            return;
+                        it = multiplexer.extendedSearch(session, searchObject, Contact.DISPLAY_NAME, Order.ASCENDING, "utf-8", columns);
+                        while (it.hasNext()) {
+                            contacts.add(it.next());
                         }
-                        final ContactSearchObject searchObject = createContactSearchObject(from[0]);
-                        final ContactSearchMultiplexer multiplexer =
-                            new ContactSearchMultiplexer(getService(ContactInterfaceDiscoveryService.class));
-                        SearchIterator<Contact> it = null;
-                        final List<Contact> contacts = new LinkedList<Contact>();
-                        try {
-                            it = multiplexer.extendedSearch(session, searchObject, Contact.DISPLAY_NAME, Order.ASCENDING, "utf-8", columns);
-                            while (it.hasNext()) {
-                                contacts.add(it.next());
-                            }
-                        } finally {
-                            if (it != null) {
-                                it.close();
-                            }
+                    } finally {
+                        if (it != null) {
+                            it.close();
                         }
-                        converter.convert2JSON(requestData, result, session);
-                        final JSONObject jObject = (JSONObject) result.getResultObject();
-                        final JSONArray jArray = new JSONArray();
-                        for (final Contact contact : contacts) {
+                    }
+                    converter.convert2JSON(requestData, result, session);
+                    final JSONObject jObject = (JSONObject) result.getResultObject();
+                    final JSONArray jArray = new JSONArray();
+                    for (final Contact contact : contacts) {
 
-                            if (contact.containsImage1()) {
-                                final byte[] imageData = contact.getImage1();
-                                if (imageData != null) {
-                                    try {
-                                        final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
-                                        final ImageLocation imageLocation =
-                                            new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
-                                                Integer.toString(contact.getObjectID())).build();
-                                        final String imageURL = imgSource.generateUrl(imageLocation, session);
-                                        jArray.put(imageURL);
-                                    } catch (final OXException e) {
-                                        com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn(
-                                            "Contact image URL could not be generated.",
-                                            e);
-                                    }
+                        if (contact.containsImage1()) {
+                            final byte[] imageData = contact.getImage1();
+                            if (imageData != null) {
+                                try {
+                                    final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
+                                    final ImageLocation imageLocation =
+                                        new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
+                                            Integer.toString(contact.getObjectID())).build();
+                                    final String imageURL = imgSource.generateUrl(imageLocation, session);
+                                    jArray.put(imageURL);
+                                } catch (final OXException e) {
+                                    com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn(
+                                        "Contact image URL could not be generated.",
+                                        e);
                                 }
                             }
                         }
-                        jObject.put("from_image_urls", jArray);
-                    } catch (final JSONException e) {
-                        throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                     }
+                    jObject.put("from_image_urls", jArray);
+                } catch (final JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                 }
             }
-        });
-    }
+        }
 
-    protected static ContactSearchObject createContactSearchObject(final InternetAddress from) {
-        final ContactSearchObject searchObject = new ContactSearchObject();
-        // searchObject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID); // Global address book
-        searchObject.setOrSearch(true);
-        final String address = from.getAddress();
-        searchObject.setEmail1(address);
-        searchObject.setEmail2(address);
-        searchObject.setEmail3(address);
-        return searchObject;
-    }
+        private ContactSearchObject createContactSearchObject(final InternetAddress from) {
+            final ContactSearchObject searchObject = new ContactSearchObject();
+            // searchObject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID); // Global address book
+            searchObject.setOrSearch(true);
+            final String address = from.getAddress();
+            searchObject.setEmail1(address);
+            searchObject.setEmail2(address);
+            searchObject.setEmail3(address);
+            return searchObject;
+        }
+
+    } // End of class DecoratorImpl
 
 }
