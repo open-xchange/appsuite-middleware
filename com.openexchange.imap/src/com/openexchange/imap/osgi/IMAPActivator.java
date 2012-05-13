@@ -238,6 +238,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Clear service registry
              */
             IMAPStoreCache.shutDownInstance();
+            ThreadableCache.getInstance().clear();
             getServiceRegistry().clearRegistry();
             if (secretService != null) {
                 secretService.close();
