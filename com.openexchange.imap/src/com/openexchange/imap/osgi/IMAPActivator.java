@@ -50,12 +50,9 @@
 package com.openexchange.imap.osgi;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-import gnu.trove.set.hash.TLongHashSet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.osgi.framework.BundleActivator;
@@ -65,10 +62,6 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPAccess;
-import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.IMAPStoreCache;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -76,17 +69,10 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.imap.thread.Threadable;
 import com.openexchange.imap.thread.ThreadableCache;
-import com.openexchange.imap.thread.ThreadableCache.ThreadableCacheEntry;
+import com.openexchange.imap.thread.ThreadableLoginHandler;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginResult;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -99,11 +85,10 @@ import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
-import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPActivator extends HousekeepingActivator {
@@ -187,51 +172,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             /*
              * Register login handler
              */
-            {
-                registerService(LoginHandlerService.class, new LoginHandlerService() {
-                    
-                    @Override
-                    public void handleLogout(final LoginResult logout) throws OXException {
-                        // Nothing to do
-                    }
-                    
-                    @Override
-                    public void handleLogin(final LoginResult login) throws OXException {
-                        final MailAccountStorageService storageService = getService(MailAccountStorageService.class);
-                        final Session session = login.getSession();
-                        final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-                        for (final MailAccount account : accounts) {
-                            if (account.getMailProtocol().equals(IMAPProtocol.getInstance().getName())) {
-                                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                                try {
-                                    mailAccess = MailAccess.getInstance(session);
-                                    mailAccess.connect(true);
-                                    final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
-                                    final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(sentFolder, account.getId(), session);
-                                    synchronized (entry) {
-                                        if (null == entry.getThreadable()) {
-                                            final IMAPFolder sent = (IMAPFolder) ((IMAPAccess) mailAccess).getIMAPStore().getFolder(sentFolder);
-                                            sent.open(Folder.READ_ONLY);
-                                            try {
-                                                final Threadable threadable = Threadable.getAllThreadablesFrom(sent);
-                                                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(sent)), threadable, false);
-                                            } finally {
-                                                sent.close(false);
-                                            }
-                                        }
-                                    }
-                                } catch (final MessagingException e) {
-                                    throw MimeMailException.handleMessagingException(e, null == mailAccess ? null : mailAccess.getMailConfig(), session);
-                                } finally {
-                                    if (null != mailAccess) {
-                                        mailAccess.close(true);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+            registerService(LoginHandlerService.class, new ThreadableLoginHandler(this));
             /*
              * Register event handler
              */
