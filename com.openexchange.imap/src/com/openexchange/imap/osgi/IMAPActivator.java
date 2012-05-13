@@ -185,7 +185,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 }
             }
             /*
-             * Register login preformer
+             * Register login handler
              */
             {
                 registerService(LoginHandlerService.class, new LoginHandlerService() {
