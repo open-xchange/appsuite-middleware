@@ -60,7 +60,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.mail.smal.impl.SmalProvider;
@@ -99,7 +98,7 @@ public class SmalActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class };
+            ConfigurationService.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override
