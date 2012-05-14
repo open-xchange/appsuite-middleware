@@ -1,12 +1,13 @@
 	<Product>
 		<Name>OXtender for Microsoft Outlook</Name> 
-		<Version>6.18.4</Version>
+		<Version>6.18.17</Version>
 		<UpgradeCode>{3BBB2D56-0B19-4C83-9266-307F49DF9DD6}</UpgradeCode>
 		<MD5>${FILETOOL.md5("OXtender_for_Microsoft_Outlook.msi")}</MD5>
-		<ReleaseDate>25.08.2010</ReleaseDate>
+		<ReleaseDate>24.11.2011</ReleaseDate>
 		<URL>${FILETOOL.url("OXtender_for_Microsoft_Outlook.msi")}</URL>
 		<InfoUrl></InfoUrl>
-		<Icon></Icon>
+		<Icon>AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIiIiIiIiAAIiIiIiIiIiIiIiIiIiIiACIiIiIiIiIiIiIiIiIiIgIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiId3d3d3eId3eIiIh3d4iIh3d3d3d3eHd3eIiHd3eIiHd3eIiHd3eHd3eId3d4iIh3d4iIiHd3iHd3d3d3iIiId3eIiIh3d4iHd3d3eIiIiHd3iIiId3eIiHd3d4iIiP+IiP///4iI//+IiIj/////iIj///+IiP/4iIiIj////4iI////iIj/iIiIiIj///+IiI//+IiI+IiI/4iIj///+IiIiIiIj4iIj//4iIj///+IiIiIiP+IiP///4iI/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w////////////////////AP///////////////////wAP//////////////////AAAAAAAAAAAAAAAAAAAAAAD/////wAAAA4AAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAYAAAAHAAAAD/////w</Icon>
 		<InstallParams>OXCREATEIMAPACCOUNT="true" OXPROFILENAME="OXtender" ${OXURL} ${OXACCOUNTNAME} ${OXDISPLAYNAME} ${OXEMAILADDRESS} ${OXIMAPPORT} ${OXIMAPSERVER} ${OXIMAPSSL} ${OXIMAPUSERNAME} ${OXSERVERTIMEOUT} ${OXSMTPAUTH} ${OXSMTPAUTHMETHOD} ${OXSMTPPORT} ${OXSMTPSERVER} ${OXSMTPSSL}</InstallParams> 
 		<Importance>200</Importance> 
+		<Requirement Root="HKLM" Key="SOFTWARE\Microsoft\Office\14.0\Outlook" ValueName="Bitness" Compare="KeyNotExist" Value="x64" />
 	</Product>
