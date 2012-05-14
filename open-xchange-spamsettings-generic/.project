@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>open-xchange-messaging-sms</name>
+	<name>open-xchange-spamsettings-generic</name>
 	<comment></comment>
 	<projects>
-		<project>com.openexchange.messaging.sms</project>
+		<project>com.openexchange.spamsettings.generic</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
