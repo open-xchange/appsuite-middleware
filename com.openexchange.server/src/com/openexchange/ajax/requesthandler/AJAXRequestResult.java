@@ -142,7 +142,7 @@ public class AJAXRequestResult {
      */
     public static enum ResultType {
         /**
-         * A common request result which should be further handled.
+         * A common request result which should be further processed.
          */
         COMMON,
         /**
