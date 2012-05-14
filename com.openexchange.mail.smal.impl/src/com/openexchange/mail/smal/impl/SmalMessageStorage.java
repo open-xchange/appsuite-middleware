@@ -58,10 +58,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.mail.SolrMailUtility;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -286,7 +285,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+        if (null == getIndexFacadeService()) {
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         final MailFields mfs = new MailFields(fields);
@@ -364,7 +363,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-    	if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+    	if (null == getIndexFacadeService()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final MailFields mfs = new MailFields(fields);
@@ -568,7 +567,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+        if (null == getIndexFacadeService()) {
             return messageStorage.getMessage(folder, mailId, markSeen);
         }
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);

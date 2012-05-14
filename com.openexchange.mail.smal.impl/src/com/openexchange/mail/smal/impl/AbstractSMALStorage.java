@@ -51,10 +51,14 @@ package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -139,6 +143,11 @@ public abstract class AbstractSMALStorage {
     private volatile MailJobInfo jobInfo;
 
     /**
+     * Whether denoted account is blacklisted.
+     */
+    protected Boolean blacklisted;
+
+    /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
     protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
@@ -150,6 +159,69 @@ public abstract class AbstractSMALStorage {
         this.delegateMailAccess = delegateMailAccess;
         processorStrategy = DefaultProcessorStrategy.getInstance();
         processor = new Processor(processorStrategy);
+    }
+
+    /**
+     * Checks if denoted account is blacklisted
+     * 
+     * @return <code>true</code> if blacklisted; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean isBlacklisted() throws OXException {
+        if (null == blacklisted) {
+            final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+            final Object param = sessionCache.getParameter(accountId, "com.openexchange.mail.smal.isBlacklisted");
+            if (null == param) {
+                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+                blacklisted = Boolean.valueOf(!isEmpty(blacklist) || blacklist.indexOf(delegateMailAccess.getMailConfig().getServer()) >= 0);
+                sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+            } else {
+                try {
+                    blacklisted = (Boolean) param;
+                } catch (final ClassCastException e) {
+                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                    final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+                    blacklisted = Boolean.valueOf(!isEmpty(blacklist) || blacklist.indexOf(delegateMailAccess.getMailConfig().getServer()) >= 0);
+                }
+            }
+        }
+        return blacklisted.booleanValue();
+    }
+
+    /**
+     * Gets the <tt>IndexFacadeService</tt> service.
+     * 
+     * @return The <tt>IndexFacadeService</tt> service
+     * @throws OXException If user configuration cannot be read
+     */
+    protected IndexFacadeService getIndexFacadeService() throws OXException {
+        final IndexFacadeService facadeService = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        if (null == facadeService) {
+            return null;
+        }
+        return isBlacklisted() ? null : facadeService;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Gets the {@link ConfigViewFactory} service.
+     * 
+     * @return The service
+     */
+    protected ConfigViewFactory getConfigViewFactory() {
+        return SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
     }
 
     /**
