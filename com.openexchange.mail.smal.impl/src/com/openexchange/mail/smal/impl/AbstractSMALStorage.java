@@ -144,6 +144,8 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Whether denoted account is blacklisted.
+     * <p>
+     * See {@link #isBlacklisted()}
      */
     protected Boolean blacklisted;
 
