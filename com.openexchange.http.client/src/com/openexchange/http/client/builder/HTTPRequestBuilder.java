@@ -6,7 +6,7 @@ public interface HTTPRequestBuilder {
 	
 	public HTTPPostRequestBuilder post();
 	
-	public HTTPMulitpartPostRequestBuilder multipartPost();
+	public HTTPMultipartPostRequestBuilder multipartPost();
 	
 	public HTTPGetRequestBuilder get();
 	

@@ -7,7 +7,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
 import com.openexchange.http.client.builder.HTTPGetRequestBuilder;
-import com.openexchange.http.client.builder.HTTPMulitpartPostRequestBuilder;
+import com.openexchange.http.client.builder.HTTPMultipartPostRequestBuilder;
 import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
 import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequestBuilder;
@@ -35,7 +35,7 @@ public class ApacheClientRequestBuilder extends AbstractBuilder implements
 		return new ApachePostRequestBuilder(this);
 	}
 	
-	public HTTPMulitpartPostRequestBuilder multipartPost() {
+	public HTTPMultipartPostRequestBuilder multipartPost() {
 		return new ApacheMultipartPostRequestBuilder(this, fileManager);
 	}
 	
