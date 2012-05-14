@@ -408,7 +408,18 @@ public class AJAXRequestResult {
      * Sets a header value
      */
     public void setHeader(final String header, final String value) {
-        headers.put(header, value);
+        if (null == value) {
+            headers.remove(header);
+        } else {
+            headers.put(header, value);
+        }
+    }
+
+    /**
+     * Removes a header value
+     */
+    public String removeHeader(final String header) {
+        return headers.remove(header);
     }
 
     /**
@@ -442,6 +453,15 @@ public class AJAXRequestResult {
     }
 
     /**
+     * Removes a parameter.
+     * 
+     * @param name The parameter name
+     */
+    public void removeParameter(final String name) {
+        parameters.remove(name);
+    }
+
+    /**
      * Gets the associated parameter value.
      * 
      * @param name The parameter name
@@ -472,6 +492,15 @@ public class AJAXRequestResult {
         } else {
             responseProperties.put(name, value);
         }
+    }
+
+    /**
+     * Removes a response property.
+     * 
+     * @param name The property name
+     */
+    public void removeResponseProperty(final String name) {
+        responseProperties.remove(name);
     }
 
     /**
