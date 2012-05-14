@@ -9,19 +9,17 @@ import org.w3c.dom.Document;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
-import com.openexchange.http.client.builder.HTTPResponseWrapper;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
-public class DOMProcessor implements HTTPResponseProcessor<InputStream, Document> {
+public class DOMProcessor implements HTTPResponseProcessor {
 
 	public Class<?>[] getTypes() {
 		return new Class[]{InputStream.class, Document.class};
 	}
 
-	public HTTPResponse<Document> process(HTTPResponse<InputStream> response) throws OXException {
+	public Object process(Object response) throws OXException {
 		try {
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(response.getPayload(), "UTF-8");
-			return new HTTPResponseWrapper<Document>(response, document);
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((InputStream) response, "UTF-8");
 		} catch (Exception e) {
 			throw OxHttpClientExceptionCodes.CATCH_ALL.create(e.getMessage(), e);
 		}

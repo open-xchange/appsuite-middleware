@@ -14,20 +14,20 @@ import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
-public class ApacheHTTPRequest<R> implements HTTPRequest<R> {
+public class ApacheHTTPRequest implements HTTPRequest {
 
 	private Map<String, String> headers;
 	private Map<String, String> parameters;
 
 	private HttpMethodBase method;
 	private HttpClient client;
-	private ApacheClientRequestBuilder<R> coreBuilder;
+	private ApacheClientRequestBuilder coreBuilder;
 	private CommonApacheHTTPRequest reqBuilder;
 	
 	
 	
 	public ApacheHTTPRequest(Map<String, String> headers, Map<String, String> parameters,
-			HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder<R> coreBuilder, CommonApacheHTTPRequest builder) {
+			HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, CommonApacheHTTPRequest builder) {
 		super();
 		this.headers = headers;
 		this.parameters = parameters;
@@ -37,7 +37,7 @@ public class ApacheHTTPRequest<R> implements HTTPRequest<R> {
 		this.reqBuilder = builder;
 	}
 
-	public HTTPResponse<R> execute() throws OXException {
+	public HTTPResponse execute() throws OXException {
 		try {
 			HttpState state = coreBuilder.getState();
 			if (state != null) {
@@ -51,7 +51,7 @@ public class ApacheHTTPRequest<R> implements HTTPRequest<R> {
 				reqBuilder.url(location);
 				return reqBuilder.build().execute();
 			}
-			return new ApacheHTTPResponse<R>(method, client, coreBuilder);
+			return new ApacheHTTPResponse(method, client, coreBuilder);
 		} catch (HttpException e) {
 			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		} catch (IOException e) {

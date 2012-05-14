@@ -5,18 +5,18 @@ import java.io.InputStream;
 
 import com.openexchange.exception.OXException;
 
-public interface HTTPMulitpartPostRequestBuilder<R> extends
-		HTTPGenericRequestBuilder<HTTPMulitpartPostRequestBuilder<R>, R> {
+public interface HTTPMulitpartPostRequestBuilder extends
+		HTTPGenericRequestBuilder<HTTPMulitpartPostRequestBuilder> {
 	
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, File file) throws OXException;
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, File file) throws OXException;
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, InputStream is, String contentType, String filename) throws OXException;
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, InputStream is, String contentType, String filename) throws OXException;
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, InputStream is, String contentType) throws OXException;
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, InputStream is, String contentType) throws OXException;
 	
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s, String contentType, String filename) throws OXException;
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, String s, String contentType, String filename) throws OXException;
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s, String contentType) throws OXException;
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, String s, String contentType) throws OXException;
 
 	
 }

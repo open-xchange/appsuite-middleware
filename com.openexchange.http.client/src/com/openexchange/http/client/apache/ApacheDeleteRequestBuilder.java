@@ -6,10 +6,10 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
 
-public class ApacheDeleteRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPDeleteRequestBuilder<R>, R> implements
-		HTTPDeleteRequestBuilder<R> {
+public class ApacheDeleteRequestBuilder extends CommonApacheHTTPRequest<HTTPDeleteRequestBuilder> implements
+		HTTPDeleteRequestBuilder {
 
-	public ApacheDeleteRequestBuilder(ApacheClientRequestBuilder<R> coreBuilder) {
+	public ApacheDeleteRequestBuilder(ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
 	}
 

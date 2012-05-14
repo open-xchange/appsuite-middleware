@@ -8,9 +8,9 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 
-public class ApachePostRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPPostRequestBuilder<R>, R>implements HTTPPostRequestBuilder<R> {
+public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRequestBuilder>implements HTTPPostRequestBuilder {
 
-	public ApachePostRequestBuilder(ApacheClientRequestBuilder<R> coreBuilder) {
+	public ApachePostRequestBuilder(ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
 	}
 

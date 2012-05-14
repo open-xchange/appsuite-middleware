@@ -5,10 +5,10 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import com.openexchange.http.client.builder.HTTPGetRequestBuilder;
 
-public class ApacheGetRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPGetRequestBuilder<R>, R> implements HTTPGetRequestBuilder<R> {
+public class ApacheGetRequestBuilder extends CommonApacheHTTPRequest<HTTPGetRequestBuilder> implements HTTPGetRequestBuilder {
 
 	
-	public ApacheGetRequestBuilder(ApacheClientRequestBuilder<R> coreBuilder) {
+	public ApacheGetRequestBuilder(ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
 	}
 

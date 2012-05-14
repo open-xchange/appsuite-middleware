@@ -22,8 +22,8 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.builder.HTTPMulitpartPostRequestBuilder;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
-public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPMulitpartPostRequestBuilder<R>, R> implements
-		HTTPMulitpartPostRequestBuilder<R> {
+public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<HTTPMulitpartPostRequestBuilder> implements
+		HTTPMulitpartPostRequestBuilder {
 
 	private ManagedFileManagement fileManager;
 	private List<Part> parts = new ArrayList<Part>();
@@ -31,13 +31,13 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 	private List<ManagedFile> managedFiles = new ArrayList<ManagedFile>();
 	
 	public ApacheMultipartPostRequestBuilder(
-			ApacheClientRequestBuilder<R> coreBuilder, ManagedFileManagement fileManager) {
+			ApacheClientRequestBuilder coreBuilder, ManagedFileManagement fileManager) {
 		super(coreBuilder);
 		this.fileManager = fileManager;
 		
 	}
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, File file) throws OXException {
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, File file) throws OXException {
 		try {
 			parts.add(new FilePart(fieldName, file));
 		} catch (FileNotFoundException e) {
@@ -45,20 +45,20 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 		return this;
 	}
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName,
+	public HTTPMulitpartPostRequestBuilder part(String fieldName,
 			InputStream is, String contentType, String filename) throws OXException {
 		parts.add(new FilePart(fieldName, partSource(filename, is), contentType, "UTF-8"));
 		return this;
 	}
 
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName,
+	public HTTPMulitpartPostRequestBuilder part(String fieldName,
 			InputStream is, String contentType) throws OXException {
 		parts.add(new FilePart(fieldName, partSource("data.bin", is), contentType, "UTF-8"));
 		return this;
 	}
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s,
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, String s,
 			String contentType, String filename) throws OXException {
 		try {
 			parts.add(new FilePart(fieldName, new ByteArrayPartSource(filename, s.getBytes("UTF-8")), contentType, "UTF-8"));
@@ -67,7 +67,7 @@ public class ApacheMultipartPostRequestBuilder<R> extends CommonApacheHTTPReques
 		return this;
 	}
 
-	public HTTPMulitpartPostRequestBuilder<R> part(String fieldName, String s,
+	public HTTPMulitpartPostRequestBuilder part(String fieldName, String s,
 			String contentType) throws OXException {
 		try {
 			parts.add(new FilePart(fieldName, new ByteArrayPartSource("data.txt", s.getBytes("UTF-8")), contentType, "UTF-8"));

@@ -16,13 +16,13 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 
-public class ApachePutRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPPutRequestBuilder<R>, R> implements HTTPPutRequestBuilder<R> {
+public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequestBuilder> implements HTTPPutRequestBuilder {
 
 	private String stringBody;
 	private InputStream isBody;
 	private String cType;
 
-	public ApachePutRequestBuilder(ApacheClientRequestBuilder<R> coreBuilder) {
+	public ApachePutRequestBuilder(ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
 	}
 
@@ -45,13 +45,13 @@ public class ApachePutRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPPutR
 		return putMethod;
 	}
 
-	public HTTPPutRequestBuilder<R> body(String body) {
+	public HTTPPutRequestBuilder body(String body) {
 		clearBody();
 		this.stringBody = body;
 		return this;
 	}
 
-	public HTTPPutRequestBuilder<R> body(InputStream body) {
+	public HTTPPutRequestBuilder body(InputStream body) {
 		clearBody();
 		this.isBody = body;
 		return this;
@@ -69,7 +69,7 @@ public class ApachePutRequestBuilder<R> extends CommonApacheHTTPRequest<HTTPPutR
 		}
 	}
 
-	public HTTPPutRequestBuilder<R> contentType(String ctype) {
+	public HTTPPutRequestBuilder contentType(String ctype) {
 		this.cType = ctype;
 		return this;
 	}

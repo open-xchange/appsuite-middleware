@@ -11,30 +11,27 @@ import org.apache.commons.httpclient.HttpMethodBase;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 
-public class ApacheHTTPResponse<R> implements HTTPResponse<R> {
+public class ApacheHTTPResponse implements HTTPResponse {
 
 	private HttpMethodBase method;
 	private HttpClient client;
-	private ApacheClientRequestBuilder<R> coreBuilder;
-	private R payload;
+	private ApacheClientRequestBuilder coreBuilder;
+	private Object payload;
 
 	public ApacheHTTPResponse(HttpMethodBase method, HttpClient client,
-			ApacheClientRequestBuilder<R> coreBuilder) {
+			ApacheClientRequestBuilder coreBuilder) {
 		this.method = method;
 		this.client = client;
 		this.coreBuilder = coreBuilder;
 	}
 
-	public R getPayload() throws OXException {
-		if (payload != null) {
-			return payload;
+	public <R> R getPayload(Class<R> type) throws OXException {
+		if (payload != null && type.isInstance(payload)) {
+			return (R) payload;
 		}
-		return payload = coreBuilder.extractPayload(method);
+		return coreBuilder.extractPayload(method, type);
 	}
 
-	public void setPayload(R payload) {
-		this.payload = payload;
-	}
 
 	public Map<String, String> getHeaders() {
 		Header[] responseHeaders = method.getResponseHeaders();

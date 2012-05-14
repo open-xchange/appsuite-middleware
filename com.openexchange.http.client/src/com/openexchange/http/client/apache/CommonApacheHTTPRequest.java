@@ -24,18 +24,18 @@ import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
-public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilder<T, R>, R> {
+public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilder<T>> {
 
 	protected String url;
 
 	protected Map<String, String> parameters = new TreeMap<String, String>();
 	protected Map<String, String> headers = new TreeMap<String, String>();
 
-	protected ApacheClientRequestBuilder<R> coreBuilder;
+	protected ApacheClientRequestBuilder coreBuilder;
 
 	private boolean verbatimURL;
 
-	public CommonApacheHTTPRequest(ApacheClientRequestBuilder<R> coreBuilder) {
+	public CommonApacheHTTPRequest(ApacheClientRequestBuilder coreBuilder) {
 		this.coreBuilder = coreBuilder;
 	}
 
@@ -72,7 +72,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 		return (T) this;
 	}
 
-	public HTTPRequest<R> build() throws OXException {
+	public HTTPRequest build() throws OXException {
 		try {
 			final HttpClient client = new HttpClient();
 			final int timeout = 10000;
@@ -111,7 +111,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 				addParams(m, javaURL.getQuery());
 				
 				
-				return new ApacheHTTPRequest<R>(headers, parameters, m, client,
+				return new ApacheHTTPRequest(headers, parameters, m, client,
 						coreBuilder, this);
 			}
 			/*
@@ -123,7 +123,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 			}
 			addParams(m, javaURL.getQuery());
 
-			return new ApacheHTTPRequest<R>(headers, parameters, m, client,
+			return new ApacheHTTPRequest(headers, parameters, m, client,
 					coreBuilder, this);
 		} catch (URIException x) {
 			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(x.getMessage(), x);

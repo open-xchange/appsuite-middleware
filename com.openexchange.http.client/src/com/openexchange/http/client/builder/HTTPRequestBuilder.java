@@ -1,18 +1,15 @@
 package com.openexchange.http.client.builder;
 
-public interface HTTPRequestBuilder<R> {
+public interface HTTPRequestBuilder {
 	
-	public HTTPPutRequestBuilder<R> put();
+	public HTTPPutRequestBuilder put();
 	
-	public HTTPPostRequestBuilder<R> post();
+	public HTTPPostRequestBuilder post();
 	
-	public HTTPMulitpartPostRequestBuilder<R> multipartPost();
+	public HTTPMulitpartPostRequestBuilder multipartPost();
 	
-	public HTTPGetRequestBuilder<R> get();
+	public HTTPGetRequestBuilder get();
 	
-	public HTTPDeleteRequestBuilder<R> delete();
+	public HTTPDeleteRequestBuilder delete();
 	
-	public <T> HTTPRequestBuilder<T> chain(HTTPResponseProcessor<R, T> processor);
-	
-	public HTTPRequestBuilder<R> addStrategy(HTTPStrategy<R> strategy);
 }

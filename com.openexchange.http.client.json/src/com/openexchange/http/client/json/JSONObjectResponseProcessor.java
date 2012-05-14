@@ -6,22 +6,19 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
-import com.openexchange.http.client.builder.HTTPResponseWrapper;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class JSONObjectResponseProcessor implements
-		HTTPResponseProcessor<String, JSONObject> {
+		HTTPResponseProcessor {
 
 	public Class<?>[] getTypes() {
 		return new Class<?>[]{String.class, JSONObject.class};
 	}
 
-	public HTTPResponse<JSONObject> process(HTTPResponse<String> response)
+	public Object process(Object response)
 			throws OXException {
-		String payload = response.getPayload();
 		try {
-			JSONObject object = new JSONObject(payload);
-			return new HTTPResponseWrapper<JSONObject>(response, object);
+			return new JSONObject((String)response);
 		} catch (JSONException e) {
 			throw OxHttpClientExceptionCodes.JSON_ERROR.create(e);
 		}

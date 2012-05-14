@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class ApacheHTTPClient implements HTTPClient {
 	
-	private Map<Class<?>, List<HTTPResponseProcessor<?,?>>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor<?,?>>>();
+	private Map<Class<?>, List<HTTPResponseProcessor>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor>>();
 	private ManagedFileManagement fileManager;
 	
 	public ApacheHTTPClient(ManagedFileManagement fileManager) {
@@ -28,83 +29,65 @@ public class ApacheHTTPClient implements HTTPClient {
 	}
 	
 	
-	public <R> HTTPRequestBuilder<R> getBuilder(Class<R> responseType) {
+	public String extractString(HttpMethodBase method) throws OXException {
+		try {
+			return method.getResponseBodyAsString();
+		} catch (IOException e) {
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+		}
+	}
+	
+	public InputStream extractStream(HttpMethodBase method) throws OXException {
+		try {
+			return method.getResponseBodyAsStream();
+		} catch (IOException e) {
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+		}
+	}
+	
+	public Reader extractReader(HttpMethodBase method) throws OXException {
+		try {
+			return new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet());
+		} catch (IOException e) {
+			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+		}
+	}
+	
+	public <R> R extractPayload(HttpMethodBase method, Class<R> responseType) throws OXException {
 		if (responseType == String.class) {
-			return (HTTPRequestBuilder<R>) new ApacheClientRequestBuilder<String>(fileManager) {
-
-				@Override
-				String extractPayload(HttpMethodBase method) throws OXException {
-					try {
-						return method.getResponseBodyAsString();
-					} catch (IOException e) {
-						throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
-					}
-				}
-			};
+			return (R) extractString(method);
 		} else if (responseType == InputStream.class) {
-			return (HTTPRequestBuilder<R>) new ApacheClientRequestBuilder<InputStream>(fileManager) {
-
-				@Override
-				InputStream extractPayload(HttpMethodBase method) throws OXException {
-					try {
-						return method.getResponseBodyAsStream();
-					} catch (IOException e) {
-						throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
-					}
-				}
-			};
+			return (R) extractStream(method);
 		} else if (responseType == Reader.class) {
-			return (HTTPRequestBuilder<R>) new ApacheClientRequestBuilder<Reader>(fileManager) {
-
-				@Override
-				Reader extractPayload(HttpMethodBase method) throws OXException {
-					try {
-						return new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet());
-					} catch (IOException e) {
-						throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
-					}
-				}
-			};
+			return (R) extractReader(method);
 		}
 		
-		
-		// TODO: Expand this to make longer paths, similar to shortest-path in ng conversion framework
-		
-		List<HTTPResponseProcessor<?, ?>> stringProcessors = processors.get(String.class);
-		if (stringProcessors !=  null) {
-			for (HTTPResponseProcessor<?, ?> p : stringProcessors) {
-				if (p.getTypes()[1] == responseType) {
-					return getBuilder(String.class).chain((HTTPResponseProcessor<String, R>) p);
+		for(Class inputType: Arrays.asList(InputStream.class, Reader.class, String.class)) {
+			List<HTTPResponseProcessor> procList = processors.get(inputType);
+			for (HTTPResponseProcessor processor : procList) {
+				if (processor.getTypes()[1] == responseType) {
+					return (R) processor.process(extractPayload(method, inputType));
 				}
 			}
 		}
 		
-		List<HTTPResponseProcessor<?, ?>> readerProcessors = processors.get(Reader.class);
-		if (readerProcessors != null) {
-			for (HTTPResponseProcessor<?, ?> p : readerProcessors) {
-				if (p.getTypes()[1] == responseType) {
-					return getBuilder(Reader.class).chain((HTTPResponseProcessor<Reader, R>) p);
-				}
-			}
-		}
 		
-		List<HTTPResponseProcessor<?, ?>> isProcessors = processors.get(InputStream.class);
-		if (isProcessors != null) {
-			for (HTTPResponseProcessor<?, ?> p : isProcessors) {
-				if (p.getTypes()[1] == responseType) {
-					return getBuilder(InputStream.class).chain((HTTPResponseProcessor<InputStream, R>) p);
-				}
-			}
-		}
-		
-		return null;
+		throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create();
+	}
+	
+	/*
+	 * 		
+	 */
+	
+	public  HTTPRequestBuilder getBuilder() {
+		return new ApacheClientRequestBuilder(fileManager, this);
 	}
 
-	public void registerProcessor(HTTPResponseProcessor<?, ?> processor) {
+	public void registerProcessor(HTTPResponseProcessor processor) {
 		Class<?>[] types = processor.getTypes();
-		List<HTTPResponseProcessor<?, ?>> list = processors.get(types[0]);
+		List<HTTPResponseProcessor> list = processors.get(types[0]);
 		if (list == null) {
-			list = new ArrayList<HTTPResponseProcessor<?,?>>();
+			list = new ArrayList<HTTPResponseProcessor>();
 			processors.put(types[0], list);
 		}
 		
@@ -113,9 +96,9 @@ public class ApacheHTTPClient implements HTTPClient {
 		
 	}
 
-	public void forgetProcessor(HTTPResponseProcessor<?, ?> processor) {
+	public void forgetProcessor(HTTPResponseProcessor processor) {
 		Class<?>[] types = processor.getTypes();
-		List<HTTPResponseProcessor<?, ?>> list = processors.get(types[0]);
+		List<HTTPResponseProcessor> list = processors.get(types[0]);
 		if (list == null) {
 			return;
 		}

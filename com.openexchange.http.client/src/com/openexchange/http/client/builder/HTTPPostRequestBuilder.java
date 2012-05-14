@@ -1,5 +1,5 @@
 package com.openexchange.http.client.builder;
 
-public interface HTTPPostRequestBuilder<R> extends HTTPGenericRequestBuilder<HTTPPostRequestBuilder<R>, R> {
+public interface HTTPPostRequestBuilder extends HTTPGenericRequestBuilder<HTTPPostRequestBuilder> {
 	
 }

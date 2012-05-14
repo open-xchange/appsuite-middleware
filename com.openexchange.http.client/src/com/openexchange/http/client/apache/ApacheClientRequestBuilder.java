@@ -13,38 +13,43 @@ import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequestBuilder;
 import com.openexchange.http.client.internal.AbstractBuilder;
 
-public abstract class ApacheClientRequestBuilder<R> extends AbstractBuilder<R> implements
-		HTTPRequestBuilder<R> {
+public class ApacheClientRequestBuilder extends AbstractBuilder implements
+		HTTPRequestBuilder {
 	
 	private HttpState state;
 	
 	private ManagedFileManagement fileManager;
+
+	private ApacheHTTPClient client;
 	
-	public ApacheClientRequestBuilder(ManagedFileManagement mgmt) {
+	public ApacheClientRequestBuilder(ManagedFileManagement mgmt, ApacheHTTPClient client) {
 		fileManager = mgmt;
+		this.client = client;
 	}
 	
-	public HTTPPutRequestBuilder<R> put() {
-		return new ApachePutRequestBuilder<R>(this);
+	public HTTPPutRequestBuilder put() {
+		return new ApachePutRequestBuilder(this);
 	}
 	
-	public HTTPPostRequestBuilder<R> post() {
-		return new ApachePostRequestBuilder<R>(this);
+	public HTTPPostRequestBuilder post() {
+		return new ApachePostRequestBuilder(this);
 	}
 	
-	public HTTPMulitpartPostRequestBuilder<R> multipartPost() {
-		return new ApacheMultipartPostRequestBuilder<R>(this, fileManager);
+	public HTTPMulitpartPostRequestBuilder multipartPost() {
+		return new ApacheMultipartPostRequestBuilder(this, fileManager);
 	}
 	
-	public HTTPGetRequestBuilder<R> get() {
-		return new ApacheGetRequestBuilder<R>(this);
+	public HTTPGetRequestBuilder get() {
+		return new ApacheGetRequestBuilder(this);
 	}
 	
-	public HTTPDeleteRequestBuilder<R> delete() {
-		return new ApacheDeleteRequestBuilder<R>(this);
+	public HTTPDeleteRequestBuilder delete() {
+		return new ApacheDeleteRequestBuilder(this);
 	}
 
-	abstract R extractPayload(HttpMethodBase method) throws OXException;
+	public <R> R extractPayload(HttpMethodBase method, Class<R> type) throws OXException {
+		return client.extractPayload(method, type);
+	}
 
 	HttpState getState() {
 		return state;
