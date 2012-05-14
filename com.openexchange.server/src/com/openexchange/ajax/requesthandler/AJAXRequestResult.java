@@ -135,6 +135,31 @@ public class AJAXRequestResult {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
+        @Override
+        public void setParameter(final String name, final Object value) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void setResponseProperty(final String name, final Object value) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeHeader(final String header) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeParameter(final String name) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeResponseProperty(final String name) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
     };
 
     /**
@@ -418,8 +443,8 @@ public class AJAXRequestResult {
     /**
      * Removes a header value
      */
-    public String removeHeader(final String header) {
-        return headers.remove(header);
+    public void removeHeader(final String header) {
+        headers.remove(header);
     }
 
     /**
