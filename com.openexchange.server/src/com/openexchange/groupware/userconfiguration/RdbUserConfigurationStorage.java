@@ -59,8 +59,6 @@ import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;

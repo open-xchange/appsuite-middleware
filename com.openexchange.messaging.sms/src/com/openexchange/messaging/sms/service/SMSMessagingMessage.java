@@ -140,67 +140,83 @@ public final class SMSMessagingMessage implements MessagingMessage {
         }
     }
 
+    @Override
     public int getColorLabel() {
         return 0;
     }
 
+    @Override
     public int getFlags() {
         return 0;
     }
 
+    @Override
     public String getFolder() {
         return MessagingFolder.ROOT_FULLNAME;
     }
 
+    @Override
     public long getReceivedDate() {
         return -1L;
     }
 
+    @Override
     public Collection<String> getUserFlags() {
         return Collections.emptyList();
     }
 
+    @Override
     public MessagingContent getContent() {
         return content;
     }
 
+    @Override
     public String getDisposition() {
         return MessagingPart.INLINE;
     }
 
+    @Override
     public String getFileName() {
         return null;
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
 
+    @Override
     public String getSectionId() {
         return null;
     }
 
+    @Override
     public void writeTo(final OutputStream os) {
         // Nothing to do.
     }
 
+    @Override
     public long getSize() {
         return size;
     }
 
+    @Override
     public int getThreadLevel() {
         return 0;
     }
 
+    @Override
     public ContentType getContentType() {
         return CONTENT_TYPE;
     }
@@ -213,14 +229,17 @@ public final class SMSMessagingMessage implements MessagingMessage {
         return wrap(new StringMessageHeader(name, value));
     }
 
+    @Override
     public String getId() {
         return null;
     }
 
+    @Override
     public String getPicture() {
         return null;
     }
 
+    @Override
     public String getUrl() {
         return null;
     }

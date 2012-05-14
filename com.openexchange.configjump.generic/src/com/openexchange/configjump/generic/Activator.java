@@ -58,7 +58,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class Activator extends HousekeepingActivator {
 
-    private Services services;
+    private Services servicess;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -68,14 +68,14 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        services = new Services(context);
-        track(ConfigurationService.class, new ConfigurationTracker(context, services));
+        servicess = new Services(context);
+        track(ConfigurationService.class, new ConfigurationTracker(context, servicess));
         openTrackers();
     }
 
     @Override
     public void stopBundle() {
-        services.unregisterService();
+        servicess.unregisterService();
         closeTrackers();
         cleanUp();
     }

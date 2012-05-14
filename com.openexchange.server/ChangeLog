@@ -1,3 +1,7 @@
+* 2012-05-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22113: Do not return a database connection twice and database pooling now throws an exception in those cases.
+
 * 2012-05-10 - marcus.klein@open-xchange.com
 
  - Fix for bug 20893: Using ui/product/name from ui.properties for calendar printing templates title.

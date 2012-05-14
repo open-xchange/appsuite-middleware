@@ -14,19 +14,17 @@ import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.service.messaging.MessagingService;
@@ -54,7 +52,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
+	static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 
 	private volatile EmbeddedSolrAccessImpl embeddedAccess;
 

@@ -63,11 +63,9 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
  */
 public class ContactJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class, ContactService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] { ContactInterfaceDiscoveryService.class, ContactService.class };
     }
 
     @Override

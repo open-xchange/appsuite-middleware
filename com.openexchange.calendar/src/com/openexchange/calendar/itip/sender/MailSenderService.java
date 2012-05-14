@@ -50,7 +50,6 @@
 package com.openexchange.calendar.itip.sender;
 
 import com.openexchange.calendar.itip.generators.NotificationMail;
-import com.openexchange.groupware.notify.State;
 import com.openexchange.session.Session;
 
 

@@ -340,6 +340,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return separator.charValue();
     }
 
+    @Override
     public int[] getTotalAndUnreadCounter(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return new int[] { 0, 0 };

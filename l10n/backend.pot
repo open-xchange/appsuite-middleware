@@ -4169,6 +4169,10 @@ msgstr ""
 msgid "Unregistration of consistency MBean failed."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:67
+msgid "Malformed policy. Policies are formed like \"condition:action\""
+msgstr ""
+
 #. This message will be logged if a context is disabled and some user of that context tries to login.
 #. %1$d is replaced with the unique context identifier.
 #. %2$s is replaced with the context name.

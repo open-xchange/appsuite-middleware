@@ -135,6 +135,31 @@ public class AJAXRequestResult {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
+        @Override
+        public void setParameter(final String name, final Object value) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void setResponseProperty(final String name, final Object value) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeHeader(final String header) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeParameter(final String name) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeResponseProperty(final String name) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
     };
 
     /**
@@ -142,7 +167,7 @@ public class AJAXRequestResult {
      */
     public static enum ResultType {
         /**
-         * A common request result which should be further handled.
+         * A common request result which should be further processed.
          */
         COMMON,
         /**
@@ -408,7 +433,18 @@ public class AJAXRequestResult {
      * Sets a header value
      */
     public void setHeader(final String header, final String value) {
-        headers.put(header, value);
+        if (null == value) {
+            headers.remove(header);
+        } else {
+            headers.put(header, value);
+        }
+    }
+
+    /**
+     * Removes a header value
+     */
+    public void removeHeader(final String header) {
+        headers.remove(header);
     }
 
     /**
@@ -442,6 +478,15 @@ public class AJAXRequestResult {
     }
 
     /**
+     * Removes a parameter.
+     * 
+     * @param name The parameter name
+     */
+    public void removeParameter(final String name) {
+        parameters.remove(name);
+    }
+
+    /**
      * Gets the associated parameter value.
      * 
      * @param name The parameter name
@@ -472,6 +517,15 @@ public class AJAXRequestResult {
         } else {
             responseProperties.put(name, value);
         }
+    }
+
+    /**
+     * Removes a response property.
+     * 
+     * @param name The property name
+     */
+    public void removeResponseProperty(final String name) {
+        responseProperties.remove(name);
     }
 
     /**

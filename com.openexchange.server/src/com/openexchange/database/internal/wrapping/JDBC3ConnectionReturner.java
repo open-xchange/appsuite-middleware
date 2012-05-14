@@ -98,12 +98,13 @@ public abstract class JDBC3ConnectionReturner implements Connection {
     }
 
     @Override
-    public void close() {
+    public void close() throws SQLException {
+        if (null == delegate) {
+            throw new SQLException("Connection is already closed.");
+        }
         final Connection toReturn = delegate;
         delegate = null;
-        if (null != toReturn) {
-            ReplicationMonitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
-        }
+        ReplicationMonitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
     }
 
     @Override

@@ -51,8 +51,6 @@ package com.openexchange.log;
 
 import java.util.Comparator;
 
-import com.openexchange.log.LogPropertyName.LogLevel;
-
 /**
  * {@link LogPropertyName} - A log property name.
  *

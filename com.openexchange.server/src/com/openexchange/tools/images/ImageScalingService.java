@@ -51,6 +51,7 @@ package com.openexchange.tools.images;
 
 import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ImageScalingService}
@@ -60,4 +61,5 @@ import java.io.InputStream;
 public interface ImageScalingService {
 
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException;
+    public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException;
 }

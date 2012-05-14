@@ -107,7 +107,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void unregisterServices() {
-        unregisterServices();
+        super.unregisterServices();
     }
 
     public OAuthServiceMetaData getOAuthServiceMetadata() {

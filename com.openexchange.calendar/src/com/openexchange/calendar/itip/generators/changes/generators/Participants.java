@@ -51,7 +51,6 @@ package com.openexchange.calendar.itip.generators.changes.generators;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,8 +85,6 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
 import static com.openexchange.ajax.fields.AppointmentFields.*;
-import static com.openexchange.ajax.fields.CalendarFields.NOTE;
-import static com.openexchange.ajax.fields.CalendarFields.TITLE;
 
 /**
  * {@link Participants}

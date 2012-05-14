@@ -77,9 +77,6 @@ public class TaskCopyActivator implements BundleActivator {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<UserService, UserService>(context, UserService.class.getName(), new ServiceTrackerCustomizer<UserService, UserService>() {
             
@@ -92,6 +89,7 @@ public class TaskCopyActivator implements BundleActivator {
             }
 
             public void modifiedService(final ServiceReference<UserService> reference, final UserService service) {
+                // Nope
             }
 
             public void removedService(final ServiceReference<UserService> reference, final UserService service) {
@@ -102,9 +100,6 @@ public class TaskCopyActivator implements BundleActivator {
         tracker.open();
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(final BundleContext context) throws Exception {
         if (tracker != null) {
             tracker.close();

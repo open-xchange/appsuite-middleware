@@ -126,6 +126,7 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException {
         final String[] splitted = split(loginInfo.getUsername());
         final String uid = splitted[1];
@@ -136,9 +137,11 @@ public class LDAPAuthentication implements AuthenticationService {
         final String returnstring = bind(uid, password);
         LOG.info("User " + uid + " successful authenticated.");
         return new Authenticated() {
+            @Override
             public String getContextInfo() {
                 return splitted[0];
             }
+            @Override
             public String getUserInfo() {
                 return null == returnstring ? splitted[1] : returnstring;
             }

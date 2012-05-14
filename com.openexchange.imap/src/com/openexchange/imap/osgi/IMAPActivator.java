@@ -70,6 +70,8 @@ import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.thread.ThreadableCache;
+import com.openexchange.imap.thread.ThreadableLoginHandler;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,7 +88,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPActivator extends HousekeepingActivator {
@@ -168,7 +170,11 @@ public final class IMAPActivator extends HousekeepingActivator {
                 }
             }
             /*
-             * Register event handle
+             * Register login handler
+             */
+            registerService(LoginHandlerService.class, new ThreadableLoginHandler(this));
+            /*
+             * Register event handler
              */
             {
                 final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
@@ -232,6 +238,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Clear service registry
              */
             IMAPStoreCache.shutDownInstance();
+            ThreadableCache.getInstance().clear();
             getServiceRegistry().clearRegistry();
             if (secretService != null) {
                 secretService.close();

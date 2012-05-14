@@ -57,7 +57,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
 

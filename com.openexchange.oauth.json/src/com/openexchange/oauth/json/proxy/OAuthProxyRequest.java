@@ -5,8 +5,8 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 
 public class OAuthProxyRequest {
-	private AJAXRequestData req;
-	private OAuthService oauthService;
+	private final AJAXRequestData req;
+	private final OAuthService oauthService;
 	
 	public OAuthProxyRequest(AJAXRequestData req, OAuthService oauthService) {
 		this.req = req;

@@ -10,13 +10,13 @@ public class RedirectActivator extends HousekeepingActivator{
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class[]{HttpService.class};
+		return new Class[]{HttpService.class, DispatcherPrefixService.class};
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
 		final HttpService service = getService(HttpService.class);
-		service.registerServlet(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "redirect", new RedirectServlet(), null, null);
+		service.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "redirect", new RedirectServlet(), null, null);
 	}
 	
 	@Override

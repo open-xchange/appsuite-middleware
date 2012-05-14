@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
 public class PassthroughWrapper implements TypeWrapper {
 
     @Override
-    public String none(Object argument) {
+    public String none(final Object argument) {
         if (argument != null) {
             return argument.toString();
         }
@@ -69,37 +69,37 @@ public class PassthroughWrapper implements TypeWrapper {
     }
 
     @Override
-    public String original(Object argument) {
+    public String original(final Object argument) {
         return none(argument);
     }
 
     @Override
-    public String participant(Object argument) {
+    public String participant(final Object argument) {
         return none(argument);
     }
 
     @Override
-    public String state(Object argument, ConfirmStatus status) {
+    public String state(final Object argument, final ConfirmStatus status) {
         return none(argument);
     }
 
     @Override
-    public String updated(Object argument) {
+    public String updated(final Object argument) {
         return none(argument);
     }
 
 	@Override
-    public String emphasiszed(Object argument) {
+    public String emphasiszed(final Object argument) {
 		return none(argument);
 	}
 	
 	@Override
-    public String reference(Object argument) {
+    public String reference(final Object argument) {
 		return none(argument);
 	}
 
 	@Override
-	public String shownAs(Object argument, int shownAs) {
+	public String shownAs(final Object argument, final int shownAs) {
 		return none(argument);
 	}
 
