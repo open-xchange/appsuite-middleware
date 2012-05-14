@@ -71,5 +71,3 @@ Import-Package: com.openexchange.config,
  org.osgi.framework
 Export-Package: com.openexchange.index.solr,
  com.openexchange.index.solr.mail
-Bundle-ClassPath: .,
- lib/junit-4.6.jar

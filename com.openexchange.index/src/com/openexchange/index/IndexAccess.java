@@ -89,35 +89,41 @@ public interface IndexAccess<V> {
      * Adds specified document's content to associated index.
      * 
      * @param document The document to add
-     * @throws OXException If add operation fails
+     * @param full If <code>true</code> the document will be added as a whole. 
+     * Otherwise it will be loaded from the index and only the content will be added to the existing document.
+     * @throws OXException If parameter full is false but the document could not be found in the index or if an index error occurs.
      */
-    void addContent(IndexDocument<V> document) throws OXException;
+    void addContent(IndexDocument<V> document, boolean full) throws OXException;
 
     /**
      * Adds specified documents' contents to associated index.
      * 
      * @param documents The documents to add
-     * @throws OXException If add operation fails
-     * @throws InterruptedException If interrupted while adding
+     * @param full If <code>true</code> the document will be added as a whole. 
+     * Otherwise it will be loaded from the index and only the content will be added to the existing document.
+     * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
-    void addContent(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
+    void addContent(Collection<IndexDocument<V>> documents, boolean full) throws OXException, InterruptedException;
 
     /**
      * Adds specified document's attachments to associated index.
      * 
      * @param document The document to add
-     * @throws OXException If add operation fails
+     * @param full If <code>true</code> the document will be added as a whole. 
+     * Otherwise it will be loaded from the index and only the attachment will be added to the existing document.
+     * @throws OXException If parameter full is false but the document could not be found in the index or if an index error occurs.
      */
-    void addAttachments(IndexDocument<V> document) throws OXException;
+    void addAttachments(IndexDocument<V> document, boolean full) throws OXException;
 
     /**
      * Adds specified documents' attachments to associated index.
      * 
      * @param documents The documents to add
-     * @throws OXException If add operation fails
-     * @throws InterruptedException If interrupted while adding
+     * @param full If <code>true</code> the document will be added as a whole. 
+     * Otherwise it will be loaded from the index and only the attachment will be added to the existing document.
+     * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
-    void addAttachments(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
+    void addAttachments(Collection<IndexDocument<V>> documents, boolean full) throws OXException, InterruptedException;
 
     /**
      * Changes the denoted fields of already existing document according to specified input document.
@@ -164,12 +170,5 @@ public interface IndexAccess<V> {
      * @throws InterruptedException If interrupted while retrieving results
      */
     IndexResult<V> query(QueryParameters parameters) throws OXException, InterruptedException;
-
-    /**
-     * Gets the trigger type for this access.
-     * 
-     * @return he trigger type.
-     */
-    TriggerType getTriggerType();
 
 }

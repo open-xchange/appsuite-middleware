@@ -52,7 +52,6 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,6 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.TriggerType;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
@@ -86,6 +84,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
 
 /**
@@ -104,11 +103,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     protected static final int ADD_ROWS = 2000;
 
     /**
-     * The trigger type.
-     */
-    private final TriggerType triggerType;
-
-    /**
      * The helper instance.
      */
     protected final SolrInputDocumentHelper helper;
@@ -119,9 +113,8 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
      * @param identifier The Solr server identifier
      * @param triggerType The trigger type
      */
-    public MailSolrIndexAccess(SolrCoreIdentifier identifier, TriggerType triggerType) {
+    public MailSolrIndexAccess(SolrCoreIdentifier identifier) {
         super(identifier);
-        this.triggerType = triggerType;
         helper = SolrInputDocumentHelper.getInstance();
     }
 
@@ -167,6 +160,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
     
     private SolrDocument getIndexedDocument(IndexDocument<MailMessage> document) throws OXException {
+        // TODO: Use Get-Handler
         MailMessage mailMessage = document.getObject();
         int accountId = mailMessage.getAccountId();
         MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());        
@@ -191,14 +185,83 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void addContent(IndexDocument<MailMessage> document) throws OXException {
+    public void addContent(IndexDocument<MailMessage> document, boolean full) throws OXException {
         MailMessage message = document.getObject();
         SolrInputDocument inputDocument;
-        {
+        if (full) {
+            inputDocument = helper.inputDocumentFor(message, userId, contextId);
+        } else {
             SolrDocument solrDocument = getIndexedDocument(document);
-            if (null == solrDocument) {
+            if (solrDocument == null) {
+                MailUUID uuid = new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());    
+                throw SolrExceptionCodes.DOCUMENT_NOT_FOUND.create(uuid.toString());
+            }
+            
+            String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
+            if (contentFlagField == null) {
+                return;
+            }
+            
+            Boolean contentFlag = (Boolean) solrDocument.getFieldValue(contentFlagField);
+            if (null != contentFlag && contentFlag.booleanValue()) {
+                return;
+            }
+            inputDocument = new SolrInputDocument();
+            for (Entry<String, Object> entry : solrDocument.entrySet()) {
+                String name = entry.getKey();
+                SolrInputField field = new SolrInputField(name);
+                field.setValue(entry.getValue(), 1.0f);
+                inputDocument.put(name, field);
+            }
+        }
+        
+        if (message instanceof ContentAwareMailMessage) {
+            ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
+            String text = contentAwareMessage.getPrimaryContent();
+            if (null == text) {
+                TextFinder textFinder = new TextFinder();
+                text = textFinder.getText(message);
+            }
+            if (null != text) {
+                String contentField = SolrMailField.CONTENT.solrName();
+                if (contentField != null) {
+                    inputDocument.setField(contentField, text);
+                }
+            }
+        } else {
+            TextFinder textFinder = new TextFinder();
+            String text = textFinder.getText(message);
+            if (null != text) {
+                String contentField = SolrMailField.CONTENT.solrName();
+                if (contentField != null) {
+                    inputDocument.setField(contentField, text);
+                }
+            }
+        }
+        
+        String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
+        if (contentFlagField != null) {
+            inputDocument.setField(contentFlagField, Boolean.TRUE);    
+        }
+        
+        addDocument(inputDocument);           
+    }
+        
+    @Override
+    public void addContent(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException, InterruptedException {
+        Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+        for (IndexDocument<MailMessage> document : documents) {
+            MailMessage message = document.getObject();
+            SolrInputDocument inputDocument;
+            if (full) {
                 inputDocument = helper.inputDocumentFor(message, userId, contextId);
             } else {
+                SolrDocument solrDocument = getIndexedDocument(document);
+                if (solrDocument == null) {
+                    MailUUID uuid = new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());    
+                    throw SolrExceptionCodes.DOCUMENT_NOT_FOUND.create(uuid.toString());
+                }
+                
                 String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
                 if (contentFlagField == null) {
                     return;
@@ -216,60 +279,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                     inputDocument.put(name, field);
                 }
             }
-        }
-
-        TextFinder textFinder = new TextFinder();
-        String text = textFinder.getText(message);
-        if (null != text) {
-            String contentField = SolrMailField.CONTENT.solrName();
-            if (contentField != null) {
-                inputDocument.setField(contentField, text);
-            }
-//            Locale locale = detectLocale(text);
-        }
-        
-        String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
-        if (contentFlagField != null) {
-            inputDocument.setField(contentFlagField, Boolean.TRUE);    
-        }
-        addDocument(inputDocument);     
-    }
-    
-    private static boolean SINGLE_LOADING = true;
-    
-    @Override
-    public void addContent(Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
-        if (SINGLE_LOADING) {
-            addContentWithSingleLoading(documents);
-        } else {
-            addContentWithoutSingleLoading(documents);
-        }
-    }
-    
-    private void addContentWithSingleLoading(Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
-        Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<MailMessage> document : documents) {
-            if (Thread.interrupted()) {
-                // Clears the thread's interrupted flag
-                throw new InterruptedException("Thread interrupted while adding mail contents.");
-            }
-
-            MailMessage message = document.getObject();
-            SolrInputDocument inputDocument;
-            {
-                SolrDocument solrDocument = getIndexedDocument(document);
-                if (null == solrDocument) {
-                    inputDocument = helper.inputDocumentFor(message, userId, contextId);
-                } else {
-                    inputDocument = new SolrInputDocument();
-                    for (Entry<String, Object> entry : solrDocument.entrySet()) {
-                        String name = entry.getKey();
-                        SolrInputField field = new SolrInputField(name);
-                        field.setValue(entry.getValue(), 1.0f);
-                        inputDocument.put(name, field);
-                    }
-                }
-            }
 
             if (message instanceof ContentAwareMailMessage) {
                 ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
@@ -283,7 +292,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                     if (contentField != null) {
                         inputDocument.setField(contentField, text);
                     }
-//                    Locale locale = detectLocale(text);
                 }
             } else {
                 TextFinder textFinder = new TextFinder();
@@ -293,104 +301,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                     if (contentField != null) {
                         inputDocument.setField(contentField, text);
                     }
-//                    Locale locale = detectLocale(text);
-                }
-            }
-            
-            String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
-            if (contentFlagField != null) {
-                inputDocument.setField(contentFlagField, Boolean.TRUE);    
-            }
-
-            inputDocuments.add(inputDocument);
-        }
-        
-        addDocuments(inputDocuments);
-    }
-
-    private void addContentWithoutSingleLoading(Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
-        Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>(documents.size());
-        Map<String, IndexDocument<MailMessage>> toAdd = new HashMap<String, IndexDocument<MailMessage>>(documents.size());
-        Map<String, SolrDocument> loadedDocuments = new HashMap<String, SolrDocument>(documents.size());
-        
-        StringBuilder queryBuilder = new StringBuilder(128);
-        boolean first = true;
-        String uuidField = SolrMailField.UUID.solrName();
-        for (IndexDocument<MailMessage> document : documents) {
-            MailMessage mailMessage = document.getObject();
-            int accountId = mailMessage.getAccountId();
-            MailUUID uuid = new MailUUID(contextId, userId, accountId, mailMessage.getFolder(), mailMessage.getMailId());
-            
-            if (uuidField != null) {
-                if (first) {
-                    queryBuilder.append('(').append(uuidField).append(":\"").append(uuid.getUUID()).append("\")");
-                    first = false;
-                } else {
-                    queryBuilder.append(" OR ");
-                    queryBuilder.append('(').append(uuidField).append(":\"").append(uuid.getUUID()).append("\")");
-                }
-                
-                toAdd.put(uuid.getUUID(), document);
-            }            
-        }
-        
-        SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-        solrQuery.setStart(Integer.valueOf(0));
-        solrQuery.setRows(Integer.valueOf(documents.size()));   
-        QueryResponse queryResponse = query(solrQuery);
-        SolrDocumentList results = queryResponse.getResults();
-        if (uuidField != null) {
-            for (SolrDocument solrDocument : results) {
-                String uuid = (String) solrDocument.getFieldValue(uuidField);
-                loadedDocuments.put(uuid, solrDocument);
-            }
-        }
-        
-        for (String uuid : toAdd.keySet()) {
-            if (Thread.interrupted()) {
-                // Clears the thread's interrupted flag
-                throw new InterruptedException("Thread interrupted while adding mail contents.");
-            }
-            
-            IndexDocument<MailMessage> document = toAdd.get(uuid);
-            MailMessage message = document.getObject();
-            SolrDocument solrDocument = loadedDocuments.get(uuid);
-            SolrInputDocument inputDocument;
-            if (solrDocument == null) {
-                inputDocument = helper.inputDocumentFor(message, userId, contextId);
-            } else {
-                inputDocument = new SolrInputDocument();
-                for (Entry<String, Object> entry : solrDocument.entrySet()) {
-                    String name = entry.getKey();
-                    SolrInputField field = new SolrInputField(name);
-                    field.setValue(entry.getValue(), 1.0f);
-                    inputDocument.put(name, field);
-                }
-            }
-
-            if (message instanceof ContentAwareMailMessage) {
-                ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
-                String text = contentAwareMessage.getPrimaryContent();
-                if (null == text) {
-                    TextFinder textFinder = new TextFinder();
-                    text = textFinder.getText(message);
-                }
-                if (null != text) {
-                    String contentField = SolrMailField.CONTENT.solrName();
-                    if (contentField != null) {
-                        inputDocument.setField(contentField, text);
-                    }
-//                        Locale locale = detectLocale(text);
-                }
-            } else {
-                TextFinder textFinder = new TextFinder();
-                String text = textFinder.getText(message);
-                if (null != text) {
-                    String contentField = SolrMailField.CONTENT.solrName();
-                    if (contentField != null) {
-                        inputDocument.setField(contentField, text);
-                    }
-//                    Locale locale = detectLocale(text);
                 }
             }
             
@@ -406,13 +316,13 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void addAttachments(IndexDocument<MailMessage> document) throws OXException {
-        addContent(document);
+    public void addAttachments(IndexDocument<MailMessage> document, boolean full) throws OXException {
+        addContent(document, full);
     }
 
     @Override
-    public void addAttachments(Collection<IndexDocument<MailMessage>> documents) throws OXException, InterruptedException {
-        addContent(documents);
+    public void addAttachments(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException, InterruptedException {
+        addContent(documents, full);
     }
     
     @Override
@@ -427,10 +337,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         Set<SolrMailField> solrFields = convertFields(fields);     
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
-            if (Thread.interrupted()) {
-                // Clears the thread's interrupted flag
-                throw new InterruptedException("Thread interrupted while changing mail contents.");
-            }
             SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields); 
             inputDocuments.add(inputDocument);
         }
@@ -526,11 +432,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             indexResult.setResults(mails);
             return indexResult;
         }        
-    }
-
-    @Override
-    public TriggerType getTriggerType() {
-        return triggerType;
     }
     
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {

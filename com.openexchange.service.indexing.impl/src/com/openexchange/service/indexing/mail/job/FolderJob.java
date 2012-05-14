@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
@@ -72,8 +71,8 @@ import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailUtility;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -475,9 +474,7 @@ public final class FolderJob extends AbstractMailJob {
             /*
              * Specify fields
              */
-            final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-            // //fields.removeMailField(MailField.BODY); <--- Allow body!
-            fields.removeMailField(MailField.FULL);
+            MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
             final List<MailMessage> mails =
                 Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
             // Read primary content
@@ -522,10 +519,10 @@ public final class FolderJob extends AbstractMailJob {
                 indexAccess.addEnvelopeData(documents);
                 break;
             case BODY:
-                indexAccess.addContent(documents);
+                indexAccess.addContent(documents, true);
                 break;
             default:
-                indexAccess.addAttachments(documents);
+                indexAccess.addAttachments(documents, true);
                 break;
             }
             setTimestamp(fullName, System.currentTimeMillis());
@@ -540,10 +537,10 @@ public final class FolderJob extends AbstractMailJob {
                             indexAccess.addEnvelopeData(document);
                             break;
                         case BODY:
-                            indexAccess.addContent(document);
+                            indexAccess.addContent(document, true);
                             break;
                         default:
-                            indexAccess.addAttachments(document);
+                            indexAccess.addAttachments(document, true);
                             break;
                         }
                         if ((++count % 100) == 0) {

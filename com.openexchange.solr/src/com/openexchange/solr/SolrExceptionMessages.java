@@ -104,5 +104,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // The affected solr core %1$s is not started up yet. Please try again later.
 	public static final String CORE_NOT_STARTED_MSG = "The affected solr core %1$s is not started up yet. Please try again later.";
+
+	// The document with uuid %1$s could not be found.
+    public static final String DOCUMENT_NOT_FOUND_MSG = "The document with uuid %1$s could not be found.";
     
 }

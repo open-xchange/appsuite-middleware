@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
@@ -89,6 +90,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexAccessAdapter implements SolrMailConstants {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexAccessAdapter.class));
 
     private static final IndexAccessAdapter INSTANCE = new IndexAccessAdapter();
 
@@ -115,6 +118,23 @@ public final class IndexAccessAdapter implements SolrMailConstants {
      */
     public IndexingService getIndexingService() {
         return SmalServiceLookup.getServiceStatic(IndexingService.class);
+    }
+    
+    public IndexAccess<MailMessage> getIndexAccess(final Session session) throws OXException {
+        final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
+        return indexAccess;
+    }
+    
+    public void releaseIndexAccess(IndexAccess<MailMessage> indexAccess) {
+        if (indexAccess != null) {
+            final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+            try {
+                facade.releaseIndexAccess(indexAccess);
+            } catch (OXException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
     }
 
     /**
@@ -414,7 +434,7 @@ public final class IndexAccessAdapter implements SolrMailConstants {
         IndexAccess<MailMessage> indexAccess = null;
         try {
             indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(message, IndexDocument.Type.MAIL));
+            indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(message, IndexDocument.Type.MAIL), true);
         } finally {
             releaseAccess(facade, indexAccess);
         }

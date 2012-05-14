@@ -82,6 +82,7 @@
 	<requestHandler name="allSearch" class="solr.SearchHandler">
 		<lst name="defaults">
 			<str name="fl">*</str> <!-- Envelope Felder -->
+			<str name="df">full_name</str>
 			<str name="q.op">OR</str>
 		</lst>
 		
@@ -93,6 +94,7 @@
 	<requestHandler name="customSearch" class="solr.SearchHandler">
 		<lst name="defaults">
 			<str name="fl">*</str>
+<!-- 			<str name="df">full_name</str> -->
 			<str name="q.op">OR</str>
 		</lst>
 

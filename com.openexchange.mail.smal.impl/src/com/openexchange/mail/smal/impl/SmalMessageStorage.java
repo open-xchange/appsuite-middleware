@@ -58,10 +58,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.mail.SolrMailUtility;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -290,9 +291,16 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         final MailFields mfs = new MailFields(fields);
-        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
-            return messageStorage.getMessages(folder, mailIds, fields);
+        IndexAccess<MailMessage> indexAccess = null;
+        try {
+            indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+            if (!SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                return messageStorage.getMessages(folder, mailIds, fields);
+            }
+        } finally {
+            IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
         }
+
         try {
             /*
              * Obtain folder
@@ -367,10 +375,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     	if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
-        final MailFields mfs = new MailFields(fields);
-        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
-            return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+    	
+        final MailFields mfs = new MailFields(fields);        
+        IndexAccess<MailMessage> indexAccess = null;
+        try {
+            indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+            if (!SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            }
+        } finally {
+            IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
         }
+        
         try {
             /*
              * Obtain folder

@@ -369,12 +369,12 @@ public final class Processor implements SolrMailConstants {
             if (DEBUG) {
                 LOG.debug("Starting addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
                 final long st = System.currentTimeMillis();
-                indexAccess.addAttachments(documents);
+                indexAccess.addAttachments(documents, true);
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("Performed addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                     mailAccess));
             } else {
-                indexAccess.addAttachments(documents);
+                indexAccess.addAttachments(documents, true);
             }
         } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
             processingProgress.setProcessType(ProcessType.HEADERS_AND_CONTENT);
@@ -392,12 +392,12 @@ public final class Processor implements SolrMailConstants {
             if (DEBUG) {
                 LOG.debug("Starting addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
                 final long st = System.currentTimeMillis();
-                indexAccess.addContent(documents);
+                indexAccess.addContent(documents, true);
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("Performed addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                     mailAccess));
             } else {
-                indexAccess.addContent(documents);
+                indexAccess.addContent(documents, true);
             }
         } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
             processingProgress.setProcessType(ProcessType.HEADERS_ONLY);

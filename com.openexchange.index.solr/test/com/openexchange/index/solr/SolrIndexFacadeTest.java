@@ -101,7 +101,7 @@ public class SolrIndexFacadeTest extends TestCase {
             final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 999, 1);
             final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
             final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
-            indexAccess.addContent(document);
+            indexAccess.addContent(document, true);
             final FromTerm fromTerm = new FromTerm("Alice");
             final Map<String, Object> params = new HashMap<String, Object>();
 //            params.put("accountId", 0);

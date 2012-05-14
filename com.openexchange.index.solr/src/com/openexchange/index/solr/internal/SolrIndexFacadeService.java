@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.TriggerType;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.session.Session;
@@ -182,12 +181,11 @@ public class SolrIndexFacadeService implements IndexFacadeService {
     }
 
     private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrCoreIdentifier identifier) throws OXException {
-        // FIXME: Use right trigger type
         final int module = identifier.getModule();
         switch(module) {
         
         case Types.EMAIL:
-            return new MailSolrIndexAccess(identifier, TriggerType.USER_INTERACTION);
+            return new MailSolrIndexAccess(identifier);
             
         default:
             throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
