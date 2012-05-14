@@ -57,11 +57,9 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.solr.mail.SolrMailUtility;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -85,6 +83,7 @@ import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.job.AddByIDsJob;
 import com.openexchange.service.indexing.mail.job.ChangeByIDsJob;
 import com.openexchange.service.indexing.mail.job.ChangeByMessagesJob;
+import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.service.indexing.mail.job.RemoveByIDsJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
@@ -97,8 +96,6 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -602,6 +599,25 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
+        if (fast) {
+            messageStorage.moveMessages(sourceFolder, destFolder, mailIds, true);
+            /*
+             * Remover job
+             */
+            final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
+            removerJob.setMailIds(asList(mailIds));
+            removerJob.setPriority(9);
+            submitJob(removerJob);
+            /*
+             * Schedule folder job
+             */
+            final FolderJob folderJob = new FolderJob(destFolder, createJobInfo());
+            submitJob(folderJob);
+            /*
+             * Return depending on "fast" parameter
+             */
+            return new String[0];
+        }
         final String[] newIds = messageStorage.moveMessages(sourceFolder, destFolder, mailIds, false);
         /*
          * Adder job
@@ -614,13 +630,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
          * Remover job
          */
         final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
-        adderJob.setMailIds(asList(mailIds));
-        adderJob.setPriority(9);
+        removerJob.setMailIds(asList(mailIds));
+        removerJob.setPriority(9);
         submitJob(removerJob);
         /*
          * Return depending on "fast" parameter
          */
-        return fast ? new String[0] : newIds;
+        return newIds;
     }
 
     @Override
