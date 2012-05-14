@@ -50,17 +50,11 @@
 package com.openexchange.index.solr.osgi;
 
 import org.apache.commons.logging.Log;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.junit.runner.JUnitCore;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.solr.SolrIndexFacadeTest;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
@@ -78,14 +72,14 @@ public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
     
-    private static final boolean REGISTER_TEST = true;
+//    private static final boolean REGISTER_TEST = true;
     
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            LanguageDetectionService.class, SolrAccessService.class };
+            SolrAccessService.class };
     }
 
     @Override
@@ -97,9 +91,9 @@ public class SolrIndexActivator extends HousekeepingActivator {
         solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
-        if (REGISTER_TEST) {
-        	registerService(CommandProvider.class, new UtilCommandProvider());
-        }
+//        if (REGISTER_TEST) {
+//        	registerService(CommandProvider.class, new UtilCommandProvider());
+//        }
         
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
@@ -114,22 +108,22 @@ public class SolrIndexActivator extends HousekeepingActivator {
          */
     }
     
-    public class UtilCommandProvider implements CommandProvider {
-
-        public UtilCommandProvider() {
-            super();
-        }
-
-        @Override
-		public String getHelp() {
-            final StringBuilder help = new StringBuilder();
-            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
-            return help.toString();
-        }
-
-        public void _startTest(final CommandInterpreter commandInterpreter) {
-            final JUnitCore jUnit = new JUnitCore();
-            jUnit.run(SolrIndexFacadeTest.class);
-        }
-    }
+//    public class UtilCommandProvider implements CommandProvider {
+//
+//        public UtilCommandProvider() {
+//            super();
+//        }
+//
+//        @Override
+//		public String getHelp() {
+//            final StringBuilder help = new StringBuilder();
+//            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
+//            return help.toString();
+//        }
+//
+//        public void _startTest(final CommandInterpreter commandInterpreter) {
+//            final JUnitCore jUnit = new JUnitCore();
+//            jUnit.run(SolrIndexFacadeTest.class);
+//        }
+//    }
 }

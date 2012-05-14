@@ -54,9 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
@@ -70,7 +68,6 @@ import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailConstants;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -85,8 +82,6 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link IndexAccessAdapter}
@@ -550,21 +545,21 @@ public final class IndexAccessAdapter implements SolrMailConstants {
     // }
     // }
 
-    private Locale getUserLocale(final Session session) {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser().getLocale();
-        }
-        final UserService userService = SmalServiceLookup.getServiceStatic(UserService.class);
-        final ContextService contextService = SmalServiceLookup.getServiceStatic(ContextService.class);
-        if (null == userService || null == contextService) {
-            return LanguageDetectionService.DEFAULT_LOCALE;
-        }
-        try {
-            return userService.getUser(session.getUserId(), contextService.getContext(session.getContextId())).getLocale();
-        } catch (final OXException e) {
-            return LanguageDetectionService.DEFAULT_LOCALE;
-        }
-    }
+//    private Locale getUserLocale(final Session session) {
+//        if (session instanceof ServerSession) {
+//            return ((ServerSession) session).getUser().getLocale();
+//        }
+//        final UserService userService = SmalServiceLookup.getServiceStatic(UserService.class);
+//        final ContextService contextService = SmalServiceLookup.getServiceStatic(ContextService.class);
+//        if (null == userService || null == contextService) {
+//            return LanguageDetectionService.DEFAULT_LOCALE;
+//        }
+//        try {
+//            return userService.getUser(session.getUserId(), contextService.getContext(session.getContextId())).getLocale();
+//        } catch (final OXException e) {
+//            return LanguageDetectionService.DEFAULT_LOCALE;
+//        }
+//    }
 
     private static final class SimpleSearchTermVisitor extends AbstractSearchTermVisitor {
 
