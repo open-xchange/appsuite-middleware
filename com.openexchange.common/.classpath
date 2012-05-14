@@ -19,7 +19,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-slide-webdavlib-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/json.jar" sourcepath="source/json-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/libidn-1.9.jar" sourcepath="lib/libidn-1.9.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.18-bin.jar" sourcepath="source/mysql-connector-java-5.1.18-source.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.20-bin.jar" sourcepath="source/mysql-connector-java-5.1.20-source.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
