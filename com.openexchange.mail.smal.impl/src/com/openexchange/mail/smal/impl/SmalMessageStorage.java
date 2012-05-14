@@ -147,8 +147,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      */
     protected static <V> MailResult<V> takeNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
         try {
-            final Future<MailResult<V>> future = completionService.take();
-            return getFrom(future);
+            return getFrom(completionService.take());
         } catch (final InterruptedException e) {
             // Keep interrupted state
             Thread.currentThread().interrupt();
@@ -165,10 +164,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      */
     protected static <V> MailResult<V> tryTakeNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
         final Future<MailResult<V>> future = completionService.poll();
-        if (null == future) {
-            return null;
-        }
-        return getFrom(future);
+        return null == future ? null : getFrom(future);
     }
 
     /**
@@ -188,10 +184,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
-        if (null == future) {
-            return null;
-        }
-        return getFrom(future);
+        return null == future ? null : getFrom(future);
     }
 
     /**
