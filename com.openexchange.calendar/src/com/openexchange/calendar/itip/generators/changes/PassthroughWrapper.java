@@ -63,7 +63,7 @@ public class PassthroughWrapper implements TypeWrapper {
     @Override
     public String none(final Object argument) {
         if (argument != null) {
-            return argument.toString().trim();
+            return argument.toString();
         }
         return "";
     }
