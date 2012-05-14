@@ -56,15 +56,17 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.search.FromTerm;
 
 
 /**
@@ -96,10 +98,14 @@ public class SolrIndexFacadeTest extends TestCase {
     public void testAddAndGetMessage() throws Exception {
         try {
             final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
-            final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 3, 1);
+            final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 999, 1);
+            final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
+            final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
+            indexAccess.addContent(document);
+            final FromTerm fromTerm = new FromTerm("Alice");
             final Map<String, Object> params = new HashMap<String, Object>();
-            params.put("accountId", 0);
-            final QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(Type.MAIL).setFolder("INBOX").build();
+//            params.put("accountId", 0);
+            final QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.CUSTOM).setType(Type.MAIL).setSearchTerm(fromTerm).build();
             final IndexResult<MailMessage> result = indexAccess.query(qp);
             facade.releaseIndexAccess(indexAccess);
         } catch (final Exception e) {
@@ -107,8 +113,8 @@ public class SolrIndexFacadeTest extends TestCase {
             e.printStackTrace();
         }
         
-        final SolrAccessService sas = Services.getService(SolrAccessService.class);
-        sas.optimize(new SolrCoreIdentifier(1, 3, Types.EMAIL));
+//        final SolrAccessService sas = Services.getService(SolrAccessService.class);
+//        sas.optimize(new SolrCoreIdentifier(1, 3, Types.EMAIL));
 //        final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
 //        final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
 //        indexAccess.addContent(document);

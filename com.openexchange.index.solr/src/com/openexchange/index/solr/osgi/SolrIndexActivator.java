@@ -50,9 +50,14 @@
 package com.openexchange.index.solr.osgi;
 
 import org.apache.commons.logging.Log;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import org.junit.runner.JUnitCore;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.SolrIndexFacadeTest;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.langdetect.LanguageDetectionService;
@@ -73,6 +78,8 @@ public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
     
+    private static final boolean REGISTER_TEST = true;
+    
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -90,7 +97,10 @@ public class SolrIndexActivator extends HousekeepingActivator {
         solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
-//        registerService(CommandProvider.class, new UtilCommandProvider());
+        if (REGISTER_TEST) {
+        	registerService(CommandProvider.class, new UtilCommandProvider());
+        }
+        
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
@@ -103,21 +113,23 @@ public class SolrIndexActivator extends HousekeepingActivator {
          * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
          */
     }
-//    public class UtilCommandProvider implements CommandProvider {
-//
-//        public UtilCommandProvider() {
-//            super();
-//        }
-//
-//        public String getHelp() {
-//            final StringBuilder help = new StringBuilder();
-//            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
-//            return help.toString();
-//        }
-//
-//        public void _startTest(final CommandInterpreter commandInterpreter) {
-//            final JUnitCore jUnit = new JUnitCore();
-//            jUnit.run(SolrIndexFacadeTest.class);
-//        }
-//    }
+    
+    public class UtilCommandProvider implements CommandProvider {
+
+        public UtilCommandProvider() {
+            super();
+        }
+
+        @Override
+		public String getHelp() {
+            final StringBuilder help = new StringBuilder();
+            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
+            return help.toString();
+        }
+
+        public void _startTest(final CommandInterpreter commandInterpreter) {
+            final JUnitCore jUnit = new JUnitCore();
+            jUnit.run(SolrIndexFacadeTest.class);
+        }
+    }
 }

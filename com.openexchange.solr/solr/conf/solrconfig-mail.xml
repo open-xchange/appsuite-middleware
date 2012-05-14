@@ -68,23 +68,48 @@
 		<lst name="defaults">
 			<str name="fl">*</str> <!-- Envelope Felder -->
 		</lst>
+		
+		<arr name="components">
+			<str>query</str>
+		</arr>
 	</requestHandler>
 
 	<requestHandler name="allSearch" class="solr.SearchHandler">
 		<lst name="invariants">
 			<str name="df">full_name</str>
+			<str name="q.op">OR</str>
 		</lst>
 		<lst name="defaults">
 			<str name="fl">*</str> <!-- Envelope Felder -->
 		</lst>
+		
+		<arr name="components">
+			<str>query</str>
+		</arr>
 	</requestHandler>
 
 	<requestHandler name="customSearch" class="solr.SearchHandler">
+		<lst name="invariants">
+			<str name="df">full_name</str>
+			<str name="q.op">OR</str>
+		</lst>
 		<lst name="defaults">
 			<str name="fl">*</str>
 		</lst>
+
+		<!-- Use this only if "components" is not specified to use the defaults -->
+		<!-- 
 		<arr name="first-components">
 			<str>queryModifier</str>
+		</arr>
+		-->
+		<arr name="components">
+			<str>queryModifier</str>
+			<str>query</str>
+			<!-- Uncomment for debugging purposes only -->
+			<!-- 
+			<str>debug</str>
+			-->
 		</arr>
 	</requestHandler>
 
