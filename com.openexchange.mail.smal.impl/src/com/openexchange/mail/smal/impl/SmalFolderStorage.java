@@ -74,6 +74,8 @@ import com.openexchange.session.Session;
  */
 public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
 
+    private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
+
     private final IMailFolderStorage folderStorage;
 
     /**
@@ -88,7 +90,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public boolean exists(final String fullName) throws OXException {
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return true;
         }
         final boolean exists = folderStorage.exists(fullName);
@@ -229,7 +231,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public MailFolder getRootFolder() throws OXException {
-        return folderStorage.getFolder(MailFolder.DEFAULT_FOLDER_ID);
+        return folderStorage.getFolder(DEFAULT_FOLDER_ID);
     }
 
     @Override
