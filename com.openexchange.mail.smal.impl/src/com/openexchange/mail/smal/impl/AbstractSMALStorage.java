@@ -192,7 +192,7 @@ public abstract class AbstractSMALStorage {
     /**
      * Gets the <tt>IndexFacadeService</tt> service.
      * 
-     * @return The <tt>IndexFacadeService</tt> service
+     * @return The <tt>IndexFacadeService</tt> service or <code>null</code> if absent or disabled via configuration 
      * @throws OXException If user configuration cannot be read
      */
     protected IndexFacadeService getIndexFacadeService() throws OXException {
