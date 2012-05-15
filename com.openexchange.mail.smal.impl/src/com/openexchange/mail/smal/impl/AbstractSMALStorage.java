@@ -199,9 +199,8 @@ public abstract class AbstractSMALStorage {
         if (isEmpty(host) || isEmpty(blacklist)) {
             return false;
         }
-        final String[] strings = SPLIT_CSV.split(blacklist, 0);
-        for (final String string : strings) {
-            if (host.equals(string)) {
+        for (final String blacklistedHost : SPLIT_CSV.split(blacklist, 0)) {
+            if (host.equals(blacklistedHost)) {
                 return true;
             }
         }
