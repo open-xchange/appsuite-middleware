@@ -228,10 +228,7 @@ public abstract class AbstractSMALStorage {
      */
     protected IndexFacadeService getIndexFacadeService() throws OXException {
         final IndexFacadeService facadeService = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
-        if (null == facadeService) {
-            return null;
-        }
-        return isBlacklisted() ? null : facadeService;
+        return null == facadeService ? null : (isBlacklisted() ? null : facadeService);
     }
 
     /**
