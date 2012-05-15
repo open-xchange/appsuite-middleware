@@ -54,8 +54,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
@@ -64,6 +69,10 @@ import net.oauth.OAuthProblemException;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
+import net.oauth.server.OAuthServlet;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONException;
+import org.json.JSONTokener;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
@@ -157,6 +166,15 @@ public class DatabaseOAuthProvider {
     /**
      * Loads consumers from database
      * 
+     * @throws OXException If loading consumers fails
+     */
+    public void loadConsumers() throws OXException {
+        loadConsumers(OAuthProviderServiceLookup.getService(DatabaseService.class));
+    }
+
+    /**
+     * Loads consumers from database
+     * 
      * @param databaseService The database service
      * @throws OXException If loading consumers fails
      */
@@ -165,9 +183,10 @@ public class DatabaseOAuthProvider {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT key, secret, callbackUrl, name FROM oauthServiceProvider WHERE providerId = ?");
+            stmt = con.prepareStatement("SELECT key, secret, callbackUrl, name, id FROM oauthConsumer WHERE providerId = ?");
             stmt.setInt(1, DEFAULT);
             rs = stmt.executeQuery();
+            consumers.clear();
             while (rs.next()) {
                 String callbackUrl = rs.getString(3);
                 if (rs.wasNull()) {
@@ -176,11 +195,28 @@ public class DatabaseOAuthProvider {
                 final String consumerKey = rs.getString(1);
                 final OAuthConsumer consumer = new OAuthConsumer(callbackUrl, consumerKey, rs.getString(2), provider);
                 consumer.setProperty("name", consumerKey);
+                consumer.setProperty("id", Integer.valueOf(rs.getInt(5)));
                 final String name = rs.getString(4);
                 if (!rs.wasNull()) {
                     consumer.setProperty("description", name);
                 }
                 consumers.put(consumerKey, consumer);
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+            for (final OAuthConsumer consumer : consumers.values()) {
+                stmt = con.prepareStatement("SELECT name, value FROM oauthConsumerProperty WHERE id = ?");
+                final int id = ((Integer) consumer.getProperty("id")).intValue();
+                stmt.setInt(1, id);
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    try {
+                        consumer.setProperty(rs.getString(1), new JSONTokener(rs.getString(2)).nextValue());
+                    } catch (final JSONException e) {
+                        consumer.setProperty(rs.getString(1), rs.getString(2));
+                    }
+                }
+                consumer.setProperty("name", consumer.consumerKey);
+                consumer.setProperty("id", Integer.valueOf(id));
             }
         } catch (final SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -236,18 +272,100 @@ public class DatabaseOAuthProvider {
 
     /**
      * Set the access token
+     * 
+     * @throws OXException 
      */
-    public synchronized void markAsAuthorized(final OAuthAccessor accessor, final String userId) throws OAuthException {
+    public void markAsAuthorized(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
+        // Set properties
+        accessor.setProperty("context", Integer.valueOf(contextId));
+        accessor.setProperty("user", Integer.valueOf(userId));
+        accessor.setProperty("authorized", Boolean.TRUE);
+        // Generate map for SQL INSERT
+        final Map<String, Object> m = new HashMap<String, Object>(3);
+        m.put("context", Integer.valueOf(contextId));
+        m.put("user", Integer.valueOf(userId));
+        m.put("authorized", Boolean.TRUE);
+        // Perform SQL INSERT
+        final DatabaseService databaseService = OAuthProviderServiceLookup.getService(DatabaseService.class);
+        final Connection con = databaseService.getWritable(anyContextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO oauthAccessorProperty (cid,user,consumerId,name,value) VALUES (?,?,?,?,?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, ((Integer) accessor.consumer.getProperty("id")).intValue());
+
+            for (final Map.Entry<String, Object> entry : m.entrySet()) {
+                stmt.setString(4, entry.getKey());
+                stmt.setString(5, entry.getValue().toString());
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(anyContextId, con);
+        }
+        // Update token in local cache
+        tokens.put(accessor, PRESENT);
+    }
+
+    /**
+     * Generate a fresh request token and secret for a consumer.
+     * 
+     * @throws OAuthException
+     */
+    public void generateRequestToken(final OAuthAccessor accessor) throws OAuthException {
+        // Generate oauth_token and oauth_secret
+        final String consumerKey = accessor.consumer.consumerKey;
+        // Generate token and secret based on consumerKey
+
+        // For now use md5 of name + current time as token
+        final String tokenData = consumerKey + System.nanoTime();
+        final String token = DigestUtils.md5Hex(tokenData);
+        // For now use md5 of name + current time + token as secret
+        final String secretData = consumerKey + System.nanoTime() + token;
+        final String secret = DigestUtils.md5Hex(secretData);
+
+        accessor.requestToken = token;
+        accessor.tokenSecret = secret;
+        accessor.accessToken = null;
+
+        // Add to the local cache
+        tokens.put(accessor, PRESENT);
+
+    }
+
+    /**
+     * Generate a fresh request token and secret for a consumer.
+     * 
+     * @throws OAuthException
+     */
+    public void generateAccessToken(final OAuthAccessor accessor) throws OAuthException {
+
+        // generate oauth_token and oauth_secret
+        final String consumer_key = accessor.consumer.consumerKey;
+        // generate token and secret based on consumer_key
+
+        // for now use md5 of name + current time as token
+        final String token_data = consumer_key + System.nanoTime();
+        final String token = DigestUtils.md5Hex(token_data);
         // first remove the accessor from cache
         tokens.remove(accessor);
 
-        accessor.setProperty("user", userId);
-        accessor.setProperty("authorized", Boolean.TRUE);
-        
-        // TODO: Update in database, too
+        accessor.requestToken = null;
+        accessor.accessToken = token;
 
         // update token in local cache
         tokens.put(accessor, PRESENT);
+    }
+
+    public static void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
+        String realm = (request.isSecure()) ? "https://" : "http://";
+        realm += request.getLocalName();
+        OAuthServlet.handleException(response, e, realm, sendBody);
     }
 
 }

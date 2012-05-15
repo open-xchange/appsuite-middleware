@@ -16,9 +16,16 @@ CREATE TABLE `oauthConsumer` (
   `secret` varchar(255) NOT NULL,
   `callbackUrl` varchar(255) DEFAULT NULL,
   `name` varchar(127) DEFAULT NULL,
-  PRIMARY KEY  (`id`,`providerId`),
+  PRIMARY KEY  (`id`),
   KEY `providerIndex` (`providerId`),
   KEY `keyIndex` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauthConsumerProperty` (
+  `id` int(10) unsigned NOT NULL,
+  `name` varchar(32) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oauthAccessor` (
@@ -29,7 +36,15 @@ CREATE TABLE `oauthAccessor` (
   `requestToken` varchar(255) NOT NULL,
   `accessToken` varchar(255) NOT NULL,
   `tokenSecret` varchar(255) NOT NULL,
-  PRIMARY KEY  (`cid`,`user`,`consumerId`,`providerId`),
-  KEY `consumerIndex` (`cid`,`consumerId`,`providerId`),
-  KEY `providerIndex` (`cid`,`providerId`),
+  PRIMARY KEY  (`cid`,`user`,`consumerId`),
+  KEY `consumerIndex` (`cid`,`user`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauthAccessorProperty` (
+  `cid` int(10) unsigned NOT NULL,
+  `user` int(10) unsigned NOT NULL,
+  `consumerId` int(10) unsigned NOT NULL,
+  `name` varchar(32) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY  (`cid`,`user`,`consumerId`,`providerId`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
