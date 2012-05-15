@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.impl;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 
@@ -81,7 +82,11 @@ public final class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void addJob(final IndexingJob job) throws OXException {
-        serviceInit.getSender().sendJobMessage(job);
+        final IndexingQueueSender sender = serviceInit.getSender();
+        if (null == sender) {
+            throw MQExceptionCodes.QUEUE_NOT_FOUND.create(IndexingService.INDEXING_QUEUE);
+        }
+        sender.sendJobMessage(job);
     }
 
 }

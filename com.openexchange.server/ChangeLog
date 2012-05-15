@@ -1,3 +1,7 @@
+* 2012-05-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22128: Fall-back if user configuration cannot be loaded
+
 * 2012-05-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 22113: Do not return a database connection twice and database pooling now throws an exception in those cases.
