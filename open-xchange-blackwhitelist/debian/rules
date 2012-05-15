@@ -3,38 +3,37 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-blackwhitelist
-guiroot=$(CURDIR)/debian/open-xchange-blackwhitelist-gui
+pkgname=open-xchange-blackwhitelist
+oxroot=$(CURDIR)/debian/$(pkgname)
+guiroot=$(CURDIR)/debian/$(pkgname)-gui
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	# Nothing to do to configure the package
 	touch configure-stamp
 
 build: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
-	ant -Dprefix=$(instprefix) compile
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	ant clean
-	dh_clean 
+	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
+	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
-	ant -Ddestdir=$(oxroot) -Dprefix=$(instprefix) -Dguiprefix=/var/www/ox6 install 
-	ant -Ddestdir=$(guiroot) -Dhtdoc=/var/www/ox6 installGui
-	
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(oxroot)  -DpackageName=$(pkgname) -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(guiroot) -DpackageName=$(pkgname) -DbuildTarget=installGui -f build/build.xml build
+
 # Build architecture-independent files here.
 binary-indep: build install
 # We have nothing to do by default.
@@ -43,7 +42,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs ChangeLog
+	dh_installchangelogs
 	dh_installdocs
 	dh_installexamples
 #	dh_install
@@ -60,7 +59,7 @@ binary-arch: build install
 	dh_link
 	dh_strip
 	dh_compress
-	dh_fixperms -X opt/open-xchange/etc
+	dh_fixperms
 #	dh_perl
 #	dh_python
 #	dh_makeshlibs
