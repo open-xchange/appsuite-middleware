@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.server;
+package com.openexchange.oauth.provider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -133,7 +133,7 @@ public class StaticOAuthProvider {
     /**
      * Get the access token and token secret for the given oauth_token.
      */
-    public static synchronized OAuthAccessor getAccessor(final OAuthMessage requestMessage) throws IOException, OAuthProblemException {
+    public static OAuthAccessor getAccessor(final OAuthMessage requestMessage) throws IOException, OAuthProblemException {
 
         // try to load from local cache if not throw exception
         final String consumer_token = requestMessage.getToken();

@@ -47,55 +47,60 @@
  *
  */
 
-package com.openexchange.oauth.server;
+package com.openexchange.oauth.provider.servlets;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthMessage;
+import net.oauth.example.provider.core.SampleOAuthProvider;
+import net.oauth.server.OAuthServlet;
 
 /**
- * {@link OAuthProviderServiceLookup}
+ * A text servlet to echo incoming "echo" param along with userId
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthProviderServiceLookup {
-
-    /**
-     * Initializes a new {@link OAuthProviderServiceLookup}.
-     */
-    private OAuthProviderServiceLookup() {
-        super();
+public class EchoServlet extends HttpServlet {
+    
+    @Override
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException
+    {
+        doGet(request, response);
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
+    @Override
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException, ServletException {
+        try{
+            final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
+            final OAuthAccessor accessor = SampleOAuthProvider.getAccessor(requestMessage);
+            SampleOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
+            final String userId = (String) accessor.getProperty("user");
+            
+            response.setContentType("text/plain");
+            final PrintWriter out = response.getWriter();
+            out.println("[Your UserId:" + userId + "]");
+            for (final Object item : request.getParameterMap().entrySet()) {
+                final Map.Entry parameter = (Map.Entry) item;
+                final String[] values = (String[]) parameter.getValue();
+                for (final String value : values) {
+                    out.println(parameter.getKey() + ": " + value);
+                }
+            }
+            out.close();
+            
+        } catch (final Exception e){
+            SampleOAuthProvider.handleException(e, request, response, false);
+        }
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
+    private static final long serialVersionUID = 1L;
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,42 @@
  *
  */
 
-package com.openexchange.oauth.server.servlets;
+package com.openexchange.oauth.provider.osgi;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthMessage;
-import net.oauth.example.provider.core.SampleOAuthProvider;
-import net.oauth.server.OAuthServlet;
+import com.openexchange.oauth.provider.OAuthProviderServiceLookup;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * A text servlet to echo incoming "echo" param along with userId
+ * {@link OAuthProviderActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class EchoServlet extends HttpServlet {
-    
-    @Override
-    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException
-    {
-        doGet(request, response);
+public final class OAuthProviderActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link OAuthProviderActivator}.
+     */
+    public OAuthProviderActivator() {
+        super();
     }
 
     @Override
-    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
-        try{
-            final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-            final OAuthAccessor accessor = SampleOAuthProvider.getAccessor(requestMessage);
-            SampleOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
-            final String userId = (String) accessor.getProperty("user");
-            
-            response.setContentType("text/plain");
-            final PrintWriter out = response.getWriter();
-            out.println("[Your UserId:" + userId + "]");
-            for (final Object item : request.getParameterMap().entrySet()) {
-                final Map.Entry parameter = (Map.Entry) item;
-                final String[] values = (String[]) parameter.getValue();
-                for (final String value : values) {
-                    out.println(parameter.getKey() + ": " + value);
-                }
-            }
-            out.close();
-            
-        } catch (final Exception e){
-            SampleOAuthProvider.handleException(e, request, response, false);
-        }
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void startBundle() throws Exception {
+        OAuthProviderServiceLookup.set(this);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        OAuthProviderServiceLookup.set(null);
+        super.stopBundle();
+    }
 
 }

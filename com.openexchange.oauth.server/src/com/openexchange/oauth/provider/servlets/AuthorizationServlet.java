@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.server.servlets;
+package com.openexchange.oauth.provider.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
