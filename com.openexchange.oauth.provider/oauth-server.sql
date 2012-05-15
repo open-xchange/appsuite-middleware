@@ -14,8 +14,8 @@ CREATE TABLE `oauthConsumer` (
   `providerId` int(10) unsigned NOT NULL,
   `key` varchar(255) NOT NULL,
   `secret` varchar(255) NOT NULL,
-  `name` varchar(127) DEFAULT NULL,
   `callbackUrl` varchar(255) DEFAULT NULL,
+  `name` varchar(127) DEFAULT NULL,
   PRIMARY KEY  (`id`,`providerId`),
   KEY `providerIndex` (`providerId`),
   KEY `keyIndex` (`key`)

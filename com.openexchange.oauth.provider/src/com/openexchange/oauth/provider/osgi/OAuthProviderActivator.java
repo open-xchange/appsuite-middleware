@@ -49,13 +49,13 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import com.openexchange.database.DatabaseService;
 import com.openexchange.oauth.provider.OAuthProviderServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
 
-
 /**
- * {@link OAuthProviderActivator}
- *
+ * {@link OAuthProviderActivator} - The activator fir OAuth provider bundle.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthProviderActivator extends HousekeepingActivator {
@@ -69,10 +69,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] { DatabaseService.class };
     }
-
 
     @Override
     protected void startBundle() throws Exception {
