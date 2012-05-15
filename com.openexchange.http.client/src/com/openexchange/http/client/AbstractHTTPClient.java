@@ -1,28 +1,16 @@
-package com.openexchange.oauth.impl;
+package com.openexchange.http.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.http.client.HTTPClient;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthHTTPClientFactory;
-import com.openexchange.oauth.httpclient.OAuthHTTPClient;
 
-public class OAuthHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
-
+public abstract class AbstractHTTPClient {
+	
 	protected Map<Class<?>, List<HTTPResponseProcessor>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor>>();
-
-	@Override
-	public HTTPClient create(OAuthAccount account, API api, String apiKey, String secret) throws OXException {
-		OAuthHTTPClient client = new OAuthHTTPClient(account, api, apiKey, secret);
-		client.setProcessors(processors);
-		return client;
-	}
+	
 	
 	public void registerProcessor(HTTPResponseProcessor processor) {
 		Class<?>[] types = processor.getTypes();
@@ -31,7 +19,10 @@ public class OAuthHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 			list = new ArrayList<HTTPResponseProcessor>();
 			processors.put(types[0], list);
 		}
+		
 		list.add(processor);
+		
+		
 	}
 
 	public void forgetProcessor(HTTPResponseProcessor processor) {
@@ -44,5 +35,9 @@ public class OAuthHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 		list.remove(processor);
 		
 	}
-
+	
+	public void setProcessors(
+			Map<Class<?>, List<HTTPResponseProcessor>> processors) {
+		this.processors = processors;
+	}
 }

@@ -10,11 +10,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
 
-public class HttpOauthRequest implements HTTPRequest {
+public class OAuthHTTPRequest implements HTTPRequest {
 
 	private OAuthRequest delegate;
 
-	public HttpOauthRequest(OAuthRequest req) {
+	public OAuthHTTPRequest(OAuthRequest req) {
 		delegate = req;
 	}
 

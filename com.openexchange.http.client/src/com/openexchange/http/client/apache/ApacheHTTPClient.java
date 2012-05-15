@@ -14,14 +14,14 @@ import org.apache.commons.httpclient.HttpMethodBase;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.http.client.AbstractHTTPClient;
 import com.openexchange.http.client.HTTPClient;
 import com.openexchange.http.client.builder.HTTPRequestBuilder;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
-public class ApacheHTTPClient implements HTTPClient {
+public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 	
-	private Map<Class<?>, List<HTTPResponseProcessor>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor>>();
 	private ManagedFileManagement fileManager;
 	
 	public ApacheHTTPClient(ManagedFileManagement fileManager) {
@@ -83,28 +83,6 @@ public class ApacheHTTPClient implements HTTPClient {
 		return new ApacheClientRequestBuilder(fileManager, this);
 	}
 
-	public void registerProcessor(HTTPResponseProcessor processor) {
-		Class<?>[] types = processor.getTypes();
-		List<HTTPResponseProcessor> list = processors.get(types[0]);
-		if (list == null) {
-			list = new ArrayList<HTTPResponseProcessor>();
-			processors.put(types[0], list);
-		}
-		
-		list.add(processor);
-		
-		
-	}
-
-	public void forgetProcessor(HTTPResponseProcessor processor) {
-		Class<?>[] types = processor.getTypes();
-		List<HTTPResponseProcessor> list = processors.get(types[0]);
-		if (list == null) {
-			return;
-		}
-		
-		list.remove(processor);
-		
-	}
+	
 
 }

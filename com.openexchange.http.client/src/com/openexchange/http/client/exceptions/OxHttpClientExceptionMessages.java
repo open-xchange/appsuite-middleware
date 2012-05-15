@@ -7,4 +7,5 @@ public class OxHttpClientExceptionMessages implements LocalizableStrings {
 	public static String JSON_ERROR_MSG = "Parsing this JSON did not work: %1";
 	public static String SAX_ERROR_MSG = "Parsing this XML with SAX did not work: %1";
 	public static String CATCH_ALL_MSG = "Some generic exception was thrown: %1";
+	public static String IO_ERROR_MSG = "An IO error occurred: %1";
 }

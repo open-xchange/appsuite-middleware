@@ -17,12 +17,13 @@ public class HttpOauthResponse implements HTTPResponse {
 
 	@Override
 	public <R> R getPayload(Class<R> klass) throws OXException {
-		return (R) delegate.getBody();
+		return (R) delegate.getBody(); // TODO: Funky
 	}
 
 	@Override
 	public Map<String, String> getCookies() {
-		return delegate.getHeaders(); //MAYBE?
+		throw new UnsupportedOperationException("Implement me ;)");
+		//return delegate.getHeaders(); //MAYBE?
 	}
 
 	@Override
