@@ -86,7 +86,7 @@ public class SampleOAuthProvider {
 
     private static Properties consumerProperties = null;
 
-    public static synchronized void loadConsumers() throws IOException {
+    public static synchronized void loadConsumers() {
         Properties consumerProperties = SampleOAuthProvider.consumerProperties;
         if (null == consumerProperties) {
             consumerProperties = OAuthProviderServiceLookup.getService(ConfigurationService.class).getFile("oauth-provider.properties");
@@ -94,7 +94,7 @@ public class SampleOAuthProvider {
         }
 
         // for each entry in the properties file create an OAuthConsumer
-        for (final Map.Entry prop : consumerProperties.entrySet()) {
+        for (final Map.Entry<Object, Object> prop : consumerProperties.entrySet()) {
             final String consumer_key = (String) prop.getKey();
             // make sure it's key not additional properties
             if (!consumer_key.contains(".")) {
