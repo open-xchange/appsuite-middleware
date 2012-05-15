@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
@@ -65,6 +64,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -284,6 +284,7 @@ public class CarddavPerformer implements SessionHolder {
             webdavRequest.setUrlPrefix("/carddav/");
             final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
+            sess.setParameter("user-agent", req.getHeader("user-agent"));
             session.set(sess);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Executing " + action);

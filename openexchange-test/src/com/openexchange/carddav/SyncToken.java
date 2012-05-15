@@ -47,30 +47,45 @@
  *
  */
 
-package com.openexchange.carddav.tests;
+package com.openexchange.carddav;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 
 /**
- * {@link CardDAVTestSuite} - Testsuite for the CardDAV interface.
+ * {@link SyncToken} - Holds the sync token
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CardDAVTestSuite {
+public class SyncToken {
+	
+	private String token;
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(CurrentUserPrincipalTest.class);
-        suite.addTestSuite(OptionsTest.class);
-        suite.addTestSuite(CollectionsTest.class);
-        suite.addTestSuite(PrincipalPropertiesTest.class);
-        suite.addTestSuite(AddressbookPropertiesTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
-        suite.addTestSuite(DeleteTest.class);
-        suite.addTestSuite(GroupTest.class);
-        suite.addTestSuite(MoveTest.class);
-        return suite;
-    }
+	public SyncToken() {
+		this(null);
+	}
+
+	public SyncToken(String token) {
+		super();
+		this.token = token;		
+	}
+	
+	public void update(ReportInfo reportInfo) {
+		if (null != reportInfo) {
+						
+		}
+	}
+
+	/**
+	 * @return the token
+	 */
+	public String getToken() {
+		return token;
+	}
+
+	/**
+	 * @param token the token to set
+	 */
+	public void setToken(String token) {
+		this.token = token;
+	}
 }

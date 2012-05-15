@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -81,19 +82,28 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Node;
 
+import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.carddav.reports.AddressbookMultiGetReportInfo;
 import com.openexchange.carddav.reports.SyncCollectionReportInfo;
+import com.openexchange.carddav.reports.SyncCollectionResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
 
 /**
@@ -105,10 +115,14 @@ import com.openexchange.test.ContactTestManager;
  */
 public abstract class CardDAVTest extends AbstractAJAXSession {
 	
-	private CardDAVClient cardDAVClient = null;
+	protected static final int TIMEOUT = 10000;
+	
 	private ContactTestManager testManager = null;
 	private int folderId;
 	private VCardEngine vCardEngine;
+	private List<FolderObject> foldersToCleanUp;
+	private Map<Long, CardDAVClient> cardDAVClients;
+	
 	
 	public CardDAVTest(final String name) {
 		super(name);
@@ -124,10 +138,30 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	this.getManager().setFailOnError(true);
         this.folderId = this.getAJAXClient().getValues().getPrivateContactFolder();
         this.vCardEngine = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
-        /*
-         * setup webdav client
-         */
-        this.cardDAVClient = new CardDAVClient();
+        this.foldersToCleanUp = new ArrayList<FolderObject>();
+        this.cardDAVClients = new HashMap<Long, CardDAVClient>();
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+    	if (null != this.getManager()) {
+    		this.getManager().cleanUp();
+    	}
+    	this.cleanupFolders();
+        super.tearDown();
+    }
+    
+    private void cleanupFolders() {
+    	if (null != this.foldersToCleanUp) {
+    		for (FolderObject folder : foldersToCleanUp) {
+        		try {
+        			getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW,
+        					folder.getObjectID(), new Date()));
+        		} catch (Exception e) {
+        			System.out.println(e);
+        		}
+			}
+    	}
     }
     
     /**
@@ -138,11 +172,15 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	this.getManager().getCreatedEntities().add(contact);
     }
     
+    protected void rememberForCleanUp(FolderObject folder) {
+    	this.foldersToCleanUp.add(folder);
+    }
+    
     /**
      * Gets the personal contacts folder id
      * @return
      */
-    protected int getFolderId() {
+    protected int getDefaultFolderID() {
     	return this.folderId;
     }
 
@@ -150,7 +188,7 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
      * Gets the folder id of the global address book
      * @return
      */
-    protected int getGABFolderId() {
+    protected int getGABFolderID() {
     	return 6;
     }
 
@@ -177,6 +215,10 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
         }
     }
     
+    protected void delete(Contact contact) {
+    	getManager().deleteAction(contact);
+    }
+    
     protected String getCTag() throws OXException, IOException, DavException {
 		PropFindMethod propFind = null;
 		try {
@@ -192,24 +234,24 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
 		}
     }
     
-	protected int putVCard(final String uid, final String vCard) throws HttpException, IOException, OXException {
+	protected int putVCard(String uid, String vCard) throws HttpException, IOException, OXException {
         PutMethod put = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_NONE_MATCH, "*");
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
-            return this.getCardDAVClient().executeMethod(put);
+            return getCardDAVClient().executeMethod(put);
         } finally {
             release(put);
         }
 	}
 	
-	protected int putVCardUpdate(final String uid, final String vCard) throws HttpException, IOException, OXException {
+	protected int putVCardUpdate(String uid, String vCard) throws HttpException, IOException, OXException {
 		return this.putVCardUpdate(uid, vCard, null);
 	}
 	
-	protected int putVCardUpdate(final String uid, final String vCard, final String ifMatchEtag) throws HttpException, IOException, OXException {
+	protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws HttpException, IOException, OXException {
         PutMethod put = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -218,7 +260,7 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
                 put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
             }
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
-            return this.getCardDAVClient().executeMethod(put);
+            return getCardDAVClient().executeMethod(put);
         } finally {
             release(put);
         }
@@ -267,6 +309,15 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	return eTags;
 	}
 	
+	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws OXException, IOException, DavException {
+    	DavPropertyNameSet props = new DavPropertyNameSet();
+    	props.add(PropertyNames.GETETAG);
+    	SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
+    	SyncCollectionResponse syncCollectionResponse = this.getCardDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
+        syncToken.setToken(syncCollectionResponse.getSyncToken());
+        return syncCollectionResponse;
+	}
+	
 	/**
 	 * Gets all changed vCards by performing a sync-collection REPORT with the 
 	 * supplied sync-token, followed by an addressbook-multiget REPORT for 
@@ -300,15 +351,56 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
 		return this.addressbookMultiget(eTags.keySet());		
 	}
 	
-	protected VCardResource getGlobalAddressbookVCard() throws OXException, IOException, DavException {
-		final List<VCardResource> groupVCards = this.getAllGroupVCards();
-		for (final VCardResource resource : groupVCards) {
-			// the server is a grey box here, so we know how the global addressbook resource looks like
-			if (resource.getHref().endsWith("_" + this.getGABFolderId() + ".vcf")) { 
-				return resource;				
+	protected VCardResource getGlobalAddressbookVCard() throws OXException, IOException, DavException, JSONException {
+		GetResponse response = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, getGABFolderID()));
+		String gabFolderName = response.getFolder().getFolderName();
+		return getGroupVCard(gabFolderName);
+	}
+	
+	protected VCardResource getGroupVCard(String folderName) throws OXException, IOException, DavException, JSONException {
+		List<VCardResource> groupVCards = this.getAllGroupVCards();
+		for (VCardResource resource : groupVCards) {
+			if (folderName.equals(resource.getVCard().getFormattedName().getFormattedName())) { 
+				return resource;
 			}
 		}
-		fail("no vCard representing the global addressbook found");
+		fail("no vCard representing the folder '" + folderName + "' found");
+		return null;
+	}
+	
+	/**
+	 * Gets a folder by its name.
+	 * 
+	 * @param folderName
+	 * @return
+	 * @throws OXException
+	 * @throws IOException
+	 * @throws JSONException
+	 */
+	protected FolderObject getFolder(String folderName) throws OXException, IOException, JSONException {
+		VisibleFoldersResponse response = client.execute(
+				new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", 
+						new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+		FolderObject folder = findByName(response.getPrivateFolders(), folderName);
+		if (null == folder) {
+			folder = findByName(response.getPublicFolders(), folderName);
+			if (null == folder) {
+				folder = findByName(response.getSharedFolders(), folderName);
+			}
+		}		
+		if (null != folder) {
+			folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+		}
+		return folder;
+	}
+	
+	private static FolderObject findByName(Iterator<FolderObject> iter, String folderName) {
+		while (iter.hasNext()) {
+			FolderObject folder = iter.next();
+			if (folderName.equals(folder.getFolderName())) {
+				return folder;
+			}
+		}
 		return null;
 	}
 
@@ -421,23 +513,85 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	return vCard;		
 	}
 	
-	protected Contact getContact(final String uid) {
-		final Contact contact = this.getContact(uid, getFolderId());
-		return null != contact ? contact : this.getContact(uid, getGABFolderId());
+	private static JSONObject getSearchFilter(String uid, int[] folderIDs) throws JSONException {
+		String filter = null;
+		if (null == folderIDs || 0 == folderIDs.length) {
+			filter = "{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}";		
+		} else if (1 == folderIDs.length) {
+			filter = "{'filter' : [ 'and', " +
+					"['=' , {'field' : 'uid'} , '" + uid + "'], " +
+					"['=' , {'field' : 'fid'}, '" + folderIDs[0] + "']" +
+				"]})";
+		} else {
+			filter = "{'filter' : [ 'and', " +
+					"['=' , {'field' : 'uid'} , '" + uid + "'], " +
+					"[ 'or', " +
+						"['=' , {'field' : 'fid'}, '" + folderIDs[0] + "'] ";
+			for (int i = 1; i < folderIDs.length; i++) {
+				filter = filter + ", " +
+						"['=' , {'field' : 'fid'}, '" + folderIDs[i] + "'] ";
+			}
+			filter = filter +
+					"]" +
+				"]})";
+		}
+		return new JSONObject(filter);
 	}
 	
-	protected Contact getContact(final String uid, final int folderId) {
-		final Contact[] contacts = this.getManager().allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
-		for (final Contact contact : contacts) {
-			if (uid.equals(contact.getUid())) {
-				return this.getManager().getAction(contact);
+	protected Contact searchContact(String uid, int[] folderIDs, int[] columnIDs) throws JSONException {
+		Contact[] contacts = getManager().searchAction(getSearchFilter(uid, folderIDs), null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
+		return null != contacts && 0 < contacts.length ? contacts[0] : null;
+	}
+	
+//	protected Contact getContact(String uid, int folderID) {
+//		Contact[] contacts = this.getManager().allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
+//		for (Contact contact : contacts) {
+//			if (uid.equals(contact.getUid())) {
+//				return this.getManager().getAction(contact);
+//			}
+//		}
+//		return null;
+//	}
+
+	protected Contact getContact(String uid) throws InterruptedException, JSONException {
+		return getContact(uid, null);
+	}
+	
+	protected List<Contact> getContacts(int folderID) throws InterruptedException, JSONException {
+		Contact[] contacts = getManager().allAction(folderID);
+		return Arrays.asList(contacts);
+	}
+	
+	protected Contact getContact(String uid, int folderID) throws InterruptedException, JSONException {
+		return getContact(uid, new int[] { folderID });
+	}
+	
+	protected Contact getContact(String uid, int[] folderIDs) throws InterruptedException, JSONException {
+		return this.searchContact(uid, folderIDs, null);
+	}
+
+	protected Contact waitForContact(String uid) throws InterruptedException, JSONException {
+		return waitForContact(uid, null);
+	}
+	
+	protected Contact waitForContact(String uid, int folderID) throws InterruptedException, JSONException {
+		return waitForContact(uid, new int[] { folderID });
+	}
+	
+	protected Contact waitForContact(String uid, int[] folderIDs) throws InterruptedException, JSONException {
+		long timeoutTime = new Date().getTime() + TIMEOUT;
+		do {
+			Contact contact = this.getContact(uid, folderIDs);
+			if (null != contact) {
+				return contact;
 			}
-		}
+			Thread.sleep(TIMEOUT / 20);
+		} while (new Date().getTime() < timeoutTime);
 		return null;
 	}
     
     protected Contact[] findContacts(final String pattern) {
-    	return this.getManager().searchAction(pattern, this.getFolderId());
+    	return this.getManager().searchAction(pattern, this.getDefaultFolderID());
     }
     
     /**
@@ -460,8 +614,61 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
      * @return
      */
     protected Contact create(final Contact contact) {
-    	contact.setParentFolderID(this.getFolderId());
+    	return this.create(contact, this.getDefaultFolderID());
+    }
+
+    protected Contact update(int originalFolderID, Contact contact) {
+    	return getManager().updateAction(originalFolderID, contact);
+    }
+
+    protected Contact update(Contact contact) {
+    	return getManager().updateAction(contact);
+    }
+
+    /**
+     * Creates a contact in the given folder.
+     * @param contact
+     * @return
+     */
+    protected Contact create(Contact contact, int folderID) {
+    	contact.setParentFolderID(folderID);
     	return this.getManager().newAction(contact);
+    }
+
+    protected FolderObject createFolder(FolderObject folder) throws OXException, IOException, JSONException {
+		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
+		folder.setObjectID(response.getId());
+        folder.setLastModified(response.getTimestamp());
+		return folder;
+    }
+    
+    protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
+		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_NEW, folder));
+        folder.setLastModified(response.getTimestamp());
+		return folder;
+    }
+    
+    protected FolderObject getDefaultFolder() throws OXException, IOException, JSONException {
+    	return getFolder(getDefaultFolderID());
+    }
+    
+    protected FolderObject getGABFolder() throws OXException, IOException, JSONException {
+    	return getFolder(getGABFolderID());
+    }
+
+    protected FolderObject getFolder(int folderID) throws OXException, IOException, JSONException {
+    	return getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folderID)).getFolder();
+    }
+
+    protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
+    	FolderObject parent = this.getDefaultFolder();
+    	FolderObject folder = new FolderObject();
+    	folder.setFolderName(folderName);
+    	folder.setParentFolderID(parent.getObjectID());
+    	folder.setModule(parent.getModule());
+    	folder.setType(parent.getType());
+    	folder.setPermissions(parent.getPermissions());
+    	return this.createFolder(folder);
     }
     
     protected static String getBaseUri() throws OXException {
@@ -542,16 +749,12 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
 		return UUID.randomUUID().toString();
 	}
 
-    @Override
-    protected void tearDown() throws Exception {
-    	if (null != this.getManager()) {
-    		this.getManager().cleanUp();
+    protected CardDAVClient getCardDAVClient() throws OXException {
+    	Long threadID = Long.valueOf(Thread.currentThread().getId());
+    	if (false == this.cardDAVClients.containsKey(threadID)) {
+    		this.cardDAVClients.put(threadID, new CardDAVClient());	
     	}
-        super.tearDown();
-    }
-    
-    protected CardDAVClient getCardDAVClient() {
-    	return this.cardDAVClient;
+    	return this.cardDAVClients.get(threadID);
     }
     
     protected AJAXClient getAJAXClient() {
@@ -559,18 +762,32 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     }
     
     protected String extractHref(final DavPropertyName propertyName, final MultiStatusResponse response) {
-    	final Node node = this.extractNode(propertyName, response);
+    	final Node node = this.extractNodeValue(propertyName, response);
     	assertMatches(PropertyNames.HREF, node);
     	final String content = node.getTextContent();
     	assertNotNull("no text content in " + PropertyNames.HREF + " child for " + propertyName, content);
     	return content;
     }
     
-    protected Node extractNode(final DavPropertyName propertyName, final MultiStatusResponse response) {
+    protected Node extractNodeValue(final DavPropertyName propertyName, final MultiStatusResponse response) {
     	assertNotEmpty(propertyName, response);
     	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
     	assertTrue("value is not a node in " + propertyName, value instanceof Node);
     	return (Node)value;
+    }
+    
+    protected List<Node> extractNodeListValue(DavPropertyName propertyName, MultiStatusResponse response) {
+    	assertNotEmpty(propertyName, response);
+    	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
+    	assertTrue("value is not a node list in " + propertyName, value instanceof List<?>);
+    	return (List<Node>)value;
+    }
+    
+    protected DavProperty<?> extractProperty(DavPropertyName propertyName, MultiStatusResponse response) {
+    	assertNotEmpty(propertyName, response);
+    	DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(propertyName);
+    	assertNotNull("property " + propertyName + " not found", property);
+    	return property;
     }
     
     protected String extractTextContent(final DavPropertyName propertyName, final MultiStatusResponse response) {
@@ -585,6 +802,26 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return dateFormat.format(date);
     }
+    
+	protected static DistributionListEntryObject asDistListMember(Contact contact) throws OXException {
+		DistributionListEntryObject member = new DistributionListEntryObject();
+		member.setFolderID(contact.getParentFolderID());
+		member.setEntryID(contact.getObjectID());
+		member.setDisplayname(contact.getDisplayName());
+		member.setFirstname(contact.getGivenName());
+		member.setLastname(contact.getSurName());
+		member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
+		if (contact.containsEmail1()) {
+			member.setEmailaddress(contact.getEmail1());
+		} else if (contact.containsEmail2()) {
+			member.setEmailaddress(contact.getEmail2());
+			member.setEmailfield(DistributionListEntryObject.EMAILFIELD2);
+		} else if (contact.containsEmail3()) {
+			member.setEmailaddress(contact.getEmail3());
+			member.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
+		}
+        return member;
+	}
     
     /*
      * Additional assertXXX methods
@@ -602,6 +839,52 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	return match;
     }
     
+    public static VCardResource assertContainsFN(String formattedName, Collection<VCardResource> vCards) {
+    	VCardResource match = null;
+    	for (VCardResource vCard : vCards) {
+    		if (formattedName.equals(vCard.getFN())) {
+    			match = vCard;
+    			break;
+    		}
+		}
+    	assertNotNull("no vCard with FN '" + formattedName + "' found", match);
+    	return match;
+    }
+    
+    public static String assertContainsMemberUID(String uid, VCardResource groupVCard) {
+    	List<String> members = groupVCard.getMemberUIDs();
+    	assertNotNull("no members found in group vcard", members);
+    	String match = null;
+    	for (String memberUid : members) {
+			if (uid.equals(memberUid)) {
+				match = memberUid;
+				break;
+			}
+		}
+    	assertNotNull("no group member with UID '" + uid + "' found", match);
+    	return match;
+    }
+    
+    public static void assertNotContainsMemberUID(String uid, VCardResource groupVCard) {
+    	List<String> members = groupVCard.getMemberUIDs();
+    	String match = null;
+    	for (String memberUid : members) {
+			if (uid.equals(memberUid)) {
+				match = memberUid;
+				break;
+			}
+		}
+    	assertNull("group member with UID '" + uid + "' found", match);
+    }
+    
+    public static void assertNotContainsFN(String formattedName, Collection<VCardResource> vCards) {
+    	if (null != vCards && 0 < vCards.size()) {
+	    	for (VCardResource vCard : vCards) {
+	    		assertFalse("vCard with FN '" + formattedName + "' found", formattedName.equals(vCard.getFN()));
+			}
+    	}
+    }
+    
     public static void assertNotContains(final String uid, final Collection<VCardResource> vCards) {
     	if (null != vCards && 0 < vCards.size()) {
 	    	for (final VCardResource vCard : vCards) {
@@ -615,9 +898,19 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	assertEquals("wrong element namespace", propertyName.getNamespace().getURI(), node.getNamespaceURI());
 	}
 	
-	public static void assertIsPresent(final DavPropertyName propertyName, final MultiStatusResponse response) {
+	public static void assertContains(DavPropertyName propertyName, List<Node> nodeList) {
+		for (Node node : nodeList) {
+			if (propertyName.getName().equals(node.getLocalName()) && 
+					propertyName.getNamespace().getURI().equals(node.getNamespaceURI())) {
+				return;
+			}
+		}
+		fail("property " + propertyName + " not found in list");
+	}
+	
+	public static void assertIsPresent(DavPropertyName propertyName, MultiStatusResponse response) {
     	final DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(propertyName);
-    	assertNotNull(propertyName + " not found", property);
+    	assertNotNull("property " + propertyName + " not found", property);
 	}
 	
 	public static void assertNotEmpty(final DavPropertyName propertyName, final MultiStatusResponse response) {

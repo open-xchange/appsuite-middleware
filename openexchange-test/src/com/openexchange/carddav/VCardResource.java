@@ -60,6 +60,7 @@ import net.sourceforge.cardme.io.VCardWriter;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.VCardVersion;
 import net.sourceforge.cardme.vcard.features.ExtendedFeature;
+import net.sourceforge.cardme.vcard.features.FormattedNameFeature;
 import net.sourceforge.cardme.vcard.features.UIDFeature;
 
 /**
@@ -85,6 +86,11 @@ public class VCardResource {
 	public String getUID() {
 		final UIDFeature uidFeature = this.vCard.getUID();
 		return null != uidFeature ? uidFeature.getUID() : null;
+	}	
+
+	public String getFN() {
+		FormattedNameFeature formattedName = this.vCard.getFormattedName();
+		return null != formattedName ? formattedName.getFormattedName() : null;
 	}	
 
 	public List<ExtendedFeature> getExtendedFeatures(final String extensionName) {
@@ -125,8 +131,33 @@ public class VCardResource {
 		return null != xFeatures && 0 < xFeatures.size() && "group".equals(xFeatures.get(0).getExtensionData());
 	}
 	
-	@Override
-    public String toString() {
+	public List<String> getMemberUIDs() {
+		List<ExtendedFeature> members = this.getExtendedFeatures("X-ADDRESSBOOKSERVER-MEMBER");
+		if (null == members) {
+			return null;
+		}
+		List<String> uids = new ArrayList<String>();
+		for (ExtendedFeature memberFeature : members) {
+			uids.add(memberFeature.getExtensionData().substring(9));
+			
+		}
+		return uids;
+	}
+	
+	public ExtendedFeature getMemberXFeature(String uid) {
+		List<ExtendedFeature> members = this.getExtendedFeatures("X-ADDRESSBOOKSERVER-MEMBER");
+		if (null == members) {
+			return null;
+		}
+		for (ExtendedFeature memberFeature : members) {
+			if (uid.equals(memberFeature.getExtensionData().substring(9))) {
+				return memberFeature;
+			}
+		}
+		return null;
+	}
+	
+	public String toString() {
 		WRITER.setVCard(this.vCard);
 		return WRITER.buildVCardString();		
 	}

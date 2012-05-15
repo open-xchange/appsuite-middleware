@@ -53,12 +53,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import net.sourceforge.cardme.vcard.features.ExtendedFeature;
-
 import com.openexchange.carddav.CardDAVClient;
 import com.openexchange.carddav.CardDAVTest;
 import com.openexchange.carddav.StatusCodes;
+import com.openexchange.carddav.SyncToken;
 import com.openexchange.carddav.VCardResource;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug21354Test}
@@ -78,46 +78,38 @@ public class Bug21354Test extends CardDAVTest {
 		/*
 		 * store current sync state via all ETags and CTag properties
 		 */
-		final Map<String, String> eTags = super.getAllETags();
-		final String cTag = super.getCTag();		
+		Map<String, String> eTags = super.getAllETags();
+		String cTag = super.getCTag();		
 		/*
 		 * pick random contact from global address book
 		 */
-		final VCardResource globalAddressbookVCard = super.getGlobalAddressbookVCard();
-		final List<ExtendedFeature> members = globalAddressbookVCard.getExtendedFeatures("X-ADDRESSBOOKSERVER-MEMBER");
-		final int randomIndex = new Random().nextInt(members.size());
-		final ExtendedFeature member = members.get(randomIndex);
-		final String memberUID = member.getExtensionData().substring(9);
+		List<Contact> contacts = super.getContacts(super.getGABFolderID());
+		String uid = contacts.get(new Random().nextInt(contacts.size())).getUid();
 		/*
-		 * try to delete contact and change group, asserting positive responses
+		 * try to delete contact, asserting positive response
 		 */
-		globalAddressbookVCard.getVCard().removeExtendedType(member);
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, 
-				super.putVCardUpdate(globalAddressbookVCard.getUID(), globalAddressbookVCard.toString()));
-		super.removeFromETags(eTags, memberUID);
-		assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(memberUID));
-		super.removeFromETags(eTags, globalAddressbookVCard.getUID());
+		super.removeFromETags(eTags, uid);
+        assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(uid));
 		/*
 		 * verify that contact was not deleted on server
 		 */
-		assertNotNull("Contact deleted on server", super.getContact(memberUID, super.getGABFolderId()));
+		assertNotNull("Contact deleted on server", super.getContact(uid));
 		/*
 		 * check for updates via ctag
 		 */
-		final String cTag2 = super.getCTag();
+		String cTag2 = super.getCTag();
 		assertFalse("No changes indicated by CTag", cTag.equals(cTag2));
 		/*
 		 * check Etag collection 
 		 */
-		final Map<String, String> eTags2 = super.getAllETags();
-		final List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
-		assertTrue("less than 2 changes reported in Etags", 1 < changedHrefs.size());
+		Map<String, String> eTags2 = super.getAllETags();
+		List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
+		assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
 		/*
-		 * check updated vCards for deleted member and global address book 
+		 * check updated vCard for deleted member 
 		 */
         final List<VCardResource> addressData = super.addressbookMultiget(changedHrefs);
-        assertContains(memberUID, addressData);
-        assertContains(globalAddressbookVCard.getUID(), addressData);
+        assertContains(uid, addressData);
 	}
 	
 	public void testDeleteFromGAB_10_7() throws Exception {
@@ -125,40 +117,33 @@ public class Bug21354Test extends CardDAVTest {
 		/*
 		 * store current sync state via all ETags and sync-token properties
 		 */
-		final Map<String, String> eTags = super.getAllETags();
-		final String syncToken = super.fetchSyncToken();
+		Map<String, String> eTags = super.getAllETags();
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * pick random contact from global address book
 		 */
-		final VCardResource globalAddressbookVCard = super.getGlobalAddressbookVCard();
-		final List<ExtendedFeature> members = globalAddressbookVCard.getExtendedFeatures("X-ADDRESSBOOKSERVER-MEMBER");
-		final int randomIndex = new Random().nextInt(members.size());
-		final ExtendedFeature member = members.get(randomIndex);
-		final String memberUID = member.getExtensionData().substring(9);
+		List<Contact> contacts = super.getContacts(super.getGABFolderID());
+		String uid =  contacts.get(new Random().nextInt(contacts.size())).getUid();
 		/*
-		 * try to delete contact and change group, asserting positive responses
+		 * try to delete contact, asserting positive response
 		 */
-		globalAddressbookVCard.getVCard().removeExtendedType(member);
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, 
-				super.putVCardUpdate(globalAddressbookVCard.getUID(), globalAddressbookVCard.toString()));
-		super.removeFromETags(eTags, memberUID);
-		assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(memberUID));
-		super.removeFromETags(eTags, globalAddressbookVCard.getUID());
+		super.removeFromETags(eTags, uid);
+		assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(uid));
 		/*
 		 * verify that contact was not deleted on server
 		 */
-		assertNotNull("Contact deleted on server", super.getContact(memberUID, super.getGABFolderId()));
+		assertNotNull("Contact deleted on server", super.getContact(uid));
 		/*
 		 * check for updates via Etags with sync-token
 		 */
-        final Map<String, String> eTags2 = super.syncCollection(syncToken);
-		final List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
-		assertTrue("less than 2 changes reported in Etags", 1 < changedHrefs.size());
+        Map<String, String> eTags2 = super.syncCollection(syncToken).getETagsStatusOK();
+		List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
+		assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
 		/*
 		 * check updated vCards for deleted member and global address book 
 		 */
         final List<VCardResource> addressData = super.addressbookMultiget(changedHrefs);
-        assertContains(memberUID, addressData);
-        assertContains(globalAddressbookVCard.getUID(), addressData);
+        assertContains(uid, addressData);
 	}
+	
 }

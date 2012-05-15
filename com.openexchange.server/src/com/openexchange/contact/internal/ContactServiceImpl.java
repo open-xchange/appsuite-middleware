@@ -255,6 +255,12 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * broadcast event
 		 */
+		ContactMapper.getInstance().mergeDifferences(contact, delta);
+		contact.setObjectID(storedContact.getObjectID());
+		contact.setParentFolderID(storedContact.getParentFolderID());
+		for (ContactStorage contactStorage : Tools.getStorages(contextID)) {
+			contactStorage.updateReferences(contextID, contact);
+		}
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 	
@@ -262,7 +268,7 @@ public class ContactServiceImpl extends DefaultContactService {
     protected void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
-		final ContactStorage storage = Tools.getStorage(contextID, folderID);
+		ContactStorage storage = Tools.getStorage(contextID, folderID);
 		/*
 		 * check supplied contact
 		 */
@@ -273,19 +279,19 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check folder
 		 */
-		final FolderObject folder = Tools.getFolder(contextID, folderID);
+		FolderObject folder = Tools.getFolder(contextID, folderID);
 		Check.isContactFolder(folder, contextID, userID);
 		Check.noPrivateInPublic(folder, contact, contextID, userID);
 		Check.canWriteInGAB(storage, contextID, userID, folderID, contact);
 		/*
 		 * check general permissions
 		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
 		Check.canWriteOwn(permission, contextID, userID, folderID);
 		/*
 		 * check currently stored contact
 		 */
-		final Contact storedContact = storage.get(contextID, folderID, objectID, ContactField.values());
+		Contact storedContact = storage.get(contextID, folderID, objectID, ContactField.values());
 		Check.contactNotNull(storedContact, contextID, userID);
 		if (storedContact.getCreatedBy() != userID) {
 			Check.canWriteAll(permission, contextID, userID, folderID);
@@ -295,7 +301,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+		Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsObjectID()) {
@@ -314,7 +320,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * prepare update
 		 */
-        final Date now = new Date();
+        Date now = new Date();
         delta.setLastModified(now);
         delta.setModifiedBy(userID);
 		if ((false == storedContact.containsUid() || Tools.isEmpty(storedContact.getUid())) && false == delta.containsUid()) {
@@ -337,6 +343,12 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * broadcast event
 		 */
+		ContactMapper.getInstance().mergeDifferences(contact, delta);
+		contact.setObjectID(storedContact.getObjectID());
+		contact.setParentFolderID(storedContact.getParentFolderID());
+		for (ContactStorage contactStorage : Tools.getStorages(contextID)) {
+			contactStorage.updateReferences(contextID, contact);
+		}
 		new EventClient(session).modify(storedContact, contact, folder);
 	}
 	
@@ -404,7 +416,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		final ContactStorage storage = Tools.getStorage(contextID, folderID);
 		SearchIterator<Contact> contacts = null;
 		if (null != since) {
-			contacts = deleted ? storage.deleted(contextID, folderID, since, queryFields.getFields()) : 
+			contacts = deleted ? storage.deleted(contextID, folderID, since, queryFields.getFields(), sortOptions) : 
 				storage.modified(contextID, folderID, since, queryFields.getFields(), sortOptions);
 		} else if (null != ids) {
 			contacts = storage.list(contextID, folderID, ids, queryFields.getFields(), sortOptions);

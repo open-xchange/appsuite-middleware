@@ -51,6 +51,7 @@ package com.openexchange.contact.internal;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -138,12 +139,23 @@ public final class Tools {
 	 * @return the contact storage
 	 * @throws OXException
 	 */
-	public static ContactStorage getStorage(final int contextID, final String folderID) throws OXException {
-		final ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(contextID, folderID);
+	public static ContactStorage getStorage(int contextID, String folderID) throws OXException {
+		ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(contextID, folderID);
         if (null == storage) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("'Contact storage for folder " + folderID + "'");
         }
         return storage;
+	}
+	
+	/**
+	 * Gets all contact storages. 
+	 * 
+	 * @param contextID the current context ID
+	 * @return the contact storages
+	 * @throws OXException
+	 */
+	public static List<ContactStorage> getStorages(int contextID) throws OXException {
+		return ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorages(contextID);
 	}
 	
 	/**
@@ -155,10 +167,10 @@ public final class Tools {
 	 * @return the contact storages
 	 * @throws OXException
 	 */
-	public static Map<ContactStorage, List<String>> getStorages(final int contextID, final List<String> folderIDs) throws OXException {
-		final Map<ContactStorage, List<String>> storages = new HashMap<ContactStorage, List<String>>();
-		for (final String folderID : folderIDs) {
-			final ContactStorage storage = getStorage(contextID, folderID);
+	public static Map<ContactStorage, List<String>> getStorages(int contextID, Collection<String> folderIDs) throws OXException {
+		Map<ContactStorage, List<String>> storages = new HashMap<ContactStorage, List<String>>();
+		for (String folderID : folderIDs) {
+			ContactStorage storage = getStorage(contextID, folderID);
 			if (false == storages.containsKey(storage)) {
 				storages.put(storage, new ArrayList<String>());
 			}

@@ -49,9 +49,6 @@
 
 package com.openexchange.carddav;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,15 +62,14 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
-import com.openexchange.carddav.reports.Syncstatus;
+import com.openexchange.carddav.resources.RootCollection;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -86,21 +82,20 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.WebdavStatusImpl;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
@@ -111,25 +106,27 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  */
 public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
-	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 	private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
+	private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
+	private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
+	private static final String COMBINED_REQUEST_TIMEOUT_PROPERTY = "com.openexchange.carddav.combinedRequestTimeout";
+	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 	private static final Log LOG = LogFactory.getLog(GroupwareCarddavFactory.class);
-	private static final int SC_DELETED = 404;
 
-	private final FolderService folders;
+	private final FolderService folderService;
 	private final SessionHolder sessionHolder;
 	private final ThreadLocal<State> stateHolder = new ThreadLocal<State>();
 	private final ConfigViewFactory configs;
-	private final UserService users;
+	private final UserService userService;
 	private final ContactService contactService;	
 	
-	public GroupwareCarddavFactory(final FolderService folders, final SessionHolder sessionHolder, final ConfigViewFactory configs, 
-			final UserService users, final ContactService contactService) {
+	public GroupwareCarddavFactory(FolderService folders, SessionHolder sessionHolder, ConfigViewFactory configs, 
+			UserService users, ContactService contactService) {
 		super();
-		this.folders = folders;
+		this.folderService = folders;
 		this.sessionHolder = sessionHolder;
 		this.configs = configs;
-		this.users = users;
+		this.userService = users;
 		this.contactService = contactService;
 	}
 	
@@ -140,7 +137,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 
 	@Override
-	public void endRequest(final int status) {
+	public void endRequest(int status) {
 		stateHolder.set(null);
 		super.endRequest(status);
 	}
@@ -151,36 +148,40 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 
 	@Override
-	public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
-		if (url.size() > 1) {
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, SC_DELETED);
-		}
-		if (isRoot(url)) {
+	public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
+		if (0 == url.size()) {
+			/*
+			 * this is the root collection
+			 */
 			return mixin(new RootCollection(this));
-		}
-		return mixin(new AggregatedCollection(url, this));
-	}
-
-	// TODO: i18n
-
-	public boolean isRoot(final WebdavPath url) {
-		return url.size() == 0;
+		} else if (1 == url.size()) {
+			/*
+			 * get child collection from root by name 
+			 */
+			return mixin(new RootCollection(this).getChild(url.name()));
+		} else {		
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_NOT_FOUND);
+		}		
 	}
 
 	@Override
-	public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
-		if (url.size() == 2) {
-			return mixin(((AggregatedCollection) resolveCollection(url.parent())).getChild(url.name()));
+	public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
+		if (2 == url.size()) {
+			/*
+			 * get child resource from parent collection by name 
+			 */
+			return mixin(new RootCollection(this).getChild(url.parent().name()).getChild(url.name()));
+		} else {
+			return resolveCollection(url);
 		}
-		return resolveCollection(url);
 	}
+
+    public User resolveUser(int userID) throws OXException {
+    	return userService.getUser(userID, getContext());
+    }
 
 	public FolderService getFolderService() {
-		return folders;
-	}
-
-	public OXFolderManager getOXFolderManager() throws OXException {
-		return OXFolderManager.getInstance(getSession());
+		return folderService;
 	}
 
 	public Context getContext() {
@@ -203,97 +204,17 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		return stateHolder.get();
 	}
 
-	public OXFolderAccess getOXFolderAccess() {
-		return new OXFolderAccess(getContext());
-	}
-
-	public ConfigView getConfigView() throws OXException {
-		return configs.getView(sessionHolder.getSessionObject().getUserId(), sessionHolder.getSessionObject().getContextId());
-	}
-
-	public User resolveUser(final int uid) throws WebdavProtocolException {
-		try {
-			return users.getUser(uid, getContext());
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	public Syncstatus<WebdavResource> getSyncStatus(final Date since) throws WebdavProtocolException {
-		final Syncstatus<WebdavResource> multistatus = new Syncstatus<WebdavResource>();
-		final TIntObjectMap<Date> contentsLastModified = new TIntObjectHashMap<Date>();
-		Date nextSyncToken = new Date(since.getTime());
-		final AggregatedCollection collection = new AggregatedCollection(new WebdavPath().append("Contacts"), this);
-		try {
-			/*
-			 * new and modified contacts
-			 */
-			final List<Contact> modifiedContacts = this.getState().getModifiedContacts(since);
-			for (final Contact contact : modifiedContacts) {
-				// add contact resource to multistatus
-				final ContactResource resource = new ContactResource(collection, this, contact);
-				final int status = contact.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
-				multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
-				// remember aggregated last modified for parent folder								
-				final Date contactLastModified = contact.getLastModified();
-				final int folderID = contact.getParentFolderID();
-				if (false == contentsLastModified.containsKey(folderID) || contactLastModified.after(contentsLastModified.get(folderID))) {
-					contentsLastModified.put(folderID, contactLastModified);
-				}
-				// remember aggregated last modified for next sync token 
-				nextSyncToken = Tools.getLatestModified(nextSyncToken, contactLastModified);
-			}
-			/*
-			 * deleted contacts
-			 */
-			final List<Contact> deletedContacts = this.getState().getDeletedContacts(since);
-			for (final Contact contact : deletedContacts) {
-				// add contact resource to multistatus
-				final ContactResource resource = new ContactResource(collection, this, contact);
-				multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(SC_DELETED, resource.getUrl(), resource));
-				// remember aggregated last modified for parent folder								
-				final Date contactLastModified = contact.getLastModified();
-				final int folderID = contact.getParentFolderID();
-				if (false == contentsLastModified.containsKey(folderID) || contactLastModified.after(contentsLastModified.get(folderID))) {
-					contentsLastModified.put(folderID, contactLastModified);
-				}
-				// remember aggregated last modified for next sync token 								
-				nextSyncToken = Tools.getLatestModified(nextSyncToken, contactLastModified);
-			}
-			/*
-			 * folders
-			 */			
-			final List<UserizedFolder> folders = this.getState().getFolders();
-			for (final UserizedFolder folder : folders) {
-				// determine effective last modified of folder and its content
-				Date folderLastModified = folder.getLastModifiedUTC();
-				final Date folderContentsLastModified = contentsLastModified.get(Integer.parseInt(folder.getID()));
-				if (null != folderContentsLastModified && folderContentsLastModified.after(folderLastModified)) {
-					folderLastModified = folderContentsLastModified;
-				}
-				if (folderLastModified.after(since)) {
-					// add folder resource to multistatus
-					final FolderGroupResource resource = new FolderGroupResource(collection, this, folder);
-					resource.overrrideLastModified(folderLastModified);
-					final int status = folder.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
-					multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
-					// remember aggregated last modified for next sync token
-					nextSyncToken = Tools.getLatestModified(nextSyncToken, folderLastModified);
-				}				
-			}
-			multistatus.setToken(Long.toString(nextSyncToken.getTime()));
-			// TODO: Deleted Folders
-			return multistatus;
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-		}
-	}
+    public String getConfigValue(String key, String defaultValue) throws OXException {
+        ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        ComposedConfigProperty<String> property = view.property(key, String.class);
+        return property.isDefined() ? property.get() : defaultValue;
+    }
 	
 	/**
-	 * Sets the next sync token for the current user to <code>"0"</code>, enforcing the next sync status report to contain all changes 
-	 * independently of the sync token supplied by the client, thus emulating some kind of slow-sync this way. 
+	 * Sets the next sync token for the current user to <code>"0"</code>, 
+	 * enforcing the next sync status report to contain all changes 
+	 * independently of the sync token supplied by the client, thus emulating 
+	 * some kind of slow-sync this way. 
 	 */
 	public void overrideNextSyncToken() {
 		this.setOverrideNextSyncToken("0");		
@@ -301,101 +222,118 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 	/**
 	 * Sets the next sync token for the current user to the supplied value.
+	 * 
 	 * @param value
 	 */
-	public void setOverrideNextSyncToken(final String value) {
+	public void setOverrideNextSyncToken(String value) {
 		try {
-			this.users.setUserAttribute(OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY, value, this.getUser().getId(), this.getContext());
-		} catch (final OXException e) {
+			this.userService.setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, this.getUser().getId(), this.getContext());
+		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
 	
 	/**
-	 * Gets a value indicating the overridden sync token for the current user if defined 
-	 * @return
+	 * Gets a value indicating the overridden sync token for the current user 
+	 * if defined
+	 *  
+	 * @return the value of the overridden sync-token, or <code>null</code> if 
+	 * not set
 	 */
 	public String getOverrideNextSyncToken() {
 		try {
-			return this.users.getUserAttribute(OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY, this.getUser().getId(), this.getContext());
-		} catch (final OXException e) {
+			return this.userService.getUserAttribute(getOverrideNextSyncTokenAttributeName(), this.getUser().getId(), this.getContext());
+		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;
 	}
 	
-	/**
-	 * 
-	 * @param token
-	 * @return
-	 * @throws WebdavProtocolException
-	 */
-	public Syncstatus<WebdavResource> getSyncStatusSince(String token) throws WebdavProtocolException {
-		long since = 0;
-		if (null != token && 0 < token.length()) {
-			final String overrrideSyncToken = this.getOverrideNextSyncToken();
-			if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
-				this.setOverrideNextSyncToken(null);
-				token = overrrideSyncToken;				
-				LOG.debug("Overriding sync token to '" + token + "' for user '" + this.getUser() + "'.");
-			}
-			try {
-				since = Long.parseLong(token);
-			} catch (final NumberFormatException e) {
-				LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");								
-			}
-		}		
-		return this.getSyncStatus(new Date(since));				
-	}	
-		
+	private String getOverrideNextSyncTokenAttributeName() {
+		String userAgent = (String)this.getSession().getParameter("user-agent");
+		return null != userAgent ? OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY + userAgent.hashCode() : OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY;
+	}
+	
 	public static final class State {
 
 		private static final ContactField[] BASIC_FIELDS = { 
 			ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MARK_AS_DISTRIBUTIONLIST, 
-			ContactField.UID 
+			ContactField.DISTRIBUTIONLIST, ContactField.UID, ContactField.USERFIELD19
 		};
 		
 		private final GroupwareCarddavFactory factory;
 		private Map<String, Contact> uidCache = null;
+		private Map<String, Contact> userfield19Cache = null;
 		private List<UserizedFolder> allFolders = null;		
 		private HashSet<String> folderBlacklist = null;		
-		private int defaultFolderId = Integer.MIN_VALUE;
-		private ContactService contactService = null;
+		private UserizedFolder defaultFolder = null;
+		private String treeID = null;
+		private Date overallLastModified = null;
+		private long combinedRequestTimeout = Long.MIN_VALUE; 
 		
 		/**
-		 * Initializes a new {@link State}
-		 * @param factory
+		 * Initializes a new {@link State}.
+		 * 
+		 * @param factory the CardDAV factory
 		 */
 		public State(final GroupwareCarddavFactory factory) {
 			super();
 			this.factory = factory;
 		}
 		
-		private ContactService getContactService() throws OXException {
-			if (null == this.contactService) {
-				contactService = this.factory.getContactService();
+		public Contact waitFor(String uid, ContactField[] fields) throws OXException, InterruptedException {
+			/*
+			 * try caches first
+			 */
+			if (null != uidCache && uidCache.containsKey(uid)) {
+				return load(uidCache.get(uid), fields);
+			} else if (null != userfield19Cache && userfield19Cache.containsKey(uid)) {
+				return load(userfield19Cache.get(uid), fields);
 			}
-			return contactService;
+			/*
+			 * perform repeated search 
+			 */
+			SearchTerm<?> searchTerm = Tools.getSearchTerm(uid, getFolderIDs());
+			SortOptions sortOptions = new SortOptions(0, 1);
+			long timeoutTime = getCombinedRequestTimeout() + System.currentTimeMillis();
+			long waitInterval = getCombinedRequestTimeout() / 20;
+			do {
+				SearchIterator<Contact> iter = null;
+				try {
+					iter = factory.getContactService().searchContacts(factory.getSession(), searchTerm, fields, sortOptions);
+					if (null != iter && iter.hasNext()) {
+						return prepare(iter.next());
+					}
+				} finally {
+					close(iter);
+				}
+				LOG.debug("Waiting for contact '" + uid + "'...");
+				Thread.sleep(waitInterval);
+			} while (System.currentTimeMillis() < timeoutTime);
+			LOG.warn("Contact '" + uid + "' not found after " + getCombinedRequestTimeout() + "ms.");
+			return null; // not found
 		}
-
+		
 		/**
 		 * Loads a {@link Contact} containing all data identified by the supplied uid
 		 * @param uid
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public Contact load(final String uid) throws OXException {
-			final Contact contact = this.get(uid);
+		public Contact load(String uid) throws OXException {
+			Contact contact = this.get(uid);
 			if (null == contact) {
-				if (LOG.isDebugEnabled()) {
 					LOG.debug("Contact '" + uid + "' not found, unable to load.");
-				}
 				return null;
 			} else {
 				return this.load(contact);
 			}
 		}
 
+		public Contact load(Contact contact) throws OXException {
+			return load(contact, null);
+		}
+		
 		/**
 		 * Loads a {@link Contact} containing all data identified by object- 
 		 * and parent folder id found in the supplied contact.
@@ -404,13 +342,13 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @throws OXException
 		 * @throws ContextException
 		 */
-		public Contact load(final Contact contact) throws OXException {
+		public Contact load(Contact contact, ContactField[] fields) throws OXException {
 			if (null == contact) {
 				throw new IllegalArgumentException("contact is null");
 			} else if (false == contact.containsObjectID() || false == contact.containsParentFolderID()) {
 				throw new IllegalArgumentException("need at least object- and parent folder id");
 			}
-			return this.load(contact.getObjectID(), contact.getParentFolderID());
+			return this.load(contact.getObjectID(), Integer.toString(contact.getParentFolderID()), fields);
 		}
 		
 		/**
@@ -423,46 +361,39 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			return this.getUidCache().values();			
 		}
 		
-		/**
-		 * Gets all contacts from the folder with the supplied id, each 
-		 * containing the basic information as defined by the 
-		 * <code>FIELDS_FOR_ALL_REQUEST</code> array.
-		 * @return
-		 * @throws AbstractOXException
-		 */
-		public List<Contact> getContacts(final int folderId) throws OXException {
-			final List<Contact> contacts = new ArrayList<Contact>();
-			final Collection<Contact> allContacts = this.getContacts();
-			for (final Contact contact : allContacts) {
-				if (folderId == contact.getParentFolderID()) {
+		public Collection<Contact> getContacts(String folderID) throws OXException {
+			List<Contact> contacts = new ArrayList<Contact>();
+			int parsedFolderID = Tools.parse(folderID);
+			for (Contact contact : getContacts()) {
+				if (contact.getParentFolderID() == parsedFolderID) {
 					contacts.add(contact);
 				}
-			}			
-			return contacts;
+			}
+			return contacts;			
 		}
 		
 		/**
-		 * Gets the id of the default contact folder.
-		 * @return
+		 * Gets the default contact folder.
+		 * 
+		 * @return the default folder.
 		 * @throws OXException
 		 */
-		public int getDefaultFolderId() throws OXException {
-			if (Integer.MIN_VALUE == this.defaultFolderId) {
-				this.defaultFolderId = this.factory.getOXFolderAccess().getDefaultFolder(
-						this.factory.getUser().getId(), FolderObject.CONTACT).getObjectID();
+		public UserizedFolder getDefaultFolder() throws OXException {
+			if (null == this.defaultFolder) {
+				this.defaultFolder = factory.getFolderService().getDefaultFolder(factory.getUser(), getTreeID(), 
+						ContactContentType.getInstance(), factory.getSession(), null);
 			}
-			return this.defaultFolderId;
+			return this.defaultFolder;
 		}
 		
 		/**
-		 * Gets the folder identified with the supplied id.
+		 * Gets the folder identified by the supplied id.
+		 * 
 		 * @param id
 		 * @return
 		 * @throws OXException 
-		 * @throws ConfigCascadeException 
-		 * @throws FolderException 
 		 */
-		public UserizedFolder getFolder(final String id) throws OXException {
+		public UserizedFolder getFolder(String id) throws OXException {
 			final List<UserizedFolder> folders = this.getFolders();
 			for (final UserizedFolder folder : folders) {
 				if (id.equals(folder.getID())) {
@@ -481,40 +412,21 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @throws ConfigCascadeException
 		 * @throws OXException
 		 */
-		public synchronized List<UserizedFolder> getFolders() throws OXException {
+		public List<UserizedFolder> getFolders() throws OXException {
 			if (null == this.allFolders) {
-				if (CarddavProtocol.REDUCED_FOLDER_SET) {
-					this.allFolders = getReducedFolders();
-				} else {
-					this.allFolders = getVisibleFolders();
-				}
+				this.allFolders = getVisibleFolders();
 			}
 			return this.allFolders;
 		}
 		
-	    private List<UserizedFolder> getReducedFolders() throws OXException {
-	    	final List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
-			final FolderService folderService = this.factory.getFolderService();
-			final UserizedFolder globalAddressBookFolder = folderService.getFolder(
-					FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null);
-			if (false == this.blacklisted(globalAddressBookFolder)) {
-				folders.add(globalAddressBookFolder);
-			}
-			final UserizedFolder defaultContactsFolder = folderService.getFolder(
-					FolderStorage.REAL_TREE_ID, Integer.toString(this.getDefaultFolderId()), this.factory.getSession(), null);
-			if (false == this.blacklisted(defaultContactsFolder)) {
-				folders.add(defaultContactsFolder);
-			}
-			return folders;
-	    }
-		
 		/**
 		 * Gets a list of all visible folders.
+		 * 
 		 * @return
 		 * @throws FolderException
 		 */
 	    private List<UserizedFolder> getVisibleFolders() throws OXException {
-	    	final List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
+	    	List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
 	    	folders.addAll(this.getVisibleFolders(PrivateType.getInstance()));
 	    	folders.addAll(this.getVisibleFolders(PublicType.getInstance()));
 	    	folders.addAll(this.getVisibleFolders(SharedType.getInstance()));
@@ -535,7 +447,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 					this.factory.getSession(), null);
             final UserizedFolder[] response = visibleFoldersResponse.getResponse();
             for (final UserizedFolder folder : response) {
-                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.blacklisted(folder)) {
+                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder)) {
                 	folders.add(folder);                	
                 }
             }
@@ -548,63 +460,53 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @throws AbstractOXException
 		 */
 		public Date getLastModified() throws OXException {
-			Date lastModified = new Date(0);
-			final List<UserizedFolder> folders = this.getFolders();
-			for (final UserizedFolder folder : folders) {
-				lastModified = Tools.getLatestModified(lastModified, this.getLastModified(folder));
+			if (null == this.overallLastModified) {
+				overallLastModified = new Date(0);
+				for (UserizedFolder folder : this.getFolders()) {
+					overallLastModified = Tools.getLatestModified(overallLastModified, getLastModified(folder, overallLastModified));
+				}
 			}
-			return lastModified;
+			return overallLastModified;
 		}	
 		
 		/**
 		 * Gets the last modification time of the supplied folder, including its contents. 
 		 * This covers the folder's last modification time itself, and both updated and 
 		 * deleted items inside the folder.
-		 * @param folderId
+		 * 
+		 * @param folder the folder to get the last modification time for
+		 * @param since the minimum last modification time to consider
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public Date getLastModified(final UserizedFolder folder) throws OXException {
-			final ContactField[] fields = new ContactField[] { ContactField.LAST_MODIFIED };
-			Date lastModified = folder.getLastModifiedUTC();
+		public Date getLastModified(UserizedFolder folder, Date since) throws OXException {
+			ContactField[] fields = new ContactField[] { ContactField.LAST_MODIFIED };
+			Date lastModified = Tools.getLatestModified(since, folder);
 			SearchIterator<Contact> iterator = null;
-			final SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
+			SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
 			sortOptions.setLimit(1);			
 			try {
-				iterator = getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
-				while (iterator.hasNext()) {
+				iterator = factory.getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
+				if (iterator.hasNext()) {
 					lastModified = Tools.getLatestModified(lastModified, iterator.next());
 				}
 			} finally {
 				close(iterator);
 			}				
 			try {
-				iterator = getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
-				while (iterator.hasNext()) {
+				iterator = factory.getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
+				if (iterator.hasNext()) {
 					lastModified = Tools.getLatestModified(lastModified, iterator.next());
 				}
 			} finally {
 				close(iterator);
 			}				
 			return lastModified;
-		}
-		
-		/**
-		 * Gets the last modification time of the supplied folder, including its contents. This covers both updated and deleted items.
-		 * @param folderId
-		 * @return
-		 * @throws AbstractOXException
-		 */
-		public Date getLastModified(final int folderId) throws OXException {
-			final List<UserizedFolder> folders = this.getFolders();
-			for (final UserizedFolder folder : folders) {
-				final int id = Integer.parseInt(folder.getID());
-				if (id == folderId) {
-					return this.getLastModified(folder);
-				}
-			}
-			throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderId);
 		}	
+		
+		public Date getLastModified(UserizedFolder folder) throws OXException {
+			return getLastModified(folder, new Date(0));
+		}
 		
 		/**
 		 * Gets an aggregated list of all modified contacts in all folders since the supplied {@link Date}.
@@ -612,12 +514,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public List<Contact> getModifiedContacts(final Date since) throws OXException  {
-			final List<Contact> contacts = new ArrayList<Contact>();
-			final List<UserizedFolder> folders = this.getFolders();
-			for (final UserizedFolder folder : folders) {
-				final int folderId = Integer.parseInt(folder.getID());
-				contacts.addAll(this.getModifiedContacts(since, folderId));
+		public List<Contact> getModifiedContacts(Date since) throws OXException {
+			List<Contact> contacts = new ArrayList<Contact>();
+			List<UserizedFolder> folders = this.getFolders();
+			for (UserizedFolder folder : folders) {
+				contacts.addAll(this.getModifiedContacts(since, folder.getID()));
 			}
 			return contacts;
 		}
@@ -625,15 +526,15 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		/**
 		 * Gets a list of all modified contacts in a folder since the supplied {@link Date}.
 		 * @param since
-		 * @param folderId
+		 * @param folderID
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public List<Contact> getModifiedContacts(final Date since, final int folderId) throws OXException  {
-			final List<Contact> contacts = new ArrayList<Contact>();
+		public List<Contact> getModifiedContacts(Date since, String folderID) throws OXException  {
+			List<Contact> contacts = new ArrayList<Contact>();
 			SearchIterator<Contact> iterator = null;
 			try {
-				iterator = getContactService().getModifiedContacts(factory.getSession(), Integer.toString(folderId), since, BASIC_FIELDS);
+				iterator = factory.getContactService().getModifiedContacts(factory.getSession(), folderID, since, BASIC_FIELDS);
 				while (iterator.hasNext()) {
 					contacts.add(iterator.next());						
 				}
@@ -649,12 +550,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public List<Contact> getDeletedContacts(final Date since) throws OXException  {
-			final List<Contact> contacts = new ArrayList<Contact>();
-			final List<UserizedFolder> folders = this.getFolders();
-			for (final UserizedFolder folder : folders) {
-				final int folderId = Integer.parseInt(folder.getID());
-				contacts.addAll(this.getDeletedContacts(since, folderId));
+		public List<Contact> getDeletedContacts(Date since) throws OXException  {
+			List<Contact> contacts = new ArrayList<Contact>();
+			List<UserizedFolder> folders = this.getFolders();
+			for (UserizedFolder folder : folders) {
+				contacts.addAll(this.getDeletedContacts(since, folder.getID()));
 			}
 			return contacts;
 		}
@@ -662,15 +562,15 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		/**
 		 * Gets an aggregated list of all deleted contacts in a folder since the supplied {@link Date}.
 		 * @param since
-		 * @param folderId
+		 * @param folderID
 		 * @return
 		 * @throws AbstractOXException
 		 */
-		public List<Contact> getDeletedContacts(final Date since, final int folderId) throws OXException  {
-			final List<Contact> contacts = new ArrayList<Contact>();
+		public List<Contact> getDeletedContacts(Date since, String folderID) throws OXException  {
+			List<Contact> contacts = new ArrayList<Contact>();
 			SearchIterator<Contact> iterator = null;
 			try {
-				iterator = getContactService().getDeletedContacts(factory.getSession(), Integer.toString(folderId), since, BASIC_FIELDS);
+				iterator = factory.getContactService().getDeletedContacts(factory.getSession(), folderID, since, BASIC_FIELDS);
 				while (iterator.hasNext()) {
 					contacts.add(iterator.next());						
 				}
@@ -685,12 +585,12 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @param userizedFolder
 		 * @return
 		 */
-		private boolean blacklisted(final UserizedFolder userizedFolder) {
+		private boolean isBlacklisted(UserizedFolder userizedFolder) {
 			if (null == this.folderBlacklist) {
 				String ignoreFolders = null;
 				try {
-					ignoreFolders = factory.getConfigView().get("com.openexchange.carddav.ignoreFolders", String.class);
-				} catch (final OXException e) {
+					ignoreFolders = factory.getConfigValue(FOLDER_BLACKLIST_PROPERTY, null);
+				} catch (OXException e) {
 			        LOG.error(e.getMessage(), e);
 				}
 				if (null == ignoreFolders || 0 >= ignoreFolders.length()) {
@@ -702,60 +602,103 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			return this.folderBlacklist.contains(userizedFolder.getID());
 		}
 		
+	    /**
+	     * Gets the used folder tree identifier for folder operations.
+	     */
+	    private String getTreeID() {
+	    	if (null == this.treeID) {
+		        try {
+					treeID = factory.getConfigValue(FOLDER_TRRE_ID_PROPERTY, FolderStorage.REAL_TREE_ID);
+				} catch (OXException e) {
+					LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID +"'.", e);
+					treeID = FolderStorage.REAL_TREE_ID;
+				}
+	    	}
+	    	return this.treeID;
+	    }
+
+	    private long getCombinedRequestTimeout() {
+	    	if (Long.MIN_VALUE == this.combinedRequestTimeout) {
+		        try {
+		        	String value = factory.getConfigValue(COMBINED_REQUEST_TIMEOUT_PROPERTY, "10000");
+		        	combinedRequestTimeout = Tools.parse(value);
+				} catch (OXException e) {
+					LOG.warn("falling back to a value of 10000 for the combined request timeout.", e);
+					combinedRequestTimeout = 10000;
+				}
+	    	}
+	    	return this.combinedRequestTimeout;
+	    }
+
 		/**
-		 * Gets a contact object containing the basic information as defined by
-		 * the <code>FIELDS_FOR_ALL_REQUEST</code> array.
+		 * Gets a contact object containing the basic information.
+		 * 
 		 * @param uid
 		 * @return
 		 * @throws AbstractOXException 
 		 */
-		public Contact get(final String uid) throws OXException {			
-			return this.getUidCache().get(uid);
+		public Contact get(String uid) throws OXException {
+			Contact contact = this.getUidCache().get(uid);
+			if (null == contact) {
+				LOG.debug("Contact with UID '" + uid + "' not found, trying to get contact by userfield 19...");
+				contact = getUserfield19Cache().get(uid);
+			}
+			if (null == contact) {
+				LOG.debug("Contact with UID '" + uid + "' not found.");
+			}
+			return contact;
 		}
 		
 		/**
+		 * Loads a contact with the supplied fields.
 		 * 
-		 * @param objectId
-		 * @param inFolder
-		 * @return
+		 * @param objectId the contact's object ID
+		 * @param inFolder the contact' parent folder ID
+		 * @return the contact
 		 * @throws OXException
-		 * @throws ContextException
 		 */
-		private Contact load(final int objectId, final int inFolder) throws OXException {
-			final Contact contact = getContactService().getContact(factory.getSession(), Integer.toString(inFolder), 
-					Integer.toString(objectId));
+		private Contact load(int objectId, String inFolder, ContactField[] fields) throws OXException {
+			Contact contact = null;
+			if (null != fields) {
+				contact = factory.getContactService().getContact(factory.getSession(), inFolder, Integer.toString(objectId), fields);
+			} else {
+				contact = factory.getContactService().getContact(factory.getSession(), inFolder, Integer.toString(objectId));
+			}
 			if (null == contact) {
 				LOG.warn("Contact '" + objectId + "' in folder '" + inFolder + "' not found.");
 			}
 			return contact;
 		}
 		
-		private synchronized Map<String, Contact> getUidCache() throws OXException {
+		private Map<String, Contact> getUidCache() throws OXException {
 			if (null == this.uidCache) {
 				this.uidCache = generateUidCache();
 			}
 			return this.uidCache;
 		}		
 		
+		private Map<String, Contact> getUserfield19Cache() throws OXException {
+			if (null == this.userfield19Cache) {
+				this.userfield19Cache = generateUserfield19Cache();
+			}
+			return this.userfield19Cache;
+		}		
+		
 		private Map<String, Contact> generateUidCache() throws OXException {
-			final HashMap<String, Contact> cache = new HashMap<String, Contact>();			
-			final List<UserizedFolder> folders = this.getFolders(); 
-			for (final UserizedFolder folder : folders) {
-				final int folderId = Integer.parseInt(folder.getID());
+			HashMap<String, Contact> cache = new HashMap<String, Contact>();			
+			for (UserizedFolder folder : this.getFolders()) {
+				int folderID = Integer.parseInt(folder.getID());
 				SearchIterator<Contact> iterator = null;
 				try {
-					iterator = getContactService().getAllContacts(factory.getSession(), folder.getID(), BASIC_FIELDS);
+					iterator = factory.getContactService().getAllContacts(factory.getSession(), folder.getID(), BASIC_FIELDS);
 					while (iterator.hasNext()) {
-						final Contact contact = iterator.next();
-						if (contact.getMarkAsDistribtuionlist()) {
-							continue;
-						} 
-						contact.setParentFolderID(folderId);
+						Contact contact = iterator.next();
 						if (false == contact.containsUid() && false == this.tryAddUID(contact, folder)) {
 							LOG.warn("No UID found in contact '" + contact.toString() + "', skipping.");
 							continue;
 						}
-						cache.put(contact.getUid(), contact);
+						contact.setParentFolderID(folderID);
+						cache.put(contact.getUid(), prepare(contact));
 					}
 				} finally {
 					close(iterator);
@@ -764,16 +707,74 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			return cache;
 		}
 		
+		private Map<String, Contact> generateUserfield19Cache() throws OXException {
+			HashMap<String, Contact> cache = new HashMap<String, Contact>();
+			for (Contact contact : getUidCache().values()) {
+				if (null != contact.getUserField19()) {
+					cache.put(contact.getUserField19(), contact);
+				}
+			}
+			return cache;
+		}
 		
-		private boolean tryAddUID(final Contact contact, final UserizedFolder folder) {
+		private Contact prepare(Contact contact) throws OXException {
+			if (contact.getMarkAsDistribtuionlist()) {
+				filterMembers(contact);
+			}
+			return contact;
+		}
+		
+		/**
+		 * Filters members from distribution lists that are not meant to be 
+		 * synchronized via the CardDAV interface, i.e. one-off members that
+		 * don't reference an existing contact and also those members that 
+		 * reference distribution list members from other folders.		 * 
+		 * 
+		 * @param distributionList the distribution list
+		 * @throws OXException
+		 */
+		private void filterMembers(Contact distributionList) throws OXException {
+			if (null != distributionList && null != distributionList.getDistributionList() && 
+					0 < distributionList.getDistributionList().length) {
+				List<DistributionListEntryObject> filteredMembers = new ArrayList<DistributionListEntryObject>();
+				for (DistributionListEntryObject member : distributionList.getDistributionList()) {
+					if (DistributionListEntryObject.INDEPENDENT != member.getEmailfield() && 
+							this.hasFolderID(Integer.toString(member.getFolderID()))) {
+						filteredMembers.add(member);						
+					} else {
+						LOG.debug("Excluding distribution list member '" + member.getEmailaddress() + "' from distribution list.");
+					}
+				}
+				distributionList.setDistributionList(filteredMembers.toArray(new DistributionListEntryObject[filteredMembers.size()]));
+			}
+		}
+		
+		private boolean hasFolderID(String folderID) throws OXException {
+			for (UserizedFolder folder : this.getFolders()) {
+				if (folderID.equals(folder.getID())) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private List<String> getFolderIDs() throws OXException {
+			List<String> folderIDs = new ArrayList<String>();
+			for (UserizedFolder folder : this.getFolders()) {
+				folderIDs.add(folder.getID());
+			}
+			return folderIDs;
+		}
+		
+		private boolean tryAddUID(Contact contact, UserizedFolder folder) {
             if (Permission.WRITE_OWN_OBJECTS < folder.getOwnPermission().getWritePermission()) {
             	LOG.debug("Adding uid for contact '" + contact.toString() + "'.");
 				try {
 					contact.setUid(UUID.randomUUID().toString());			
-					getContactService().updateContact(factory.getSession(), folder.getID(), Integer.toString(contact.getObjectID()), 
-							contact, contact.getLastModified());
+					factory.getContactService().updateContact(factory.getSession(), folder.getID(), 
+							Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
 					return true;
-				} catch (final OXException e) {
+				} catch (OXException e) {
 					LOG.error(e.getMessage(), e);
 				}
             }

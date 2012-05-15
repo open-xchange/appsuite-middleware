@@ -47,126 +47,101 @@
  *
  */
 
-package com.openexchange.carddav;
+package com.openexchange.carddav.resources;
 
+import java.util.Collection;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
 
-import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.carddav.mixins.CTag;
+import com.openexchange.carddav.mixins.SupportedReportSet;
+import com.openexchange.carddav.mixins.SyncToken;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
+import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link UndecidedResource}
+ * {@link AggregatedCollection} - CardDAV collection aggregating the contents 
+ * of all visible folders. 
  * 
- * CardDAV resource for not yet 
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UndecidedResource extends CarddavResource {
+public class AggregatedCollection extends CardDAVCollection {
 
-    private CarddavResource delegate = null;
+    private static final Log LOG = LogFactory.getLog(AggregatedCollection.class);
     
-    private final WebdavPath url;
-	
-    public UndecidedResource(final AggregatedCollection parent, final GroupwareCarddavFactory factory, final WebdavPath url) {
-    	super(parent, factory);
-    	this.url = url;
+    private String displayName = null;
+
+    public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws WebdavProtocolException {
+        super(factory, url);
+        this.displayName = displayName;
+        try {
+			super.includeProperties(
+					new SupportedReportSet(), 
+					new CTag(factory), 
+					new SyncToken(factory), 
+					new CurrentUserPrivilegeSet(factory.getState().getDefaultFolder().getOwnPermission()))
+			;
+		} catch (OXException e) {
+			throw protocolException(e);
+		}
+        LOG.debug(getUrl() + ": initialized.");
     }
-    
-    private static boolean isGroup(final VersitObject versitObject) {
-        com.openexchange.tools.versit.Property property = versitObject.getProperty("X-ADDRESSBOOKSERVER-KIND");
-        return null != property  && "group".equals(property.getValue());
+
+	@Override
+    protected Collection<Contact> getModifiedContacts(Date since) throws OXException {
+    	return factory.getState().getModifiedContacts(since);
     }
-    
+
+	@Override
+    protected Collection<Contact> getDeletedContacts(Date since) throws OXException {
+    	return factory.getState().getDeletedContacts(since);
+    }
+
+	@Override
+    protected Collection<Contact> getContacts() throws OXException {
+    	return factory.getState().getContacts();
+    }
+
 	@Override
 	public void create() throws WebdavProtocolException {
-		if (null == this.delegate) {
-			throw super.protocolException(HttpServletResponse.SC_NOT_FOUND);
-		} 
-		delegate.create();
 	}
 
 	@Override
-	public boolean exists() {
-		// never exists
-		return false;
-	}
-
-	@Override
-    public String getETag() throws WebdavProtocolException {
-		return null != delegate ? delegate.getETag() : "";
-	}
-	
-	@Override
-	public void delete() throws WebdavProtocolException {
-		// no deletes on undecided resources
-		throw super.protocolException(HttpServletResponse.SC_CONFLICT);
+	public boolean exists() throws WebdavProtocolException {
+		return true;
 	}
 
 	@Override
 	public void save() throws WebdavProtocolException {
-		// no updates on undecided resources
-		throw super.protocolException(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	@Override
 	public Date getCreationDate() throws WebdavProtocolException {
-		return null != delegate ? delegate.getCreationDate() : new Date(0);
+		return new Date(0);
 	}
 
 	@Override
 	public Date getLastModified() throws WebdavProtocolException {
-		return null != delegate ? delegate.getLastModified() : new Date(0);
+		return new Date(0);
 	}
 
 	@Override
 	public String getDisplayName() throws WebdavProtocolException {
-		return null != this.delegate ? this.delegate.getDisplayName() : null;
+		return displayName;
 	}
 
 	@Override
-	public void setDisplayName(final String displayName) throws WebdavProtocolException {
-		// no updates on undecided resources
-		throw super.protocolException(HttpServletResponse.SC_FORBIDDEN);
+	public void setDisplayName(String displayName) throws WebdavProtocolException {
 	}
 
 	@Override
-	protected void applyVersitObject(final VersitObject versitObject) throws WebdavProtocolException {
-		if (isGroup(versitObject)) {
-			this.delegate = new FolderGroupResource(this.parent, this.factory, versitObject, this.getUrl());
-		} else {
-			this.delegate = new ContactResource(this.parent, this.factory, versitObject, this.getUrl());
-		}
+	public void setCreationDate(Date date) throws WebdavProtocolException {
 	}
 
-	@Override
-	protected String generateVCard() throws WebdavProtocolException {
-		return null != this.delegate ? this.delegate.generateVCard() : null;
-	}
-
-	@Override
-	protected String getUID() {
-		String uid = null;		
-		if (null != this.delegate) {
-			uid = this.delegate.getUID();
-		} 
-		if (null == uid && null != this.url) {
-			uid = Tools.extractUID(this.url);
-		}
-		return uid;
-	}
-	
-	@Override
-    public WebdavPath getUrl() {
-		if (null != this.delegate) {
-			return this.delegate.getUrl();
-		} else if (null != this.url) {
-			return this.url;
-		} else {
-			return super.getUrl(); 
-		}
-	}
 }

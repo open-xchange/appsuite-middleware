@@ -2756,7 +2756,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             
             @Override
         	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
-            	if (0 < from.getNumberOfImages() && from.containsImageLastModified() && null != from.getImageLastModified()) {
+            	if (reallyHasImage(from)) {
     				ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
     						String.valueOf(from.getObjectID())).build();
 					try {
@@ -2767,6 +2767,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             	}
     			return JSONObject.NULL;
         	}
+            
+            /**
+             * Checks whether the supplied contact contains an image. 
+             * 
+             * @param contact the contact
+             * @return <code>true</code>, if the contact has an image, <code>false</code>, otherwise
+             */
+            private boolean reallyHasImage(Contact contact) {
+            	return contact.containsImage1() && null != contact.getImage1() ||
+            			0 < contact.getNumberOfImages() && contact.containsImageLastModified() && null != contact.getImageLastModified();
+            }
 
             @Override
             public String get(Contact contact) {

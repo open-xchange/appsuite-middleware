@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.carddav;
+package com.openexchange.carddav.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -59,8 +59,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
+import com.openexchange.carddav.CarddavProtocol;
+import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -73,53 +75,51 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link CarddavResource}
- * 
- * Common base class for CardDAV resources.
+ * {@link CardDAVResource} - Abstract base class for CardDAV resources.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class CarddavResource extends AbstractResource {
+public abstract class CardDAVResource extends AbstractResource {
 
-	/**
-	 * Named logger instance
-	 */
-    protected static final Log LOG = LogFactory.getLog(CarddavResource.class);
-    
+    private static final Log LOG = LogFactory.getLog(CardDAVResource.class);
+
     /**
      * The prefix to be applied to all OX CardDAV entities
      */
 	protected static final String ETAG_PREFIX = "http://www.open-xchange.com/carddav/";
-	
-	/**
-	 * The content type for CardDAV resources
-	 */
-	protected static final String CONTENT_TYPE = "text/vcard; charset=utf-8";
-	
-	/**
-	 * The used {@link GroupwareCarddavFactory}
-	 */
-	protected final GroupwareCarddavFactory factory;
 
-	/**
-	 * The parent collection of this resource
-	 */
-	protected final AggregatedCollection parent;
-		
+    protected GroupwareCarddavFactory factory;
+    protected WebdavPath url;
 	private String cachedVCard = null;
-	
-	/**
-	 * 
-	 * @param parent
-	 * @param factory
-	 */
-	public CarddavResource(final AggregatedCollection parent, final GroupwareCarddavFactory factory) { 
-		super();
-		this.parent = parent;
-		this.factory = factory;		
-	}
-	
+
+    public CardDAVResource(GroupwareCarddavFactory factory, WebdavPath url) {
+        super();
+        this.factory = factory;
+        this.url = url;
+        LOG.debug(getUrl() + ": initialized.");
+    }
+    
+    protected WebdavProtocolException protocolException(Throwable t) {
+    	return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    protected WebdavProtocolException protocolException(int statusCode) {
+    	return protocolException(null, statusCode);
+    }
+
+    protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
+    	if (null == t) {
+    		t = new Throwable();
+    	}
+        LOG.error(t.getMessage(), t);
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
+    }
+
+	protected abstract void applyVersitObject(VersitObject versitObject) throws WebdavProtocolException;
+	protected abstract String generateVCard() throws WebdavProtocolException;
+	protected abstract String getUID();	
+
 	private String getVCard() throws WebdavProtocolException {
 		if (null == this.cachedVCard) {
 			this.cachedVCard = this.generateVCard();
@@ -127,99 +127,30 @@ public abstract class CarddavResource extends AbstractResource {
 		return this.cachedVCard;
 	}
 	
-/*    private VersitObject readBodyOLD(final InputStream body) throws WebdavProtocolException {
+    private VersitObject readBody(InputStream body) throws WebdavProtocolException {
     	try {
-            final int buflen = 2048;
-            final byte[] buf = new byte[buflen];
-            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-            for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
-                baos.write(buf, 0, read);
-            }
-            byte[] vcard = baos.toByteArray();
-            vcard = Patches.IncomingFile.removeCropParameter(new String(vcard, "UTF-8")).getBytes("UTF-8");
-            final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-            final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(vcard), "UTF-8");
+            VersitDefinition def = Versit.getDefinition("text/vcard");
+            VersitDefinition.Reader versitReader = def.getReader(body, "UTF-8");
             return def.parse(versitReader);
-        } catch (final IOException e) {
-        	throw this.internalError(e);
+        } catch (IOException e) {
+        	throw this.protocolException(e);
         } finally {
             try {
                 body.close();
-            } catch (final IOException e) {
-                LOG.error(e);
-            }
-        }
-    }*/
-	
-    private VersitObject readBody(final InputStream body) throws WebdavProtocolException {
-    	try {
-            final VersitDefinition def = Versit.getDefinition("text/vcard");
-            final VersitDefinition.Reader versitReader = def.getReader(body, "UTF-8");
-            return def.parse(versitReader);
-        } catch (final IOException e) {
-        	throw this.internalError(e);
-        } finally {
-            try {
-                body.close();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error(e);
             }
         }
     }	
-    
-	protected WebdavProtocolException protocolException(final Throwable cause, final int status) {
-		LOG.error(this.getUrl() + ": " + cause.getMessage(), cause);
-		return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), status, cause);
+
+	@Override
+	protected WebdavFactory getFactory() {
+		return this.factory;
 	}
-	
-	protected WebdavProtocolException protocolException(final int status) {
-		LOG.debug(this.getUrl() + ": " + status);
-		return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), status);
-	}
-	
-	protected WebdavProtocolException internalError(final Throwable cause) throws WebdavProtocolException {
-		return this.protocolException(cause, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	}
-		
-	@Override
-	public abstract void create() throws WebdavProtocolException;
 
-	@Override
-	public abstract boolean exists();
-
-	@Override
-	public abstract void delete() throws WebdavProtocolException;
-
-	@Override
-	public abstract void save() throws WebdavProtocolException;
-
-	@Override
-	public abstract Date getCreationDate() throws WebdavProtocolException;
-
-	@Override
-	public abstract Date getLastModified() throws WebdavProtocolException;
-
-	@Override
-	public abstract String getDisplayName() throws WebdavProtocolException;
-
-	@Override
-	public abstract void setDisplayName(final String displayName) throws WebdavProtocolException;
-
-	protected abstract void applyVersitObject(final VersitObject versitObject) throws WebdavProtocolException;
-	
-	protected abstract String generateVCard() throws WebdavProtocolException;
-	
-	protected abstract String getUID();	
-		
 	@Override
 	public WebdavPath getUrl() {
-		if (this.exists()) {
-			final String uid = this.getUID();
-			if (null != uid && 0 < uid.length()) {
-				return parent.getUrl().dup().append(uid + ".vcf");
-			}
-		}
-		return new WebdavPath("UNSET");
+		return this.url;
 	}
 
 	@Override
@@ -228,13 +159,13 @@ public abstract class CarddavResource extends AbstractResource {
 	}
 
 	@Override
-	public void setLanguage(final String language) throws WebdavProtocolException {
+	public void setLanguage(String language) throws WebdavProtocolException {
 	}
 
 	@Override
 	public Long getLength() throws WebdavProtocolException {
 		if (this.exists()) {
-			final String vCard = this.getVCard();
+			String vCard = this.getVCard();
 			if (null != vCard && 0 < vCard.length()) {
 				return new Long(vCard.getBytes().length);
 			}			
@@ -252,7 +183,7 @@ public abstract class CarddavResource extends AbstractResource {
 
 	@Override
 	public String getContentType() throws WebdavProtocolException {
-		return CarddavResource.CONTENT_TYPE;
+		return "text/vcard; charset=utf-8";
 	}
 
 	@Override
@@ -298,7 +229,7 @@ public abstract class CarddavResource extends AbstractResource {
 
 	@Override
 	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
-		return null;
+        return Collections.emptyList();
 	}
 
 	@Override
@@ -307,9 +238,8 @@ public abstract class CarddavResource extends AbstractResource {
 	}
 
 	@Override
-	public void putBody(final InputStream body, final boolean guessSize) throws WebdavProtocolException {
-    	final VersitObject versitObject = this.readBody(body);
-    	this.applyVersitObject(versitObject);
+	public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
+    	this.applyVersitObject(this.readBody(body));
 	}
 
 	@Override
@@ -327,11 +257,6 @@ public abstract class CarddavResource extends AbstractResource {
 	}
 
 	@Override
-	protected WebdavFactory getFactory() {
-		return this.factory;
-	}
-
-	@Override
 	protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
 	}
 
@@ -340,9 +265,9 @@ public abstract class CarddavResource extends AbstractResource {
 	}
 
 	@Override
-	protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
+	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
         if (CarddavProtocol.CARD_NS.getURI().equals(namespace) && "address-data".equals(name)) {
-            final WebdavProperty property = new WebdavProperty(namespace, name);
+            WebdavProperty property = new WebdavProperty(namespace, name);
             property.setValue(this.getVCard());
             return property;
         } else {
@@ -353,5 +278,6 @@ public abstract class CarddavResource extends AbstractResource {
 	@Override
 	protected boolean isset(Property p) {
 		return true;
-	}    
+	}
+
 }

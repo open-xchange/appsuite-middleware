@@ -49,41 +49,73 @@
 
 package com.openexchange.carddav.reports;
 
-import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.version.DeltaVConstants;
-import org.apache.jackrabbit.webdav.version.report.Report;
-import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.version.report.ReportType;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.Assert;
+
+import org.apache.jackrabbit.webdav.MultiStatus;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
 
 import com.openexchange.carddav.PropertyNames;
+import com.openexchange.carddav.StatusCodes;
 
 /**
- * {@link SyncCollectionReport}
+ * {@link SyncCollectionResponse} - Custom response to an "sync-collection" report 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReport implements Report, DeltaVConstants {
+public class SyncCollectionResponse {
+	
+	private MultiStatusResponse[] responses;
+	private String syncToken;
+	
+	public SyncCollectionResponse(MultiStatus multiStatus, String syncToken) {
+		super();
+		this.responses = multiStatus.getResponses();
+		this.syncToken = syncToken;
+	}
+	
+	/**
+	 * @return the syncToken
+	 */
+	public String getSyncToken() {
+		return syncToken;
+	}
 
-    public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), 
-    		PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class); 
+	/**
+	 * @return the responses
+	 */
+	public MultiStatusResponse[] getResponses() {
+		return responses;
+	}
 
-    public ReportType getType() {
-        return SYNC_COLLECTION;
-    }
-
-    public boolean isMultiStatusReport() {
-        return true;
-    }
-
-    public void init(DavResource dr, ReportInfo ri) throws DavException {
-    	System.out.println("init");
-    }
-
-    public Element toXml(Document dcmnt) {
-    	System.out.println("toxml");
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	public Map<String, String> getETagsStatusOK() {
+		Map<String, String> eTags = new HashMap<String, String>();
+        for (MultiStatusResponse response : responses) {
+        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
+	        	String href = response.getHref();
+	        	Assert.assertNotNull("got no href from response", href);
+	        	Object value = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.GETETAG).getValue();
+	        	Assert.assertNotNull("got no ETag from response", value);
+	        	String eTag = (String)value;
+	        	eTags.put(href, eTag);
+        	}
+		}
+		return eTags;
+	}
+	
+	public List<String> getHrefsStatusNotFound() {
+		List<String> hrefs = new ArrayList<String>();
+        for (MultiStatusResponse response : responses) {
+        	if (null != response.getStatus() && 0 < response.getStatus().length && null != response.getStatus()[0] && 
+        			StatusCodes.SC_NOT_FOUND == response.getStatus()[0].getStatusCode()) {
+            	hrefs.add(response.getHref());
+        	}
+        }
+		return hrefs;
+	}
+	
 }
