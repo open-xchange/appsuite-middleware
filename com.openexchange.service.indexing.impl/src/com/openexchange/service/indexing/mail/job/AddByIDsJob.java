@@ -52,12 +52,11 @@ package com.openexchange.service.indexing.mail.job;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.solr.mail.SolrMailUtility;
-import com.openexchange.mail.MailField;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
@@ -148,9 +147,7 @@ public final class AddByIDsJob extends AbstractMailJob {
                 /*
                  * Fetch mails
                  */
-                final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-                // fields.removeMailField(MailField.BODY);  <--- Allow body!
-                fields.removeMailField(MailField.FULL);
+                MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
                 mails = storageAccess.allMailsFromStorage(fullName, fields.toArray());
             } finally {
                 storageAccess.releaseMailAccess();
@@ -165,10 +162,10 @@ public final class AddByIDsJob extends AbstractMailJob {
                     indexAccess.addEnvelopeData(documents);
                     break;
                 case BODY:
-                    indexAccess.addContent(documents);
+                    indexAccess.addContent(documents, true);
                     break;
                 default:
-                    indexAccess.addAttachments(documents);
+                    indexAccess.addAttachments(documents, true);
                     break;
                 }
             } catch (final OXException e) {
@@ -180,10 +177,10 @@ public final class AddByIDsJob extends AbstractMailJob {
                             indexAccess.addEnvelopeData(document);
                             break;
                         case BODY:
-                            indexAccess.addContent(document);
+                            indexAccess.addContent(document, true);
                             break;
                         default:
-                            indexAccess.addAttachments(document);
+                            indexAccess.addAttachments(document, true);
                             break;
                         }
                     } catch (final Exception inner) {

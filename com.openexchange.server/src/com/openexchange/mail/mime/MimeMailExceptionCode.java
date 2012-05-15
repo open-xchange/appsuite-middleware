@@ -2,9 +2,11 @@
 package com.openexchange.mail.mime;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -311,7 +313,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        return create(this, new Object[0]);
     }
 
     /**
@@ -321,7 +323,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return create(null, args);
     }
 
     /**
@@ -332,6 +334,21 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        final Category category = getCategory();
+        final MimeMailException ret;
+        if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+            ret = new MimeMailException(getNumber(), getMessage(), cause, args);
+        } else {
+            ret =
+                new MimeMailException(
+                    getNumber(),
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    cause,
+                    new Object[0]);
+            ret.setLogMessage(getMessage(), args);
+        }
+        ret.addCategory(category);
+        ret.setPrefix(getPrefix());
+        return ret;
     }
 }

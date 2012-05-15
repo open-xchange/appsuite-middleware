@@ -59,8 +59,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
@@ -68,6 +69,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 
@@ -328,7 +330,7 @@ public abstract class Consistency implements ConsistencyMBean {
             this.filesolver = filesolver;
         }
 
-        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor, final Consistency consistency) {
+        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor, final Consistency consistency) throws OXException {
             final String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
@@ -336,6 +338,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
             for(final String option : options) {
                 final String[] tuple = option.split("\\s*:\\s*");
+                if(tuple.length!=2){
+                	throw ConsistencyExceptionCodes.MALFORMED_POLICY.create();
+                }
                 final String condition = tuple[0];
                 final String action = tuple[1];
                 if("missing_file_for_infoitem".equals(condition)) {

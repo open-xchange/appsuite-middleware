@@ -49,9 +49,8 @@
 
 package com.openexchange.consistency;
 
-import static com.openexchange.consistency.ConsistencyExceptionMessages.COMMUNICATION_PROBLEM_MSG;
-import static com.openexchange.consistency.ConsistencyExceptionMessages.REGISTRATION_FAILED_MSG;
-import static com.openexchange.consistency.ConsistencyExceptionMessages.UNREGISTRATION_FAILED_MSG;
+import static com.openexchange.consistency.ConsistencyExceptionMessages.*;
+
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -68,7 +67,9 @@ public enum ConsistencyExceptionCodes implements OXExceptionCode {
     /** Registration of consistency MBean failed. */
     REGISTRATION_FAILED(REGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 2),
     /** Unregistration of consistency MBean failed. */
-    UNREGISTRATION_FAILED(UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3);
+    UNREGISTRATION_FAILED(UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3),
+    /** User entered malformed policy string. */
+    MALFORMED_POLICY(MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4);
 
     private final String message;
     private final Category category;

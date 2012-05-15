@@ -63,7 +63,6 @@ import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipDingeMacher;
 import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;

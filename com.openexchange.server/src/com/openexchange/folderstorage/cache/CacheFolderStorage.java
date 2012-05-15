@@ -72,7 +72,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -106,6 +105,7 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -919,9 +919,13 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             if (!FolderStorage.ROOT_ID.equals(parentId)) {
                 removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
-                final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, true, storageParameters);
-                if (parentFolder.isCacheable()) {
-                    putFolder(parentFolder, treeId, storageParameters);
+                try {
+                    final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, true, storageParameters);
+                    if (parentFolder.isCacheable()) {
+                        putFolder(parentFolder, treeId, storageParameters);
+                    }
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
         } finally {

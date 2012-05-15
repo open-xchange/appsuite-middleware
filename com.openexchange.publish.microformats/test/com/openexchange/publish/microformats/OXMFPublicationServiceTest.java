@@ -63,7 +63,6 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplatingHelper;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OXMFPublicationServiceTest}

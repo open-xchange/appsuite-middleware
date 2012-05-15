@@ -57,10 +57,8 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexAccess;
 import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -85,6 +83,7 @@ import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.job.AddByIDsJob;
 import com.openexchange.service.indexing.mail.job.ChangeByIDsJob;
 import com.openexchange.service.indexing.mail.job.ChangeByMessagesJob;
+import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.service.indexing.mail.job.RemoveByIDsJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
@@ -97,8 +96,6 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -147,8 +144,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      */
     protected static <V> MailResult<V> takeNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
         try {
-            final Future<MailResult<V>> future = completionService.take();
-            return getFrom(future);
+            return getFrom(completionService.take());
         } catch (final InterruptedException e) {
             // Keep interrupted state
             Thread.currentThread().interrupt();
@@ -165,10 +161,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      */
     protected static <V> MailResult<V> tryTakeNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
         final Future<MailResult<V>> future = completionService.poll();
-        if (null == future) {
-            return null;
-        }
-        return getFrom(future);
+        return null == future ? null : getFrom(future);
     }
 
     /**
@@ -188,10 +181,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
-        if (null == future) {
-            return null;
-        }
-        return getFrom(future);
+        return null == future ? null : getFrom(future);
     }
 
     /**
@@ -286,13 +276,20 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+        if (null == getIndexFacadeService()) {
             return messageStorage.getMessages(folder, mailIds, fields);
         }
         final MailFields mfs = new MailFields(fields);
-        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
-            return messageStorage.getMessages(folder, mailIds, fields);
+        IndexAccess<MailMessage> indexAccess = null;
+        try {
+            indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+            if (!SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                return messageStorage.getMessages(folder, mailIds, fields);
+            }
+        } finally {
+            IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
         }
+
         try {
             /*
              * Obtain folder
@@ -364,13 +361,21 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-    	if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+    	if (null == getIndexFacadeService()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
-        final MailFields mfs = new MailFields(fields);
-        if (!SolrMailUtility.getIndexableFields().containsAll(mfs)) {
-            return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+    	
+        final MailFields mfs = new MailFields(fields);        
+        IndexAccess<MailMessage> indexAccess = null;
+        try {
+            indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+            if (!SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            }
+        } finally {
+            IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
         }
+        
         try {
             /*
              * Obtain folder
@@ -568,7 +573,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        if (null == SmalServiceLookup.getServiceStatic(IndexFacadeService.class)) {
+        if (null == getIndexFacadeService()) {
             return messageStorage.getMessage(folder, mailId, markSeen);
         }
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
@@ -594,6 +599,25 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
+        if (fast) {
+            messageStorage.moveMessages(sourceFolder, destFolder, mailIds, true);
+            /*
+             * Remover job
+             */
+            final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
+            removerJob.setMailIds(asList(mailIds));
+            removerJob.setPriority(9);
+            submitJob(removerJob);
+            /*
+             * Schedule folder job
+             */
+            final FolderJob folderJob = new FolderJob(destFolder, createJobInfo());
+            submitJob(folderJob);
+            /*
+             * Return depending on "fast" parameter
+             */
+            return new String[0];
+        }
         final String[] newIds = messageStorage.moveMessages(sourceFolder, destFolder, mailIds, false);
         /*
          * Adder job
@@ -606,13 +630,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
          * Remover job
          */
         final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
-        adderJob.setMailIds(asList(mailIds));
-        adderJob.setPriority(9);
+        removerJob.setMailIds(asList(mailIds));
+        removerJob.setPriority(9);
         submitJob(removerJob);
         /*
          * Return depending on "fast" parameter
          */
-        return fast ? new String[0] : newIds;
+        return newIds;
     }
 
     @Override

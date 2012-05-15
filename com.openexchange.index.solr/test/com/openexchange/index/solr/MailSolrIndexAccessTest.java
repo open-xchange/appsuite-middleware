@@ -161,7 +161,7 @@ public class MailSolrIndexAccessTest extends TestCase {
          * @param triggerType
          */
         public MockMailSolrIndexAccess(int docs) {
-            super(new SolrCoreIdentifier(1, 1, 1), null);
+            super(new SolrCoreIdentifier(1, 1, 1));
             for (int i = 0; i < docs; i++) {                
                 index.add(Collections.singletonMap("time_" + i, (Object) System.currentTimeMillis()));
             }

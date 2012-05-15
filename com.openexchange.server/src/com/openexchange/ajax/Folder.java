@@ -75,7 +75,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,6 +95,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -114,6 +114,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -262,7 +263,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
             actionGetFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on /ajax/folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on "+ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "folders"));
         }
     }
 
@@ -282,7 +283,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase("removetestfolders")) {
             actionPutRemoveTestFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on /ajax/folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on "+ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "folders"));
         }
     }
 

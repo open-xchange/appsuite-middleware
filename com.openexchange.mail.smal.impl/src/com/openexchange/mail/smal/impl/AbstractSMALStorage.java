@@ -50,11 +50,16 @@
 package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -139,6 +144,13 @@ public abstract class AbstractSMALStorage {
     private volatile MailJobInfo jobInfo;
 
     /**
+     * Whether denoted account is blacklisted.
+     * <p>
+     * See {@link #isBlacklisted()}
+     */
+    protected Boolean blacklisted;
+
+    /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
     protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
@@ -153,6 +165,81 @@ public abstract class AbstractSMALStorage {
     }
 
     /**
+     * Checks if denoted account is blacklisted
+     * 
+     * @return <code>true</code> if blacklisted; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean isBlacklisted() throws OXException {
+        if (null == blacklisted) {
+            final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+            final Object param = sessionCache.getParameter(accountId, "com.openexchange.mail.smal.isBlacklisted");
+            if (null == param) {
+                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+                blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+                sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+            } else {
+                try {
+                    blacklisted = (Boolean) param;
+                } catch (final ClassCastException e) {
+                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                    final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+                    blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+                    sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+                }
+            }
+        }
+        return blacklisted.booleanValue();
+    }
+
+    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
+
+    private static boolean contains(final String host, final String blacklist) {
+        if (isEmpty(host) || isEmpty(blacklist)) {
+            return false;
+        }
+        for (final String blacklistedHost : SPLIT_CSV.split(blacklist, 0)) {
+            if (host.equals(blacklistedHost)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Gets the <tt>IndexFacadeService</tt> service.
+     * 
+     * @return The <tt>IndexFacadeService</tt> service or <code>null</code> if absent or disabled via configuration
+     * @throws OXException If user configuration cannot be read
+     */
+    protected IndexFacadeService getIndexFacadeService() throws OXException {
+        final IndexFacadeService facadeService = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        return null == facadeService ? null : (isBlacklisted() ? null : facadeService);
+    }
+
+    /**
+     * Gets the {@link ConfigViewFactory} service.
+     * 
+     * @return The service
+     */
+    protected ConfigViewFactory getConfigViewFactory() {
+        return SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+    }
+
+    /**
      * Initiates processing of given folder.
      * 
      * @param fullName The folder full name
@@ -164,7 +251,11 @@ public abstract class AbstractSMALStorage {
         final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-            return processor.processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), accountId, session, Collections.<String, Object> emptyMap());
+            return processor.processFolder(
+                new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)),
+                accountId,
+                session,
+                Collections.<String, Object> emptyMap());
         }
         return processFolder(folderStorage.getFolder(fullName));
     }

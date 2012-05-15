@@ -9,6 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.osgi,
  com.openexchange.api2,
+ com.openexchange.config.cascade,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.group,
  com.openexchange.groupware,

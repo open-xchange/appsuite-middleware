@@ -49,10 +49,6 @@
 
 package com.openexchange.index.solr.mail;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,14 +59,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link SolrMailField}
@@ -108,8 +102,9 @@ public enum SolrMailField {
     CONTENT_FLAG("CONTENT_FLAG", MailIndexField.CONTENT_FLAG, "param27"),
     CONTENT("CONTENT", MailIndexField.CONTENT, "param28");
 
-    private static final String PROP_FILE = "solr_mailfields.properties";
 
+    private static final String PROP_FILE = "solr_mailfields.properties";
+    
     private static final Map<MailIndexField, SolrMailField> fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
 
     private static final Set<MailIndexField> indexedFields;
@@ -128,7 +123,7 @@ public enum SolrMailField {
         for (final SolrMailField field : values()) {
             fieldMapping.put(field.indexField, field);
 
-            if (null == field.solrName()) {
+            if (field.solrName() != null) {
                 set.add(field.indexField);
             }
         }
@@ -242,20 +237,7 @@ public enum SolrMailField {
     private static synchronized void checkProperties() {
         if (properties == null) {
             final ConfigurationService config = Services.getService(ConfigurationService.class);
-            final String solrConfDir = config.getProperty(SolrProperties.CONFIG_DIR);
-
-            properties = new Properties();
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(solrConfDir + File.separator + PROP_FILE);
-                properties.load(fis);
-            } catch (final FileNotFoundException e) {
-                throw new IllegalStateException("Could not load solr mail fields from property file.", e);
-            } catch (final IOException e) {
-                throw new IllegalStateException("Could not load solr mail fields from property file.", e);
-            } finally {
-                IOUtils.closeQuietly(fis);
-            }
+            properties = config.getFile(PROP_FILE);
         }
     }
 

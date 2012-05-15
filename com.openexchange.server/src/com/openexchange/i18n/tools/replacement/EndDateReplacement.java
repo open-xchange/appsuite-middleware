@@ -87,7 +87,7 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      */
     public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale, final TimeZone timeZone) {
         super(
-            correctDayOfMonth(endDate, fulltime),
+            correctDayOfMonth(endDate, fulltime, isTask),
             !fulltime,
             isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE,
             locale,
@@ -102,13 +102,13 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * to move (when printing) the appointment into the previous day, if only by some milliseconds, so that the appointment ends
      * shortly before midnight the next day, in our example on the 4th of August.
      */
-    private static Date correctDayOfMonth(final Date endDate, final boolean fulltime) {
+    private static Date correctDayOfMonth(final Date endDate, final boolean fulltime, boolean isTask) {
         /*-
          * Previous implementation:
          *
          * return fulltime && null != endDate ? new Date(endDate.getTime()-1) : endDate;
          */
-        if (!fulltime || null == endDate) {
+        if (!fulltime || null == endDate || isTask) {
             return endDate;
         }
         final Calendar calendar = GregorianCalendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));

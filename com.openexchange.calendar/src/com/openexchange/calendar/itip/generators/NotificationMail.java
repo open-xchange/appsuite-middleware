@@ -66,8 +66,6 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.notify.State.Type;
 

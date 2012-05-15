@@ -52,12 +52,9 @@ package com.openexchange.calendar.itip.generators;
 import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.ITipRole;
-import com.openexchange.calendar.itip.MockITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
@@ -65,18 +62,13 @@ import com.openexchange.calendar.itip.generators.NotificationParticipantResolver
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
-import com.openexchange.session.SimSession;
-
 import static com.openexchange.time.TimeTools.D;
 
 

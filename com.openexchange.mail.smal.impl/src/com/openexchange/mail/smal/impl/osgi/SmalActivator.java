@@ -54,13 +54,13 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.mail.smal.impl.SmalProvider;
@@ -99,7 +99,7 @@ public class SmalActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class };
+            ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override

@@ -96,9 +96,7 @@ public enum MailIndexField implements IndexField {
     
     
     private static final Map<MailField, EnumSet<MailIndexField>> reverseMap = new EnumMap<MailField, EnumSet<MailIndexField>>(MailField.class);
-    
-    private static final EnumSet<MailField> indexableMailFields = EnumSet.noneOf(MailField.class);
-    
+        
     private final MailField mailField;
     
     static {
@@ -111,13 +109,8 @@ public enum MailIndexField implements IndexField {
                     reverseMap.put(tmpMailField, enumSet);
                 }
                 enumSet.add(field);                
-                indexableMailFields.add(tmpMailField);
             }
         }
-    }
-    
-    public static MailField[] getIndexableMailFields() {
-        return indexableMailFields.toArray(new MailField[indexableMailFields.size()]);
     }
     
     public static Set<MailIndexField> getFor(final MailField[] mailFields) {

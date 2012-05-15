@@ -64,6 +64,7 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -73,6 +74,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -158,7 +160,7 @@ public class SyncServlet extends PermissionServlet {
 			actionPutClearFolderContent(req, resp);
 		} else {
 			throw getWrappingOXException(new Exception("Action \"" + actionStr
-					+ "\" NOT supported via PUT on /ajax/sync"));
+					+ "\" NOT supported via PUT on "+ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "sync"));
 		}
 	}
 

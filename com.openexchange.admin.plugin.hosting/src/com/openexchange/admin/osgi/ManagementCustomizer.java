@@ -52,19 +52,19 @@ package com.openexchange.admin.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.monitoring.Monitor;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 
 /**
  * Starts the monitoring for the administration daemon if {@link ManagementService} appears.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ManagementCustomizer implements ServiceTrackerCustomizer {
+public final class ManagementCustomizer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
     private static final Log LOG = LogFactory.getLog(ManagementCustomizer.class);
 
@@ -72,36 +72,36 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer {
 
     private ObjectName objName;
 
-    public ManagementCustomizer(BundleContext context) {
+    public ManagementCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        ManagementService management = (ManagementService) context.getService(reference);
+    public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+        final ManagementService management = context.getService(reference);
         try {
             objName = new ObjectName("com.openexchange.admin.monitor", "name", "CallMonitor");
             management.registerMBean(objName, new Monitor());
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return management;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
-        ManagementService management = (ManagementService) service;
+    public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
+        final ManagementService management = service;
         if (null != objName) {
             try {
                 management.unregisterMBean(objName);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             objName = null;

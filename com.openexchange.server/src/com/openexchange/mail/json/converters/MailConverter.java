@@ -93,10 +93,21 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailConverter.class));
 
+    private static final MailConverter INSTANCE = new MailConverter();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static MailConverter getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Initializes a new {@link MailConverter}.
      */
-    public MailConverter() {
+    private MailConverter() {
         super();
     }
 

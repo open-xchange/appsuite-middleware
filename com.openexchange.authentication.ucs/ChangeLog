@@ -1,0 +1,16 @@
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2008-07-07 - manuel.kraft@open-xchange.com
+
+  - Fixed build.xml install target and added "localhost" as default imap host.
+
+* 2008-07-07 - manuel.kraft@open-xchange.com
+
+  - Fixed Univention Corporate Server LoginImpl SP4 OSGi!
+
+
+* 2008-07-04 - benjamin.otterbach@open-xchange.com
+
+  - Upgraded Univention Corporate Server LoginImpl to SP4 OSGi architecture.

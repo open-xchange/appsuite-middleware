@@ -55,7 +55,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
@@ -73,12 +72,14 @@ public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
     
+//    private static final boolean REGISTER_TEST = true;
+    
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            LanguageDetectionService.class, SolrAccessService.class };
+            SolrAccessService.class };
     }
 
     @Override
@@ -90,7 +91,10 @@ public class SolrIndexActivator extends HousekeepingActivator {
         solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
-//        registerService(CommandProvider.class, new UtilCommandProvider());
+//        if (REGISTER_TEST) {
+//        	registerService(CommandProvider.class, new UtilCommandProvider());
+//        }
+        
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
@@ -103,13 +107,15 @@ public class SolrIndexActivator extends HousekeepingActivator {
          * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
          */
     }
+    
 //    public class UtilCommandProvider implements CommandProvider {
 //
 //        public UtilCommandProvider() {
 //            super();
 //        }
 //
-//        public String getHelp() {
+//        @Override
+//		public String getHelp() {
 //            final StringBuilder help = new StringBuilder();
 //            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
 //            return help.toString();

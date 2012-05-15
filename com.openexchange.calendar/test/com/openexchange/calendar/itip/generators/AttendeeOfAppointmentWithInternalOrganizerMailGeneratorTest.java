@@ -51,7 +51,6 @@ package com.openexchange.calendar.itip.generators;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static com.openexchange.time.TimeTools.*;
 import java.util.ArrayList;

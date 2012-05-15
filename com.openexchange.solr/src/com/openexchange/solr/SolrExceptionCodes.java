@@ -114,7 +114,11 @@ public enum SolrExceptionCodes implements OXExceptionCode {
     /**
      * The affected solr core %1$s is not started up yet. Please try again later.
      */
-    CORE_NOT_STARTED(SolrExceptionMessages.CORE_NOT_STARTED_MSG, Category.CATEGORY_ERROR, 1013)
+    CORE_NOT_STARTED(SolrExceptionMessages.CORE_NOT_STARTED_MSG, Category.CATEGORY_ERROR, 1013),
+    /**
+     * The document with uuid %1$s could not be found.
+     */
+    DOCUMENT_NOT_FOUND(SolrExceptionMessages.DOCUMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1014),
     
     ;
 

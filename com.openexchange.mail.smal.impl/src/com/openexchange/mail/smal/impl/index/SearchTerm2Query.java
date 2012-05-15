@@ -49,33 +49,7 @@
 
 package com.openexchange.mail.smal.impl.index;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.solr.mail.SolrMailConstants;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.BccTerm;
-import com.openexchange.mail.search.BodyTerm;
-import com.openexchange.mail.search.BooleanTerm;
-import com.openexchange.mail.search.CcTerm;
-import com.openexchange.mail.search.ComparablePattern;
-import com.openexchange.mail.search.FlagTerm;
-import com.openexchange.mail.search.FromTerm;
-import com.openexchange.mail.search.HeaderTerm;
-import com.openexchange.mail.search.NOTTerm;
-import com.openexchange.mail.search.ORTerm;
-import com.openexchange.mail.search.ReceivedDateTerm;
-import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.search.SearchTermVisitor;
-import com.openexchange.mail.search.SentDateTerm;
-import com.openexchange.mail.search.SizeTerm;
-import com.openexchange.mail.search.SubjectTerm;
-import com.openexchange.mail.search.ToTerm;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.

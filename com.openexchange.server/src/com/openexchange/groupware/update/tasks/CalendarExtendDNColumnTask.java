@@ -104,33 +104,21 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
     private static final String SQL_MODIFY = "ALTER TABLE #TABLE# MODIFY dn varchar(" + DESIRED_SIZE + ") collate utf8_unicode_ci default NULL";
 
     private void modifyColumnInTable(final String tableName, final int contextId) throws OXException {
-        if (checkColumnInTable(tableName, contextId)) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going to extend size of column `dn` in table `" + tableName + "`.");
-            }
-            /*
-             * Column does not exist yet
-             */
-            final Connection writeCon;
-            try {
-                writeCon = Database.getNoTimeout(contextId, true);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
-            /*
-             * Check if size needs to be increased
-             */
+        if (LOG.isInfoEnabled()) {
+            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going to extend size of column `dn` in table `" + tableName + "`.");
+        }
+        final Connection con = Database.getNoTimeout(contextId, true);
+        try {
+            // Check if size needs to be increased
             ResultSet rs = null;
             try {
-                final DatabaseMetaData metadata = writeCon.getMetaData();
+                final DatabaseMetaData metadata = con.getMetaData();
                 rs = metadata.getColumns(null, null, tableName, null);
                 final String columnName = "dn";
                 while (rs.next()) {
                     final String name = rs.getString("COLUMN_NAME");
                     if (columnName.equals(name)) {
-                        /*
-                         * A column whose VARCHAR size shall possibly be changed
-                         */
+                        // A column whose VARCHAR size shall possibly be changed
                         final int size = rs.getInt("COLUMN_SIZE");
                         if (size >= DESIRED_SIZE) {
                             LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Column " + tableName + '.' + name + " with size " + size + " is already equal to/greater than " + DESIRED_SIZE);
@@ -143,54 +131,26 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             } finally {
                 closeSQLStuff(rs);
                 rs = null;
-                Database.back(contextId, true, writeCon);
             }
-            /*
-             * ALTER TABLE...
-             */
+            // ALTER TABLE...
             PreparedStatement stmt = null;
             try {
-                stmt = writeCon.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
+                stmt = con.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw wrapSQLException(e);
             } finally {
-                closeSQLStuff(null, stmt);
-                Database.backNoTimeout(contextId, true, writeCon);
+                closeSQLStuff(stmt);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Size of column `dn` in table `" + tableName + "` successfully extended.");
-            }
-        }
-    }
-
-    private boolean checkColumnInTable(final String tableName, final int contextId) throws OXException {
-        final Connection writeCon = Database.get(contextId, true);
-        ResultSet rs = null;
-        try {
-            final DatabaseMetaData metadata = writeCon.getMetaData();
-            rs = metadata.getColumns(null, null, tableName, null);
-            while (rs.next()) {
-                final String name = rs.getString("COLUMN_NAME");
-                if ("dn".equals(name)) {
-                    final int size = rs.getInt("COLUMN_SIZE");
-                    return (size < DESIRED_SIZE);
-                }
-            }
-            throw notFound(tableName);
-        } catch (final SQLException e) {
-            throw wrapSQLException(e);
         } finally {
-            closeSQLStuff(rs);
-            Database.back(contextId, true, writeCon);
+            Database.backNoTimeout(contextId, true, con);
+        }
+        if (LOG.isInfoEnabled()) {
+            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Size of column `dn` in table `" + tableName + "` successfully extended.");
         }
     }
 
     private static OXException wrapSQLException(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-    }
-
-    private static OXException notFound(final String tableName) {
-        return UpdateExceptionCodes.COLUMN_NOT_FOUND.create("dn", tableName);
     }
 }

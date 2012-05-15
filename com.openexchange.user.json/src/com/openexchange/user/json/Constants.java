@@ -66,7 +66,7 @@ public final class Constants {
     /**
      * The servlet path.
      */
-    public static final String SERVLET_PATH = "/ajax/" + MODULE;
+    public static final String SERVLET_PATH_APPENDIX = MODULE;
 
     /**
      * The user address book folder identifier.

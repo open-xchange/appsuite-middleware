@@ -135,12 +135,12 @@ public class DefaultDispatcherTest extends TestCase {
             private boolean skipped = false;
 
             @Override
-            public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
+            public AJAXRequestData incoming(final AJAXRequestData requestData, final ServerSession session) throws OXException {
                 if (!skipped) {
                     skipped = true;
                     throw new FlowControl.Later();
                 }
-                return super.incoming(request, session);
+                return super.incoming(requestData, session);
             }
         };
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
@@ -176,12 +176,12 @@ public class DefaultDispatcherTest extends TestCase {
             private int skipCount = 0;
 
             @Override
-            public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
+            public AJAXRequestData incoming(final AJAXRequestData requestData, final ServerSession session) throws OXException {
                 if (skipCount < 2) {
                     skipCount++;
                     throw new FlowControl.Later();
                 }
-                return super.incoming(request, session);
+                return super.incoming(requestData, session);
             }
         };
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
@@ -219,12 +219,12 @@ public class DefaultDispatcherTest extends TestCase {
             private boolean skipped = false;
 
             @Override
-            public AJAXRequestResult outgoing(final AJAXRequestData request,final AJAXRequestResult res, final ServerSession session) throws OXException {
+            public AJAXRequestResult outgoing(final AJAXRequestData requestData,final AJAXRequestResult res, final ServerSession session) throws OXException {
                 if (!skipped) {
                     skipped = true;
                     throw new FlowControl.Later();
                 }
-                return super.outgoing(request, res, session);
+                return super.outgoing(requestData, res, session);
             }
         };
 
@@ -260,12 +260,12 @@ public class DefaultDispatcherTest extends TestCase {
             private int skipCount = 0;
 
             @Override
-            public AJAXRequestResult outgoing(final AJAXRequestData request,final AJAXRequestResult res, final ServerSession session) throws OXException {
+            public AJAXRequestResult outgoing(final AJAXRequestData requestData,final AJAXRequestResult res, final ServerSession session) throws OXException {
                 if (skipCount < 2) {
                     skipCount++;
                     throw new FlowControl.Later();
                 }
-                return super.outgoing(request, res, session);
+                return super.outgoing(requestData, res, session);
             }
         };
 
@@ -352,14 +352,14 @@ public class DefaultDispatcherTest extends TestCase {
         }
 
         @Override
-        public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
-            this.request = request;
+        public AJAXRequestData incoming(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+            this.request = requestData;
             LOG.add(name+":incoming");
-            return request;
+            return requestData;
         }
 
         @Override
-        public AJAXRequestResult outgoing(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
             this.result = result;
             LOG.add(name+":outgoing");
             return result;

@@ -63,6 +63,9 @@ public final class ConsistencyExceptionMessages implements LocalizableStrings {
     public static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
 
     public static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
+    
+    public static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
+    
     private ConsistencyExceptionMessages() {
         super();
     }

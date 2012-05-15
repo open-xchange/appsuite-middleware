@@ -55,15 +55,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.SQLException;
 import java.util.Hashtable;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
@@ -77,6 +73,7 @@ import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.log.LogFactory;
 
 public class Activator implements BundleActivator {
 
@@ -86,7 +83,7 @@ public class Activator implements BundleActivator {
 
     private static OXReseller reseller = null;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         try {
             initCache();
 
@@ -99,10 +96,10 @@ public class Activator implements BundleActivator {
             registry.bind(OXResellerInterface.RMI_NAME, oxresell_stub);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
-            Hashtable<String, String> props = new Hashtable<String, String>();
+            final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "BasicAuthenticator");
             LOG.info(BasicAuthenticatorPluginInterface.class.getName());
-            ServiceRegistration reg = context.registerService(BasicAuthenticatorPluginInterface.class.getName(), new ResellerAuth(), props);
+            ServiceRegistration<?> reg = context.registerService(BasicAuthenticatorPluginInterface.class, new ResellerAuth(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
@@ -111,7 +108,7 @@ public class Activator implements BundleActivator {
             props.clear();
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
-            reg = context.registerService(OXContextPluginInterface.class.getName(), new OXResellerContextImpl(), props);
+            reg = context.registerService(OXContextPluginInterface.class, new OXResellerContextImpl(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
@@ -120,7 +117,7 @@ public class Activator implements BundleActivator {
             props.clear();
             props.put("name", "OXUser");
             LOG.info(OXUserPluginInterface.class.getName());
-            reg = context.registerService(OXUserPluginInterface.class.getName(), new OXResellerUserImpl(), props);
+            reg = context.registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
@@ -135,16 +132,13 @@ public class Activator implements BundleActivator {
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (OXGenericException e) {
+        } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
             throw e;
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         try {
             if (null != registry) {
                 registry.unbind(OXResellerInterface.RMI_NAME);
@@ -161,8 +155,8 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private void initCache() throws SQLException, OXGenericException {
-        AdminCacheExtended cache = new AdminCacheExtended();
+    private void initCache() throws OXGenericException {
+        final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;

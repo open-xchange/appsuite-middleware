@@ -63,13 +63,15 @@ import java.util.Properties;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.w3c.tidy.Report;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
+import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -85,7 +87,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -101,6 +103,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
+            HTMLImageFilterHandler.PREFIX.set(getService(DispatcherPrefixService.class));
             /*
              * Configure
              */
@@ -139,6 +142,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              * Restore
              */
             restore();
+            HTMLImageFilterHandler.PREFIX.set(null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

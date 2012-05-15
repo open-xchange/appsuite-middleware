@@ -6,7 +6,7 @@
     <property name="testBundlesDir" value="testBundles"/>
 
     <!-- Constants -->
-    <property name="conf.dir" value="conf"/>
+    <property name="confDir" value="conf"/>
     <property name="tmpDir" value="tmp"/>
 
        <!-- Compile Constants -->
@@ -99,7 +99,7 @@
 
     <target name="run-i18n-tests">
         <antcall target="run-tests">
-            <param name="testJar" value="open-xchange-unit-tests.jar"/>
+            <param name="testJar" value="${basedir}/open-xchange-unit-tests.jar"/>
             <param name="testClass" value="com.openexchange.test.I18nTests"/>
         </antcall>
     </target>
@@ -111,13 +111,12 @@
             <classpath>
                 <path refid="classpath"/>
                 <pathelement location="${testJar}"/>
-                <pathelement location="test-common.jar"/>
             </classpath>
 
             <test name="${testClass}" todir="${testXmlDir}"/>
 
             <formatter type="xml"/>
-            <sysproperty key="test.propfile" value="${conf.dir}/test.properties"/>
+            <sysproperty key="test.propfile" value="${confDir}/test.properties"/>
             <sysproperty key="user.language" value="en"/>
             <sysproperty key="user.country" value="US"/>
         </junit>

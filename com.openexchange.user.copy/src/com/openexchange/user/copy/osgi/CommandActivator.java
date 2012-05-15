@@ -65,10 +65,9 @@ import com.openexchange.user.copy.CopyUserTaskService;
  */
 public class CommandActivator extends HousekeepingActivator {
 
-    public class UtilCommandProvider implements CommandProvider {
+    public static final class UtilCommandProvider implements CommandProvider {
 
         private final BundleContext context;
-
 
         public UtilCommandProvider(final BundleContext context) {
             super();
@@ -101,19 +100,11 @@ public class CommandActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
-     */
     @Override
     public void startBundle() throws Exception {
         registerService(CommandProvider.class, new UtilCommandProvider(context));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
-     */
     @Override
     public void stopBundle() throws Exception {
         unregisterServices();
@@ -122,8 +113,7 @@ public class CommandActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
 }

@@ -116,6 +116,10 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Used to indicate that session for autologin can not be found.
     public static final String NO_SESSION_FOUND_MSG = "No session found.";
 
+    // Thrown when an AuthenticationService implementation does not support the auto login method.
+    // %s is replaced with the implementations name.
+    public static final String NOT_SUPPORTED_MSG = "%s does not support an auto login authentication.";
+
     private LoginExceptionMessages() {
         super();
     }

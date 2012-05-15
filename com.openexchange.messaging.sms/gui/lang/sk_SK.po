@@ -1,0 +1,66 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2011-07-22 08:55+0200\n"
+"PO-Revision-Date: 2011-07-25 14:26+0100\n"
+"Language-Team: NAME <EMAIL>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+msgid "From"
+msgstr "Od"
+
+msgid "To"
+msgstr "Komu"
+
+msgid "Send SMS"
+msgstr "Odoslať SMS"
+
+msgid "Send"
+msgstr "Odoslať"
+
+msgid "Cancel"
+msgstr "Zrušiť"
+
+#. Character and message count status
+#. %1$d is the number of used characters
+#. %2$s is the number of corresponding messages as text
+msgid "%1$d character (%2$s)"
+msgid_plural "%1$d characters (%2$s)"
+msgstr[0] "%1$d znak (%2$s)"
+msgstr[1] "%1$d znaky (%2$s)"
+msgstr[2] "%1$d znakov (%2$s)"
+
+#. Message count status
+#. %d is the number of messages
+msgid "%d message"
+msgid_plural "%d messages"
+msgstr[0] "%d správa"
+msgstr[1] "%d správy"
+msgstr[2] "%d správ"
+
+#. Character count status
+#. %1$d is the number of used characters
+#. %2$d is the number of remaining characters
+#. %3$d is the total number of available characters
+msgid "%1$d / %3$d"
+msgstr "%1$d / %3$d"
+
+msgid "MMS"
+msgstr "MMS"
+
+#. %s is the email address used as signature
+msgid "Add signature: %s"
+msgstr "Pridať podpis: %s"
+
+msgid "Invalid CAPTCHA, please try again."
+msgstr "Chyba v opisovaní CAPTCHA. Prosím, skúste to znova."
+
+msgid "New SMS"
+msgstr "Nová SMS"
+
+msgid "SMS"
+msgstr "SMS"
+
