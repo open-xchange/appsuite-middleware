@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -176,7 +177,7 @@ public abstract class AbstractSMALStorage {
             if (null == param) {
                 final ConfigView view = getConfigViewFactory().getView(userId, contextId);
                 final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
-                blacklisted = Boolean.valueOf(!isEmpty(blacklist) || blacklist.indexOf(delegateMailAccess.getMailConfig().getServer()) >= 0);
+                blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
                 sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
             } else {
                 try {
@@ -184,25 +185,27 @@ public abstract class AbstractSMALStorage {
                 } catch (final ClassCastException e) {
                     final ConfigView view = getConfigViewFactory().getView(userId, contextId);
                     final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
-                    blacklisted = Boolean.valueOf(!isEmpty(blacklist) || blacklist.indexOf(delegateMailAccess.getMailConfig().getServer()) >= 0);
+                    blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+                    sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
                 }
             }
         }
         return blacklisted.booleanValue();
     }
 
-    /**
-     * Gets the <tt>IndexFacadeService</tt> service.
-     * 
-     * @return The <tt>IndexFacadeService</tt> service or <code>null</code> if absent or disabled via configuration 
-     * @throws OXException If user configuration cannot be read
-     */
-    protected IndexFacadeService getIndexFacadeService() throws OXException {
-        final IndexFacadeService facadeService = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
-        if (null == facadeService) {
-            return null;
+    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
+
+    private static boolean contains(final String host, final String blacklist) {
+        if (isEmpty(host) || isEmpty(blacklist)) {
+            return false;
         }
-        return isBlacklisted() ? null : facadeService;
+        final String[] strings = SPLIT_CSV.split(blacklist, 0);
+        for (final String string : strings) {
+            if (host.equals(string)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isEmpty(final String string) {
@@ -215,6 +218,20 @@ public abstract class AbstractSMALStorage {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets the <tt>IndexFacadeService</tt> service.
+     * 
+     * @return The <tt>IndexFacadeService</tt> service or <code>null</code> if absent or disabled via configuration
+     * @throws OXException If user configuration cannot be read
+     */
+    protected IndexFacadeService getIndexFacadeService() throws OXException {
+        final IndexFacadeService facadeService = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        if (null == facadeService) {
+            return null;
+        }
+        return isBlacklisted() ? null : facadeService;
     }
 
     /**
@@ -238,7 +255,11 @@ public abstract class AbstractSMALStorage {
         final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-            return processor.processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), accountId, session, Collections.<String, Object> emptyMap());
+            return processor.processFolder(
+                new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)),
+                accountId,
+                session,
+                Collections.<String, Object> emptyMap());
         }
         return processFolder(folderStorage.getFolder(fullName));
     }
