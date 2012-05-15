@@ -71,9 +71,8 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 	}
 
 	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		final long value = from.getLong(getAjaxName());
-		this.set(to, new Date(value));
+	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+		this.set(to, from.isNull(getAjaxName()) ? null : new Date(from.getLong(getAjaxName())));
 	}
 
 	@Override

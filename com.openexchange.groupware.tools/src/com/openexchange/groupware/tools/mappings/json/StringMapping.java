@@ -67,8 +67,8 @@ public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
 	}
 
 	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		this.set(to, from.getString(getAjaxName()));
+	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+		this.set(to, from.isNull(getAjaxName()) ? null : from.getString(getAjaxName()));
 	}
 
 	@Override
