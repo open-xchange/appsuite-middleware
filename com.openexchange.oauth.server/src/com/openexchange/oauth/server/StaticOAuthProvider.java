@@ -73,7 +73,7 @@ import com.openexchange.config.ConfigurationService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SampleOAuthProvider {
+public class StaticOAuthProvider {
 
     /**
      * The OAuth validator.
@@ -87,11 +87,13 @@ public class SampleOAuthProvider {
     private static Properties consumerProperties = null;
 
     public static synchronized void loadConsumers() {
-        Properties consumerProperties = SampleOAuthProvider.consumerProperties;
-        if (null == consumerProperties) {
-            consumerProperties = OAuthProviderServiceLookup.getService(ConfigurationService.class).getFile("oauth-provider.properties");
-            SampleOAuthProvider.consumerProperties = consumerProperties;
+        Properties consumerProperties = StaticOAuthProvider.consumerProperties;
+        if (null != consumerProperties) {
+            // Already loaded
+            return;
         }
+        consumerProperties = OAuthProviderServiceLookup.getService(ConfigurationService.class).getFile("oauth-provider.properties");
+        StaticOAuthProvider.consumerProperties = consumerProperties;
 
         // for each entry in the properties file create an OAuthConsumer
         for (final Map.Entry<Object, Object> prop : consumerProperties.entrySet()) {
@@ -118,7 +120,7 @@ public class SampleOAuthProvider {
         // try to load from local cache if not throw exception
         final String consumer_key = requestMessage.getConsumerKey();
 
-        consumer = SampleOAuthProvider.ALL_CONSUMERS.get(consumer_key);
+        consumer = StaticOAuthProvider.ALL_CONSUMERS.get(consumer_key);
 
         if (consumer == null) {
             final OAuthProblemException problem = new OAuthProblemException("token_rejected");
@@ -136,7 +138,7 @@ public class SampleOAuthProvider {
         // try to load from local cache if not throw exception
         final String consumer_token = requestMessage.getToken();
         OAuthAccessor accessor = null;
-        for (final OAuthAccessor a : SampleOAuthProvider.ALL_TOKENS.keySet()) {
+        for (final OAuthAccessor a : StaticOAuthProvider.ALL_TOKENS.keySet()) {
             if (a.requestToken != null) {
                 if (a.requestToken.equals(consumer_token)) {
                     accessor = a;
