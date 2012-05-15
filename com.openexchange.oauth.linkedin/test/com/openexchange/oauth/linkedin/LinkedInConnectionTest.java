@@ -128,10 +128,17 @@ public class LinkedInConnectionTest extends TestCase {
         System.out.println();
     }
 
+    public void testUsageOfExistingAccount() {
+        final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
+        for (final Contact contact : contacts){
+            System.out.println(contact.getGivenName() + " " + contact.getSurName()+", "+contact.getEmail1());
+        }
+    }
+
     public void testXMLParsing() {
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("${workspace_loc}/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
             String string = "";
             String line;
             while ((line = reader.readLine()) != null) {
@@ -161,7 +168,7 @@ public class LinkedInConnectionTest extends TestCase {
         }
     }
 
-    public void testGetMyContacts() {
+    public void _testGetMyContacts() {
         final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
         boolean found = false;
         for (final Contact contact : contacts){
@@ -173,44 +180,44 @@ public class LinkedInConnectionTest extends TestCase {
     }
 
 
-    public void testGetContacts() {
+    public void _testGetContacts() {
     	linkedIn.getContacts(null,1,1,1);
     }
 
-    public void testGetProfileForEMail() throws OXException, JSONException {
+    public void _testGetProfileForEMail() throws OXException, JSONException {
     	final JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),null,1,1,1);
     	assertEquals("Tobias", fullProfile.getString("firstName"));
     	assertEquals("Prinz", fullProfile.getString("lastName"));
     }
 
-	public void testGetProfileForId() throws OXException, JSONException {
+	public void _testGetProfileForId() throws OXException, JSONException {
 		final JSONObject profile = linkedIn.getProfileForId(LI_ID_KLEIN,null,1,1,1);
 		assertEquals("Marcus", profile.getString("firstName"));
 	}
 
-	public void testGetConnections() throws Exception {
+	public void _testGetConnections() throws Exception {
 		final JSONObject connections = linkedIn.getConnections(null,1,1,1);
 		final List<String> ids = linkedIn.extractIds(connections.getJSONArray("values"));
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", ids.contains(LI_ID_KAUSS) || ids.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
 
-	public void testGetUsersConnectionsIds() throws OXException {
+	public void _testGetUsersConnectionsIds() throws OXException {
 		final List<String> connectionIds = linkedIn.getUsersConnectionsIds(null,1,1,1);
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", connectionIds.contains(LI_ID_KAUSS) || connectionIds.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
 
-	public void testGetRelationToViewer() throws Exception {
+	public void _testGetRelationToViewer() throws Exception {
 		final JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, null,1,1,1);
 		assertTrue("Should know Martin", relations.getJSONObject("relationToViewer").getInt("distance") > 0);
 	}
 
-	public void testNetworkUpdates() throws Exception {
+	public void _testNetworkUpdates() throws Exception {
 		final JSONObject updateObj = linkedIn.getNetworkUpdates(null,1,1,1);
 		final JSONArray updates = updateObj.getJSONArray("values");
 		assertTrue("Something should have happened lately", updates.length() > 0);
 	}
 
-	public void testMessageInbox() throws Exception {
+	public void _testMessageInbox() throws Exception {
 		final JSONObject inbox = linkedIn.getMessageInbox(null,1,1,1);
 		assertEquals("Should have zero messages.", 0, inbox.getInt("_total"));
 	}
