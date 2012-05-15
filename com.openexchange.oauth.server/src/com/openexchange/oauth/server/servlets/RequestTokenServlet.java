@@ -1,30 +1,61 @@
 /*
- * Copyright 2007 AOL, LLC.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    OPEN-XCHANGE legal information
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
  */
 
 package com.openexchange.oauth.server.servlets;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -35,47 +66,47 @@ import net.oauth.server.OAuthServlet;
 /**
  * Request token request handler
  * 
- * @author Praveen Alavilli
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RequestTokenServlet extends HttpServlet {
     
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         // nothing at this point
         try{
             SampleOAuthProvider.loadConsumers(config);
-        }catch(IOException e){
+        }catch(final IOException e){
             throw new ServletException(e.getMessage());
         }
     }
     
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
         processRequest(request, response);
     }
     
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response)
+    public void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
         processRequest(request, response);
     }
         
-    public void processRequest(HttpServletRequest request, HttpServletResponse response)
+    public void processRequest(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
 
         try {
-            OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
+            final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
             
-            OAuthConsumer consumer = SampleOAuthProvider.getConsumer(requestMessage);
+            final OAuthConsumer consumer = SampleOAuthProvider.getConsumer(requestMessage);
             
-            OAuthAccessor accessor = new OAuthAccessor(consumer);
+            final OAuthAccessor accessor = new OAuthAccessor(consumer);
             SampleOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
             {
                 // Support the 'Variable Accessor Secret' extension
                 // described in http://oauth.pbwiki.com/AccessorSecret
-                String secret = requestMessage.getParameter("oauth_accessor_secret");
+                final String secret = requestMessage.getParameter("oauth_accessor_secret");
                 if (secret != null) {
                     accessor.setProperty(OAuthConsumer.ACCESSOR_SECRET, secret);
                 }
@@ -84,13 +115,13 @@ public class RequestTokenServlet extends HttpServlet {
             SampleOAuthProvider.generateRequestToken(accessor);
             
             response.setContentType("text/plain");
-            OutputStream out = response.getOutputStream();
+            final OutputStream out = response.getOutputStream();
             OAuth.formEncode(OAuth.newList("oauth_token", accessor.requestToken,
                                            "oauth_token_secret", accessor.tokenSecret),
                              out);
             out.close();
             
-        } catch (Exception e){
+        } catch (final Exception e){
             SampleOAuthProvider.handleException(e, request, response, true);
         }
         
