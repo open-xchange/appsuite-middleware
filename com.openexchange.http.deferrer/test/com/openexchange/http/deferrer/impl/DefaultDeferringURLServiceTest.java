@@ -52,6 +52,7 @@ package com.openexchange.http.deferrer.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import junit.framework.TestCase;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 
 
 /**
@@ -63,22 +64,40 @@ public class DefaultDeferringURLServiceTest extends TestCase {
 
     TestDeferringURLService service = new TestDeferringURLService();
 
+    @Override
+    protected void setUp() throws Exception {
+        DefaultDeferringURLService.PREFIX.set(new DispatcherPrefixService() {
+            
+            @Override
+            public String getPrefix() {
+                return "/ajax/";
+            }
+        });
+        super.setUp();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        DefaultDeferringURLService.PREFIX.set(null);
+    }
+
     public void testBasic() throws UnsupportedEncodingException {
-        String url = "http://mydomain.de/ajax/someModule";
-        String encodedUrl = URLEncoder.encode(url, "UTF-8");
+        final String url = "http://mydomain.de/ajax/someModule";
+        final String encodedUrl = URLEncoder.encode(url, "UTF-8");
         assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect="+encodedUrl);
     }
 
     public void testEncoding() throws UnsupportedEncodingException {
-        String url = "http://mydomain.de/ajax/someModule?arg1=value1&arg2=value2";
-        String encodedUrl = URLEncoder.encode(url, "UTF-8");
+        final String url = "http://mydomain.de/ajax/someModule?arg1=value1&arg2=value2";
+        final String encodedUrl = URLEncoder.encode(url, "UTF-8");
         assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect="+encodedUrl);
 
     }
 
     public void testNoDeferrer() {
         service.setUrl(null);
-        String url = "http://mydomain.de/ajax/someModule";
+        final String url = "http://mydomain.de/ajax/someModule";
         assertTransformed(url, url);
     }
 
@@ -86,8 +105,8 @@ public class DefaultDeferringURLServiceTest extends TestCase {
         assertTrue(null == service.getDeferredURL(null));
     }
 
-    public void assertTransformed(String url, String expectedTransformation) {
-        String deferredURL = service.getDeferredURL(url);
+    public void assertTransformed(final String url, final String expectedTransformation) {
+        final String deferredURL = service.getDeferredURL(url);
         assertNotNull("URL was null: ", deferredURL);
         assertEquals(expectedTransformation, deferredURL);
     }
@@ -96,7 +115,7 @@ public class DefaultDeferringURLServiceTest extends TestCase {
 
         private String url = "https://www.open-xchange.com";
 
-        public void setUrl(String url) {
+        public void setUrl(final String url) {
             this.url = url;
         }
 
