@@ -56,10 +56,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageActionFactory}
@@ -100,7 +99,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
         if (null == url) {
             return null;
         }
-        final String ALIAS = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX;
+        final String ALIAS = DefaultDispatcherPrefixService.getInstance().getPrefix() + ALIAS_APPENDIX;
         String s = url;
         final int pos = s.indexOf(ALIAS);
         if (pos > 0) {
