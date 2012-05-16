@@ -53,10 +53,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import net.sourceforge.cardme.vcard.types.ExtendedType;
+
 import com.openexchange.carddav.CardDAVTest;
 import com.openexchange.carddav.StatusCodes;
+import com.openexchange.carddav.SyncToken;
+import com.openexchange.carddav.ThrowableHolder;
 import com.openexchange.carddav.VCardResource;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link NewTest}
@@ -154,4 +160,140 @@ public class NewTest extends CardDAVTest {
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
 	}
+	
+	public void testAddContactInSubfolderServer() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		/*
+		 * create folder and contact on server
+		 */
+    	String folderName = "testfolder_" + randomUID();
+    	FolderObject folder = super.createFolder(folderName);
+		super.rememberForCleanUp(folder);
+        FolderObject createdFolder = super.getFolder(folderName);
+        assertNotNull("folder not found on server", createdFolder);
+        assertEquals("foldername wrong", folderName, createdFolder.getFolderName());
+    	String uid = randomUID();
+    	String firstName = "test";
+    	String lastName = "herbert";    	
+		Contact contact = new Contact();
+		contact.setSurName(lastName);
+		contact.setGivenName(firstName);
+		contact.setDisplayName(firstName + " " + lastName);
+		contact.setUid(uid);
+		super.rememberForCleanUp(super.create(contact, createdFolder.getObjectID()));
+        /*
+         * verify contact on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        VCardResource card = assertContains(uid, addressData);
+        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
+        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+	}
+
+	public void testCreateContactInGroupOnClient() throws Throwable {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		/*
+		 * create empty distribution list on server
+		 */
+    	String listUid = randomUID();
+    	String listName = "test distribution list";
+		Contact distributionList = new Contact();
+		distributionList.setDisplayName(listName);
+		distributionList.setUid(listUid);
+		distributionList.setMarkAsDistributionlist(true);
+		super.rememberForCleanUp(super.create(distributionList));
+        /*
+         * verify distribution list on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        VCardResource groupCard = assertContains(listUid, addressData);
+        assertEquals("FN wrong", listName, groupCard.getFN());
+        /*
+         * add contact on client
+         */
+    	final String contactUid = randomUID();
+    	String firstName = "test";
+    	String lastName = "daphne";
+    	String email = "daphne88@example.com";
+        final String contactVCard =
+        		"BEGIN:VCARD" + "\r\n" +
+   				"VERSION:3.0" + "\r\n" +
+				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
+				"FN:" + firstName + " " + lastName + "\r\n" +
+				"ORG:test88;" + "\r\n" +
+				"EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" +
+				"TEL;type=WORK;type=pref:24235423" + "\r\n" +
+				"TEL;type=CELL:352-3534" + "\r\n" +
+				"TEL;type=HOME:547547" + "\r\n" +
+				"UID:" + contactUid + "\r\n" +
+				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
+				"PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
+				"END:VCARD" + "\r\n"
+		;
+        ExtendedType newMember = new ExtendedType("X-ADDRESSBOOKSERVER-MEMBER", "urn:uuid:" + contactUid);
+        groupCard.getVCard().addExtendedType(newMember);
+        /*
+         * perform contact creation and group update on different threads to simulate concurrent requests of the client
+         */
+        final ThrowableHolder throwableHolder = new ThrowableHolder();
+        Thread createThread = new Thread() {
+        	public void run() {
+                try {
+	                assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCard(contactUid, contactVCard));
+				} catch (Throwable t) {
+					throwableHolder.setThrowable(t);
+				}
+    		}
+        };
+        createThread.start();
+		assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCardUpdate(groupCard.getUID(), groupCard.toString(), groupCard.getETag()));
+        createThread.join();
+        throwableHolder.reThrowIfSet();
+        /*
+         * verify contact and group on server
+         */
+        Contact contact = super.getContact(contactUid);
+        assertNotNull("contact not found on server", contact);
+        super.rememberForCleanUp(contact);
+        assertEquals("uid wrong", contactUid, contact.getUid());
+        assertEquals("firstname wrong", firstName, contact.getGivenName());
+        assertEquals("lastname wrong", lastName, contact.getSurName());
+        assertEquals("email wrong", email, contact.getEmail1());
+        distributionList = super.getContact(listUid);
+        assertNotNull("distribution list not found on server", distributionList);
+        assertEquals("uid wrong", listUid, distributionList.getUid());
+        assertEquals("displayname wrong", listName, distributionList.getDisplayName());
+        assertTrue("list not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
+        assertNotNull("no members in distribution list", distributionList.getDistributionList());
+        assertTrue("invalid member count in distribution list", 1 == distributionList.getNumberOfDistributionLists());
+        assertTrue("invalid member count in distribution list", 1 == distributionList.getDistributionList().length);
+        DistributionListEntryObject member = distributionList.getDistributionList()[0];
+        assertNotNull("no member in distribution list", member);
+        assertEquals("email wrong", email, member.getEmailaddress());
+        /*
+         * verify contact and group on client
+         */
+        eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        addressData = super.addressbookMultiget(eTags.keySet());
+        VCardResource card = assertContains(contactUid, addressData);
+        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
+        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        card = assertContains(listUid, addressData);
+        assertEquals("FN wrong", listName, card.getFN());
+        assertContainsMemberUID(contactUid, card);
+	}
+
 }

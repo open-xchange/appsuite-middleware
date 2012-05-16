@@ -49,41 +49,66 @@
 
 package com.openexchange.carddav.reports;
 
+import java.io.IOException;
+
+import org.apache.commons.httpclient.HttpConnection;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.version.DeltaVConstants;
-import org.apache.jackrabbit.webdav.version.report.Report;
+import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.version.report.ReportType;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.ElementIterator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.openexchange.carddav.PropertyNames;
 
 /**
- * {@link SyncCollectionReport}
+ * {@link SyncCollectionReportMethod} - Report method for the 
+ * "sync-collection" request.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReport implements Report, DeltaVConstants {
+public class SyncCollectionReportMethod extends ReportMethod {
+	
+	private String syncToken;
+	private Document responseDocument = null;
 
-    public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), 
-    		PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class); 
-
-    public ReportType getType() {
-        return SYNC_COLLECTION;
+	public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
+		super(uri, reportInfo);
+		this.syncToken = null;
+	}
+	
+	public String getSyncTokenFromResponse() {
+		return syncToken;
+	}
+	
+	public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
+        checkUsed();
+		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
+	}
+	
+    public Document getResponseBodyAsDocument() throws IOException {
+    	if (null == this.responseDocument) {
+    		this.responseDocument = super.getResponseBodyAsDocument();
+    	}
+        return responseDocument;
     }
+	
+    protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
+    	super.processResponseBody(httpState, httpConnection);
+    	Document document = null;
+    	try {
+			document = getResponseBodyAsDocument();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), 
+        		PropertyNames.SYNC_TOKEN.getNamespace());
+        if (it.hasNext()) {
+            Element respElem = it.nextElement();
+            this.syncToken = respElem.getTextContent();
+        }
+    }	
 
-    public boolean isMultiStatusReport() {
-        return true;
-    }
-
-    public void init(DavResource dr, ReportInfo ri) throws DavException {
-    	System.out.println("init");
-    }
-
-    public Element toXml(Document dcmnt) {
-    	System.out.println("toxml");
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

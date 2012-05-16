@@ -49,8 +49,11 @@
 
 package com.openexchange.contact.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 
@@ -76,7 +79,8 @@ public class ResultIterator implements SearchIterator<Contact> {
 	
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResultIterator.class));
 
-    private static final ContactField[] DLISTMEMBER_FIELDS = { ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.FOLDER_ID,  
+    private static final ContactField[] DLISTMEMBER_FIELDS = { 
+    	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED, 
     	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, };
 
     private final SearchIterator<Contact> delegate;
@@ -152,20 +156,38 @@ public class ResultIterator implements SearchIterator<Contact> {
 		}
 	}
 	
+	/**
+	 * Adds distribution list member information dynamically by querying the 
+	 * referenced contacts. 
+	 * 
+	 * @param contact
+	 */
 	private void addDistributionListInfo(Contact contact) {
-		if (null != contact && 0 < contact.getNumberOfDistributionLists() && null != contact.getDistributionList()) {
-			for (DistributionListEntryObject member : contact.getDistributionList()) {
-				if (DistributionListEntryObject.INDEPENDENT != member.getEmailfield()) {
-					Contact referencedContact = getReferencedContact(member);
-					if (null != referencedContact) {
+		if (null != contact && 0 < contact.getNumberOfDistributionLists()) {
+			DistributionListEntryObject[] members = contact.getDistributionList();
+			if (null != members && 0 < members.length) {
+				Contact[] referencedContacts = getReferencedContacts(members);
+				for (int i = 0; i < referencedContacts.length; i++) {
+					if (null != referencedContacts[i]) {
 						/*
 						 * update member info dynamically
 						 */
-						updateMemberInfo(member, referencedContact);
+						updateMemberInfo(members[i], referencedContacts[i]);
+					} else {
+						/*
+						 * 'dead' reference, convert into one-off address entry
+						 */
+						convertToOneOff(members[i]);
 					}
 				}
 			}
 		}
+	}
+
+	private void convertToOneOff(DistributionListEntryObject member) {
+		member.removeFolderld();
+		member.removeEntryID();
+		member.setEmailfield(DistributionListEntryObject.INDEPENDENT);
 	}
 	
 	private void updateMemberInfo(DistributionListEntryObject member, Contact referencedContact) {
@@ -182,29 +204,69 @@ public class ResultIterator implements SearchIterator<Contact> {
 		} else if (DistributionListEntryObject.EMAILFIELD3 == member.getEmailfield()) {
 			email = referencedContact.getEmail3();
 		}
-		if (null != email) {
-			try {
-				member.setEmailaddress(email);
-			} catch (OXException e) {
-				LOG.warn("error setting email address for distributionlist member", e);
-			}
-		}
-	}
-	
-	private Contact getReferencedContact(DistributionListEntryObject member) {
 		try {
-			ContactStorage storage = Tools.getStorage(session.getContextId(), Integer.toString(member.getFolderID()));
-			Contact referencedContact = storage.get(session.getContextId(), Integer.toString(member.getFolderID()), 
-					Integer.toString(member.getEntryID()), DLISTMEMBER_FIELDS);
-			if (null != referencedContact && this.accept(referencedContact, null)) {
-				return referencedContact;
-			}
+			member.setEmailaddress(email);
 		} catch (OXException e) {
-			LOG.warn("Error resolving referenced member for distribution list", e);
+			LOG.warn("Error setting e-mail address for updated distribution list member", e);
 		}
-		return null;
 	}
 	
+	private Contact[] getReferencedContacts(DistributionListEntryObject[] members) {
+		Contact[] contacts = new Contact[members.length];
+		/*
+		 * determine queried folders
+		 */
+		Map<String, List<String>> folderAndObjectIDs = new HashMap<String, List<String>>();  
+		for (DistributionListEntryObject member : members) {
+			if (DistributionListEntryObject.INDEPENDENT != member.getEmailfield()) {
+				String folderID = Integer.toString(member.getFolderID()); 
+				if (null == folderAndObjectIDs.get(folderID)) {
+					folderAndObjectIDs.put(folderID, new ArrayList<String>());
+				}
+				folderAndObjectIDs.get(folderID).add(Integer.toString(member.getEntryID()));
+			}
+		}
+		/*
+		 * query needed contacts from each folder
+		 */
+		for (Entry<String, List<String>> entry : folderAndObjectIDs.entrySet()) {
+			SearchIterator<Contact> searchIterator = null;
+			try {
+				ContactStorage storage = Tools.getStorage(session.getContextId(), entry.getKey());
+				searchIterator = storage.list(session.getContextId(), "0".equals(entry.getKey()) ? null : entry.getKey(), 
+						entry.getValue().toArray(new String[entry.getValue().size()]), DLISTMEMBER_FIELDS);
+				while (searchIterator.hasNext()) {
+					Contact contact = searchIterator.next();
+					try {
+						if (this.accept(contact, null)) {
+							/*
+							 * add contact info for matching member in result
+							 */
+							for (int i = 0; i < members.length; i++) {
+								if (members[i].getEntryID() == contact.getObjectID() && (0 == members[i].getFolderID() || 										
+										members[i].getFolderID() == contact.getParentFolderID())) {
+									contacts[i] = contact;
+								}
+							}
+						}
+					} catch (OXException e) {
+						LOG.warn("Error resolving referenced member for distribution list", e);
+					}
+				}
+			} catch (OXException e) {
+				LOG.warn("Error resolving referenced members for distribution list", e);
+			} finally {
+				if (null != searchIterator) {
+					try {
+						searchIterator.close();
+					} catch (OXException e) {
+						LOG.warn(e);
+					}
+				}
+			}
+		}
+		return contacts;
+	}
 	
 	/**
 	 * Gets a value indicating whether the supplied contact should be passed

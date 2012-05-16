@@ -52,6 +52,10 @@ package com.openexchange.ajax.contact;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -64,7 +68,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class DistListMemberUpdateTest extends AbstractManagedContactTest {
 	
-	private Contact  referencedContact1, referencedContact2;
+	private Contact referencedContact1, referencedContact2;
 	
     public DistListMemberUpdateTest(String name) {
         super(name);
@@ -80,11 +84,11 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
 	    referencedContact1.setEmail1("email1@example.com");
 	    referencedContact1.setEmail2("email2@example.com");
 	    referencedContact1.setEmail3("email3@example.com");
+	    referencedContact1 = manager.newAction(referencedContact1);
 	    referencedContact2 = super.generateContact("Test2");
 	    referencedContact2.setEmail1("email1@example.org");
-	    referencedContact2.setEmail2("email1@example.org");
-	    referencedContact2.setEmail3("email1@example.org");
-	    referencedContact1 = manager.newAction(referencedContact1);
+	    referencedContact2.setEmail2("email2@example.org");
+	    referencedContact2.setEmail3("email3@example.org");
 	    referencedContact2 = manager.newAction(referencedContact2);
 	}
 	
@@ -97,7 +101,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         for (Contact referencedContact : referencedContacts) {
         	DistributionListEntryObject member = new DistributionListEntryObject();
         	member.setEntryID(referencedContact.getObjectID());
-        	member.setEmailfield(1);
+        	member.setEmailfield(mailField);
         	member.setFolderID(referencedContact.getParentFolderID());
         	member.setDisplayname(referencedContact.getDisplayName());
         	if (DistributionListEntryObject.EMAILFIELD1 == mailField) {
@@ -186,7 +190,78 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
     	distributionList = manager.getAction(distributionList);
     	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
-    
+
+    public void testRemoveEMail1() throws Exception {
+    	Contact distributionList = createDistributionList(1, referencedContact1, referencedContact2);
+    	/*
+    	 * remove referenced contact's email1-address (using the workarounds from EmptyEmailTest)
+    	 */
+    	referencedContact1.setEmail1(null);
+    	this.updateContact(referencedContact1, referencedContact1.getParentFolderID());
+    	/*
+    	 * verify the distribution list
+    	 */
+    	distributionList = manager.getAction(distributionList);
+    	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
+    	/*
+    	 * remove other referenced contact's email1-address
+    	 */
+    	referencedContact2.setEmail1(null);
+    	this.updateContact(referencedContact2, referencedContact2.getParentFolderID());
+    	/*
+    	 * verify the distribution list
+    	 */
+    	distributionList = manager.getAction(distributionList);
+    	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
+    }
+
+    public void testRemoveEMail2() throws Exception {
+    	Contact distributionList = createDistributionList(2, referencedContact1, referencedContact2);
+    	/*
+    	 * remove referenced contact's email2-address (using the workarounds from EmptyEmailTest)
+    	 */
+    	referencedContact1.setEmail2(null);
+    	this.updateContact(referencedContact1, referencedContact1.getParentFolderID());
+    	/*
+    	 * verify the distribution list
+    	 */
+    	distributionList = manager.getAction(distributionList);
+    	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
+    	/*
+    	 * remove other referenced contact's email2-address
+    	 */
+    	referencedContact2.setEmail2(null);
+    	this.updateContact(referencedContact2, referencedContact2.getParentFolderID());
+    	/*
+    	 * verify the distribution list
+    	 */
+    	distributionList = manager.getAction(distributionList);
+    	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
+    }
+
+    public void testRemoveEMail3() throws Exception {
+    	Contact distributionList = createDistributionList(3, referencedContact1, referencedContact2);
+    	/*
+    	 * remove referenced contact's email3-address (using the workarounds from EmptyEmailTest)
+    	 */
+    	referencedContact1.setEmail3(null);
+    	this.updateContact(referencedContact1, referencedContact1.getParentFolderID());
+    	/*
+    	 * verify the distribution list
+    	 */
+    	distributionList = manager.getAction(distributionList);
+    	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
+    	/*
+    	 * remove other referenced contact's email3-address
+    	 */
+    	referencedContact2.setEmail3(null);
+    	this.updateContact(referencedContact2, referencedContact2.getParentFolderID());
+    	/*
+    	 * verify the distribution list
+    	 */
+    	distributionList = manager.getAction(distributionList);
+    	assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
+    }
 
     private static void assertMatches(DistributionListEntryObject[] members, Contact...contacts) {
     	for (Contact contact : contacts) {
@@ -211,4 +286,74 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
 		}
     }
     
+    /**
+     * the following methods are taken from EmptyEmailTest 
+     */
+    
+    /**
+     * {@link EmptyEmailUpdateRequest} - Private inner class that let's us set empty emails during updates. Workaround needed because
+     * DataWriter will always replace empty Strings with null which results in the field not being set in the JSONObject
+     * 
+     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+     */
+    private class EmptyEmailUpdateRequest extends UpdateRequest {
+
+        private JSONObject modifiedBody;
+
+        /**
+         * Initializes a new {@link EmptyEmailUpdateRequest}.
+         * 
+         * @param contactObj
+         */
+        public EmptyEmailUpdateRequest(Contact contactObj) {
+            super(contactObj);
+        }
+
+        public EmptyEmailUpdateRequest(Contact co, JSONObject jo) {
+            super(co);
+            modifiedBody = jo;
+        }
+
+        @Override
+        public Object getBody() throws JSONException {
+            return modifiedBody;
+        }
+
+    }
+
+    /**
+     * Own version of updateContact, expanding the one from {@link AbstractContactTest} with email fields and using
+     * {@link EmptyEmailUpdateRequest}
+     * 
+     * @param contact The contact to update
+     * @param inFolder the folder
+     * @param email1 email1
+     * @param email2 email2
+     * @param email3 email3
+     * @throws Exception
+     */
+    private void updateContact(final Contact contact, final int inFolder) throws Exception {
+        final UpdateRequest request = new UpdateRequest(inFolder, contact, true);
+        JSONObject jsonObject = (JSONObject) request.getBody();
+        jsonObject = setEmail(jsonObject, contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
+        EmptyEmailUpdateRequest modifiedRequest = new EmptyEmailUpdateRequest(contact, jsonObject);
+        client.execute(modifiedRequest);
+    }
+
+    /**
+     * Set the email fields in a contact already converted to a JSONObject. 
+     * @param jo JSONObject
+     * @param email1 email1
+     * @param email2 email2
+     * @param email3 email3
+     * @return The modified contact in JSONObject form
+     * @throws JSONException
+     */
+    private JSONObject setEmail(final JSONObject jo, final String email1, final String email2, final String email3) throws JSONException {
+        jo.put("email1", email1 == null ? JSONObject.NULL : email1);
+        jo.put("email2", email2 == null ? JSONObject.NULL : email3);
+        jo.put("email3", email3 == null ? JSONObject.NULL : email3);
+        return jo;
+    }
+
 }

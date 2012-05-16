@@ -94,7 +94,7 @@ public class DistListMember extends DistributionListEntryObject {
 			member.setDisplayname(dleo.getDisplayname());
 		}
 		if (dleo.containsEmailaddress()) {
-			member.setEmailaddress(dleo.getEmailaddress());
+			member.setEmailaddress(dleo.getEmailaddress(), false);
 		}
 		if (dleo.containsEmailfield()) {
 			member.setEmailfield(dleo.getEmailfield());

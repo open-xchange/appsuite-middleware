@@ -47,38 +47,45 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings.json;
+package com.openexchange.carddav;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.exception.OXException;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 
 /**
- * {@link StringMapping} - JSON specific mapping implementation for Strings.
- *
- * @param <O> the type of the object
+ * {@link SyncToken} - Holds the sync token
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
+public class SyncToken {
+	
+	private String token;
 
-	public StringMapping(final String ajaxName, final int columnID) {
-		super(ajaxName, columnID);
+	public SyncToken() {
+		this(null);
 	}
 
-	@Override
-	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-		this.set(to, from.isNull(getAjaxName()) ? null : from.getString(getAjaxName()));
-	}
-
-	@Override
-	public boolean truncate(final O object, final int length) throws OXException {
-		final String value = this.get(object);
-		if (null != value && length < value.length()) {
-			this.set(object, value.substring(0, length));
-			return true;
-		}
-		return false;
+	public SyncToken(String token) {
+		super();
+		this.token = token;		
 	}
 	
+	public void update(ReportInfo reportInfo) {
+		if (null != reportInfo) {
+						
+		}
+	}
+
+	/**
+	 * @return the token
+	 */
+	public String getToken() {
+		return token;
+	}
+
+	/**
+	 * @param token the token to set
+	 */
+	public void setToken(String token) {
+		this.token = token;
+	}
 }

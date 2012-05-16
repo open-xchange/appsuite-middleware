@@ -49,38 +49,38 @@
 
 package com.openexchange.carddav;
 
-import java.util.Arrays;
-import java.util.List;
-import com.openexchange.carddav.mixins.DummySyncToken;
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link RootCollection}
+ * {@link ThrowableHolder} - Holds a {@link Throwable}.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RootCollection extends AbstractCarddavCollection {
+public class ThrowableHolder {
+	
+	private Throwable throwable;
+	
+	public ThrowableHolder() {
+		super();
+		this.setThrowable(null);
+	}
+	
+	public void reThrowIfSet() throws Throwable {
+		if (null != this.getThrowable()) {
+			throw getThrowable();
+		}
+	}
 
-    public RootCollection(GroupwareCarddavFactory factory) {
-        super(factory, new WebdavPath());
-        includeProperties(new DummySyncToken());
-    }
+	/**
+	 * @return the throwable
+	 */
+	public Throwable getThrowable() {
+		return throwable;
+	}
 
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return "Contacts";
-    }
-
-    @Override
-    public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        return Arrays.asList((WebdavResource)new AggregatedCollection(getUrl().dup().append("Contacts"), factory));
-    }
-
-    protected final static ContentType CONTACT_CTYPE = ContactContentType.getInstance();
-
-
+	/**
+	 * @param t the throwable to set
+	 */
+	public void setThrowable(Throwable t) {
+		this.throwable = t;
+	}
 }
