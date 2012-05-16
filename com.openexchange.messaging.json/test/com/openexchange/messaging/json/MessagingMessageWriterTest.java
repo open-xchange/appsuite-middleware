@@ -63,6 +63,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
@@ -75,6 +77,7 @@ import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link MessagingMessageWriterTest}
@@ -98,7 +101,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setPicture("http://www.somesite.invalid/somepic.png");
         message.setUrl("http://www.somesite.invalid/messageid");
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", new SimServerSession(new SimContext(1), new SimUser(), null), null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
             "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f\u00fcnf").inAnyOrder().hasKey(
@@ -117,7 +120,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         message.setHeaders(headers);
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
             "Value1").hasKey("multiHeader").withValueArray().withValues("v1", "v2", "v3").inStrictOrder().objectEnds().objectEnds();
@@ -141,7 +144,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         message.setHeaders(headers);
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "", null, null);
 
         // Where happy if they are all included. Concrete header writing is tested elsewhere
 
@@ -188,7 +191,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         writer.addHeaderWriter(new InverseWriter());
 
-        final JSONObject messageJSON = writer.write(message, null, null, null);
+        final JSONObject messageJSON = writer.write(message, "", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
             "1eulaV").objectEnds().objectEnds();
@@ -201,7 +204,7 @@ public class MessagingMessageWriterTest extends TestCase {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("content").objectEnds();
 
@@ -213,7 +216,7 @@ public class MessagingMessageWriterTest extends TestCase {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContentReference("coolReferenceId");
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueObject().hasKey("ref").withValue("coolReferenceId").objectEnds().objectEnds();
 
@@ -223,9 +226,9 @@ public class MessagingMessageWriterTest extends TestCase {
 
     public void testBinaryMessage() throws OXException, JSONException, UnsupportedEncodingException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
-        message.setContent("content".getBytes(com.openexchange.java.Charsets.UTF_8));
+        message.setContent("content".getBytes("UTF-8"));
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue(Base64.encode("content")).objectEnds();
 
@@ -236,7 +239,7 @@ public class MessagingMessageWriterTest extends TestCase {
     public void testMultipartMessage() throws UnsupportedEncodingException, OXException, JSONException {
         final SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
         binMessage.setSectionId("1");
-        binMessage.setContent("content".getBytes(com.openexchange.java.Charsets.UTF_8));
+        binMessage.setContent("content".getBytes("UTF-8"));
         binMessage.setDisposition(MessagingMessage.ATTACHMENT);
         binMessage.setFileName("content.txt");
 
@@ -250,7 +253,7 @@ public class MessagingMessageWriterTest extends TestCase {
         plainMessage.setParent((MultipartContent) message.getContent());
         binMessage.setParent((MultipartContent) message.getContent());
 
-        final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+        final JSONObject messageJSON = new MessagingMessageWriter().write(message, "", null, null);
 
         JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueArray().objectEnds();
 
@@ -300,7 +303,7 @@ public class MessagingMessageWriterTest extends TestCase {
         final MessagingMessageWriter writer = new MessagingMessageWriter();
         writer.addContentWriter(new InverseContentWriter());
 
-        final JSONObject messageJSON = writer.write(message, null, null, null);
+        final JSONObject messageJSON = writer.write(message, "", null, null);
 
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("tnetnoc").objectEnds();
 
@@ -331,9 +334,9 @@ public class MessagingMessageWriterTest extends TestCase {
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
 
-        final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
+        final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", new SimServerSession(new SimContext(1), new SimUser(), null), null);
 
-        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337L, 1234567L, 313, 12, 13, "Supercontent!", "pic", "http://url.tld").inStrictOrder();
+        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic", "http://url.tld").inStrictOrder();
 
         assertValidates(assertion, fieldsJSON);
     }
