@@ -50,6 +50,12 @@
 package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,12 +81,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.activation.MimetypesFileTypeMap;
+import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -528,7 +540,30 @@ public class OXContainerConverter {
                      * Apply image data as it is since ValueDefinition#parse(Scanner s, Property property) already decodes value dependent
                      * on "ENCODING" parameter
                      */
-                    contactContainer.setImage1((byte[]) propertyValue);
+                	byte[] imageData = (byte[])propertyValue;
+                	Rectangle clipRect = extractClipRect(property.getParameter("X-ABCROP-RECTANGLE"));
+                	if (null != clipRect) {
+                		/*
+                		 * determine image format
+                		 */                		
+        				String formatName = "JPEG";
+        				Parameter typeParameter = property.getParameter("TYPE");
+        				if (null != typeParameter && 1 == typeParameter.getValueCount()) {
+        					String type = typeParameter.getValue(0).getText();
+        					if (null != type && 0 < type.length()) {
+        						formatName = type; 
+        					}
+        				}                		
+        				/*
+                		 * try to crop the image
+                		 */
+                		try {
+                			imageData = doABCrop(imageData, clipRect, formatName);
+                		} catch (IOException e) {
+                			LOG.error("error cropping image, falling back to uncropped image.", e);
+                		}
+                	}
+                    contactContainer.setImage1(imageData);
                     value = null;
                 } else if (propertyValue instanceof URI) {
                     loadImageFromURL(contactContainer, propertyValue.toString());
@@ -835,6 +870,93 @@ public class OXContainerConverter {
         }
     }
 
+    /**
+     * Extracts the clipping information from the supplied 'X-ABCROP-RECTANGLE'
+     * rectangle if defined. The result's 'width' and 'height' properties 
+     * represent the dimensions of the target image. The 'x' property is the 
+     * horizontal offset to draw the source image in the target image from the 
+     * left border, the 'y' property is the vertical offset from the bottom.
+     * 
+     * @param cropParameter the 'X-ABCROP-RECTANGLE' parameter
+     * @return the clipping rectangle, or <code>null</code>, if not defined
+     */
+    private static Rectangle extractClipRect(Parameter cropParameter) {
+    	if (null != cropParameter && 0 < cropParameter.getValueCount()) {
+    		Pattern clipRectPattern = Pattern.compile("ABClipRect_1&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&");
+    		for (int i = 0; i < cropParameter.getValueCount(); i++) {
+    			String text = cropParameter.getValue(i).getText();
+    			Matcher matcher = clipRectPattern.matcher(text);
+    			if (matcher.find()) {
+    				try {
+        				int offsetLeft = Integer.parseInt(matcher.group(1));                				
+        				int offsetBottom = Integer.parseInt(matcher.group(2));                				
+        				int targetWidth = Integer.parseInt(matcher.group(3));                				
+        				int targetHeight = Integer.parseInt(matcher.group(4));
+        				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
+    				} catch (NumberFormatException e) {
+    					LOG.warn("unable to parse clipping rectangle from " + text, e);
+    				}
+    			}
+    		}
+    	}    	
+		return null;
+    }
+    
+    /**
+     * Performs a crop operation on the source image as defined by the 
+     * supplied clipping rectangle. 
+     * 
+     * @param source the source image
+     * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property 
+     * @param imageFormat the target image format
+     * @return the cropped image
+     * @throws IOException
+     */
+    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException {
+    	InputStream inputStream = null;
+    	ByteArrayOutputStream outputStream = null;
+    	try {
+    		/*
+    		 * read source image
+    		 */
+    		inputStream = new ByteArrayInputStream(source);
+        	BufferedImage sourceImage = ImageIO.read(inputStream);
+    		/*
+    		 * prepare target image
+    		 */
+        	BufferedImage targetImage = new BufferedImage(clipRect.width, clipRect.height, sourceImage.getType());
+    		Graphics2D graphics = targetImage.createGraphics();
+    		graphics.setBackground(new Color(255, 255, 255, 0));
+    		graphics.clearRect(0,  0, clipRect.width, clipRect.height);
+    		/*
+    		 * draw image, translating the offsets to coordinates
+    		 */
+    		graphics.drawImage(sourceImage, clipRect.x * -1, clipRect.height + clipRect.y - sourceImage.getHeight(), null);
+    		/*
+    		 * write back to byte array
+    		 */    		
+    		outputStream = new ByteArrayOutputStream();
+    		ImageIO.write(targetImage, imageFormat, outputStream);
+    		outputStream.flush();
+    		return outputStream.toByteArray();
+    	} finally {
+    		if (null != inputStream) {
+				try {
+					inputStream.close();
+				} catch (Exception e) {
+					LOG.debug(e);
+				}
+    		}
+    		if (null != outputStream) {
+				try {
+					outputStream.close();
+				} catch (Exception e) {
+					LOG.debug(e);
+				}
+    		}
+    	}
+    }
+    
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
