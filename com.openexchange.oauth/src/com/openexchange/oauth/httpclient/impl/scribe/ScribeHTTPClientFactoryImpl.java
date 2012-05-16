@@ -1,4 +1,4 @@
-package com.openexchange.oauth.impl;
+package com.openexchange.oauth.httpclient.impl.scribe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.httpclient.OAuthHTTPClient;
 
-public class OAuthHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
+public class ScribeHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 
 	protected Map<Class<?>, List<HTTPResponseProcessor>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor>>();
 

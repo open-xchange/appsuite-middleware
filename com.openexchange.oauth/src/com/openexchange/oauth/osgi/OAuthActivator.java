@@ -63,7 +63,7 @@ import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.impl.OAuthHTTPClientFactoryImpl;
+import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
@@ -171,7 +171,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(EncryptedItemDetectorService.class, oauthService, null);
             registerService(SecretMigrator.class, oauthService, null);
             
-            final OAuthHTTPClientFactoryImpl oauthFactory = new OAuthHTTPClientFactoryImpl();
+            final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
 			registerService(OAuthHTTPClientFactory.class, oauthFactory);
 			
 			@SuppressWarnings("rawtypes")
