@@ -57,6 +57,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
@@ -97,7 +99,7 @@ public class NewTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final AJAXRequestResult result = action.perform(request, session);
 
@@ -132,7 +134,7 @@ public class NewTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
             final AJAXRequestResult result = action.perform(request, session);
@@ -166,7 +168,7 @@ public class NewTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
             final AJAXRequestResult result = action.perform(request, session);
