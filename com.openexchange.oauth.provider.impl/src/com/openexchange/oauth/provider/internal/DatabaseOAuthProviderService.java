@@ -241,6 +241,9 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
             final ConcurrentMap<OAuthAccessor, Object> tokens = this.tokens;
             final Object present = DatabaseOAuthProviderService.PRESENT;
+            /*
+             * TODO: Improve!
+             */
             final List<int[]> delete = new LinkedList<int[]>();
             contextIds.forEach(new TIntProcedure() {
                 
