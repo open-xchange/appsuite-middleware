@@ -54,6 +54,8 @@ import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
@@ -121,7 +123,7 @@ public class AllTest extends TestCase {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.test1");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final AJAXRequestResult result = action.perform(requestData, session);
 
@@ -141,7 +143,7 @@ public class AllTest extends TestCase {
 
         final AJAXRequestData requestData = new AJAXRequestData();
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final AJAXRequestResult result = action.perform(requestData, session);
 
@@ -158,15 +160,15 @@ public class AllTest extends TestCase {
 
     // Error Cases
     public void testExceptionInMessagingRegistry() throws OXException {
-        registry.setException(new OXException());
+        registry.setException(new OXException(-1));
         final AllAction action = new AllAction(registry);
 
         final AJAXRequestData requestData = new AJAXRequestData();
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
-            final AJAXRequestResult result = action.perform(requestData, session);
+            action.perform(requestData, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             //SUCCESS
@@ -176,15 +178,15 @@ public class AllTest extends TestCase {
     }
 
     public void testExceptionInMessagingAccountManager() throws OXException {
-        ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new OXException());
+        ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new OXException(-1));
         final AllAction action = new AllAction(registry);
 
         final AJAXRequestData requestData = new AJAXRequestData();
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
-            final AJAXRequestResult result = action.perform(requestData, session);
+            action.perform(requestData, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             //SUCCESS
