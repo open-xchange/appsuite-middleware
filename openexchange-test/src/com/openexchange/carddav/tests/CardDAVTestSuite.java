@@ -71,6 +71,7 @@ public final class CardDAVTestSuite {
         suite.addTestSuite(DeleteTest.class);
         suite.addTestSuite(GroupTest.class);
         suite.addTestSuite(MoveTest.class);
+        suite.addTestSuite(UpgradeTest.class);
         return suite;
     }
 }
