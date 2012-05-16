@@ -3,6 +3,7 @@ package com.openexchange.oauth.json.proxy;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +12,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthExceptionMessages;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -42,9 +45,10 @@ public class OAuthProxyRequest {
 		}
 		analyzed = true;
 		
-		// TODO: Error handling
-		
 		JSONObject proxyRequest = (JSONObject) req.getData();
+		if(proxyRequest == null){
+			throw OAuthExceptionCodes.MISSING_BODY.create();
+		}
 		
 		String methodName = proxyRequest.optString("type");
 		if (methodName == null || methodName.equals("")) {
@@ -135,8 +139,36 @@ public class OAuthProxyRequest {
 	}
 	
 	public String getUrl() throws OXException {
-		// TODO: Whitelist
+		whitelist(url);
 		analyzeBody();
 		return url;
+	}
+
+	private void whitelist(String checkMe) throws OXException {
+		API proposedApi = getAccount().getAPI();
+		switch (proposedApi) {
+		case FACEBOOK:
+			if(! Pattern.matches("^https:\\/\\/graph\\.facebook\\.com", checkMe))
+				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
+			break;
+		case LINKEDIN:
+			if(! Pattern.matches("^http:\\/\\/api\\.linkedin\\.com", checkMe))
+				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
+			break;
+		case TWITTER:
+			if(! Pattern.matches("^https?:\\/\\/(.*?\\.)?twitter.com", checkMe))
+				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
+			break;
+		case YAHOO:
+			if(! Pattern.matches("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com", checkMe))
+				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
+			break;
+		case MSN:
+		case OTHER:
+		default:
+			break;
+		}
+		
+		
 	}
 }
