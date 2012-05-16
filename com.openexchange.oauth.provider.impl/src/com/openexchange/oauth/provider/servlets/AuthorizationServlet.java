@@ -60,10 +60,12 @@ import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
-import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
- * Autherization request handler.
+ * Authorization request handler.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -78,12 +80,13 @@ public class AuthorizationServlet extends HttpServlet {
 
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        final OAuthProviderService providerService = getProviderService();
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
 
-            final OAuthAccessor accessor = StaticOAuthProvider.getAccessor(requestMessage);
+            final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
 
-            if (Boolean.TRUE.equals(accessor.getProperty("authorized"))) {
+            if (Boolean.TRUE.equals(accessor.getProperty(OAuthProviderService.PROP_AUTHORIZED))) {
                 // already authorized send the user back
                 returnToConsumer(request, response, accessor);
             } else {
@@ -91,29 +94,30 @@ public class AuthorizationServlet extends HttpServlet {
             }
 
         } catch (final Exception e) {
-            StaticOAuthProvider.handleException(e, request, response, true);
+            DatabaseOAuthProviderService.handleException(e, request, response, true);
         }
 
     }
 
     @Override
     public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        final OAuthProviderService providerService = getProviderService();
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
 
-            final OAuthAccessor accessor = StaticOAuthProvider.getAccessor(requestMessage);
+            final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
 
             final String userId = request.getParameter("userId");
             if (userId == null) {
                 sendToAuthorizePage(request, response, accessor);
             }
             // set userId in accessor and mark it as authorized
-            StaticOAuthProvider.markAsAuthorized(accessor, userId);
+            providerService.markAsAuthorized(accessor, Integer.parseInt(userId), accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue());
 
             returnToConsumer(request, response, accessor);
 
         } catch (final Exception e) {
-            StaticOAuthProvider.handleException(e, request, response, true);
+            DatabaseOAuthProviderService.handleException(e, request, response, true);
         }
     }
 
@@ -170,6 +174,10 @@ public class AuthorizationServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
             response.setHeader("Location", callback);
         }
+    }
+
+    private OAuthProviderService getProviderService() {
+        return OAuthProviderServiceLookup.getService(OAuthProviderService.class);
     }
 
 }

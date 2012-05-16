@@ -67,7 +67,6 @@ import com.openexchange.log.LogFactory;
 /**
  * Utilities for database resource handling.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBUtils {

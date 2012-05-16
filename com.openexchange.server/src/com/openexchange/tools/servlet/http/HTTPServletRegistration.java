@@ -113,8 +113,8 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
      */
     public void unregister() {
         close();
-        if (getService() != null) {
-            final HttpService service = getService();
+        final HttpService service = getService();
+        if (service != null) {
             service.unregister(alias);
         }
     }

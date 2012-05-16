@@ -59,8 +59,9 @@ import net.oauth.SimpleOAuthValidator;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java library</a>.
- *
+ * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
+ * library</a>.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthProviderService {
@@ -74,6 +75,49 @@ public interface OAuthProviderService {
      * The identifier of the default provider.
      */
     public static final int DEFAULT_PROVIDER = 0;
+
+    /*
+     * Property names
+     */
+
+    /**
+     * Property name <code>"authorized"</code>
+     */
+    public static final String PROP_AUTHORIZED = "authorized";
+
+    /**
+     * Property name <code>"user"</code>
+     */
+    public static final String PROP_USER = "user";
+
+    /**
+     * Property name <code>"context"</code>
+     */
+    public static final String PROP_CONTEXT = "context";
+
+    /**
+     * Property name <code>"description"</code>
+     */
+    public static final String PROP_DESCRIPTION = "description";
+
+    /**
+     * Property name <code>"providerId"</code>
+     */
+    public static final String PROP_PROVIDER_ID = "providerId";
+
+    /**
+     * Property name <code>"name"</code>
+     */
+    public static final String PROP_NAME = "name";
+
+    /**
+     * Property name <code>"id"</code>
+     */
+    public static final String PROP_ID = "id";
+
+    /*
+     * Methods
+     */
 
     /**
      * Loads consumers from database

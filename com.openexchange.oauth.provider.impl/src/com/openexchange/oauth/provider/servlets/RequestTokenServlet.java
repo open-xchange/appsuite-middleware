@@ -61,7 +61,9 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
-import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * Request token request handler
@@ -69,12 +71,12 @@ import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RequestTokenServlet extends HttpServlet {
-    
+
+    private static final long serialVersionUID = -8594772241585718925L;
+
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        // nothing at this point
-        StaticOAuthProvider.loadConsumers();
     }
     
     @Override
@@ -91,14 +93,14 @@ public class RequestTokenServlet extends HttpServlet {
         
     public void processRequest(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
-
+        final OAuthProviderService providerService = getProviderService();
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
             
-            final OAuthConsumer consumer = StaticOAuthProvider.getConsumer(requestMessage);
+            final OAuthConsumer consumer = providerService.getConsumer(requestMessage);
             
             final OAuthAccessor accessor = new OAuthAccessor(consumer);
-            StaticOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
+            OAuthProviderService.VALIDATOR.validateMessage(requestMessage, accessor);
             {
                 // Support the 'Variable Accessor Secret' extension
                 // described in http://oauth.pbwiki.com/AccessorSecret
@@ -108,7 +110,7 @@ public class RequestTokenServlet extends HttpServlet {
                 }
             }
             // generate request_token and secret
-            StaticOAuthProvider.generateRequestToken(accessor);
+            providerService.generateRequestToken(accessor, accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue(), accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue());
             
             response.setContentType("text/plain");
             final OutputStream out = response.getOutputStream();
@@ -118,11 +120,13 @@ public class RequestTokenServlet extends HttpServlet {
             out.close();
             
         } catch (final Exception e){
-            StaticOAuthProvider.handleException(e, request, response, true);
+            DatabaseOAuthProviderService.handleException(e, request, response, true);
         }
         
     }
 
-    private static final long serialVersionUID = 1L;
+    private OAuthProviderService getProviderService() {
+        return OAuthProviderServiceLookup.getService(OAuthProviderService.class);
+    }
 
 }

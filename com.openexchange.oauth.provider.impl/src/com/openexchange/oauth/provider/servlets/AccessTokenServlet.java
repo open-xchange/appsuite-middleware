@@ -61,7 +61,9 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
-import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * Access Token request handler
@@ -89,19 +91,20 @@ public class AccessTokenServlet extends HttpServlet {
     }
 
     public void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        final OAuthProviderService providerService = getProviderService();
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
 
-            final OAuthAccessor accessor = StaticOAuthProvider.getAccessor(requestMessage);
-            StaticOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
+            final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+            OAuthProviderService.VALIDATOR.validateMessage(requestMessage, accessor);
 
             // make sure token is authorized
-            if (!Boolean.TRUE.equals(accessor.getProperty("authorized"))) {
+            if (!Boolean.TRUE.equals(accessor.getProperty(OAuthProviderService.PROP_AUTHORIZED))) {
                 final OAuthProblemException problem = new OAuthProblemException("permission_denied");
                 throw problem;
             }
             // generate access token and secret
-            StaticOAuthProvider.generateAccessToken(accessor);
+            providerService.generateAccessToken(accessor, accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue(), accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue());
 
             response.setContentType("text/plain");
             final OutputStream out = response.getOutputStream();
@@ -109,8 +112,12 @@ public class AccessTokenServlet extends HttpServlet {
             out.close();
 
         } catch (final Exception e) {
-            StaticOAuthProvider.handleException(e, request, response, true);
+            DatabaseOAuthProviderService.handleException(e, request, response, true);
         }
+    }
+
+    private OAuthProviderService getProviderService() {
+        return OAuthProviderServiceLookup.getService(OAuthProviderService.class);
     }
 
 }

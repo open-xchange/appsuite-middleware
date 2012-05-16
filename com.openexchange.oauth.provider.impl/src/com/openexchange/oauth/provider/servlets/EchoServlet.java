@@ -59,7 +59,9 @@ import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
-import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * A text servlet to echo incoming "echo" param along with userId
@@ -67,7 +69,9 @@ import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class EchoServlet extends HttpServlet {
-    
+
+    private static final long serialVersionUID = 650486968603097312L;
+
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException
@@ -78,10 +82,11 @@ public class EchoServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
+        final OAuthProviderService providerService = getProviderService();
         try{
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-            final OAuthAccessor accessor = StaticOAuthProvider.getAccessor(requestMessage);
-            StaticOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
+            final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+            OAuthProviderService.VALIDATOR.validateMessage(requestMessage, accessor);
             final String userId = (String) accessor.getProperty("user");
             
             response.setContentType("text/plain");
@@ -97,10 +102,12 @@ public class EchoServlet extends HttpServlet {
             out.close();
             
         } catch (final Exception e){
-            StaticOAuthProvider.handleException(e, request, response, false);
+            DatabaseOAuthProviderService.handleException(e, request, response, false);
         }
     }
 
-    private static final long serialVersionUID = 1L;
+    private OAuthProviderService getProviderService() {
+        return OAuthProviderServiceLookup.getService(OAuthProviderService.class);
+    }
 
 }

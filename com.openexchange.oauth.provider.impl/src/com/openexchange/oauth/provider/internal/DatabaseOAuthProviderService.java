@@ -80,21 +80,7 @@ import com.openexchange.server.ServiceLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DatabaseOAuthProvider implements OAuthProviderService {
-
-    private static final String PROP_AUTHORIZED = "authorized";
-
-    private static final String PROP_USER = "user";
-
-    private static final String PROP_CONTEXT = "context";
-
-    private static final String PROP_DESCRIPTION = "description";
-
-    private static final String PROP_PROVIDER_ID = "providerId";
-
-    private static final String PROP_NAME = "name";
-
-    private static final String PROP_ID = "id";
+public class DatabaseOAuthProviderService implements OAuthProviderService {
 
     private static final Object PRESENT = new Object();
 
@@ -113,11 +99,11 @@ public class DatabaseOAuthProvider implements OAuthProviderService {
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link DatabaseOAuthProvider}.
+     * Initializes a new {@link DatabaseOAuthProviderService}.
      * 
      * @throws OXException If initialization fails
      */
-    public DatabaseOAuthProvider(final ServiceLookup services) throws OXException {
+    public DatabaseOAuthProviderService(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
         consumers = new ConcurrentHashMap<String, OAuthConsumer>(16);

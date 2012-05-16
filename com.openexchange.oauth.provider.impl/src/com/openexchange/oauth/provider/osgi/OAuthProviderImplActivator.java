@@ -49,12 +49,18 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.DatabaseOAuthProvider;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
+import com.openexchange.oauth.provider.servlets.AccessTokenServlet;
+import com.openexchange.oauth.provider.servlets.AuthorizationServlet;
+import com.openexchange.oauth.provider.servlets.EchoServlet;
+import com.openexchange.oauth.provider.servlets.RequestTokenServlet;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 
 /**
  * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
@@ -72,13 +78,22 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, HttpService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         OAuthProviderServiceLookup.set(this);
-        registerService(OAuthProviderService.class, new DatabaseOAuthProvider(this));
+        // Register OAuth provider service
+        final DatabaseOAuthProviderService providerService = new DatabaseOAuthProviderService(this);
+        registerService(OAuthProviderService.class, providerService);
+        addService(OAuthProviderService.class, providerService);
+        // Service trackers
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/accessToken", new AccessTokenServlet()));
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/authorization", new AuthorizationServlet()));
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/requestToken", new RequestTokenServlet()));
+        openTrackers();
     }
 
     @Override
