@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
 
 import java.io.IOException;
 import java.util.Map;

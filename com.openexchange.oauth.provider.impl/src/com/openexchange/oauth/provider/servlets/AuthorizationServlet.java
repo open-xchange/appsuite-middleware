@@ -59,8 +59,8 @@ import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
-import net.oauth.example.provider.core.SampleOAuthProvider;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
 
 /**
  * Autherization request handler.
@@ -81,7 +81,7 @@ public class AuthorizationServlet extends HttpServlet {
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
 
-            final OAuthAccessor accessor = SampleOAuthProvider.getAccessor(requestMessage);
+            final OAuthAccessor accessor = StaticOAuthProvider.getAccessor(requestMessage);
 
             if (Boolean.TRUE.equals(accessor.getProperty("authorized"))) {
                 // already authorized send the user back
@@ -91,7 +91,7 @@ public class AuthorizationServlet extends HttpServlet {
             }
 
         } catch (final Exception e) {
-            SampleOAuthProvider.handleException(e, request, response, true);
+            StaticOAuthProvider.handleException(e, request, response, true);
         }
 
     }
@@ -101,19 +101,19 @@ public class AuthorizationServlet extends HttpServlet {
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
 
-            final OAuthAccessor accessor = SampleOAuthProvider.getAccessor(requestMessage);
+            final OAuthAccessor accessor = StaticOAuthProvider.getAccessor(requestMessage);
 
             final String userId = request.getParameter("userId");
             if (userId == null) {
                 sendToAuthorizePage(request, response, accessor);
             }
             // set userId in accessor and mark it as authorized
-            SampleOAuthProvider.markAsAuthorized(accessor, userId);
+            StaticOAuthProvider.markAsAuthorized(accessor, userId);
 
             returnToConsumer(request, response, accessor);
 
         } catch (final Exception e) {
-            SampleOAuthProvider.handleException(e, request, response, true);
+            StaticOAuthProvider.handleException(e, request, response, true);
         }
     }
 

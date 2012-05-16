@@ -49,32 +49,36 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.oauth.provider.OAuthProviderServiceLookup;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProvider;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link OAuthProviderActivator} - The activator fir OAuth provider bundle.
+ * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthProviderActivator extends HousekeepingActivator {
+public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link OAuthProviderActivator}.
+     * Initializes a new {@link OAuthProviderImplActivator}.
      */
-    public OAuthProviderActivator() {
+    public OAuthProviderImplActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         OAuthProviderServiceLookup.set(this);
+        registerService(OAuthProviderService.class, new DatabaseOAuthProvider(this));
     }
 
     @Override

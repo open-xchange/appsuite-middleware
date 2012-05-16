@@ -4,9 +4,10 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.redirect.RedirectServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 public class RedirectActivator extends HousekeepingActivator{
+
+    private volatile String alias;
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -16,14 +17,22 @@ public class RedirectActivator extends HousekeepingActivator{
 	@Override
 	protected void startBundle() throws Exception {
 		final HttpService service = getService(HttpService.class);
-		service.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "redirect", new RedirectServlet(), null, null);
+		final String alias = getService(DispatcherPrefixService.class).getPrefix() + "redirect";
+		this.alias = alias;
+        service.registerServlet(alias, new RedirectServlet(), null, null);
 	}
 	
 	@Override
 	protected void stopBundle() throws Exception {
 		final HttpService service = getService(HttpService.class);
-		service.unregister(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "redirect");
-		super.stopBundle();
+		if (null != service) {
+            final String alias = this.alias;
+            if (null != alias) {
+                service.unregister(alias);
+                this.alias = null;
+            }
+        }
+        super.stopBundle();
 	}
 
 }

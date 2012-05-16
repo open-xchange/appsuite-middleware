@@ -58,59 +58,71 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
+import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
-import net.oauth.example.provider.core.SampleOAuthProvider;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.oauth.provider.internal.StaticOAuthProvider;
 
 /**
- * Access Token request handler
+ * Request token request handler
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AccessTokenServlet extends HttpServlet {
-
-    private static final long serialVersionUID = -1473491912970781256L;
-
+public class RequestTokenServlet extends HttpServlet {
+    
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         // nothing at this point
+        StaticOAuthProvider.loadConsumers();
     }
-
+    
     @Override
-    public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException, ServletException {
         processRequest(request, response);
     }
-
+    
     @Override
-    public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+    public void doPost(final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException, ServletException {
         processRequest(request, response);
     }
+        
+    public void processRequest(final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException, ServletException {
 
-    public void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-
-            final OAuthAccessor accessor = SampleOAuthProvider.getAccessor(requestMessage);
-            SampleOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
-
-            // make sure token is authorized
-            if (!Boolean.TRUE.equals(accessor.getProperty("authorized"))) {
-                final OAuthProblemException problem = new OAuthProblemException("permission_denied");
-                throw problem;
+            
+            final OAuthConsumer consumer = StaticOAuthProvider.getConsumer(requestMessage);
+            
+            final OAuthAccessor accessor = new OAuthAccessor(consumer);
+            StaticOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
+            {
+                // Support the 'Variable Accessor Secret' extension
+                // described in http://oauth.pbwiki.com/AccessorSecret
+                final String secret = requestMessage.getParameter("oauth_accessor_secret");
+                if (secret != null) {
+                    accessor.setProperty(OAuthConsumer.ACCESSOR_SECRET, secret);
+                }
             }
-            // generate access token and secret
-            SampleOAuthProvider.generateAccessToken(accessor);
-
+            // generate request_token and secret
+            StaticOAuthProvider.generateRequestToken(accessor);
+            
             response.setContentType("text/plain");
             final OutputStream out = response.getOutputStream();
-            OAuth.formEncode(OAuth.newList("oauth_token", accessor.accessToken, "oauth_token_secret", accessor.tokenSecret), out);
+            OAuth.formEncode(OAuth.newList("oauth_token", accessor.requestToken,
+                                           "oauth_token_secret", accessor.tokenSecret),
+                             out);
             out.close();
-
-        } catch (final Exception e) {
-            SampleOAuthProvider.handleException(e, request, response, true);
+            
+        } catch (final Exception e){
+            StaticOAuthProvider.handleException(e, request, response, true);
         }
+        
     }
+
+    private static final long serialVersionUID = 1L;
 
 }
