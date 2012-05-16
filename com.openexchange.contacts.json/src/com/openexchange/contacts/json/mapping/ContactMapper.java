@@ -120,8 +120,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		}
 		Set<ContactField> setFields = new HashSet<ContactField>();
 		for (Entry<ContactField, ? extends JsonMapping<? extends Object, Contact>> entry : getMappings().entrySet()) {
-			if (entry.getValue().isSet(contact)) {
-				setFields.add(entry.getKey());
+			JsonMapping<? extends Object, Contact> mapping = entry.getValue();
+			if (mapping.isSet(contact)) {
+				ContactField field = entry.getKey();
+				setFields.add(field);
+				if (ContactField.IMAGE1.equals(field)) {
+					// assume virtual IMAGE1_URL is set, too
+					setFields.add(ContactField.IMAGE1_URL);
+				} else if (ContactField.LAST_MODIFIED.equals(field)) {
+					// assume virtual LAST_MODIFIED_UTC is set, too
+					setFields.add(ContactField.LAST_MODIFIED_UTC);
+				}
 			}
 		}
 		if (null != mandatoryFields) {
