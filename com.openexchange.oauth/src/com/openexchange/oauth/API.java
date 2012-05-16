@@ -1,5 +1,5 @@
 package com.openexchange.oauth;
 
 public enum API {
-	FACEBOOK;
+	FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO;
 }

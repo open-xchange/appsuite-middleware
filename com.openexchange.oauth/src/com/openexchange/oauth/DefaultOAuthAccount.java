@@ -118,4 +118,9 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
             this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
     }
 
+	@Override
+	public API getAPI() {
+		return metaData.getAPI();
+	}
+
 }

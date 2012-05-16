@@ -52,6 +52,7 @@ package com.openexchange.oauth.facebook;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteraction;
@@ -163,5 +164,11 @@ public class MockOAuthService implements OAuthService {
         // TODO Auto-generated method stub
         return null;
     }
+
+	@Override
+	public OAuthAccount getDefaultAccount(API api, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

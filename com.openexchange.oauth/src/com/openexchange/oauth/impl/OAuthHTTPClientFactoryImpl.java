@@ -18,8 +18,8 @@ public class OAuthHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 	protected Map<Class<?>, List<HTTPResponseProcessor>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor>>();
 
 	@Override
-	public HTTPClient create(OAuthAccount account, API api, String apiKey, String secret) throws OXException {
-		OAuthHTTPClient client = new OAuthHTTPClient(account, api, apiKey, secret);
+	public HTTPClient create(OAuthAccount account) throws OXException {
+		OAuthHTTPClient client = new OAuthHTTPClient(account, account.getAPI(), account.getMetaData().getAPIKey(), account.getMetaData().getAPISecret());
 		client.setProcessors(processors);
 		return client;
 	}

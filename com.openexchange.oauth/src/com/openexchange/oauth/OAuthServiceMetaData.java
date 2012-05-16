@@ -145,4 +145,10 @@ public interface OAuthServiceMetaData {
      */
     String modifyCallbackURL(String callbackUrl);
 
+    /**
+     * Gets the style of API (e.g. Facebook, Twitter...).
+     * @return
+     */
+	API getAPI();
+
 }

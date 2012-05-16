@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.linkedin;
 
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 
@@ -101,5 +102,10 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }
+
+	@Override
+	public API getAPI() {
+		return API.LINKEDIN;
+	}
 
 }

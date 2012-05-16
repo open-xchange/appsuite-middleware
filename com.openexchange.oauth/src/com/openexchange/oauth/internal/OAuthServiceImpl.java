@@ -85,11 +85,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthEventConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthExceptionMessages;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
@@ -569,6 +571,26 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseReadConnection(context, con);
         }
     }
+    
+    @Override
+	public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
+    	List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
+    	for (OAuthServiceMetaData metaData : allServices) {
+			if (metaData.getAPI() == api) {
+				List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
+				OAuthAccount likely = null;
+				for(OAuthAccount acc: accounts){
+					if(likely == null || acc.getId() < likely.getId()){
+						likely = acc;
+					}
+				}
+				if(likely != null){
+					return likely;
+				}
+			}
+		}
+    	throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:"+api.toString(), session.getUserId(), session.getContextId());
+	}
 
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
@@ -896,5 +918,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseWriteConnection(context, con);
         }
     }
+
+	
 
 }

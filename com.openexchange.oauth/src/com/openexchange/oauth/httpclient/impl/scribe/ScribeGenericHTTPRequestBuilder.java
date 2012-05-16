@@ -11,6 +11,9 @@ import org.junit.runner.Request;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
+import org.scribe.builder.api.LinkedInApi;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.YahooApi;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
@@ -51,6 +54,9 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 	protected Class<? extends Api> getProvider(API api) {
 		switch(api) {
 		case FACEBOOK: return FacebookApi.class;
+		case LINKEDIN: return LinkedInApi.class;
+		case TWITTER: return TwitterApi.class;
+		case YAHOO: return YahooApi.class;
 		}
 		throw new IllegalStateException("Unsupported API type: "+api);
 	}
