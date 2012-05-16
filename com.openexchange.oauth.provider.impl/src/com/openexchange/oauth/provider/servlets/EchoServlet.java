@@ -50,83 +50,64 @@
 package com.openexchange.oauth.provider.servlets;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import javax.servlet.ServletConfig;
+import java.io.PrintWriter;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
-import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
-import net.oauth.example.provider.core.SampleOAuthProvider;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
- * Request token request handler
- * 
+ * A text servlet to echo incoming "echo" param along with userId
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RequestTokenServlet extends HttpServlet {
-    
-    @Override
-    public void init(final ServletConfig config) throws ServletException {
-        super.init(config);
-        // nothing at this point
-        try{
-            SampleOAuthProvider.loadConsumers(config);
-        }catch(final IOException e){
-            throw new ServletException(e.getMessage());
-        }
-    }
-    
-    @Override
-    public void doGet(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
-        processRequest(request, response);
-    }
-    
-    @Override
-    public void doPost(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
-        processRequest(request, response);
-    }
-        
-    public void processRequest(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
+public class EchoServlet extends HttpServlet {
 
-        try {
+    private static final long serialVersionUID = 650486968603097312L;
+
+    @Override
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException
+    {
+        doGet(request, response);
+    }
+
+    @Override
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException, ServletException {
+        final OAuthProviderService providerService = getProviderService();
+        try{
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-            
-            final OAuthConsumer consumer = SampleOAuthProvider.getConsumer(requestMessage);
-            
-            final OAuthAccessor accessor = new OAuthAccessor(consumer);
-            SampleOAuthProvider.VALIDATOR.validateMessage(requestMessage, accessor);
-            {
-                // Support the 'Variable Accessor Secret' extension
-                // described in http://oauth.pbwiki.com/AccessorSecret
-                final String secret = requestMessage.getParameter("oauth_accessor_secret");
-                if (secret != null) {
-                    accessor.setProperty(OAuthConsumer.ACCESSOR_SECRET, secret);
-                }
-            }
-            // generate request_token and secret
-            SampleOAuthProvider.generateRequestToken(accessor);
+            final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+            OAuthProviderService.VALIDATOR.validateMessage(requestMessage, accessor);
+            final String userId = (String) accessor.getProperty("user");
             
             response.setContentType("text/plain");
-            final OutputStream out = response.getOutputStream();
-            OAuth.formEncode(OAuth.newList("oauth_token", accessor.requestToken,
-                                           "oauth_token_secret", accessor.tokenSecret),
-                             out);
+            final PrintWriter out = response.getWriter();
+            out.println("[Your UserId:" + userId + "]");
+            for (final Object item : request.getParameterMap().entrySet()) {
+                final Map.Entry parameter = (Map.Entry) item;
+                final String[] values = (String[]) parameter.getValue();
+                for (final String value : values) {
+                    out.println(parameter.getKey() + ": " + value);
+                }
+            }
             out.close();
             
         } catch (final Exception e){
-            SampleOAuthProvider.handleException(e, request, response, true);
+            DatabaseOAuthProviderService.handleException(e, request, response, false);
         }
-        
     }
 
-    private static final long serialVersionUID = 1L;
+    private OAuthProviderService getProviderService() {
+        return OAuthProviderServiceLookup.getService(OAuthProviderService.class);
+    }
 
 }

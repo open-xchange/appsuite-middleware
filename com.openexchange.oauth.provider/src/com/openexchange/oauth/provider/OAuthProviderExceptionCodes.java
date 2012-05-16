@@ -95,13 +95,9 @@ public enum OAuthProviderExceptionCodes implements OXExceptionCode {
      */
     MISSING_ARGUMENT(OAuthProviderExceptionMessages.MISSING_ARGUMENT_MSG, Category.CATEGORY_ERROR, 8),
     /**
-     * Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-     */
-    TOKEN_EXPIRED(OAuthProviderExceptionMessages.TOKEN_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 9),
-    /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthProviderExceptionMessages.OAUTH_ERROR_MSG, Category.CATEGORY_ERROR, 10),
+    OAUTH_ERROR(OAuthProviderExceptionMessages.OAUTH_ERROR_MSG, Category.CATEGORY_ERROR, 9),
     /**
      * No OAuth provider found for identifier %1$s.
      */

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,59 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import org.osgi.service.http.HttpService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
+import com.openexchange.oauth.provider.servlets.AccessTokenServlet;
+import com.openexchange.oauth.provider.servlets.AuthorizationServlet;
+import com.openexchange.oauth.provider.servlets.EchoServlet;
+import com.openexchange.oauth.provider.servlets.RequestTokenServlet;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 
 /**
- * {@link OAuthProviderServiceLookup}
- *
+ * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthProviderServiceLookup {
+public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link OAuthProviderServiceLookup}.
+     * Initializes a new {@link OAuthProviderImplActivator}.
      */
-    private OAuthProviderServiceLookup() {
+    public OAuthProviderImplActivator() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, HttpService.class };
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getService(clazz);
+    @Override
+    protected void startBundle() throws Exception {
+        OAuthProviderServiceLookup.set(this);
+        // Register OAuth provider service
+        final DatabaseOAuthProviderService providerService = new DatabaseOAuthProviderService(this);
+        registerService(OAuthProviderService.class, providerService);
+        addService(OAuthProviderService.class, providerService);
+        // Service trackers
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/accessToken", new AccessTokenServlet()));
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/authorization", new AuthorizationServlet()));
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
+        rememberTracker(new HTTPServletRegistration(context, "/oauth/requestToken", new RequestTokenServlet()));
+        openTrackers();
     }
 
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
+    @Override
+    protected void stopBundle() throws Exception {
+        OAuthProviderServiceLookup.set(null);
+        super.stopBundle();
     }
 
 }
