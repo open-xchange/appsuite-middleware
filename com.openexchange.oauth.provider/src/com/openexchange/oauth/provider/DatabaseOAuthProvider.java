@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,7 +64,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
-import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuthServiceProvider;
@@ -71,8 +71,6 @@ import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.server.OAuthServlet;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.json.JSONException;
-import org.json.JSONTokener;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
@@ -148,7 +146,7 @@ public class DatabaseOAuthProvider {
         ResultSet rs = null;
         try {
             stmt =
-                con.prepareStatement("SELECT requestTokenUrl, userAuthorizationUrl, accessTokenURL FROM oauthServiceProvider WHERE id = ?");
+                con.prepareStatement("SELECT requestTokenUrl, userAuthorizationUrl, accessTokenURL FROM oauthServiceProvider WHERE id=?");
             stmt.setInt(1, DEFAULT);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -183,7 +181,7 @@ public class DatabaseOAuthProvider {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT key, secret, callbackUrl, name, id FROM oauthConsumer WHERE providerId = ?");
+            stmt = con.prepareStatement("SELECT key, secret, callbackUrl, name, id FROM oauthConsumer WHERE providerId=?");
             stmt.setInt(1, DEFAULT);
             rs = stmt.executeQuery();
             consumers.clear();
@@ -196,27 +194,72 @@ public class DatabaseOAuthProvider {
                 final OAuthConsumer consumer = new OAuthConsumer(callbackUrl, consumerKey, rs.getString(2), provider);
                 consumer.setProperty("name", consumerKey);
                 consumer.setProperty("id", Integer.valueOf(rs.getInt(5)));
+                consumer.setProperty("providerId", Integer.valueOf(DEFAULT));
                 final String name = rs.getString(4);
                 if (!rs.wasNull()) {
                     consumer.setProperty("description", name);
                 }
                 consumers.put(consumerKey, consumer);
             }
-            DBUtils.closeSQLStuff(rs, stmt);
             for (final OAuthConsumer consumer : consumers.values()) {
-                stmt = con.prepareStatement("SELECT name, value FROM oauthConsumerProperty WHERE id = ?");
+                /*
+                 * Load consumer's properties
+                 */
+                DBUtils.closeSQLStuff(rs, stmt);
+                stmt = con.prepareStatement("SELECT name, value FROM oauthConsumerProperty WHERE id=?");
                 final int id = ((Integer) consumer.getProperty("id")).intValue();
                 stmt.setInt(1, id);
                 rs = stmt.executeQuery();
                 while (rs.next()) {
-                    try {
-                        consumer.setProperty(rs.getString(1), new JSONTokener(rs.getString(2)).nextValue());
-                    } catch (final JSONException e) {
-                        consumer.setProperty(rs.getString(1), rs.getString(2));
+                    final Object value = valueOf(rs.getString(2));
+                    if (null != value) {
+                        consumer.setProperty(rs.getString(1), value);
                     }
                 }
                 consumer.setProperty("name", consumer.consumerKey);
                 consumer.setProperty("id", Integer.valueOf(id));
+                /*
+                 * Load associated accessors aka tokens
+                 */
+                DBUtils.closeSQLStuff(rs, stmt);
+                stmt =
+                    con.prepareStatement("SELECT cid, user, requestToken, accessToken, tokenSecret FROM oauthAccessor WHERE consumerId=? AND providerId=?");
+                stmt.setInt(1, id);
+                stmt.setInt(2, DEFAULT);
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    final OAuthAccessor accessor = new OAuthAccessor(consumer);
+                    accessor.accessToken = stringOf(rs.getString(4));
+                    accessor.requestToken = stringOf(rs.getString(3));
+                    accessor.tokenSecret = stringOf(rs.getString(5));
+                    accessor.setProperty("context", Integer.valueOf(rs.getInt(1)));
+                    accessor.setProperty("user", Integer.valueOf(rs.getInt(2)));
+                    tokens.put(accessor, PRESENT);
+                }
+                for (final OAuthAccessor accessor : tokens.keySet()) {
+                    /*
+                     * Load accessors's properties
+                     */
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    stmt =
+                        con.prepareStatement("SELECT name, value FROM oauthAccessorProperty WHERE cid=? AND user=? AND consumerId=?");
+                    final int contextId = ((Integer) accessor.getProperty("context")).intValue();
+                    final int userId = ((Integer) accessor.getProperty("user")).intValue();
+                    final int consumerId = ((Integer) accessor.consumer.getProperty("id")).intValue();
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    stmt.setInt(3, consumerId);
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        final Object value = valueOf(rs.getString(2));
+                        if (null != value) {
+                            accessor.setProperty(rs.getString(1), value);
+                        }
+                    }
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    accessor.setProperty("context", Integer.valueOf(contextId));
+                    accessor.setProperty("user", Integer.valueOf(userId));
+                }
             }
         } catch (final SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -273,7 +316,7 @@ public class DatabaseOAuthProvider {
     /**
      * Set the access token
      * 
-     * @throws OXException 
+     * @throws OXException
      */
     public void markAsAuthorized(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
         // Set properties
@@ -294,13 +337,11 @@ public class DatabaseOAuthProvider {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, ((Integer) accessor.consumer.getProperty("id")).intValue());
-
             for (final Map.Entry<String, Object> entry : m.entrySet()) {
                 stmt.setString(4, entry.getKey());
                 stmt.setString(5, entry.getValue().toString());
                 stmt.addBatch();
             }
-
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -315,9 +356,10 @@ public class DatabaseOAuthProvider {
     /**
      * Generate a fresh request token and secret for a consumer.
      * 
-     * @throws OAuthException
+     * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
+     * @throws OXException If generation fails
      */
-    public void generateRequestToken(final OAuthAccessor accessor) throws OAuthException {
+    public void generateRequestToken(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
         // Generate oauth_token and oauth_secret
         final String consumerKey = accessor.consumer.consumerKey;
         // Generate token and secret based on consumerKey
@@ -336,36 +378,171 @@ public class DatabaseOAuthProvider {
         // Add to the local cache
         tokens.put(accessor, PRESENT);
 
+        // Add to database
+        final DatabaseService databaseService = OAuthProviderServiceLookup.getService(DatabaseService.class);
+        final Connection con = databaseService.getWritable(anyContextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO oauthAccessor (cid,user,consumerId,providerId,requestToken,accessToken,tokenSecret) VALUES (?,?,?,?,?,?,?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, ((Integer) accessor.consumer.getProperty("id")).intValue());
+            stmt.setInt(4, ((Integer) accessor.consumer.getProperty("providerId")).intValue());
+            stmt.setString(5, token);
+            stmt.setNull(6, Types.VARCHAR);
+            stmt.setString(7, secret);
+            stmt.executeUpdate();
+            /*
+             * Properties, too
+             */
+            DBUtils.closeSQLStuff(stmt);
+            stmt = con.prepareStatement("INSERT INTO oauthAccessorProperty (cid,user,consumerId,name,value) VALUES (?,?,?,?,?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, ((Integer) accessor.consumer.getProperty("id")).intValue());
+            for (final Map.Entry<String, Object> entry : accessor.getProperties().entrySet()) {
+                stmt.setString(4, entry.getKey());
+                stmt.setString(5, entry.getValue().toString());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            // "context"
+            stmt.setString(4, "context");
+            stmt.setString(5, Integer.toString(contextId));
+            stmt.addBatch();
+            // "user"
+            stmt.setString(4, "user");
+            stmt.setString(5, Integer.toString(userId));
+            stmt.addBatch();
+            // Execute batch
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(anyContextId, con);
+        }
     }
 
     /**
-     * Generate a fresh request token and secret for a consumer.
+     * Generate an access token for a consumer.
      * 
-     * @throws OAuthException
+     * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
+     * @throws OXException If generation fails
      */
-    public void generateAccessToken(final OAuthAccessor accessor) throws OAuthException {
+    public void generateAccessToken(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
+        // Generate oauth_token and oauth_secret
+        final String consumerKey = accessor.consumer.consumerKey;
+        // Generate token and secret based on consumer_key
 
-        // generate oauth_token and oauth_secret
-        final String consumer_key = accessor.consumer.consumerKey;
-        // generate token and secret based on consumer_key
-
-        // for now use md5 of name + current time as token
-        final String token_data = consumer_key + System.nanoTime();
-        final String token = DigestUtils.md5Hex(token_data);
+        // For now use md5 of name + current time as token
+        final String tokenData = consumerKey + System.nanoTime();
+        final String token = DigestUtils.md5Hex(tokenData);
         // first remove the accessor from cache
         tokens.remove(accessor);
 
         accessor.requestToken = null;
         accessor.accessToken = token;
 
-        // update token in local cache
+        // Update token in local cache
         tokens.put(accessor, PRESENT);
+
+        // Update in database
+        final DatabaseService databaseService = OAuthProviderServiceLookup.getService(DatabaseService.class);
+        final Connection con = databaseService.getWritable(anyContextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE oauthAccessor SET requestToken=?,accessToken=? WHERE cid=? AND user=? AND consumerId=?");
+            stmt.setNull(1, Types.VARCHAR);
+            stmt.setString(2, token);
+            stmt.setInt(3, contextId);
+            stmt.setInt(4, userId);
+            stmt.setInt(5, ((Integer) accessor.consumer.getProperty("id")).intValue());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(anyContextId, con);
+        }
     }
 
     public static void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
         String realm = (request.isSecure()) ? "https://" : "http://";
         realm += request.getLocalName();
         OAuthServlet.handleException(response, e, realm, sendBody);
+    }
+
+    private static Object valueOf(final String value) {
+        if (isEmpty(value)) {
+            return null;
+        }
+        /*
+         * If it is true, false, or null, return the proper value.
+         */
+        final String s = value.trim();
+        if (s.equalsIgnoreCase("true")) {
+            return Boolean.TRUE;
+        }
+        if (s.equalsIgnoreCase("false")) {
+            return Boolean.FALSE;
+        }
+        if (s.equalsIgnoreCase("null")) {
+            return null;
+        }
+        /*
+         * If it might be a number, try converting it. We support the 0- and 0x- conventions. If a number cannot be produced, then the value
+         * will just be a string. Note that the 0-, 0x-, plus, and implied string conventions are non-standard. A JSON parser is free to
+         * accept non-JSON forms as long as it accepts all correct JSON forms.
+         */
+        final char b = s.charAt(0);
+        if ((b >= '0' && b <= '9') || b == '.' || b == '-' || b == '+') {
+            if (b == '0') {
+                if (s.length() > 2 && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
+                    try {
+                        return Integer.valueOf(Integer.parseInt(s.substring(2), 16));
+                    } catch (final Exception e) {
+                        /* Ignore the error */
+                    }
+                } else {
+                    try {
+                        return Integer.valueOf(Integer.parseInt(s, 8));
+                    } catch (final Exception e) {
+                        /* Ignore the error */
+                    }
+                }
+            }
+            try {
+                return Integer.valueOf(s);
+            } catch (final Exception e) {
+                try {
+                    return Long.valueOf(s);
+                } catch (final Exception f) {
+                    try {
+                        return Double.valueOf(s);
+                    } catch (final Exception g) {
+                        return s;
+                    }
+                }
+            }
+        }
+        return s;
+    }
+
+    private static String stringOf(final String value) {
+        return isEmpty(value) ? null : value;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

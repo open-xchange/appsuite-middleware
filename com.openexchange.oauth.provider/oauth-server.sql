@@ -33,11 +33,12 @@ CREATE TABLE `oauthAccessor` (
   `user` int(10) unsigned NOT NULL,
   `consumerId` int(10) unsigned NOT NULL,
   `providerId` int(10) unsigned NOT NULL,
-  `requestToken` varchar(255) NOT NULL,
-  `accessToken` varchar(255) NOT NULL,
+  `requestToken` varchar(255) DEFAULT NULL,
+  `accessToken` varchar(255) DEFAULT NULL,
   `tokenSecret` varchar(255) NOT NULL,
   PRIMARY KEY  (`cid`,`user`,`consumerId`),
-  KEY `consumerIndex` (`cid`,`user`)
+  KEY `userIndex` (`cid`,`user`),
+  KEY `consumerIndex` (`consumerId`,`providerId`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oauthAccessorProperty` (
@@ -46,5 +47,5 @@ CREATE TABLE `oauthAccessorProperty` (
   `consumerId` int(10) unsigned NOT NULL,
   `name` varchar(32) NOT NULL,
   `value` varchar(255) NOT NULL,
-  PRIMARY KEY  (`cid`,`user`,`consumerId`,`providerId`,`name`)
+  PRIMARY KEY  (`cid`,`user`,`consumerId`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
