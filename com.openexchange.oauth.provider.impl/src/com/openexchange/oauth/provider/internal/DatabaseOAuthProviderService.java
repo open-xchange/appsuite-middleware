@@ -49,16 +49,25 @@
 
 package com.openexchange.oauth.provider.internal;
 
+import static com.openexchange.oauth.provider.internal.DBUtils.closeSQLStuff;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.procedure.TIntProcedure;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -88,8 +97,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
      * Member section
      */
 
-    private final int anyContextId;
-
     private final OAuthServiceProvider provider;
 
     private final ConcurrentMap<String, OAuthConsumer> consumers;
@@ -109,22 +116,26 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         consumers = new ConcurrentHashMap<String, OAuthConsumer>(16);
         tokens = new ConcurrentHashMap<OAuthAccessor, Object>(256);
         final DatabaseService databaseService = services.getService(DatabaseService.class);
-        // Load arbitrary context identifier
-        final int cid = getAnyContextId(databaseService);
-        anyContextId = cid;
         // Load provider
         provider = loadServiceProvider(databaseService);
         loadConsumers(databaseService);
     }
 
-    private int getAnyContextId(final DatabaseService databaseService) throws OXException {
+    private TIntList getContextIds(final DatabaseService databaseService) throws OXException {
         final Connection con = databaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid FROM context LIMIT 1");
+            stmt = con.prepareStatement("SELECT cid FROM context");
             rs = stmt.executeQuery();
-            return rs.next() ? rs.getInt(1) : -1;
+            if (!rs.next()) {
+                return new TIntLinkedList();
+            }
+            final TIntList ret = new TIntLinkedList();
+            do {
+                ret.add(rs.getInt(1));
+            } while (rs.next());
+            return ret;
         } catch (final SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -141,7 +152,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
      * @throws OXException If loading fails
      */
     private OAuthServiceProvider loadServiceProvider(final DatabaseService databaseService) throws OXException {
-        final Connection con = databaseService.getReadOnly(anyContextId);
+        final Connection con = databaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -157,7 +168,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(anyContextId, con);
+            databaseService.backReadOnly(con);
         }
     }
 
@@ -173,11 +184,11 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
      * @throws OXException If loading consumers fails
      */
     private void loadConsumers(final DatabaseService databaseService) throws OXException {
-        final Connection con = databaseService.getReadOnly(anyContextId);
+        Connection con = databaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT key, secret, callbackUrl, name, id FROM oauthConsumer WHERE providerId=?");
+            stmt = con.prepareStatement("SELECT `key`, `secret`, `callbackUrl`, `name`, `id` FROM oauthConsumer WHERE `providerId`=?");
             stmt.setInt(1, DEFAULT_PROVIDER);
             rs = stmt.executeQuery();
             consumers.clear();
@@ -202,7 +213,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                  * Load consumer's properties
                  */
                 DBUtils.closeSQLStuff(rs, stmt);
-                stmt = con.prepareStatement("SELECT name, value FROM oauthConsumerProperty WHERE id=?");
+                stmt = con.prepareStatement("SELECT `name`, `value` FROM oauthConsumerProperty WHERE `id`=?");
                 final int id = consumer.<Integer> getProperty(PROP_ID).intValue();
                 stmt.setInt(1, id);
                 rs = stmt.executeQuery();
@@ -214,55 +225,186 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                 }
                 consumer.setProperty(PROP_NAME, consumer.consumerKey);
                 consumer.setProperty(PROP_ID, Integer.valueOf(id));
-                /*
-                 * Load associated accessors aka tokens
-                 */
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt =
-                    con.prepareStatement("SELECT cid, user, requestToken, accessToken, tokenSecret FROM oauthAccessor WHERE consumerId=? AND providerId=?");
-                stmt.setInt(1, id);
-                stmt.setInt(2, DEFAULT_PROVIDER);
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    final OAuthAccessor accessor = new OAuthAccessor(consumer);
-                    accessor.accessToken = stringOf(rs.getString(4));
-                    accessor.requestToken = stringOf(rs.getString(3));
-                    accessor.tokenSecret = stringOf(rs.getString(5));
-                    accessor.setProperty(PROP_CONTEXT, Integer.valueOf(rs.getInt(1)));
-                    accessor.setProperty(PROP_USER, Integer.valueOf(rs.getInt(2)));
-                    tokens.put(accessor, PRESENT);
-                }
-                for (final OAuthAccessor accessor : tokens.keySet()) {
-                    /*
-                     * Load accessors's properties
-                     */
-                    DBUtils.closeSQLStuff(rs, stmt);
-                    stmt =
-                        con.prepareStatement("SELECT name, value FROM oauthAccessorProperty WHERE cid=? AND user=? AND consumerId=?");
-                    final int contextId = ((Integer) accessor.getProperty(PROP_CONTEXT)).intValue();
-                    final int userId = ((Integer) accessor.getProperty(PROP_USER)).intValue();
-                    final int consumerId = accessor.consumer.<Integer> getProperty(PROP_ID).intValue();
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, userId);
-                    stmt.setInt(3, consumerId);
-                    rs = stmt.executeQuery();
-                    while (rs.next()) {
-                        final Object value = valueOf(rs.getString(2));
-                        if (null != value) {
-                            accessor.setProperty(rs.getString(1), value);
-                        }
-                    }
-                    DBUtils.closeSQLStuff(rs, stmt);
-                    accessor.setProperty(PROP_CONTEXT, Integer.valueOf(contextId));
-                    accessor.setProperty(PROP_USER, Integer.valueOf(userId));
-                }
             }
         } catch (final SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(anyContextId, con);
+            databaseService.backReadOnly(con);
         }
+        // Load access tokens
+        stmt = null;
+        rs = null;
+        con = null;
+        final TIntList contextIds = getContextIds(databaseService);
+        try {
+            final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
+            final ConcurrentMap<OAuthAccessor, Object> tokens = this.tokens;
+            final Object present = DatabaseOAuthProviderService.PRESENT;
+            final List<int[]> delete = new LinkedList<int[]>();
+            contextIds.forEach(new TIntProcedure() {
+                
+                @Override
+                public boolean execute(final int contextId) {
+                    Connection con = null;
+                    PreparedStatement ps = null;
+                    ResultSet result = null;
+                    try {
+                        con = databaseService.getReadOnly(contextId);
+                        if (!tableExists(con, "oauthAccessor")) {
+                            databaseService.backReadOnly(contextId, con);
+                            con = databaseService.getWritable(contextId);
+                            Statement stmt = null;
+                            try {
+                                DBUtils.startTransaction(con);
+                                stmt = con.createStatement();
+                                stmt.execute("CREATE TABLE `oauthAccessor` (" + 
+                                		" `cid` int(10) unsigned NOT NULL," + 
+                                		" `user` int(10) unsigned NOT NULL," + 
+                                		" `consumerId` int(10) unsigned NOT NULL," + 
+                                		" `providerId` int(10) unsigned NOT NULL," + 
+                                		" `requestToken` varchar(255) DEFAULT NULL," + 
+                                		" `accessToken` varchar(255) DEFAULT NULL," + 
+                                		" `tokenSecret` varchar(255) NOT NULL," + 
+                                		" PRIMARY KEY (`cid`,`user`,`consumerId`)," + 
+                                		" KEY `userIndex` (`cid`,`user`)," + 
+                                		" KEY `consumerIndex` (`consumerId`,`providerId`)" + 
+                                		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+                                stmt.execute("CREATE TABLE `oauthAccessorProperty` (" + 
+                                		" `cid` int(10) unsigned NOT NULL," + 
+                                		" `user` int(10) unsigned NOT NULL," + 
+                                		" `consumerId` int(10) unsigned NOT NULL," + 
+                                		" `name` varchar(32) NOT NULL," + 
+                                		" `value` varchar(255) NOT NULL," + 
+                                		" PRIMARY KEY (`cid`,`user`,`consumerId`,`name`)" + 
+                                		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+                                con.commit();
+                            } catch (final SQLException e) {
+                                errorRef.set(OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage()));
+                                DBUtils.rollback(con);
+                                return false;
+                            } catch (final Exception e) {
+                                errorRef.set(OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+                                DBUtils.rollback(con);
+                                return false;
+                            } finally {
+                                DBUtils.closeSQLStuff(stmt);
+                                DBUtils.autocommit(con);
+                                databaseService.backWritable(contextId, con);
+                                con = null; // Set to null to successfully pass finally block
+                            }
+                            return true;
+                        }
+                        // Tables already exist; load them
+                        ps = con.prepareStatement("SELECT cid, user, consumerId, requestToken, accessToken, tokenSecret FROM oauthAccessor WHERE providerId=?");
+                        ps.setInt(1, DEFAULT_PROVIDER);
+                        result = ps.executeQuery();
+                        final List<OAuthAccessor> accessors = new LinkedList<OAuthAccessor>();
+                        while (result.next()) {
+                            final int consumerId = result.getInt(3);
+                            final OAuthConsumer consumer = consumerById(consumerId);
+                            if (null == consumer) {
+                                delete.add(new int[] { result.getInt(1), result.getInt(2), consumerId });
+                            } else {
+                                final OAuthAccessor accessor = new OAuthAccessor(consumer);
+                                accessor.accessToken = stringOf(result.getString(5));
+                                accessor.requestToken = stringOf(result.getString(4));
+                                accessor.tokenSecret = stringOf(result.getString(6));
+                                accessor.setProperty(PROP_CONTEXT, Integer.valueOf(result.getInt(1)));
+                                accessor.setProperty(PROP_USER, Integer.valueOf(result.getInt(2)));
+                                tokens.put(accessor, present);
+                                accessors.add(accessor);
+                            }
+                        }
+                        for (final OAuthAccessor accessor : accessors) {
+                            /*
+                             * Load accessors's properties
+                             */
+                            DBUtils.closeSQLStuff(result, ps);
+                            ps =
+                                con.prepareStatement("SELECT name, value FROM oauthAccessorProperty WHERE cid=? AND user=? AND consumerId=?");
+                            final int userId = ((Integer) accessor.getProperty(PROP_USER)).intValue();
+                            final int consumerId = accessor.consumer.<Integer> getProperty(PROP_ID).intValue();
+                            ps.setInt(1, contextId);
+                            ps.setInt(2, userId);
+                            ps.setInt(3, consumerId);
+                            result = ps.executeQuery();
+                            while (result.next()) {
+                                final Object value = valueOf(result.getString(2));
+                                if (null != value) {
+                                    accessor.setProperty(result.getString(1), value);
+                                }
+                            }
+                            DBUtils.closeSQLStuff(result, ps);
+                            accessor.setProperty(PROP_CONTEXT, Integer.valueOf(contextId));
+                            accessor.setProperty(PROP_USER, Integer.valueOf(userId));
+                        }
+                        return true;
+                    } catch (final OXException e) {
+                        errorRef.set(e);
+                        return false;
+                    } catch (final SQLException e) {
+                        errorRef.set(OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage()));
+                        return false;
+                    } catch (final RuntimeException e) {
+                        errorRef.set(OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+                        return false;
+                    } finally {
+                        DBUtils.closeSQLStuff(result, ps);
+                        if (null != con) {
+                            databaseService.backReadOnly(contextId, con);
+                        }
+                    }
+                }
+            });
+            // Check for error
+            {
+                final OXException err = errorRef.get();
+                if (null != err) {
+                    throw err;
+                }
+            }
+            // Check delete
+            if (!delete.isEmpty()) {
+                for (final int[] arr : delete) {
+                    final int cid = arr[0];
+                    con = databaseService.getWritable(cid);
+                    try {
+                        stmt = con.prepareStatement("DELETE FROM oauthAccessor WHERE cid=? AND user=? AND consumerId=?");
+                        stmt.setInt(1, cid);
+                        stmt.setInt(2, arr[1]);
+                        stmt.setInt(3, arr[2]);
+                        stmt.executeUpdate();
+                        DBUtils.closeSQLStuff(stmt);
+                        stmt = con.prepareStatement("DELETE FROM oauthAccessorProperty WHERE cid=? AND user=? AND consumerId=?");
+                        stmt.setInt(1, cid);
+                        stmt.setInt(2, arr[1]);
+                        stmt.setInt(3, arr[2]);
+                        stmt.executeUpdate();
+                    } finally {
+                        DBUtils.closeSQLStuff(stmt);
+                        databaseService.backWritable(cid, con);
+                    }
+                }
+            }
+        } catch (final SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Looks-up consumer by identifier.
+     * 
+     * @param id The consumer identifier
+     * @return The consumer or <code>null</code>
+     */
+    protected OAuthConsumer consumerById(final int id) {
+        for (final OAuthConsumer consumer : consumers.values()) {
+            if (id == consumer.<Integer> getProperty(PROP_ID).intValue()) {
+                return consumer;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -306,7 +448,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         accessor.setProperty(PROP_AUTHORIZED, Boolean.TRUE);
         // Perform SQL INSERT
         final DatabaseService databaseService = services.getService(DatabaseService.class);
-        final Connection con = databaseService.getWritable(anyContextId);
+        final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO oauthAccessorProperty (cid,user,consumerId,name,value) VALUES (?,?,?,?,?)");
@@ -320,7 +462,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(anyContextId, con);
+            databaseService.backWritable(contextId, con);
         }
         // Update token in local cache
         tokens.put(accessor, PRESENT);
@@ -345,7 +487,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         tokens.put(accessor, PRESENT);
         // Add to database
         final DatabaseService databaseService = services.getService(DatabaseService.class);
-        final Connection con = databaseService.getWritable(anyContextId);
+        final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO oauthAccessor (cid,user,consumerId,providerId,requestToken,accessToken,tokenSecret) VALUES (?,?,?,?,?,?,?)");
@@ -386,7 +528,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(anyContextId, con);
+            databaseService.backWritable(contextId, con);
         }
     }
 
@@ -407,7 +549,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         tokens.put(accessor, PRESENT);
         // Update in database
         final DatabaseService databaseService = services.getService(DatabaseService.class);
-        final Connection con = databaseService.getWritable(anyContextId);
+        final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE oauthAccessor SET requestToken=?, accessToken=? WHERE cid=? AND user=? AND consumerId=?");
@@ -421,7 +563,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(anyContextId, con);
+            databaseService.backWritable(contextId, con);
         }
     }
 
@@ -431,7 +573,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         OAuthServlet.handleException(response, e, realm.toString(), sendBody);
     }
 
-    private static Object valueOf(final String value) {
+    protected static Object valueOf(final String value) {
         if (isEmpty(value)) {
             return null;
         }
@@ -487,7 +629,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         return s;
     }
 
-    private static String stringOf(final String value) {
+    protected static String stringOf(final String value) {
         return isEmpty(value) ? null : value;
     }
 
@@ -501,6 +643,19 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    protected static final boolean tableExists(final Connection con, final String table) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
+            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
     }
 
 }

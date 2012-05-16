@@ -51,8 +51,15 @@ package com.openexchange.oauth.provider.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableService;
+import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableTask;
+import com.openexchange.oauth.provider.groupware.OAuthProviderDeleteListener;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.oauth.provider.servlets.AccessTokenServlet;
@@ -83,17 +90,30 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
         OAuthProviderServiceLookup.set(this);
-        // Register OAuth provider service
+        /*
+         * Register OAuth provider service
+         */
         final DatabaseOAuthProviderService providerService = new DatabaseOAuthProviderService(this);
         registerService(OAuthProviderService.class, providerService);
         addService(OAuthProviderService.class, providerService);
-        // Service trackers
+        /*
+         * Service trackers
+         */
         rememberTracker(new HTTPServletRegistration(context, "/oauth/accessToken", new AccessTokenServlet()));
         rememberTracker(new HTTPServletRegistration(context, "/oauth/authorization", new AuthorizationServlet()));
         rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
         rememberTracker(new HTTPServletRegistration(context, "/oauth/requestToken", new RequestTokenServlet()));
         openTrackers();
+        /*
+         * Register update task, create table job and delete listener
+         */
+        {
+            registerService(CreateTableService.class, new OAuthProviderCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new OAuthProviderCreateTableTask()));
+            registerService(DeleteListener.class, new OAuthProviderDeleteListener());
+        }
     }
 
     @Override

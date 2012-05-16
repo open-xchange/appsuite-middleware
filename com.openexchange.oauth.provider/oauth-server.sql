@@ -5,8 +5,7 @@ CREATE TABLE `oauthServiceProvider` (
   `requestTokenUrl` varchar(255) NOT NULL,
   `userAuthorizationUrl` varchar(255) NOT NULL,
   `accessTokenURL` varchar(255) DEFAULT NULL,
-  PRIMARY KEY  (`id`),
-  KEY `nameIndex` (`name`)
+  PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oauthConsumer` (
@@ -38,7 +37,7 @@ CREATE TABLE `oauthAccessor` (
   `tokenSecret` varchar(255) NOT NULL,
   PRIMARY KEY  (`cid`,`user`,`consumerId`),
   KEY `userIndex` (`cid`,`user`),
-  KEY `consumerIndex` (`consumerId`,`providerId`),
+  KEY `consumerIndex` (`consumerId`,`providerId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oauthAccessorProperty` (
