@@ -1,4 +1,5 @@
 *.class
+.DS_Store
 bin
 bin/
 openexchange-test/conf/test.properties
