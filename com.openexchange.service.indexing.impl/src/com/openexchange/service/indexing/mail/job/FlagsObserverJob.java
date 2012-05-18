@@ -156,7 +156,20 @@ public final class FlagsObserverJob extends AbstractMailJob {
                 final Map<String, Object> params = new HashMap<String, Object>();
                 params.put("ids", partialUUIDs);
                 final QueryParameters query = new QueryParameters.Builder(params).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(SearchHandler.GET_REQUEST).setType(MAIL).setOffset(0).setLength(len).build();
-                final IndexResult<MailMessage> indexResult = indexAccess.query(query);
+                Set<MailIndexField> fields = new HashSet<MailIndexField>();
+                fields.add(MailIndexField.FLAG_ANSWERED);
+                fields.add(MailIndexField.FLAG_DELETED);
+                fields.add(MailIndexField.FLAG_DRAFT);
+                fields.add(MailIndexField.FLAG_FLAGGED);
+                fields.add(MailIndexField.FLAG_RECENT);
+                fields.add(MailIndexField.FLAG_SEEN);
+                fields.add(MailIndexField.FLAG_USER);
+                fields.add(MailIndexField.FLAG_SPAM);
+                fields.add(MailIndexField.FLAG_FORWARDED);
+                fields.add(MailIndexField.FLAG_READ_ACK);
+                fields.add(MailIndexField.USER_FLAGS);
+                fields.add(MailIndexField.COLOR_LABEL);
+                final IndexResult<MailMessage> indexResult = indexAccess.query(query, fields);
                 if (0 < indexResult.getNumFound()) {
                     for (final IndexDocument<MailMessage> indexDocument : indexResult.getResults()) {
                         final MailMessage mailMessage = indexDocument.getObject();

@@ -139,7 +139,7 @@ public interface IndexAccess<V> {
      * Changes the denoted fields of already existing documents according to specified input documents.
      * 
      * @param documents The documents providing changes
-     * @param The fields denoting the changes or <code>null</code> to indicate usage of all possible fields.
+     * @param fields The fields denoting the changes or <code>null</code> to indicate usage of all possible fields.
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
      */
@@ -165,10 +165,11 @@ public interface IndexAccess<V> {
      * Queries indexed documents by specified query parameters.
      * 
      * @param parameters The query parameters
+     * @param fields The fields to be filled within the returned documents. If set to <code>null</code> all known fields will be filled.
      * @return The query result
      * @throws OXException If query fails
      * @throws InterruptedException If interrupted while retrieving results
      */
-    IndexResult<V> query(QueryParameters parameters) throws OXException, InterruptedException;
+    IndexResult<V> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException, InterruptedException;
 
 }

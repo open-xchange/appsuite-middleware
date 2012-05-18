@@ -106,7 +106,7 @@ public class SolrIndexFacadeTest extends TestCase {
             final Map<String, Object> params = new HashMap<String, Object>();
 //            params.put("accountId", 0);
             final QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.CUSTOM).setType(Type.MAIL).setSearchTerm(fromTerm).build();
-            final IndexResult<MailMessage> result = indexAccess.query(qp);
+            final IndexResult<MailMessage> result = indexAccess.query(qp, null);
             facade.releaseIndexAccess(indexAccess);
         } catch (final Exception e) {
             // TODO Auto-generated catch block

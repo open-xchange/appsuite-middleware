@@ -1,12 +1,28 @@
 	<Product>
-		<Name>OXtender 2 for Microsoft Outlook</Name> 
-		<Version>6.17.61</Version>
+		<Name>${PRODUCT_NAME}</Name> 
+		<Version>7.0.46</Version>
+		<Requirement Root="HKLM" Key="Software\Microsoft\Office\14.0\Outlook" ValueName="Bitness" Compare="ValueNotEqualTo" Value="x64" />
 		<UpgradeCode>{38de77fa-5954-4855-afc1-094c9f0c317c}</UpgradeCode>
-		<MD5>${FILETOOL.md5("OXtender_2_for_Microsoft_Outlook")}</MD5>
-		<ReleaseDate>27.08.2010</ReleaseDate>
-		<URL>${FILETOOL.url("OXtender_2_for_Microsoft_Outlook")}</URL>
+		<MD5>${FILETOOL.md5()}</MD5>
+		<ReleaseDate>09.02.2012</ReleaseDate>
+		<URL>${FILETOOL.url()}</URL>
 		<InfoUrl></InfoUrl>
-		<Icon>AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIiIiIiIiAAIiIiIiIiIiIiIiIiIiIiACIiIiIiIiIiIiIiIiIiIgIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiId3d3d3eId3eIiIh3d4iIh3d3d3d3eHd3eIiHd3eIiHd3eIiHd3eHd3eId3d4iIh3d4iIiHd3iHd3d3d3iIiId3eIiIh3d4iHd3d3eIiIiHd3iIiId3eIiHd3d4iIiP+IiP///4iI//+IiIj/////iIj///+IiP/4iIiIj////4iI////iIj/iIiIiIj///+IiI//+IiI+IiI/4iIj///+IiIiIiIj4iIj//4iIj///+IiIiIiP+IiP///4iI/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w////////////////////AP///////////////////wAP//////////////////AAAAAAAAAAAAAAAAAAAAAAD/////wAAAA4AAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAYAAAAHAAAAD/////w</Icon>
+		<Icon>${ICON}</Icon>
 		<InstallParams>OX_CREATEPROFILE=1 OX_PROFILENAME="Oxtender 2" ${OX_SERVERURL} ${OX_USERNAME} OX_OVERWRITEPROFILE=0 OX_DEFAULTPROFILE=1 OX_SUPPORTPAGEENABLED=0 OX_SUPPORTEMAIL=""</InstallParams> 
-		<Importance>200</Importance> 
+		<Importance>200</Importance>
+		<ServerRequiredVersion>${SERVER_REQUIRED_VERSION}</ServerRequiredVersion>
+	</Product>
+	<Product>
+		<Name>${PRODUCT_NAME}</Name> 
+		<Version>7.0.46</Version>
+		<Requirement Root="HKLM" Key="Software\Microsoft\Office\14.0\Outlook" ValueName="Bitness" Compare="ValueEqualTo" Value="x64" />
+		<UpgradeCode>{38de77fa-5954-4855-afc1-094c9f0c317c}</UpgradeCode>
+		<MD5>${FILETOOL.md5x64()}</MD5>
+		<ReleaseDate>09.02.2012</ReleaseDate>
+		<URL>${FILETOOL.urlx64()}</URL>
+		<InfoUrl></InfoUrl>
+		<Icon>${ICON}</Icon>
+		<InstallParams>OX_CREATEPROFILE=1 OX_PROFILENAME="Oxtender 2" ${OX_SERVERURL} ${OX_USERNAME} OX_OVERWRITEPROFILE=0 OX_DEFAULTPROFILE=1 OX_SUPPORTPAGEENABLED=0 OX_SUPPORTEMAIL=""</InstallParams> 
+		<Importance>200</Importance>
+		<ServerRequiredVersion>${SERVER_REQUIRED_VERSION}</ServerRequiredVersion>
 	</Product>

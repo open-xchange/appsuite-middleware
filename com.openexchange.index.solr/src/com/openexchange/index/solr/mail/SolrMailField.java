@@ -157,7 +157,7 @@ public enum SolrMailField {
         return indexedFields;
     }
 
-    public static String[] solrNamesFor(final SolrMailField[] fields) {
+    public static String[] solrNamesFor(final Set<SolrMailField> fields) {
         final List<String> names = new ArrayList<String>();
         for (final SolrMailField field : fields) {
             final String solrName = field.solrName();
