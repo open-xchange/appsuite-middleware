@@ -14,7 +14,9 @@ import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -26,11 +28,14 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrMBean;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.groupware.SolrCoreLoginHandler;
 import com.openexchange.solr.groupware.SolrCoresCreateTableService;
@@ -41,6 +46,7 @@ import com.openexchange.solr.internal.MessagingConstants;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
 import com.openexchange.solr.internal.Services;
 import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
+import com.openexchange.solr.internal.SolrMBeanImpl;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -51,11 +57,15 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-	static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
+	static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 
 	private volatile EmbeddedSolrAccessImpl embeddedAccess;
 
 	private static RMISolrAccessService solrRMI;
+
+    private SolrMBean solrMBean;
+
+    private ObjectName solrMBeanName;
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -65,46 +75,45 @@ public class SolrActivator extends HousekeepingActivator {
 	@Override
 	protected void startBundle() throws Exception {
 		Services.setServiceLookup(this);
-		final EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess = new EmbeddedSolrAccessImpl();
+		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess = new EmbeddedSolrAccessImpl();
 		embeddedAccess.startUp();
-		final DelegationSolrAccessImpl accessService = new DelegationSolrAccessImpl(embeddedAccess);
+		DelegationSolrAccessImpl accessService = new DelegationSolrAccessImpl(embeddedAccess);
 		registerService(SolrAccessService.class, accessService);
-		final SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
+		SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
 		registerService(SolrCoreConfigService.class, coreService);
 		addService(SolrCoreConfigService.class, coreService);
 		registerRMIInterface();
 
-		final SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
+		SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
 		registerService(CreateTableService.class, createTableService);
 		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(createTableService)));
 		// new SolrCoreStoresCreateTableTask()
 		registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
-	
-		final Dictionary<String, Object> ht = new Hashtable<String, Object>();
-        ht.put(EventConstants.EVENT_TOPIC, new String[] { MessagingConstants.START_CORE_TOPIC });
-		final EventHandler startCoreEventHandler = new EventHandler() {			
-			@Override
-			public void handleEvent(final Event event) {
-				final String topic = event.getTopic();
-				if (topic.equals(MessagingConstants.START_CORE_TOPIC)) {
-					final Object property = event.getProperty(MessagingConstants.PROP_IDENTIFIER);
-					if (property != null && property instanceof SolrCoreIdentifier) {
-						final SolrCoreIdentifier identifier = (SolrCoreIdentifier) property;
-						try {
-							final ConfigurationService config = Services.getService(ConfigurationService.class);
-							final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-							if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
-								embeddedAccess.startCore(identifier);
-							}
-						} catch (final OXException e) {
-							LOG.error("Could not start solr core.", e);
-						}						
-					}
-				}				
-			}
-		};
+		registerEventHandler();
 		
-		registerService(EventHandler.class, startCoreEventHandler);
+		solrMBeanName = new ObjectName(SolrMBean.DOMAIN, "name", "Solr Control");
+		solrMBean = new SolrMBeanImpl(embeddedAccess, coreService);
+		track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+            @Override
+            public void added(ServiceReference<ManagementService> ref, ManagementService service) {
+                try {
+                    service.registerMBean(solrMBeanName, solrMBean);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
+                try {
+                    service.unregisterMBean(solrMBeanName);
+                } catch (OXException e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+        });
+		openTrackers();
 	}
 
 	@Override
@@ -112,36 +121,68 @@ public class SolrActivator extends HousekeepingActivator {
 		super.stopBundle();
 
 		unregisterRMIInterface();
-		final EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess;
+		ManagementService managementService = Services.optService(ManagementService.class);
+		if (managementService != null && solrMBeanName != null) {
+		    managementService.unregisterMBean(solrMBeanName);
+		    solrMBean = null;
+		}
+		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess;
 		if (embeddedAccess != null) {
 			embeddedAccess.shutDown();
 			this.embeddedAccess = null;
 		}
 	}
+	
+	private void registerEventHandler() {
+	    Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        ht.put(EventConstants.EVENT_TOPIC, new String[] { MessagingConstants.START_CORE_TOPIC });
+        EventHandler startCoreEventHandler = new EventHandler() {         
+            @Override
+            public void handleEvent(Event event) {
+                String topic = event.getTopic();
+                if (topic.equals(MessagingConstants.START_CORE_TOPIC)) {
+                    Object property = event.getProperty(MessagingConstants.PROP_IDENTIFIER);
+                    if (property != null && property instanceof SolrCoreIdentifier) {
+                        SolrCoreIdentifier identifier = (SolrCoreIdentifier) property;
+                        try {
+                            ConfigurationService config = Services.getService(ConfigurationService.class);
+                            boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+                            if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
+                                embeddedAccess.startCore(identifier);
+                            }
+                        } catch (OXException e) {
+                            LOG.error("Could not start solr core.", e);
+                        }                       
+                    }
+                }               
+            }
+        };      
+        registerService(EventHandler.class, startCoreEventHandler);
+	}
 
 	private void registerRMIInterface() throws UnknownHostException, RemoteException, AlreadyBoundException {
 		LOG.info("Registering Solr RMI Interface.");
-		final ConfigurationService config = getService(ConfigurationService.class);
-		final EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess;
+		ConfigurationService config = getService(ConfigurationService.class);
+		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess;
 		solrRMI = new RMISolrAccessImpl(embeddedAccess);
-		final RMISolrAccessService stub = (RMISolrAccessService) UnicastRemoteObject.exportObject(solrRMI, 0);
+		RMISolrAccessService stub = (RMISolrAccessService) UnicastRemoteObject.exportObject(solrRMI, 0);
 		final InetAddress addr = InetAddress.getLocalHost();
-		final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+		int rmiPort = config.getIntProperty("RMI_PORT", 1099);
 		Registry registry = null;
 		try {
 			registry = LocateRegistry.createRegistry(rmiPort, RMISocketFactory.getDefaultSocketFactory(), new RMIServerSocketFactory() {
 				@Override
-				public ServerSocket createServerSocket(final int port) throws IOException {
-					final ServerSocket socket = new ServerSocket(port, 0, addr);
+				public ServerSocket createServerSocket(int port) throws IOException {
+					ServerSocket socket = new ServerSocket(port, 0, addr);
 					return socket;
 				}
 
 			});
-		} catch (final RemoteException e) {
+		} catch (RemoteException e) {
 			LOG.info("RMI registry seems to be already exported.");
 			try {
 				registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
-			} catch (final RemoteException r) {
+			} catch (RemoteException r) {
 				LOG.error("Could not get RMI registry. SolrServerRMI will not be registered!", r);
 				solrRMI = null;
 			}
@@ -155,13 +196,13 @@ public class SolrActivator extends HousekeepingActivator {
 	private void unregisterRMIInterface() throws UnknownHostException, NotBoundException {
 		try {
 			LOG.info("Unregistering Solr RMI Interface.");
-			final ConfigurationService config = getService(ConfigurationService.class);
-			final InetAddress addr = InetAddress.getLocalHost();
-			final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-			final Registry registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
+			ConfigurationService config = getService(ConfigurationService.class);
+			InetAddress addr = InetAddress.getLocalHost();
+			int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+			Registry registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
 
 			registry.unbind(RMISolrAccessService.RMI_NAME);
-		} catch (final RemoteException r) {
+		} catch (RemoteException r) {
 			LOG.error("Could not get RMI registry.", r);
 		}
 	}
