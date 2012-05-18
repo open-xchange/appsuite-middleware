@@ -271,6 +271,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         rs = null;
         con = null;
         if (loadAccessors) {
+            final ConcurrentMap<OAuthAccessor, Object> tokens = DatabaseOAuthProviderService.this.tokens;
+            final Object present = DatabaseOAuthProviderService.PRESENT;
             final Runnable loader = new Runnable() {
 
                 @Override
@@ -281,8 +283,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                         final TIntList contextIds = getContextIds(databaseService);
                         final TIntSet processed = new TIntHashSet(contextIds.size());
                         final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
-                        final ConcurrentMap<OAuthAccessor, Object> tokens = DatabaseOAuthProviderService.this.tokens;
-                        final Object present = DatabaseOAuthProviderService.PRESENT;
                         final List<int[]> delete = new LinkedList<int[]>();
                         contextIds.forEach(new TIntProcedure() {
 
