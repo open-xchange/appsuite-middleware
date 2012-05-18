@@ -52,11 +52,11 @@ package com.openexchange.service.indexing.mail.job;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 

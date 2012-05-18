@@ -68,6 +68,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class SolrCoreStoresCreateTableTask extends UpdateTaskAdapter {
     
+    // FIXME: This has to be rewritten as soon as we have a framework for config DB update tasks
+    
     private static final String CT_CORE_STORES = 
         "CREATE TABLE solrCoreStores (" +
             "id int(10) unsigned NOT NULL," +

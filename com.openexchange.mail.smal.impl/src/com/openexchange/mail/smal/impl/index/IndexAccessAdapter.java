@@ -70,7 +70,6 @@ import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.MailUUID;
-import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -90,7 +89,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexAccessAdapter implements SolrMailConstants {
+public final class IndexAccessAdapter {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexAccessAdapter.class));
 

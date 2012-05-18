@@ -110,7 +110,7 @@ public final class AddByIDsJob extends AbstractMailJob {
      * @return This folder job
      */
     public AddByIDsJob setMails(final List<MailMessage> mails) {
-        this.mailIds = new ArrayList<String>(mails.size());
+        mailIds = new ArrayList<String>(mails.size());
         for (final MailMessage mailMessage : mails) {
             final String mailId = mailMessage.getMailId();
             if (null != mailId) {

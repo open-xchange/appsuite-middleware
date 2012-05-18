@@ -50,17 +50,14 @@
 package com.openexchange.index.solr.groupware;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.user.UserService;
 
 
@@ -73,13 +70,10 @@ public class IndexDeleteListener implements DeleteListener {
     
     private final int[] coreTypes;
     
-    private final SolrCoreConfigService indexService;
-    
 
-    public IndexDeleteListener(final SolrCoreConfigService indexService) {
+    public IndexDeleteListener() {
         super();
-        this.indexService = indexService;
-     // TODO: extend!
+        // TODO: extend!
         coreTypes = new int[] { Types.EMAIL };
     }
 
@@ -90,7 +84,6 @@ public class IndexDeleteListener implements DeleteListener {
             final int uid = event.getId();
             
             deleteAllCores(cid, uid);
-            deleteUserEntriesFromDB(writeCon, cid, uid);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
             final int cid = event.getContext().getContextId();
             final UserService userService = Services.getService(UserService.class);
@@ -99,40 +92,13 @@ public class IndexDeleteListener implements DeleteListener {
             for (final User user : users) {
                 deleteAllCores(cid, user.getId());
             }
-            deleteContextEntriesFromDB(writeCon, cid);
         }
     }
     
     private void deleteAllCores(final int cid, final int uid) throws OXException {
+        final SolrCoreConfigService indexService = Services.getService(SolrCoreConfigService.class);
         for (final int type : coreTypes) {
-            indexService.removeCoreEnvironment(cid, uid, type); 
-        }
-    }
-
-    private void deleteContextEntriesFromDB(final Connection con, final int cid) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM solrCores WHERE cid = ?");
-            stmt.setInt(1, cid);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    private void deleteUserEntriesFromDB(final Connection con, final int cid, final int uid) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM solrCores WHERE cid = ? AND uid = ?");
-            stmt.setInt(1, cid);
-            stmt.setInt(2, uid);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
+            indexService.removeCoreEnvironment(new SolrCoreIdentifier(cid, uid, type)); 
         }
     }
 }

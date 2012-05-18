@@ -58,11 +58,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -74,10 +71,10 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.xml.sax.SAXException;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
@@ -135,7 +132,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
                 return false;
             }
 
-            final com.openexchange.solr.SolrCore solrCore = getCoreOrCreateEnvironment(contextId, userId, module);
+            final com.openexchange.solr.SolrCore solrCore = getCoreOrCreateEnvironment(identifier);
             if (solrCore.isActive()) {
                 if (solrCore.getServer().equals(getLocalServerAddress())) {
                     indexMysql.deactivateCoreEntry(contextId, userId, module);
@@ -193,7 +190,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         final int contextId = identifier.getContextId();
         final int userId = identifier.getUserId();
         final int module = identifier.getModule();
-        // FIXME : remove optimize and implement a suitable
+        // TODO : remove optimize and implement a suitable
         // optimize-strategy
         optimize(identifier);
         indexMysql.deactivateCoreEntry(contextId, userId, module);
@@ -554,14 +551,14 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
     }
 
-    private com.openexchange.solr.SolrCore getCoreOrCreateEnvironment(final int contextId, final int userId, final int module) throws OXException {
+    private com.openexchange.solr.SolrCore getCoreOrCreateEnvironment(final SolrCoreIdentifier identifier) throws OXException {
         try {
-            return indexMysql.getSolrCore(contextId, userId, module);
+            return indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
         } catch (final OXException e) {
             if (e.similarTo(SolrExceptionCodes.CORE_ENTRY_NOT_FOUND)) {
                 final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
-                coreService.createCoreEnvironment(contextId, userId, module);
-                return indexMysql.getSolrCore(contextId, userId, module);
+                coreService.createCoreEnvironment(identifier);
+                return indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
             } else {
                 throw e;
             }

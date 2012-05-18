@@ -70,7 +70,6 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
 import com.openexchange.mail.MailField;
@@ -95,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailSearchHandler implements SearchHandler, SolrMailConstants {
+public class MailSearchHandler implements SearchHandler {
 
     private final ServiceLookup services;
 

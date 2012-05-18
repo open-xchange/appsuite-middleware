@@ -52,13 +52,11 @@ package com.openexchange.solr.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
-
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrCoreIdentifier;
 

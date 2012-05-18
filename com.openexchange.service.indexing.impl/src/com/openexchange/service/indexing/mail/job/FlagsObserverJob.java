@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -65,6 +64,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.MailUUID;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 
@@ -81,6 +81,8 @@ public final class FlagsObserverJob extends AbstractMailJob {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FlagsObserverJob.class));
 
+    private static final int MAX_ROWS = 25;
+    
     private final String fullName;
 
     private volatile List<MailMessage> storageMails;
@@ -136,7 +138,7 @@ public final class FlagsObserverJob extends AbstractMailJob {
                 }
             }
             
-            final int maxRows = GET_ROWS;
+            final int maxRows = MAX_ROWS;
             final int length = mailUUIDs.length;
             int off = 0;
             final Map<String, MailMessage> indexMap = new HashMap<String, MailMessage>(length);

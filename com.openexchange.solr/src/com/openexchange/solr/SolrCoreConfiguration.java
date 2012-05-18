@@ -51,7 +51,6 @@ package com.openexchange.solr;
 
 import java.io.File;
 import java.net.URI;
-
 import com.openexchange.exception.OXException;
 
 

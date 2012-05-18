@@ -55,13 +55,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -80,7 +80,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
      * Timeout in minutes.
      * An index access will be released after being unused for this time and if it isn't referenced anymore.
      */
-    private static final long SOFT_TIMEOUT = 5;
+    private static final long SOFT_TIMEOUT = 10;
     
     /**
      * Timeout in minutes.
@@ -182,14 +182,15 @@ public class SolrIndexFacadeService implements IndexFacadeService {
 
     private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrCoreIdentifier identifier) throws OXException {
         final int module = identifier.getModule();
+        // TODO: Add other modules 
         switch(module) {
         
-        case Types.EMAIL:
-            return new MailSolrIndexAccess(identifier);
+            case Types.EMAIL:
+                return new MailSolrIndexAccess(identifier);
+                
+            default:
+                throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
             
-        default:
-            throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
-        
         }
     }
 }

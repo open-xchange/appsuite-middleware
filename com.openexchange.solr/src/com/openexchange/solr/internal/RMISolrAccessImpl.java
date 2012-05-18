@@ -51,12 +51,10 @@ package com.openexchange.solr.internal;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -77,77 +75,55 @@ public class RMISolrAccessImpl implements RMISolrAccessService {
         this.solrService = solrService;
     }
 
-    // ---------------------------------------------------------------------------
-
     @Override
     public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws RemoteException, OXException {
         return solrService.add(identifier, documents, commit);
     }
-
-    // ---------------------------------------------------------------------------
 
     @Override
     public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws RemoteException, OXException {
         return solrService.add(identifier, document, commit);
     }
 
-    // ---------------------------------------------------------------------------
-
     @Override
     public UpdateResponse deleteByIdRmi(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws RemoteException, OXException {
         return solrService.deleteById(identifier, id, commit);
     }
-
-    // ---------------------------------------------------------------------------
 
     @Override
     public UpdateResponse deleteByQueryRmi(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws RemoteException, OXException {
         return solrService.deleteByQuery(identifier, query, commit);
     }
 
-    // ---------------------------------------------------------------------------
-
     @Override
     public UpdateResponse commitRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
         return solrService.commit(identifier);
     }
-
-    // ---------------------------------------------------------------------------
 
     @Override
     public UpdateResponse commitRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, OXException {
         return solrService.commit(identifier, waitFlush, waitSearcher);
     }
 
-    // ---------------------------------------------------------------------------
-
     @Override
     public UpdateResponse rollbackRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
         return solrService.rollback(identifier);
     }
-
-    // ---------------------------------------------------------------------------
 
     @Override
     public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
         return solrService.optimize(identifier);
     }
 
-    // ---------------------------------------------------------------------------
-
     @Override
     public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, OXException {
         return solrService.optimize(identifier, waitFlush, waitSearcher);
     }
 
-    // ---------------------------------------------------------------------------
-
     @Override
     public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws RemoteException, OXException {
         return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
     }
-
-    // ---------------------------------------------------------------------------
 
     @Override
     public QueryResponse queryRmi(final SolrCoreIdentifier identifier, final SolrParams params) throws RemoteException, OXException {

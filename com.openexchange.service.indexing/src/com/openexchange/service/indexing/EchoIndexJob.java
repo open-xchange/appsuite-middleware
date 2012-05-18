@@ -51,8 +51,8 @@ package com.openexchange.service.indexing;
 
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link EchoIndexJob} - A simple job for echo'ing a given message.

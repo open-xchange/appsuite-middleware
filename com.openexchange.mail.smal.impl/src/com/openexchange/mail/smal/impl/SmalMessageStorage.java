@@ -392,7 +392,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
-            final IMailMessageStorage ms = this.messageStorage;
+            final IMailMessageStorage ms = messageStorage;
             final CancelableCompletionService<MailResult<List<MailMessage>>> completionService = newCompletionService();
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
 

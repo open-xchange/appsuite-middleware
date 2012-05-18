@@ -52,14 +52,10 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import javax.mail.internet.AddressException;
 import org.apache.solr.common.SolrDocument;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -73,7 +69,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFillers implements SolrMailConstants {
+public final class MailFillers {
 
     /**
      * Initializes a new {@link MailFillers}.
@@ -147,8 +143,6 @@ public final class MailFillers implements SolrMailConstants {
         }
         return list;
     }
-
-    protected static final Set<Locale> KNOWN_LOCALES = IndexConstants.KNOWN_LOCALES;
 
     /**
      * A mail filler.

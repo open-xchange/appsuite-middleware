@@ -80,45 +80,37 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      */
     INSTANCE_DIR_EXISTS(SolrExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
     /**
-     * An index fault occurred: %1$s
-     */
-    INDEX_FAULT(SolrExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
-    /**
-     * The file or directory %1$s does not exist.
-     */
-    FILE_NOT_EXISTS_ERROR(SolrExceptionMessages.FILE_EXISTS_ERROR_MSG, CATEGORY_ERROR, 1006),
-    /**
      * Could neither delegate solr request to a local nor to a remote server instance.
      */
-    DELEGATION_ERROR(SolrExceptionMessages.DELEGATION_ERROR_MSG, CATEGORY_ERROR, 1007),
+    DELEGATION_ERROR(SolrExceptionMessages.DELEGATION_ERROR_MSG, CATEGORY_ERROR, 1005),
     /**
      * Could not parse URI: %1$s.
      */
-    URI_PARSE_ERROR(SolrExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1008),
+    URI_PARSE_ERROR(SolrExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1006),
     /**
      * Remote error: %1$s.
      */
-    REMOTE_ERROR(SolrExceptionMessages.REMOTE_ERROR_MSG, Category.CATEGORY_ERROR, 1009),
+    REMOTE_ERROR(SolrExceptionMessages.REMOTE_ERROR_MSG, Category.CATEGORY_ERROR, 1007),
     /**
      * Could not parse solr core identifier %1$s.
      */
-    IDENTIFIER_PARSE_ERROR(SolrExceptionMessages.IDENTIFIER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1010),
+    IDENTIFIER_PARSE_ERROR(SolrExceptionMessages.IDENTIFIER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1008),
     /**
      * Unknown module: %1$s.
      */
-    UNKNOWN_MODULE(SolrExceptionMessages.UNKNOWN_MODULE_MSG, Category.CATEGORY_ERROR, 1011),
+    UNKNOWN_MODULE(SolrExceptionMessages.UNKNOWN_MODULE_MSG, Category.CATEGORY_ERROR, 1009),
     /**
      * Can not reach solr core store. URI %1$s does not lead to an existing directory.
      */
-    CORE_STORE_NOT_EXISTS_ERROR(SolrExceptionMessages.CORE_STORE_NOT_EXISTS_ERROR_MSG, Category.CATEGORY_ERROR, 1012),
+    CORE_STORE_NOT_EXISTS_ERROR(SolrExceptionMessages.CORE_STORE_NOT_EXISTS_ERROR_MSG, Category.CATEGORY_ERROR, 1010),
     /**
      * The affected solr core %1$s is not started up yet. Please try again later.
      */
-    CORE_NOT_STARTED(SolrExceptionMessages.CORE_NOT_STARTED_MSG, Category.CATEGORY_ERROR, 1013),
+    CORE_NOT_STARTED(SolrExceptionMessages.CORE_NOT_STARTED_MSG, Category.CATEGORY_ERROR, 1011),
     /**
      * The document with uuid %1$s could not be found.
      */
-    DOCUMENT_NOT_FOUND(SolrExceptionMessages.DOCUMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1014),
+    DOCUMENT_NOT_FOUND(SolrExceptionMessages.DOCUMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1012),
     
     ;
 

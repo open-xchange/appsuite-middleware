@@ -255,7 +255,7 @@ public final class StorageAccess implements Serializable {
                     mailConfig.setPort(info.port);
                     mailConfig.setSecure(info.secure);
                     tmp.connect(true);
-                    this.mailAccess = tmp;
+                    mailAccess = tmp;
                 }
             }
         }

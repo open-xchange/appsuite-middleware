@@ -26,19 +26,17 @@
 
 		<fieldType name="addr" class="solr.TextField">
 			<analyzer>
-				<tokenizer class="solr.UAX29URLEmailTokenizerFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.WordDelimiterFilterFactory" 
-					generateWordParts="1" 
-					generateNumberParts="0" 
-					catenateWords="0"
-					catenateNumbers="0" 
-					catenateAll="0"
-					splitOnCaseChange="0"
-					splitOnNumerics="0"
-					stemEnglishPossessive="0"
-					preserveOriginal="1" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+			      <tokenizer class="solr.KeywordTokenizerFactory" />
+			      <filter class="de.kippdata.solrext.analyzer.InternetAddressCleanupFilterFactory"/>
+			      <filter class="solr.WordDelimiterFilterFactory"
+			              catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+			              splitOnNumerics="0"
+			              types="${confDir:/opt/open-xchange/solr/conf}/wdf.txt" />
+			      <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory"/>
+			      <filter class="solr.WordDelimiterFilterFactory"
+			              catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+			              splitOnNumerics="0" />
+			      <filter class="solr.LengthFilterFactory" min="2" max="30" />
 			</analyzer>
 		</fieldType>
 	</types>
@@ -95,4 +93,5 @@
 
 	<uniqueKey>uuid</uniqueKey>
 	<solrQueryParser defaultOperator="AND" />
+	<!-- <defaultSearchField>from_analyzed</defaultSearchField> -->
 </schema>

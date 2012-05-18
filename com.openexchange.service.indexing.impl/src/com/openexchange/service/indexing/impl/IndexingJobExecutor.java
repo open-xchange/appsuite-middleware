@@ -56,8 +56,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingJob.Behavior;
 import com.openexchange.threadpool.AbstractTask;
@@ -157,8 +157,8 @@ public final class IndexingJobExecutor implements Callable<Void> {
         super();
         this.maxConcurrentJobs = maxConcurrentJobs;
         this.threadPool = threadPool;
-        this.queue = new BoundedPriorityBlockingQueue<IndexingJob>(CAPACITY);
-        this.serviceLookup = Services.getServiceLookup();
+        queue = new BoundedPriorityBlockingQueue<IndexingJob>(CAPACITY);
+        serviceLookup = Services.getServiceLookup();
     }
 
     @Override

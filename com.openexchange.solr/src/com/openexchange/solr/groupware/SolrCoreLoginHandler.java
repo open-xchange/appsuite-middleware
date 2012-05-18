@@ -1,10 +1,11 @@
 package com.openexchange.solr.groupware;
 
 import java.util.concurrent.Callable;
-
+import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -16,6 +17,8 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.DiscardBehavior;
 
 public class SolrCoreLoginHandler implements LoginHandlerService {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrCoreLoginHandler.class));
 	
 	private final EmbeddedSolrAccessImpl embeddedAccess;
 	
@@ -34,15 +37,19 @@ public class SolrCoreLoginHandler implements LoginHandlerService {
 			
 			@Override
 			public Object call() throws Exception {
-				// TODO: extend with other modules
-				final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, Types.EMAIL);
-				final ConfigurationService config = Services.getService(ConfigurationService.class);
-				final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-				if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
-					embeddedAccess.startCore(identifier);
-				}
+				try {
+                    // TODO: extend with other modules
+                    final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, Types.EMAIL);
+                    final ConfigurationService config = Services.getService(ConfigurationService.class);
+                    final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+                    if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
+                        embeddedAccess.startCore(identifier);
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Error durig core start up.", e);
+                }
 				
-				return null;
+                return null;
 			}
 			
 		};

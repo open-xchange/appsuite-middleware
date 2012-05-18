@@ -51,10 +51,10 @@ package com.openexchange.service.indexing.mail.job;
 
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.StorageAccess;

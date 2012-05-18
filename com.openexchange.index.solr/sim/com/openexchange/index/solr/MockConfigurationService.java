@@ -52,7 +52,6 @@ package com.openexchange.index.solr;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.solr.SolrProperties;
