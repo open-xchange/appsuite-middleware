@@ -57,9 +57,11 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.solr.mail.SolrMailUtility;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -97,6 +99,8 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
+    
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static enum MailResultType {
@@ -661,15 +665,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
-        final Long timestamp = (Long) session.getParameter("smal.Timestamp");
-
         return messageStorage.getNewAndModifiedMessages(folder, fields);
     }
 
     @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
-        final Long timestamp = (Long) session.getParameter("smal.Timestamp");
-
         return messageStorage.getDeletedMessages(folder, fields);
     }
 
