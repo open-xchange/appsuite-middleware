@@ -96,7 +96,7 @@ public class AccessTokenServlet extends HttpServlet {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
 
             final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
-            OAuthProviderService.VALIDATOR.validateMessage(requestMessage, accessor);
+            providerService.getValidator().validateMessage(requestMessage, accessor);
 
             // make sure token is authorized
             if (!Boolean.TRUE.equals(accessor.getProperty(OAuthProviderService.PROP_AUTHORIZED))) {
