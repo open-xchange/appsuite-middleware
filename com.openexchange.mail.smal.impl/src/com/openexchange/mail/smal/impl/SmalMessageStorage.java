@@ -577,6 +577,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             return messageStorage.getMessage(folder, mailId, markSeen);
         }
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
+        if (mail == null)  {
+            throw MailExceptionCode.MAIL_NOT_FOUN_BY_MESSAGE_ID.create(folder, mailId);
+        }
         mail.setAccountId(accountId);
         try {
             IndexAccessAdapter.getInstance().addContent(mail, session);
