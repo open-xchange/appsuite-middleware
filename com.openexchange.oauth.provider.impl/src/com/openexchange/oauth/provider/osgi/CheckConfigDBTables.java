@@ -91,6 +91,7 @@ public final class CheckConfigDBTables {
             DBUtils.startTransaction(con);
             checkServiceProvider(con);
             checkConsumer(con);
+            checkNonce(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -164,11 +165,11 @@ public final class CheckConfigDBTables {
 
     private void checkNonce(final Connection con) throws SQLException {
         final String createSql = "\n" + 
-        		"CREATE TABLE `oauthNone` (\n" + 
+        		"CREATE TABLE `oauthNonce` (\n" + 
         		"  `nonce` varchar(255) NOT NULL,\n" + 
-        		"  PRIMARY KEY  (`id`,`name`)\n" + 
+        		"  PRIMARY KEY  (`nonce`)\n" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-        createIfAbsent("oauthNone", createSql, con);
+        createIfAbsent("oauthNonce", createSql, con);
     }
   
     private void createIfAbsent(final String name, final String createSql, final Connection con) throws SQLException {
