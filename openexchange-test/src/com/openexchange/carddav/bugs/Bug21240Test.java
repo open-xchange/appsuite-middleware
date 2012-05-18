@@ -50,6 +50,8 @@
 package com.openexchange.carddav.bugs;
 
 import java.util.Date;
+import java.util.Map;
+
 import com.openexchange.carddav.CardDAVClient;
 import com.openexchange.carddav.CardDAVTest;
 import com.openexchange.carddav.StatusCodes;
@@ -68,7 +70,6 @@ public class Bug21240Test extends CardDAVTest {
 		super(name);
 	}
 	
-    @Override
     protected void setUp() throws Exception {
         super.setUp();
 		super.getCardDAVClient().setUserAgent(CardDAVClient.USER_AGENT_10_6_8);
@@ -79,6 +80,7 @@ public class Bug21240Test extends CardDAVTest {
 		 * create contact
 		 */
     	final String uid = randomUID() + "-ABSPlugin";
+    	final String pathUid = randomUID() + "-ABSPlugin";
     	final String firstName = "test";
     	final String lastName = "hannes";
     	final String vCard = 
@@ -88,11 +90,11 @@ public class Bug21240Test extends CardDAVTest {
 				"FN:" + firstName + " " + lastName + "\r\n" +
 				"CATEGORIES:Kontakte" + "\r\n" +
 				"X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" +
-				"UID:" + randomUID() + "-ABSPlugin" + "\r\n" +
+				"UID:" + uid + "\r\n" +
 				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
 				"END:VCARD" + "\r\n"
 		;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(pathUid, vCard));
         /*
          * verify contact on server
          */
@@ -104,7 +106,7 @@ public class Bug21240Test extends CardDAVTest {
 		/*
 		 * delete contact
 		 */
-        assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(uid));
+        assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(pathUid));
         /*
          * verify deletion on server
          */
@@ -112,9 +114,9 @@ public class Bug21240Test extends CardDAVTest {
         /*
          * verify deletion on client
          */
-        //TODO
-//        final String[] hrefs = { "/carddav/Contacts/" + uid };
-//        final Map<String, VCard> addressData = super.addressbookMultiget(Arrays.asList(hrefs));
-//        assertNotContains(uid, addressData.values());
+        Map<String, String> allETags = super.getAllETags();
+        for (String href : allETags.values()) {
+        	assertFalse("resource still present", href.contains(pathUid));
+        }
 	}
 }

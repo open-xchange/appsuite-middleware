@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.openexchange.contact.storage.ContactStorage;
@@ -81,6 +82,11 @@ public final class DefaultContactStorageRegistry implements ContactStorageRegist
             }
         }
         return null;
+    }
+    
+    @Override
+    public List<ContactStorage> getStorages(int contextID) throws OXException {
+    	return Collections.unmodifiableList(knownStorages);
     }
     
     /**

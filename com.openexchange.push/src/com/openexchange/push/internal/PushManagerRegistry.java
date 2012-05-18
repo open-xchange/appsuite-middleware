@@ -181,8 +181,7 @@ public final class PushManagerRegistry {
         };
     }
 
-    @SuppressWarnings("unchecked")
-    private static Iterator EMPTY_ITER = new Iterator() {
+    private static final Iterator EMPTY_ITER = new Iterator() {
 
         @Override
         public boolean hasNext() {

@@ -50,6 +50,7 @@
 package com.openexchange.carddav.bugs;
 
 import java.util.Date;
+
 import com.openexchange.carddav.CardDAVClient;
 import com.openexchange.carddav.CardDAVTest;
 import com.openexchange.carddav.StatusCodes;
@@ -68,7 +69,6 @@ public class Bug21235Test extends CardDAVTest {
 		super(name);
 	}
 	
-    @Override
     protected void setUp() throws Exception {
         super.setUp();
 		super.getCardDAVClient().setUserAgent(CardDAVClient.USER_AGENT_10_6_8);
@@ -79,6 +79,7 @@ public class Bug21235Test extends CardDAVTest {
 		 * create contact
 		 */
     	final String uid = randomUID() + "-ABSPlugin";
+    	final String pathUid = randomUID() + "-ABSPlugin";
     	final String firstName = "test";
     	final String lastName = "heinz";
     	final String vCard = 
@@ -88,11 +89,11 @@ public class Bug21235Test extends CardDAVTest {
 				"FN:" + firstName + " " + lastName + "\r\n" +
 				"CATEGORIES:Kontakte" + "\r\n" +
 				"X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" +
-				"UID:" + randomUID() + "-ABSPlugin" + "\r\n" +
+				"UID:" + uid + "\r\n" +
 				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
 				"END:VCARD" + "\r\n"
 		;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(pathUid, vCard));
         /*
          * verify contact on server
          */
@@ -116,7 +117,7 @@ public class Bug21235Test extends CardDAVTest {
 				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
 				"END:VCARD" + "\r\n"
 		;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(uid, updatedVCard));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(pathUid, updatedVCard));
         /*
          * verify contact on server
          */

@@ -53,10 +53,11 @@ import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
@@ -94,9 +95,9 @@ public class UpdateTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
-        final AJAXRequestResult result = action.perform(request, session);
+        action.perform(request, session);
 
         assertNotNull(accManager.getUpdatedAccount());
         assertEquals(12, accManager.getUpdatedAccount().getId());
@@ -129,10 +130,10 @@ public class UpdateTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
-            final AJAXRequestResult result = action.perform(request, session);
+            action.perform(request, session);
             fail("Should have failed w/o ID");
         } catch (final OXException x) {
             //SUCCESS
@@ -141,9 +142,9 @@ public class UpdateTest extends TestCase {
     }
 
 
-    public void testOXExceptionFromRegistry() throws JSONException, OXException {
+    public void testMessagingExceptionFromRegistry() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        registry.setException(new OXException());
+        registry.setException(new OXException(-1));
 
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
@@ -163,10 +164,10 @@ public class UpdateTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
-            final AJAXRequestResult result = action.perform(request, session);
+            action.perform(request, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             // SUCCESS
@@ -174,11 +175,11 @@ public class UpdateTest extends TestCase {
 
     }
 
-    public void testOXExceptionFromAccManager() throws JSONException, OXException {
+    public void testMessagingExceptionFromAccManager() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
-        accManager.setException(new OXException());
+        accManager.setException(new OXException(-1));
 
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
@@ -197,10 +198,10 @@ public class UpdateTest extends TestCase {
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         try {
-            final AJAXRequestResult result = action.perform(request, session);
+            action.perform(request, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             // SUCCESS

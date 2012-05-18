@@ -54,16 +54,17 @@ import java.sql.DataTruncation;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -211,4 +212,64 @@ public final class Tools {
         }
     }
 	
+    /**
+     * Updates a distribution list member with properties read out from the 
+     * referenced contact.
+     * 
+     * @param member the distribution list member
+     * @param referencedContact the contact referenced by the member
+     * @return <code>true</code>, if the member was actually updated, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public static boolean updateMember(DistListMember member, Contact referencedContact) throws OXException {
+    	boolean wasUpdated = false;
+    	if (referencedContact.containsParentFolderID() && referencedContact.getParentFolderID() != member.getFolderID()) {
+    		member.setFolderID(referencedContact.getParentFolderID());
+    		wasUpdated = true;
+    	}
+    	if (referencedContact.containsDisplayName()) {
+    		if (null == referencedContact.getDisplayName() && null != member.getDisplayname() || 
+    				null != referencedContact.getDisplayName() && false == referencedContact.getDisplayName().equals(member.getDisplayname())) {
+    			member.setDisplayname(referencedContact.getDisplayName());
+    			wasUpdated = true;
+    		}
+    	}
+    	if (referencedContact.containsSurName()) {
+    		if (null == referencedContact.getSurName() && null != member.getLastname() || 
+    				null != referencedContact.getSurName() && false == referencedContact.getSurName().equals(member.getLastname())) {
+    			member.setLastname(referencedContact.getSurName());
+    			wasUpdated = true;
+    		}
+    	}
+    	if (referencedContact.containsGivenName()) {
+    		if (null == referencedContact.getGivenName() && null != member.getFirstname() || 
+    				null != referencedContact.getGivenName() && false == referencedContact.getGivenName().equals(member.getFirstname())) {
+    			member.setFirstname(referencedContact.getGivenName());
+    			wasUpdated = true;
+    		}
+    	}
+    	if (referencedContact.containsEmail1() && DistributionListEntryObject.EMAILFIELD1 == member.getEmailfield()) {
+    		if (null == referencedContact.getEmail1() && null != member.getEmailaddress() || 
+    				null != referencedContact.getEmail1() && false == referencedContact.getEmail1().equals(member.getEmailaddress())) {
+    			member.setEmailaddress(referencedContact.getEmail1(), false);
+    			wasUpdated = true;
+    		}
+    	}
+    	if (referencedContact.containsEmail2() && DistributionListEntryObject.EMAILFIELD2 == member.getEmailfield()) {
+    		if (null == referencedContact.getEmail2() && null != member.getEmailaddress() || 
+    				null != referencedContact.getEmail2() && false == referencedContact.getEmail2().equals(member.getEmailaddress())) {
+    			member.setEmailaddress(referencedContact.getEmail2(), false);
+    			wasUpdated = true;
+    		}
+    	}
+    	if (referencedContact.containsEmail3() && DistributionListEntryObject.EMAILFIELD3 == member.getEmailfield()) {
+    		if (null == referencedContact.getEmail3() && null != member.getEmailaddress() || 
+    				null != referencedContact.getEmail3() && false == referencedContact.getEmail3().equals(member.getEmailaddress())) {
+    			member.setEmailaddress(referencedContact.getEmail3(), false);
+    			wasUpdated = true;
+    		}
+    	}
+    	return wasUpdated;
+    }
+    
 }

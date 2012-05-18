@@ -70,22 +70,20 @@ public class SyncCollectionReport implements Report, DeltaVConstants {
     public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), 
     		PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class); 
 
-    @Override
     public ReportType getType() {
         return SYNC_COLLECTION;
     }
 
-    @Override
     public boolean isMultiStatusReport() {
         return true;
     }
 
-    @Override
     public void init(DavResource dr, ReportInfo ri) throws DavException {
+    	System.out.println("init");
     }
 
-    @Override
     public Element toXml(Document dcmnt) {
+    	System.out.println("toxml");
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

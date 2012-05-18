@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.storage.registry;
 
+import java.util.List;
+
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 
@@ -69,5 +71,14 @@ public interface ContactStorageRegistry {
      * @throws OXException
      */
     ContactStorage getStorage(int contextID, String folderId) throws OXException;
+
+    /**
+     * Gets a list of all registered {@link ContactStorage}s.
+     * 
+     * @param context ID the context ID
+     * @return the storages
+     * @throws OXException
+     */
+    List<ContactStorage> getStorages(int contextID) throws OXException;
 
 }

@@ -186,19 +186,29 @@ public final class Check {
 				/*
 				 * check if display name is already in use
 				 */
-		    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-				final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+		    	CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+				SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 				folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
 				folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
 				andTerm.addSearchTerm(folderIDTerm);
-				final SingleSearchTerm displayNameTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+				SingleSearchTerm displayNameTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 				displayNameTerm.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME)); 
 				displayNameTerm.addOperand(new ConstantOperand<String>(update.getDisplayName()));
 				andTerm.addSearchTerm(displayNameTerm);
-				final SearchIterator<Contact> contacts = storage.search(contextID, andTerm, new ContactField[] { 
-						ContactField.OBJECT_ID });
-				if (null != contacts && 0 < contacts.size()) {
-					throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(contextID, update.getObjectID());
+				SingleSearchTerm objectIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.NOT_EQUALS);
+				objectIDTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID)); 
+				objectIDTerm.addOperand(new ConstantOperand<Integer>(update.getObjectID()));
+				andTerm.addSearchTerm(objectIDTerm);
+				SearchIterator<Contact> searchIterator = null;
+				try {
+					searchIterator = storage.search(contextID, andTerm, new ContactField[] { ContactField.OBJECT_ID });
+					if (searchIterator.hasNext()) {
+						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(contextID, update.getObjectID());
+					}
+				} finally {
+					if (null != searchIterator) {
+						searchIterator.close();
+					}
 				}
 			}
 			/*

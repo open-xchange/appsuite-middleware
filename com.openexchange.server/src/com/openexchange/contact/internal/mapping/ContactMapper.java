@@ -52,11 +52,16 @@ package com.openexchange.contact.internal.mapping;
 import java.util.Date;
 import java.util.EnumMap;
 
+import javax.mail.internet.AddressException;
+
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link ContactMapper} - Maps contact fields to contact mappings
@@ -2291,6 +2296,29 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 			}
         });
 
+        mappings.put(ContactField.PRIVATE_FLAG, new ContactMapping<Boolean>() {
+
+            @Override
+            public void set(Contact contact, Boolean value) { 
+                contact.setPrivateFlag(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsPrivateFlag();
+            }
+
+            @Override
+            public Boolean get(Contact contact) { 
+                return contact.getPrivateFlag();
+            }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removePrivateFlag();
+			}
+        });
+
         mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new ContactMapping<Integer>() {
 
             @Override
@@ -2355,9 +2383,43 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             public DistributionListEntryObject[] get(Contact contact) { 
                 return contact.getDistributionList();
             }
+            
+            private void validateString(String value) throws OXException {
+            	if (null != value) {
+            		String result = Check.containsInvalidChars(value);
+					if (null != result) {
+						throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
+					}
+            	}
+            }
 
 			@Override
 			public void validate(Contact contact) throws OXException {
+				DistributionListEntryObject[] members = this.get(contact);
+				if (null != members && 0 < members.length) {
+					for (DistributionListEntryObject member : members) {
+						/*
+						 * Validate strings
+						 */
+						validateString(member.getDisplayname());
+						validateString(member.getEmailaddress());
+						validateString(member.getLastname());
+						validateString(member.getFirstname());						
+						/*
+						 * Independent entries ('one-offs') must contain a valid e-mail address
+						 */
+						if (DistributionListEntryObject.INDEPENDENT == member.getEmailfield()) {
+							if (null == member.getEmailaddress() || 0 == member.getEmailaddress().trim().length()) {
+								throw ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.create();
+							}
+							try {
+								new QuotedInternetAddress(member.getEmailaddress()).validate();
+							} catch (final AddressException e) {
+								throw ContactExceptionCodes.INVALID_EMAIL.create(e, member.getEmailaddress());
+							}
+						}
+					}
+				}
 			}
 
 			@Override

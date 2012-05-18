@@ -230,6 +230,17 @@ public interface ContactStorage {
     void update(int contextID, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
+     * Updates references to the supplied contact. This method is called for 
+     * after a contact has been updated to propagate the changes throughout 
+     * all storages, e.g. to update referenced distribution list members.
+     * 
+     * @param contextID the context ID
+     * @param contact the contact that has been updated
+     * @throws OXException
+     */
+    void updateReferences(int contextID, Contact contact) throws OXException;
+    	
+    /**
      * Deletes a contact.
      * 
      * @param contextID the context ID

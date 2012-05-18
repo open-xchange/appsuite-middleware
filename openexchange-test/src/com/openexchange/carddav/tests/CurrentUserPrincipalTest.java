@@ -89,7 +89,7 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
     	assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains(Config.getUsername()));
         final String principalURL = super.extractHref(PropertyNames.PRINCIPAL_URL, response);
     	assertTrue("username not found in href child of " + PropertyNames.PRINCIPAL_URL, principalURL.contains(Config.getUsername()));
-    	final Node node = super.extractNode(PropertyNames.RESOURCETYPE, response);
+    	final Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
     	assertMatches(PropertyNames.COLLECTION, node);
 	}
 	

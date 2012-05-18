@@ -87,6 +87,8 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.image.ImageRequest;
+import com.openexchange.ajax.image.ImageResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -558,11 +560,11 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private List<Contact> transform(final JSONArray data) throws JSONException, OXException, OXException {
+    private List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
     	return transform(data, Contact.ALL_COLUMNS);
     }
 
-    private List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, OXException {
+    private List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
         final List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
@@ -577,6 +579,16 @@ public class ContactTestManager implements TestManager {
             }
             final Contact contactObject = new Contact();
             getContactParser().parse(contactObject, jsonObject);
+            
+            if (null != contactObject.getImage1()) {
+            	String image1 = new String(contactObject.getImage1());
+            	if (0 < image1.length() && image1.contains("image")) {
+            		// interpret as image url, download real image
+        			ImageResponse response = getClient().execute(new ImageRequest(image1), getSleep());
+        			contactObject.setImage1(response.getImage());
+            	}            	
+            }
+            
             contacts.add(contactObject);
         }
         return contacts;
@@ -744,6 +756,7 @@ final class ContactMapping extends TestCase {
             put(ContactFields.ADDRESS_OTHER, Contact.ADDRESS_OTHER);
 
             put(ContactFields.UID, Contact.UID);
+            put(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL);
 
         } catch (final Exception e) {
             fail(e.getMessage());

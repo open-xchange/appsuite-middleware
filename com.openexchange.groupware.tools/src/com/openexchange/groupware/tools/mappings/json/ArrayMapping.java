@@ -76,14 +76,18 @@ public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> impl
 	protected abstract T deserialize(final JSONArray array, int index) throws JSONException, OXException;
 
 	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		final JSONArray jsonArray = from.getJSONArray(getAjaxName());
-		final int size = jsonArray.length();		
-		final T[] array = newArray(size);
-		for (int i = 0; i < size; i++) {
-			array[i] = this.deserialize(jsonArray, i);
+	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+		if (from.isNull(getAjaxName())) {
+			this.set(to, null);
+		} else {
+			JSONArray jsonArray = from.getJSONArray(getAjaxName());
+			int size = jsonArray.length();		
+			T[] array = newArray(size);
+			for (int i = 0; i < size; i++) {
+				array[i] = this.deserialize(jsonArray, i);
+			}
+			this.set(to, array);
 		}
-		this.set(to, array);
 	}
 
 	@Override

@@ -53,14 +53,62 @@ import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
+///**
+// * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
+// *
+// * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+// */
+
+
 /**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
- *
+ * {@link AddressbookHomeSet} - Identifies the URL of any WebDAV collections 
+ * that contain address book collections owned by the associated principal
+ * resource.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AddressbookHomeSet extends SingleXMLPropertyMixin {
+	
+/*	
+   Name:  addressbook-home-set
 
+   Namespace:  urn:ietf:params:xml:ns:carddav
+
+   Purpose:  Identifies the URL of any WebDAV collections that contain
+      address book collections owned by the associated principal
+      resource.
+
+   Protected:  MAY be protected if the server has fixed locations in
+      which address books are created.
+
+   COPY/MOVE behavior:  This property value MUST be preserved in COPY
+      and MOVE operations.
+
+   allprop behavior:  SHOULD NOT be returned by a PROPFIND DAV:allprop
+      request.
+
+   Description:  The CARDDAV:addressbook-home-set property is meant to
+      allow users to easily find the address book collections owned by
+      the principal.  Typically, users will group all the address book
+      collections that they own under a common collection.  This
+      property specifies the URL of collections that are either address
+      book collections or ordinary collections that have child or
+      descendant address book collections owned by the principal.
+
+   Definition:
+
+       <!ELEMENT addressbook-home-set (DAV:href*)>
+
+   Example:
+
+       <C:addressbook-home-set xmlns:D="DAV:"
+          xmlns:C="urn:ietf:params:xml:ns:carddav">
+         <D:href>/bernard/addresses/</D:href>
+       </C:addressbook-home-set>
+*/
     private static final String PROPERTY_NAME = "addressbook-home-set";
+    public static final String ADDRESSBOOK_HOME = "/carddav/";
     
     public AddressbookHomeSet() {
         super(CarddavProtocol.CARD_NS.getURI(), PROPERTY_NAME);

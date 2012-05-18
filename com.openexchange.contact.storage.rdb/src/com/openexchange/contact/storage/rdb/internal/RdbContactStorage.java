@@ -54,6 +54,7 @@ import static com.openexchange.contact.storage.rdb.internal.Tools.parse;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -63,6 +64,7 @@ import org.apache.commons.logging.Log;
 
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
+import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
@@ -361,6 +363,58 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create();
+        } finally {
+        	if (false == committed) {
+        		DBUtils.rollback(connection);
+        	}
+            DBUtils.autocommit(connection);
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+    
+    public void updateReferences(int contextID, Contact contact) throws OXException {
+    	boolean committed = false;
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            connection.setAutoCommit(false);
+        	/*
+        	 * check with existing member references
+        	 */
+        	List<Integer> affectedDistributionLists = new ArrayList<Integer>();
+    		List<DistListMember> referencedMembers = executor.select(connection, Table.DISTLIST, contextID, contact.getObjectID(), 
+    				contact.getParentFolderID(), DistListMemberField.values());
+    		if (null != referencedMembers && 0 < referencedMembers.size()) {
+    			for (DistListMember member : referencedMembers) {
+    				if (Tools.updateMember(member, contact)) {
+    					/*
+    					 * Update member, remember affected parent contact id of the list   
+    					 */
+    					if (0 < executor.updateMember(connection, Table.DISTLIST, contextID, member, DistListMemberField.values())) {
+    						affectedDistributionLists.add(Integer.valueOf(member.getParentContactID()));
+    					}
+    				}
+    			}
+    		}
+        	/*
+        	 * Update affected parent distribution lists' timestamps, too
+        	 */
+    		if (0 < affectedDistributionLists.size()) {
+    			for (Integer distListID : affectedDistributionLists) {
+					executor.update(connection, Table.CONTACTS, contextID, distListID.intValue(), Long.MIN_VALUE, contact, 
+							new ContactField[] { ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY });
+				}    			
+    		}
+            /*
+             * commit
+             */
+            connection.commit();
+        	committed = true;
+        } catch (DataTruncation e) {
+            DBUtils.rollback(connection);
+            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
+        } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create();
         } finally {
         	if (false == committed) {

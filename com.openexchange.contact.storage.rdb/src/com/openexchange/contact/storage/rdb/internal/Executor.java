@@ -335,6 +335,45 @@ public class Executor {
         }
     }
 
+    /**
+     * Selects members of distribution lists from the database.
+     * 
+     * @param connection
+     * @param table
+     * @param contextID
+     * @param entryIDs
+     * @param fields
+     * @return
+     * @throws SQLException
+     * @throws OXException
+     */
+    public List<DistListMember> select(Connection connection, Table table, int contextID, int referencedObjectID, int referencedFolderID, DistListMemberField[] fields) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=? AND ( ")
+            //FIXME: the previous implementation didn't write the contact folder ID, so we need to extend the possible folder IDs here 
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_FOLDER_ID).getColumnLabel()).append(" IS NULL OR ")
+        	.append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_FOLDER_ID).getColumnLabel()).append("=0 OR ")
+        	.append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_FOLDER_ID).getColumnLabel()).append("=? );");
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        List<DistListMember> members = new ArrayList<DistListMember>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, referencedObjectID);
+            stmt.setInt(3, referencedFolderID);
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+            	members.add(Mappers.DISTLIST.fromResultSet(resultSet, fields));
+            }
+            return members; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
     public int insert(final Connection connection, final Table table, final Contact contact, final ContactField[] fields) 
     		throws SQLException, OXException {        
         final StringBuilder stringBuilder = new StringBuilder();
@@ -409,20 +448,42 @@ public class Executor {
         return this.insertFrom(connection, from, to, contextID, objectID, Long.MIN_VALUE);
     }
             
-    public int update(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified, final Contact contact, 
-    		final ContactField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+    public int update(Connection connection, Table table, int contextID, int objectID, long minLastModified, Contact contact, ContactField[] fields) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
-            .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel())
-            .append("=? AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;"); 
+            .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
+        if (Long.MIN_VALUE == minLastModified) {
+            stringBuilder.append(';');
+        } else {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+        }             
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             Mappers.CONTACT.setParameters(stmt, contact, fields);
             stmt.setInt(1 + fields.length, contextID);
             stmt.setInt(2 + fields.length, objectID);
-            stmt.setLong(3 + fields.length, minLastModified);
+            if (Long.MIN_VALUE != minLastModified) {
+                stmt.setLong(3 + fields.length, minLastModified);
+            }
+            return logExecuteUpdate(stmt);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+    
+    public int updateMember(Connection connection, Table table, int contextID, DistListMember member, DistListMemberField[] fields) throws SQLException, OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.DISTLIST.getAssignments(fields)).append(" WHERE ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=?;"); 
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            Mappers.DISTLIST.setParameters(stmt, member, fields);
+            stmt.setInt(1 + fields.length, contextID);
+            stmt.setInt(2 + fields.length, member.getEntryID());
             return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);

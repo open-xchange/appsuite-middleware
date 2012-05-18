@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.ldap;
 
+import com.openexchange.java.util.TimeZones;
+
 
 /**
  * {@link SimUser}
@@ -57,14 +59,20 @@ package com.openexchange.groupware.ldap;
  */
 public class SimUser extends MockUser {
 
-	public SimUser() {
-		super();
-	}
+    private static final long serialVersionUID = -6348974615827294736L;
 
-	public SimUser(int id) {
-		super(id);
-	}
-	
-	
+    public SimUser() {
+        super();
+        init();
+    }
 
+    public SimUser(final int id) {
+        super(id);
+        init();
+    }
+
+    private final void init() {
+        setTimeZone(TimeZones.UTC.getID());
+    }
+	
 }

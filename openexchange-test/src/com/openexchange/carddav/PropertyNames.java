@@ -477,6 +477,11 @@ public final class PropertyNames {
 	public static final DavPropertyName ADDRESSBOOK_HOME_SET = DavPropertyName.create("addressbook-home-set", NS_CARDDAV);
 
 	/**
+	 * addressbook xmlns="urn:ietf:params:xml:ns:carddav"
+	 */
+	public static final DavPropertyName ADDRESSBOOK = DavPropertyName.create("addressbook", NS_CARDDAV);
+
+	/**
 	 * directory-gateway xmlns="urn:ietf:params:xml:ns:carddav"
 	 */
 	public static final DavPropertyName DIRECTORY_GATEWAY = DavPropertyName.create("directory-gateway", NS_CARDDAV);
@@ -490,6 +495,11 @@ public final class PropertyNames {
 	 * address-data xmlns="urn:ietf:params:xml:ns:carddav"
 	 */
 	public static final DavPropertyName ADDRESS_DATA = DavPropertyName.create("address-data", NS_CARDDAV);
+
+	/**
+	 * me-card xmlns="http://calendarserver.org/ns/"
+	 */
+	public static final DavPropertyName ME_CARD = DavPropertyName.create("me-card", NS_CALENDARSERVER);
 
 	
 	private PropertyNames() {

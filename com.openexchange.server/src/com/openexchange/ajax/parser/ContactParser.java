@@ -50,9 +50,11 @@
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.exception.OXException;
@@ -107,6 +109,10 @@ public class ContactParser extends CommonParser {
             distributionlist[a] = new DistributionListEntryObject();
             if (entry.has(DistributionListFields.ID)) {
                 distributionlist[a].setEntryID(parseInt(entry, DistributionListFields.ID));
+            }
+
+            if (entry.has(DistributionListFields.FOLDER_ID)) {
+                distributionlist[a].setFolderID(parseInt(entry, DistributionListFields.FOLDER_ID));
             }
 
             if (entry.has(DistributionListFields.FIRST_NAME)) {

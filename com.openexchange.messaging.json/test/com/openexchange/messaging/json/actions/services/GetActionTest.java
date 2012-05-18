@@ -53,8 +53,11 @@ import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
+import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link GetActionTest}
@@ -77,7 +80,7 @@ public class GetActionTest extends TestCase {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "com.openexchange.test");
 
-        final AJAXRequestResult result = action.perform(requestData, null);
+        final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
         assertNotNull(result);
 
         final Object resultObject = result.getResultObject();
@@ -96,7 +99,7 @@ public class GetActionTest extends TestCase {
         requestData.putParameter("id", "com.openexchange.test");
 
         try {
-            final AJAXRequestResult result = action.perform(requestData, null);
+            final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should fail");
             assertNull(result);
         } catch (final OXException e) {
@@ -110,7 +113,7 @@ public class GetActionTest extends TestCase {
         final GetAction action = new GetAction(registry);
         final AJAXRequestData requestData = new AJAXRequestData();
         try {
-            final AJAXRequestResult result = action.perform(requestData, null);
+            final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should fail");
             assertNull(result);
         } catch (final OXException e) {
@@ -134,7 +137,7 @@ public class GetActionTest extends TestCase {
         requestData.putParameter("id", "com.openexchange.test");
 
         try {
-            final AJAXRequestResult result = action.perform(requestData, null);
+            final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should fail");
             assertNull(result);
         } catch (final OXException e) {

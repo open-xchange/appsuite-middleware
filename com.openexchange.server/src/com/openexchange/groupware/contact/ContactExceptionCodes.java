@@ -130,6 +130,8 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     LAST_NAME_MANDATORY(LAST_NAME_MANDATORY_MSG, Category.CATEGORY_USER_INPUT, 175),
     /** You are not allowed to modify contact %1$d in context %2$d. */
     NO_CHANGE_PERMISSION(NO_CHANGE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 176),
+    /** An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address. */
+    EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS(EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG, Category.CATEGORY_USER_INPUT, 177),    
     /** Unable to load objects. Context %1$d User %2$d */
     LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CATEGORY_ERROR, 252),
     /** User contacts can not be deleted. */

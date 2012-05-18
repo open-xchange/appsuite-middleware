@@ -63,7 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -79,30 +79,35 @@ public class DelUserFolderDiscoverer extends DBService {
 
     public List<FolderObject> discoverFolders(final int userId, final Context ctx) throws OXException {
         final List<FolderObject> discovered = new ArrayList<FolderObject>();
+        final User user = UserStorage.getInstance().getUser(userId, ctx);
+        int[] accessibleModules;
         try {
-            final User user = UserStorage.getInstance().getUser(userId, ctx);
-            final UserConfiguration userConfig = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx);
-
-            final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                userId,
-                user.getGroups(),
-                userConfig.getAccessibleModules(),
-                FolderObject.INFOSTORE,
-                ctx)).asQueue();
-            folder: for (final FolderObject fo : queue) {
-                if (isVirtual(fo)) {
-                    continue folder;
-                }
-                for (final OCLPermission perm : fo.getPermissionsAsArray()) {
-                    if (someoneElseMayReadInfoitems(perm, userId)) {
-                        continue folder;
-                    }
-                }
-                discovered.add(fo);
+            accessibleModules = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx).getAccessibleModules();
+        } catch (final OXException e) {
+            if (!UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                throw e;
             }
-
+            accessibleModules = null;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
+        }
+
+        final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+            userId,
+            user.getGroups(),
+            accessibleModules,
+            FolderObject.INFOSTORE,
+            ctx)).asQueue();
+        folder: for (final FolderObject fo : queue) {
+            if (isVirtual(fo)) {
+                continue folder;
+            }
+            for (final OCLPermission perm : fo.getPermissionsAsArray()) {
+                if (someoneElseMayReadInfoitems(perm, userId)) {
+                    continue folder;
+                }
+            }
+            discovered.add(fo);
         }
 
         return discovered;

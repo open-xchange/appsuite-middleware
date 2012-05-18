@@ -108,8 +108,8 @@ public class TestTemplateService extends TestCase {
         final UserConfiguration noInfostore = new UserConfiguration(0,0,new int[0],null);
         noInfostore.setInfostore(false);
 
-        session = ServerSessionAdapter.valueOf(null, null, null, userConfig);
-        sessionWithoutInfostore = ServerSessionAdapter.valueOf(null, null, null, noInfostore);
+        session = new ServerSessionAdapter(null, null, null, userConfig);
+        sessionWithoutInfostore = new ServerSessionAdapter(null, null, null, noInfostore);
     }
 
     @Override

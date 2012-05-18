@@ -124,6 +124,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String NO_CHANGE_PERMISSION_MSG = "You are not allowed to modify contact %1$d in context %2$d.";
 
+    public static final String EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG = "An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address.";
+
     public static final String LOAD_OBJECT_FAILED_MSG = "Unable to load objects. Context %1$d User %2$d";
 
     public static final String FEATURE_DISABLED_MSG = "This feature has not been enabled";
@@ -145,7 +147,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
     public static final String TOO_FEW_SEARCH_CHARS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
     public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-
+    
+    
     private ContactExceptionMessages() {
         super();
     }

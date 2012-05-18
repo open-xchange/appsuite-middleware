@@ -81,7 +81,9 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(YomiContactSearchTests.class);
         tests.addTestSuite(ContactSearchTests.class);
         tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
+        tests.addTestSuite(DistListTest.class);
         tests.addTestSuite(DistListMemberUpdateTest.class);
+        tests.addTestSuite(DistListPermissionsTest.class);
 
         tests.addTest(ContactBugTestSuite.suite());
         return tests;

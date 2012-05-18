@@ -73,6 +73,9 @@ import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
 import org.w3c.dom.Element;
 
+import com.openexchange.carddav.reports.SyncCollectionReportInfo;
+import com.openexchange.carddav.reports.SyncCollectionReportMethod;
+import com.openexchange.carddav.reports.SyncCollectionResponse;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.exception.OXException;
 
@@ -158,6 +161,18 @@ public abstract class WebDAVClient {
 		}
 	}
 	
+	public SyncCollectionResponse doReport(SyncCollectionReportMethod report, int expectedStatus) throws HttpException, IOException, DavException {
+		try {
+	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(report));
+	    	return report.getResponseBodyAsSyncCollection();	    	
+		} catch (final DavException e) {
+	    	Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
+			return null;
+		} finally {
+			release(report);
+		}
+	}
+	
 	public MultiStatusResponse[] doReport(final ReportMethod report) throws HttpException, IOException, DavException {
 		return this.doReport(report, StatusCodes.SC_MULTISTATUS);
 	}
@@ -175,6 +190,18 @@ public abstract class WebDAVClient {
 		return responses;
 	}
 	
+	protected SyncCollectionResponse doReport(SyncCollectionReportInfo reportInfo, String uri) throws ConfigurationException, IOException, DavException {
+		SyncCollectionReportMethod report = null;
+		SyncCollectionResponse response = null;
+    	try {
+            report = new SyncCollectionReportMethod(uri, reportInfo);
+	        response = this.doReport(report, StatusCodes.SC_MULTISTATUS);
+    	} finally {
+    		release(report);
+    	}
+        Assert.assertNotNull("got no response", response);
+		return response;
+	}
 	
 	public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
 		try {

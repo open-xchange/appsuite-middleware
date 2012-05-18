@@ -56,6 +56,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
@@ -96,7 +98,7 @@ public class GetTest extends TestCase {
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final AJAXRequestResult result = action.perform(requestData, session);
 
@@ -117,7 +119,7 @@ public class GetTest extends TestCase {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final GetAction action = new GetAction(null);
 
@@ -133,7 +135,7 @@ public class GetTest extends TestCase {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final GetAction action = new GetAction(null);
 
@@ -150,7 +152,7 @@ public class GetTest extends TestCase {
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final GetAction action = new GetAction(null);
 
@@ -178,7 +180,7 @@ public class GetTest extends TestCase {
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final GetAction action = new GetAction(registry);
         try {
@@ -206,7 +208,7 @@ public class GetTest extends TestCase {
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final GetAction action = new GetAction(registry);
         try {
