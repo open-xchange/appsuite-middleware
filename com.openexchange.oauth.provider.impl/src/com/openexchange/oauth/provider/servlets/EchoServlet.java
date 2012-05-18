@@ -86,7 +86,8 @@ public class EchoServlet extends HttpServlet {
         try{
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
             final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
-            providerService.getValidator().validateMessage(requestMessage, accessor);
+            providerService.getValidator()
+            .validateMessage(requestMessage, accessor);
             final String userId = (String) accessor.getProperty("user");
             
             response.setContentType("text/plain");

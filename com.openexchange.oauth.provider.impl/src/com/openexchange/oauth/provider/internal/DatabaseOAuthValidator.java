@@ -122,31 +122,35 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
      * Remove usedNonces with time stamps that are too old to be valid.
      */
     private Date removeOldNonces(final long currentTimeMsec, final DatabaseService databaseService) throws OXException {
-        final Connection con = databaseService.getReadOnly();
         final Set<String> remove = new HashSet<String>();
-        final String minSortKey = new UsedNonce((currentTimeMsec - maxTimestampAgeMsec + 500) / 1000L).toString();
         String nextSortKey = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT nonce FROM oauthNone ORDER BY nonce ASC");
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                final String sortKey = rs.getString(1);
-                if (minSortKey.compareTo(sortKey) <= 0) {
-                    nextSortKey = minSortKey;
-                    break; // Rest is OK
+        {
+            final Connection con = databaseService.getReadOnly();
+            final String minSortKey = new UsedNonce((currentTimeMsec - maxTimestampAgeMsec + 500) / 1000L).toString();
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT nonce FROM oauthNone ORDER BY nonce ASC");
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    final String sortKey = rs.getString(1);
+                    if (minSortKey.compareTo(sortKey) <= 0) {
+                        nextSortKey = minSortKey;
+                        break; // Rest is OK
+                    }
+                    remove.add(sortKey);
                 }
-                remove.add(sortKey);
+            } catch (final SQLException e) {
+                throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(con);
             }
-        } catch (final SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(con);
         }
+        // Delete elapsed ones
         if (!remove.isEmpty()) {
             final Connection wcon = databaseService.getWritable();
+            PreparedStatement stmt = null;
             try {
                 stmt = wcon.prepareStatement("DELETE FROM oauthNone WHERE nonce = ?");
                 for (final String nonce : remove) {
