@@ -131,7 +131,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         loadConsumers(databaseService, true);
     }
 
-    private static OAuthValidator generateValidator(final ServiceLookup services) {
+    private OAuthValidator generateValidator(final ServiceLookup services) {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final int maxTimestampAgeMsec = service.getIntProperty("com.openexchange.oauth.provider.validator.maxTimestampAgeMsec", 300000);
         final double maxVersion =
@@ -139,7 +139,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         return new DatabaseOAuthValidator(maxTimestampAgeMsec, maxVersion);
     }
 
-    protected static TIntList getContextIds(final DatabaseService databaseService) throws OXException {
+    private TIntList getContextIds(final DatabaseService databaseService) throws OXException {
         final Connection con = databaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -271,7 +271,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         rs = null;
         con = null;
         if (loadAccessors) {
-            final ConcurrentMap<OAuthAccessor, Object> tokens = DatabaseOAuthProviderService.this.tokens;
+            final TIntList contextIds = getContextIds(databaseService);
+            final ConcurrentMap<OAuthAccessor, Object> tokens = this.tokens;
             final Object present = DatabaseOAuthProviderService.PRESENT;
             final Runnable loader = new Runnable() {
 
@@ -280,7 +281,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                     try {
                         final boolean infoEnabled = LOG.isInfoEnabled();
                         final long st = infoEnabled ? System.currentTimeMillis() : 0L;
-                        final TIntList contextIds = getContextIds(databaseService);
                         final TIntSet processed = new TIntHashSet(contextIds.size());
                         final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
                         final List<int[]> delete = new LinkedList<int[]>();
