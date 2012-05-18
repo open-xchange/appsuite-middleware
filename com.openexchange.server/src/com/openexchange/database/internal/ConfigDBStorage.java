@@ -49,15 +49,13 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -108,11 +106,11 @@ public class ConfigDBStorage {
                 stmt.setInt(2, writePoolId);
                 stmt.setString(3, schema);
                 rs = stmt.executeQuery();
-                final List<Integer> tmp = new ArrayList<Integer>();
+                final TIntList tmp = new TIntLinkedList();
                 while (rs.next()) {
-                    tmp.add(I(rs.getInt(1)));
+                    tmp.add(rs.getInt(1));
                 }
-                return I2i(tmp);
+                return tmp.toArray();
             } finally {
                 closeSQLStuff(rs, stmt);
                 if (con != null) {
