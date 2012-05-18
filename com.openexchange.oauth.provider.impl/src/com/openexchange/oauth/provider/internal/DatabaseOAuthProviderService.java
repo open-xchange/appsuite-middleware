@@ -129,7 +129,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
     private OAuthValidator generateValidator() {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final int maxTimestampAgeMsec = service.getIntProperty("com.openexchange.oauth.provider.validator.maxTimestampAgeMsec", 300000);
-        final double maxVersion = Double.parseDouble(service.getProperty("com.openexchange.oauth.provider.validator.maxVersion", "1.0").trim());
+        final double maxVersion =
+            Double.parseDouble(service.getProperty("com.openexchange.oauth.provider.validator.maxVersion", "1.0").trim());
         return new DatabaseOAuthValidator(maxTimestampAgeMsec, maxVersion);
     }
 
@@ -186,7 +187,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
 
     /**
      * Gets the <tt>OAuthServiceProvider</tt> instance
-     *
+     * 
      * @return The provider
      */
     public OAuthServiceProvider getProvider() {
@@ -272,7 +273,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
              */
             final List<int[]> delete = new LinkedList<int[]>();
             contextIds.forEach(new TIntProcedure() {
-                
+
                 @Override
                 public boolean execute(final int contextId) {
                     Connection con = null;
@@ -287,26 +288,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                             try {
                                 DBUtils.startTransaction(con);
                                 stmt = con.createStatement();
-                                stmt.execute("CREATE TABLE `oauthAccessor` (" + 
-                                		" `cid` int(10) unsigned NOT NULL," + 
-                                		" `user` int(10) unsigned NOT NULL," + 
-                                		" `consumerId` int(10) unsigned NOT NULL," + 
-                                		" `providerId` int(10) unsigned NOT NULL," + 
-                                		" `requestToken` varchar(255) DEFAULT NULL," + 
-                                		" `accessToken` varchar(255) DEFAULT NULL," + 
-                                		" `tokenSecret` varchar(255) NOT NULL," + 
-                                		" PRIMARY KEY (`cid`,`user`,`consumerId`)," + 
-                                		" KEY `userIndex` (`cid`,`user`)," + 
-                                		" KEY `consumerIndex` (`consumerId`,`providerId`)" + 
-                                		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-                                stmt.execute("CREATE TABLE `oauthAccessorProperty` (" + 
-                                		" `cid` int(10) unsigned NOT NULL," + 
-                                		" `user` int(10) unsigned NOT NULL," + 
-                                		" `consumerId` int(10) unsigned NOT NULL," + 
-                                		" `name` varchar(32) NOT NULL," + 
-                                		" `value` varchar(255) NOT NULL," + 
-                                		" PRIMARY KEY (`cid`,`user`,`consumerId`,`name`)" + 
-                                		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+                                stmt.execute("CREATE TABLE `oauthAccessor` (" + " `cid` int(10) unsigned NOT NULL," + " `user` int(10) unsigned NOT NULL," + " `consumerId` int(10) unsigned NOT NULL," + " `providerId` int(10) unsigned NOT NULL," + " `requestToken` varchar(255) DEFAULT NULL," + " `accessToken` varchar(255) DEFAULT NULL," + " `tokenSecret` varchar(255) NOT NULL," + " PRIMARY KEY (`cid`,`user`,`consumerId`)," + " KEY `userIndex` (`cid`,`user`)," + " KEY `consumerIndex` (`consumerId`,`providerId`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+                                stmt.execute("CREATE TABLE `oauthAccessorProperty` (" + " `cid` int(10) unsigned NOT NULL," + " `user` int(10) unsigned NOT NULL," + " `consumerId` int(10) unsigned NOT NULL," + " `name` varchar(32) NOT NULL," + " `value` varchar(255) NOT NULL," + " PRIMARY KEY (`cid`,`user`,`consumerId`,`name`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
                                 con.commit();
                             } catch (final SQLException e) {
                                 errorRef.set(OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage()));
@@ -325,7 +308,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                             return true;
                         }
                         // Tables already exist; load them
-                        ps = con.prepareStatement("SELECT cid, user, consumerId, requestToken, accessToken, tokenSecret FROM oauthAccessor WHERE providerId=?");
+                        ps =
+                            con.prepareStatement("SELECT cid, user, consumerId, requestToken, accessToken, tokenSecret FROM oauthAccessor WHERE providerId=?");
                         ps.setInt(1, DEFAULT_PROVIDER);
                         result = ps.executeQuery();
                         final List<OAuthAccessor> accessors = new LinkedList<OAuthAccessor>();
@@ -473,32 +457,18 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
 
     @Override
     public void markAsAuthorized(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
-        // Set property
+        // Set properties
         accessor.setProperty(PROP_AUTHORIZED, Boolean.TRUE);
-        // Perform SQL INSERT
-        final DatabaseService databaseService = services.getService(DatabaseService.class);
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("INSERT INTO oauthAccessorProperty (cid,user,consumerId,name,value) VALUES (?,?,?,?,?)");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, accessor.consumer.<Integer> getProperty(PROP_ID).intValue());
-            stmt.setString(4, PROP_AUTHORIZED);
-            stmt.setString(5, "true");
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
-        }
+        accessor.setProperty(PROP_USER, Integer.valueOf(userId));
+        accessor.setProperty(PROP_CONTEXT, Integer.valueOf(contextId));
+        // INSERT
+        insertOAuthAccessor(accessor, userId, contextId);
         // Update token in local cache
         tokens.put(accessor, PRESENT);
     }
 
     @Override
-    public void generateRequestToken(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
+    public void generateRequestToken(final OAuthAccessor accessor) throws OXException {
         // Generate oauth_token and oauth_secret
         final String consumerKey = accessor.consumer.consumerKey;
         // Generate token and secret based on consumerKey
@@ -512,53 +482,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         accessor.requestToken = token;
         accessor.tokenSecret = secret;
         accessor.accessToken = null;
-        // Add to the local cache
+        // Add to the local cache (in-memory only for unauthorized request token)
         tokens.put(accessor, PRESENT);
-        // Add to database
-        final DatabaseService databaseService = services.getService(DatabaseService.class);
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("INSERT INTO oauthAccessor (cid,user,consumerId,providerId,requestToken,accessToken,tokenSecret) VALUES (?,?,?,?,?,?,?)");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, accessor.consumer.<Integer> getProperty(PROP_ID).intValue());
-            stmt.setInt(4, accessor.consumer.<Integer> getProperty(PROP_PROVIDER_ID).intValue());
-            stmt.setString(5, token);
-            stmt.setNull(6, Types.VARCHAR);
-            stmt.setString(7, secret);
-            stmt.executeUpdate();
-            /*
-             * Properties, too
-             */
-            DBUtils.closeSQLStuff(stmt);
-            stmt = con.prepareStatement("INSERT INTO oauthAccessorProperty (cid,user,consumerId,name,value) VALUES (?,?,?,?,?)");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, accessor.consumer.<Integer> getProperty(PROP_ID).intValue());
-            for (final Iterator<Map.Entry<String, Object>> iter = accessor.getProperties(); iter.hasNext();) {
-                final Map.Entry<String, Object> entry = iter.next();
-                stmt.setString(4, entry.getKey());
-                stmt.setString(5, entry.getValue().toString());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-            // "context"
-            stmt.setString(4, PROP_CONTEXT);
-            stmt.setString(5, Integer.toString(contextId));
-            stmt.addBatch();
-            // "user"
-            stmt.setString(4, PROP_USER);
-            stmt.setString(5, Integer.toString(userId));
-            stmt.addBatch();
-            // Execute batch
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
-        }
     }
 
     @Override
@@ -569,8 +494,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         // For now use md5 of name + current time as token
         final String tokenData = consumerKey + System.nanoTime();
         final String token = DigestUtils.md5Hex(tokenData);
-        // first remove the accessor from cache
-        tokens.remove(accessor);
         // Apply access token
         accessor.requestToken = null;
         accessor.accessToken = token;
@@ -600,6 +523,55 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
         realm.append(request.getLocalName());
         OAuthServlet.handleException(response, e, realm.toString(), sendBody);
+    }
+
+    private void insertOAuthAccessor(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException {
+        // Add to database
+        final DatabaseService databaseService = services.getService(DatabaseService.class);
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            DBUtils.startTransaction(con);
+            stmt =
+                con.prepareStatement("INSERT INTO oauthAccessor (cid,user,consumerId,providerId,requestToken,accessToken,tokenSecret) VALUES (?,?,?,?,?,?,?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, accessor.consumer.<Integer> getProperty(PROP_ID).intValue());
+            stmt.setInt(4, accessor.consumer.<Integer> getProperty(PROP_PROVIDER_ID).intValue());
+            stmt.setString(5, accessor.requestToken);
+            stmt.setNull(6, Types.VARCHAR);
+            stmt.setString(7, accessor.tokenSecret);
+            stmt.executeUpdate();
+            /*
+             * Properties, too
+             */
+            DBUtils.closeSQLStuff(stmt);
+            stmt = con.prepareStatement("INSERT INTO oauthAccessorProperty (cid,user,consumerId,name,value) VALUES (?,?,?,?,?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, accessor.consumer.<Integer> getProperty(PROP_ID).intValue());
+            // Ensure user+context
+            accessor.setProperty(PROP_USER, Integer.valueOf(userId));
+            accessor.setProperty(PROP_CONTEXT, Integer.valueOf(contextId));
+            for (final Iterator<Map.Entry<String, Object>> iter = accessor.getProperties(); iter.hasNext();) {
+                final Map.Entry<String, Object> entry = iter.next();
+                stmt.setString(4, entry.getKey());
+                stmt.setString(5, entry.getValue().toString());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
     }
 
     protected static Object valueOf(final String value) {

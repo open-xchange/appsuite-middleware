@@ -78,28 +78,35 @@ public class RequestTokenServlet extends HttpServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
     }
-    
+
     @Override
-    public void doGet(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         processRequest(request, response);
     }
-    
+
     @Override
-    public void doPost(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
+    public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         processRequest(request, response);
     }
-        
-    public void processRequest(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
-        final OAuthProviderService providerService = getProviderService();
+
+    public void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         try {
+            /*
+             * Parse OAuth message from HTTP request
+             */
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-            
+            /*
+             * Get provider service & look-up consumer by oauth_consumer_key
+             */
+            final OAuthProviderService providerService = getProviderService();
             final OAuthConsumer consumer = providerService.getConsumer(requestMessage);
-            
+            /*
+             * Create accessor for unauthorized request token
+             */
             final OAuthAccessor accessor = new OAuthAccessor(consumer);
+            /*
+             * Validate OAuth message (nonce, signature, timestamp...)
+             */
             providerService.getValidator().validateMessage(requestMessage, accessor);
             {
                 // Support the 'Variable Accessor Secret' extension
@@ -110,21 +117,17 @@ public class RequestTokenServlet extends HttpServlet {
                 }
             }
             // generate request_token and secret
-            final int userId = accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue();
-            final int contextId = accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue();
-            providerService.generateRequestToken(accessor, userId, contextId);
-            
+            providerService.generateRequestToken(accessor);
+            /*
+             * Write-back
+             */
             response.setContentType("text/plain");
             final OutputStream out = response.getOutputStream();
-            OAuth.formEncode(OAuth.newList("oauth_token", accessor.requestToken,
-                                           "oauth_token_secret", accessor.tokenSecret),
-                             out);
+            OAuth.formEncode(OAuth.newList("oauth_token", accessor.requestToken, "oauth_token_secret", accessor.tokenSecret), out);
             out.close();
-            
-        } catch (final Exception e){
+        } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, true);
         }
-        
     }
 
     private OAuthProviderService getProviderService() {

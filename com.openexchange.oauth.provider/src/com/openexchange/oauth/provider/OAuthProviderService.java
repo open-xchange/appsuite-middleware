@@ -135,29 +135,29 @@ public interface OAuthProviderService {
      * @throws IOException If an I/O error occurs
      * @throws OAuthProblemException If an OAuth problem occurs
      */
-    public OAuthConsumer getConsumer(final OAuthMessage requestMessage) throws IOException, OAuthProblemException;
+    public OAuthConsumer getConsumer(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
 
     /**
      * Get the access token and token secret for the given oauth_token.
      * 
      * @param requestMessage The OAuth message providing oauth_token
      */
-    public OAuthAccessor getAccessor(final OAuthMessage requestMessage) throws IOException, OAuthProblemException;
+    public OAuthAccessor getAccessor(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
 
     /**
      * Marks specified access token as authorized.
      * 
      * @throws OXException If token cannot be marked as authorized
      */
-    public void markAsAuthorized(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException;
+    public void markAsAuthorized(OAuthAccessor accessor, int userId, int contextId) throws OXException;
 
     /**
      * Generate a fresh request token and secret for a consumer.
+     * @param accessor The <b><small>VALIDATED</small></b> <tt>OAuthAccessor</tt> instance
      * 
-     * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
      * @throws OXException If generation fails
      */
-    public void generateRequestToken(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException;
+    public void generateRequestToken(OAuthAccessor accessor) throws OXException;
 
     /**
      * Generate an access token for a consumer.
@@ -165,6 +165,6 @@ public interface OAuthProviderService {
      * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
      * @throws OXException If generation fails
      */
-    public void generateAccessToken(final OAuthAccessor accessor, final int userId, final int contextId) throws OXException;
+    public void generateAccessToken(OAuthAccessor accessor, int userId, int contextId) throws OXException;
 
 }
