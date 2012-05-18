@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import net.oauth.OAuthServiceProvider;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
@@ -101,10 +102,11 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
         /*
          * Service trackers
          */
-        rememberTracker(new HTTPServletRegistration(context, "/oauth/accessToken", new AccessTokenServlet()));
-        rememberTracker(new HTTPServletRegistration(context, "/oauth/authorization", new AuthorizationServlet()));
+        final OAuthServiceProvider provider = providerService.getProvider();
+        rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL, new AccessTokenServlet()));
+        rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL, new AuthorizationServlet()));
         rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
-        rememberTracker(new HTTPServletRegistration(context, "/oauth/requestToken", new RequestTokenServlet()));
+        rememberTracker(new HTTPServletRegistration(context, provider.requestTokenURL, new RequestTokenServlet()));
         openTrackers();
         /*
          * Register update task, create table job and delete listener

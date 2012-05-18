@@ -184,6 +184,15 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         }
     }
 
+    /**
+     * Gets the <tt>OAuthServiceProvider</tt> instance
+     *
+     * @return The provider
+     */
+    public OAuthServiceProvider getProvider() {
+        return provider;
+    }
+
     @Override
     public OAuthValidator getValidator() {
         return validator;
