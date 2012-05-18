@@ -190,7 +190,7 @@ public final class FolderJob extends AbstractMailJob {
      * @return This folder job with specified index mails applied
      */
     public FolderJob setIndexMails(final List<MailMessage> indexMail) {
-        this.indexMails = indexMail;
+        indexMails = indexMail;
         return this;
     }
 
@@ -275,7 +275,7 @@ public final class FolderJob extends AbstractMailJob {
                  */
                 final Map<String, MailMessage> indexMap;
                 {
-                    List<MailMessage> indexedMails = this.indexMails;
+                    List<MailMessage> indexedMails = indexMails;
                     if (null == indexedMails) {
                         indexedMails = storageAccess.allMailsFromIndex(fullName);
                     }
@@ -635,7 +635,7 @@ public final class FolderJob extends AbstractMailJob {
 
         protected LatchedIndexingJob(final IndexingJob job, final CountDownLatch latch) {
             super();
-            this.delegate = job;
+            delegate = job;
             this.latch = latch;
         }
 

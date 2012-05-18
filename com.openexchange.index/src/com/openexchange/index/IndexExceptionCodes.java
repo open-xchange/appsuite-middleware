@@ -67,18 +67,6 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      * An unexpected error occurred: %1$s
      */
     UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
-    /**
-     * An I/O error occurred: %1$s
-     */
-    IO_ERROR(IndexExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_CONNECTIVITY, 2),
-    /**
-     * Could not find a suitable index for user %1$s and module %2$s in context %3$s.
-     */
-    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
-    /**
-     * Could not parse URI: %1$s.
-     */
-    URI_PARSE_ERROR(IndexExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 4),
     
     ;
 

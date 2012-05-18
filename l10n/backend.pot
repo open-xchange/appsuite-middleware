@@ -25,6 +25,7 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -55,7 +56,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:106
@@ -867,8 +867,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:300
 msgid ""
-"You have received this mail because this appointment contains the resource %1"
-"$s, that you manage."
+"You have received this mail because this appointment contains the resource "
+"%1$s, that you manage."
 msgstr ""
 
 #. An error occurred: %1$s
@@ -1631,8 +1631,8 @@ msgstr ""
 #. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 msgid ""
-"File storage account %1$s of service \"%2$s\" could not be found for user %3"
-"$s in context %4$s."
+"File storage account %1$s of service \"%2$s\" could not be found for user "
+"%3$s in context %4$s."
 msgstr ""
 
 #. The operation is not supported by service %1$s.
@@ -2162,8 +2162,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:75
 msgid ""
-"Found duplicate used authentication identifier. Login of existing session: %1"
-"$s. Current denied login request: %2$s."
+"Found duplicate used authentication identifier. Login of existing session: "
+"%1$s. Current denied login request: %2$s."
 msgstr ""
 
 #. This message is thrown if an inconsistancy in SessionD bundle is detected when it returns the wrong session for a given session identifier.
@@ -2220,8 +2220,8 @@ msgstr ""
 #. Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:105
 msgid ""
-"Max. number of sessions exceeded for client %1$s of user %2$s in context %3"
-"$s exceeded"
+"Max. number of sessions exceeded for client %1$s of user %2$s in context "
+"%3$s exceeded"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
@@ -2290,8 +2290,8 @@ msgstr ""
 #. third argument will contain the file name and the fourth the line number.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:71
 msgid ""
-"Malformed token or a unsupported token. Got %s but expected %s in .po file %"
-"s:%s."
+"Malformed token or a unsupported token. Got %s but expected %s in .po file "
+"%s:%s."
 msgstr ""
 
 #. The argument contains the filename of the .po file that could not be read.
@@ -2316,8 +2316,8 @@ msgstr ""
 #. An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:73
 msgid ""
-"An I/O error occurred while creating the socket connection to IMAP server (%1"
-"$s): %2$s"
+"An I/O error occurred while creating the socket connection to IMAP server "
+"(%1$s): %2$s"
 msgstr ""
 
 #. Missing property %1$s in system.properties.
@@ -2580,59 +2580,9 @@ msgstr ""
 msgid "Could not create the following element: %s"
 msgstr ""
 
-#. Could not find solr core entry for user %1$s and module %2$s in context %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:70
-msgid ""
-"Did not find solr core entry for user %1$s and module %2$s in context %3$s."
-msgstr ""
-
-#. Could not find solr core store for given attributes. %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:73
-msgid "Could not find solr core store for given attributes. %1$s."
-msgstr ""
-
-#. All core stores seem to be full.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:76
-msgid "All core stores seem to be full."
-msgstr ""
-
-#. This cores instance directory (%1$s) already exists. It cannot be created.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:79
-msgid ""
-"This cores instance directory (%1$s) already exists. It cannot be created."
-msgstr ""
-
-#. An index fault occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:83
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:82
-msgid "An index fault occurred: %1$s"
-msgstr ""
-
 #. No IndexAccess implementation was found for module $1%s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
 msgid "No IndexAccess implementation was found for module $1%s."
-msgstr ""
-
-#. Field %1$s is not indexed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:88
-msgid "Field %1$s is not indexed."
-msgstr ""
-
-#. Could not find a suitable index for user %1$s and module %2$s in context %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:76
-msgid ""
-"Could not find a suitable index for user %1$s and module %2$s in context %3"
-"$s."
-msgstr ""
-
-#. Could not parse URI: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:91
-msgid "Could not parse URI: %1$s."
 msgstr ""
 
 #. Index-based search is not supported for module: %1$s
@@ -2705,6 +2655,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:80
 msgid "A remote error occurred: %1$s"
+msgstr ""
+
+#. An index fault occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:83
+msgid "An index fault occurred: %1$s"
 msgstr ""
 
 #. Unparseable HTTP response: %1$s
@@ -3092,8 +3047,8 @@ msgstr ""
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:130
 msgid ""
-"No attachment found with section identifier %1$s in message %2$s in folder %3"
-"$s."
+"No attachment found with section identifier %1$s in message %2$s in folder "
+"%3$s."
 msgstr ""
 
 #. Message %1$s not found in folder %2$s.
@@ -3603,8 +3558,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:201
 msgid ""
-"Message(s) %1$s in folder %2$s could not be deleted due to following error: %"
-"3$s"
+"Message(s) %1$s in folder %2$s could not be deleted due to following error: "
+"%3$s"
 msgstr ""
 
 #. *
@@ -4437,8 +4392,8 @@ msgstr ""
 #. User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:149
 msgid ""
-"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%"
-"3$s\"."
+"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context "
+"\"%3$s\"."
 msgstr ""
 
 #. No mail folder allowed below a public folder.
@@ -5198,8 +5153,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid ""
-"Found a user contact outside global address book in folder %1$d in context %2"
-"$d."
+"Found a user contact outside global address book in folder %1$d in context "
+"%2$d."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
@@ -5221,8 +5176,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid ""
-"You do not have permission to access objects in this folder %1$d in context %"
-"2$d with user %3$d"
+"You do not have permission to access objects in this folder %1$d in context "
+"%2$d with user %3$d"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
@@ -5239,8 +5194,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:77
 msgid ""
-"You do not have permission to create objects in this folder %1$d in context %"
-"2$d with user %3$d"
+"You do not have permission to create objects in this folder %1$d in context "
+"%2$d with user %3$d"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:79
@@ -5317,8 +5272,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
 msgid ""
-"You do not have permission to delete objects from folder %1$d in context %2"
-"$d with user %3$d"
+"You do not have permission to delete objects from folder %1$d in context "
+"%2$d with user %3$d"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
@@ -5327,8 +5282,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid ""
-"A contact with private flag cannot be stored in a public folder. Folder: %1"
-"$d context %2$d user %3$d"
+"A contact with private flag cannot be stored in a public folder. Folder: "
+"%1$d context %2$d user %3$d"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
@@ -7208,8 +7163,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
-"Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2"
-"$s. Scheduled: %3$s."
+"Unable to determine next update task to execute. Executed: %1$s. Enqueued: "
+"%2$s. Scheduled: %3$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
@@ -7535,8 +7490,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:192
 msgid ""
-"Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)"
+"Message field %1$s cannot be handled on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
 msgstr ""
 
 #. *
@@ -7779,8 +7734,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:363
 msgid ""
-"Checking default folders on server %1$s for user %2$s (%3$s) in context on %4"
-"$s failed: %5$s"
+"Checking default folders on server %1$s for user %2$s (%3$s) in context on "
+"%4$s failed: %5$s"
 msgstr ""
 
 #. *
@@ -7831,8 +7786,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:398
 msgid ""
-"A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)."
+"A folder named %1$s already exists on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
 msgstr ""
 
 #. *
@@ -7840,8 +7795,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:408
 msgid ""
-"No create access on mail folder %1$s on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)."
+"No create access on mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
 msgstr ""
 
 #. *
@@ -7987,8 +7942,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:513
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of %1"
-"$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of "
+"%1$s."
 msgstr ""
 
 #. *
@@ -8069,8 +8024,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) due to some reason.\n"
+"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+"%4$s, context=%5$s) due to some reason.\n"
 "Probably your request took too long."
 msgstr ""
 
@@ -8178,8 +8133,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:197
 msgid ""
-"Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s)."
+"Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s)."
 msgstr ""
 
 #. *
@@ -8280,8 +8235,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
-"A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s). Server response: %5$s"
+"A command failed on mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s). Server response: %5$s"
 msgstr ""
 
 #. *
@@ -8352,8 +8307,9 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:320
 msgid ""
-"Wrong or missing login data to access mail transport server %1$s with login %"
-"2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s"
+"Wrong or missing login data to access mail transport server %1$s with login "
+"%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
+"%5$s"
 msgstr ""
 
 #. *
@@ -8415,8 +8371,8 @@ msgstr ""
 #. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
 msgid ""
-"Found two mail accounts with same identifier %1$s for user %2$s in context %3"
-"$s."
+"Found two mail accounts with same identifier %1$s for user %2$s in context "
+"%3$s."
 msgstr ""
 
 #. Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
@@ -8825,8 +8781,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
 msgid ""
-"Parent folder %1$s does not allow folder's module setting (%2$s) in context %"
-"3$s"
+"Parent folder %1$s does not allow folder's module setting (%2$s) in context "
+"%3$s"
 msgstr ""
 
 #. *
@@ -8986,8 +8942,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:264
 msgid ""
-"User %1$s is not allowed to move all subfolders of folder %2$s in context %3"
-"$s"
+"User %1$s is not allowed to move all subfolders of folder %2$s in context "
+"%3$s"
 msgstr ""
 
 #. *
@@ -9375,8 +9331,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
-"Only the folder visibility permission is allowed to be changed for folder %1"
-"$s in context %2$s."
+"Only the folder visibility permission is allowed to be changed for folder "
+"%1$s in context %2$s."
 msgstr ""
 
 #. *
@@ -9809,6 +9765,22 @@ msgstr ""
 msgid "Unable to parse SMTP server URI \"%1$s\"."
 msgstr ""
 
+#. Could not find solr core entry for user %1$s and module %2$s in context %3$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:70
+msgid ""
+"Did not find solr core entry for user %1$s and module %2$s in context %3$s."
+msgstr ""
+
+#. Could not find solr core store for given attributes. %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:73
+msgid "Could not find solr core store for given attributes. %1$s."
+msgstr ""
+
+#. All core stores seem to be full.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:76
+msgid "All core stores seem to be full."
+msgstr ""
+
 #. This cores instance directory (%1$s) already exists and its structure is inconsistent.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:79
 msgid ""
@@ -9816,48 +9788,48 @@ msgid ""
 "inconsistent."
 msgstr ""
 
-#. The file or directory %1$s does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:85
-msgid "The file or directory %1$s does not exist."
-msgstr ""
-
 #. Could neither delegate solr request to a local nor to a remote server instance.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:81
 msgid ""
 "Could neither delegate solr request to a local nor to a remote server "
 "instance."
 msgstr ""
 
+#. Could not parse URI: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:84
+msgid "Could not parse URI: %1$s."
+msgstr ""
+
 #. Remote error: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:87
 msgid "Remote error: %1$s."
 msgstr ""
 
 #. Could not parse solr core identifier %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:90
 msgid "Could not parse solr core identifier %1$s."
 msgstr ""
 
 #. Unknown module: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:93
 msgid "Unknown module: %1$s."
 msgstr ""
 
 #. Can not reach solr core store. URI %1$s does not lead to an existing directory.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:96
 msgid ""
 "Can not reach solr core store. URI %1$s does not lead to an existing "
 "directory."
 msgstr ""
 
 #. The affected solr core %1$s is not started up yet. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:99
 msgid ""
 "The affected solr core %1$s is not started up yet. Please try again later."
 msgstr ""
 
 #. The document with uuid %1$s could not be found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:102
 msgid "The document with uuid %1$s could not be found."
 msgstr ""
 

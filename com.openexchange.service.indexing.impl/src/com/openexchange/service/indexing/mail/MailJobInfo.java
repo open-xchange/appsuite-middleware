@@ -110,15 +110,15 @@ public final class MailJobInfo implements Serializable {
      */
     protected MailJobInfo(final Builder builder) {
         super();
-        this.accountId = builder.accountId;
-        this.contextId = builder.contextId;
-        this.userId = builder.userId;
-        this.primaryPassword = builder.primaryPassword;
-        this.login = builder.login;
-        this.password = builder.password;
-        this.server = builder.server;
-        this.port = builder.port;
-        this.secure = builder.secure;
+        accountId = builder.accountId;
+        contextId = builder.contextId;
+        userId = builder.userId;
+        primaryPassword = builder.primaryPassword;
+        login = builder.login;
+        password = builder.password;
+        server = builder.server;
+        port = builder.port;
+        secure = builder.secure;
     }
 
     @Override

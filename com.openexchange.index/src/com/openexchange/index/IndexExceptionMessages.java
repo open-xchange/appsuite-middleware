@@ -68,14 +68,5 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // An unexpected error occurred: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Could not find a suitable index for user %1$s and module %2$s in context %3$s.
-    public static final String INDEX_NOT_FOUND_MSG = "Could not find a suitable index for user %1$s and module %2$s in context %3$s.";
-
-    // Could not parse URI: %1$s.
-    public static final String URI_PARSE_ERROR_MSG = "Could not parse URI: %1$s.";
     
 }

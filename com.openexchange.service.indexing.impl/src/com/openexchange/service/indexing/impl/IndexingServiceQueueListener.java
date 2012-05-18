@@ -74,7 +74,7 @@ public final class IndexingServiceQueueListener implements MQQueueListener {
      */
     public IndexingServiceQueueListener(final IndexingJobExecutor executor) {
         super();
-        this.jobExecutor = executor;
+        jobExecutor = executor;
     }
 
     @Override

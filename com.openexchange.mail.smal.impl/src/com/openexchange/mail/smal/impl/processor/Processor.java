@@ -64,14 +64,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.solr.mail.SolrMailConstants;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -103,7 +102,7 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Processor implements SolrMailConstants {
+public final class Processor {
 
     /**
      * The logger constant.

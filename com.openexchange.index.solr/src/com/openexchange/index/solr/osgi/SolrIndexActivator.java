@@ -71,9 +71,7 @@ import com.openexchange.user.UserService;
 public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
-    
-//    private static final boolean REGISTER_TEST = true;
-    
+        
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -91,10 +89,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
         solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
-//        if (REGISTER_TEST) {
-//        	registerService(CommandProvider.class, new UtilCommandProvider());
-//        }
-        
+//        	registerService(CommandProvider.class, new UtilCommandProvider());        
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);

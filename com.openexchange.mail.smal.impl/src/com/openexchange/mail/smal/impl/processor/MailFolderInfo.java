@@ -81,8 +81,8 @@ public final class MailFolderInfo {
      */
     public MailFolderInfo(final MailFolder mailFolder) {
         super();
-        this.fullName = mailFolder.getFullname();
-        this.messageCount = mailFolder.isHoldsMessages() ? mailFolder.getMessageCount() : -1;
+        fullName = mailFolder.getFullname();
+        messageCount = mailFolder.isHoldsMessages() ? mailFolder.getMessageCount() : -1;
     }
 
     /**

@@ -52,8 +52,6 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
@@ -78,10 +76,9 @@ import com.openexchange.mail.search.ToTerm;
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
  * 
- * @see http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SearchTerm2Query implements SolrMailConstants {
+public final class SearchTerm2Query {
 
     private static final class SearchTerm2QueryVisitor implements SearchTermVisitor {
 
@@ -90,11 +87,6 @@ public final class SearchTerm2Query implements SolrMailConstants {
         protected SearchTerm2QueryVisitor() {
             super();
             queryBuilder = new StringBuilder(48);
-        }
-
-        protected SearchTerm2QueryVisitor reset() {
-            queryBuilder.setLength(0);
-            return this;
         }
 
         @Override
@@ -288,7 +280,6 @@ public final class SearchTerm2Query implements SolrMailConstants {
 
         @Override
         public void visit(final SubjectTerm term) {
-            // TODO: use locales?
             if (SolrMailField.SUBJECT.isIndexed()) {
                 final List<String> fields = Collections.singletonList(SolrMailField.SUBJECT.parameterName());
                 stringPattern(fields, term.getPattern());

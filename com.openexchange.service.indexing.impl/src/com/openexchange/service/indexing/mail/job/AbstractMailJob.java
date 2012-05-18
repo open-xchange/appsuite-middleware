@@ -63,7 +63,6 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
@@ -80,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMailJob extends StandardIndexingJob implements SolrMailConstants {
+public abstract class AbstractMailJob extends StandardIndexingJob {
 
     private static final long serialVersionUID = 8617301658519763880L;
 
@@ -138,10 +137,10 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
     protected AbstractMailJob(final MailJobInfo info) {
         super();
         this.info = info;
-        this.accountId = info.accountId;
-        this.userId = info.userId;
-        this.contextId = info.contextId;        
-        this.storageAccess = new StorageAccess(info);
+        accountId = info.accountId;
+        userId = info.userId;
+        contextId = info.contextId;        
+        storageAccess = new StorageAccess(info);
     }
 
     @Override

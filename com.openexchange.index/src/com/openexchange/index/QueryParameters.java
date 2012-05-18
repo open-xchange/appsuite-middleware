@@ -183,16 +183,16 @@ public final class QueryParameters {
      */
     QueryParameters(final Builder builder) {
         super();
-        this.handler = builder.handler;
-        this.len = builder.len;
-        this.off = builder.off;
-        this.parameters = builder.parameters;
-        this.pattern = builder.pattern;
-        this.type = builder.type;
-        this.searchTerm = builder.searchTerm;
-        this.folder = builder.folder;
-        this.sortField = builder.sortField;
-        this.order = builder.order;
+        handler = builder.handler;
+        len = builder.len;
+        off = builder.off;
+        parameters = builder.parameters;
+        pattern = builder.pattern;
+        type = builder.type;
+        searchTerm = builder.searchTerm;
+        folder = builder.folder;
+        sortField = builder.sortField;
+        order = builder.order;
     }
 
     /**

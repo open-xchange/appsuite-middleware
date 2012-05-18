@@ -83,8 +83,8 @@ public final class DebugInfo {
     public DebugInfo(final int accountId, final Session session) {
         super();
         this.accountId = accountId;
-        this.userId = session.getUserId();
-        this.contextId = session.getContextId();
+        userId = session.getUserId();
+        contextId = session.getContextId();
     }
 
     /**
@@ -92,10 +92,10 @@ public final class DebugInfo {
      */
     public DebugInfo(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         super();
-        this.accountId = mailAccess.getAccountId();
+        accountId = mailAccess.getAccountId();
         final Session session = mailAccess.getSession();
-        this.userId = session.getUserId();
-        this.contextId = session.getContextId();
+        userId = session.getUserId();
+        contextId = session.getContextId();
     }
 
     @Override

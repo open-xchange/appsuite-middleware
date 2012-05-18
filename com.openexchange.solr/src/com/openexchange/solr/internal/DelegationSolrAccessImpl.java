@@ -59,16 +59,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.service.messaging.Message;
 import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
@@ -94,7 +92,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     public DelegationSolrAccessImpl(EmbeddedSolrAccessImpl localDelegate) {
         super();
-        this.embeddedAccess = localDelegate;
+        embeddedAccess = localDelegate;
         indexMysql = SolrIndexMysql.getInstance();
     }
 

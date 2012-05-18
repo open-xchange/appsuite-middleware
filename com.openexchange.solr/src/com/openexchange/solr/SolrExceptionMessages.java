@@ -77,13 +77,6 @@ public final class SolrExceptionMessages implements LocalizableStrings {
     
     // This cores instance directory (%1$s) already exists and its structure is inconsistent.
     public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists and its structure is inconsistent.";
-
-    // An index fault occurred: %1$s
-    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
-
-    // The file or directory %1$s does not exist.
-    public static final String FILE_EXISTS_ERROR_MSG = "The file or directory %1$s does not exist.";
-
     // Could neither delegate solr request to a local nor to a remote server instance.
     public static final String DELEGATION_ERROR_MSG = "Could neither delegate solr request to a local nor to a remote server instance.";
 
