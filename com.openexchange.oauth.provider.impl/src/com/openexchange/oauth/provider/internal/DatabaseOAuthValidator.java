@@ -114,7 +114,9 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
             return removeOldNonces(currentTimeMsec, databaseService);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new IOException(String.format(Locale.US, e.getPlainLogMessage(), e.getLogArgs()), e);
+            final String logMessage = e.getPlainLogMessage();
+            final Object[] args = e.getLogArgs();
+            throw new IOException(String.format(Locale.US, null == logMessage ? "I/O error." : logMessage, null == args ? new Object[0] : args), e);
         }
     }
 
@@ -122,33 +124,37 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
      * Remove usedNonces with time stamps that are too old to be valid.
      */
     private Date removeOldNonces(final long currentTimeMsec, final DatabaseService databaseService) throws OXException {
-        final Connection con = databaseService.getReadOnly();
         final Set<String> remove = new HashSet<String>();
-        final String minSortKey = new UsedNonce((currentTimeMsec - maxTimestampAgeMsec + 500) / 1000L).toString();
         String nextSortKey = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT nonce FROM oauthNone ORDER BY nonce ASC");
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                final String sortKey = rs.getString(1);
-                if (minSortKey.compareTo(sortKey) <= 0) {
-                    nextSortKey = minSortKey;
-                    break; // Rest is OK
+        {
+            final Connection con = databaseService.getReadOnly();
+            final String minSortKey = new UsedNonce((currentTimeMsec - maxTimestampAgeMsec + 500) / 1000L).toString();
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT nonce FROM oauthNonce ORDER BY nonce ASC");
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    final String sortKey = rs.getString(1);
+                    if (minSortKey.compareTo(sortKey) <= 0) {
+                        nextSortKey = minSortKey;
+                        break; // Rest is OK
+                    }
+                    remove.add(sortKey);
                 }
-                remove.add(sortKey);
+            } catch (final SQLException e) {
+                throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(con);
             }
-        } catch (final SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(con);
         }
+        // Delete elapsed ones
         if (!remove.isEmpty()) {
             final Connection wcon = databaseService.getWritable();
+            PreparedStatement stmt = null;
             try {
-                stmt = wcon.prepareStatement("DELETE FROM oauthNone WHERE nonce = ?");
+                stmt = wcon.prepareStatement("DELETE FROM oauthNonce WHERE nonce = ?");
                 for (final String nonce : remove) {
                     stmt.setString(1, nonce);
                     stmt.addBatch();
@@ -178,7 +184,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
         final Connection con = databaseService.getWritable();
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO oauthNone (nonce) VALUES (?)");
+            stmt = con.prepareStatement("INSERT INTO oauthNonce (nonce) VALUES (?)");
             stmt.setString(1, nonce.toString());
             try {
                 final int result = stmt.executeUpdate();
