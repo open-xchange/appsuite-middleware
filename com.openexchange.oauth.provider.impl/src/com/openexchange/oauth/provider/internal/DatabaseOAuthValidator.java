@@ -132,7 +132,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT nonce FROM oauthNone ORDER BY nonce ASC");
+                stmt = con.prepareStatement("SELECT nonce FROM oauthNonce ORDER BY nonce ASC");
                 rs = stmt.executeQuery();
                 while (rs.next()) {
                     final String sortKey = rs.getString(1);
@@ -154,7 +154,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
             final Connection wcon = databaseService.getWritable();
             PreparedStatement stmt = null;
             try {
-                stmt = wcon.prepareStatement("DELETE FROM oauthNone WHERE nonce = ?");
+                stmt = wcon.prepareStatement("DELETE FROM oauthNonce WHERE nonce = ?");
                 for (final String nonce : remove) {
                     stmt.setString(1, nonce);
                     stmt.addBatch();
@@ -184,7 +184,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
         final Connection con = databaseService.getWritable();
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO oauthNone (nonce) VALUES (?)");
+            stmt = con.prepareStatement("INSERT INTO oauthNonce (nonce) VALUES (?)");
             stmt.setString(1, nonce.toString());
             try {
                 final int result = stmt.executeUpdate();
