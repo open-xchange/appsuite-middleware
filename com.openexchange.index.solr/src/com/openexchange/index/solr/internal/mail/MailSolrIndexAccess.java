@@ -395,9 +395,11 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public IndexResult<MailMessage> query(QueryParameters parameters) throws OXException, InterruptedException {
+    public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException, InterruptedException {
+        Set<SolrMailField> solrFields = convertFields(fields);
         List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
-        SolrQuery solrQuery = buildSolrQuery(parameters);
+        SolrQuery solrQuery = buildSolrQuery(parameters);        
+        setFieldList(solrQuery, solrFields);
         int off = parameters.getOff();
         int len = parameters.getLen();
         int fetched = 0;
@@ -432,6 +434,11 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             indexResult.setResults(mails);
             return indexResult;
         }        
+    }
+    
+    private void setFieldList(SolrQuery solrQuery, Set<SolrMailField> fields) {
+        String[] solrFields = SolrMailField.solrNamesFor(fields);
+        solrQuery.setFields(solrFields);
     }
     
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {

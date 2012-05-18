@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +73,7 @@ import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.SolrMailConstants;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BooleanTerm;
@@ -141,7 +143,9 @@ public class MailSearchHandler implements SearchHandler, SolrMailConstants {
                         builder.setFolder(fullName);
                     }
                     QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandler.CUSTOM).setSearchTerm(mailSearchTerm).build();
-                    IndexResult<MailMessage> indexResult = indexAccess.query(parameters);
+                    MailField[] mailFields = MailField.getFields(fields);
+                    Set<MailIndexField> indexFields = MailIndexField.getFor(mailFields);
+                    IndexResult<MailMessage> indexResult = indexAccess.query(parameters, indexFields);
                     if (range[1] > 0 && range[1] < indexResult.getNumFound()) {
                         more[0] = true;
                     }

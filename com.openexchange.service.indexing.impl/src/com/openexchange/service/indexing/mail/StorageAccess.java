@@ -283,7 +283,7 @@ public final class StorageAccess implements Serializable {
         final Builder queryBuilder =
             new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(
                 SearchHandler.ALL_REQUEST);
-        final IndexResult<MailMessage> indexResult = getIndexAccess().query(queryBuilder.build());
+        final IndexResult<MailMessage> indexResult = getIndexAccess().query(queryBuilder.build(), null);
         if (0 >= indexResult.getNumFound()) {
             return Collections.emptyList();
         }
