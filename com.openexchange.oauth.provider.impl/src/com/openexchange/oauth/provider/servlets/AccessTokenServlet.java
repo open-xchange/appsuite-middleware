@@ -77,7 +77,6 @@ public class AccessTokenServlet extends HttpServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        // nothing at this point
     }
 
     @Override
@@ -91,26 +90,40 @@ public class AccessTokenServlet extends HttpServlet {
     }
 
     public void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-        final OAuthProviderService providerService = getProviderService();
         try {
+            /*
+             * Parse OAuth message
+             */
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-
+            /*
+             * Get provider service
+             */
+            final OAuthProviderService providerService = getProviderService();
             final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+            /*
+             * Validate message
+             */
             providerService.getValidator().validateMessage(requestMessage, accessor);
-
-            // make sure token is authorized
+            /*
+             * Make sure token is authorized
+             */
             if (!Boolean.TRUE.equals(accessor.getProperty(OAuthProviderService.PROP_AUTHORIZED))) {
                 final OAuthProblemException problem = new OAuthProblemException("permission_denied");
                 throw problem;
             }
-            // generate access token and secret
-            providerService.generateAccessToken(accessor, accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue(), accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue());
-
+            /*
+             * Generate access token and secret
+             */
+            final int userId = accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue();
+            final int contextId = accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue();
+            providerService.generateAccessToken(accessor, userId, contextId);
+            /*
+             * Write back
+             */
             response.setContentType("text/plain");
             final OutputStream out = response.getOutputStream();
             OAuth.formEncode(OAuth.newList("oauth_token", accessor.accessToken, "oauth_token_secret", accessor.tokenSecret), out);
             out.close();
-
         } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, true);
         }

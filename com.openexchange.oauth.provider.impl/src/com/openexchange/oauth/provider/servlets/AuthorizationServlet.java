@@ -101,21 +101,32 @@ public class AuthorizationServlet extends HttpServlet {
 
     @Override
     public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-        final OAuthProviderService providerService = getProviderService();
         try {
+            /*
+             * Parse OAuth request message
+             */
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
-
+            /*
+             * Get accessor from memory
+             */
+            final OAuthProviderService providerService = getProviderService();
             final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
-
+            /*
+             * User + context
+             */
             final String userId = request.getParameter("userId");
-            if (userId == null) {
+            final String contextId = request.getParameter("ucontextId");
+            if (isEmpty(userId) || isEmpty(contextId)) {
                 sendToAuthorizePage(request, response, accessor);
             }
-            // set userId in accessor and mark it as authorized
-            providerService.markAsAuthorized(accessor, Integer.parseInt(userId), accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue());
-
+            /*
+             * Set userId in accessor and mark it as authorized
+             */
+            providerService.markAsAuthorized(accessor, Integer.parseInt(userId.trim()), Integer.parseInt(contextId.trim()));
+            /*
+             * Return to consumer
+             */
             returnToConsumer(request, response, accessor);
-
         } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, true);
         }
@@ -126,16 +137,15 @@ public class AuthorizationServlet extends HttpServlet {
         if (isEmpty(callback)) {
             callback = "none";
         }
-        final String consumer_description = (String) accessor.consumer.getProperty("description");
+        // TODO: Open-Xchange authorize page
+        final String consumer_description = accessor.consumer.getProperty("description");
         request.setAttribute("CONS_DESC", consumer_description);
         request.setAttribute("CALLBACK", callback);
         request.setAttribute("TOKEN", accessor.requestToken);
-        request.getRequestDispatcher //
-        ("/authorize.jsp").forward(request, response);
-
+        request.getRequestDispatcher("/authorize.jsp").forward(request, response);
     }
 
-    private static boolean isEmpty(final String string) {
+    private boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
@@ -148,18 +158,22 @@ public class AuthorizationServlet extends HttpServlet {
     }
 
     private void returnToConsumer(final HttpServletRequest request, final HttpServletResponse response, final OAuthAccessor accessor) throws IOException, ServletException {
-        // send the user back to site's callBackUrl
+        /*
+         * Send the user back to site's callBackUrl
+         */
         String callback = request.getParameter("oauth_callback");
-        if ("none".equals(callback) && accessor.consumer.callbackURL != null && accessor.consumer.callbackURL.length() > 0) {
+        if ("none".equals(callback) && !isEmpty(accessor.consumer.callbackURL)) {
             // first check if we have something in our properties file
             callback = accessor.consumer.callbackURL;
         }
-
+        /*
+         * Check call-back
+         */
         if ("none".equals(callback)) {
             // no call back it must be a client
             response.setContentType("text/plain");
             final PrintWriter out = response.getWriter();
-            out.println("You have successfully authorized '" + accessor.consumer.getProperty("description") + "'. Please close this browser window and click continue" + " in the client.");
+            out.println("You have successfully authorized '" + accessor.consumer.getProperty("description") + "'. Please close this browser window and click continue in the client.");
             out.close();
         } else {
             // if callback is not passed in, use the callback from config
