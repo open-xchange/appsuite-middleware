@@ -33,7 +33,6 @@ import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.groupware.SolrCoreLoginHandler;
-import com.openexchange.solr.groupware.SolrCoreStoresCreateTableTask;
 import com.openexchange.solr.groupware.SolrCoresCreateTableService;
 import com.openexchange.solr.groupware.SolrCoresCreateTableTask;
 import com.openexchange.solr.internal.DelegationSolrAccessImpl;
@@ -77,7 +76,8 @@ public class SolrActivator extends HousekeepingActivator {
 
 		final SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
 		registerService(CreateTableService.class, createTableService);
-		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoreStoresCreateTableTask(), new SolrCoresCreateTableTask(createTableService)));
+		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(createTableService)));
+		// new SolrCoreStoresCreateTableTask()
 		registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
 	
 		final Dictionary<String, Object> ht = new Hashtable<String, Object>();
