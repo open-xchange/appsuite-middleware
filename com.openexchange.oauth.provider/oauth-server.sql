@@ -27,6 +27,11 @@ CREATE TABLE `oauthConsumerProperty` (
   PRIMARY KEY  (`id`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `oauthNone` (
+  `nonce` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE `oauthAccessor` (
   `cid` int(10) unsigned NOT NULL,
   `user` int(10) unsigned NOT NULL,

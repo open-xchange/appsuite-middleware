@@ -100,7 +100,7 @@ public class RequestTokenServlet extends HttpServlet {
             final OAuthConsumer consumer = providerService.getConsumer(requestMessage);
             
             final OAuthAccessor accessor = new OAuthAccessor(consumer);
-            OAuthProviderService.VALIDATOR.validateMessage(requestMessage, accessor);
+            providerService.getValidator().validateMessage(requestMessage, accessor);
             {
                 // Support the 'Variable Accessor Secret' extension
                 // described in http://oauth.pbwiki.com/AccessorSecret
@@ -110,7 +110,9 @@ public class RequestTokenServlet extends HttpServlet {
                 }
             }
             // generate request_token and secret
-            providerService.generateRequestToken(accessor, accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue(), accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue());
+            final int userId = accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue();
+            final int contextId = accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue();
+            providerService.generateRequestToken(accessor, userId, contextId);
             
             response.setContentType("text/plain");
             final OutputStream out = response.getOutputStream();

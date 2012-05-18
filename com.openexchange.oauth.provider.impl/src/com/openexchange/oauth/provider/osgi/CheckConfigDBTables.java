@@ -161,6 +161,15 @@ public final class CheckConfigDBTables {
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauthConsumerProperty", createSql, con);
     }
+
+    private void checkNonce(final Connection con) throws SQLException {
+        final String createSql = "\n" + 
+        		"CREATE TABLE `oauthNone` (\n" + 
+        		"  `nonce` varchar(255) NOT NULL,\n" + 
+        		"  PRIMARY KEY  (`id`,`name`)\n" + 
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        createIfAbsent("oauthNone", createSql, con);
+    }
   
     private void createIfAbsent(final String name, final String createSql, final Connection con) throws SQLException {
         if (!tableExists(con, name)) {

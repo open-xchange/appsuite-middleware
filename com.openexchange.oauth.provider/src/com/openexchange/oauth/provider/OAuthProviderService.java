@@ -55,7 +55,6 @@ import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuthValidator;
-import net.oauth.SimpleOAuthValidator;
 import com.openexchange.exception.OXException;
 
 /**
@@ -65,11 +64,6 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthProviderService {
-
-    /**
-     * The OAuth validator.
-     */
-    public static final OAuthValidator VALIDATOR = new SimpleOAuthValidator();
 
     /**
      * The identifier of the default provider.
@@ -118,6 +112,13 @@ public interface OAuthProviderService {
     /*
      * Methods
      */
+
+    /**
+     * Gets the associated validator instance.
+     * 
+     * @return The validator instance
+     */
+    public OAuthValidator getValidator();
 
     /**
      * Loads consumers from database

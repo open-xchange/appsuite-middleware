@@ -76,8 +76,10 @@ import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuthServiceProvider;
+import net.oauth.OAuthValidator;
 import net.oauth.server.OAuthServlet;
 import org.apache.commons.codec.digest.DigestUtils;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
@@ -97,6 +99,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
      * Member section
      */
 
+    private final OAuthValidator validator;
+
     private final OAuthServiceProvider provider;
 
     private final ConcurrentMap<String, OAuthConsumer> consumers;
@@ -112,6 +116,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
      */
     public DatabaseOAuthProviderService(final ServiceLookup services) throws OXException {
         super();
+        validator = generateValidator();
         this.services = services;
         consumers = new ConcurrentHashMap<String, OAuthConsumer>(16);
         tokens = new ConcurrentHashMap<OAuthAccessor, Object>(256);
@@ -119,6 +124,13 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         // Load provider
         provider = loadServiceProvider(databaseService);
         loadConsumers(databaseService);
+    }
+
+    private OAuthValidator generateValidator() {
+        final ConfigurationService service = services.getService(ConfigurationService.class);
+        final int maxTimestampAgeMsec = service.getIntProperty("com.openexchange.oauth.provider.validator.maxTimestampAgeMsec", 300000);
+        final double maxVersion = Double.parseDouble(service.getProperty("com.openexchange.oauth.provider.validator.maxVersion", "1.0").trim());
+        return new DatabaseOAuthValidator(maxTimestampAgeMsec, maxVersion);
     }
 
     private TIntList getContextIds(final DatabaseService databaseService) throws OXException {
@@ -170,6 +182,20 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(con);
         }
+    }
+
+    /**
+     * Gets the <tt>OAuthServiceProvider</tt> instance
+     *
+     * @return The provider
+     */
+    public OAuthServiceProvider getProvider() {
+        return provider;
+    }
+
+    @Override
+    public OAuthValidator getValidator() {
+        return validator;
     }
 
     @Override
