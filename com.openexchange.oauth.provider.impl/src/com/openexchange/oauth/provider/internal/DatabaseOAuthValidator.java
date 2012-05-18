@@ -167,9 +167,9 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
     }
 
     private static long getTimestamp(final String sortKey) {
-        int end = sortKey.indexOf("&");
+        final int end = sortKey.indexOf("&");
         if (end < 0) {
-            end = sortKey.length();
+            return Long.parseLong(sortKey.trim());
         }
         return Long.parseLong(sortKey.substring(0, end).trim());
     }
