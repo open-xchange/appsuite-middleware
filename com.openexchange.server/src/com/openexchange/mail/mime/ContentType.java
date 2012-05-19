@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -386,40 +387,46 @@ public class ContentType extends ParameterizedHeader {
         // Check for '/' character
         final int slashPos = type.indexOf(DELIMITER);
         if (slashPos >= 0) {
-            // Primary type
-            {
-                String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
-                if (pt.charAt(0) == '"') {
-                    pt = pt.substring(1);
-                }
-                if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
-                    pt = pt.substring(13);
+            try {
+                // Primary type
+                {
+                    String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
                     if (pt.charAt(0) == '"') {
                         pt = pt.substring(1);
                     }
+                    if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
+                        pt = pt.substring(13);
+                        if (pt.charAt(0) == '"') {
+                            pt = pt.substring(1);
+                        }
+                    }
+                    if (isInvalidToken(pt)) {
+                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                    }
+                    primaryType = pt;
                 }
-                if (isInvalidToken(pt)) {
-                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                // Subtype
+                {
+                    String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
+                    final int mlen = st.length() - 1;
+                    if (st.charAt(mlen) == '"') {
+                        st = st.substring(0, mlen);
+                    }
+                    if (isInvalidToken(st)) {
+                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                    }
+                    subType = st;
                 }
-                primaryType = pt;
+                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                if (paramList) {
+                    parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+                }
+                return;
+            } catch (final OXException e) {
+                // Content-Type could not be parsed the simple way
+                final Log logger = com.openexchange.log.Log.loggerFor(ContentType.class);
+                logger.debug(e.getMessage(), e);
             }
-            // Subtype
-            {
-                String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
-                final int mlen = st.length() - 1;
-                if (st.charAt(mlen) == '"') {
-                    st = st.substring(0, mlen);
-                }
-                if (isInvalidToken(st)) {
-                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
-                }
-                subType = st;
-            }
-            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-            if (paramList) {
-                parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
-            }
-            return;
         }
         // Try with regex-based parsing
         final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(type);
