@@ -121,6 +121,9 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // Missing facebook configuration parameter "%1$s". Please re-create facebook account.
     public static final String MISSING_CONFIG_PARAM_MSG = "Missing facebook configuration parameter \"%1$s\". Please re-create facebook account.";
 
+    // A Facebook API error occurred. Error code: %1$s. Error message: "%2$s". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.
+    public static final String FB_API_ERROR_MSG = "A Facebook API error occurred. Error code: %1$s. Error message: \"%2$s\". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.";
+
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.
      */
