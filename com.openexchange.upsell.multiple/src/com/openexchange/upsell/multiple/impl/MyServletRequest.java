@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.http.HttpServletRequest;
@@ -483,11 +482,6 @@ public final class MyServletRequest  {
     private void sendUpsellEmail(final String to, final String from,final String text,final String subject) throws OXException{
         MailConfig mailConfig = null;
         try {
-            final InternetAddress fromAddress = new QuotedInternetAddress(from, true);
-            /*
-             * Look-up transport provider
-             */
-            final com.openexchange.mail.transport.TransportProvider provider = com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(this.sessionObj, 0);
             /*
              * Compose rfc822 message
              */
@@ -495,7 +489,7 @@ public final class MyServletRequest  {
             {
                 final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
                 mimeMessage.setSubject(subject);
-                mimeMessage.setFrom(fromAddress);
+                mimeMessage.setFrom(new QuotedInternetAddress(from, true));
                 mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(to));
                 /*
                  * Set text content
