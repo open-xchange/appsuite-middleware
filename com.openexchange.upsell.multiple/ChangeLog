@@ -1,3 +1,7 @@
+* 2012-05-20 - choeger@open-xchange.com
+
+  - Bugfix #22014 - Specifying proper charset on upsell mail composal
+
 * 2011-09-12 - choeger@open-xchange.com
 
   - Bugfix #20290 - upsell-multiple-gui.properties in wrong package

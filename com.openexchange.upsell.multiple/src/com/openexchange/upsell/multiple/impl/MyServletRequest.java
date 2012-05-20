@@ -50,6 +50,7 @@
 package com.openexchange.upsell.multiple.impl;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -62,9 +63,11 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.mail.Address;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
@@ -85,11 +88,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
@@ -474,37 +481,57 @@ public final class MyServletRequest  {
     }
 
     private void sendUpsellEmail(final String to, final String from,final String text,final String subject) throws OXException{
+        MailConfig mailConfig = null;
         try {
-            final InternetAddress fromAddress = new InternetAddress(from, true);
-
+            final InternetAddress fromAddress = new QuotedInternetAddress(from, true);
+            /*
+             * Look-up transport provider
+             */
             final com.openexchange.mail.transport.TransportProvider provider = com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(this.sessionObj, 0);
-
-            final ComposedMailMessage msg = provider.getNewComposedMailMessage(this.sessionObj, this.ctx);
-            msg.setSubject(subject);
-            msg.addFrom(fromAddress);
-            msg.addTo(new InternetAddress(to));
-
-
-            final TextBodyMailPart textPart = provider.getNewTextBodyPart(text);
-            msg.setBodyPart(textPart);
-            msg.setContentType("text/plain");
-
+            /*
+             * Compose rfc822 message
+             */
+            final byte[] rfc822;
+            {
+                final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+                mimeMessage.setSubject(subject);
+                mimeMessage.setFrom(fromAddress);
+                mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(to));
+                /*
+                 * Set text content
+                 */
+                mimeMessage.setText(text, "UTF-8");
+                mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                /*
+                 * Write bytes
+                 */
+                final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(2048);
+                mimeMessage.writeTo(tmp);
+                rfc822 = tmp.toByteArray();
+            }
+            /*
+             * Perform transport
+             */
             final MailTransport transport = MailTransport.getInstance(this.sessionObj);
             try {
-                transport.sendMailMessage(msg, com.openexchange.mail.dataobjects.compose.ComposeType.NEW, new Address[] { new InternetAddress(to) });
+                mailConfig = transport.getTransportConfig();
+                transport.sendRawMessage(rfc822);
                 LOG.info("Upsell request from user "+this.sessionObj.getLogin()+" (cid:"+this.ctx.getContextId()+")  was sent to "+to+"");
             } finally {
                 transport.close();
             }
-
-
         } catch (final OXException e) {
             LOG.error("Couldn't send provisioning mail", e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
         } catch (final AddressException e) {
             LOG.error("Target email address cannot be parsed",e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
-
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, mailConfig, sessionObj);
+        } catch (final IOException e) {
+            // Cannot occur
+            throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e, e.getMessage());
         }
     }
 
