@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.upsell.multiple.impl;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -55,36 +55,47 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link ConfigCascadeExceptionCodes} - Enumeration of all {@link OXException}s.
- *
- * @author francisco.laguna@open-xchange.com
+ * {@link MyServletException}
+ * 
+ * 
  */
-public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
+public enum MyServletExceptionCodes implements OXExceptionCode {
+
+
+    API_COMMUNICATION_ERROR("An interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , CATEGORY_ERROR, 1),
+
+    HTTP_COMMUNICATION_ERROR("Http communication error deteced. Details: \"%1$s\"" , CATEGORY_ERROR, 1),
+
+    EMAIL_COMMUNICATION_ERROR("Upsell email communication error deteced.Details \"%1$s\"" , CATEGORY_ERROR, 1);
+
+    public static final String PREFIX = "RES";
 
     /**
-     * An error occurred: %1$s
+     * Message of the exception.
      */
-    UNEXPECTED_ERROR(ConfigCascadeExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
-    COULD_NOT_COERCE_VALUE(ConfigCascadeExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, Category.CATEGORY_ERROR, 2),
-    CAN_NOT_DEFINE_METADATA(ConfigCascadeExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, Category.CATEGORY_ERROR, 3),
-    CAN_NOT_SET_PROPERTY(ConfigCascadeExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CATEGORY_ERROR, 4),
-    ;
-
-    /**
-     * The prefix for ConfigCascadeException.
-     */
-    public static final String PREFIX = "CONF";
-
-    private final Category category;
-
-    private final int detailNumber;
-
     private final String message;
 
-    private ConfigCascadeExceptionCodes(final String message, final Category category, final int detailNumber) {
+    /**
+     * Category of the exception.
+     */
+    private final Category category;
+
+    /**
+     * Detail number of the exception.
+     */
+    private final int number;
+
+    /**
+     * Default constructor.
+     *
+     * @param message message.
+     * @param category category.
+     * @param detailNumber detail number.
+     */
+    private MyServletExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        this.detailNumber = detailNumber;
         this.category = category;
+        number = detailNumber;
     }
 
     @Override
@@ -104,11 +115,7 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
 
     @Override
     public int getNumber() {
-        return detailNumber;
-    }
-
-    public String getHelp() {
-        return null;
+        return number;
     }
 
     @Override
