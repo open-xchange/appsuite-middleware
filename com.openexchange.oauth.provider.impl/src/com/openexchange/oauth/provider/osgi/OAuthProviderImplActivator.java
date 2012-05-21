@@ -62,6 +62,7 @@ import com.openexchange.oauth.provider.groupware.OAuth2ProviderCreateTableTask;
 import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableService;
 import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableTask;
 import com.openexchange.oauth.provider.groupware.OAuthProviderDeleteListener;
+import com.openexchange.oauth.provider.internal.DatabaseOAuth2ProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.oauth.provider.servlets.AccessTokenServlet;
@@ -70,6 +71,7 @@ import com.openexchange.oauth.provider.servlets.AuthorizationServlet;
 import com.openexchange.oauth.provider.servlets.AuthorizationServlet2;
 import com.openexchange.oauth.provider.servlets.EchoServlet;
 import com.openexchange.oauth.provider.servlets.RequestTokenServlet;
+import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 
@@ -99,13 +101,19 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
         /*
          * Register OAuth provider service
          */
-        final DatabaseOAuthProviderService providerService = new DatabaseOAuthProviderService(this);
-        registerService(OAuthProviderService.class, providerService);
-        addService(OAuthProviderService.class, providerService);
+        final DatabaseOAuthProviderService oauthProviderService = new DatabaseOAuthProviderService(this);
+        registerService(OAuthProviderService.class, oauthProviderService);
+        addService(OAuthProviderService.class, oauthProviderService);
+        /*
+         * Register OAuth v2 provider service
+         */
+        final DatabaseOAuth2ProviderService oauth2ProviderService = new DatabaseOAuth2ProviderService(this);
+        registerService(OAuth2ProviderService.class, oauth2ProviderService);
+        addService(OAuth2ProviderService.class, oauth2ProviderService);
         /*
          * Service trackers
          */
-        final OAuthServiceProvider provider = providerService.getProvider();
+        final OAuthServiceProvider provider = oauthProviderService.getProvider();
         // OAuth v1
         rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL, new AccessTokenServlet()));
         rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL, new AuthorizationServlet()));
