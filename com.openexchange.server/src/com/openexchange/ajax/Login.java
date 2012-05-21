@@ -72,7 +72,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -100,6 +99,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.login.ConfigurationProperty;
@@ -977,6 +977,20 @@ public class Login extends AJAXServlet {
 
             @Override
             public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
+                final LoginRequest request = parseLogin(req2, LoginFields.NAME_PARAM, false);
+                return LoginPerformer.getInstance().doLogin(request);
+            }
+        });
+    }
+
+    protected void doOAuthLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+        loginOperation(req, resp, new LoginClosure() {
+
+            @Override
+            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
+                // TODO: Perform OAuth login
+                
+                
                 final LoginRequest request = parseLogin(req2, LoginFields.NAME_PARAM, false);
                 return LoginPerformer.getInstance().doLogin(request);
             }

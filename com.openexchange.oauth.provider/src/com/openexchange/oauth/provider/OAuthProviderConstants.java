@@ -82,6 +82,11 @@ public interface OAuthProviderConstants {
     public static final String PROP_PASSWORD = "password";
 
     /**
+     * Property name <code>"login"</code>
+     */
+    public static final String PROP_LOGIN = "login";
+
+    /**
      * Property name <code>"description"</code>
      */
     public static final String PROP_DESCRIPTION = "description";

@@ -57,6 +57,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import net.oauth.OAuthServiceProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
@@ -94,6 +98,11 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
     private final String secret;
 
     /**
+     * The secret property names.
+     */
+    private static final Set<String> SECRET_PROP_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(PROP_PASSWORD, PROP_LOGIN)));
+
+    /**
      * Initializes a new {@link AbstractOAuthProviderService}.
      * 
      * @throws OXException If service provider cannot be loaded from database
@@ -105,6 +114,15 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
         provider = loadServiceProvider();
         final ConfigurationService service = services.getService(ConfigurationService.class);
         secret = service.getProperty("com.openexchange.oauth.provider.secret", "f58c636e089745d4a79679d726aca8b5");
+    }
+
+    /**
+     * Gets the property names of secret properties.
+     * 
+     * @return The secret property names.
+     */
+    protected static Set<String> getSecretPropertyNames() {
+        return SECRET_PROP_NAMES;
     }
 
     /**
