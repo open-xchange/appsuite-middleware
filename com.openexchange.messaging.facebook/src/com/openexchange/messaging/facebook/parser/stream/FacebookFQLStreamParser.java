@@ -58,14 +58,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
+import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookURLConnectionContent;
 import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
@@ -580,6 +581,7 @@ public final class FacebookFQLStreamParser {
         if (!streamElement.hasChildNodes()) {
             return null;
         }
+        checkFacebookError(streamElement);
         final FacebookMessagingMessage message = new FacebookMessagingMessage(locale);
         /*
          * Iterate child nodes
@@ -716,6 +718,27 @@ public final class FacebookFQLStreamParser {
          * Return parsed message
          */
         return message;
+    }
+
+    private static void checkFacebookError(final Element streamElement) throws OXException {
+        long errorCode = -1L;
+        String errorMsg = null;
+        final NodeList childNodes = streamElement.getChildNodes();
+        final int length = childNodes.getLength();
+        for (int i = 0; i < length; i++) {
+            final Node item = childNodes.item(i);
+            final String localName = item.getLocalName();
+            if (null != localName) {
+                if ("error_code".equals(localName)) {
+                    errorCode = FacebookMessagingUtility.parseUnsignedLong(item.getTextContent());
+                } else if ("error_msg".equals(localName)) {
+                    errorMsg = item.getTextContent();
+                }
+            }
+        }
+        if (errorCode >= 0) {
+            throw FacebookMessagingExceptionCodes.FB_API_ERROR.create(Long.valueOf(errorCode), null == errorMsg ? "" : errorMsg);
+        }
     }
 
     /**

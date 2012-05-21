@@ -131,7 +131,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         loadConsumers(databaseService, true);
     }
 
-    private static OAuthValidator generateValidator(final ServiceLookup services) {
+    private OAuthValidator generateValidator(final ServiceLookup services) {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final int maxTimestampAgeMsec = service.getIntProperty("com.openexchange.oauth.provider.validator.maxTimestampAgeMsec", 300000);
         final double maxVersion =
@@ -139,7 +139,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         return new DatabaseOAuthValidator(maxTimestampAgeMsec, maxVersion);
     }
 
-    protected static TIntList getContextIds(final DatabaseService databaseService) throws OXException {
+    private TIntList getContextIds(final DatabaseService databaseService) throws OXException {
         final Connection con = databaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -271,7 +271,8 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         rs = null;
         con = null;
         if (loadAccessors) {
-            final ConcurrentMap<OAuthAccessor, Object> tokens = DatabaseOAuthProviderService.this.tokens;
+            final TIntList contextIds = getContextIds(databaseService);
+            final ConcurrentMap<OAuthAccessor, Object> tokens = this.tokens;
             final Object present = DatabaseOAuthProviderService.PRESENT;
             final Runnable loader = new Runnable() {
 
@@ -280,7 +281,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                     try {
                         final boolean infoEnabled = LOG.isInfoEnabled();
                         final long st = infoEnabled ? System.currentTimeMillis() : 0L;
-                        final TIntList contextIds = getContextIds(databaseService);
                         final TIntSet processed = new TIntHashSet(contextIds.size());
                         final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
                         final List<int[]> delete = new LinkedList<int[]>();
@@ -377,6 +377,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                                 final Connection con = databaseService.getWritable(cid);
                                 PreparedStatement stmt = null;
                                 try {
+                                    DBUtils.startTransaction(con);
                                     stmt = con.prepareStatement("DELETE FROM oauthAccessor WHERE cid=? AND user=? AND consumerId=?");
                                     stmt.setInt(1, cid);
                                     stmt.setInt(2, arr[1]);
@@ -389,8 +390,13 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                                     stmt.setInt(2, arr[1]);
                                     stmt.setInt(3, arr[2]);
                                     stmt.executeUpdate();
+                                    con.commit();
+                                } catch (final Exception e) {
+                                    DBUtils.rollback(con);
+                                    LOG.warn("Couldn't delete OAuth accessor.", e);
                                 } finally {
                                     DBUtils.closeSQLStuff(stmt);
+                                    DBUtils.autocommit(con);
                                     databaseService.backWritable(cid, con);
                                 }
                             }
@@ -400,7 +406,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                             LOG.info("DatabaseOAuthProviderService.loadConsumers(): Loading accessors took " + dur + "msec");
                         }
                     } catch (final Exception e) {
-                        LOG.warn("Couldn't load accessors", e);
+                        LOG.warn("Couldn't load OAuth accessors.", e);
                     }
                 }
             };

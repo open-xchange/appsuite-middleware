@@ -1,3 +1,10 @@
+* 2012-05-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22051: Re-parse Content-Type with regexes
+ - Fix for bug 22062: Check for non-null mail identifier
+ - Fix for bug 21933: Dealing with possible Facebook API error response (http://fbdevwiki.com/wiki/Error_codes)
+ - Fix for bug 22060: Fixed parsing of IDN address
+
 * 2012-05-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 22128: Fall-back if user configuration cannot be loaded

@@ -798,9 +798,9 @@ public class MimeMessageFiller {
                          * Well-formed HTML
                          */
                         final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(wellFormedHTMLContent, charset, false, true, type), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(wellFormedHTMLContent, content), charset, false, true, type), 0);
                     } else {
-                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, charset, false, false, type), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type), 0);
                     }
                 } else {
                     /*-
@@ -1123,9 +1123,9 @@ public class MimeMessageFiller {
          */
         final String plainText = textBodyPart.getPlainText();
         if (null == plainText) {
-            alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, charset, true, true, type), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(htmlContent, mailBody), charset, true, true, type), 0);
         } else {
-            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, charset, true, false, type), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, true, false, type), 0);
         }
         return alternativeMultipart;
     }
@@ -1385,7 +1385,7 @@ public class MimeMessageFiller {
     /**
      * Creates a body part of type <code>text/plain</code> from given HTML content
      *
-     * @param content The content
+     * @param contents The contents array
      * @param charset The character encoding
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
      * @param isHtml Whether provided content is HTML or not
@@ -1393,7 +1393,7 @@ public class MimeMessageFiller {
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      */
-    protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
+    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
         /*
          * Convert HTML content to regular text. First: Create a body part for text content
          */
@@ -1402,12 +1402,15 @@ public class MimeMessageFiller {
          * Define text content
          */
         final String textContent;
-        if (content == null || content.length() == 0) {
-            textContent = "";
-        } else if (isHtml) {
-            textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
-        } else {
-            textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(content, usm.getAutoLinebreak());
+        {
+            final String content = contents[0];
+            if (content == null || content.length() == 0) {
+                textContent = "";
+            } else if (isHtml) {
+                textContent = ComposeType.NEW_SMS.equals(type) ? contents[1] : performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
+            } else {
+                textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(content, usm.getAutoLinebreak());
+            }
         }
         text.setText(textContent, charset);
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
@@ -1719,6 +1722,19 @@ public class MimeMessageFiller {
             }
         }
         return true;
+    }
+
+    private static String[] toArray(final String... contents) {
+        if (null == contents) {
+            return new String[0];
+        }
+        final int length = contents.length;
+        if (0 == length) {
+            return new String[0];
+        }
+        final String[] ret = new String[length];
+        System.arraycopy(contents, 0, ret, 0, length);
+        return ret;
     }
 
     private static interface ImageProvider {

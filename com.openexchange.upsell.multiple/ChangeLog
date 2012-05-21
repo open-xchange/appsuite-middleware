@@ -1,0 +1,15 @@
+* 2012-05-20 - thorben.betten@open-xchange.com
+
+  - Bugfix #22014 - Specifying proper charset on upsell mail composal
+
+* 2011-09-12 - choeger@open-xchange.com
+
+  - Bugfix #20290 - upsell-multiple-gui.properties in wrong package
+
+* 2011-05-11 - dennis.sieben@open-xchange.com
+
+  - Bugfix #19191 - NPE in upsell multiple if method is set to direct
+
+* 2010-09-22 - manuel@open-xchange.com
+
+Initial

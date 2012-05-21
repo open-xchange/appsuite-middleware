@@ -860,7 +860,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-    private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}]");
+    private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}\\p{L}]");
 
     private static String init(final String address, final boolean suppressControlOrWhitespace) {
         if (!suppressControlOrWhitespace) {
