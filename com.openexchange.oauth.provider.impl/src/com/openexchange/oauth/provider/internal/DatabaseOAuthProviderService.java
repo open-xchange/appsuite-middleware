@@ -377,6 +377,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                                 final Connection con = databaseService.getWritable(cid);
                                 PreparedStatement stmt = null;
                                 try {
+                                    DBUtils.startTransaction(con);
                                     stmt = con.prepareStatement("DELETE FROM oauthAccessor WHERE cid=? AND user=? AND consumerId=?");
                                     stmt.setInt(1, cid);
                                     stmt.setInt(2, arr[1]);
@@ -389,8 +390,13 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                                     stmt.setInt(2, arr[1]);
                                     stmt.setInt(3, arr[2]);
                                     stmt.executeUpdate();
+                                    con.commit();
+                                } catch (final Exception e) {
+                                    DBUtils.rollback(con);
+                                    LOG.warn("Couldn't delete OAuth accessor.", e);
                                 } finally {
                                     DBUtils.closeSQLStuff(stmt);
+                                    DBUtils.autocommit(con);
                                     databaseService.backWritable(cid, con);
                                 }
                             }
@@ -400,7 +406,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                             LOG.info("DatabaseOAuthProviderService.loadConsumers(): Loading accessors took " + dur + "msec");
                         }
                     } catch (final Exception e) {
-                        LOG.warn("Couldn't load accessors", e);
+                        LOG.warn("Couldn't load OAuth accessors.", e);
                     }
                 }
             };
