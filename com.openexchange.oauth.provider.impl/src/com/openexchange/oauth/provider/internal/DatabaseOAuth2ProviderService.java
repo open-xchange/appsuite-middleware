@@ -214,7 +214,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
                                 try {
                                     processed.addAll(databaseService.getContextsInSameSchema(contextId));
                                     con = databaseService.getReadOnly(contextId);
-                                    if (!tableExists(con, "oauthAccessor")) {
+                                    if (!tableExists(con, "oauth2Accessor")) {
                                         return true;
                                     }
                                     // Tables already exist; load them

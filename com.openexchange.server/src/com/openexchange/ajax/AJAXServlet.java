@@ -231,6 +231,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_LOGIN = "login";
 
+    public static final String ACTION_OAUTH = "oauth";
+
     public static final String ACTION_STORE = "store";
 
     public static final String ACTION_LOGOUT = "logout";

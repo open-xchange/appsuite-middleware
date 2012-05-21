@@ -71,6 +71,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
+import net.oauth.server.OAuthServlet;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,6 +111,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -259,6 +264,18 @@ public class Login extends AJAXServlet {
                 // Look-up necessary credentials
                 try {
                     doLogin(req, resp);
+                } catch (final OXException e) {
+                    logAndSendException(resp, e);
+                }
+            }
+        });
+        map.put(ACTION_OAUTH, new JSONRequestHandler() {
+
+            @Override
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                // Look-up necessary credentials
+                try {
+                    doOAuthLogin(req, resp);
                 } catch (final OXException e) {
                     logAndSendException(resp, e);
                 }
@@ -988,11 +1005,19 @@ public class Login extends AJAXServlet {
 
             @Override
             public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
-                // TODO: Perform OAuth login
-                
-                
-                final LoginRequest request = parseLogin(req2, LoginFields.NAME_PARAM, false);
-                return LoginPerformer.getInstance().doLogin(request);
+                try {
+                    final OAuthProviderService providerService = ServerServiceRegistry.getInstance().getService(OAuthProviderService.class);
+                    final OAuthMessage requestMessage = OAuthServlet.getMessage(req2, null);
+                    final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+                    final String login = accessor.<String> getProperty(OAuthProviderService.PROP_LOGIN);
+                    final String password = accessor.<String> getProperty(OAuthProviderService.PROP_PASSWORD);
+                    final LoginRequest request = parseLogin(req2, login, password, false);
+                    return LoginPerformer.getInstance().doLogin(request);
+                } catch (final OAuthProblemException e) {
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                } catch (final IOException e) {
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                }
             }
         });
     }
@@ -1114,6 +1139,10 @@ public class Login extends AJAXServlet {
         if (null == password) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
         }
+        return parseLogin(req, login, password, strict);
+    }
+
+    protected LoginRequest parseLogin(final HttpServletRequest req, final String login, final String password, final boolean strict) throws OXException {
         final String authId = parseAuthId(req, strict);
         final String client = parseClient(req, strict);
         final String version;
