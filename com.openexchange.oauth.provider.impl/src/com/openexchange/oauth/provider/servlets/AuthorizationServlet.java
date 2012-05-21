@@ -60,6 +60,7 @@ import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
@@ -86,7 +87,7 @@ public class AuthorizationServlet extends HttpServlet {
 
             final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
 
-            if (Boolean.TRUE.equals(accessor.getProperty(OAuthProviderService.PROP_AUTHORIZED))) {
+            if (Boolean.TRUE.equals(accessor.getProperty(OAuthProviderConstants.PROP_AUTHORIZED))) {
                 // already authorized send the user back
                 returnToConsumer(request, response, accessor);
             } else {
@@ -174,9 +175,11 @@ public class AuthorizationServlet extends HttpServlet {
             response.setContentType("text/plain");
             final PrintWriter out = response.getWriter();
             out.println("You have successfully authorized '" + accessor.consumer.getProperty("description") + "'. Please close this browser window and click continue in the client.");
-            out.close();
+            out.flush();
         } else {
-            // if callback is not passed in, use the callback from config
+            /*
+             * If callback is not passed in, use the callback from config
+             */
             if (callback == null || callback.length() <= 0) {
                 callback = accessor.consumer.callbackURL;
             }
@@ -184,7 +187,9 @@ public class AuthorizationServlet extends HttpServlet {
             if (token != null) {
                 callback = OAuth.addParameters(callback, "oauth_token", token);
             }
-
+            /*
+             * Set redirect headers
+             */
             response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
             response.setHeader("Location", callback);
         }

@@ -10,7 +10,10 @@ Import-Package: com.openexchange.exception,
 Bundle-ClassPath: .,
  lib/oauth-googlecode.jar
 Export-Package: com.openexchange.oauth.provider,
+ com.openexchange.oauth.provider.v2,
  net.oauth,
  net.oauth.server,
  net.oauth.signature,
- net.oauth.signature.pem
+ net.oauth.signature.pem,
+ net.oauth.v2,
+ net.oauth.v2.server

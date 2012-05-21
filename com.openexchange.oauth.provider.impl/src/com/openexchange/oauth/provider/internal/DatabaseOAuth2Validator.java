@@ -47,80 +47,38 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
 
-import java.io.IOException;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthConsumer;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
-import net.oauth.OAuthValidator;
-import com.openexchange.exception.OXException;
+import net.oauth.v2.OAuth2Validator;
+import net.oauth.v2.SimpleOAuth2Validator;
+import org.apache.commons.logging.Log;
 
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
- * library</a>.
+ * {@link DatabaseOAuth2Validator} - A simple {@link OAuth2Validator}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OAuthProviderService extends OAuthProviderConstants {
+public final class DatabaseOAuth2Validator extends SimpleOAuth2Validator {
 
-    /*
-     * Methods
-     */
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseOAuth2Validator.class);
 
     /**
-     * Gets the associated validator instance.
-     * 
-     * @return The validator instance
+     * Initializes a new {@link DatabaseOAuth2Validator} that rejects messages more than five minutes old or with a OAuth version other than
+     * <code>1.0</code>.
      */
-    public OAuthValidator getValidator();
+    public DatabaseOAuth2Validator() {
+        super();
+    }
 
     /**
-     * Loads consumers from database
+     * Initializes a new {@link DatabaseOAuth2Validator}.
      * 
-     * @throws OXException If loading consumers fails
+     * @param maxTimestampAgeMsec The range of valid time stamps, in milliseconds into the past or future. So the total range of valid time
+     *            stamps is twice this value, rounded to the nearest second.
+     * @param maxVersion The maximum valid oauth_version
      */
-    public void loadConsumers() throws OXException;
-
-    /**
-     * Gets the consumer for specified OAuth request message.
-     * 
-     * @param requestMessage The request message
-     * @return The associated consumer
-     * @throws IOException If an I/O error occurs
-     * @throws OAuthProblemException If an OAuth problem occurs
-     */
-    public OAuthConsumer getConsumer(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
-
-    /**
-     * Get the access token and token secret for the given oauth_token.
-     * 
-     * @param requestMessage The OAuth message providing oauth_token
-     */
-    public OAuthAccessor getAccessor(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
-
-    /**
-     * Marks specified access token as authorized.
-     * 
-     * @throws OXException If token cannot be marked as authorized
-     */
-    public void markAsAuthorized(OAuthAccessor accessor, int userId, int contextId) throws OXException;
-
-    /**
-     * Generate a fresh request token and secret for a consumer.
-     * 
-     * @param accessor The <b><small>VALIDATED</small></b> <tt>OAuthAccessor</tt> instance
-     * @throws OXException If generation fails
-     */
-    public void generateRequestToken(OAuthAccessor accessor) throws OXException;
-
-    /**
-     * Generate an access token for a consumer.
-     * 
-     * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
-     * @throws OXException If generation fails
-     */
-    public void generateAccessToken(OAuthAccessor accessor, int userId, int contextId) throws OXException;
+    public DatabaseOAuth2Validator(final long maxTimestampAgeMsec, final double maxVersion) {
+        super(maxTimestampAgeMsec, maxVersion);
+    }
 
 }

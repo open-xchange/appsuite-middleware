@@ -62,6 +62,9 @@ public final class OAuthProviderCreateTableService extends AbstractCreateTableIm
     private static final String TABLE_ACCESSOR = "oauthAccessor";
     private static final String TABLE_ACCESSOR_PROPERTY = "oauthAccessorProperty";
 
+    private static final String TABLE_ACCESSOR_V2 = "oauth2Accessor";
+    private static final String TABLE_ACCESSOR_PROPERTY_V2 = "oauth2AccessorProperty";
+
     private static final String CREATE_ACCESSOR = "CREATE TABLE `"+TABLE_ACCESSOR+"` (" + 
         " `cid` int(10) unsigned NOT NULL," + 
         " `user` int(10) unsigned NOT NULL," + 
@@ -82,7 +85,33 @@ public final class OAuthProviderCreateTableService extends AbstractCreateTableIm
         " `name` varchar(32) NOT NULL," + 
         " `value` varchar(255) NOT NULL," + 
         " PRIMARY KEY (`cid`,`user`,`consumerId`,`name`)" + 
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+    private static final String CREATE_ACCESSOR_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_V2+"` (" + 
+        " `cid` int(10) unsigned NOT NULL," + 
+        " `user` int(10) unsigned NOT NULL," + 
+        " `clientId` int(10) unsigned NOT NULL," + 
+        " `providerId` int(10) unsigned NOT NULL," + 
+        " `code` varchar(255) DEFAULT NULL," + 
+        " `refreshToken` varchar(255) DEFAULT NULL," + 
+        " `accessToken` varchar(255) DEFAULT NULL," + 
+        " `expiresIn` varchar(255) DEFAULT NULL," + 
+        " `tokenType` varchar(255) DEFAULT NULL," + 
+        " `scope` varchar(255) DEFAULT NULL," + 
+        " `state` varchar(255) DEFAULT NULL," + 
+        " PRIMARY KEY (`cid`,`user`,`clientId`)," + 
+        " KEY `userIndex` (`cid`,`user`)," + 
+        " KEY `consumerIndex` (`clientId`,`providerId`)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+    private static final String CREATE_ACCESSOR_PROPERTY_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_PROPERTY_V2+"` (" + 
+        " `cid` int(10) unsigned NOT NULL," + 
+        " `user` int(10) unsigned NOT NULL," + 
+        " `clientId` int(10) unsigned NOT NULL," + 
+        " `name` varchar(32) NOT NULL," + 
+        " `value` varchar(255) NOT NULL," + 
+        " PRIMARY KEY (`cid`,`user`,`clientId`,`name`)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
      * Gets the table names.
@@ -90,7 +119,7 @@ public final class OAuthProviderCreateTableService extends AbstractCreateTableIm
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
-        return new String[] { TABLE_ACCESSOR, TABLE_ACCESSOR_PROPERTY };
+        return new String[] { TABLE_ACCESSOR, TABLE_ACCESSOR_PROPERTY, TABLE_ACCESSOR_V2, TABLE_ACCESSOR_PROPERTY_V2 };
     }
 
     /**
@@ -99,7 +128,7 @@ public final class OAuthProviderCreateTableService extends AbstractCreateTableIm
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { CREATE_ACCESSOR, CREATE_ACCESSOR_PROPERTY };
+        return new String[] { CREATE_ACCESSOR, CREATE_ACCESSOR_PROPERTY, CREATE_ACCESSOR_V2, CREATE_ACCESSOR_PROPERTY_V2 };
     }
 
     /**

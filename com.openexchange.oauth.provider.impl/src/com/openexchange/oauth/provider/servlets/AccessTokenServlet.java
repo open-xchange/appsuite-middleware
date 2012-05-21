@@ -61,6 +61,7 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
@@ -107,15 +108,15 @@ public class AccessTokenServlet extends HttpServlet {
             /*
              * Make sure token is authorized
              */
-            if (!Boolean.TRUE.equals(accessor.getProperty(OAuthProviderService.PROP_AUTHORIZED))) {
+            if (!Boolean.TRUE.equals(accessor.getProperty(OAuthProviderConstants.PROP_AUTHORIZED))) {
                 final OAuthProblemException problem = new OAuthProblemException("permission_denied");
                 throw problem;
             }
             /*
              * Generate access token and secret
              */
-            final int userId = accessor.<Integer> getProperty(OAuthProviderService.PROP_USER).intValue();
-            final int contextId = accessor.<Integer> getProperty(OAuthProviderService.PROP_CONTEXT).intValue();
+            final int userId = accessor.<Integer> getProperty(OAuthProviderConstants.PROP_USER).intValue();
+            final int contextId = accessor.<Integer> getProperty(OAuthProviderConstants.PROP_CONTEXT).intValue();
             providerService.generateAccessToken(accessor, userId, contextId);
             /*
              * Write back
