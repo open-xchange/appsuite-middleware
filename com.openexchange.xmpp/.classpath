@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/jdbc-mysql.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tigase-extras.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tigase-muc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tigase-pubsub.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tigase-server.jar" sourcepath="lib/tigase-server-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tigase-utils.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tigase-xmltools.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>
