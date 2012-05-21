@@ -174,7 +174,6 @@ public final class OAuthActivator extends HousekeepingActivator {
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
 			registerService(OAuthHTTPClientFactory.class, oauthFactory);
 			
-			@SuppressWarnings("rawtypes")
 			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
 				public void added(ServiceReference<HTTPResponseProcessor> ref,
