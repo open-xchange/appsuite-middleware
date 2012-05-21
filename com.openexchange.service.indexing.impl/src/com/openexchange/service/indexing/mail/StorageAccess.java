@@ -66,6 +66,7 @@ import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters.Builder;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.mail.IndexRange;
@@ -281,7 +282,7 @@ public final class StorageAccess implements Serializable {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("accountId", Integer.valueOf(info.accountId));
         final Builder queryBuilder =
-            new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder("desc").setHandler(
+            new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder(Order.DESC).setHandler(
                 SearchHandler.ALL_REQUEST);
         final IndexResult<MailMessage> indexResult = getIndexAccess().query(queryBuilder.build(), null);
         if (0 >= indexResult.getNumFound()) {

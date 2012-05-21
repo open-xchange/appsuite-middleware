@@ -272,12 +272,14 @@ public final class MailFillers {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(SolrMailField.FROM.solrName(), doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addFrom(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addFrom(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.FROM.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -287,12 +289,14 @@ public final class MailFillers {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(SolrMailField.TO.solrName(), doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addTo(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addTo(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.TO.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -302,12 +306,14 @@ public final class MailFillers {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(SolrMailField.CC.solrName(), doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addCc(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addCc(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.CC.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -317,12 +323,14 @@ public final class MailFillers {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(SolrMailField.BCC.solrName(), doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addBcc(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addBcc(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.BCC.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }

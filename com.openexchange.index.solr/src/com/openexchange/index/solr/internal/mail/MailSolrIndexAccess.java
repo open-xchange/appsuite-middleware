@@ -52,6 +52,7 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,7 @@ import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
@@ -398,7 +400,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException, InterruptedException {
         Set<SolrMailField> solrFields = convertFields(fields);
         List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
-        SolrQuery solrQuery = buildSolrQuery(parameters);        
+        SolrQuery solrQuery = buildSolrQuery(parameters);
         setFieldList(solrQuery, solrFields);
         int off = parameters.getOff();
         int len = parameters.getLen();
@@ -430,6 +432,9 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (mails.isEmpty()) {
             return Indexes.emptyResult();
         } else {
+            if (solrQuery.getBool("sortManually", false)) {
+                Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
+            }
             MailIndexResult indexResult = new MailIndexResult(mails.size());
             indexResult.setResults(mails);
             return indexResult;
@@ -457,8 +462,8 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                     solrQuery = new SolrQuery("\"" + folder + "\"");
                     solrQuery.setQueryType(handler);
                 }
-                solrQuery.setFilterQueries(buildFilterQueries(accountId, null));
-                setSortAndOrder(parameters, solrQuery);
+                solrQuery.setFilterQueries(buildFilterQueries(accountId, null));                
+                solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
                 break;
             }                
                 
@@ -468,7 +473,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                     String handler = config.getProperty(SolrProperties.SIMPLE_HANLDER);
                     solrQuery = new SolrQuery(parameters.getPattern());
                     solrQuery.setQueryType(handler);
-                    setSortAndOrder(parameters, solrQuery);
+                    solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
                     solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
                     break;
                 }
@@ -496,7 +501,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                     }
                     sb.append(')');
                     solrQuery = new SolrQuery(sb.toString());
-                    setSortAndOrder(parameters, solrQuery);
+                    solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
                     break;
                 }
                 
@@ -508,7 +513,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                 StringBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
                 solrQuery = new SolrQuery(queryBuilder.toString());
                 solrQuery.setQueryType(handler);
-                setSortAndOrder(parameters, solrQuery);
+                solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
                 solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
                 break;
             }
@@ -585,18 +590,26 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return (String[]) parameters.getParameters().get("ids");
     }
     
-    private void setSortAndOrder(QueryParameters parameters, SolrQuery query) {
+    private boolean setSortAndOrder(QueryParameters parameters, SolrQuery query) {
         IndexField indexField = parameters.getSortField();
         String sortField = null;
+        boolean retval = false;
         if (indexField != null && indexField instanceof MailIndexField) {
-            sortField = SolrMailField.solrMailFieldFor((MailIndexField) indexField).solrName();
+            SolrMailField solrField = SolrMailField.solrMailFieldFor((MailIndexField) indexField);
+            if (solrField.equals(SolrMailField.FROM) || solrField.equals(SolrMailField.TO) || solrField.equals(SolrMailField.CC) || solrField.equals(SolrMailField.BCC)) {
+                retval = true;
+            } else {
+                sortField = solrField.solrName();
+            }
         }
         
-        String orderStr = parameters.getOrder();
+        Order orderParam = parameters.getOrder();
         if (sortField != null) {
-            ORDER order = orderStr == null ? ORDER.desc : orderStr.equalsIgnoreCase("desc") ? ORDER.desc : ORDER.asc;
+            ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
             query.setSortField(sortField, order);
         }
+        
+        return retval;
     }
 
     private String buildQueryString(int accountId, String folder) {
