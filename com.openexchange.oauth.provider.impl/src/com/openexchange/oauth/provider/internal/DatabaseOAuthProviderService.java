@@ -49,15 +49,12 @@
 
 package com.openexchange.oauth.provider.internal;
 
-import static com.openexchange.oauth.provider.internal.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -76,7 +73,6 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
-import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.server.OAuthServlet;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -94,11 +90,9 @@ import com.openexchange.threadpool.ThreadPools;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DatabaseOAuthProviderService implements OAuthProviderService {
+public class DatabaseOAuthProviderService extends AbstractOAuthProviderService implements OAuthProviderService {
 
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseOAuthProviderService.class);
-
-    private static final Object PRESENT = new Object();
 
     /*
      * Member section
@@ -106,13 +100,9 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
 
     private final OAuthValidator validator;
 
-    private final OAuthServiceProvider provider;
-
     private final ConcurrentMap<String, OAuthConsumer> consumers;
 
     private final ConcurrentMap<OAuthAccessor, Object> tokens;
-
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link DatabaseOAuthProviderService}.
@@ -120,14 +110,11 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
      * @throws OXException If initialization fails
      */
     public DatabaseOAuthProviderService(final ServiceLookup services) throws OXException {
-        super();
+        super(services);
         validator = generateValidator(services);
-        this.services = services;
         consumers = new ConcurrentHashMap<String, OAuthConsumer>(16);
         tokens = new ConcurrentHashMap<OAuthAccessor, Object>(256);
         final DatabaseService databaseService = services.getService(DatabaseService.class);
-        // Load provider
-        provider = loadServiceProvider(databaseService);
         loadConsumers(databaseService, true);
     }
 
@@ -137,66 +124,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
         final double maxVersion =
             Double.parseDouble(service.getProperty("com.openexchange.oauth.provider.validator.maxVersion", "1.0").trim());
         return new DatabaseOAuthValidator(maxTimestampAgeMsec, maxVersion);
-    }
-
-    private TIntList getContextIds(final DatabaseService databaseService) throws OXException {
-        final Connection con = databaseService.getReadOnly();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT cid FROM context");
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return new TIntLinkedList();
-            }
-            final TIntList ret = new TIntLinkedList();
-            do {
-                ret.add(rs.getInt(1));
-            } while (rs.next());
-            return ret;
-        } catch (final SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(con);
-        }
-    }
-
-    /**
-     * Loads the service provider.
-     * 
-     * @param databaseService The database service
-     * @return The service provider
-     * @throws OXException If loading fails
-     */
-    private OAuthServiceProvider loadServiceProvider(final DatabaseService databaseService) throws OXException {
-        final Connection con = databaseService.getReadOnly();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt =
-                con.prepareStatement("SELECT requestTokenUrl, userAuthorizationUrl, accessTokenURL FROM oauthServiceProvider WHERE id=?");
-            stmt.setInt(1, DEFAULT_PROVIDER);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                throw OAuthProviderExceptionCodes.PROVIDER_NOT_FOUND.create(Integer.valueOf(DEFAULT_PROVIDER));
-            }
-            return new OAuthServiceProvider(rs.getString(1), rs.getString(2), rs.getString(3));
-        } catch (final SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(con);
-        }
-    }
-
-    /**
-     * Gets the <tt>OAuthServiceProvider</tt> instance
-     * 
-     * @return The provider
-     */
-    public OAuthServiceProvider getProvider() {
-        return provider;
     }
 
     @Override
@@ -224,6 +151,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             stmt.setInt(1, DEFAULT_PROVIDER);
             rs = stmt.executeQuery();
             consumers.clear();
+            final Integer providerId = Integer.valueOf(DEFAULT_PROVIDER);
             while (rs.next()) {
                 String callbackUrl = rs.getString(3);
                 if (rs.wasNull()) {
@@ -233,7 +161,7 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
                 final OAuthConsumer consumer = new OAuthConsumer(callbackUrl, consumerKey, rs.getString(2), provider);
                 consumer.setProperty(PROP_NAME, consumerKey);
                 consumer.setProperty(PROP_ID, Integer.valueOf(rs.getInt(5)));
-                consumer.setProperty(PROP_PROVIDER_ID, Integer.valueOf(DEFAULT_PROVIDER));
+                consumer.setProperty(PROP_PROVIDER_ID, providerId);
                 final String name = rs.getString(4);
                 if (!rs.wasNull()) {
                     consumer.setProperty(PROP_DESCRIPTION, name);
@@ -581,91 +509,6 @@ public class DatabaseOAuthProviderService implements OAuthProviderService {
             DBUtils.autocommit(con);
             databaseService.backWritable(contextId, con);
         }
-    }
-
-    protected static Object valueOf(final String value) {
-        if (isEmpty(value)) {
-            return null;
-        }
-        /*
-         * If it is true, false, or null, return the proper value.
-         */
-        final String s = value.trim();
-        if (s.equalsIgnoreCase("true")) {
-            return Boolean.TRUE;
-        }
-        if (s.equalsIgnoreCase("false")) {
-            return Boolean.FALSE;
-        }
-        if (s.equalsIgnoreCase("null")) {
-            return null;
-        }
-        /*
-         * If it might be a number, try converting it. We support the 0- and 0x- conventions. If a number cannot be produced, then the value
-         * will just be a string. Note that the 0-, 0x-, plus, and implied string conventions are non-standard. A JSON parser is free to
-         * accept non-JSON forms as long as it accepts all correct JSON forms.
-         */
-        final char b = s.charAt(0);
-        if ((b >= '0' && b <= '9') || b == '.' || b == '-' || b == '+') {
-            if (b == '0') {
-                if (s.length() > 2 && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
-                    try {
-                        return Integer.valueOf(Integer.parseInt(s.substring(2), 16));
-                    } catch (final Exception e) {
-                        /* Ignore the error */
-                    }
-                } else {
-                    try {
-                        return Integer.valueOf(Integer.parseInt(s, 8));
-                    } catch (final Exception e) {
-                        /* Ignore the error */
-                    }
-                }
-            }
-            try {
-                return Integer.valueOf(s);
-            } catch (final Exception e) {
-                try {
-                    return Long.valueOf(s);
-                } catch (final Exception f) {
-                    try {
-                        return Double.valueOf(s);
-                    } catch (final Exception g) {
-                        return s;
-                    }
-                }
-            }
-        }
-        return s;
-    }
-
-    protected static String stringOf(final String value) {
-        return isEmpty(value) ? null : value;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    protected static final boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        boolean retval = false;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
-        } finally {
-            closeSQLStuff(rs);
-        }
-        return retval;
     }
 
 }

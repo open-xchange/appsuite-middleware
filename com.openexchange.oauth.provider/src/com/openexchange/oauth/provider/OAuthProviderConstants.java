@@ -49,78 +49,51 @@
 
 package com.openexchange.oauth.provider;
 
-import java.io.IOException;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthConsumer;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
-import net.oauth.OAuthValidator;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
- * library</a>.
- * 
+ * {@link OAuthProviderConstants} - Constants for OAuth provider.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OAuthProviderService extends OAuthProviderConstants {
-
-    /*
-     * Methods
-     */
+public interface OAuthProviderConstants {
 
     /**
-     * Gets the associated validator instance.
-     * 
-     * @return The validator instance
+     * The identifier of the default provider.
      */
-    public OAuthValidator getValidator();
+    public static final int DEFAULT_PROVIDER = 0;
 
     /**
-     * Loads consumers from database
-     * 
-     * @throws OXException If loading consumers fails
+     * Property name <code>"authorized"</code>
      */
-    public void loadConsumers() throws OXException;
+    public static final String PROP_AUTHORIZED = "authorized";
 
     /**
-     * Gets the consumer for specified OAuth request message.
-     * 
-     * @param requestMessage The request message
-     * @return The associated consumer
-     * @throws IOException If an I/O error occurs
-     * @throws OAuthProblemException If an OAuth problem occurs
+     * Property name <code>"user"</code>
      */
-    public OAuthConsumer getConsumer(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
+    public static final String PROP_USER = "user";
 
     /**
-     * Get the access token and token secret for the given oauth_token.
-     * 
-     * @param requestMessage The OAuth message providing oauth_token
+     * Property name <code>"context"</code>
      */
-    public OAuthAccessor getAccessor(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
+    public static final String PROP_CONTEXT = "context";
 
     /**
-     * Marks specified access token as authorized.
-     * 
-     * @throws OXException If token cannot be marked as authorized
+     * Property name <code>"description"</code>
      */
-    public void markAsAuthorized(OAuthAccessor accessor, int userId, int contextId) throws OXException;
+    public static final String PROP_DESCRIPTION = "description";
 
     /**
-     * Generate a fresh request token and secret for a consumer.
-     * 
-     * @param accessor The <b><small>VALIDATED</small></b> <tt>OAuthAccessor</tt> instance
-     * @throws OXException If generation fails
+     * Property name <code>"providerId"</code>
      */
-    public void generateRequestToken(OAuthAccessor accessor) throws OXException;
+    public static final String PROP_PROVIDER_ID = "providerId";
 
     /**
-     * Generate an access token for a consumer.
-     * 
-     * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
-     * @throws OXException If generation fails
+     * Property name <code>"name"</code>
      */
-    public void generateAccessToken(OAuthAccessor accessor, int userId, int contextId) throws OXException;
+    public static final String PROP_NAME = "name";
+
+    /**
+     * Property name <code>"id"</code>
+     */
+    public static final String PROP_ID = "id";
 
 }

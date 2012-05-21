@@ -58,8 +58,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DBUtils;
 
 
@@ -91,6 +91,7 @@ public final class CheckConfigDBTables {
             DBUtils.startTransaction(con);
             checkServiceProvider(con);
             checkConsumer(con);
+            checkClient(con);
             checkNonce(con);
             con.commit();
         } catch (final SQLException e) {
@@ -120,7 +121,7 @@ public final class CheckConfigDBTables {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT id FROM oauthServiceProvider WHERE id = ?");
-            stmt.setInt(1, OAuthProviderService.DEFAULT_PROVIDER);
+            stmt.setInt(1, OAuthProviderConstants.DEFAULT_PROVIDER);
             rs = stmt.executeQuery();
             contains = rs.next();
         } finally {
@@ -129,7 +130,7 @@ public final class CheckConfigDBTables {
         if (!contains) {
             try {
                 stmt = con.prepareStatement("INSERT INTO oauthServiceProvider (id,requestTokenUrl,userAuthorizationUrl,accessTokenUrl) VALUES (?,?,?,?)");
-                stmt.setInt(1, OAuthProviderService.DEFAULT_PROVIDER);
+                stmt.setInt(1, OAuthProviderConstants.DEFAULT_PROVIDER);
                 stmt.setString(2, "/oauth/requestToken");
                 stmt.setString(3, "/oauth/authorization");
                 stmt.setString(4, "/oauth/accessToken");
@@ -161,6 +162,29 @@ public final class CheckConfigDBTables {
         		" PRIMARY KEY (`id`,`name`)\n" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauthConsumerProperty", createSql, con);
+    }
+
+    private void checkClient(final Connection con) throws SQLException {
+        String createSql = "CREATE TABLE `oauth2Client` (\n" + 
+                " `id` int(10) unsigned NOT NULL,\n" + 
+                " `providerId` int(10) unsigned NOT NULL,\n" + 
+                " `key` varchar(255) NOT NULL,\n" + 
+                " `secret` varchar(255) NOT NULL,\n" + 
+                " `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
+                " `name` varchar(127) DEFAULT NULL,\n" + 
+                " PRIMARY KEY (`id`),\n" + 
+                " KEY `providerIndex` (`providerId`),\n" + 
+                " KEY `keyIndex` (`key`)\n" + 
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        createIfAbsent("oauth2Client", createSql, con);
+
+        createSql = "CREATE TABLE `oauth2ClientProperty` (\n" + 
+                " `id` int(10) unsigned NOT NULL,\n" + 
+                " `name` varchar(32) NOT NULL,\n" + 
+                " `value` varchar(255) NOT NULL,\n" + 
+                " PRIMARY KEY (`id`,`name`)\n" + 
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        createIfAbsent("oauth2ClientProperty", createSql, con);
     }
 
     private void checkNonce(final Connection con) throws SQLException {
