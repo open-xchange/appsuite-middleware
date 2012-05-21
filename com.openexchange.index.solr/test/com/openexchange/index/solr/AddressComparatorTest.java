@@ -50,18 +50,27 @@
 package com.openexchange.index.solr;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
+
+import junit.framework.TestCase;
+
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.QueryParameters.Order;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.mail.AddressComparator;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import junit.framework.TestCase;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -72,17 +81,59 @@ import junit.framework.TestCase;
 public class AddressComparatorTest extends TestCase {
     
     public void testCompare() throws Exception {
-        MailMessage m1 = new MockMailMessage(new QuotedInternetAddress[] {new QuotedInternetAddress("aaa@abc.de", "Aa, Aa")});
+    	Services.setServiceLookup(new ServiceLookup() {            
+            @Override
+            public <S> S getService(Class<? extends S> clazz) {
+                return (S) new MockConfigurationService();
+            }
+            
+            @Override
+            public <S> S getOptionalService(Class<? extends S> clazz) {
+                return null;
+            }
+        });
+    	
+        IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        		new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
+        		new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
+        		new QuotedInternetAddress("iii@abc.de", "Ii, Ii")        		
+        		}), Type.MAIL);
+        IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        		new QuotedInternetAddress("hhh@abc.de", "Hh, Hh"),
+        		new QuotedInternetAddress("ccc@abc.de", "Cc, Cc"), 
+        		new QuotedInternetAddress("fff@abc.de", "Ff, Ff")
+        		}), Type.MAIL);
+        IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        		new QuotedInternetAddress("ggg@abc.de", "Gg, Gg"),
+        		new QuotedInternetAddress("eee@abc.de", "Ee, Ee"),
+        		new QuotedInternetAddress("ddd@abc.de", "Dd, Dd")
+        		}), Type.MAIL);
+        List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
+        documents.add(m1);
+        documents.add(m2);
+        documents.add(m3);
+        Collections.shuffle(documents);      
+
         AddressComparator comp = new AddressComparator(MailIndexField.FROM, Order.ASC);
+        Collections.sort(documents, comp);
+        assertTrue(documents.get(0) == m1);
+        assertTrue(documents.get(1) == m2);
+        assertTrue(documents.get(2) == m3);
+        
+        comp = new AddressComparator(MailIndexField.FROM, Order.DESC);
+        Collections.sort(documents, comp);
+        assertTrue(documents.get(0) == m1);
+        assertTrue(documents.get(1) == m2);
+        assertTrue(documents.get(2) == m3);
     }
     
     private static final class MockMailMessage extends MailMessage {
-        
-        private static final long serialVersionUID = -7674767132402239055L;
-        
-        private InternetAddress[] addrs;
 
-        public MockMailMessage(InternetAddress[] addrs) {
+		private static final long serialVersionUID = -7674767132402239055L;
+        
+        private final InternetAddress[] addrs;
+
+        public MockMailMessage(final InternetAddress[] addrs) {
             super();
             this.addrs = addrs;
         }
@@ -99,7 +150,7 @@ public class AddressComparatorTest extends TestCase {
         }
 
         @Override
-        public void setMailId(String id) {
+        public void setMailId(final String id) {
             // TODO Auto-generated method stub
             
         }
@@ -111,7 +162,7 @@ public class AddressComparatorTest extends TestCase {
         }
 
         @Override
-        public void setUnreadMessages(int unreadMessages) {
+        public void setUnreadMessages(final int unreadMessages) {
             // TODO Auto-generated method stub
             
         }
@@ -141,7 +192,7 @@ public class AddressComparatorTest extends TestCase {
         }
 
         @Override
-        public MailPart getEnclosedMailPart(int index) throws OXException {
+        public MailPart getEnclosedMailPart(final int index) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }
