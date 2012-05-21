@@ -454,7 +454,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                 } else {
                     ConfigurationService config = Services.getService(ConfigurationService.class);
                     String handler = config.getProperty(SolrProperties.ALL_HANLDER);
-                    solrQuery = new SolrQuery(folder);
+                    solrQuery = new SolrQuery("\"" + folder + "\"");
                     solrQuery.setQueryType(handler);
                 }
                 solrQuery.setFilterQueries(buildFilterQueries(accountId, null));
@@ -608,7 +608,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             
         if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
             sb.append(" AND ");
-            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
+            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append("\"" + folder + "\"").append("\")");
         }  
         
         return sb.toString();
@@ -620,7 +620,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             filters.add(SolrMailField.ACCOUNT.solrName() + ':' + String.valueOf(accountId));
         }
         if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
-            filters.add(SolrMailField.FULL_NAME.solrName() + ':' + folder);
+            filters.add(SolrMailField.FULL_NAME.solrName() + ':' + "\"" + folder + "\"");
         }
         
         return filters.toArray(new String[filters.size()]);

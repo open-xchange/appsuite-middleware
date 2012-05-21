@@ -103,3 +103,11 @@ CREATE TABLE context_server2db_pool (
     INDEX (db_schema),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `solrCoreStores` (
+  `id` INT4 UNSIGNED NOT NULL,
+  `uri` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,
+  `maxCores` INT4 UNSIGNED NOT NULL,
+  `numCores` INT4 UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
