@@ -100,5 +100,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
 	// The document with uuid %1$s could not be found.
     public static final String DOCUMENT_NOT_FOUND_MSG = "The document with uuid %1$s could not be found.";
+
+    // %1$s is not a valid field for sorting.
+    public static final String INVALID_SORT_FIELD_MSG = "%1$s is not a valid field for sorting.";
     
 }

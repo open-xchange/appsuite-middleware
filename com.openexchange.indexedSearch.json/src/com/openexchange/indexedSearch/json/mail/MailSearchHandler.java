@@ -69,6 +69,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
@@ -136,7 +137,7 @@ public class MailSearchHandler implements SearchHandler {
                                                                 .setLength(range[1] - range[0])
                                                                 .setType(IndexDocument.Type.MAIL)
                                                                 .setSortField(MailIndexField.RECEIVED_DATE)
-                                                                .setOrder("desc");                    
+                                                                .setOrder(Order.DESC);                    
                     String fullName = query.getFullName();
                     if (fullName != null) {
                         builder.setFolder(fullName);

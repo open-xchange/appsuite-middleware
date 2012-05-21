@@ -58,6 +58,10 @@ import com.openexchange.index.IndexDocument.Type;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QueryParameters {
+    
+    public static enum Order {
+        ASC, DESC;
+    }
 
     /**
      * The builder for {@link QueryParameters} instances.
@@ -69,7 +73,7 @@ public final class QueryParameters {
         String pattern;
         String folder;
         IndexField sortField;
-        String order;
+        Order order;
         Map<String, Object> parameters;
         SearchHandler handler;
         Type type;
@@ -147,7 +151,7 @@ public final class QueryParameters {
             return this;
         }
         
-        public Builder setOrder(String order) {
+        public Builder setOrder(Order order) {
             this.order = order;
             return this;
         }
@@ -176,7 +180,7 @@ public final class QueryParameters {
     
     IndexField sortField;
     
-    String order;
+    Order order;
 
     /**
      * Initializes a new {@link QueryParameters}.
@@ -281,7 +285,7 @@ public final class QueryParameters {
      *
      * @return The order
      */
-    public String getOrder() {
+    public Order getOrder() {
         return order;
     }
 

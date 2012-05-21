@@ -111,6 +111,10 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      * The document with uuid %1$s could not be found.
      */
     DOCUMENT_NOT_FOUND(SolrExceptionMessages.DOCUMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1012),
+    /**
+     * %1$s is not a valid field for sorting.
+     */
+    INVALID_SORT_FIELD(SolrExceptionMessages.INVALID_SORT_FIELD_MSG, Category.CATEGORY_ERROR, 1013);
     
     ;
 

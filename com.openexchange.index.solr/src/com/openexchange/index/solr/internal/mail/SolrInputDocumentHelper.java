@@ -52,6 +52,7 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -63,6 +64,7 @@ import com.openexchange.index.solr.mail.MailUUID;
 import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link SolrInputDocumentHelper} - Helper for <code>SolrInputDocument</code> to <code>MailMessage</code> conversion and vice versa.
@@ -148,17 +150,27 @@ public final class SolrInputDocumentHelper {
         return documents;
     }
     
-    private static String createAddressHeader(final InternetAddress[] addrs) {
+    private static List<Object> createAddressHeader(final InternetAddress[] addrs) {
         if (addrs == null || addrs.length == 0) {
             return null;
         } else {
-            final StringBuilder lineBuilder = new StringBuilder(256);
-            for (int i = 0; i < addrs.length; i++) {
-                final InternetAddress address = addrs[i];
-                lineBuilder.append(", ").append(address.toString());
+            final List<Object> retval = new ArrayList<Object>(addrs.length);
+            for (final InternetAddress addr : addrs) {
+                if (addr instanceof QuotedInternetAddress) {
+                    retval.add(((QuotedInternetAddress) addr).toUnicodeString());
+                } else {
+                    String quoted;
+                    try {
+                        quoted = new QuotedInternetAddress(addr.toUnicodeString()).toUnicodeString();
+                    } catch (AddressException e) {
+                        quoted = addr.toUnicodeString();
+                    }
+                    
+                    retval.add(quoted);
+                }
             }
-            lineBuilder.delete(0, 2);
-            return lineBuilder.toString();
+
+            return retval;
         }
     }
 
@@ -177,10 +189,10 @@ public final class SolrInputDocumentHelper {
          */
         setFieldInDocument(inputDocument, SolrMailField.FULL_NAME, mail.getFolder());
         setFieldInDocument(inputDocument, SolrMailField.ID, mail.getMailId());        
-        setFieldInDocument(inputDocument, SolrMailField.FROM, createAddressHeader(mail.getFrom()));        
-        setFieldInDocument(inputDocument, SolrMailField.TO, createAddressHeader(mail.getTo()));
-        setFieldInDocument(inputDocument, SolrMailField.CC, createAddressHeader(mail.getCc()));
-        setFieldInDocument(inputDocument, SolrMailField.BCC, createAddressHeader(mail.getBcc()));        
+        addFieldInDocument(inputDocument, SolrMailField.FROM, createAddressHeader(mail.getFrom()));        
+        addFieldInDocument(inputDocument, SolrMailField.TO, createAddressHeader(mail.getTo()));
+        addFieldInDocument(inputDocument, SolrMailField.CC, createAddressHeader(mail.getCc()));
+        addFieldInDocument(inputDocument, SolrMailField.BCC, createAddressHeader(mail.getBcc()));        
         setFieldInDocument(inputDocument, SolrMailField.ATTACHMENT, mail.hasAttachment());
         setFieldInDocument(inputDocument, SolrMailField.COLOR_LABEL, mail.getColorLabel());
         setFieldInDocument(inputDocument, SolrMailField.SIZE, mail.getSize());
@@ -223,6 +235,13 @@ public final class SolrInputDocumentHelper {
         if (fieldName != null && value != null) {
             inputDocument.remove(fieldName);
             inputDocument.addField(field.solrName(), value);
+        }
+    }
+    
+    public static void addFieldInDocument(final SolrInputDocument inputDocument, final SolrMailField field, final List<Object> values) {
+        final String fieldName = field.solrName();
+        if (fieldName != null && values != null && !values.isEmpty()) {
+            inputDocument.addField(field.solrName(), values);
         }
     }
 }

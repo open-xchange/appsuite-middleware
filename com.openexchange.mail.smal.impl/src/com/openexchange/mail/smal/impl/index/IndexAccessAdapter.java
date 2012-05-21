@@ -66,6 +66,7 @@ import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
@@ -239,7 +240,7 @@ public final class IndexAccessAdapter {
                 final MailIndexField indexSortField = MailIndexField.getFor(field);
                 if (indexSortField != null) {
                     builder.setSortField(indexSortField);
-                    builder.setOrder(OrderDirection.DESC.equals(order) ? "desc" : "asc");
+                    builder.setOrder(OrderDirection.DESC.equals(order) ? Order.DESC : Order.ASC);
                 }
             }
             
