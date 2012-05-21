@@ -50,7 +50,6 @@
 package com.openexchange.oauth.provider.osgi;
 
 import net.oauth.OAuthServiceProvider;
-import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -58,13 +57,17 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.groupware.OAuth2ProviderCreateTableService;
+import com.openexchange.oauth.provider.groupware.OAuth2ProviderCreateTableTask;
 import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableService;
 import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableTask;
 import com.openexchange.oauth.provider.groupware.OAuthProviderDeleteListener;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.oauth.provider.servlets.AccessTokenServlet;
+import com.openexchange.oauth.provider.servlets.AccessTokenServlet2;
 import com.openexchange.oauth.provider.servlets.AuthorizationServlet;
+import com.openexchange.oauth.provider.servlets.AuthorizationServlet2;
 import com.openexchange.oauth.provider.servlets.EchoServlet;
 import com.openexchange.oauth.provider.servlets.RequestTokenServlet;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,7 +89,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, HttpService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class };
     }
 
     @Override
@@ -103,17 +106,22 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
          * Service trackers
          */
         final OAuthServiceProvider provider = providerService.getProvider();
+        // OAuth v1
         rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL, new AccessTokenServlet()));
         rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL, new AuthorizationServlet()));
         rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
         rememberTracker(new HTTPServletRegistration(context, provider.requestTokenURL, new RequestTokenServlet()));
+        // OAuth v2
+        rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL+"/v2", new AccessTokenServlet2()));
+        rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL+"/v2", new AuthorizationServlet2()));
         openTrackers();
         /*
          * Register update task, create table job and delete listener
          */
         {
             registerService(CreateTableService.class, new OAuthProviderCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new OAuthProviderCreateTableTask()));
+            registerService(CreateTableService.class, new OAuth2ProviderCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new OAuthProviderCreateTableTask(), new OAuth2ProviderCreateTableTask()));
             registerService(DeleteListener.class, new OAuthProviderDeleteListener());
         }
     }

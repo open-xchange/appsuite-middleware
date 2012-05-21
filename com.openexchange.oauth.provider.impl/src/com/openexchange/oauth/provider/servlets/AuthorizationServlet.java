@@ -119,6 +119,7 @@ public class AuthorizationServlet extends HttpServlet {
             final String contextId = request.getParameter("ucontextId");
             if (isEmpty(userId) || isEmpty(contextId)) {
                 sendToAuthorizePage(request, response, accessor);
+                return;
             }
             /*
              * Set userId in accessor and mark it as authorized
