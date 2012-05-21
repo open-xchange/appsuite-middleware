@@ -1,5 +1,9 @@
 package com.openexchange.oauth.json.proxy;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -28,6 +32,13 @@ public class OAuthProxyRequest {
 	private String url;
 	private String body;
 	private ServerSession session;
+	
+	protected Map<API, List<Pattern>> whitelist = new HashMap<API,List<Pattern>>(){{
+		put(API.FACEBOOK, 	Arrays.asList(Pattern.compile("^https:\\/\\/graph\\.facebook\\.com")));
+		put(API.LINKEDIN, 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
+		put(API.TWITTER,	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
+		put(API.YAHOO, 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
+	}};
 	
 	public static enum HTTPMethod {
 		GET, PUT, POST, DELETE
@@ -146,29 +157,15 @@ public class OAuthProxyRequest {
 
 	private void whitelist(String checkMe) throws OXException {
 		API proposedApi = getAccount().getAPI();
-		switch (proposedApi) {
-		case FACEBOOK:
-			if(! Pattern.matches("^https:\\/\\/graph\\.facebook\\.com", checkMe))
-				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
-			break;
-		case LINKEDIN:
-			if(! Pattern.matches("^http:\\/\\/api\\.linkedin\\.com", checkMe))
-				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
-			break;
-		case TWITTER:
-			if(! Pattern.matches("^https?:\\/\\/(.*?\\.)?twitter.com", checkMe))
-				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
-			break;
-		case YAHOO:
-			if(! Pattern.matches("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com", checkMe))
-				throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
-			break;
-		case MSN:
-		case OTHER:
-		default:
-			break;
+		List<Pattern> patterns = whitelist.get(proposedApi);
+		if(patterns == null){
+			throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi); //TODO: debatable
 		}
-		
-		
+		for(Pattern p: patterns){
+			if(p.matcher(checkMe).find()){
+				return;
+			}
+		}
+		throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
 	}
 }
