@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 public interface XmppServer {
 
     /**
-     * Initializes & starts this tigase XMPP server.
+     * Initializes & starts this XMPP server.
      * 
      * @throws OXException If initialization fails
      */
