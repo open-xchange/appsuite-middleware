@@ -47,74 +47,27 @@
  *
  */
 
-package com.openexchange.xmpp.tigase;
+package com.openexchange.xmpp;
 
-import tigase.conf.ConfigurationException;
-import tigase.conf.Configurator;
-import tigase.conf.ConfiguratorAbstract;
-import tigase.db.TigaseDBException;
-import tigase.server.MessageRouter;
-import tigase.server.MessageRouterIfc;
 import com.openexchange.exception.OXException;
-import com.openexchange.xmpp.XmppExceptionCodes;
-import com.openexchange.xmpp.XmppServer;
 
 /**
- * {@link TigaseXmppServer} - The tigase XMPP server.
- * 
+ * {@link XmppServer}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TigaseXmppServer implements XmppServer {
-
-    private volatile MessageRouterIfc router;
+public interface XmppServer {
 
     /**
-     * Creates a new {@link TigaseXmppServer}.
+     * Initializes & starts this tigase XMPP server.
+     * 
+     * @throws OXException If initialization fails
      */
-    public TigaseXmppServer() {
-        super();
-    }
+    public void init() throws OXException;
 
-    @Override
-    public void init() throws OXException {
-        try {
-            final String initialConfig =
-                "tigase.level=ALL\n" + "tigase.xml.level=INFO\n"
-                + "handlers=java.util.logging.ConsoleHandler\n"
-                + "java.util.logging.ConsoleHandler.level=ALL\n"
-                + "java.util.logging.ConsoleHandler.formatter=tigase.util.LogFormatter\n";
-            ConfiguratorAbstract.loadLogManagerConfig(initialConfig);
-            
-            final ConfiguratorAbstract config = new Configurator();
-            config.init(new String[] {
-                "config-type","--gen-config-def",
-                "--admins","admin@devel.tigase.org,admin@test-d",
-                "--virt-hosts","devel.tigase.org,test-d",
-                "--user-db","mysql",
-                "--user-db-uri","jdbc:mysql://localhost/tigasedb?user=tigase_user&password=mypass"});
-
-            // config = new ConfiguratorOld(config_file, args);
-            config.setName("basic-conf");
-
-            final MessageRouterIfc router = new MessageRouter();
-
-            router.setName("open-xchange-router");
-            router.setConfig(config);
-            router.start();
-            this.router = router;
-        } catch (final ConfigurationException e) {
-            throw XmppExceptionCodes.CONFIG_ERROR.create(e, e.getMessage());
-        } catch (final TigaseDBException e) {
-            throw XmppExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public void release() {
-        final MessageRouterIfc router = this.router;
-        if (null != router) {
-            router.release();
-        }
-    }
+    /**
+     * Releases started XMPP server.
+     */
+    public void release();
 
 }
