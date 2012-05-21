@@ -51,15 +51,16 @@ package com.openexchange.oauth.provider.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletConfig;
+import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
@@ -70,14 +71,9 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AuthorizationServlet extends HttpServlet {
+public class AuthorizationServlet extends AbstractAuthorizationServlet {
 
     private static final long serialVersionUID = 1107814765742902151L;
-
-    @Override
-    public void init(final ServletConfig config) throws ServletException {
-        super.init(config);
-    }
 
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
@@ -115,16 +111,20 @@ public class AuthorizationServlet extends HttpServlet {
             /*
              * User + context
              */
-            final String userId = request.getParameter("userId");
-            final String contextId = request.getParameter("ucontextId");
-            if (isEmpty(userId) || isEmpty(contextId)) {
+            final String login = request.getParameter("login");
+            final String password = request.getParameter("password");
+            if (isEmpty(login) || isEmpty(password)) {
                 sendToAuthorizePage(request, response, accessor);
                 return;
             }
             /*
+             * Resolve login
+             */
+            final Map<String, Object> map = resolveLogin(login, password);
+            /*
              * Set userId in accessor and mark it as authorized
              */
-            providerService.markAsAuthorized(accessor, Integer.parseInt(userId.trim()), Integer.parseInt(contextId.trim()));
+            providerService.markAsAuthorized(accessor, ((User) map.get("user")).getId(), ((Context) map.get("context")).getContextId());
             /*
              * Return to consumer
              */
@@ -145,18 +145,6 @@ public class AuthorizationServlet extends HttpServlet {
         request.setAttribute("CALLBACK", callback);
         request.setAttribute("TOKEN", accessor.requestToken);
         request.getRequestDispatcher("/authorize.jsp").forward(request, response);
-    }
-
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private void returnToConsumer(final HttpServletRequest request, final HttpServletResponse response, final OAuthAccessor accessor) throws IOException, ServletException {

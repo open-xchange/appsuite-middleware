@@ -52,9 +52,8 @@ package com.openexchange.oauth.provider.servlets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletConfig;
+import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.oauth.v2.BaseResponseType;
@@ -65,6 +64,8 @@ import net.oauth.v2.OAuth2Client;
 import net.oauth.v2.OAuth2Message;
 import net.oauth.v2.OAuth2ProblemException;
 import net.oauth.v2.server.OAuth2Servlet;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.provider.internal.DatabaseOAuth2ProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
@@ -74,14 +75,9 @@ import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AuthorizationServlet2 extends HttpServlet {
+public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
 
     private static final long serialVersionUID = 6393806486708501254L;
-
-    @Override
-    public void init(final ServletConfig config) throws ServletException {
-        super.init(config);
-    }
 
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
@@ -136,19 +132,23 @@ public class AuthorizationServlet2 extends HttpServlet {
             /*
              * Get user/context identifier
              */
-            final String sUserId = request.getParameter("userId");
-            final String sContextId = request.getParameter("ucontextId");
-            if (isEmpty(sUserId) || isEmpty(sContextId)) {
+            final String login = request.getParameter("login");
+            final String password = request.getParameter("password");
+            if (isEmpty(login) || isEmpty(password)) {
                 providerService.getValidator().validateRequestMessageForAuthorization(requestMessage, client);
                 sendToAuthorizePage(request, response, client);
                 return;
             }
             /*
+             * Resolve login
+             */
+            final Map<String, Object> map = resolveLogin(login, password);
+            /*
              * Set userId in accessor and mark it as authorized
              */
             final OAuth2Accessor accessor = new OAuth2Accessor(client);
-            final int userId = Integer.parseInt(sUserId.trim());
-            final int contextId = Integer.parseInt(sContextId.trim());
+            final int userId = ((User) map.get("user")).getId();
+            final int contextId = ((Context) map.get("context")).getContextId();
             providerService.markAsAuthorized(accessor, userId, contextId);
             /*
              * Process by response type
@@ -212,18 +212,6 @@ public class AuthorizationServlet2 extends HttpServlet {
         request.getRequestDispatcher //
         ("/authorize2.jsp").forward(request, response);
 
-    }
-
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private void returnToConsumer(final HttpServletRequest request, final HttpServletResponse response, final OAuth2Accessor accessor) throws IOException, ServletException {

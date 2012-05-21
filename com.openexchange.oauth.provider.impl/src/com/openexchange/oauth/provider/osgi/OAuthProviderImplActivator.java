@@ -50,7 +50,9 @@
 package com.openexchange.oauth.provider.osgi;
 
 import net.oauth.OAuthServiceProvider;
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -74,6 +76,7 @@ import com.openexchange.oauth.provider.servlets.RequestTokenServlet;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import com.openexchange.user.UserService;
 
 /**
  * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
@@ -91,7 +94,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class };
     }
 
     @Override
