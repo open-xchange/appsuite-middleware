@@ -225,8 +225,18 @@ public class Multiple extends SessionServlet {
             jsonObj.put(MultipleHandler.ROUTE, Tools.getRoute(req.getSession(true).getId()));
             jsonObj.put(MultipleHandler.REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
-            if (dispatcher.handles(module)) {
-                final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
+            StringBuilder moduleCandidate = new StringBuilder();
+            boolean handles = false;
+            for(String component: module.split("/")) {
+            	moduleCandidate.append(component);
+            	handles = dispatcher.handles(moduleCandidate.toString());
+            	if (handles) {
+            		break;
+            	}
+            	moduleCandidate.append('/');
+            }
+            if (handles) {
+                final AJAXRequestData request = MultipleAdapter.parse(moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
                 final AJAXRequestResult result;
                 try {

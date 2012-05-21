@@ -78,7 +78,7 @@ public final class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
-        track(filter);
+        track(filter, new FacebookRegisterer(context));
         openTrackers();
     }
 
