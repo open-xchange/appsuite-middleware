@@ -50,8 +50,10 @@
 package com.openexchange.index.solr.internal.mail;
 
 import java.util.Comparator;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
@@ -148,7 +150,7 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
             if (highest == null) {
                 highest = quotedStr;
             } else {
-                if (isFirstHigherThanSecond(highest, quotedStr)) {
+                if (isFirstHigherThanSecond(quotedStr, highest)) {
                     highest = quotedStr;
                 }
             }
