@@ -58,16 +58,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import net.oauth.OAuthServiceProvider;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link AbstractOAuthProviderService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOAuthProviderService implements OAuthProviderConstants {
@@ -88,15 +89,22 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
     protected final OAuthServiceProvider provider;
 
     /**
+     * The secret string.
+     */
+    private final String secret;
+
+    /**
      * Initializes a new {@link AbstractOAuthProviderService}.
      * 
-     * @throws OXException If service provider cannot be loaded from database 
+     * @throws OXException If service provider cannot be loaded from database
      */
     protected AbstractOAuthProviderService(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
         // Load provider
         provider = loadServiceProvider();
+        final ConfigurationService service = services.getService(ConfigurationService.class);
+        secret = service.getProperty("com.openexchange.oauth.provider.secret", "f58c636e089745d4a79679d726aca8b5");
     }
 
     /**
@@ -260,6 +268,44 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
             closeSQLStuff(rs);
         }
         return retval;
+    }
+
+    /**
+     * Encrypts specified string.
+     * 
+     * @param toEncrypt The string to encrypt
+     * @return The encrypted string
+     * @throws OXException If operation fails
+     * @throws IllegalStateException If service is missing
+     */
+    protected String encrypt(final String toEncrypt) throws OXException {
+        if (isEmpty(toEncrypt)) {
+            return toEncrypt;
+        }
+        final CryptoService service = services.getService(CryptoService.class);
+        if (null == service) {
+            throw new IllegalStateException("Missing service: " + CryptoService.class);
+        }
+        return service.encrypt(toEncrypt, secret);
+    }
+
+    /**
+     * Decrypts specified string.
+     * 
+     * @param toDecrypt The string to decrypt
+     * @return The decrypted string
+     * @throws OXException If operation fails
+     * @throws IllegalStateException If service is missing
+     */
+    protected String decrypt(final String toDecrypt) throws OXException {
+        if (isEmpty(toDecrypt)) {
+            return toDecrypt;
+        }
+        final CryptoService service = services.getService(CryptoService.class);
+        if (null == service) {
+            throw new IllegalStateException("Missing service: " + CryptoService.class);
+        }
+        return service.decrypt(toDecrypt, secret);
     }
 
 }

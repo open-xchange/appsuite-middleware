@@ -124,6 +124,7 @@ public class AuthorizationServlet extends AbstractAuthorizationServlet {
             /*
              * Set userId in accessor and mark it as authorized
              */
+            accessor.setProperty(OAuthProviderService.PROP_PASSWORD, password);
             providerService.markAsAuthorized(accessor, ((User) map.get("user")).getId(), ((Context) map.get("context")).getContextId());
             /*
              * Return to consumer

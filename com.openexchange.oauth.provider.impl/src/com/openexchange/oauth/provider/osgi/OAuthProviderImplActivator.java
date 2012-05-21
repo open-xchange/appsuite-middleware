@@ -53,6 +53,7 @@ import net.oauth.OAuthServiceProvider;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -94,7 +95,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class };
     }
 
     @Override

@@ -257,8 +257,13 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
                                         result = ps.executeQuery();
                                         while (result.next()) {
                                             final Object value = valueOf(result.getString(2));
-                                            if (null != value) {
-                                                accessor.setProperty(result.getString(1), value);
+                                            if (!result.wasNull()) {
+                                                final String name = result.getString(1);
+                                                if (PROP_PASSWORD.equals(name)) {
+                                                    accessor.setProperty(name, decrypt(value.toString()));
+                                                } else {
+                                                    accessor.setProperty(name, value);
+                                                }
                                             }
                                         }
                                         DBUtils.closeSQLStuff(result, ps);
@@ -576,8 +581,13 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
             accessor.setProperty(PROP_CONTEXT, Integer.valueOf(contextId));
             for (final Iterator<Map.Entry<String, Object>> iter = accessor.getProperties(); iter.hasNext();) {
                 final Map.Entry<String, Object> entry = iter.next();
-                stmt.setString(4, entry.getKey());
-                stmt.setString(5, entry.getValue().toString());
+                final String propName = entry.getKey();
+                stmt.setString(4, propName);
+                if (PROP_PASSWORD.equals(propName)) {
+                    stmt.setString(5, encrypt(entry.getValue().toString()));
+                } else {
+                    stmt.setString(5, entry.getValue().toString());
+                }
                 stmt.addBatch();
             }
             stmt.executeBatch();

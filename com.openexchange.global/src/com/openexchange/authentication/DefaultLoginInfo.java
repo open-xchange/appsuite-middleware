@@ -47,58 +47,61 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.authentication;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
- * {@link OAuthProviderConstants} - Constants for OAuth provider.
- *
+ * {@link DefaultLoginInfo} - The default login info.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OAuthProviderConstants {
+public final class DefaultLoginInfo implements LoginInfo {
+
+    private final String userName;
+
+    private final String password;
+
+    private final Map<String, Object> properties;
 
     /**
-     * The identifier of the default provider.
+     * Initializes a new {@link DefaultLoginInfo}.
+     * 
+     * @param userName The user name
+     * @param password The password
      */
-    public static final int DEFAULT_PROVIDER = 0;
+    public DefaultLoginInfo(final String userName, final String password) {
+        this(userName, password, null);
+    }
 
     /**
-     * Property name <code>"authorized"</code>
+     * Initializes a new {@link DefaultLoginInfo}.
+     * 
+     * @param userName The user name
+     * @param password The password
+     * @param properties The optional properties; may be <code>null</code>
      */
-    public static final String PROP_AUTHORIZED = "authorized";
+    public DefaultLoginInfo(final String userName, final String password, final Map<String, Object> properties) {
+        super();
+        this.userName = userName;
+        this.password = password;
+        this.properties = null == properties ? Collections.<String, Object> emptyMap() : properties;
+    }
 
-    /**
-     * Property name <code>"user"</code>
-     */
-    public static final String PROP_USER = "user";
+    @Override
+    public String getUsername() {
+        return userName;
+    }
 
-    /**
-     * Property name <code>"context"</code>
-     */
-    public static final String PROP_CONTEXT = "context";
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
-    /**
-     * Property name <code>"password"</code>
-     */
-    public static final String PROP_PASSWORD = "password";
-
-    /**
-     * Property name <code>"description"</code>
-     */
-    public static final String PROP_DESCRIPTION = "description";
-
-    /**
-     * Property name <code>"providerId"</code>
-     */
-    public static final String PROP_PROVIDER_ID = "providerId";
-
-    /**
-     * Property name <code>"name"</code>
-     */
-    public static final String PROP_NAME = "name";
-
-    /**
-     * Property name <code>"id"</code>
-     */
-    public static final String PROP_ID = "id";
+    @Override
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
 
 }

@@ -49,13 +49,12 @@
 
 package com.openexchange.oauth.provider.servlets;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginInfo;
+import com.openexchange.authentication.DefaultLoginInfo;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -96,23 +95,7 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
          * Resolve login
          */
         final AuthenticationService authenticationService = OAuthProviderServiceLookup.getService(AuthenticationService.class);
-        final Authenticated authenticated = authenticationService.handleLoginInfo(new LoginInfo() {
-            
-            @Override
-            public String getUsername() {
-                return login;
-            }
-            
-            @Override
-            public Map<String, Object> getProperties() {
-                return Collections.emptyMap();
-            }
-            
-            @Override
-            public String getPassword() {
-                return password;
-            }
-        });
+        final Authenticated authenticated = authenticationService.handleLoginInfo(new DefaultLoginInfo(login, password));
         final Context ctx = findContext(authenticated.getContextInfo());
         final Map<String, Object> map = new HashMap<String, Object>(2);
         map.put("user", findUser(ctx, authenticated.getUserInfo()));
