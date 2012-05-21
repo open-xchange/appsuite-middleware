@@ -52,7 +52,7 @@ package com.openexchange.xmpp;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link XmppServer}
+ * {@link XmppServer} - The XMPP server.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
