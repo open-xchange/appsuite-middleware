@@ -201,9 +201,11 @@ public final class FolderJob extends AbstractMailJob {
             /*
              * Check against table entry if allowed to be run
              */
+            final long[] box = new long[1];
+            box[0] = -1L;
             try {
                 final long now = System.currentTimeMillis();
-                if ((span > 0 ? !shouldSync(fullName, now, span) : false) || !wasAbleToSetSyncFlag(fullName, now)) {
+                if ((span > 0 ? !shouldSync(fullName, now, span, box) : false) || !wasAbleToSetSyncFlag(fullName, now)) {
                     if (debug) {
                         LOG.debug("Folder job should not yet be performed or wasn't able to acquire 'sync' flag: " + info);
                     }
@@ -446,6 +448,15 @@ public final class FolderJob extends AbstractMailJob {
                  */
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;
+            } catch (final OXException e) {
+                restoreTimeStamp(fullName, box[0]);
+                throw e;
+            } catch (final InterruptedException e) {
+                restoreTimeStamp(fullName, box[0]);
+                throw e;
+            } catch (final RuntimeException e) {
+                restoreTimeStamp(fullName, box[0]);
+                throw e;
             } finally {
                 if (unset) {
                     // Unset 'sync' flag
@@ -474,7 +485,7 @@ public final class FolderJob extends AbstractMailJob {
             /*
              * Specify fields
              */
-            MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
+            final MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
             final List<MailMessage> mails =
                 Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), fields.toArray()));
             // Read primary content

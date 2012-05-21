@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
@@ -183,15 +184,64 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
     }
 
     /**
+     * Restores the time stamp to specified value (performs a <small>DELETE</small> if <tt>stamp</tt> is <tt>-1</tt>).
+     * 
+     * @param fullName The folder full name
+     * @param stamp The time stamp to restore to
+     * @return <code>true</code> if successfully restored; otherwise <code>false</code>
+     */
+    protected boolean restoreTimeStamp(final String fullName, final long stamp) {
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+        if (null == databaseService) {
+            return false;
+        }
+        final Connection con;
+        try {
+            con = databaseService.getWritable(contextId);
+        } catch (final OXException e) {
+            final Log logger = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+            logger.warn("An Open-Xchange error occurred: " + e.getMessage(), e);
+            return false;
+        }
+        PreparedStatement stmt = null;
+        try {
+            int pos = 1;
+            if (stamp >= 0) {
+                stmt = con.prepareStatement("UPDATE mailSync SET timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+                stmt.setLong(pos++, stamp);
+            } else {
+                stmt = con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            }
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            final Log logger = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+            logger.warn("A SQL error occurred: " + e.getMessage(), e);
+            return false;
+        } catch (final RuntimeException e) {
+            final Log logger = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+            logger.warn("A runtime error occurred: " + e.getMessage(), e);
+            return false;
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
      * Checks if a sync should be performed for specified full name with default span of 1 hour.
      * 
      * @param fullName The full name
      * @param now The current time milliseconds
+     * @param box Simple container for previous time stamp
      * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    protected boolean shouldSync(final String fullName, final long now) throws OXException {
-        return shouldSync(fullName, now, Constants.HOUR_MILLIS);
+    protected boolean shouldSync(final String fullName, final long now, final long[] box) throws OXException {
+        return shouldSync(fullName, now, Constants.HOUR_MILLIS, box);
     }
 
     /**
@@ -200,10 +250,11 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
      * @param fullName The full name
      * @param now The current time milliseconds
      * @param span The max. allowed span; if exceeded the folder is considered to be synchronized
+     * @param box Simple container for previous time stamp
      * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    protected boolean shouldSync(final String fullName, final long now, final long span) throws OXException {
+    protected boolean shouldSync(final String fullName, final long now, final long span, final long[] box) throws OXException {
         final DatabaseService databaseService = Services.getService(DatabaseService.class);
         if (null == databaseService) {
             return false;
@@ -222,6 +273,7 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 DBUtils.closeSQLStuff(rs, stmt);
+                box[0] = -1L;
                 stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
                 pos = 1;
                 stmt.setLong(pos++, contextId);
@@ -241,6 +293,7 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
                 }
             }
             final long stamp = rs.getLong(1);
+            box[0] = stamp;
             if ((now - stamp) > span) {
                 /*
                  * Ensure sync flag is NOT set
