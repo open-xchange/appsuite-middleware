@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -250,6 +251,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                                             accessors.add(accessor);
                                         }
                                     }
+                                    final Set<String> secretPropertyNames = getSecretPropertyNames();
                                     for (final OAuthAccessor accessor : accessors) {
                                         /*
                                          * Load accessors's properties
@@ -267,7 +269,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                                             final Object value = valueOf(result.getString(2));
                                             if (!result.wasNull()) {
                                                 final String name = result.getString(1);
-                                                if (PROP_PASSWORD.equals(name)) {
+                                                if (secretPropertyNames.contains(name)) {
                                                     accessor.setProperty(name, decrypt(value.toString()));
                                                 } else {
                                                     accessor.setProperty(name, value);
@@ -495,11 +497,12 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
             // Ensure user+context
             accessor.setProperty(PROP_USER, Integer.valueOf(userId));
             accessor.setProperty(PROP_CONTEXT, Integer.valueOf(contextId));
+            final Set<String> secretPropertyNames = getSecretPropertyNames();
             for (final Iterator<Map.Entry<String, Object>> iter = accessor.getProperties(); iter.hasNext();) {
                 final Map.Entry<String, Object> entry = iter.next();
                 final String propName = entry.getKey();
                 stmt.setString(4, propName);
-                if (PROP_PASSWORD.equals(propName)) {
+                if (secretPropertyNames.contains(propName)) {
                     stmt.setString(5, encrypt(entry.getValue().toString()));
                 } else {
                     stmt.setString(5, entry.getValue().toString());

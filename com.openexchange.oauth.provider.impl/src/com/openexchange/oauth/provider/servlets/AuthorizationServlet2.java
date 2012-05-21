@@ -150,6 +150,7 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
             final OAuth2Accessor accessor = new OAuth2Accessor(client);
             final int userId = ((User) map.get("user")).getId();
             final int contextId = ((Context) map.get("context")).getContextId();
+            accessor.setProperty(OAuthProviderService.PROP_LOGIN, login);
             accessor.setProperty(OAuthProviderService.PROP_PASSWORD, password);
             providerService.markAsAuthorized(accessor, userId, contextId);
             /*
