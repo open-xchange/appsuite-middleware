@@ -8,7 +8,9 @@ import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequestBuilder;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPDeleteRequestBuilder;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPGetRequestBuilder;
+import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPPostRequestBuilder;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPPutRequestBuilder;
 
 public class OAuthHTTPRequestBuilder implements HTTPRequestBuilder {

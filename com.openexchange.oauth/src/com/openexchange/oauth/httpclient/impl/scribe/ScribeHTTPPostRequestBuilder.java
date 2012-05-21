@@ -1,4 +1,4 @@
-package com.openexchange.oauth.httpclient;
+package com.openexchange.oauth.httpclient.impl.scribe;
 
 import java.util.Map;
 
@@ -6,7 +6,7 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Verb;
 
 import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
-import com.openexchange.oauth.httpclient.impl.scribe.ScribeGenericHTTPRequestBuilder;
+import com.openexchange.oauth.httpclient.OAuthHTTPRequestBuilder;
 
 public class ScribeHTTPPostRequestBuilder extends ScribeGenericHTTPRequestBuilder<HTTPPostRequestBuilder> implements HTTPPostRequestBuilder {
 

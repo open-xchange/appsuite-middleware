@@ -1,4 +1,4 @@
-package com.openexchange.oauth.httpclient;
+package com.openexchange.oauth.httpclient.impl.scribe;
 
 import java.io.File;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import org.scribe.model.Verb;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPMultipartPostRequestBuilder;
-import com.openexchange.oauth.httpclient.impl.scribe.ScribeGenericHTTPRequestBuilder;
+import com.openexchange.oauth.httpclient.OAuthHTTPRequestBuilder;
 
 public class ScribeHTTPMultipartPostRequestBuilder extends
 		ScribeGenericHTTPRequestBuilder<HTTPMultipartPostRequestBuilder>

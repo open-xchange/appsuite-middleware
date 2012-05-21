@@ -1,9 +1,9 @@
-package com.openexchange.oauth.httpclient;
+package com.openexchange.oauth.httpclient.impl.scribe;
 
 import org.scribe.model.Verb;
 
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
-import com.openexchange.oauth.httpclient.impl.scribe.ScribeGenericHTTPRequestBuilder;
+import com.openexchange.oauth.httpclient.OAuthHTTPRequestBuilder;
 
 public class ScribeHTTPDeleteRequestBuilder extends ScribeGenericHTTPRequestBuilder<HTTPDeleteRequestBuilder>implements HTTPDeleteRequestBuilder {
 
