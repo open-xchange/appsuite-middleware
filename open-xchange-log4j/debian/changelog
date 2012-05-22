@@ -1,9 +1,3 @@
-open-xchange-log4j (6.21.0-4) unstable; urgency=low
-
-  * Internal release build for EDP drop #2
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 22 May 2012 13:30:40 +0200
-
 open-xchange-log4j (6.21.0-3) unstable; urgency=low
 
   * Internal release build for EDP drop #1
