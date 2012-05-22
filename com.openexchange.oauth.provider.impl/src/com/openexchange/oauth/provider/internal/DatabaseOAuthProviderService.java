@@ -70,6 +70,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
@@ -368,12 +369,13 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
     public OAuthConsumer getConsumer(final OAuthMessage requestMessage) throws IOException, OAuthProblemException {
         final String consumerKey = requestMessage.getConsumerKey();
         if (null == consumerKey) {
-            OAuthProblemException oAuthProblemException = new OAuthProblemException("parameter_absent");
-            throw oAuthProblemException;
+            final OAuthProblemException exception = new OAuthProblemException("parameter_absent");
+            exception.setParameter("oauth_parameters_absent", OAuth.OAUTH_CONSUMER_KEY);
+            throw exception;
         }
         final OAuthConsumer consumer = consumers.get(consumerKey);
         if (consumer == null) {
-            throw new OAuthProblemException("token_rejected");
+            throw new OAuthProblemException("consumer_key_unknown");
         }
         return consumer;
     }
