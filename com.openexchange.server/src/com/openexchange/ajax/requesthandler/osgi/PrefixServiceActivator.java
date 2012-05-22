@@ -74,17 +74,17 @@ public class PrefixServiceActivator extends HousekeepingActivator {
 		try {
 			final String prefix;
 	        {
-	            String tmp = getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
+	            String tmp = getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax").trim();
 	            if (tmp.charAt(0) != '/') {
 	                tmp = '/' + tmp;
 	            }
-	            if (!tmp.endsWith("/")) {
-	                tmp = tmp + '/';
-	            }
+//	            if (!tmp.endsWith("/")) {
+//	                tmp = tmp + '/';
+//	            }
 	            prefix = tmp;
 	        }
-	        DispatcherServlet.setPrefix(prefix);
-	        final DispatcherPrefixService prefixService = DefaultDispatcherPrefixService.getInstance();
+//	        DispatcherServlet.setPrefix(prefix);
+	        final DispatcherPrefixService prefixService = new DefaultDispatcherPrefixService(prefix);
 	        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
 	        ImageMatcher.setPrefixService(prefixService);
 	        registerService(DispatcherPrefixService.class, prefixService);

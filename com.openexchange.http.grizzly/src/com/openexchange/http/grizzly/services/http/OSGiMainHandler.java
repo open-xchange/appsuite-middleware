@@ -332,7 +332,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         }
         if (alias.length() > 1 && alias.endsWith("/")) {
             // if longer than "/", should not end with "/"
-            String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't and with '/' with exception to alias '/'.").toString();
+            String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '/' with exception to alias '/'.").toString();
             LOG.warn(msg);
             throw new NamespaceException(msg);
         }

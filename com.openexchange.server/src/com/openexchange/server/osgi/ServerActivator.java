@@ -77,6 +77,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
@@ -101,6 +102,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dataretention.DataRetentionService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.impl.EventFactoryServiceImpl;
 import com.openexchange.event.impl.EventQueue;
@@ -246,7 +248,8 @@ public final class ServerActivator extends HousekeepingActivator {
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class,
-            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
+            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
+            DispatcherPrefixService.class
         };
 
     private static volatile BundleContext CONTEXT;
@@ -687,7 +690,7 @@ public final class ServerActivator extends HousekeepingActivator {
 //        http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
 //        http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
 
-        final String prefix = Dispatcher.PREFIX.get();
+        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         http.registerServlet(prefix+"mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
         // http.registerServlet(prefix+"calendar", new com.openexchange.ajax.Appointment(), null, null);
         // http.registerServlet(prefix+"config", new com.openexchange.ajax.ConfigMenu(), null, null);

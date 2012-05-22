@@ -62,12 +62,17 @@ import com.openexchange.tools.session.ServerSession;
 public interface Dispatcher {
 
     /**
-     * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
-     * <p>
-     * All requests starting with this prefix are directed to dispatcher framework.
+     * Set the prefix of urls that this dispatcher handles.
+     * @param prefix the url prefix like e.g. /ajax without a trailing slash.
      */
-    public static final AtomicReference<String> PREFIX = new AtomicReference<String>(DispatcherPrefixService.DEFAULT_PREFIX);
-
+    public void setPrefix(String prefix) throws IllegalArgumentException;
+    
+    /**
+     * Get the prefix of urls that this dispatcher handles. 
+     * @return the prefix of urls that this dispatcher handles.
+     */
+    public String getPrefix();
+    
     /**
      * Performs given request.
      * 

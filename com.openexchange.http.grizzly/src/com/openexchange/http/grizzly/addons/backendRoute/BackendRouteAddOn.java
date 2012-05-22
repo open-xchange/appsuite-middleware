@@ -47,22 +47,57 @@
  *
  */
 
-package com.openexchange.dispatcher;
+package com.openexchange.http.grizzly.addons.backendRoute;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.glassfish.grizzly.filterchain.Filter;
+import org.glassfish.grizzly.filterchain.FilterChainBuilder;
+import org.glassfish.grizzly.http.server.AddOn;
+import org.glassfish.grizzly.http.server.HttpServerFilter;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import com.openexchange.http.grizzly.filters.BackendRouteFilter;
+import com.openexchange.http.grizzly.util.FilterChainUtils;
 
 /**
- * {@link DispatcherPrefixService} - Provides the dispatcher prefix
+ * {@link BackendRouteAddOn}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface DispatcherPrefixService {
+public class BackendRouteAddOn implements AddOn {
 
-    /**
-     * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
-     * <p>
-     * All requests starting with this prefix are directed to dispatcher framework.
-     * 
-     * @return The prefix
-     */
-    public String getPrefix();
+    private static final Log LOG = LogFactory.getLog(BackendRouteAddOn.class);
+
+    private Filter filter;
+
+    public BackendRouteAddOn(BackendRouteFilter filter) {
+        this.filter = filter;
+        LOG.info("constructed WatcherAddon");
+    }
+
+    @Override
+    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
+
+        // networkListener.getTransport().getConnectionMonitoringConfig().addProbes(new TCPConnectionWatcherProbe());
+        // builder.add(2, new ConnectionWatcherFilter());
+        //
+        // int transportFilterIdx = builder.indexOfType(org.glassfish.grizzly.filterchain.TransportFilter.class);
+        // if(transportFilterIdx > 0) {
+        // builder.add(transportFilterIdx - 1 , new ConnectionWatcherFilter());
+        // }
+        // int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
+        // if(httpServerFilterIdx > 0) {
+        // builder.add(httpServerFilterIdx - 1 , new RequestWatcherFilter());
+        // }
+        AddOn[] addOns = networkListener.getAddOns();
+        for (AddOn addOn : addOns) {
+            LOG.info("Current Addon is: " + addOn.getClass());
+        }
+        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
+        if (httpServerFilterIdx > 0) {
+            builder.add(httpServerFilterIdx - 1, filter);
+        }
+        LOG.info("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+    }
 
 }

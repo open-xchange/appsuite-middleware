@@ -50,8 +50,12 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.io.IOException;
+import java.util.Iterator;
 import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
+import org.glassfish.grizzly.filterchain.Filter;
+import org.glassfish.grizzly.filterchain.FilterChain;
+import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
@@ -60,7 +64,10 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
+import com.openexchange.http.grizzly.addons.backendRoute.BackendRouteAddOn;
+import com.openexchange.http.grizzly.filters.BackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.services.http.OSGiMainHandler;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -105,6 +112,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", true);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebsocketsEnabled", true);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
+            final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "OX-0");
 
 
             // create, configure and start server
@@ -117,35 +125,33 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
                 grizzly.getServerConfiguration().setJmxEnabled(true);
             }
-            
             if (hasWebsocketsEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
             }
-
             if (hasCometEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling Comet for Grizzly server.");
                 }
                 networkListener.registerAddOn(new CometAddOn());
             }
-            
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format("Registering Grizzly HttpNetworkListener on host: %s and port: %d", httpHost, Integer.valueOf(httpPort)));
             }
-            
+            networkListener.registerAddOn(new BackendRouteAddOn(new BackendRouteFilter(backendRoute)));
             grizzly.addListener(networkListener);
-            grizzly.start();
 
-            
             /*
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
              * getService() will get its own instance of HttpServiceImpl
              */
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
+            //TODO: add Filters to context
             registerService(HttpService.class.getName(), serviceFactory);
+            
+            grizzly.start();
         } catch (final IOException e) {
             throw GrizzlyExceptionCode.SERVER_NOT_STARTED.create(e, new Object[] {});
         }
@@ -163,6 +169,15 @@ public class GrizzlyActivator extends HousekeepingActivator {
             LOG.info("Stopping Grizzly OSGi HttpService");
         }
         grizzly.stop();
+    }
+    
+    private void addRouteFilter(NetworkListener networkListener, BackendRouteFilter routeFilter) {
+        FilterChain filterChain = networkListener.getFilterChain();
+        filterChain.add(routeFilter);
+        Iterator<Filter> filterIterator = filterChain.iterator();
+        while(filterIterator.hasNext()) {
+            LOG.info(filterIterator.next());
+        }
     }
 
 }

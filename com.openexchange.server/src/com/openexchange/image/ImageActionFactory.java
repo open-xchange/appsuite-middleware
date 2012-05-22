@@ -66,13 +66,15 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ImageActionFactory implements AJAXActionServiceFactory {
-
+    
     private final Map<String, AJAXActionService> actions;
 
     public static final ConcurrentMap<String, String> regName2Alias = new ConcurrentHashMap<String, String>();
 
     public static final ConcurrentMap<String, String> alias2regName = new ConcurrentHashMap<String, String>();
 
+    public static String prefix;
+    
     /**
      * The image servlet's alias
      */
@@ -99,7 +101,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
         if (null == url) {
             return null;
         }
-        final String ALIAS = DefaultDispatcherPrefixService.getInstance().getPrefix() + ALIAS_APPENDIX;
+        final String ALIAS = prefix + ALIAS_APPENDIX;
         String s = url;
         final int pos = s.indexOf(ALIAS);
         if (pos > 0) {
