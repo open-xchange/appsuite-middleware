@@ -5,13 +5,7 @@ Bundle-SymbolicName: com.openexchange.xmpp
 Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: .,
- lib/jdbc-mysql.jar,
- lib/tigase-extras.jar,
- lib/tigase-muc.jar,
- lib/tigase-pubsub.jar,
- lib/tigase-server.jar,
- lib/tigase-utils.jar,
- lib/tigase-xmltools.jar
+Bundle-ClassPath: .
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n
+Export-Package: com.openexchange.xmpp
