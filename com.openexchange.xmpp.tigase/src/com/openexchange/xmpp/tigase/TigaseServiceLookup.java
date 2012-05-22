@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,55 @@
  *
  */
 
-package com.openexchange.xmpp.tigase.osgi;
+package com.openexchange.xmpp.tigase;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.xmpp.XmppServer;
-import com.openexchange.xmpp.tigase.TigaseServiceLookup;
-import com.openexchange.xmpp.tigase.TigaseXmppServer;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link TigaseXmppActivator} - The activator for tigase XMPP.
+ * {@link TigaseServiceLookup}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TigaseXmppActivator extends HousekeepingActivator {
-
-    private volatile TigaseXmppServer tigaseXmppServer;
+public final class TigaseServiceLookup {
 
     /**
-     * Initializes a new {@link TigaseXmppActivator}.
+     * Initializes a new {@link TigaseServiceLookup}.
      */
-    public TigaseXmppActivator() {
+    private TigaseServiceLookup() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        TigaseServiceLookup.set(this);
-        final TigaseXmppServer tigaseXmppServer = new TigaseXmppServer();
-        tigaseXmppServer.init();
-        registerService(XmppServer.class, tigaseXmppServer);
-        this.tigaseXmppServer = tigaseXmppServer;
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = ref.get();
+        return null == serviceLookup ? null : serviceLookup.getService(clazz);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        final TigaseXmppServer tigaseXmppServer = this.tigaseXmppServer;
-        if (null != tigaseXmppServer) {
-            try {
-                tigaseXmppServer.release();
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-        TigaseServiceLookup.set(null);
-        super.stopBundle();
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(final ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
 }
