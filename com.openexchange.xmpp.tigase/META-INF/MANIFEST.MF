@@ -12,6 +12,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.xmpp,
+ javax.net,
+ javax.net.ssl,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker

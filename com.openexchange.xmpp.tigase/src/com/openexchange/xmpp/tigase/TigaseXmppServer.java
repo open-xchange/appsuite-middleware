@@ -55,6 +55,7 @@ import tigase.conf.ConfiguratorAbstract;
 import tigase.db.TigaseDBException;
 import tigase.server.MessageRouter;
 import tigase.server.MessageRouterIfc;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.xmpp.XmppExceptionCodes;
 import com.openexchange.xmpp.XmppServer;
@@ -78,20 +79,23 @@ public final class TigaseXmppServer implements XmppServer {
     @Override
     public void init() throws OXException {
         try {
-            // final String initialConfig =
-            // "tigase.level=ALL\n" + "tigase.xml.level=INFO\n"
-            // + "handlers=java.util.logging.ConsoleHandler\n"
-            // + "java.util.logging.ConsoleHandler.level=ALL\n"
-            // + "java.util.logging.ConsoleHandler.formatter=tigase.util.LogFormatter\n";
-            // ConfiguratorAbstract.loadLogManagerConfig(initialConfig);
-            
+            // loadLogManager();
+            /*
+             * Configuration
+             */
             final ConfiguratorAbstract config = new Configurator();
-            config.init(new String[] {
-                "config-type","--gen-config-def",
-                "--admins","admin@devel.tigase.org,admin@test-d",
-                "--virt-hosts","devel.tigase.org,test-d",
-                "--user-db","mysql",
-                "--user-db-uri","jdbc:mysql://localhost/tigasedb?user=tigase_user&password=mypass"});
+            {
+                final ConfigurationService service = TigaseServiceLookup.getService(ConfigurationService.class);
+                final String configPath = service.getProperty("CONFIGPATH");
+                config.init(new String[] {
+                    "config-type","--gen-config-def",
+                    "--admins","admin@devel.tigase.org,admin@test-d",
+                    "--ssl-container-class","com.openexchange.xmpp.tigase.TrustAllSslContextContainer", //ssl-container-class=tigase.io.SSLContextContainer
+                    "--ssl-certs-location",configPath+"/certs/",
+                    "--virt-hosts","devel.tigase.org,test-d",
+                    "--user-db","mysql",
+                    "--user-db-uri","jdbc:mysql://devel-master.netline.de/tigasedb?user=openexchange&password=secret"});
+            }
 
             // config = new ConfiguratorOld(config_file, args);
             config.setName("basic-conf");
@@ -107,6 +111,21 @@ public final class TigaseXmppServer implements XmppServer {
         } catch (final TigaseDBException e) {
             throw XmppExceptionCodes.ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void loadLogManager() {
+        final ConfigurationService service = TigaseServiceLookup.getService(ConfigurationService.class);
+        String logManagerConfig = service.getText("file-logging.properties");
+        if (null == logManagerConfig) {
+            logManagerConfig = service.getText("logging.properties");
+        }
+        if (null == logManagerConfig) {
+            logManagerConfig = "tigase.level=ALL\n" + "tigase.xml.level=INFO\n"
+                 + "handlers=java.util.logging.ConsoleHandler\n"
+                 + "java.util.logging.ConsoleHandler.level=ALL\n"
+                 + "java.util.logging.ConsoleHandler.formatter=tigase.util.LogFormatter\n";
+        }
+        ConfiguratorAbstract.loadLogManagerConfig(logManagerConfig);
     }
 
     @Override
