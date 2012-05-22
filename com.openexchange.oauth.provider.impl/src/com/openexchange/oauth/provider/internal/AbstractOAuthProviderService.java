@@ -71,7 +71,9 @@ import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AbstractOAuthProviderService}
+ * {@link AbstractOAuthProviderService} - The abstract class for OAuth providers.
+ * <p>
+ * <a href="http://wiki.oauth.net/w/page/12238543/ProblemReporting">OAuth error codes</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

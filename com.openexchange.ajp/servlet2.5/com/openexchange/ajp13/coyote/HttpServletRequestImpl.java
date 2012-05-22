@@ -750,6 +750,20 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         return values.get(0);
     }
 
+    private static final Enumeration EMPTY_ENUM = new Enumeration() {
+
+        @Override
+        public boolean hasMoreElements() {
+            return false;
+        }
+
+        @Override
+        public Object nextElement() {
+            return null;
+        }
+
+    };
+
     /**
      * Creates a new {@link Enumeration} for specified array.
      *
@@ -758,6 +772,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      * @return A new {@link Enumeration}
      */
     protected static <T> Enumeration<T> makeEnumeration(final List<T> list) {
+        if (null == list) {
+            return EMPTY_ENUM;
+        }
         return (new Enumeration<T>() {
 
             private final int size = list.size();

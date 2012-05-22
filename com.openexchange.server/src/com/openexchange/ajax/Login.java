@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuthAccessor;
+import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
@@ -1009,15 +1011,33 @@ public class Login extends AJAXServlet {
                     final OAuthProviderService providerService = ServerServiceRegistry.getInstance().getService(OAuthProviderService.class);
                     final OAuthMessage requestMessage = OAuthServlet.getMessage(req2, null);
                     final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+                    providerService.getValidator().validateMessage(requestMessage, accessor);
                     final String login = accessor.<String> getProperty(OAuthProviderService.PROP_LOGIN);
                     final String password = accessor.<String> getProperty(OAuthProviderService.PROP_PASSWORD);
                     final LoginRequest request = parseLogin(req2, login, password, false);
                     return LoginPerformer.getInstance().doLogin(request);
                 } catch (final OAuthProblemException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                    try {
+                        handleException(e, req2, resp, false);
+                        return null;
+                    } catch (final IOException ioe) {
+                        throw LoginExceptionCodes.UNKNOWN.create(ioe, ioe.getMessage());
+                    } catch (final ServletException se) {
+                        throw LoginExceptionCodes.UNKNOWN.create(se, se.getMessage());
+                    }
                 } catch (final IOException e) {
                     throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                } catch (final OAuthException e) {
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                } catch (final URISyntaxException e) {
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                 }
+            }
+
+            private void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
+                final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
+                realm.append(request.getLocalName());
+                OAuthServlet.handleException(response, e, realm.toString(), sendBody);
             }
         });
     }

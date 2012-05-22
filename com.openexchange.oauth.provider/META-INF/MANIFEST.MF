@@ -6,7 +6,10 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
- com.openexchange.i18n
+ com.openexchange.i18n,
+ javax.servlet,
+ javax.servlet.http,
+ javax.servlet.resources
 Bundle-ClassPath: .,
  lib/oauth-googlecode.jar
 Export-Package: com.openexchange.oauth.provider,
