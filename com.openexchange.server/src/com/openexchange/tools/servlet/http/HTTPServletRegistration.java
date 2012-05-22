@@ -60,7 +60,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.log.LogFactory;
 
 /**
- * {@link HTTPServletRegistration}
+ * {@link HTTPServletRegistration} -  A simple {@link ServiceTracker service tracker} for {@link HttpService OSGi's HttpService}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -80,6 +80,20 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
      * @param servlet The Servlet instance to register/de-register on {@link HttpService} presence/absence
      */
     public HTTPServletRegistration(final BundleContext context, final String alias, final Servlet servlet) {
+        super(context, HttpService.class, null);
+        this.alias = alias;
+        this.servlet = servlet;
+        open();
+    }
+
+    /**
+     * Initializes a new {@link HTTPServletRegistration}.
+     * 
+     * @param context The bundle context
+     * @param servlet The Servlet instance to register/de-register on {@link HttpService} presence/absence
+     * @param alias The Servlet's alias
+     */
+    public HTTPServletRegistration(final BundleContext context, final Servlet servlet, final String alias) {
         super(context, HttpService.class, null);
         this.alias = alias;
         this.servlet = servlet;
