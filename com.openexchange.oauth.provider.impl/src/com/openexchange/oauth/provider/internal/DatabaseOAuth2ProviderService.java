@@ -371,6 +371,9 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
     @Override
     public OAuth2Client getClient(final OAuth2Message requestMessage) throws IOException, OAuth2ProblemException {
         final String clientId = requestMessage.getClientId();
+        if (null == clientId) {
+            throw new OAuth2ProblemException("parameter_absent");
+        }
         final OAuth2Client client = clients.get(clientId);
         if (client == null) {
             final OAuth2ProblemException problem = new OAuth2ProblemException(BaseErrorCode.INVALID_CLIENT);

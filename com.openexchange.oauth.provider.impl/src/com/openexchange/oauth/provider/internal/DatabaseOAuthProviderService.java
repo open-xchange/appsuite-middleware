@@ -367,6 +367,10 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
     @Override
     public OAuthConsumer getConsumer(final OAuthMessage requestMessage) throws IOException, OAuthProblemException {
         final String consumerKey = requestMessage.getConsumerKey();
+        if (null == consumerKey) {
+            OAuthProblemException oAuthProblemException = new OAuthProblemException("parameter_absent");
+            throw oAuthProblemException;
+        }
         final OAuthConsumer consumer = consumers.get(consumerKey);
         if (consumer == null) {
             throw new OAuthProblemException("token_rejected");
@@ -377,6 +381,9 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
     @Override
     public OAuthAccessor getAccessor(final OAuthMessage requestMessage) throws IOException, OAuthProblemException {
         final String consumerToken = requestMessage.getToken();
+        if (null == consumerToken) {
+            throw new OAuthProblemException("parameter_absent");
+        }
         OAuthAccessor accessor = null;
         for (final OAuthAccessor a : tokens.keySet()) {
             if (a.requestToken != null) {
