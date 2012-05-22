@@ -1,3 +1,9 @@
+open-xchange-manage-group-resource (6.21.0-4) unstable; urgency=low
+
+  * Internal release build for EDP drop #2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 22 May 2012 16:03:21 +0200
+
 open-xchange-manage-group-resource (6.21.0-3) unstable; urgency=low
 
   * Internal release build for EDP drop #1

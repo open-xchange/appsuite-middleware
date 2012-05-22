@@ -1,3 +1,7 @@
+* 2012-05-22 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22154: Fixed NullPointerException in startup of mail filter bundle.
+
 * 2012-05-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 22051: Re-parse Content-Type with regexes
@@ -270,6 +274,10 @@
 
  - Fixed bug 21680: Improved create routine for faster folder look-up
 
+* 2012-03-05 - choeger@open-xchange.com
+
+ - SCR976: new configuration option com.openexchange.mail.filter.useSIEVEResponseCodes
+
 * 2012-03-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 21678: Improved delete listener and replaced useless foreign keys with appropriate index entries
@@ -304,6 +312,10 @@
  - Fix for bug 21627: Introduced JSON field "account_id" (653)
  - Fix for bug 21622: Fixed MIME encoding/decoding of file names
 
+* 2012-02-24 - choeger@open-xchange.com
+
+ - SCR963: New backend only api action: notify
+ 
 * 2012-02-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 21625: Sanitize header names before message transport
@@ -416,6 +428,10 @@
 
  - Fix for bug 21242: Check syntactical correctness of composed SQL query
  - Fix for bug 21405: Added support for new calendar fields
+
+* 2012-02-02 - dennis.sieben@open-xchange.com
+
+ - Bugfix 21391 - [L3] Mailfilter should support punycode encoding
 
 * 2012-01-31 - tobias.friedrich@open-xchange.com
 
@@ -1327,6 +1343,10 @@
 
  - Bugfix #19522: Added support for hexadecimal entities like &#xFC;
 
+* 2011-06-16 - dennis.sieben@open-xchange.com
+
+ - Bugfix #19454 - [L3] Using '"' character in mail filter condition removes vacation message
+ 
 * 2011-06-15 - thorben.betten@open-xchange.com
 
  - Bugfix #19497: Setting proper "msgref" attribute
@@ -1629,6 +1649,10 @@
 
  - Bugfix #18826: Fixed missing keep-seen right "s" when applying read-all access to an IMAP folder
 
+* 2011-04-11 - dennis.sieben@open-xchange.com
+
+ - Bugfix #18918 - OXSieveHandlerInvalidCredentialsException must be moved to the export package
+
 * 2011-04-08 - marcus.klein@open-xchange.com, martin.herfurth@open-xchange.com
 
  - Bugfix #18912: Using enumeration to pass order directory for data everywhere. Not showing failing SQL statements to the end user.
@@ -1824,6 +1848,10 @@
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
  - Bugfix #18463: Added necessary imports for OAuth LinkedIn bundle.
+
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 
 * 2011-02-28 - steffen.templin@open-xchange.com
 
@@ -2089,6 +2117,11 @@
  - Bugfix #17762: Allowing "editpassword" module access for all module access combinations (webmail, pim, etc.)
  - Bugfix #17723: Updated to new twitter OAuth authorization URL
 
+* 2010-12-08 - dennis.sieben@open-xchange.com
+
+  - Bugfix #17776: "not" tests are not written back correctly
+    - Added special case for "not" in RuleConverter
+
 * 2010-12-07 - thorben.betten@open-xchange.com
 
  - Bugfix #17689: Introduced batch-loading of folders, users, and user configurations
@@ -2331,6 +2364,11 @@
 
  - Bugfix #17161: Fixed NPE
 
+* 2010-09-21 - steffen.templin@open-xchange.com
+
+ - Bugfix #16747: After removal of the admin mode oxadmin is able to manage 
+ 				  the users sieve scripts again within a normal groupware session.
+
 * 2010-10-20 - steffen.templin@open-xchange.com
 
  - Bugfix #17261: Duplicate folder exception is thrown for synchronizing contact folder 'Vorgeschlagene Kontakte' with Outlook 2010.
@@ -2526,6 +2564,11 @@
 * 2010-08-31 - thorben.betten@open-xchange.com
 
  - Bugfix #16762: No blind future use of previously passed connection
+
+* 2010-08-31 - dennis.sieben@open-xchange.com
+
+  - Added possibility to define the password source. It is now possible to
+    switch between the password from the session or a global defined one.
 
 * 2010-08-30 - martin.herfurth@open-xchange.com
 
@@ -2960,6 +3003,11 @@
  - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized.
  - Bugfix #16224: The list of known tasks is searched for the requested update task if they should be started through JMX interface.
 
+* 2010-06-02 - dennis.sieben@open-xchange.com
+
+  - Bugfix #16149: [L3] connection timeout for SieveHandler
+    - Made timeout configurable
+  
 * 2010-06-01 - karsten.will@open-xchange.com
 
  - Bugfix #16160: (Subscriptions) UID collision detected even if the user does not have any other appointments.
@@ -3434,6 +3482,11 @@
 
  - Bugfix #15241 - VCards by Apple Addressbook with inline images are imported now
 
+* 2010-02-16 - dennis.sieben@open-xchange.com
+
+  - Added possibility to define if vacation messages should only be sent to
+    specific domains
+
 * 2010-02-15 - thorben.betten@open-xchange.com
 
  - Bugfix #15365: Added admin daemon to build files
@@ -3574,6 +3627,11 @@
 
  - Bugfix #15094: Fixed AJP keep-alive mechanism to not mess up AJP communication cycle
 
+* 2009-12-16 - dennis.sieben@open-xchange.com
+
+  - Added ability to disable TLS and define the regex for non-correct working
+    TLS implementations in the config file
+
 * 2009-12-15 - thorben.betten@open-xchange.com
 
  - Bugfix #15075: Fixed un-quoting personal part of an email
@@ -3598,6 +3656,12 @@
 * 2009-12-02 - thorben.betten@open-xchange.com
 
  - Bugfix #14993: Checking for default auxiliary on cache start-up
+
+* 2009-12-02 - dennis.sieben@open-xchange.com
+
+  - Bugfix #14655: [L3] Sieve capability wrong if TLS is used
+    - Fixed regex once again to include all Cyrus versions including 2.3.9 to 
+      the implementations which aren't working correct 
 
 * 2009-12-01 - thorben.betten@open-xchange.com
 

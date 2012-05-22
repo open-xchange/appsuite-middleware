@@ -120,6 +120,7 @@ public class MailFilterServletInit implements Initialization {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be registered");
 			return;
 		}
+		PREFIX.set(MailFilterServletServiceRegistry.getServiceRegistry().getService(DispatcherPrefixService.class));
 		try {
 			/*
 			 * Register mail filter servlet

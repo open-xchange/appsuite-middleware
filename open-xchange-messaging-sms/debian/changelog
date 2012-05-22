@@ -1,3 +1,9 @@
+open-xchange-messaging-sms (6.21.0-1) unstable; urgency=low
+
+  * Internal release build for EDP drop #2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 22 May 2012 16:05:15 +0200
+
 open-xchange-messaging-sms (6.21.0-0) unstable; urgency=low
 
   * prepare for 6.21.0

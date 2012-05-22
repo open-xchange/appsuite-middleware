@@ -1,3 +1,9 @@
+open-xchange-indexing (6.21.0-2) unstable; urgency=low
+
+  * Internal release build for EDP drop #2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 22 May 2012 16:05:14 +0200
+
 open-xchange-indexing (6.21.0-1) unstable; urgency=low
 
   * Initial release
