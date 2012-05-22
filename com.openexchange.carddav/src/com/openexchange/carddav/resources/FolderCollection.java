@@ -78,7 +78,7 @@ public class FolderCollection extends CardDAVCollection {
 
     private static final Log LOG = LogFactory.getLog(FolderCollection.class);
 
-    private UserizedFolder folder;
+    private final UserizedFolder folder;
 
     public FolderCollection(GroupwareCarddavFactory factory, WebdavPath url, UserizedFolder folder) throws WebdavProtocolException {
         super(factory, url);

@@ -373,6 +373,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         }
     }
     
+    @Override
     public void updateReferences(int contextID, Contact contact) throws OXException {
     	boolean committed = false;
         DatabaseService databaseService = getDatabaseService();

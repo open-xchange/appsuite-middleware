@@ -124,6 +124,7 @@ public class JavaImageScalingService implements ImageScalingService {
         return new ByteArrayInputStream(baos.toByteArray());
     }
 
+    @Override
     public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException {
         String fileType;
         if (contentType.startsWith(CT_JPEG)) {
@@ -220,7 +221,7 @@ public class JavaImageScalingService implements ImageScalingService {
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile), false);
             Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-            JpegDirectory jpegDirectory = (JpegDirectory) metadata.getDirectory(JpegDirectory.class);
+            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
             orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             width = jpegDirectory.getImageWidth();
             height = jpegDirectory.getImageHeight();
@@ -249,6 +250,7 @@ public class JavaImageScalingService implements ImageScalingService {
             this.height = height;
         }
 
+        @Override
         public String toString() {
             return String.format("%dx%d,%d", this.width, this.height, this.orientation);
         }

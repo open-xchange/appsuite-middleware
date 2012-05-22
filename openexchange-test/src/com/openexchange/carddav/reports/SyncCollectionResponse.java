@@ -69,8 +69,8 @@ import com.openexchange.carddav.StatusCodes;
  */
 public class SyncCollectionResponse {
 	
-	private MultiStatusResponse[] responses;
-	private String syncToken;
+	private final MultiStatusResponse[] responses;
+	private final String syncToken;
 	
 	public SyncCollectionResponse(MultiStatus multiStatus, String syncToken) {
 		super();

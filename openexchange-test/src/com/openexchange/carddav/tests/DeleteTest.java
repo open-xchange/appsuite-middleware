@@ -258,7 +258,8 @@ public class DeleteTest extends CardDAVTest {
         groupVCard.getVCard().removeExtendedType(groupVCard.getMemberXFeature(contactUid));
         final ThrowableHolder throwableHolder = new ThrowableHolder(); 
         Thread updateThread = new Thread() {
-        	public void run() {
+        	@Override
+            public void run() {
                 try {
 					assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCardUpdate(groupVCard.getUID(), groupVCard.toString(), 
 							groupVCard.getETag()));
