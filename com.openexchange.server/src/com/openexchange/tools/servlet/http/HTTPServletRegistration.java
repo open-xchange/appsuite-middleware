@@ -63,6 +63,7 @@ import com.openexchange.log.LogFactory;
  * {@link HTTPServletRegistration} -  A simple {@link ServiceTracker service tracker} for {@link HttpService OSGi's HttpService}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
