@@ -49,13 +49,15 @@
 
 package com.openexchange.xmpp.tigase.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.xmpp.XmppServer;
+import com.openexchange.xmpp.tigase.TigaseServiceLookup;
 import com.openexchange.xmpp.tigase.TigaseXmppServer;
 
 
 /**
- * {@link TigaseXmppActivator}
+ * {@link TigaseXmppActivator} - The activator for tigase XMPP.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,11 +74,12 @@ public final class TigaseXmppActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        TigaseServiceLookup.set(this);
         final TigaseXmppServer tigaseXmppServer = new TigaseXmppServer();
         tigaseXmppServer.init();
         registerService(XmppServer.class, tigaseXmppServer);
@@ -87,8 +90,13 @@ public final class TigaseXmppActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         final TigaseXmppServer tigaseXmppServer = this.tigaseXmppServer;
         if (null != tigaseXmppServer) {
-            tigaseXmppServer.release();
+            try {
+                tigaseXmppServer.release();
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
+        TigaseServiceLookup.set(null);
         super.stopBundle();
     }
 
