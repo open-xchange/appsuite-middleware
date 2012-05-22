@@ -257,7 +257,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
             assertTrue("Element does not contain name", elementJson.hasAndNotNull("name"));
 
             if (elementJson.getString("name").equals("login")) {
-                assertTrue("Element does not contain a default value", elementJson.hasAndNotNull("default"));
+                assertTrue("Element does not contain a default value", elementJson.hasAndNotNull("defaultValue"));
                 assertEquals("Wrong displayName", "Login", elementJson.getString("displayName"));
                 assertEquals("Wrong widget", "input", elementJson.getString("widget"));
                 assertTrue("Wrong mandatory value", elementJson.getBoolean("mandatory"));
