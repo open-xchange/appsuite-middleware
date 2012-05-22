@@ -90,7 +90,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         try {
             retval = parse(source);
         } catch (final JSONException e) {
-            JSONEXCEPTION.create(e);
+            throw JSONEXCEPTION.create(e);
         }
         return retval;
     }
@@ -111,12 +111,12 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                     try {
                         row.put(formWriter.write(source.getFormDescription()));
                     } catch (final JSONException e) {
-                        JSONEXCEPTION.create(e);
+                        throw JSONEXCEPTION.create(e);
                     }
                 } else if (MODULE.equals(field)) {
                     row.put(getModuleAsString(source));
                 } else {
-                    SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(field);
+                    throw SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(field);
                 }
             }
             retval.put(row);
@@ -162,7 +162,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             missingFields.add(FORM_DESCRIPTION);
         }
         if (missingFields.size() > 0) {
-            MISSING_FIELD.create(buildStringList(missingFields,", "));
+            throw MISSING_FIELD.create(buildStringList(missingFields,", "));
         }
 
         for (final Iterator<FormElement> iter = source.getFormDescription().iterator(); iter.hasNext();) {
@@ -179,7 +179,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             }
             // TODO: check for mandatory field "mandatory"
             if (missingFormFields.size() > 0) {
-                MISSING_FORM_FIELD.create(buildStringList(missingFormFields, ", "));
+                throw MISSING_FORM_FIELD.create(buildStringList(missingFormFields, ", "));
             }
         }
     }
