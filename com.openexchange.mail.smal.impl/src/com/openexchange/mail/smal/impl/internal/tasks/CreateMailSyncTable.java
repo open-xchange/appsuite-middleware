@@ -64,9 +64,9 @@ public class CreateMailSyncTable extends AbstractCreateTableImpl {
 
     public static final String CREATE_MAIL_SYNC_TABLE_STATEMENT =
         "CREATE TABLE "+ MAIL_SYNC_TABLE + " (" +
-        "cid int(10) unsigned NOT NULL," +
-        "user int(10) unsigned NOT NULL," +
-        "accountId int(10) unsigned NOT NULL," +
+        "cid INT4 unsigned NOT NULL," +
+        "user INT4 unsigned NOT NULL," +
+        "accountId INT4 unsigned NOT NULL," +
         "fullName varchar(128) collate utf8_unicode_ci NOT NULL," +
         "timestamp bigint(64) NOT NULL," +
         "sync tinyint(3) unsigned NOT NULL," +
