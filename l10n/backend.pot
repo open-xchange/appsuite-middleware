@@ -72,6 +72,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:117
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/internal/TextXtractExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xmpp/src/com/openexchange/xmpp/XmppExceptionMessages.java:66
 msgid "An I/O error occurred: %1$s"
 msgstr ""
 
@@ -913,6 +914,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/internal/TextXtractExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xmpp/src/com/openexchange/xmpp/XmppExceptionMessages.java:63
 msgid "An error occurred: %1$s"
 msgstr ""
 
@@ -9840,6 +9842,11 @@ msgstr ""
 msgid "The document with uuid %1$s could not be found."
 msgstr ""
 
+#. %1$s is not a valid field for sorting.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:105
+msgid "%1$s is not a valid field for sorting."
+msgstr ""
+
 #. *
 #. * The given value for mode "%s" is not a possible one
 #.
@@ -10274,6 +10281,11 @@ msgstr ""
 #. A SOAP fault occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:83
 msgid "A SOAP fault occurred: %1$s"
+msgstr ""
+
+#. A configuration error: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xmpp/src/com/openexchange/xmpp/XmppExceptionMessages.java:69
+msgid "A configuration error: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
