@@ -108,7 +108,7 @@ public final class CheckConfigDBTables {
 
     private void checkServiceProvider(final Connection con) throws SQLException {
         final String createSql = "CREATE TABLE oauthServiceProvider (\n" + 
-            " id int(10) unsigned NOT NULL,\n" + 
+            " id INT4 unsigned NOT NULL,\n" + 
             " requestTokenUrl varchar(255) NOT NULL,\n" + 
             " userAuthorizationUrl varchar(255) NOT NULL,\n" + 
             " accessTokenURL varchar(255) DEFAULT NULL,\n" + 
@@ -143,8 +143,8 @@ public final class CheckConfigDBTables {
 
     private void checkConsumer(final Connection con) throws SQLException {
         String createSql = "CREATE TABLE `oauthConsumer` (\n" + 
-        		" `id` int(10) unsigned NOT NULL,\n" + 
-        		" `providerId` int(10) unsigned NOT NULL,\n" + 
+        		" `id` INT4 unsigned NOT NULL,\n" + 
+        		" `providerId` INT4 unsigned NOT NULL,\n" + 
         		" `key` varchar(255) NOT NULL,\n" + 
         		" `secret` varchar(255) NOT NULL,\n" + 
         		" `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
@@ -156,7 +156,7 @@ public final class CheckConfigDBTables {
         createIfAbsent("oauthConsumer", createSql, con);
 
         createSql = "CREATE TABLE `oauthConsumerProperty` (\n" + 
-        		" `id` int(10) unsigned NOT NULL,\n" + 
+        		" `id` INT4 unsigned NOT NULL,\n" + 
         		" `name` varchar(32) NOT NULL,\n" + 
         		" `value` varchar(255) NOT NULL,\n" + 
         		" PRIMARY KEY (`id`,`name`)\n" + 
@@ -166,8 +166,8 @@ public final class CheckConfigDBTables {
 
     private void checkClient(final Connection con) throws SQLException {
         String createSql = "CREATE TABLE `oauth2Client` (\n" + 
-                " `id` int(10) unsigned NOT NULL,\n" + 
-                " `providerId` int(10) unsigned NOT NULL,\n" + 
+                " `id` INT4 unsigned NOT NULL,\n" + 
+                " `providerId` INT4 unsigned NOT NULL,\n" + 
                 " `key` varchar(255) NOT NULL,\n" + 
                 " `secret` varchar(255) NOT NULL,\n" + 
                 " `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
@@ -179,7 +179,7 @@ public final class CheckConfigDBTables {
         createIfAbsent("oauth2Client", createSql, con);
 
         createSql = "CREATE TABLE `oauth2ClientProperty` (\n" + 
-                " `id` int(10) unsigned NOT NULL,\n" + 
+                " `id` INT4 unsigned NOT NULL,\n" + 
                 " `name` varchar(32) NOT NULL,\n" + 
                 " `value` varchar(255) NOT NULL,\n" + 
                 " PRIMARY KEY (`id`,`name`)\n" + 
