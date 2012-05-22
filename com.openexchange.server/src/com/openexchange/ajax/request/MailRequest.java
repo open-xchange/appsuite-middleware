@@ -152,6 +152,8 @@ public final class MailRequest {
             MAIL_SERVLET.actionGetStructure(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
             MAIL_SERVLET.actionGetAttachment();
+        } else if (action.equalsIgnoreCase("attachmentToken")) {
+            MAIL_SERVLET.actionGetAttachmentToken(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_MSGS)) {
             MAIL_SERVLET.actionGetNew(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {

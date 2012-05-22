@@ -145,6 +145,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.attachment.AttachmentToken;
+import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -408,6 +410,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionGetStructure(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_MATTACH)) {
             actionGetAttachment(req, resp);
+        } else if (actionStr.equalsIgnoreCase("attachmentToken")) {
+            actionGetAttachmentToken(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_ZIP_MATTACH)) {
             actionGetMultipleAttachments(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_ZIP_MESSAGES)) {
@@ -1994,6 +1998,110 @@ public class Mail extends PermissionServlet implements UploadListener {
             LOG.error(exc.getMessage(), exc);
             callbackError(resp, outSelected, true, session, exc);
         }
+    }
+
+    public void actionGetAttachmentToken(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws OXException, JSONException {
+        ResponseWriter.write(actionGetAttachmentToken(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
+    }
+
+    private final void actionGetAttachmentToken(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        try {
+            ResponseWriter.write(
+                actionGetAttachmentToken(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
+                resp.getWriter());
+        } catch (final JSONException e) {
+            final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
+            LOG.error(oxe.getMessage(), oxe);
+            final Response response = new Response();
+            response.setException(oxe);
+            try {
+                ResponseWriter.write(response, resp.getWriter());
+            } catch (final JSONException e1) {
+                LOG.error(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
+        }
+    }
+
+    private final Response actionGetAttachmentToken(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response(session);
+        Object data = JSONObject.NULL;
+        final List<OXException> warnings = new ArrayList<OXException>(2);
+        /*
+         * Start response
+         */
+        try {
+            /*
+             * Read in parameters
+             */
+            final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
+            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            final String sequenceId = paramContainer.getStringParam(PARAMETER_MAILATTCHMENT);
+            final String imageContentId = paramContainer.getStringParam(PARAMETER_MAILCID);
+            if (sequenceId == null && imageContentId == null) {
+                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(
+                    " | ").append(PARAMETER_MAILCID).toString());
+            }
+            int ttlMillis;
+            {
+                final String tmp = paramContainer.getStringParam("ttlMillis");
+                try {
+                    ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
+                } catch (final NumberFormatException e) {
+                    ttlMillis = -1;
+                }
+            }
+            /*
+             * Generate attachment token
+             */
+            MailServletInterface mailInterface = mailInterfaceArg;
+            boolean closeMailInterface = false;
+            try {
+                if (mailInterface == null) {
+                    mailInterface = MailServletInterface.getInstance(session);
+                    closeMailInterface = true;
+                }
+                /*
+                 * Get mail part
+                 */
+                final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, true);
+                if (mailPart == null) {
+                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
+                token.setAccessInfo(mailInterface.getAccountID(), session);
+                token.setAttachmentInfo(folderPath, uid, sequenceId);
+                AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(true), session);
+                final JSONObject attachmentObject = new JSONObject();
+                attachmentObject.put("id", token.getId());
+                attachmentObject.put("jsessionid", token.getJSessionId());
+                data = attachmentObject;
+                warnings.addAll(mailInterface.getWarnings());
+            } finally {
+                if (closeMailInterface && mailInterface != null) {
+                    mailInterface.close(true);
+                }
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final RuntimeException e) {
+            final OXException wrapper = getWrappingOXException(e);
+            LOG.error(wrapper.getMessage(), wrapper);
+            response.setException(wrapper);
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(data);
+        response.setTimestamp(null);
+        if (!warnings.isEmpty()) {
+            response.addWarning(warnings.get(0));
+        }
+        return response;
     }
 
     public void actionGetAttachment() throws OXException {
