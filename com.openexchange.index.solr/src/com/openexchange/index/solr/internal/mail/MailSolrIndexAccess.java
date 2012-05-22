@@ -329,14 +329,14 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     
     @Override
     public void change(IndexDocument<MailMessage> document, Set<? extends IndexField> fields) throws OXException {
-        Set<SolrMailField> solrFields = convertFields(fields);        
+        Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
         SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields);        
         addDocument(inputDocument, true);
     }
 
     @Override
     public void change(Collection<IndexDocument<MailMessage>> documents, Set<? extends IndexField> fields) throws OXException, InterruptedException {     
-        Set<SolrMailField> solrFields = convertFields(fields);     
+        Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields); 
@@ -398,7 +398,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException, InterruptedException {
-        Set<SolrMailField> solrFields = convertFields(fields);
+        Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
         List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
         SolrQuery solrQuery = buildSolrQuery(parameters);
         setFieldList(solrQuery, solrFields);
@@ -639,17 +639,25 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return filters.toArray(new String[filters.size()]);
     }
     
-    private Set<SolrMailField> convertFields(Set<? extends IndexField> fields) {
+    private Set<SolrMailField> convertAndCheckFields(QueryParameters parameters, Set<? extends IndexField> fields) {
         Set<SolrMailField> solrFields;
         if (fields == null) {
             solrFields = new HashSet<SolrMailField>(Arrays.asList(SolrMailField.values()));
         } else {
-            solrFields = new HashSet<SolrMailField>();
+            solrFields = new HashSet<SolrMailField>(fields.size());
             for (IndexField field : fields) {
                 if (field instanceof MailIndexField) {
                     solrFields.add(SolrMailField.solrMailFieldFor((MailIndexField) field));
                 }
             }
+            
+            if (parameters != null) {
+                IndexField sortField = parameters.getSortField();
+                if (sortField != null && sortField instanceof MailIndexField) {
+                    SolrMailField solrSortField = SolrMailField.solrMailFieldFor((MailIndexField) sortField);
+                    solrFields.add(solrSortField);                
+                }
+            }            
         }
         
         return solrFields;

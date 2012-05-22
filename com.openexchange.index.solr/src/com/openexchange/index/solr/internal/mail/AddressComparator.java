@@ -122,11 +122,15 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
             
             String firstHighest = getHighest(firstAddrs);
             String secondHighest = getHighest(secondAddrs);
-            if (isFirstHigherThanSecond(firstHighest, secondHighest)) {
-                return -1;
-            } else {
-                return 1;
-            }                
+            return compare(firstHighest, secondHighest);            
+        }
+        
+        if ((firstAddrs == null || firstAddrs.length == 0) && (secondAddrs == null || secondAddrs.length == 0))  {
+            return 0;
+        } else if (firstAddrs == null || firstAddrs.length == 0) {
+            return 1;
+        } else if (secondAddrs == null || secondAddrs.length == 0) {
+            return -1;
         }
         
         return 0;
@@ -135,23 +139,13 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
     private String getHighest(InternetAddress[] addrs) {
         String highest = null;
         for (InternetAddress addr : addrs) {
-            QuotedInternetAddress quoted;
-            if (addr instanceof QuotedInternetAddress) {
-                quoted = (QuotedInternetAddress) addr;
-            } else {
-                try {
-                    quoted = new QuotedInternetAddress(addr.toUnicodeString());
-                } catch (AddressException e) {
-                    return null;
-                }
-            }
-            
-            String quotedStr = quoted.toUnicodeString();
+            String toCompare = getSortString(addr);
             if (highest == null) {
-                highest = quotedStr;
+                highest = toCompare;
             } else {
-                if (isFirstHigherThanSecond(quotedStr, highest)) {
-                    highest = quotedStr;
+                int compare = compare(toCompare, highest);
+                if (compare < 0) {
+                    highest = toCompare;
                 }
             }
         }
@@ -159,13 +153,78 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
         return highest;
     }
     
-    private boolean isFirstHigherThanSecond(String first, String second) {
-        if ((first.compareToIgnoreCase(second) > 0 && order.equals(Order.ASC))
-            || (first.compareToIgnoreCase(second) < 0 && order.equals(Order.DESC))) {
-            return false;
+    private String getSortString(InternetAddress addr) {
+        if (addr == null) {
+            return null;
         }
         
-        return true;
+        String toCompare = null;
+        if (addr instanceof QuotedInternetAddress) {                
+            toCompare = ((QuotedInternetAddress) addr).getPersonal();
+            if (toCompare == null) {
+                toCompare = ((QuotedInternetAddress) addr).getIDNAddress();
+            }
+        } else {
+            try {
+                if (addr != null) {
+                    QuotedInternetAddress quoted = new QuotedInternetAddress(addr.toUnicodeString());
+                    toCompare = quoted.getPersonal();
+                    if (toCompare == null) {
+                        toCompare = ((QuotedInternetAddress) addr).getIDNAddress();
+                    }
+                }                    
+            } catch (AddressException e) {
+                toCompare = addr.getPersonal();
+                if (toCompare == null) {
+                    toCompare = addr.getAddress();
+                }
+            }
+        }
+        
+        if (toCompare != null && toCompare.startsWith("\"")) {
+            int end = toCompare.endsWith("\"") ? toCompare.length() : toCompare.length() + 1;
+            toCompare = toCompare.substring(1, end);
+        }
+        return toCompare;
+    }
+//    
+//    private boolean isFirstHigherThanSecond(String first, String second) {
+//        if (first == null) {
+//            return false;
+//        }
+//        if (second == null) {
+//            return true;
+//        }
+//        
+//        if ((first.compareToIgnoreCase(second) > 0 && order.equals(Order.ASC))
+//            || (first.compareToIgnoreCase(second) < 0 && order.equals(Order.DESC))) {
+//            return false;
+//        }
+//        
+//        return true;
+//    }
+    
+    private int compare(String first, String second) {
+        if (first == null) {
+            return 1;
+        }
+        
+        if (second == null) {
+            return -1;
+        }
+        
+        int compare = first.compareToIgnoreCase(second);
+        if (compare < 0 && order.equals(Order.ASC)) {
+            return -1;
+        } else if (compare < 0 && order.equals(Order.DESC)) {
+            return 1;
+        } else if (compare > 0 && order.equals(Order.ASC)) {
+            return 1;
+        } else if (compare > 0 && order.equals(Order.DESC)) {
+            return -1;
+        }
+        
+        return 0;
     }
     
 }

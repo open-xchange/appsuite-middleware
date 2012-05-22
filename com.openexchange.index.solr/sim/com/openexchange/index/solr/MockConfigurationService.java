@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.solr.SolrProperties;
 
 
 /**
@@ -66,10 +65,6 @@ public class MockConfigurationService implements ConfigurationService {
 
     @Override
     public String getProperty(final String name) {
-        if (name.equals(SolrProperties.CONFIG_DIR)) {
-            return "/development/git/backend/open-xchange-development/solr/conf";
-        }
-        
         return "IAmAString";
     }
 

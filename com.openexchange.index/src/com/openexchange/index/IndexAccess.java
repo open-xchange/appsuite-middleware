@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexAccess<V> {
-
+    
     /**
      * Gets the fields indexed by this access.
      * 
