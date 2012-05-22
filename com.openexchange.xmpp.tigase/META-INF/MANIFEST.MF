@@ -10,6 +10,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.xmpp,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-ClassPath: .,

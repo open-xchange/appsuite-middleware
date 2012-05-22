@@ -78,12 +78,12 @@ public final class TigaseXmppServer implements XmppServer {
     @Override
     public void init() throws OXException {
         try {
-            final String initialConfig =
-                "tigase.level=ALL\n" + "tigase.xml.level=INFO\n"
-                + "handlers=java.util.logging.ConsoleHandler\n"
-                + "java.util.logging.ConsoleHandler.level=ALL\n"
-                + "java.util.logging.ConsoleHandler.formatter=tigase.util.LogFormatter\n";
-            ConfiguratorAbstract.loadLogManagerConfig(initialConfig);
+            // final String initialConfig =
+            // "tigase.level=ALL\n" + "tigase.xml.level=INFO\n"
+            // + "handlers=java.util.logging.ConsoleHandler\n"
+            // + "java.util.logging.ConsoleHandler.level=ALL\n"
+            // + "java.util.logging.ConsoleHandler.formatter=tigase.util.LogFormatter\n";
+            // ConfiguratorAbstract.loadLogManagerConfig(initialConfig);
             
             final ConfiguratorAbstract config = new Configurator();
             config.init(new String[] {
