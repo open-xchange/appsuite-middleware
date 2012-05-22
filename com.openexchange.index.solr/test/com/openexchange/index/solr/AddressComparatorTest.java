@@ -80,8 +80,10 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AddressComparatorTest extends TestCase {
     
-    public void testCompare() throws Exception {
-    	Services.setServiceLookup(new ServiceLookup() {            
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        Services.setServiceLookup(new ServiceLookup() {            
             @Override
             public <S> S getService(Class<? extends S> clazz) {
                 return (S) new MockConfigurationService();
@@ -92,7 +94,9 @@ public class AddressComparatorTest extends TestCase {
                 return null;
             }
         });
-    	
+    }
+    
+    public void testCompare() throws Exception {    	
         IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
         		new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
         		new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
@@ -125,6 +129,32 @@ public class AddressComparatorTest extends TestCase {
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m2);
         assertTrue(documents.get(2) == m3);
+    }
+    
+    public void testNull() throws Exception {
+        IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+            new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
+            new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
+            null               
+            }), Type.MAIL);
+        IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(new MockMailMessage(null), Type.MAIL);
+        IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+            new QuotedInternetAddress("ggg@abc.de", "Gg, Gg"),
+            new QuotedInternetAddress("eee@abc.de", "Ee, Ee"),
+            new QuotedInternetAddress("ddd@abc.de", "Dd, Dd")
+            }), Type.MAIL);
+    
+        List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
+        documents.add(m1);
+        documents.add(m2);
+        documents.add(m3);
+        Collections.shuffle(documents);   
+        
+        AddressComparator comp = new AddressComparator(MailIndexField.FROM, Order.ASC);
+        Collections.sort(documents, comp);
+        assertTrue(documents.get(0) == m1);
+        assertTrue(documents.get(1) == m3);
+        assertTrue(documents.get(2) == m2);
     }
     
     private static final class MockMailMessage extends MailMessage {

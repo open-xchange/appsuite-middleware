@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.indexedSearch.json.action.AbstractIndexAction;
+import com.openexchange.indexedSearch.json.action.IsIndexedAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -78,6 +79,9 @@ public class IndexActionFactory implements AJAXActionServiceFactory {
 
         final AbstractIndexAction action = new com.openexchange.indexedSearch.json.action.SearchAction(services, registry);
         actions.put(action.getAction(), action);
+        
+        final AbstractIndexAction action2 = new IsIndexedAction(services, registry);
+        actions.put(action2.getAction(), action2);        
     }
 
     @Override
