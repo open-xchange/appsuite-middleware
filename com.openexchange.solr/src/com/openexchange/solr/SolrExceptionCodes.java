@@ -64,6 +64,10 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum SolrExceptionCodes implements OXExceptionCode {
 
     /**
+     * An error occurred: %1$s
+     */
+    ERROR(SolrExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 1000),
+    /**
      * Could not find solr core entry for user %1$s and module %2$s in context %3$s. 
      */
     CORE_ENTRY_NOT_FOUND(SolrExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1001),

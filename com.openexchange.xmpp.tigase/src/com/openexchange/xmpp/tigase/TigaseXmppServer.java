@@ -86,7 +86,7 @@ public final class TigaseXmppServer implements XmppServer {
             final ConfiguratorAbstract config = new Configurator();
             {
                 final ConfigurationService service = TigaseServiceLookup.getService(ConfigurationService.class);
-                final String configPath = service.getProperty("CONFIGPATH");
+                final String configPath = service.getProperty("CONFIGPATH", "");
                 config.init(new String[] {
                     "config-type","--gen-config-def",
                     "--admins","admin@devel.tigase.org,admin@test-d",
@@ -102,7 +102,7 @@ public final class TigaseXmppServer implements XmppServer {
 
             final MessageRouterIfc router = new MessageRouter();
 
-            router.setName("open-xchange-router");
+            router.setName("open-xchange-message-router");
             router.setConfig(config);
             router.start();
             this.router = router;
