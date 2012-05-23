@@ -65,6 +65,7 @@
         </move>
         <replace dir="${patchConfDir}">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${confSubstPatch}"/>
+            <replacefilter token="@oxconfdir@" value="${confSubstPatch}"/>
         </replace>
     </target>
 

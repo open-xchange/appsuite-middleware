@@ -1,0 +1,134 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.rmi.osgi;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
+import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.rmi.LocalServerFactory;
+import com.openexchange.rmi.RMITracker;
+import com.openexchange.rmi.exceptions.OXRMIExceptionCodes;
+
+/**
+ * {@link RMIService}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class RMIActivator extends HousekeepingActivator {
+
+    private static Log log = LogFactory.getLog(RMIActivator.class);
+
+    private ServiceRegistry serviceRegistry;
+
+    private RMITracker rmiTracker;
+
+    private Registry rmiRegistry;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
+        return needed;
+    }
+
+    @Override
+    protected void startBundle() throws OXException {
+        log.info("Starting bundle com.openexchange.rmi");
+        // ClassLoader oldLoader = null;
+        // try {
+        // oldLoader = Thread.currentThread().getContextClassLoader();
+        // Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+        try {
+            serviceRegistry = new ServiceRegistry();
+            for (Class<?> clazz : getNeededServices()) {
+                Object service = getService(clazz);
+                serviceRegistry.addService(clazz, service);
+            }
+            ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
+            int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
+            rmiRegistry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
+            rmiTracker = new RMITracker(context, rmiRegistry);
+            track(Remote.class, rmiTracker);
+            openTrackers();
+        } catch (RemoteException e) {
+            log.fatal(e.getMessage(), e);
+            throw OXRMIExceptionCodes.RMI_START_FAILED.create(e);
+        }
+        // } finally {
+        // Thread.currentThread().setContextClassLoader(oldLoader);
+        // }
+    }
+
+    @Override
+    protected void stopBundle() {
+        log.info("Stopping bundle com.openexchange.rmi");
+        if (serviceRegistry != null) {
+            serviceRegistry.clearRegistry();
+            serviceRegistry = null;
+        }
+        if (rmiRegistry != null) {
+            rmiRegistry = null;
+        }
+        if (rmiTracker != null) {
+            rmiTracker.close();
+            rmiTracker = null;
+        }
+        closeTrackers();
+        cleanUp();
+    }
+
+}

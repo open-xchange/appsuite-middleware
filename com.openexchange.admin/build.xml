@@ -49,6 +49,7 @@
         </move>
         <replace dir="${patchConfDir}" includes="*.properties">
             <replacefilter token="@confDir@" value="${confInstallDir}"/>
+            <replacefilter token="@oxconfdir@" value="${confSubstPatch}"/>
         </replace>
     </target>    
 
