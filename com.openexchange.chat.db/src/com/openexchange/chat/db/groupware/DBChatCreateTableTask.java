@@ -89,10 +89,10 @@ public class DBChatCreateTableTask extends UpdateTaskAdapter {
         final int contextId = params.getContextId();
         final Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        boolean transactional = false;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            rollback = true;
+            transactional = true;
             final String[] tableNames = DBChatCreateTableService.getTablesToCreate();
             final String[] createStmts = DBChatCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -108,18 +108,18 @@ public class DBChatCreateTableTask extends UpdateTaskAdapter {
             }
             writeCon.commit(); // COMMIT
         } catch (final OXException e) {
-            if (rollback) {
+            if (transactional) {
                 DBUtils.rollback(writeCon);
             }
             throw e;
         } catch (final Exception e) {
-            if (rollback) {
+            if (transactional) {
                 DBUtils.rollback(writeCon);
             }
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (rollback) {
+            if (transactional) {
                 DBUtils.autocommit(writeCon);
             }
             dbService.backForUpdateTask(contextId, writeCon);
