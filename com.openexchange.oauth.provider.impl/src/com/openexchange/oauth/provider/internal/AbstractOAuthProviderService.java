@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.internal;
 
-import static com.openexchange.oauth.provider.internal.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
@@ -69,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AbstractOAuthProviderService} - The abstract class for OAuth providers.
@@ -285,7 +285,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            closeSQLStuff(rs);
+            DBUtils.closeSQLStuff(rs);
         }
         return retval;
     }

@@ -86,6 +86,7 @@ import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Utility methods for providers that store consumers, tokens and secrets in database.

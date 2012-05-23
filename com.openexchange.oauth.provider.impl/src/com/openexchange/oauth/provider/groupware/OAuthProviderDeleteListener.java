@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.oauth.provider.internal.DBUtils;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OAuthProviderDeleteListener}
