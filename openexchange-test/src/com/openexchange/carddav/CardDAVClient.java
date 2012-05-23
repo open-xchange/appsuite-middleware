@@ -59,15 +59,25 @@ import com.openexchange.exception.OXException;
 public class CardDAVClient extends WebDAVClient {
 	
 	/**
-	 * The user agent as normally used by the Apple Addressbook client in Mac OS x 10.7.2
+	 * The user agent as normally used by the Apple Addressbook client in Mac OS X 10.7.2
 	 */
 	public static final String USER_AGENT_10_7_2 = "AddressBook/6.1 (1062) CardDAVPlugin/196 CFNetwork/520.2.5 Mac_OS_X/10.7.2 (11C74)";
 	
 	/**
-	 * The user agent as normally used by the Apple Addressbook client in a German Mac OS x 10.6.8
+	 * The user agent as normally used by the Apple Addressbook client in a German Mac OS X 10.6.8
 	 */
 	public static final String USER_AGENT_10_6_8 = "Adressbuch/883 CFNetwork/454.12.4 Darwin/10.8.0 (i386)";
 
+	/**
+	 * The user agent as normally used by the Apple Addressbook client in Mac OS X 10.7.3
+	 */
+	public static final String USER_AGENT_10_7_3 = "AddressBook/6.1 (1083) CardDAVPlugin/200 CFNetwork/520.3.2 Mac_OS_X/10.7.3 (11D50d)";
+
+	/**
+	 * The user agent as normally used by the Apple client in iOS 5.1.1
+	 */
+	public static final String USER_AGENT_IOS_5_1_1 = "iOS/5.1.1 (9B206) dataaccessd/1.0";
+	
 	public CardDAVClient() throws OXException {
 		super();
 		super.setUserAgent(USER_AGENT_10_7_2);
