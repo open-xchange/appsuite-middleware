@@ -51,6 +51,7 @@ package com.openexchange.contacts.json;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -58,9 +59,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -166,15 +169,33 @@ public class ContactRequest {
      * @throws OXException
      */
     public ContactField[] getFields() throws OXException {
-    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+    	return getFields((ContactField[])null);
+//    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+//    	if (this.isInternalSort()) {
+//        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED,
+//        			ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, 
+//        			ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, 
+//        			ContactField.USE_COUNT);
+//    	} else {
+//        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED);
+//    	}
+    }    
+
+    public ContactField[] getFields(ContactField...mandatoryFields) throws OXException {
+    	ContactField[] fields = null;
     	if (this.isInternalSort()) {
-        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED,
-        			ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, 
-        			ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, 
-        			ContactField.USE_COUNT);
+    		fields = new ContactField[] { 
+    			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, 
+				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, 
+				ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT };
     	} else {
-        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED);
+    		fields = new ContactField[] { ContactField.LAST_MODIFIED };
     	}
+    	if (null != mandatoryFields) {
+    		fields = Arrays.add(fields, mandatoryFields);
+    	}
+    	int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+    	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, fields);
     }    
 
     /**
@@ -321,6 +342,10 @@ public class ContactRequest {
 
     public int getRightHandLimit() throws OXException {
         return RequestTools.getNullableIntParameter(request, "right_hand_limit");
+    }
+    
+    public boolean isExcludeAdmin() throws OXException {
+    	return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
     }
 
     public int[][] getListRequestData() throws OXException {

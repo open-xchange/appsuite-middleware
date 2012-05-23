@@ -560,11 +560,11 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
+    public List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
     	return transform(data, Contact.ALL_COLUMNS);
     }
 
-    private List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
+    public List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
         final List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
