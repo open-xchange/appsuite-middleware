@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,26 @@
  *
  */
 
-package com.openexchange.osgi.osgi;
+package com.openexchange.json.cache.impl.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.json.cache.JsonCacheService;
+import com.openexchange.json.cache.impl.JsonCacheServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.console.ServiceStateLookup;
-import com.openexchange.osgi.console.osgi.ConsoleActivator;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
+ * {@link JsonCacheActivator}
  * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OsgiActivator extends HousekeepingActivator {
-
-    private volatile ConsoleActivator consoleActivator;
+public final class JsonCacheActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Initializes a new {@link JsonCacheActivator}.
      */
-    public OsgiActivator() {
+    public JsonCacheActivator() {
         super();
     }
 
@@ -80,36 +77,23 @@ public class OsgiActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-        logger.info("starting bundle: com.openexchange.osgi");
-        try {
-            registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-            final ConsoleActivator consoleActivator = new ConsoleActivator();
-            consoleActivator.start(context);
-            this.consoleActivator = consoleActivator;
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: start: "+e.getMessage(), e);
-            throw e;
-        }
+        /*
+         * Register services for table creation
+         */
+        registerService(CreateTableService.class, new JsonCacheCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new JsonCacheCreateTableTask(this)));
+        /*
+         * Register cache service
+         */
+        final JsonCacheServiceImpl serviceImpl = new JsonCacheServiceImpl(this);
+        registerService(JsonCacheService.class, serviceImpl);
+        JsonCacheService.CACHE_REFERENCE.set(serviceImpl);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-        logger.info("stopping bundle: com.openexchange.osgi");
-        try {
-            final ConsoleActivator consoleActivator = this.consoleActivator;
-            if (null != consoleActivator) {
-                consoleActivator.stop(context);
-                this.consoleActivator = null;
-            }
-            cleanUp();
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: stop: "+e.getMessage(), e);
-            throw e;
-        }
+        JsonCacheService.CACHE_REFERENCE.set(null);
+        super.stopBundle();
     }
 
 }

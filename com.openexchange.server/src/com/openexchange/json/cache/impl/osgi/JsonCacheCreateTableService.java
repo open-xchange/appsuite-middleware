@@ -47,69 +47,66 @@
  *
  */
 
-package com.openexchange.osgi.osgi;
+package com.openexchange.json.cache.impl.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.console.ServiceStateLookup;
-import com.openexchange.osgi.console.osgi.ConsoleActivator;
+import com.openexchange.database.AbstractCreateTableImpl;
+
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link JsonCacheCreateTableService}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OsgiActivator extends HousekeepingActivator {
+public final class JsonCacheCreateTableService extends AbstractCreateTableImpl {
 
-    private volatile ConsoleActivator consoleActivator;
+    private static final String TABLE = "jsonCache";
+
+    private static final String CREATE = "CREATE TABLE " + TABLE + " (\n" + 
+        "  cid INT4 unsigned NOT NULL,\n" + 
+        "  user INT4 unsigned NOT NULL,\n" + 
+        "  id VARCHAR(128) CHARACTER SET latin1 NOT NULL,\n" + 
+        "  json TEXT CHARACTER SET latin1 NOT NULL,\n" + 
+        "  PRIMARY KEY (cid,user,id)\n" + 
+        ") ENGINE=InnoDB";
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Gets the table names.
+     * 
+     * @return The table names.
      */
-    public OsgiActivator() {
+    public static String[] getTablesToCreate() {
+        return new String[] { TABLE };
+    }
+
+    /**
+     * Gets the CREATE-TABLE statements.
+     * 
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        return new String[] { CREATE };
+    }
+
+    /**
+     * Initializes a new {@link JsonCacheCreateTableService}.
+     */
+    public JsonCacheCreateTableService() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-        logger.info("starting bundle: com.openexchange.osgi");
-        try {
-            registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-            final ConsoleActivator consoleActivator = new ConsoleActivator();
-            consoleActivator.start(context);
-            this.consoleActivator = consoleActivator;
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: start: "+e.getMessage(), e);
-            throw e;
-        }
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-        logger.info("stopping bundle: com.openexchange.osgi");
-        try {
-            final ConsoleActivator consoleActivator = this.consoleActivator;
-            if (null != consoleActivator) {
-                consoleActivator.stop(context);
-                this.consoleActivator = null;
-            }
-            cleanUp();
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: stop: "+e.getMessage(), e);
-            throw e;
-        }
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
     }
 
 }
