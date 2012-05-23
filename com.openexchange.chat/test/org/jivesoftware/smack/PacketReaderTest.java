@@ -56,7 +56,11 @@ import org.jivesoftware.smack.filter.FromMatchesFilter;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.packet.*;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.MockPacketFilter;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smack.test.SmackTestCase;
 
 import java.util.Date;
