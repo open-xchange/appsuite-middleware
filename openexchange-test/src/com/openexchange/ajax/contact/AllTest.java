@@ -49,57 +49,105 @@
 
 package com.openexchange.ajax.contact;
 
-import org.json.JSONArray;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.groupware.container.Contact;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
-public class AllTest extends ContactTest {
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.junit.Assert;
+
+import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.arrays.Arrays;
+
+public class AllTest extends AbstractManagedContactTest {
 
 	public AllTest(final String name) {
 		super(name);
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 	}
 
-    //FIXME: This is no test!
     public void testAll() throws Exception {
-		final int cols[] = new int[]{ Contact.OBJECT_ID };
-
-		listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
+		int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
+    	Contact[] contacts = manager.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
+    	assertNotNull("got no contacts", contacts);
+    	assertTrue("got no contacts", 0 < contacts.length);
 	}
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
-        final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC};
-
-        final Contact contactObj = createContactObject("testLastModifiedUTC");
-		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-        try {
-            final AllRequest req = new AllRequest(contactFolderId, cols);
-
-            final CommonAllResponse response = Executor.execute(client, req);
-            final JSONArray arr = (JSONArray) response.getResponse().getData();
-
-            assertNotNull(arr);
-            final int size = arr.length();
-            assertTrue(size > 0);
-            for(int i = 0; i < size; i++ ){
-                final JSONArray objectData = arr.optJSONArray(i);
-                assertNotNull(objectData);
-                assertNotNull(objectData.opt(2));
-            }
-        } finally {
-            deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+    	manager.newAction(
+    			generateContact("testLastModifiedUTC1"), 
+    			generateContact("testLastModifiedUTC2"), 
+    			generateContact("testLastModifiedUTC3"));
+        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
+    	Contact[] contacts = manager.allAction(folderID, columnIDs);
+    	assertNotNull("got no contacts", contacts);
+    	assertTrue("got no contacts", 0 < contacts.length);
+        JSONArray arr = (JSONArray) manager.getLastResponse().getData();
+        assertNotNull("no json array in response data", arr);
+        int size = arr.length();
+        assertTrue("no data in json array", 0 < arr.length());
+        for (int i = 0; i < size; i++ ){
+            JSONArray objectData = arr.optJSONArray(i);
+            assertNotNull(objectData);
+            assertNotNull("no last modified utc found in contact data", objectData.opt(2));
         }
+    }
+    
+    public void testExcludeAdmin() throws Exception {
+		int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.INTERNAL_USERID };
+		/*
+		 * perform different all requests
+		 */
+		Contact[] allContactsDefault = manager.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
+		assertNotNull("got no contacts", allContactsDefault);
+    	assertTrue("got no contacts", 0 < allContactsDefault.length);
+		Contact[] allContactsWithAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, true);
+		assertNotNull("got no contacts", allContactsWithAdmin);
+    	assertTrue("got no contacts", 0 < allContactsWithAdmin.length);
+		Contact[] allContactsWithoutAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, false);
+		assertNotNull("got no contacts", allContactsWithoutAdmin);
+    	assertTrue("got no contacts", 0 < allContactsWithoutAdmin.length);
+    	/*
+    	 * check results
+    	 */
+    	Assert.assertArrayEquals("'admin=true' differs from default result", allContactsDefault, allContactsWithAdmin);
+    	assertEquals("unexpected number of contacts in result", allContactsWithAdmin.length, allContactsWithoutAdmin.length + 1);
+    }
+        
+    private Contact[] allAction(int folderId, int[] columns, Boolean admin) throws OXException, IOException, JSONException {
+        List<Contact> allContacts = new LinkedList<Contact>();
+        AllRequest request = new AllRequestWithAdmin(folderId, columns, admin);
+        CommonAllResponse response = getClient().execute(request, manager.getSleep());
+        JSONArray data = (JSONArray) response.getResponse().getData();
+        allContacts = manager.transform(data, columns);
+        return allContacts.toArray(new Contact[]{});
+    }
+    
+    private static final class AllRequestWithAdmin extends AllRequest {
+    	
+    	private Boolean admin;
+
+		public AllRequestWithAdmin(int folderId, int[] columns, Boolean admin) {
+			super(folderId, columns);
+			this.admin = admin;
+		}
+
+		@Override
+	    public Parameter[] getParameters() {
+	        Parameter[] params = super.getParameters();
+	        return null != admin ? Arrays.add(params, new Parameter("admin", admin)) : params;
+	    }
+
     }
 
 }
