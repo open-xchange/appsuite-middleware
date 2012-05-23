@@ -57,10 +57,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.imageio.ImageIO;
+
 import org.apache.commons.logging.Log;
+
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -173,6 +177,57 @@ public class JavaImageScalingService implements ImageScalingService {
         }
     }
 
+	@Override
+	public InputStream crop(InputStream pictureData, int x, int y, int width, int height, String contentType) throws IOException {
+		/*
+		 * read source image
+		 */
+    	BufferedImage sourceImage = ImageIO.read(pictureData);
+    	/*
+    	 * get cropped image
+    	 */
+    	BufferedImage targetImage = crop(sourceImage, x, y, width, height);
+		/*
+		 * write back to output stream
+		 */    		
+		ByteArrayOutputStream outputStream = new UnsynchronizedByteArrayOutputStream();
+		if (false == ImageIO.write(targetImage, getImageFormat(contentType), outputStream)) {
+			throw new IOException("Couldn't write cropped image");
+		}
+		outputStream.flush();
+		return new ByteArrayInputStream(outputStream.toByteArray());
+	}
+
+	@Override
+	public BufferedImage crop(BufferedImage sourceImage, int x, int y, int width, int height) throws IOException {
+    	/*
+    	 * prepare target image
+    	 */
+    	BufferedImage targetImage = null; 
+    	if (0 <= x && sourceImage.getWidth() > x && sourceImage.getWidth() >= x + width &&
+    			0 <= y && sourceImage.getHeight() > y && sourceImage.getHeight() >= y + height) {
+    		/*
+    		 * extract sub-image directly
+    		 */
+    		targetImage = sourceImage.getSubimage(x, y, width, height);
+    	} else {
+    		/*
+    		 * draw partial region to target image
+    		 */
+        	targetImage = new BufferedImage(width, height, sourceImage.getType());
+    		Graphics2D graphics = targetImage.createGraphics();
+    		graphics.setBackground(new Color(255, 255, 255, 0));
+    		graphics.clearRect(0, 0, width, height);
+    		graphics.drawImage(sourceImage, x, y, null);
+    	}
+    	return targetImage;
+	}
+	
+	private static String getImageFormat(String contentType) {
+		return null != contentType && contentType.toLowerCase().startsWith("image/") ? 
+				contentType.substring(6) : contentType;	
+	}
+
     private AffineTransform getExifTransformation(ImageInformation info) {
         AffineTransform t = new AffineTransform();
 
@@ -221,10 +276,14 @@ public class JavaImageScalingService implements ImageScalingService {
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile), false);
             Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            if (null != directory) {
+                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            }
             JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-            orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-            width = jpegDirectory.getImageWidth();
-            height = jpegDirectory.getImageHeight();
+            if (null != jpegDirectory) {
+	            width = jpegDirectory.getImageWidth();
+	            height = jpegDirectory.getImageHeight();
+            }
         } catch (MetadataException e) {
             LOG.debug("Unable to retrieve image information.", e);
             return null;
