@@ -152,7 +152,7 @@ CREATE TABLE `oauth2ClientProperty` (
 
 CREATE TABLE `oauthNonce` (
   `nonce` varchar(255) NOT NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`nonce`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `solrCoreStores` (
