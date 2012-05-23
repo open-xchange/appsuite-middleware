@@ -50,6 +50,7 @@
 package com.openexchange.json.cache.impl.osgi;
 
 import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.json.cache.JsonCacheService;
@@ -82,6 +83,7 @@ public final class JsonCacheActivator extends HousekeepingActivator {
          */
         registerService(CreateTableService.class, new JsonCacheCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new JsonCacheCreateTableTask(this)));
+        registerService(DeleteListener.class, new JsonCacheDeleteListener());
         /*
          * Register cache service
          */
