@@ -50,16 +50,19 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -69,6 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
@@ -141,6 +145,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         InputStream documentData = null;
         try {
             file = rotateIfImage(file);
+            file = cropIfImage(request, file);
             file = scaleIfImage(request, file);
             documentData = new BufferedInputStream(file.getStream());
             final String userAgent = req.getHeader("user-agent");
@@ -273,6 +278,28 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
     
+    private IFileHolder cropIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+    	if (null == this.scaler || false == isImage(file) || false == request.isSet("cropWidth") || false == request.isSet("cropHeight")) {
+    		return file;
+    	}
+    	/*
+    	 * get crop parameters
+    	 */
+    	int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+    	int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+    	int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+    	int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+    	/*
+    	 * crop to new input stream
+    	 */
+        try {
+            InputStream croppedImage = scaler.crop(file.getStream(), cropX, cropY, cropWidth, cropHeight, file.getContentType());
+            return new FileHolder(croppedImage, -1, file.getContentType(), file.getName());
+        } finally {
+            Streams.close(file);
+        }    
+    }
+
     private boolean isImage(IFileHolder file) {
         String contentType = file.getContentType();
         if (!contentType.startsWith("image/")) {

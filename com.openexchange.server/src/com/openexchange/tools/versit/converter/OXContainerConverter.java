@@ -51,8 +51,6 @@ package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -113,12 +111,14 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -561,7 +561,9 @@ public class OXContainerConverter {
                 			imageData = doABCrop(imageData, clipRect, formatName);
                 		} catch (IOException e) {
                 			LOG.error("error cropping image, falling back to uncropped image.", e);
-                		}
+                		} catch (OXException e) {
+                			LOG.error("error cropping image, falling back to uncropped image.", e);
+						}
                 	}
                     contactContainer.setImage1(imageData);
                     value = null;
@@ -911,8 +913,9 @@ public class OXContainerConverter {
      * @param imageFormat the target image format
      * @return the cropped image
      * @throws IOException
+     * @throws OXException 
      */
-    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException {
+    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException, OXException {
     	InputStream inputStream = null;
     	ByteArrayOutputStream outputStream = null;
     	try {
@@ -921,17 +924,12 @@ public class OXContainerConverter {
     		 */
     		inputStream = new ByteArrayInputStream(source);
         	BufferedImage sourceImage = ImageIO.read(inputStream);
-    		/*
-    		 * prepare target image
-    		 */
-        	BufferedImage targetImage = new BufferedImage(clipRect.width, clipRect.height, sourceImage.getType());
-    		Graphics2D graphics = targetImage.createGraphics();
-    		graphics.setBackground(new Color(255, 255, 255, 0));
-    		graphics.clearRect(0,  0, clipRect.width, clipRect.height);
-    		/*
-    		 * draw image, translating the offsets to coordinates
-    		 */
-    		graphics.drawImage(sourceImage, clipRect.x * -1, clipRect.height + clipRect.y - sourceImage.getHeight(), null);
+        	/*
+        	 * crop the image
+        	 */
+        	ImageScalingService imageService = ServerServiceRegistry.getInstance().getService(ImageScalingService.class, true);
+        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1, 
+        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height);
     		/*
     		 * write back to byte array
     		 */    		
@@ -940,20 +938,8 @@ public class OXContainerConverter {
     		outputStream.flush();
     		return outputStream.toByteArray();
     	} finally {
-    		if (null != inputStream) {
-				try {
-					inputStream.close();
-				} catch (Exception e) {
-					LOG.debug(e);
-				}
-    		}
-    		if (null != outputStream) {
-				try {
-					outputStream.close();
-				} catch (Exception e) {
-					LOG.debug(e);
-				}
-    		}
+    		Streams.close(inputStream);
+    		Streams.close(outputStream);
     	}
     }
     
