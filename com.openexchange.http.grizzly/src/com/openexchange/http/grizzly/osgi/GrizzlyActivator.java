@@ -63,9 +63,10 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.Configuration;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.addons.backendRoute.BackendRouteAddOn;
-import com.openexchange.http.grizzly.filters.BackendRouteFilter;
+import com.openexchange.http.grizzly.addons.BackendRouteAddOn;
+import com.openexchange.http.grizzly.grizzlyfilters.BackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
 import com.openexchange.http.grizzly.services.http.OSGiMainHandler;
 import com.openexchange.log.Log;
@@ -113,6 +114,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebsocketsEnabled", true);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
             final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "OX-0");
+            Configuration.backendRoute=backendRoute;
 
 
             // create, configure and start server
@@ -148,6 +150,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
              * getService() will get its own instance of HttpServiceImpl
              */
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
+            
             //TODO: add Filters to context
             registerService(HttpService.class.getName(), serviceFactory);
             

@@ -57,13 +57,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,18 +67,11 @@ import com.openexchange.tools.session.ServerSession;
  * {@link DefaultDispatcher} - The default {@link Dispatcher dispatcher} implementation.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private static final Log LOG = LogFactory.getLog(DefaultDispatcher.class);
-    
-    /**
-     * The prefix reference for dispatcher; e.g. <tt>"/ajax"</tt> (default).
-     * <p>
-     * All requests starting with this prefix are directed to dispatcher framework.
-     */
-    public static final AtomicReference<String> PREFIX = new AtomicReference<String>();
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultDispatcher.class));
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
 
@@ -91,27 +80,10 @@ public class DefaultDispatcher implements Dispatcher {
     /**
      * Initializes a new {@link DefaultDispatcher}.
      */
-    public DefaultDispatcher(String prefix) {
+    public DefaultDispatcher() {
         super();
-        PREFIX.set(prefix);
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
         customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.Dispatcher#getPrefix()
-     */
-    @Override
-    public String getPrefix() {
-        return PREFIX.get();
-    }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.Dispatcher#setPrefix(java.lang.String)
-     */
-    @Override
-    public void setPrefix(String prefix) throws IllegalArgumentException {
-        PREFIX.set(prefix);
     }
 
     @Override

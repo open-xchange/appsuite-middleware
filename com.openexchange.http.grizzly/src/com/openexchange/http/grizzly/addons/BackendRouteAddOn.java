@@ -47,51 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgi;
+package com.openexchange.http.grizzly.addons;
 
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
-import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.mail.mime.utils.ImageMatcher;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.services.ServerServiceRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.glassfish.grizzly.filterchain.Filter;
+import org.glassfish.grizzly.filterchain.FilterChainBuilder;
+import org.glassfish.grizzly.http.server.AddOn;
+import org.glassfish.grizzly.http.server.HttpServerFilter;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import com.openexchange.http.grizzly.grizzlyfilters.BackendRouteFilter;
+import com.openexchange.http.grizzly.util.FilterChainUtils;
 
 /**
- * {@link PrefixServiceActivator}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link BackendRouteAddOn}
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PrefixServiceActivator extends HousekeepingActivator {
+public class BackendRouteAddOn implements AddOn {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{ConfigurationService.class};
-	}
+    private static final Log LOG = LogFactory.getLog(BackendRouteAddOn.class);
 
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			final String prefix;
-	        {
-	            String tmp = getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
-	            if (tmp.charAt(0) != '/') {
-	                tmp = '/' + tmp;
-	            }
-	            if (!tmp.endsWith("/")) {
-	                tmp = tmp + '/';
-	            }
-	            prefix = tmp;
-	        }
-	        DispatcherServlet.setPrefix(prefix);
-	        final DispatcherPrefixService prefixService = DefaultDispatcherPrefixService.getInstance();
-	        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
-	        ImageMatcher.setPrefixService(prefixService);
-	        registerService(DispatcherPrefixService.class, prefixService);
-		} catch (final Throwable t) {
-			t.printStackTrace();
-		}
+    private Filter filter;
 
-	}
+    public BackendRouteAddOn(BackendRouteFilter filter) {
+        this.filter = filter;
+        LOG.info("constructed WatcherAddon");
+    }
+
+    @Override
+    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
+
+        // networkListener.getTransport().getConnectionMonitoringConfig().addProbes(new TCPConnectionWatcherProbe());
+        // builder.add(2, new ConnectionWatcherFilter());
+        //
+        // int transportFilterIdx = builder.indexOfType(org.glassfish.grizzly.filterchain.TransportFilter.class);
+        // if(transportFilterIdx > 0) {
+        // builder.add(transportFilterIdx - 1 , new ConnectionWatcherFilter());
+        // }
+        // int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
+        // if(httpServerFilterIdx > 0) {
+        // builder.add(httpServerFilterIdx - 1 , new RequestWatcherFilter());
+        // }
+        AddOn[] addOns = networkListener.getAddOns();
+        for (AddOn addOn : addOns) {
+            LOG.info("Current Addon is: " + addOn.getClass());
+        }
+        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
+        if (httpServerFilterIdx > 0) {
+            builder.add(httpServerFilterIdx - 1, filter);
+        }
+        LOG.info("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+    }
 
 }

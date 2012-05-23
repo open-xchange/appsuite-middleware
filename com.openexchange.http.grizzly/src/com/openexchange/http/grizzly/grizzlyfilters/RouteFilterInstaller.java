@@ -47,51 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgi;
+package com.openexchange.http.grizzly.grizzlyfilters;
 
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
-import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.mail.mime.utils.ImageMatcher;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.services.ServerServiceRegistry;
+import java.io.IOException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 
 /**
- * {@link PrefixServiceActivator}
+ * {@link RouteFilterInstaller}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PrefixServiceActivator extends HousekeepingActivator {
+public class RouteFilterInstaller implements Servlet {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{ConfigurationService.class};
-	}
+    /* (non-Javadoc)
+     * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+     */
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        ServletContext servletContext = config.getServletContext();
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			final String prefix;
-	        {
-	            String tmp = getService(ConfigurationService.class).getProperty("com.openexchange.dispatcher.prefix", "/ajax/").trim();
-	            if (tmp.charAt(0) != '/') {
-	                tmp = '/' + tmp;
-	            }
-	            if (!tmp.endsWith("/")) {
-	                tmp = tmp + '/';
-	            }
-	            prefix = tmp;
-	        }
-	        DispatcherServlet.setPrefix(prefix);
-	        final DispatcherPrefixService prefixService = DefaultDispatcherPrefixService.getInstance();
-	        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
-	        ImageMatcher.setPrefixService(prefixService);
-	        registerService(DispatcherPrefixService.class, prefixService);
-		} catch (final Throwable t) {
-			t.printStackTrace();
-		}
+    /* (non-Javadoc)
+     * @see javax.servlet.Servlet#getServletConfig()
+     */
+    @Override
+    public ServletConfig getServletConfig() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	}
+    /* (non-Javadoc)
+     * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     */
+    @Override
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.Servlet#getServletInfo()
+     */
+    @Override
+    public String getServletInfo() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.Servlet#destroy()
+     */
+    @Override
+    public void destroy() {
+        //Delete Filter
+
+    }
 
 }

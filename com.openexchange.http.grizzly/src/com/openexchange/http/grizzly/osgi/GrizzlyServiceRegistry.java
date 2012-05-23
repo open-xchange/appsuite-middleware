@@ -47,66 +47,15 @@
  *
  */
 
-package com.openexchange.http.grizzly.filters;
+package com.openexchange.http.grizzly.osgi;
 
-import java.io.IOException;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link RouteFilterInstaller}
- *
+ * {@link GrizzlyServiceRegistry}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RouteFilterInstaller implements Servlet {
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
-     */
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        ServletContext servletContext = config.getServletContext();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#getServletConfig()
-     */
-    @Override
-    public ServletConfig getServletConfig() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
-     */
-    @Override
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-
-    }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#getServletInfo()
-     */
-    @Override
-    public String getServletInfo() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#destroy()
-     */
-    @Override
-    public void destroy() {
-        //Delete Filter
-
-    }
+public class GrizzlyServiceRegistry {
 
 }

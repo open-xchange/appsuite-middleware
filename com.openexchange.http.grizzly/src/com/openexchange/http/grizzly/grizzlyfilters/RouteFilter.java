@@ -47,57 +47,49 @@
  *
  */
 
-package com.openexchange.http.grizzly.addons.backendRoute;
+package com.openexchange.http.grizzly.grizzlyfilters;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.glassfish.grizzly.filterchain.Filter;
-import org.glassfish.grizzly.filterchain.FilterChainBuilder;
-import org.glassfish.grizzly.http.server.AddOn;
-import org.glassfish.grizzly.http.server.HttpServerFilter;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import com.openexchange.http.grizzly.filters.BackendRouteFilter;
-import com.openexchange.http.grizzly.util.FilterChainUtils;
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 
 /**
- * {@link BackendRouteAddOn}
- * 
+ * {@link RouteFilter}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class BackendRouteAddOn implements AddOn {
+public class RouteFilter implements Filter {
 
-    private static final Log LOG = LogFactory.getLog(BackendRouteAddOn.class);
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
+     */
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // TODO Auto-generated method stub
 
-    private Filter filter;
-
-    public BackendRouteAddOn(BackendRouteFilter filter) {
-        this.filter = filter;
-        LOG.info("constructed WatcherAddon");
     }
 
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+     */
     @Override
-    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        // TODO Auto-generated method stub
 
-        // networkListener.getTransport().getConnectionMonitoringConfig().addProbes(new TCPConnectionWatcherProbe());
-        // builder.add(2, new ConnectionWatcherFilter());
-        //
-        // int transportFilterIdx = builder.indexOfType(org.glassfish.grizzly.filterchain.TransportFilter.class);
-        // if(transportFilterIdx > 0) {
-        // builder.add(transportFilterIdx - 1 , new ConnectionWatcherFilter());
-        // }
-        // int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
-        // if(httpServerFilterIdx > 0) {
-        // builder.add(httpServerFilterIdx - 1 , new RequestWatcherFilter());
-        // }
-        AddOn[] addOns = networkListener.getAddOns();
-        for (AddOn addOn : addOns) {
-            LOG.info("Current Addon is: " + addOn.getClass());
-        }
-        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
-        if (httpServerFilterIdx > 0) {
-            builder.add(httpServerFilterIdx - 1, filter);
-        }
-        LOG.info("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#destroy()
+     */
+    @Override
+    public void destroy() {
+        // TODO Auto-generated method stub
+
     }
 
 }

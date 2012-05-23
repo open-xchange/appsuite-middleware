@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -73,11 +74,10 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DispatcherServlet} - The main dispatcher servlet which delegates request to dispatcher framework.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class DispatcherServlet extends SessionServlet {
 
@@ -93,7 +93,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Sets the dispatcher instance.
-     * 
+     *
      * @param dispatcher The dispatcher instance or <code>null</code> to remove
      */
     public static void setDispatcher(final Dispatcher dispatcher) {
@@ -102,7 +102,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Gets the dispatcher instance.
-     * 
+     *
      * @return The dispatcher instance or <code>null</code> if absent
      */
     public static Dispatcher getDispatcher() {
@@ -111,20 +111,20 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Sets the prefix.
-     * 
+     *
      * @param prefix The prefix or <code>null</code> to remove
      */
     public static void setPrefix(final String prefix) {
-        getDispatcher().setPrefix(prefix);
+        PREFIX.set(prefix);
     }
 
     /**
      * Gets the prefix.
-     * 
+     *
      * @return The prefix or <code>null</code> if absent
      */
     public static String getPrefix() {
-        return getDispatcher().getPrefix();
+        return PREFIX.get();
     }
 
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
@@ -153,7 +153,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Adds specified renderer.
-     * 
+     *
      * @param renderer The renderer
      */
     public static void registerRenderer(final ResponseRenderer renderer) {
@@ -162,7 +162,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Removes specified renderer.
-     * 
+     *
      * @param renderer The renderer
      */
     public static void unregisterRenderer(final ResponseRenderer renderer) {
@@ -198,7 +198,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
-     * 
+     *
      * @param httpRequest The HTTP request to handle
      * @param httpResponse The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
@@ -212,26 +212,17 @@ public class DispatcherServlet extends SessionServlet {
 
         final String action = httpRequest.getParameter(PARAMETER_ACTION);
         AJAXState state = null;
-        final Dispatcher dispatcher = getDispatcher();
+        final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final ServerSession session = getSessionObject(
-                httpRequest,
-                dispatcher.mayUseFallbackSession(
-                    requestDataTools.getModule(getPrefix(), httpRequest),
-                    requestDataTools.getAction(httpRequest)));
+            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(requestDataTools.getModule(PREFIX.get(), httpRequest), requestDataTools.getAction(httpRequest)));
             if (null == session) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData requestData = requestDataTools.parseRequest(
-                httpRequest,
-                preferStream,
-                FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)),
-                session,
-                getPrefix());
+            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
             requestData.setSession(session);
             /*
              * Start dispatcher processing
@@ -268,9 +259,11 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    /**
+  
+
+	/**
      * Sends a proper response to requesting client after request has been orderly dispatched.
-     * 
+     *
      * @param requestData The AJAX request data
      * @param result The AJAX request result
      * @param httpRequest The associated HTTP Servlet request
@@ -290,5 +283,9 @@ public class DispatcherServlet extends SessionServlet {
         }
         candidate.write(requestData, result, httpRequest, httpResponse);
     }
+
+    
+
+   
 
 }

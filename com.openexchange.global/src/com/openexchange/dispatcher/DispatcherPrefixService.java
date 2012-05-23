@@ -57,6 +57,11 @@ package com.openexchange.dispatcher;
 public interface DispatcherPrefixService {
 
     /**
+     * The default prefix <tt>"/ajax/"</tt>.
+     */
+    public static final String DEFAULT_PREFIX = "/ajax/";
+
+    /**
      * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
      * <p>
      * All requests starting with this prefix are directed to dispatcher framework.

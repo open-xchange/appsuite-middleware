@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.filters;
+package com.openexchange.http.grizzly.grizzlyfilters;
 
 import java.io.IOException;
 import java.util.Iterator;

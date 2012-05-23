@@ -106,7 +106,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     	prefix = getService(DispatcherPrefixService.class).getPrefix();
     	
-    	final DefaultDispatcher dispatcher = new DefaultDispatcher(prefix);
+    	final DefaultDispatcher dispatcher = new DefaultDispatcher();
         /*
          * Specify default converters
          */
@@ -174,7 +174,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
-//        DispatcherServlet.setPrefix(prefix);
         
         Multiple.setDispatcher(dispatcher);
 
@@ -198,22 +197,17 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
-        
-        /*
-         * Register the Dispatcher servlet once instead of multiple times for every added AJAXActionServiceFactory in the added callback
-         */
-        registerSessionServlet(prefix, servlet);
+//        registerSessionServlet("/ajax", servlet);
         
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
-            
             @Override
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-                final String module = (String) ref.getProperty("module");
+                String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
+                    registerSessionServlet(prefix + module, servlet);
                     servlets.add(module);
-//                    registerSessionServlet(prefix + module, servlet);
                 }
             }
 
@@ -221,8 +215,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
-                    dispatcher.remove(module, service);
-//                    unregisterServlet(prefix + module);
+                    unregisterServlet(prefix + module);
                     servlets.remove(module);
                 }
             }
