@@ -54,13 +54,11 @@ import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCodes;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -71,26 +69,20 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link JsonCacheCreateTableTask}.
      * 
      * @param services The service look-up
      */
-    public JsonCacheCreateTableTask(final ServiceLookup services) {
+    public JsonCacheCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
         final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
+        final Connection writeCon = Database.getNoTimeout(contextId, true);
         PreparedStatement stmt = null;
         boolean transactional = false;
         try {
@@ -110,7 +102,6 @@ public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
                 }
             }
             writeCon.commit(); // COMMIT
-            transactional = false;
         } catch (final OXException e) {
             if (transactional) {
                 DBUtils.rollback(writeCon);
@@ -126,7 +117,7 @@ public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
             if (transactional) {
                 DBUtils.autocommit(writeCon);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
+            Database.backNoTimeout(contextId, true, writeCon);
         }
     }
 
