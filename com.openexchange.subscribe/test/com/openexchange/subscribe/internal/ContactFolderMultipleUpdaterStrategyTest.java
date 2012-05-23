@@ -67,24 +67,24 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
 
-private FolderUpdaterStrategy<Contact> strategy;
+    private FolderUpdaterStrategy<Contact> strategy;
 
-private HashMap <Integer, Object> session;
+    private HashMap <Integer, Object> session;
 
-private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
+    private SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
     @Override
     public void setUp() {
         this.strategy = new ContactFolderMultipleUpdaterStrategy();
         this.session = new HashMap<Integer,Object>();
-        this.session.put(1, contactStore);
+        this.session.put(Integer.valueOf(1), contactStore);
     }
 
     public void testHandles() {
-        final FolderObject contactFolder = new FolderObject();
+        FolderObject contactFolder = new FolderObject();
         contactFolder.setModule(FolderObject.CONTACT);
 
-        final FolderObject infostoreFolder = new FolderObject();
+        FolderObject infostoreFolder = new FolderObject();
         infostoreFolder.setModule(FolderObject.INFOSTORE);
 
         assertTrue("Should handle contact folders", strategy.handles(contactFolder));
@@ -93,13 +93,13 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
     public void testScoring() throws OXException {
         // First name is not enough
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Wurst");
         contact2.setUserField20(UUID.randomUUID().toString());
@@ -121,13 +121,13 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
         contact.setBirthday(new Date(2));
         contact2.setBirthday(new Date(2));
 
-        final int newScore = strategy.calculateSimilarityScore(contact, contact2, session);
+        int newScore = strategy.calculateSimilarityScore(contact, contact2, session);
         assertTrue("Similarity score for matching birthdays should be bigger", newScore > score);
 
     }
 
     public void testTwoCompaniesDiffer() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("");
         contact.setSurName("");
         contact.setUserField20(UUID.randomUUID().toString());
@@ -135,35 +135,35 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
         contact.setCompany("Wunderwerk GmbH");
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("");
         contact2.setSurName("");
         contact2.setCompany("Schokoladenfabrik Inc.");
         contact2.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact2);
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(session));
     }
 
     public void testNameChangedButMailAdressStayedTheSame() throws OXException {
         // First name is not enough
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Wurst");
         contact2.setEmail1("hans@example.com");
         contact2.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact2);
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("First name and email address should suffice", score >= strategy.getThreshold(session));
 
@@ -171,14 +171,14 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
     }
 
     public void notestTwoSimilarContactsWillGetAssociated() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Wurst");
         contact2.setEmail1("hans@example.com");
@@ -191,14 +191,14 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
     }
 
     public void notestTwoSeparatedContactsWillNotBeMergedHoweverSimilarTheyAre() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Dampf");
         contact2.setEmail1("hans@example.com");
@@ -207,22 +207,22 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
         contactStore.separateTwoContacts(contact, contact2);
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("These contacts were separated and should not score so high", score <= strategy.getThreshold(session));
 
     }
 
     public void notestTwoAssociatedContactsWillBeMergedRegardlessOfContent() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
-        final UUID uuid = UUID.randomUUID();
+        UUID uuid = UUID.randomUUID();
         contact.setUserField20(uuid.toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Peter");
         contact2.setSurName("Schmitt");
         contact2.setEmail2("peter@example.com");
@@ -231,12 +231,12 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
         contactStore.associateTwoContacts(contact, contact2);
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("These contacts are associated and should score high regardless of similarity", score >= strategy.getThreshold(contact2));
 
         strategy.update(contact, contact2, session);
-        final Contact updatedContact = contactStore.getContactByUUID(uuid);
+        Contact updatedContact = contactStore.getContactByUUID(uuid);
 
         assertTrue("These two contacts should have been merged, the first contact now containing the new alternative email-address", updatedContact.getEmail2().equals("peter@example.com"));
         assertTrue("These two contacts should have been merged, but the given name has to be kept because it was already filled", updatedContact.getGivenName().equals("Hans"));
@@ -245,58 +245,58 @@ private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
     }
 
     public void testWithoutUUIDNoMagicWillHappen() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Peter");
         contact2.setSurName("Schmitt");
         contact2.setEmail2("peter@example.com");
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));
     }
 
     public void testSecondContactHasUUIDButIsNotOnThisSystem() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Peter");
         contact2.setSurName("Schmitt");
         contact2.setEmail2("peter@example.com");
         contact2.setUserField20(UUID.randomUUID().toString());
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));
         assertTrue("These two contacts should not be associated as the second one is not even on this system. Trying to associate them would only produce errors", contactStore.getAssociationBetween(contact, contact2).equals(ContactUnificationState.UNDEFINED));
     }
 
     public void testTwoContactsAreSimilarButWillNotBeAssociatedBecauseOneIsNotOnTheSystem() throws OXException {
-        final Contact contact = new Contact();
+        Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
         contact.setUserField20(UUID.randomUUID().toString());
         contactStore.addContact(contact);
 
-        final Contact contact2 = new Contact();
+        Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Dampf");
         contact2.setEmail2("hd@privat.com");
         contact2.setUserField20(UUID.randomUUID().toString());
 
-        final int score = strategy.calculateSimilarityScore(contact, contact2, session);
+        int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("These two contacts are similar and should be merged", score >= strategy.getThreshold(contact2));
         assertTrue("These two contacts should not be associated as the second one is not even on this system. Trying to associate them would only produce errors", contactStore.getAssociationBetween(contact, contact2).equals(ContactUnificationState.UNDEFINED));
