@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.osgi;
 
-import java.rmi.registry.Registry;
 import java.util.Dictionary;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
@@ -58,7 +57,6 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
-import com.openexchange.admin.daemons.osgi.RMITracker;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -102,11 +100,6 @@ public class Activator extends HousekeepingActivator {
             throw e;
         }
         this.daemon.initRMI(context);
-
-        final Registry registry = AdminDaemon.getRegistry();
-        final RMITracker rmiTracker = new RMITracker(context, registry);
-        trackers.push(rmiTracker);
-        rmiTracker.open();
 
 
         if (log.isInfoEnabled()) {
@@ -153,7 +146,7 @@ public class Activator extends HousekeepingActivator {
             tracker.close();
         }
         log.info("Stopping RMI...");
-        this.daemon.unregisterRMI();
+        this.daemon.unregisterRMI(context);
         log.info("Thanks for using Open-Xchange AdminDaemon");
     }
 
