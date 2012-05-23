@@ -67,6 +67,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseOAuthValidator} - A simple {@link OAuthValidator}, which checks the version, whether the time stamp is close to now, the

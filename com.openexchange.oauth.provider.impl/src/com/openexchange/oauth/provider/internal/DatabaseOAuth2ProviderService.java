@@ -88,6 +88,7 @@ import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseOAuth2ProviderService} - The database OAuth v2 provider implementation.

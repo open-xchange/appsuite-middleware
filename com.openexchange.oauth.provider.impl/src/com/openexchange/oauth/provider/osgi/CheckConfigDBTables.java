@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.osgi;
 
-import static com.openexchange.oauth.provider.internal.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -60,7 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.internal.DBUtils;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -216,7 +215,7 @@ public final class CheckConfigDBTables {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            closeSQLStuff(rs);
+            DBUtils.closeSQLStuff(rs);
         }
         return retval;
     }
