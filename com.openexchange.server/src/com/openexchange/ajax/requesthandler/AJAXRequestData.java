@@ -110,7 +110,7 @@ public class AJAXRequestData {
 
     private InputStreamProvider uploadStreamProvider;
 
-    private final List<UploadFile> files = new ArrayList<UploadFile>(5);
+    private final List<UploadFile> files;
 
     private String hostname;
 
@@ -165,6 +165,7 @@ public class AJAXRequestData {
         super();
         params = new LinkedHashMap<String, String>();
         headers = new LinkedHashMap<String, String>();
+        files = new LinkedList<UploadFile>();
         decoratorIds = new LinkedList<String>();
         expires = -1;
     }

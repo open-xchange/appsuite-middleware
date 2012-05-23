@@ -54,6 +54,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.json.cache.JsonCacheService;
+import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.json.cache.impl.JsonCacheServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -89,12 +90,12 @@ public final class JsonCacheActivator extends HousekeepingActivator {
          */
         final JsonCacheServiceImpl serviceImpl = new JsonCacheServiceImpl(this);
         registerService(JsonCacheService.class, serviceImpl);
-        JsonCacheService.CACHE_REFERENCE.set(serviceImpl);
+        JsonCaches.CACHE_REFERENCE.set(serviceImpl);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        JsonCacheService.CACHE_REFERENCE.set(null);
+        JsonCaches.CACHE_REFERENCE.set(null);
         super.stopBundle();
     }
 

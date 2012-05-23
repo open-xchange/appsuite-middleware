@@ -67,12 +67,15 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.json.cache.JsonCacheService;
+import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
+import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
@@ -225,6 +228,32 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             jsonWriter.endArray();
         }
         result.setResultObject(jsonWriter.getObject(), "json");
+        /*
+         * Put to cache
+         */
+        final MailRequest req = new MailRequest(requestData, session);
+        final boolean cache = req.optBool("cache", false);
+        if (cache) {
+            final JsonCacheService jsonCache = JsonCaches.getCache();
+            if (null != jsonCache) {
+                final String md5Sum =
+                    JsonCaches.getMD5Sum(
+                        req.checkParameter(Mail.PARAMETER_MAILFOLDER),
+                        req.checkParameter(Mail.PARAMETER_COLUMNS),
+                        req.getParameter(Mail.PARAMETER_SORT),
+                        req.getParameter(Mail.PARAMETER_ORDER),
+                        req.getParameter(Mail.LEFT_HAND_LIMIT),
+                        req.getParameter(Mail.RIGHT_HAND_LIMIT),
+                        req.getParameter("includeSent"),
+                        req.getParameter("unseen"),
+                        req.getParameter("deleted"));
+                jsonCache.set(
+                    "com.openexchange.mail." + md5Sum,
+                    jsonWriter.getObject(),
+                    req.getSession().getUserId(),
+                    req.getSession().getContextId());
+            }
+        }
     }
 
     private static boolean containsMultipleFolders(final ThreadedStructure structure, final Set<String> fullNames) {        

@@ -49,12 +49,19 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import org.json.JSONValue;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.json.cache.JsonCacheService;
+import com.openexchange.json.cache.JsonCaches;
+import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -62,7 +69,9 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
 
 
@@ -73,6 +82,9 @@ import com.openexchange.tools.collections.PropertizedList;
  */
 public final class SimpleThreadStructureAction extends AbstractMailAction {
 
+    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(SimpleThreadStructureAction.class);
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link SimpleThreadStructureAction}.
      *
@@ -82,8 +94,82 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
         super(services);
     }
 
+    private static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("apiResponse", "json")));
+
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        /*
+         * Try JSON cache
+         */
+        // req.getRequest().putParameter("cache", "true");
+        final boolean cache = req.optBool("cache", false);
+        if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
+            final JsonCacheService jsonCache = JsonCaches.getCache();
+            if (null != jsonCache) {
+                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                final String md5Sum =
+                    JsonCaches.getMD5Sum(
+                        req.checkParameter(Mail.PARAMETER_MAILFOLDER),
+                        req.checkParameter(Mail.PARAMETER_COLUMNS),
+                        req.getParameter(Mail.PARAMETER_SORT),
+                        req.getParameter(Mail.PARAMETER_ORDER),
+                        req.getParameter(Mail.LEFT_HAND_LIMIT),
+                        req.getParameter(Mail.RIGHT_HAND_LIMIT),
+                        req.getParameter("includeSent"),
+                        req.getParameter("unseen"),
+                        req.getParameter("deleted"));
+                final JSONValue jsonValue =
+                    jsonCache.get("com.openexchange.mail." + md5Sum, req.getSession().getUserId(), req.getSession().getContextId());
+                final AJAXRequestResult result = new AJAXRequestResult(jsonValue, "json");
+                result.setResponseProperty("cached", Boolean.TRUE);
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("SimpleThreadStructureAction.perform(): JSON cache look-up took "+dur+"msec");
+                }
+                /*-
+                 * TODO: Avoid multiple "loaders", clone AJAX* classes
+                 * 
+                 * Update cache with separate thread
+                 */
+                final Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                            final AJAXRequestResult requestResult = perform0(req, true);
+                            final MailConverter mailConverter = MailConverter.getInstance();
+                            mailConverter.convert(req.getRequest(), requestResult, req.getSession(), null);
+                            if (DEBUG) {
+                                final long dur = System.currentTimeMillis() - st;
+                                LOG.debug("SimpleThreadStructureAction.perform(): JSON cache update took "+dur+"msec");
+                            }
+                        } catch (final Exception e) {
+                            // Something went wrong
+                            try {
+                                jsonCache.delete("com.openexchange.mail." + md5Sum, req.getSession().getUserId(), req.getSession().getContextId());
+                            } catch (final Exception ignore) {
+                                // Ignore
+                            }
+                        }
+                    }
+                };
+                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                /*
+                 * Return cached JSON result
+                 */
+                return result;
+            }
+        }
+        /*
+         * Perform
+         */
+        return perform0(req, cache);
+    }
+
+    /**
+     * Performs the request w/o look-up cache.
+     */
+    protected AJAXRequestResult perform0(final MailRequest req, final boolean cache) throws OXException {
         try {
             /*
              * Read in parameters
@@ -133,7 +219,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     fromToIndices = new int[] {start,end};
                 }
             }
-            final boolean cache = req.optBool("cache", false);
             final boolean includeSent = req.optBool("includeSent", false);
             final boolean unseen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);

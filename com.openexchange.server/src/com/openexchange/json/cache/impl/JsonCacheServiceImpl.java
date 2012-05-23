@@ -128,11 +128,45 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
     }
 
     @Override
+    public void delete(final String id, final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, true);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM jsonCache WHERE cid=? AND user=? AND id=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, id);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
     public void set(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            /*
+             * Check for remove operation (DELETE)
+             */
+            if (null == jsonValue) {
+                stmt = con.prepareStatement("DELETE FROM jsonCache WHERE cid=? AND user=? AND id=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, id);
+                stmt.executeUpdate();
+                return;
+            }
+            /*
+             * Perform INSERT or UPDATE
+             */
             stmt = con.prepareStatement("SELECT 1 FROM jsonCache WHERE cid=? AND user=? AND id=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);

@@ -49,7 +49,6 @@
 
 package com.openexchange.json.cache;
 
-import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 
@@ -59,11 +58,6 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JsonCacheService {
-
-    /**
-     * The cache reference for fast look-up.
-     */
-    public static final AtomicReference<JsonCacheService> CACHE_REFERENCE = new AtomicReference<JsonCacheService>();
 
     /**
      * Gets denoted JSON value from cache.
@@ -89,6 +83,8 @@ public interface JsonCacheService {
 
     /**
      * Puts specified JSON value into cache.
+     * <p>
+     * A <code>null</code> value performs a delete.
      * 
      * @param id The identifier
      * @param jsonValue The JSON value to put
@@ -97,5 +93,15 @@ public interface JsonCacheService {
      * @throws OXException If JSON value cannot be put into cache for any reason
      */
     void set(String id, JSONValue jsonValue, int userId, int contextId) throws OXException;
+
+    /**
+     * Deletes denoted JSON value from cache.
+     * 
+     * @param id The identifier
+     * @param userId The user identifier
+     * @param contextId The user's context identifier
+     * @throws OXException If JSON value cannot be returned for any reason
+     */
+    void delete(String id, int userId, int contextId) throws OXException;
 
 }

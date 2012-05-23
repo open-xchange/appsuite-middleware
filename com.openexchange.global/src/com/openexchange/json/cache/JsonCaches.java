@@ -51,20 +51,35 @@ package com.openexchange.json.cache;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.Charsets;
 
 /**
- * {@link JsonCacheUtils} - Utility class for JSON cache.
+ * {@link JsonCaches} - Utility class for JSON cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JsonCacheUtils {
+public final class JsonCaches {
 
     /**
-     * Initializes a new {@link JsonCacheUtils}.
+     * The cache reference for fast look-up.
      */
-    private JsonCacheUtils() {
+    public static final AtomicReference<JsonCacheService> CACHE_REFERENCE = new AtomicReference<JsonCacheService>();
+
+    /**
+     * Initializes a new {@link JsonCaches}.
+     */
+    private JsonCaches() {
         super();
+    }
+
+    /**
+     * Gets the cache
+     * 
+     * @return The cache or <code>null</code> if absent
+     */
+    public static JsonCacheService getCache() {
+        return CACHE_REFERENCE.get();
     }
 
     /**
@@ -80,7 +95,9 @@ public final class JsonCacheUtils {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
             for (final String arg : args) {
-                md.update(arg.getBytes(Charsets.UTF_8));
+                if (null != arg) {
+                    md.update(arg.getBytes(Charsets.UTF_8));
+                }
             }
             return asHex(md.digest());
         } catch (final NoSuchAlgorithmException e) {
