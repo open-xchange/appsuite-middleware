@@ -66,16 +66,16 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link JsonCacheAddInProgressFieldTask} - Add "inProgress" field to JSON cache table.
+ * {@link JsonCacheMediumTextTask} - <code>MEDIUM TEXT</code> to JSON cache table.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JsonCacheAddInProgressFieldTask extends UpdateTaskAdapter {
+public final class JsonCacheMediumTextTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link JsonCacheAddInProgressFieldTask}.
+     * Initializes a new {@link JsonCacheMediumTextTask}.
      */
-    public JsonCacheAddInProgressFieldTask() {
+    public JsonCacheMediumTextTask() {
         super();
     }
 
@@ -98,7 +98,11 @@ public final class JsonCacheAddInProgressFieldTask extends UpdateTaskAdapter {
         final Connection con = dbService.getForUpdateTask(cid);
         try {
             DBUtils.startTransaction(con);
-            Tools.checkAndAddColumns(con, "jsonCache", getColumns());
+            final String typeName = Tools.getColumnTypeName(con, "jsonCache", "json");
+            if (!"MEDIUMTEXT".equalsIgnoreCase(typeName)) {
+                final Column column = new Column("json", "MEDIUMTEXT character set latin1 NOT NULL");
+                Tools.modifyColumns(con, "jsonCache", column);
+            }
             con.commit();
         } catch (final SQLException e) {
             rollback(con);

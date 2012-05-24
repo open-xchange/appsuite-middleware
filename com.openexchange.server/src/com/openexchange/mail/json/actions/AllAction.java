@@ -135,7 +135,7 @@ public final class AllAction extends AbstractMailAction {
                  * Update cache with separate thread
                  */
                 final AJAXRequestData requestData = req.getRequest().copyOf();
-                requestData.setProperty("mail.md5", id);
+                requestData.setProperty("mail.md5", md5Sum);
                 requestData.setProperty(id, jsonValue);
                 final MailRequest mailRequest = new MailRequest(requestData, session);
                 final Runnable r = new Runnable() {
