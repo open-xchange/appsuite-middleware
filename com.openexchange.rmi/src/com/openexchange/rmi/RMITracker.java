@@ -70,6 +70,7 @@ import com.openexchange.rmi.osgi.RMIActivator;
  * {@link RMITracker}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class RMITracker extends ServiceTracker {
 
