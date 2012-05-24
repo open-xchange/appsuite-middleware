@@ -5,7 +5,6 @@ SQL_PROP=@oxconfdir@/Sql.properties
 USER_PROP=@oxconfdir@/AdminUser.properties
 GROUP_PROP=@oxconfdir@/Group.properties
 RESOURCE_PROP=@oxconfdir@/Resource.properties
-RMI_PROP=@oxconfdir@/RMI.properties
 
 # Disabling authentication for system calls like context/server etc. creation!
 # ONLY USE THIS SWITCH IF YOU EXACTLY KNOW WHAT YOU DO!!!

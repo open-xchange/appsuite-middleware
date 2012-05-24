@@ -155,6 +155,10 @@ public class ContactWriter extends CommonWriter {
                 }
             }
         }
+        // write image1 at least when setting it to null
+        if (contact.containsImage1() && null == contact.getImage1()) {
+        	json.put(ContactFields.IMAGE1, JSONObject.NULL);
+        }
         // writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
         writeParameter(ContactFields.INFO, contact.getInfo(), json);
         writeParameter(ContactFields.NOTE, contact.getNote(), json);

@@ -102,17 +102,17 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		Check.validateProperties(contact);		
 		/*
+		 * check general permissions
+		 */
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		Check.canCreateObjects(permission, contextID, userID, folderID);
+		/*
 		 * check folder
 		 */
 		final FolderObject folder = Tools.getFolder(contextID, folderID);
 		Check.isContactFolder(folder, contextID, userID);
 		Check.noPrivateInPublic(folder, contact, contextID, userID);
 		Check.canWriteInGAB(storage, contextID, userID, folderID, contact);
-		/*
-		 * check general permissions
-		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canCreateObjects(permission, contextID, userID, folderID);
 		/*
 		 * prepare create
 		 */
@@ -277,13 +277,6 @@ public class ContactServiceImpl extends DefaultContactService {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
-		 * check folder
-		 */
-		FolderObject folder = Tools.getFolder(contextID, folderID);
-		Check.isContactFolder(folder, contextID, userID);
-		Check.noPrivateInPublic(folder, contact, contextID, userID);
-		Check.canWriteInGAB(storage, contextID, userID, folderID, contact);
-		/*
 		 * check general permissions
 		 */
 		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
@@ -298,6 +291,13 @@ public class ContactServiceImpl extends DefaultContactService {
 		}
 		Check.lastModifiedBefore(storedContact, lastRead);
 		Check.folderEquals(storedContact, folderID, contextID);
+		/*
+		 * check folder
+		 */
+		FolderObject folder = Tools.getFolder(contextID, folderID);
+		Check.isContactFolder(folder, contextID, userID);
+		Check.noPrivateInPublic(folder, contact, contextID, userID);
+		Check.canWriteInGAB(storage, contextID, userID, folderID, contact);
 		/*
 		 * check for not allowed changes
 		 */

@@ -930,6 +930,8 @@ public class OXContainerConverter {
         	ImageScalingService imageService = ServerServiceRegistry.getInstance().getService(ImageScalingService.class, true);
         	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1, 
         			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height);
+//        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1 - 1, 
+//        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width - 1, clipRect.height - 1);
     		/*
     		 * write back to byte array
     		 */    		
@@ -1744,15 +1746,22 @@ public class OXContainerConverter {
 
     private void addADR(final VersitObject object, final Contact contactContainer, final String[] type, final int street, final int city, final int state, final int postalCode, final int country) throws ConverterException {
         try {
-            final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
-            adr.add(null);
-            adr.add(null);
-            adr.add(makeList(getStreet(street, contactContainer)));
-            adr.add(makeList(getCity(city, contactContainer)));
-            adr.add(makeList(getState(state, contactContainer)));
-            adr.add(makeList(getPostalCode(postalCode, contactContainer)));
-            adr.add(makeList(getCountry(country, contactContainer)));
-            addProperty(object, "ADR", P_TYPE, type, adr);
+        	String streetValue = getStreet(street, contactContainer);
+        	String cityValue = getCity(city, contactContainer);
+        	String stateValue = getState(state, contactContainer);
+        	String postalCodeValue = getPostalCode(postalCode, contactContainer);
+        	String countryValue = getCountry(country, contactContainer);
+        	if (null != streetValue || null != cityValue || null != stateValue || null != postalCodeValue || null != countryValue) {
+                final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
+                adr.add(null);
+                adr.add(null);
+                adr.add(makeList(streetValue));
+                adr.add(makeList(cityValue));
+                adr.add(makeList(stateValue));
+                adr.add(makeList(postalCodeValue));
+                adr.add(makeList(countryValue));
+                addProperty(object, "ADR", P_TYPE, type, adr);
+        	}
         } catch (final Exception e) {
             throw new ConverterException(e);
         }

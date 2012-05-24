@@ -49,36 +49,50 @@
 
 package com.openexchange.carddav;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-
 /**
- * {@link Patches}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link UserAgents} - Contains user-agent definitions.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Patches {
-    public static class IncomingFile {
-        
-        private static final Pattern CROP = Pattern.compile(";?X-ABCROP-RECTANGLE=(.*?)([;:])");
+public final class UserAgents {
 
-        public static String removeCropParameter(String string) {
-            Matcher matcher = CROP.matcher(string);
-            if (!matcher.find()) {
-                return string;
-            }
-            return matcher.replaceFirst(matcher.group(2)); 
-        }
-    }
 
-    public static class OutgoingFile {
-        
-        private static final Pattern CUSTOM_ATTRIBUTES_PATTERN = Pattern.compile("^X-OPEN-XCHANGE.*?\\r?\\n", Pattern.MULTILINE);
+	public static final String MACOS_10_6_7 = "Address%20Book/883 CFNetwork/454.11.12 Darwin/10.7.0 (i386) (MacBookPro4%2C1)";
 
-        public static String removeXOPENXCHANGEAttributes(final String outputString) {
-            return CUSTOM_ATTRIBUTES_PATTERN.matcher(outputString).replaceAll("");
-        }
-    }
+	public static final String MACOS_10_6_8 = "Address%20Book/883 CFNetwork/454.12.4 Darwin/10.8.0 (i386)";
+
+	public static final String MACOS_10_6_8_DE = "Adressbuch/883 CFNetwork/454.12.4 Darwin/10.8.0 (i386)";
+
+	public static final String MACOS_10_6_8_NL = "Adresboek/883 CFNetwork/454.12.4 Darwin/10.8.0 (i386)";	
+
+	public static final String MACOS_10_7_2 = "AddressBook/6.1 (1062) CardDAVPlugin/196 CFNetwork/520.2.5 Mac_OS_X/10.7.2 (11C74)";
+
+	public static final String MACOS_10_7_3 = "AddressBook/6.1 (1083) CardDAVPlugin/200 CFNetwork/520.3.2 Mac_OS_X/10.7.3 (11D50d)";
+
+	public static final String IOS_5_0_1 = "iOS/5.0.1 (9A405) dataaccessd/1.0";
+	
+	public static final String IOS_5_0_1_PREF = "iOS/5.0.1 (9A405) Preferences/1.0";
+		
+	public static final String IOS_5_1_1 = "iOS/5.1.1 (9B206) dataaccessd/1.0";
+	
+	public static final String IOS_5_1_1_PREF = "iOS/5.1.1 (9B206) Preferences/1.0";
+	
+	public static final String ANDROID_CARDAV_SYNC = "CardDAV-Sync (Android) (like iOS/5.0.1 (9A405) dataaccessd/1.0)";
+	
+		
+	public static final String[] MACOS_ALL = {
+		MACOS_10_6_7, MACOS_10_6_8, MACOS_10_6_8_DE, MACOS_10_6_8_NL, MACOS_10_7_2, MACOS_10_7_3
+	};
+	
+	public static final String[] IOS_ALL = {
+		IOS_5_0_1, IOS_5_0_1_PREF, IOS_5_1_1, IOS_5_1_1_PREF
+	};
+	
+	public static final String[] OTHER_ALL = {
+		ANDROID_CARDAV_SYNC
+	};
+	
+	private UserAgents() {
+		// prevent instantiation
+	}	
 }
- 
