@@ -106,8 +106,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
-    protected static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(AjpProcessor.class));
+    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(AjpProcessor.class);
 
     private static final boolean TRACE = LOG.isTraceEnabled();
 
@@ -819,7 +818,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             sb.append('\n');
                             appendStackTrace(t.getStackTrace(), sb);
                         }
-                        LOG.warn(sb.toString());
+                        if (t instanceof RuntimeException) {
+                            LOG.warn(sb.toString(), t);
+                        } else {
+                            LOG.warn(sb.toString());
+                        }
                     }
                     response.setStatus(400);
                     error = true;
@@ -854,6 +857,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         String charEnc = request.getCharacterEncoding();
                         if (charEnc == null) {
                             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+                            if (charEnc == null) {
+                                charEnc = "ISO-8859-1";
+                            }
                         }
                         final byte[] bytes = sink.toByteArray();
                         try {
