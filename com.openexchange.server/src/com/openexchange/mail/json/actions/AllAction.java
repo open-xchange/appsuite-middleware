@@ -152,7 +152,7 @@ public final class AllAction extends AbstractMailAction {
                             locked = true;
                             final long st = DEBUG ? System.currentTimeMillis() : 0L;
                             mailInterface = MailServletInterface.getInstance(session);
-                            final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface);
+                            final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
                             if (DEBUG) {
                                 final long dur = System.currentTimeMillis() - st;
@@ -193,10 +193,10 @@ public final class AllAction extends AbstractMailAction {
         /*
          * Perform
          */
-        return perform0(req, getMailInterface(req));
+        return perform0(req, getMailInterface(req), false);
     }
 
-    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface) throws OXException {
+    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
         try {
             /*
              * Read in parameters
@@ -340,7 +340,9 @@ public final class AllAction extends AbstractMailAction {
                     mails = mails.subList(fromIndex, toIndex);
                 }
             }
-            return new AJAXRequestResult(mails, "mail");
+            final AJAXRequestResult result = new AJAXRequestResult(mails, "mail");
+            result.setResponseProperty("cached", Boolean.valueOf(cache));
+            return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
