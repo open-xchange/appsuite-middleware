@@ -64,10 +64,12 @@ import org.apache.commons.logging.Log;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
+import com.openexchange.carddav.mixins.CTag;
+import com.openexchange.carddav.mixins.SupportedReportSet;
+import com.openexchange.carddav.mixins.SyncToken;
 import com.openexchange.carddav.reports.Syncstatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
@@ -90,7 +92,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 public abstract class CardDAVCollection extends AbstractCollection {
 
     private static final Log LOG = LogFactory.getLog(CardDAVCollection.class);
-    private static final Pattern FOLDER_NAME = Pattern.compile("f\\d+_(\\d+).vcf");
+    private static final Pattern LEGACY_FOLDER_NAME = Pattern.compile("f\\d+_(\\d+).vcf");
     private static final long OVERRIDE_LEGACY_FOLDERS = 11;
 
     protected GroupwareCarddavFactory factory;
@@ -106,6 +108,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
         super();
         this.factory = factory;
         this.url = url;
+        super.includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this)); 
         LOG.debug(getUrl() + ": initialized.");
     }
     
@@ -146,6 +149,14 @@ public abstract class CardDAVCollection extends AbstractCollection {
     protected abstract Collection<Contact> getContacts() throws OXException;
     
     /**
+     * Gets the ID of the folder that is used to create new contacts for 
+     * this collection.
+     * 
+     * @return the folder ID
+     */
+    protected abstract String getFolderID() throws OXException;
+    
+    /**
      * Constructs a {@link WebdavPath} for a vCard child resource of this 
      * collection with the supplied UID.
      * 
@@ -164,9 +175,8 @@ public abstract class CardDAVCollection extends AbstractCollection {
      * @return the path
      */
     protected WebdavPath constructPathForChildResource(Contact contact) {
-		if (null != contact.getUserField19() && contact.getUserField19().endsWith("ABSPlugin") &&
-				false == contact.getUid().equals(contact.getUserField19())) {
-			// for MacOS 10.6
+		if (null != contact.getUserField19() && false == contact.getUserField19().equals(contact.getUid())) {
+			// for MacOS 10.6 and iOS clients
 	    	return constructPathForChildResource(contact.getUserField19());
 		} else {
 			return constructPathForChildResource(contact.getUid());
@@ -174,26 +184,15 @@ public abstract class CardDAVCollection extends AbstractCollection {
     }
 
     /**
-     * Constructs a string representing the WebDAV name for a folder resource
-     * in the format "f[context_id]_[folder_id}".
-     * 
-     * @param folder the folder to construct the name for
-     * @return the name
-     */
-    protected String constructNameForChildResource(UserizedFolder folder) {
-    	return String.format("f%d_%s", factory.getSession().getContextId(), folder.getID());
-    }
-    
-    /**
      * Extracts the folder ID from the supplied resource name, i.e. the 
      * part of a ox folder resource name representing the folder's id.
      *   
      * @param name the name of the resource
      * @return the folder ID, or <code>null</code> if none was found
      */
-    private String extractFolderID(String name) {
+    private static String extractLegacyFolderID(String name) {
     	if (null != name && 0 < name.length() && 'f' == name.charAt(0)) {
-            Matcher matcher = FOLDER_NAME.matcher(name);
+            Matcher matcher = LEGACY_FOLDER_NAME.matcher(name);
             if (matcher.find()) {
                 return matcher.group(1);
             }
@@ -332,13 +331,13 @@ public abstract class CardDAVCollection extends AbstractCollection {
 	 * @throws OXException 
 	 */
 	private void addLegacyGroupsAsDeleted(Syncstatus<WebdavResource> syncStatus) throws OXException {
-		String uid = constructNameForChildResource(factory.getState().getDefaultFolder());
-		ContactResource defaultFolderResource = new ContactResource(factory, constructPathForChildResource(uid));
+		String name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getState().getDefaultFolder()); 
+		ContactResource defaultFolderResource = new ContactResource(factory, constructPathForChildResource(name), null);
 		syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(
 				HttpServletResponse.SC_NOT_FOUND, defaultFolderResource.getUrl(), defaultFolderResource));
-		uid = constructNameForChildResource(factory.getFolderService().getFolder(
-				FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null));
-		ContactResource gabResource = new ContactResource(factory, constructPathForChildResource(uid));
+		name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getFolderService().getFolder(
+				FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null)); 
+		ContactResource gabResource = new ContactResource(factory, constructPathForChildResource(name), null);
 		syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(
 				HttpServletResponse.SC_NOT_FOUND, gabResource.getUrl(), gabResource));
 	}
@@ -361,7 +360,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
      * @throws WebdavProtocolException
      */
 	public CardDAVResource getChild(String name) throws WebdavProtocolException {
-		if (null != extractFolderID(name)) {
+		if (null != extractLegacyFolderID(name)) {
 			LOG.info(getUrl() + ": client requests legacy simulated group resource '" + name + 
 					"', overriding next sync token to '11' for recovery.");
 			this.factory.setOverrideNextSyncToken("11");
@@ -375,7 +374,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
     			return new ContactResource(contact, this.factory, constructPathForChildResource(contact));
     		} else {
               	LOG.debug(this.getUrl() + ": child resource '" + name + "' not found, creating placeholder resource");
-    			return new ContactResource(factory, constructPathForChildResource(uid));
+    			return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
     		}
     	} catch (OXException e) {
     		throw protocolException(e);

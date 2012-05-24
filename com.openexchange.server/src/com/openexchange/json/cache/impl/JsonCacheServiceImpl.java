@@ -49,6 +49,7 @@
 
 package com.openexchange.json.cache.impl;
 
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,6 +75,10 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JsonCacheServiceImpl implements JsonCacheService {
+
+    private static final Charset US_ASCII = Charsets.US_ASCII;
+
+    private static final Charset UTF8 = Charsets.UTF_8;
 
     private final ServiceLookup services;
 
@@ -112,7 +117,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             if ("null".equals(string)) {
                 return null;
             }
-            final String sJson = new String(Base64.decodeBase64(string), Charsets.UTF_8);
+            final String sJson = new String(Base64.decodeBase64(string), UTF8);
             if ('{' == sJson.charAt(0)) {
                 return new JSONObject(sJson);
             }
@@ -183,7 +188,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             /*
              * Update or insert
              */
-            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(Charsets.UTF_8)), Charsets.US_ASCII);
+            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(UTF8)), US_ASCII);
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
                 stmt.setString(1, text);
@@ -237,7 +242,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                     if ("null".equals(string)) {
                         prev = null;
                     } else {
-                        final String sJson = new String(Base64.decodeBase64(string), Charsets.UTF_8);
+                        final String sJson = new String(Base64.decodeBase64(string), UTF8);
                         if ('{' == sJson.charAt(0)) {
                             prev = new JSONObject(sJson);
                         } else if ('[' == sJson.charAt(0)) {
@@ -260,7 +265,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             /*
              * Update or insert
              */
-            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(Charsets.UTF_8)), Charsets.US_ASCII);
+            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(UTF8)), US_ASCII);
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
                 stmt.setString(1, text);

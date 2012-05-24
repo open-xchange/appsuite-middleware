@@ -60,6 +60,7 @@ import org.w3c.dom.Node;
 
 import com.openexchange.carddav.CardDAVTest;
 import com.openexchange.carddav.PropertyNames;
+import com.openexchange.carddav.UserAgents;
 
 /**
  * {@link CollectionsTest}
@@ -73,8 +74,38 @@ public class CollectionsTest extends CardDAVTest {
 	public CollectionsTest(String name) {
 		super(name);
 	}
-
-	public void testDiscoverRoot() throws Exception {		
+	
+	public void testMacOSClients() throws Exception {
+		for (String userAgent : UserAgents.MACOS_ALL) {
+			super.getCardDAVClient().setUserAgent(userAgent);
+			discoverRoot();
+			discoverAggregatedCollection(true);
+			discoverContactsCollection(false);
+			discoverGABCollection(false);
+		}
+	}
+	
+	public void testIOSClients() throws Exception {
+		for (String userAgent : UserAgents.IOS_ALL) {
+			super.getCardDAVClient().setUserAgent(userAgent);
+			discoverRoot();
+			discoverAggregatedCollection(false);
+			discoverContactsCollection(true);
+			discoverGABCollection(true);
+		}
+	}
+	
+	public void testOtherClients() throws Exception {
+		for (String userAgent : UserAgents.OTHER_ALL) {
+			super.getCardDAVClient().setUserAgent(userAgent);
+			discoverRoot();
+			discoverAggregatedCollection(false);
+			discoverContactsCollection(true);
+			discoverGABCollection(true);
+		}
+	}
+	
+	private void discoverRoot() throws Exception {
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
@@ -85,8 +116,8 @@ public class CollectionsTest extends CardDAVTest {
     	Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
     	assertMatches(PropertyNames.COLLECTION, node);
 	}
-	
-	public void testDiscoverAggregatedCollection() throws Exception {
+
+	private void discoverAggregatedCollection(boolean shouldExists) throws Exception {
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADD_MEMBER);
         props.add(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
@@ -112,13 +143,17 @@ public class CollectionsTest extends CardDAVTest {
         		break;
         	}
         }
-        assertNotNull("Aggregated collection not found at /carddav/Contacts", aggregatedCollectionResponse);
-        List<Node> nodeList = super.extractNodeListValue(PropertyNames.RESOURCETYPE, aggregatedCollectionResponse);
-        assertContains(PropertyNames.COLLECTION, nodeList);
-        assertContains(PropertyNames.ADDRESSBOOK, nodeList);
+        if (shouldExists) {
+	        assertNotNull("Aggregated collection not found at /carddav/Contacts", aggregatedCollectionResponse);
+	        List<Node> nodeList = super.extractNodeListValue(PropertyNames.RESOURCETYPE, aggregatedCollectionResponse);
+	        assertContains(PropertyNames.COLLECTION, nodeList);
+	        assertContains(PropertyNames.ADDRESSBOOK, nodeList);
+        } else {
+	        assertNull("Aggregated collection found at /carddav/Contacts", aggregatedCollectionResponse);
+        }
 	}
 	
-	public void testDiscoverContactsCollection() throws Exception {
+	private void discoverContactsCollection(boolean shouldExist) throws Exception {
 		String folderName = super.getDefaultFolder().getFolderName();
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADD_MEMBER);
@@ -146,10 +181,14 @@ public class CollectionsTest extends CardDAVTest {
         		break;
         	}        	
         }
-        assertTrue("Default contact folder collection not found below /carddav/", found);
+        if (shouldExist) {
+        	assertTrue("Default contact folder collection not found below /carddav/", found);
+        } else {
+        	assertFalse("Default contact folder collection found below /carddav/", found);
+        }
 	}
 	
-	public void testDiscoverGABCollection() throws Exception {
+	private void discoverGABCollection(boolean shouldExist) throws Exception {
 		String folderName = super.getGABFolder().getFolderName();
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADD_MEMBER);
@@ -177,7 +216,11 @@ public class CollectionsTest extends CardDAVTest {
         		break;
         	}        	
         }
-        assertTrue("Default contact folder collection not found below /carddav/", found);
+        if (shouldExist) {
+        	assertTrue("GAB folder collection not found below /carddav/", found);
+        } else {
+        	assertFalse("GAB folder collection found below /carddav/", found);
+        }
 	}
-	
+
 }

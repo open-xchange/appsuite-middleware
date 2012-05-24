@@ -162,14 +162,13 @@ public class RootCollection extends AbstractCollection {
 	}
 
     /**
-     * Constructs a string representing the WebDAV name for a folder resource
-     * in the format "f[context_id]_[folder_id}".
+     * Constructs a string representing the WebDAV name for a folder resource.
      * 
      * @param folder the folder to construct the name for
      * @return the name
      */
 	private String constructNameForChildResource(UserizedFolder folder) {
-    	return String.format("f%d_%s", factory.getSession().getContextId(), folder.getID());
+		return folder.getID();
     }
 
     private WebdavPath constructPathForChildResource(UserizedFolder folder) {
@@ -240,11 +239,20 @@ public class RootCollection extends AbstractCollection {
 	}
 
 	private boolean isUseAggregatedCollection() {
-		return "0".equals(getExposedCollections()) || "2".equals(getExposedCollections());
+		return "2".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && isAddressbookClient(); 
 	}
 
 	private boolean isUseFolderCollections() {
-		return "0".equals(getExposedCollections()) || "1".equals(getExposedCollections());
+		return "1".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && false == isAddressbookClient(); 
+	}
+	
+	private boolean isAddressbookClient() {
+		String userAgent = (String)factory.getSession().getParameter("user-agent");
+		return null != userAgent && ( 
+				(userAgent.contains("CFNetwork") && userAgent.contains("Darwin")) || 
+				(userAgent.contains("AddressBook") && userAgent.contains("CardDAVPlugin") && userAgent.contains("Mac_OS_X")) && 
+				(false == (userAgent.contains("iOS") && (userAgent.contains("dataaccessd") || userAgent.contains("Preferences")))) 
+			);
 	}
 
 	@Override
