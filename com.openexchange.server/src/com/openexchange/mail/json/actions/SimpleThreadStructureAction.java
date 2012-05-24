@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONValue;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
@@ -73,103 +74,134 @@ import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
-
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SimpleThreadStructureAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SimpleThreadStructureAction extends AbstractMailAction {
 
     protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(SimpleThreadStructureAction.class);
+
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link SimpleThreadStructureAction}.
-     *
+     * 
      * @param services The service look-up
      */
     public SimpleThreadStructureAction(final ServiceLookup services) {
         super(services);
     }
 
-    private static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("apiResponse", "json")));
+    private static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(
+        Arrays.asList("apiResponse", "json")));
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         /*
          * Try JSON cache
          */
-        // req.getRequest().putParameter("cache", "true");
+        req.getRequest().putParameter("cache", "true");
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (null != jsonCache) {
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
-                final String md5Sum =
-                    JsonCaches.getMD5Sum(
-                        req.checkParameter(Mail.PARAMETER_MAILFOLDER),
-                        req.checkParameter(Mail.PARAMETER_COLUMNS),
-                        req.getParameter(Mail.PARAMETER_SORT),
-                        req.getParameter(Mail.PARAMETER_ORDER),
-                        req.getParameter(Mail.LEFT_HAND_LIMIT),
-                        req.getParameter(Mail.RIGHT_HAND_LIMIT),
-                        req.getParameter("includeSent"),
-                        req.getParameter("unseen"),
-                        req.getParameter("deleted"));
-                final JSONValue jsonValue =
-                    jsonCache.get("com.openexchange.mail." + md5Sum, req.getSession().getUserId(), req.getSession().getContextId());
-                final AJAXRequestResult result = new AJAXRequestResult(jsonValue, "json");
-                result.setResponseProperty("cached", Boolean.TRUE);
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("SimpleThreadStructureAction.perform(): JSON cache look-up took "+dur+"msec");
-                }
-                /*-
-                 * TODO: Avoid multiple "loaders", clone AJAX* classes
-                 * 
-                 * Update cache with separate thread
-                 */
-                final Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-                            final AJAXRequestResult requestResult = perform0(req, true);
-                            final MailConverter mailConverter = MailConverter.getInstance();
-                            mailConverter.convert(req.getRequest(), requestResult, req.getSession(), null);
-                            if (DEBUG) {
-                                final long dur = System.currentTimeMillis() - st;
-                                LOG.debug("SimpleThreadStructureAction.perform(): JSON cache update took "+dur+"msec");
-                            }
-                        } catch (final Exception e) {
-                            // Something went wrong
+                final String md5Sum = getMD5For(req);
+                final String id = "com.openexchange.mail." + md5Sum;
+                final ServerSession session = req.getSession();
+                final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
+                if (null != jsonValue) {
+                    final AJAXRequestResult result = new AJAXRequestResult(jsonValue, "json");
+                    result.setResponseProperty("cached", Boolean.TRUE);
+                    if (DEBUG) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache look-up took " + dur + "msec");
+                    }
+                    /*-
+                     * TODO: Avoid multiple "loaders", clone AJAX* classes
+                     * 
+                     * Update cache with separate thread
+                     */
+                    final AJAXRequestData requestData = req.getRequest().copyOf();
+                    requestData.setProperty(id, jsonValue);
+                    final MailRequest mailRequest = new MailRequest(requestData, session);
+                    final Runnable r = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            final ServerSession session = mailRequest.getSession();
+                            MailServletInterface mailInterface = null;
                             try {
-                                jsonCache.delete("com.openexchange.mail." + md5Sum, req.getSession().getUserId(), req.getSession().getContextId());
-                            } catch (final Exception ignore) {
-                                // Ignore
+                                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                                mailInterface = MailServletInterface.getInstance(session);
+                                final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
+                                MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
+                                if (DEBUG) {
+                                    final long dur = System.currentTimeMillis() - st;
+                                    LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache update took " + dur + "msec");
+                                }
+                            } catch (final Exception e) {
+                                // Something went wrong
+                                try {
+                                    jsonCache.delete(id, session.getUserId(), session.getContextId());
+                                } catch (final Exception ignore) {
+                                    // Ignore
+                                }
+                            } finally {
+                                if (null != mailInterface) {
+                                    try {
+                                        mailInterface.close(true);
+                                    } catch (final OXException e) {
+                                        // Ignore
+                                    }
+                                }
                             }
                         }
-                    }
-                };
-                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
-                /*
-                 * Return cached JSON result
-                 */
-                return result;
+                    };
+                    ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                    /*
+                     * Return cached JSON result
+                     */
+                    return result;
+                }
             }
         }
         /*
          * Perform
          */
-        return perform0(req, cache);
+        return perform0(req, getMailInterface(req), cache);
+    }
+
+    /**
+     * Gets the MD5 sum for given mail request.
+     * 
+     * @param req The mail request
+     * @return The MD5 sum
+     * @throws OXException If MD5 sum cannot be calculated.
+     */
+    public static String getMD5For(final MailRequest req) throws OXException {
+        final String md5Sum =
+            JsonCaches.getMD5Sum(
+                req.checkParameter(Mail.PARAMETER_MAILFOLDER),
+                req.checkParameter(Mail.PARAMETER_COLUMNS),
+                req.getParameter(Mail.PARAMETER_SORT),
+                req.getParameter(Mail.PARAMETER_ORDER),
+                req.getParameter(Mail.LEFT_HAND_LIMIT),
+                req.getParameter(Mail.RIGHT_HAND_LIMIT),
+                req.getParameter("includeSent"),
+                req.getParameter("unseen"),
+                req.getParameter("deleted"));
+        return md5Sum;
     }
 
     /**
      * Performs the request w/o look-up cache.
      */
-    protected AJAXRequestResult perform0(final MailRequest req, final boolean cache) throws OXException {
+    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
         try {
             /*
              * Read in parameters
@@ -190,9 +222,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
                         fromToIndices = null;
                     } else {
-                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit};
+                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit };
                         if (fromToIndices[0] >= fromToIndices[1]) {
-                            return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>>emptyList()), "mail");
+                            return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>> emptyList()), "mail");
                         }
                     }
                 } else {
@@ -207,16 +239,16 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                         } else {
                             int i = Integer.parseInt(s.substring(0, pos).trim());
                             start = i < 0 ? 0 : i;
-                            i = Integer.parseInt(s.substring(pos+1).trim());
+                            i = Integer.parseInt(s.substring(pos + 1).trim());
                             end = i < 0 ? 0 : i;
                         }
                     } catch (final NumberFormatException e) {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
                     }
                     if (start >= end) {
-                        return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>>emptyList()), "mail");
+                        return new AJAXRequestResult(ThreadedStructure.valueOf(Collections.<List<MailMessage>> emptyList()), "mail");
                     }
-                    fromToIndices = new int[] {start,end};
+                    fromToIndices = new int[] { start, end };
                 }
             }
             final boolean includeSent = req.optBool("includeSent", false);
@@ -227,7 +259,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
                 for (int i = 0; !found && i < columns.length; i++) {
-                   found = fieldFlags == columns[i];
+                    found = fieldFlags == columns[i];
                 }
                 if (!found) {
                     final int[] tmp = columns;
@@ -239,7 +271,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            final MailServletInterface mailInterface = getMailInterface(req);
             int orderDir = OrderDirection.ASC.getOrder();
             if (order != null) {
                 if (order.equalsIgnoreCase("asc")) {
@@ -255,10 +286,19 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!unseen && !ignoreDeleted) {
-                final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, fromToIndices);
+                final List<List<MailMessage>> mails =
+                    mailInterface.getAllSimpleThreadStructuredMessages(
+                        folderId,
+                        includeSent,
+                        cache,
+                        sortCol,
+                        orderDir,
+                        columns,
+                        fromToIndices);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null);
+            List<List<MailMessage>> mails =
+                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null);
             boolean cached = false;
             if (mails instanceof PropertizedList) {
                 final PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
@@ -269,7 +309,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
             for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
                 final List<MailMessage> list = iterator.next();
                 foundUnseen = false;
-                for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext(); ) {
+                for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                     final MailMessage message = tmp.next();
                     if (ignoreDeleted && message.isDeleted()) {
                         // Ignore mail marked for deletion

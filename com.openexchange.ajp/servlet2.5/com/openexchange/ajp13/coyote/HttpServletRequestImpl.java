@@ -547,6 +547,10 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     @Override
     public void setCharacterEncoding(final String characterEncoding) throws UnsupportedEncodingException {
         String charset = characterEncoding;
+        if (null == charset) {
+            charset = "ISO-8859-1";
+            return;
+        }
         final int mlen;
         if (charset.charAt(0) == '"' && charset.charAt((mlen = charset.length() - 1)) == '"') {
             charset = charset.substring(1, mlen);

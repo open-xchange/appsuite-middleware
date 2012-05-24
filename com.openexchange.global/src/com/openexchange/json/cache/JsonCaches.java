@@ -51,7 +51,12 @@ package com.openexchange.json.cache;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.java.Charsets;
 
 /**
@@ -121,6 +126,100 @@ public final class JsonCaches {
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
         }
         return new String(buf);
+    }
+
+    /**
+     * Checks if given JSON values are equal.
+     * 
+     * @param a The first JSON value
+     * @param b The second JSON value
+     * @return <code>true</code> if considered equal; otherwise <code>false</code>
+     */
+    public static boolean areEqual(final JSONValue a, final JSONValue b) {
+        try {
+            if (a == b) {
+                return true;
+            }
+            if (null == a) {
+                return null == b;
+            }
+            if (null == b) {
+                return false;
+            }
+            // Check length/size
+            final int aLen = a.length();
+            final int bLen = b.length();
+            if (aLen != bLen) {
+                return false;
+            }
+            // In-depth comparison
+            if (a.isArray()) { // ... by JSON array
+                if (!b.isArray()) {
+                    return false;
+                }
+                final JSONArray aj = (JSONArray) a;
+                final JSONArray bj = (JSONArray) b;
+                boolean bool = true;
+                for (int i = 0; bool && i < aLen; i++) {
+                    final Object ao = aj.get(i);
+                    final Object bo = bj.get(i);
+                    if (areJSONArrays(ao, bo)) {
+                        bool = areEqual((JSONArray) ao, (JSONArray) bo);
+                    } else if (areJSONObjects(ao, bo)) {
+                        bool = areEqual((JSONObject) ao, (JSONObject) bo);
+                    } else {
+                        bool = ao.equals(bo);
+                    }
+                }
+                return bool;
+            }
+            // Only thing left: JSON object
+            if (!b.isObject()) {
+                return false;
+            }
+            final JSONObject aj = (JSONObject) a;
+            final JSONObject bj = (JSONObject) b;
+            for (final Map.Entry<String,Object> entry : aj.entrySet()) {
+                final String name = entry.getKey();
+                if (!bj.has(name)) {
+                    return false;
+                }
+                final Object ao = entry.getValue();
+                final Object bo = bj.get(name);
+                if (areJSONArrays(ao, bo)) {
+                    if (!areEqual((JSONArray) ao, (JSONArray) bo)) {
+                        return false;
+                    }
+                } else if (areJSONObjects(ao, bo)) {
+                    if (!areEqual((JSONObject) ao, (JSONObject) bo)) {
+                        return false;
+                    }
+                } else {
+                    if (!ao.equals(bo)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } catch (final JSONException e) {
+            return false;
+        }
+    }
+
+    private static boolean areJSONArrays(final Object... objects) {
+        boolean b = true;
+        for (int i = 0; b && i < objects.length; i++) {
+            b = (objects[i] instanceof JSONArray);
+        }
+        return b;
+    }
+
+    private static boolean areJSONObjects(final Object... objects) {
+        boolean b = true;
+        for (int i = 0; b && i < objects.length; i++) {
+            b = (objects[i] instanceof JSONObject);
+        }
+        return b;
     }
 
 }

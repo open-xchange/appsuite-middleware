@@ -62,6 +62,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.json.cache.JsonCacheService;
+import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
@@ -195,6 +196,78 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public boolean setIfDiffers(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
+        if (null == jsonValue) {
+            return false;
+        }
+        final Connection con = Database.get(contextId, true);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            /*
+             * Perform INSERT or UPDATE
+             */
+            stmt = con.prepareStatement("SELECT json FROM jsonCache WHERE cid=? AND user=? AND id=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, id);
+            rs = stmt.executeQuery();
+            final JSONValue prev;
+            {
+                if (!rs.next()) {
+                    prev = null;
+                } else {
+                    final String sJson = new String(Base64.decodeBase64(rs.getString(1)), Charsets.UTF_8);
+                    if ('{' == sJson.charAt(0)) {
+                        prev = new JSONObject(sJson);
+                    } else if ('[' == sJson.charAt(0)) {
+                        prev = new JSONArray(sJson);
+                    } else {
+                        throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
+                    }
+                }
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
+            /*
+             * Update if differ
+             */
+            if (JsonCaches.areEqual(prev, jsonValue)) {
+                return false;
+            }
+            /*
+             * Update or insert
+             */
+            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(Charsets.UTF_8)), Charsets.US_ASCII);
+            if (null == prev) {
+                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json) VALUES (?,?,?,?)");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, id);
+                stmt.setString(4, text);
+            } else {
+                stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
+                stmt.setString(1, text);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
+                stmt.setString(4, id);
+            }
+            stmt.executeUpdate();
+            return true;
+        } catch (final SQLException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
