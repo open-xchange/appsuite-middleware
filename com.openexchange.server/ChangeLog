@@ -1,3 +1,7 @@
+* 2012-05-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22158: Ignore ITip requests for exceptions on non existing series.
+
 * 2012-05-24 - jan.bauerdick@open-xchange.com
 
  - Register RMI in the OSGI system

@@ -60,6 +60,8 @@ import com.openexchange.i18n.LocalizableStrings;
 public class OXRMIExceptionMessage implements LocalizableStrings {
     
     public static final String RMI_START_FAILED_MSG = "Start of RMI service failed.";
+    
+    public static final String RMI_ADDING_SERVICE_FAILED_MSG = "Adding service failed.";
 
     /**
      * Initializes a new {@link OXRMIExceptionMessage}.

@@ -50,19 +50,13 @@
 package com.openexchange.rmi.osgi;
 
 import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.RMISocketFactory;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.rmi.LocalServerFactory;
 import com.openexchange.rmi.RMITracker;
-import com.openexchange.rmi.exceptions.OXRMIExceptionCodes;
 
 /**
  * {@link RMIService}
@@ -77,14 +71,12 @@ public class RMIActivator extends HousekeepingActivator {
 
     private RMITracker rmiTracker;
 
-    private Registry rmiRegistry;
-
     @Override
     protected Class<?>[] getNeededServices() {
         Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
         return needed;
     }
-    
+
     public static ServiceRegistry getServiceRegistry() {
         return serviceRegistry;
     }
@@ -92,22 +84,14 @@ public class RMIActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws OXException {
         log.info("Starting bundle com.openexchange.rmi");
-        try {
-            serviceRegistry = new ServiceRegistry();
-            for (Class<?> clazz : getNeededServices()) {
-                Object service = getService(clazz);
-                serviceRegistry.addService(clazz, service);
-            }
-            ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
-            int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
-            rmiRegistry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
-            rmiTracker = new RMITracker(context, rmiRegistry);
-            track(Remote.class, rmiTracker);
-            openTrackers();
-        } catch (RemoteException e) {
-            log.fatal(e.getMessage(), e);
-            throw OXRMIExceptionCodes.RMI_START_FAILED.create(e);
+        serviceRegistry = new ServiceRegistry();
+        for (Class<?> clazz : getNeededServices()) {
+            Object service = getService(clazz);
+            serviceRegistry.addService(clazz, service);
         }
+        rmiTracker = new RMITracker(context);
+        track(Remote.class, rmiTracker);
+        openTrackers();
     }
 
     @Override
@@ -116,9 +100,6 @@ public class RMIActivator extends HousekeepingActivator {
         if (serviceRegistry != null) {
             serviceRegistry.clearRegistry();
             serviceRegistry = null;
-        }
-        if (rmiRegistry != null) {
-            rmiRegistry = null;
         }
         if (rmiTracker != null) {
             rmiTracker.close();
