@@ -109,7 +109,7 @@ public final class ThreadableLoginHandler implements LoginHandlerService {
                         if (account.getMailProtocol().equals(IMAPProtocol.getInstance().getName())) {
                             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                             try {
-                                mailAccess = MailAccess.getInstance(session);
+                                mailAccess = MailAccess.getInstance(session, account.getId());
                                 mailAccess.connect(true);
                                 final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
                                 final ThreadableCacheEntry entry =
