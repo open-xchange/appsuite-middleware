@@ -1,6 +1,4 @@
 SERVER_NAME=local
-# Set this to 0 to bind on all interfaces
-BIND_ADDRESS=localhost
 
 # Properties files for the different calls and actions
 SQL_PROP=@confDir@/Sql.properties

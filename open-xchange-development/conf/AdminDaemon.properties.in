@@ -1,6 +1,4 @@
 SERVER_NAME=dev-prototyp
-# Set this to 0 to bind on all interfaces
-BIND_ADDRESS=0
 
 # Properties files for the different calls and actions
 SQL_PROP=@oxconfdir@/Sql.properties

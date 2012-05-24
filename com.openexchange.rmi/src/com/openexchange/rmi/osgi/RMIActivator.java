@@ -73,7 +73,7 @@ public class RMIActivator extends HousekeepingActivator {
 
     private static Log log = LogFactory.getLog(RMIActivator.class);
 
-    private ServiceRegistry serviceRegistry;
+    private static ServiceRegistry serviceRegistry;
 
     private RMITracker rmiTracker;
 
@@ -83,6 +83,10 @@ public class RMIActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
         return needed;
+    }
+    
+    public static ServiceRegistry getServiceRegistry() {
+        return serviceRegistry;
     }
 
     @Override
