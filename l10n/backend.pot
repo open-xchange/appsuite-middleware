@@ -4089,7 +4089,7 @@ msgid "Start of RMI service failed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:64
-msgid "Adding service failed."
+msgid "Could not create RMI registry."
 msgstr ""
 
 #. Access to bundle %1$s is not permitted
