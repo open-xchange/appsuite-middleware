@@ -71,7 +71,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
 
     private HashMap <Integer, Object> session;
 
-    private SimContactSQLImpl contactStore = new SimContactSQLImpl();
+    private final SimContactSQLImpl contactStore = new SimContactSQLImpl();
 
     @Override
     public void setUp() {

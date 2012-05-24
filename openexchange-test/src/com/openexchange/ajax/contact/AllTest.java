@@ -135,7 +135,7 @@ public class AllTest extends AbstractManagedContactTest {
     
     private static final class AllRequestWithAdmin extends AllRequest {
     	
-    	private Boolean admin;
+    	private final Boolean admin;
 
 		public AllRequestWithAdmin(int folderId, int[] columns, Boolean admin) {
 			super(folderId, columns);
