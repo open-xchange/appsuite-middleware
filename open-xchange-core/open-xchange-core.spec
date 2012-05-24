@@ -183,7 +183,7 @@ fi
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-/opt/open-xchange/etc/*
+%config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
 /opt/open-xchange/importCSV/*
