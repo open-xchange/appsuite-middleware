@@ -251,7 +251,7 @@ final class LoggerTask extends AbstractTask<Object> {
         if (null != trace) {
             for (final StackTraceElement ste : trace) {
                 final String className = ste.getClassName();
-                if (null != className && !className.startsWith("com.openexchange.log")) {
+                if (null != className && !className.startsWith("com.openexchange.log") && !className.equals("com.openexchange.exception.Log")) {
                     sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
                     if (ste.isNativeMethod()) {
                         sb.append("(Native Method)");

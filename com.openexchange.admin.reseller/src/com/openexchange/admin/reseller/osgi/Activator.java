@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.reseller.osgi;
 
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -60,7 +58,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
@@ -82,18 +79,18 @@ public class Activator implements BundleActivator {
     private static Registry registry = null;
 
     private static OXReseller reseller = null;
+    
+    private ServiceRegistration<Remote> registration;
 
     public void start(final BundleContext context) throws Exception {
         try {
             initCache();
 
-            registry = AdminDaemon.getRegistry();
-
             reseller = new OXReseller();
             final OXResellerInterface oxresell_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);
 
             // bind all NEW Objects to registry
-            registry.bind(OXResellerInterface.RMI_NAME, oxresell_stub);
+            registration = context.registerService(Remote.class, oxresell_stub, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
@@ -126,9 +123,6 @@ public class Activator implements BundleActivator {
         } catch (final RemoteException e) {
             LOG.error(e.getMessage(), e);
             throw e;
-        } catch (final AlreadyBoundException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
@@ -139,20 +133,7 @@ public class Activator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        try {
-            if (null != registry) {
-                registry.unbind(OXResellerInterface.RMI_NAME);
-            }
-        } catch (final AccessException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final NotBoundException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+        context.ungetService(registration.getReference());
     }
 
     private void initCache() throws OXGenericException {

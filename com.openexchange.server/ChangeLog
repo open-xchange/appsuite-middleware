@@ -1,3 +1,15 @@
+* 2012-05-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22158: Ignore ITip requests for exceptions on non existing series.
+
+* 2012-05-24 - jan.bauerdick@open-xchange.com
+
+ - Register RMI in the OSGI system
+
+* 2012-05-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22163: Using cache write through for context to database assignment to prevent missing information while reading from slave.
+
 * 2012-05-22 - marcus.klein@open-xchange.com
 
  - Fix for bug 22154: Fixed NullPointerException in startup of mail filter bundle.

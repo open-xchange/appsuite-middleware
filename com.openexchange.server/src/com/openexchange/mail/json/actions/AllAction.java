@@ -52,12 +52,18 @@ package com.openexchange.mail.json.actions;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONValue;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.json.cache.JsonCacheService;
+import com.openexchange.json.cache.JsonCaches;
+import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -65,8 +71,11 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -83,6 +92,10 @@ import com.openexchange.tools.iterator.SearchIterator;
 }, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAction {
 
+    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(AllAction.class);
+
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link AllAction}.
      *
@@ -94,6 +107,97 @@ public final class AllAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        final boolean cache = req.optBool("cache", false);
+        if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
+            final JsonCacheService jsonCache = JsonCaches.getCache();
+            if (null != jsonCache) {
+                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                final String md5Sum = getMD5For(req);
+                final String id = "com.openexchange.mail." + md5Sum;
+                final ServerSession session = req.getSession();
+                final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
+                final AJAXRequestResult result;
+                if (null == jsonValue) {
+                    /*
+                     * Return empty array immediately
+                     */
+                    result = new AJAXRequestResult(new JSONArray(), "json");
+                    result.setResponseProperty("cached", Boolean.TRUE);
+                } else {
+                    result = new AJAXRequestResult(jsonValue, "json");
+                    result.setResponseProperty("cached", Boolean.TRUE);
+                    if (DEBUG) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.debug("\tAllAction.perform(): JSON cache look-up took " + dur + "msec");
+                    }
+                }
+                /*-
+                 * Update cache with separate thread
+                 */
+                final AJAXRequestData requestData = req.getRequest().copyOf();
+                requestData.setProperty("mail.md5", id);
+                requestData.setProperty(id, jsonValue);
+                final MailRequest mailRequest = new MailRequest(requestData, session);
+                final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        final ServerSession session = mailRequest.getSession();
+                        MailServletInterface mailInterface = null;
+                        boolean locked = false;
+                        try {
+                            if (!jsonCache.lock(id, session.getUserId(), session.getContextId())) {
+                                // Couldn't acquire lock
+                                return;
+                            }
+                            locked = true;
+                            final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                            mailInterface = MailServletInterface.getInstance(session);
+                            final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
+                            MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
+                            if (DEBUG) {
+                                final long dur = System.currentTimeMillis() - st;
+                                LOG.debug("\tAllAction.perform(): JSON cache update took " + dur + "msec");
+                            }
+                        } catch (final Exception e) {
+                            // Something went wrong
+                            try {
+                                jsonCache.delete(id, session.getUserId(), session.getContextId());
+                            } catch (final Exception ignore) {
+                                // Ignore
+                            }
+                        } finally {
+                            if (null != mailInterface) {
+                                try {
+                                    mailInterface.close(true);
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
+                            if (locked) {
+                                try {
+                                    jsonCache.unlock(id, session.getUserId(), session.getContextId());
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+                    }
+                };
+                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                /*
+                 * Return cached JSON result
+                 */
+                return result;
+            }
+        }
+        /*
+         * Perform
+         */
+        return perform0(req, getMailInterface(req), false);
+    }
+
+    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
         try {
             /*
              * Read in parameters
@@ -163,7 +267,6 @@ public final class AllAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            final MailServletInterface mailInterface = getMailInterface(req);
             int orderDir = OrderDirection.ASC.getOrder();
             if (order != null) {
                 if (order.equalsIgnoreCase("asc")) {
@@ -238,10 +341,39 @@ public final class AllAction extends AbstractMailAction {
                     mails = mails.subList(fromIndex, toIndex);
                 }
             }
-            return new AJAXRequestResult(mails, "mail");
+            final AJAXRequestResult result = new AJAXRequestResult(mails, "mail");
+            result.setResponseProperty("cached", Boolean.valueOf(cache));
+            return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the MD5 sum for given mail request.
+     * 
+     * @param req The mail request
+     * @return The MD5 sum
+     * @throws OXException If MD5 sum cannot be calculated.
+     */
+    public static String getMD5For(final MailRequest req) throws OXException {
+        final String id = req.getRequest().getProperty("mail.md5");
+        if (null != id) {
+            return id;
+        }
+        final String md5Sum =
+            JsonCaches.getMD5Sum(
+                "all",
+                req.checkParameter(Mail.PARAMETER_MAILFOLDER),
+                req.checkParameter(Mail.PARAMETER_COLUMNS),
+                req.getParameter(Mail.PARAMETER_SORT),
+                req.getParameter(Mail.PARAMETER_ORDER),
+                req.getParameter("limit"),
+                req.getParameter(Mail.LEFT_HAND_LIMIT),
+                req.getParameter(Mail.RIGHT_HAND_LIMIT),
+                req.getParameter("unseen"),
+                req.getParameter("deleted"));
+        return md5Sum;
     }
 
 }

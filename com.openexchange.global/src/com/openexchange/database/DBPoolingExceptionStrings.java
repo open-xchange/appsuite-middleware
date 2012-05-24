@@ -63,8 +63,8 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     public static final String NO_CONFIG_DB_MSG = "Cannot get connection to config DB.";
 
     // It was not possible to determine the database server for a specific OX server and a context.
-    // %1$d is replaced with some context identifier.
-    // %1$d is replaced with some server identifier.
+    // %1$d is replaced with the context identifier.
+    // %2$d is replaced with the server identifier.
     public static final String RESOLVE_FAILED_MSG = "Resolving database for context %1$d and server %2$d not possible!";
 
     // The connection to the database could not be established.
@@ -122,10 +122,12 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // transaction counter is used. If this transaction counter is missing this exception gets thrown.
     // %1$d is replaced with the context identifier that is stored in the schema.
     public static final String TRANSACTION_MISSING_MSG = "Transaction counter is missing for context %1$d.";
+    
+    // This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+    // %1$d is replaced with the context identifier.
+    // %2$d is replaced with the server identifier.
+    public static final String INSERT_FAILED_MSG = "Inserting database assignment for context %1$d and server %2$d failed!";
 
-    /**
-     * Prevent instantiation.
-     */
     private DBPoolingExceptionStrings() {
         super();
     }

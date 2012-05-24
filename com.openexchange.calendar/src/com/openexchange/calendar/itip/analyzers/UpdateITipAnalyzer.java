@@ -103,7 +103,14 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         } else if (message.exceptions().iterator().hasNext()) {
             uid = message.exceptions().iterator().next().getUid();
         }
-        final CalendarDataObject original = util.resolveUid(uid, session);
+        CalendarDataObject original = util.resolveUid(uid, session);
+        
+        if (original == null && update == null && message.numberOfExceptions() > 0) {
+            analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN,  locale));
+            analysis.recommendAction(ITipAction.IGNORE);
+            return analysis;
+        }
+        
         if (update == null) {
             update = original;
         }

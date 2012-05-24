@@ -67,11 +67,12 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link ThreadableLoginHandler} - The {@link LoginHandlerService login handler} obtaining <tt>Threadable</tt> for sent folder.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadableLoginHandler implements LoginHandlerService {
@@ -95,37 +96,53 @@ public final class ThreadableLoginHandler implements LoginHandlerService {
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
-        final MailAccountStorageService storageService = services.getService(MailAccountStorageService.class);
-        final Session session = login.getSession();
-        final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-        for (final MailAccount account : accounts) {
-            if (account.getMailProtocol().equals(IMAPProtocol.getInstance().getName())) {
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        final ServiceLookup services = this.services;
+        final Runnable r = new Runnable() {
+
+            @Override
+            public void run() {
                 try {
-                    mailAccess = MailAccess.getInstance(session);
-                    mailAccess.connect(true);
-                    final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
-                    final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(sentFolder, account.getId(), session);
-                    synchronized (entry) {
-                        if (null == entry.getThreadable()) {
-                            final IMAPFolder sent = (IMAPFolder) ((IMAPAccess) mailAccess).getIMAPStore().getFolder(sentFolder);
-                            sent.open(Folder.READ_ONLY);
+                    final MailAccountStorageService storageService = services.getService(MailAccountStorageService.class);
+                    final Session session = login.getSession();
+                    final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                    for (final MailAccount account : accounts) {
+                        if (account.getMailProtocol().equals(IMAPProtocol.getInstance().getName())) {
+                            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                             try {
-                                final Threadable threadable = Threadable.getAllThreadablesFrom(sent);
-                                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(sent)), threadable, false);
+                                mailAccess = MailAccess.getInstance(session, account.getId());
+                                mailAccess.connect(true);
+                                final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
+                                final ThreadableCacheEntry entry =
+                                    ThreadableCache.getInstance().getEntry(sentFolder, account.getId(), session);
+                                synchronized (entry) {
+                                    if (null == entry.getThreadable()) {
+                                        final IMAPFolder sent = (IMAPFolder) ((IMAPAccess) mailAccess).getIMAPStore().getFolder(sentFolder);
+                                        sent.open(Folder.READ_ONLY);
+                                        try {
+                                            final Threadable threadable = Threadable.getAllThreadablesFrom(sent);
+                                            entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(sent)), threadable, false);
+                                        } finally {
+                                            sent.close(false);
+                                        }
+                                    }
+                                }
+                            } catch (final MessagingException e) {
+                                throw MimeMailException.handleMessagingException(
+                                    e,
+                                    null == mailAccess ? null : mailAccess.getMailConfig(),
+                                    session);
                             } finally {
-                                sent.close(false);
+                                if (null != mailAccess) {
+                                    mailAccess.close(true);
+                                }
                             }
                         }
                     }
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e, null == mailAccess ? null : mailAccess.getMailConfig(), session);
-                } finally {
-                    if (null != mailAccess) {
-                        mailAccess.close(true);
-                    }
+                } catch (final OXException e) {
+                    // Ignore
                 }
-            }
-        }
+            } // End of run()
+        };
+        ThreadPools.getThreadPool().submit(ThreadPools.task(r));
     }
 }

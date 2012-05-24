@@ -93,15 +93,12 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -121,7 +118,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public OXContext(final BundleContext context) throws StorageException {
         super();
         this.context = context;
-        this.pool = new OXAdminPoolDBPoolExtension(new PropertyHandlerExtended(System.getProperties()));
+        this.pool = new OXAdminPoolDBPoolExtension();
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }

@@ -49,6 +49,8 @@
 
 package com.openexchange.database.internal;
 
+import java.sql.Connection;
+import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,7 +68,7 @@ interface ContextDatabaseAssignmentService {
      * @return the assignment.
      * @throws OXException If getting the assignment fails.
      */
-    Assignment getAssignment(int contextId) throws OXException;
+    AssignmentImpl getAssignment(int contextId) throws OXException;
 
     /**
      * Invalidates an assignment for a context in the cache.
@@ -75,5 +77,7 @@ interface ContextDatabaseAssignmentService {
      * @throws OXException If getting the server identifier fails.
      */
     void removeAssignments(int contextId) throws OXException;
+
+    void writeAssignment(Connection con, Assignment assignment) throws OXException;
 
 }

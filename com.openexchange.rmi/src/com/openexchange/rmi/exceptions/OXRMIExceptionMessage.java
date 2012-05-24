@@ -47,79 +47,27 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.rmi.exceptions;
 
-import java.io.Serializable;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * Assignment of context and server to read and write databases.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link OXRMIExceptionMessage}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class Assignment implements Serializable {
-
-    private static final long serialVersionUID = -3426601066426517436L;
-
-    private final int contextId;
-
-    private final int serverId;
-
-    private final int writePoolId;
-
-    private final int readPoolId;
-
-    private final String schema;
-
-    private boolean transactionInitialized = false;
-
-    private long transaction;
+public class OXRMIExceptionMessage implements LocalizableStrings {
+    
+    public static final String RMI_START_FAILED_MSG = "Start of RMI service failed.";
+    
+    public static final String RMI_ADDING_SERVICE_FAILED_MSG = "Adding service failed.";
 
     /**
-     * Default constructor.
-     * @param contextId
-     * @param serverId
-     * @param readPoolId
-     * @param writePoolId
-     * @param schema
+     * Initializes a new {@link OXRMIExceptionMessage}.
      */
-    Assignment(final int contextId, final int serverId, final int readPoolId, final int writePoolId, final String schema) {
+    private OXRMIExceptionMessage() {
         super();
-        this.contextId = contextId;
-        this.serverId = serverId;
-        this.readPoolId = readPoolId;
-        this.writePoolId = writePoolId;
-        this.schema = schema;
     }
 
-    int getContextId() {
-        return contextId;
-    }
-
-    int getServerId() {
-        return serverId;
-    }
-
-    int getReadPoolId() {
-        return readPoolId;
-    }
-
-    int getWritePoolId() {
-        return writePoolId;
-    }
-
-    String getSchema() {
-        return schema;
-    }
-
-    boolean isTransactionInitialized() {
-        return transactionInitialized;
-    }
-
-    long getTransaction() {
-        return transaction;
-    }
-
-    void setTransaction(long transaction) {
-        this.transaction = transaction;
-        transactionInitialized = true;
-    }
 }

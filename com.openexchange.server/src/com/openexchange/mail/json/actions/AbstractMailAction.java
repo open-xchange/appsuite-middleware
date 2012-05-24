@@ -53,6 +53,7 @@ import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.AddressException;
@@ -115,6 +116,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     /**
+     * Cachable formats.
+     */
+    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(
+        Arrays.asList("apiResponse", "json")));
+
+    /**
      * Gets the service of specified type
      *
      * @param clazz The service's class
@@ -157,6 +164,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } finally {
             if (LogProperties.isEnabled()) {
                 final Props logProperties = LogProperties.getLogProperties();
@@ -173,8 +182,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param req The mail request
      * @return The result
      * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
      */
-    protected abstract AJAXRequestResult perform(MailRequest req) throws OXException;
+    protected abstract AJAXRequestResult perform(MailRequest req) throws OXException, JSONException;
 
     /**
      * Triggers the contact collector for specified mail's addresses.
