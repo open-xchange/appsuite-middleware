@@ -1,3 +1,7 @@
+* 2012-05-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22189: Removed stale reference to RMI.properties configuration file.
+
 * 2012-05-24 - jan.bauerdick@open-xchange.com
 
  - Register RMI in the OSGI system
