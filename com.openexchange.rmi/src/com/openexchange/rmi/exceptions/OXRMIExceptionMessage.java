@@ -61,7 +61,7 @@ public class OXRMIExceptionMessage implements LocalizableStrings {
     
     public static final String RMI_START_FAILED_MSG = "Start of RMI service failed.";
     
-    public static final String RMI_ADDING_SERVICE_FAILED_MSG = "Adding service failed.";
+    public static final String RMI_CREATE_REGISTRY_FAILED_MSG = "Could not create RMI registry.";
 
     /**
      * Initializes a new {@link OXRMIExceptionMessage}.

@@ -49,61 +49,77 @@
 
 package com.openexchange.rmi.osgi;
 
+import java.rmi.AccessException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.rmi.RMIRegistry;
 
 /**
- * {@link RMIService}
+ * {@link RMITrackerCustomizer}
  * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class RMIActivator extends HousekeepingActivator {
+public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Remote> {
 
-    private static Log log = LogFactory.getLog(RMIActivator.class);
+    private static final Log log = LogFactory.getLog(RMITrackerCustomizer.class);
+    private final BundleContext context;
 
-    private static ServiceRegistry serviceRegistry;
-
-    private RMITrackerCustomizer rmiTrackerCustomizer;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
-        return needed;
-    }
-
-    public static ServiceRegistry getServiceRegistry() {
-        return serviceRegistry;
+    public RMITrackerCustomizer(BundleContext context) {
+        super();
+        this.context = context;
     }
 
     @Override
-    protected void startBundle() throws OXException {
-        log.info("Starting bundle com.openexchange.rmi");
-        serviceRegistry = new ServiceRegistry();
-        for (Class<?> clazz : getNeededServices()) {
-            Object service = getService(clazz);
-            serviceRegistry.addService(clazz, service);
+    public Remote addingService(ServiceReference<Remote> reference) {
+        Remote r = context.getService(reference);
+        if (r == null) {
+            log.warn("Added service is null.");
+        } else {
+            String name = RMIRegistry.findRMIName(reference, r);
+            try {
+                RMIRegistry.getRMIRegistry().bind(name, UnicastRemoteObject.exportObject(r, 0));
+            } catch (AccessException e) {
+                log.error(e.getMessage(), e);
+            } catch (RemoteException e) {
+                log.error(e.getMessage(), e);
+            } catch (AlreadyBoundException e) {
+                log.error(e.getMessage(), e);
+            } catch (OXException e) {
+                log.error(e.getMessage(), e);
+            }
         }
-        rmiTrackerCustomizer = new RMITrackerCustomizer(context);
-        track(Remote.class, rmiTrackerCustomizer);
-        openTrackers();
+        return r;
     }
 
     @Override
-    protected void stopBundle() {
-        log.info("Stopping bundle com.openexchange.rmi");
-        if (serviceRegistry != null) {
-            serviceRegistry.clearRegistry();
-            serviceRegistry = null;
-        }
-        if (rmiTrackerCustomizer != null) {
-            rmiTrackerCustomizer = null;
-        }
-        closeTrackers();
-        cleanUp();
+    public void modifiedService(ServiceReference<Remote> reference, Remote service) {
+        //nothing to do
     }
+
+    @Override
+    public void removedService(ServiceReference<Remote> reference, Remote service) {
+        String name = RMIRegistry.findRMIName(reference, service);
+        try {
+            RMIRegistry.getRMIRegistry().unbind(name);
+        } catch (AccessException e) {
+            log.error(e.getMessage(), e);
+        } catch (RemoteException e) {
+            log.error(e.getMessage(), e);
+        } catch (NotBoundException e) {
+            log.error(e.getMessage(), e);
+        } catch (OXException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
 }

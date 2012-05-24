@@ -55,102 +55,81 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
+import com.openexchange.rmi.exceptions.OXRMIExceptionCodes;
 import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
- * {@link RMITracker}
+ * {@link RMIRegistry}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class RMITracker extends ServiceTracker {
+public class RMIRegistry {
 
-    private Registry registry;
+    private static Log log = LogFactory.getLog(RMIRegistry.class);
 
-    private final Lock lock = new ReentrantLock();
+    private static Registry registry = null;
 
-    private final int port;
+    private static Lock lock = new ReentrantLock();
 
-    private static final Log LOG = LogFactory.getLog(RMITracker.class);
-
-    public RMITracker(BundleContext context) {
-        super(context, Remote.class.getName(), null);
-        this.registry = null;
-        ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
-        port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
+    /**
+     * Initializes a new {@link RMIRegistry}.
+     */
+    private RMIRegistry() {
+        super();
     }
 
-    @Override
-    public Object addingService(ServiceReference reference) {
+    public static Registry getRMIRegistry() throws OXException {
+        lock.lock();
         try {
-            lock.lock();
+            if (registry == null) {
+                registry = createRMIRegistry();
+            }
+            return registry;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static Registry createRMIRegistry() throws OXException {
+        lock.lock();
+        try {
+            ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
+            int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
             if (registry == null) {
                 registry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
             }
-            Remote r = (Remote) super.addingService(reference);
-            String name = findRMIName(reference, r);
-            try {
-                registry.bind(name, UnicastRemoteObject.exportObject(r, 0));
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-            return r;
+            return registry;
         } catch (RemoteException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
+            log.error(e.getMessage(), e);
+            throw OXRMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
         } finally {
             lock.unlock();
         }
     }
 
-    @Override
-    public void removedService(ServiceReference reference, Object service) {
-        try {
-            lock.lock();
-            Remote r = (Remote) service;
-            String name = findRMIName(reference, r);
-            try {
-                registry.unbind(name);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-            super.removedService(reference, service);
-        } finally {
-            lock.unlock();
+    public static String findRMIName(ServiceReference<Remote> reference, Remote r) {
+        Object name = reference.getProperty("RMIName");
+        if (name != null) {
+            return (String) name;
         }
-    }
-
-    private String findRMIName(ServiceReference reference, Remote r) {
         try {
-            lock.lock();
-            Object name = reference.getProperty("RMIName");
-            if (name != null) {
-                return (String) name;
-            }
-
-            try {
-                Field field = r.getClass().getField("RMI_NAME");
-                return (String) field.get(r);
-            } catch (SecurityException e) {
-                return r.getClass().getSimpleName();
-            } catch (NoSuchFieldException e) {
-                return r.getClass().getSimpleName();
-            } catch (IllegalArgumentException e) {
-                return r.getClass().getSimpleName();
-            } catch (IllegalAccessException e) {
-                return r.getClass().getSimpleName();
-            }
-        } finally {
-            lock.unlock();
+            Field field = r.getClass().getField("RMI_NAME");
+            return (String) field.get(r);
+        } catch (SecurityException e) {
+            return r.getClass().getSimpleName();
+        } catch (NoSuchFieldException e) {
+            return r.getClass().getSimpleName();
+        } catch (IllegalArgumentException e) {
+            return r.getClass().getSimpleName();
+        } catch (IllegalAccessException e) {
+            return r.getClass().getSimpleName();
         }
     }
 
