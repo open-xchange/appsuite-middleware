@@ -243,10 +243,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 final String id = "com.openexchange.mail." + md5Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
+                    final ServerSession ses = req.getSession();
                     if (null == jsonValue) {
-                        jsonCache.setIfDiffers(id, newJsonValue, req.getSession().getUserId(), req.getSession().getContextId());
+                        jsonCache.setIfDiffers(id, newJsonValue, ses.getUserId(), ses.getContextId());
                     } else {
-                        jsonCache.set(id, newJsonValue, req.getSession().getUserId(), req.getSession().getContextId());
+                        jsonCache.set(id, newJsonValue, ses.getUserId(), ses.getContextId());
                     }
                 }
             }

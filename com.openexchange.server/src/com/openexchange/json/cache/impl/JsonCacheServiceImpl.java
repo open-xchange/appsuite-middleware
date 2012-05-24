@@ -108,7 +108,11 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             if (!rs.next()) {
                 return null;
             }
-            final String sJson = new String(Base64.decodeBase64(rs.getString(1)), Charsets.UTF_8);
+            final String string = rs.getString(1);
+            if ("null".equals(string)) {
+                return null;
+            }
+            final String sJson = new String(Base64.decodeBase64(string), Charsets.UTF_8);
             if ('{' == sJson.charAt(0)) {
                 return new JSONObject(sJson);
             }
@@ -221,18 +225,26 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.setInt(2, userId);
             stmt.setString(3, id);
             rs = stmt.executeQuery();
+            final boolean update;
             final JSONValue prev;
             {
                 if (!rs.next()) {
                     prev = null;
+                    update = false;
                 } else {
-                    final String sJson = new String(Base64.decodeBase64(rs.getString(1)), Charsets.UTF_8);
-                    if ('{' == sJson.charAt(0)) {
-                        prev = new JSONObject(sJson);
-                    } else if ('[' == sJson.charAt(0)) {
-                        prev = new JSONArray(sJson);
+                    update = true;
+                    final String string = rs.getString(1);
+                    if ("null".equals(string)) {
+                        prev = null;
                     } else {
-                        throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
+                        final String sJson = new String(Base64.decodeBase64(string), Charsets.UTF_8);
+                        if ('{' == sJson.charAt(0)) {
+                            prev = new JSONObject(sJson);
+                        } else if ('[' == sJson.charAt(0)) {
+                            prev = new JSONArray(sJson);
+                        } else {
+                            throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
+                        }
                     }
                 }
             }
@@ -249,18 +261,18 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
              * Update or insert
              */
             final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(Charsets.UTF_8)), Charsets.US_ASCII);
-            if (null == prev) {
-                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json) VALUES (?,?,?,?)");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, id);
-                stmt.setString(4, text);
-            } else {
+            if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
                 stmt.setString(1, text);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.setString(4, id);
+            } else {
+                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json) VALUES (?,?,?,?)");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, id);
+                stmt.setString(4, text);
             }
             stmt.executeUpdate();
             return true;
@@ -272,6 +284,102 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public boolean lock(final String id, final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, true);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean transactional = false;
+        try {
+            DBUtils.startTransaction(con);
+            transactional = true;
+            /*
+             * Perform INSERT or UPDATE
+             */
+            stmt = con.prepareStatement("SELECT 1 FROM jsonCache WHERE cid=? AND user=? AND id=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, id);
+            rs = stmt.executeQuery();
+            final boolean update = rs.next();
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            if (!update) {
+                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json,inProgress) VALUES (?,?,?,?,1)");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, id);
+                stmt.setString(4, "null"); // Dummy
+                boolean inserted;
+                try {
+                    inserted = stmt.executeUpdate() > 0;
+                } catch (final Exception e) {
+                    inserted = false;
+                }
+                if (inserted) {
+                    return true;
+                }
+            }
+            DBUtils.closeSQLStuff(stmt);
+            stmt = con.prepareStatement("UPDATE jsonCache SET inProgress=1 WHERE cid=? AND user=? AND id=? AND inProgress=0");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, id);
+            final boolean updated = (stmt.executeUpdate() > 0);
+            con.commit();
+            return updated;
+        } catch (final SQLException e) {
+            if (transactional) {
+                DBUtils.rollback(con);
+            }
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            if (transactional) {
+                DBUtils.rollback(con);
+            }
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (transactional) {
+                DBUtils.autocommit(con);
+            }
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public void unlock(final String id, final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, true);
+        PreparedStatement stmt = null;
+        boolean transactional = false;
+        try {
+            DBUtils.startTransaction(con);
+            transactional = true;
+            stmt = con.prepareStatement("UPDATE jsonCache SET inProgress=0 WHERE cid=? AND user=? AND id=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, id);
+            stmt.executeUpdate();
+            con.commit();
+        } catch (final SQLException e) {
+            if (transactional) {
+                DBUtils.rollback(con);
+            }
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            if (transactional) {
+                DBUtils.rollback(con);
+            }
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            if (transactional) {
+                DBUtils.autocommit(con);
+            }
             Database.back(contextId, true, con);
         }
     }

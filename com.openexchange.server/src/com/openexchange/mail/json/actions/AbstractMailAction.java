@@ -53,6 +53,7 @@ import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.AddressException;
@@ -113,6 +114,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         super();
         this.services = services;
     }
+
+    /**
+     * Cachable formats.
+     */
+    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(
+        Arrays.asList("apiResponse", "json")));
 
     /**
      * Gets the service of specified type

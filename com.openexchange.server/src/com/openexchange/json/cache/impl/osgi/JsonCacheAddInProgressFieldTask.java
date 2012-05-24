@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,54 +49,69 @@
 
 package com.openexchange.json.cache.impl.osgi;
 
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.json.cache.JsonCacheService;
-import com.openexchange.json.cache.JsonCaches;
-import com.openexchange.json.cache.impl.JsonCacheServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link JsonCacheActivator}
- * 
+ * {@link JsonCacheAddInProgressFieldTask} - Add "inProgress" field to JSON cache table.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JsonCacheActivator extends HousekeepingActivator {
+public final class JsonCacheAddInProgressFieldTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link JsonCacheActivator}.
+     * Initializes a new {@link JsonCacheAddInProgressFieldTask}.
      */
-    public JsonCacheActivator() {
+    public JsonCacheAddInProgressFieldTask() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public int getPriority() {
+        @SuppressWarnings("deprecation")
+        final int priority = UpdateTask.UpdateTaskPriority.HIGH.priority;
+        return priority;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        /*
-         * Register services for table creation
-         */
-        registerService(CreateTableService.class, new JsonCacheCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new JsonCacheCreateTableTask(), new JsonCacheAddInProgressFieldTask()));
-        registerService(DeleteListener.class, new JsonCacheDeleteListener());
-        /*
-         * Register cache service
-         */
-        final JsonCacheServiceImpl serviceImpl = new JsonCacheServiceImpl(this);
-        registerService(JsonCacheService.class, serviceImpl);
-        JsonCaches.CACHE_REFERENCE.set(serviceImpl);
+    public String[] getDependencies() {
+        return new String[] { JsonCacheCreateTableTask.class.getName() };
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        JsonCaches.CACHE_REFERENCE.set(null);
-        super.stopBundle();
+    public void perform(final PerformParameters params) throws OXException {
+        final int cid = params.getContextId();
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final Connection con = dbService.getForUpdateTask(cid);
+        try {
+            con.setAutoCommit(false);
+            Tools.checkAndAddColumns(con, "jsonCache", getColumns());
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            Database.backNoTimeout(cid, true, con);
+        }
     }
 
+    protected Column[] getColumns() {
+        return new Column[] { new Column("inProgress", "TINYINT default 0") };
+    }
 }

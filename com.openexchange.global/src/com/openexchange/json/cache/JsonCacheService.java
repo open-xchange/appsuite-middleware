@@ -60,6 +60,27 @@ import com.openexchange.exception.OXException;
 public interface JsonCacheService {
 
     /**
+     * Locks for specified entry.
+     * 
+     * @param id The identifier
+     * @param userId The user identifier
+     * @param contextId The user's context identifier
+     * @return <code>true</code> if successfully locked; otherwise <code>false</code>
+     * @throws OXException If lock operation fails
+     */
+    boolean lock(String id, int userId, int contextId) throws OXException;
+
+    /**
+     * Unlocks for specified entry.
+     * 
+     * @param id The identifier
+     * @param userId The user identifier
+     * @param contextId The user's context identifier
+     * @throws OXException If unlock operation fails
+     */
+    public void unlock(String id, int userId, int contextId) throws OXException;
+
+    /**
      * Gets denoted JSON value from cache.
      * 
      * @param id The identifier
