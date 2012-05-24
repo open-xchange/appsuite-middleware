@@ -83,6 +83,9 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class AJAXRequestData {
 
+    /**
+     * The upload {@link InputStream stream} provider.
+     */
     public static interface InputStreamProvider {
 
         /**
@@ -168,6 +171,39 @@ public class AJAXRequestData {
         files = new LinkedList<UploadFile>();
         decoratorIds = new LinkedList<String>();
         expires = -1;
+    }
+
+    /**
+     * Gets a best-guess copy of this request data.
+     * 
+     * @return The copy
+     */
+    public AJAXRequestData copyOf() {
+        final AJAXRequestData copy = new AJAXRequestData();
+        copy.params.putAll(params);
+        copy.headers.putAll(headers);
+        copy.decoratorIds.addAll(decoratorIds);
+        copy.files.addAll(files);
+        copy.session = session;
+        copy.secure = secure;
+        copy.action = action;
+        copy.data = data;
+        copy.eTag = eTag;
+        copy.expires = expires;
+        copy.format = format;
+        copy.hostname = hostname;
+        copy.module = module;
+        copy.pathInfo = pathInfo;
+        copy.remoteAddress = remoteAddress;
+        copy.route = route;
+        copy.servletRequestUri = servletRequestUri;
+        /*
+         * Not sure about following members, therefore leave to null
+         */
+        copy.state = null;
+        copy.uploadEvent = null;
+        copy.uploadStreamProvider = null;
+        return copy;
     }
 
     /**
@@ -808,31 +844,67 @@ public class AJAXRequestData {
         return uploadEvent;
     }
 
+    /**
+     * Gets the module, e.g. <code>"mail"</code>.
+     * 
+     * @return The module
+     */
     public String getModule() {
         return module;
     }
 
+    /**
+     * Sets the module, e.g. <code>"mail"</code>.
+     * 
+     * @param module The module
+     */
     public void setModule(final String module) {
         this.module = module;
     }
 
+    /**
+     * Gets the action, e.g. <code>"all"</code>.
+     * 
+     * @return The action
+     */
     public String getAction() {
         return action;
     }
 
+    /**
+     * Sets the action, e.g. <code>"all"</code>.
+     * 
+     * @param action The action
+     */
     public void setAction(final String action) {
         this.action = action;
     }
 
+    /**
+     * Sets the data object.
+     * 
+     * @param object The data object
+     * @param format The data's format
+     */
     public void setData(final Object object, final String format) {
         setData(object);
         setFormat(format);
     }
 
+    /**
+     * Sets the request state.
+     * 
+     * @param state The state
+     */
     public void setState(final AJAXState state) {
         this.state = state;
     }
 
+    /**
+     * Gets the request state.
+     * 
+     * @return The state
+     */
     public AJAXState getState() {
         return state;
     }
