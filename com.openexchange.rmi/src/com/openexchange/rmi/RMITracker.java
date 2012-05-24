@@ -51,13 +51,20 @@ package com.openexchange.rmi;
 
 import java.lang.reflect.Field;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
  * {@link RMITracker}
@@ -68,55 +75,81 @@ public class RMITracker extends ServiceTracker {
 
     private Registry registry;
 
+    private final Lock lock = new ReentrantLock();
+
+    private final int port;
+
     private static final Log LOG = LogFactory.getLog(RMITracker.class);
 
-    public RMITracker(BundleContext context, Registry registry) {
+    public RMITracker(BundleContext context) {
         super(context, Remote.class.getName(), null);
-        this.registry = registry;
+        this.registry = null;
+        ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
+        port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
     }
 
     @Override
     public Object addingService(ServiceReference reference) {
-        Remote r = (Remote) super.addingService(reference);
-        String name = findRMIName(reference, r);
         try {
-            registry.bind(name, UnicastRemoteObject.exportObject(r, 0));
-        } catch (Exception e) {
+            lock.lock();
+            if (registry == null) {
+                registry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
+            }
+            Remote r = (Remote) super.addingService(reference);
+            String name = findRMIName(reference, r);
+            try {
+                registry.bind(name, UnicastRemoteObject.exportObject(r, 0));
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+            return r;
+        } catch (RemoteException e) {
             LOG.error(e.getMessage(), e);
+            return null;
+        } finally {
+            lock.unlock();
         }
-
-        return r;
     }
 
     @Override
     public void removedService(ServiceReference reference, Object service) {
-        Remote r = (Remote) service;
-        String name = findRMIName(reference, r);
         try {
-            registry.unbind(name);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            lock.lock();
+            Remote r = (Remote) service;
+            String name = findRMIName(reference, r);
+            try {
+                registry.unbind(name);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+            super.removedService(reference, service);
+        } finally {
+            lock.unlock();
         }
-        super.removedService(reference, service);
     }
 
     private String findRMIName(ServiceReference reference, Remote r) {
-        Object name = reference.getProperty("RMIName");
-        if (name != null) {
-            return (String) name;
-        }
-
         try {
-            Field field = r.getClass().getField("RMI_NAME");
-            return (String) field.get(r);
-        } catch (SecurityException e) {
-            return r.getClass().getSimpleName();
-        } catch (NoSuchFieldException e) {
-            return r.getClass().getSimpleName();
-        } catch (IllegalArgumentException e) {
-            return r.getClass().getSimpleName();
-        } catch (IllegalAccessException e) {
-            return r.getClass().getSimpleName();
+            lock.lock();
+            Object name = reference.getProperty("RMIName");
+            if (name != null) {
+                return (String) name;
+            }
+
+            try {
+                Field field = r.getClass().getField("RMI_NAME");
+                return (String) field.get(r);
+            } catch (SecurityException e) {
+                return r.getClass().getSimpleName();
+            } catch (NoSuchFieldException e) {
+                return r.getClass().getSimpleName();
+            } catch (IllegalArgumentException e) {
+                return r.getClass().getSimpleName();
+            } catch (IllegalAccessException e) {
+                return r.getClass().getSimpleName();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 

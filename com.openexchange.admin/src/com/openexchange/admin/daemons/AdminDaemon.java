@@ -49,12 +49,8 @@
 
 package com.openexchange.admin.daemons;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,23 +103,6 @@ public class AdminDaemon {
     private static OXAdminCoreImpl oxadmincore = null;
 
     private static OXTaskMgmtImpl oxtaskmgmt = null;
-
-    public class LocalServerFactory implements RMIServerSocketFactory {
-
-        public ServerSocket createServerSocket(final int port) throws IOException {
-            final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
-            if (hostname_property.equalsIgnoreCase("0")) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Admindaemon will listen on all network devices!");
-                }
-                return new ServerSocket(port, 0, null);
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Admindaemon will listen on " + hostname_property + "!");
-            }
-            return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
-        }
-    }
 
     /**
      * This method is used for initialization of the list of current running bundles. The problem is that the listener itself will not get
