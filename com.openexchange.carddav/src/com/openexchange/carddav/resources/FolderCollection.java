@@ -56,9 +56,6 @@ import java.util.Locale;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.mixins.CTag;
-import com.openexchange.carddav.mixins.SupportedReportSet;
-import com.openexchange.carddav.mixins.SyncToken;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -83,12 +80,7 @@ public class FolderCollection extends CardDAVCollection {
     public FolderCollection(GroupwareCarddavFactory factory, WebdavPath url, UserizedFolder folder) throws WebdavProtocolException {
         super(factory, url);
         this.folder = folder;
-        super.includeProperties(
-				new SupportedReportSet(), 
-				new CTag(factory), 
-				new SyncToken(factory), 
-				new CurrentUserPrivilegeSet(folder.getOwnPermission()))
-		;        
+        super.includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()));        
         LOG.debug(getUrl() + ": initialized for folder '" + folder.getName() + "' [" + folder.getID() + "].");
     }
     
@@ -106,6 +98,11 @@ public class FolderCollection extends CardDAVCollection {
     protected Collection<Contact> getContacts() throws OXException {
     	return factory.getState().getContacts(this.folder.getID());
     }
+
+	@Override
+	protected String getFolderID() throws OXException {
+		return this.folder.getID();		
+	}
 
 	@Override
 	public boolean exists() throws WebdavProtocolException {

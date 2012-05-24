@@ -2666,7 +2666,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			@Override
 			public void deserialize(JSONObject from, Contact to) throws JSONException, OXException {
 				Object value = from.get(getAjaxName());
-				if (null == value || 0 == value.toString().length()) {
+				if (null == value || JSONObject.NULL.equals(value) || 0 == value.toString().length()) {
 					to.setImage1(null);
 				} else if (byte[].class.isInstance(value)) {
 					to.setImage1((byte[])value);

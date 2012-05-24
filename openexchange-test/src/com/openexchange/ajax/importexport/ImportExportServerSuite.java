@@ -71,6 +71,7 @@ public final class ImportExportServerSuite {
 		//CSV
 		tests.addTestSuite(CSVImportExportServletTest.class);
 		tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
+        tests.addTestSuite(Bug20516Test.class);
 
 		// Overall bug tests.
 		tests.addTestSuite(Bug9209Test.class);

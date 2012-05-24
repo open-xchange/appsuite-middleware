@@ -5,7 +5,6 @@ SQL_PROP=@confDir@/Sql.properties
 USER_PROP=@confDir@/User.properties
 GROUP_PROP=@confDir@/Group.properties
 RESOURCE_PROP=@confDir@/Resource.properties
-RMI_PROP=@confDir@/RMI.properties
 
 # Disabling authentication for system calls like context/server etc. creation!
 # ONLY USE THIS SWITCH IF YOU EXACTLY KNOW WHAT YOU DO!!!
