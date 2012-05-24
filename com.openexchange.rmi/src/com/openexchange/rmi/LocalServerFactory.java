@@ -54,7 +54,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
  * {@link LocalServerFactory}
@@ -67,16 +69,17 @@ public class LocalServerFactory implements RMIServerSocketFactory {
 
     @Override
     public ServerSocket createServerSocket(final int port) throws IOException {
-        final String hostname_property = InetAddress.getLocalHost().getHostAddress();
-        if (hostname_property.equalsIgnoreCase("0")) {
+        ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
+        final String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
+        if (hostname.equalsIgnoreCase("0")) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Admindaemon will listen on all network devices!");
             }
             return new ServerSocket(port, 0, null);
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("Admindaemon will listen on " + hostname_property + "!");
+            LOG.info("Admindaemon will listen on " + hostname + "!");
         }
-        return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
+        return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }
 }

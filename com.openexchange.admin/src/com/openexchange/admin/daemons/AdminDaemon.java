@@ -54,7 +54,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -88,8 +87,6 @@ public class AdminDaemon {
     private static PropertyHandler prop = null;
 
     private AdminCache cache = null;
-
-    private static Registry registry = null;
 
     private final List<ServiceRegistration<Remote>> services = new ArrayList<ServiceRegistration<Remote>>();
 
@@ -181,20 +178,7 @@ public class AdminDaemon {
 
     public void initRMI(final BundleContext context) {
         try {
-            // final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
-            // try {
-            // // Use SslRMIServerSocketFactory for SSL here
-            // registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
-            // } catch (final RemoteException e) {
-            // // if a registry has be already created in this osgi framework
-            // // we just need to get it from the port (normally this happens
-            // // on restarting
-            // registry = LocateRegistry.getRegistry(
-            // ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost"),
-            // rmi_port);
-            // }
-
-            // Now export all NEW Objects
+            // Export all NEW Objects
             oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
             final OXUserInterface oxuser_stub_v2 = (OXUserInterface) UnicastRemoteObject.exportObject(oxuser_v2, 0);
 
@@ -225,9 +209,6 @@ public class AdminDaemon {
         } catch (final RemoteException e) {
             LOG.fatal("Error creating RMI registry!", e);
             System.exit(1);
-            // } catch (final AlreadyBoundException e) {
-            // LOG.fatal("One RMI name is already bound!", e);
-            // System.exit(1);
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
         }
@@ -237,10 +218,6 @@ public class AdminDaemon {
         for (ServiceRegistration<Remote> registration : services) {
             context.ungetService(registration.getReference());
         }
-    }
-
-    public static final Registry getRegistry() {
-        return registry;
     }
 
     public static PropertyHandler getProp() {
