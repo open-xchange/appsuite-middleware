@@ -34,6 +34,7 @@ opt/open-xchange/etc/participant.properties
 opt/open-xchange/etc/passwordchange.properties
 opt/open-xchange/etc/publications.properties
 opt/open-xchange/etc/push-udp.properties
+opt/open-xchange/etc/rmi.properties
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessioncache.ccf
 opt/open-xchange/etc/sessiond.properties
