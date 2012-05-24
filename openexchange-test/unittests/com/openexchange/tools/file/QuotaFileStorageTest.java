@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.file;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -57,7 +56,9 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Random;
 import junit.framework.TestCase;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.test.DelayedInputStream;
@@ -409,6 +410,15 @@ public class QuotaFileStorageTest extends TestCase {
         @Override
         public int getServerId() {
             return 0;
+        }
+
+        /* (non-Javadoc)
+         * @see com.openexchange.database.DatabaseService#writeAssignment(java.sql.Connection, com.openexchange.database.Assignment)
+         */
+        @Override
+        public void writeAssignment(final Connection con, final Assignment assignment) throws OXException {
+            // TODO Auto-generated method stub
+            
         }
     }
 
