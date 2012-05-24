@@ -131,6 +131,8 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        getAJAXClient().setHostname(getHostname());
+        getAJAXClient().setProtocol(getProtocol());
         /*
          * init
          */

@@ -930,6 +930,8 @@ public class OXContainerConverter {
         	ImageScalingService imageService = ServerServiceRegistry.getInstance().getService(ImageScalingService.class, true);
         	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1, 
         			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height);
+//        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1 - 1, 
+//        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width - 1, clipRect.height - 1);
     		/*
     		 * write back to byte array
     		 */    		

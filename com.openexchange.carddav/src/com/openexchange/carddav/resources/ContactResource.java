@@ -62,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.Patches;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.mapping.CardDAVMapper;
 import com.openexchange.exception.Category;
@@ -96,12 +95,14 @@ public class ContactResource extends CardDAVResource {
     private boolean exists = false;
     private Contact contact = null;    
     private int retryCount = 0;
+    private String parentFolderID = null;
 
     /**
      * Creates a new {@link ContactResource} representing an existing contact.
      * 
-     * @param parent the parent collection
      * @param contact the contact
+     * @param factory the CardDAV factory
+	 * @param url the WebDAV URL
      */
 	public ContactResource(Contact contact, GroupwareCarddavFactory factory, WebdavPath url) {
 		super(factory, url);
@@ -112,12 +113,14 @@ public class ContactResource extends CardDAVResource {
 	/**
 	 * Creates a new placeholder {@link ContactResource} at the specified URL.
 	 * 
-	 * @param parent the parent collection
+     * @param factory the CardDAV factory
 	 * @param url the WebDAV URL
+	 * @param parentFolderID the ID of the parent folder
 	 * @throws WebdavProtocolException
 	 */
-    public ContactResource(GroupwareCarddavFactory factory, WebdavPath url) throws WebdavProtocolException {
+    public ContactResource(GroupwareCarddavFactory factory, WebdavPath url, String parentFolderID) throws WebdavProtocolException {
     	this(null, factory, url);
+    	this.parentFolderID = parentFolderID;
     }
 
 	@Override
@@ -242,7 +245,7 @@ public class ContactResource extends CardDAVResource {
 		    	 * Apply default metadata
 		    	 */
 		        newContact.setContextId(this.factory.getSession().getContextId());
-		        newContact.setParentFolderID(Tools.parse(factory.getState().getDefaultFolder().getID()));
+		        newContact.setParentFolderID(Tools.parse(this.parentFolderID));
 	    		if (null != this.url) {
 	    			String extractedUID = Tools.extractUID(url);
 	    			if (null != extractedUID && false == extractedUID.equals(newContact.getUid())) {
@@ -329,31 +332,18 @@ public class ContactResource extends CardDAVResource {
 
 	private DistributionListEntryObject resolveMember(String uid) {
 		ContactField[] distListMemberFields = { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.DISPLAY_NAME, 
-				ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
-		Contact contact;
+				ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.GIVEN_NAME, ContactField.SUR_NAME, 
+				ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 		try {						
-			contact = factory.getState().waitFor(uid, distListMemberFields);
+			Contact contact = factory.getState().waitFor(uid, distListMemberFields);
 			if (null != contact) {
-				DistributionListEntryObject member = new DistributionListEntryObject();
-				member.setEntryID(contact.getObjectID());
-				member.setFolderID(contact.getParentFolderID());
-				member.setDisplayname(contact.getDisplayName());
-				member.setFirstname(contact.getGivenName());
-				member.setLastname(contact.getSurName());
-				if (null != contact.getEmail1() && 0 < contact.getEmail1().trim().length()) {
-					member.setEmailaddress(contact.getEmail1());
-					member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
-				} else if (null != contact.getEmail2() && 0 < contact.getEmail2().trim().length()) {
-					member.setEmailaddress(contact.getEmail2());
-					member.setEmailfield(DistributionListEntryObject.EMAILFIELD2);
-				} else if (null != contact.getEmail3() && 0 < contact.getEmail3().trim().length()) {
-					member.setEmailaddress(contact.getEmail3());
-					member.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
+				if (contact.getMarkAsDistribtuionlist()) {
+					LOG.debug(getUrl() + ": referenced distribution list member with '" + uid + 
+							"' is a distribution list by itself, skipping.");
+					return null;
 				} else {
-					member.setEmailaddress(null);
-					member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
+					return createMember(contact);
 				}
-				return member;
 			} else {
 				LOG.warn(getUrl() + ": unable to get distribution list member with uid '" + uid + "'.");
 			}
@@ -363,6 +353,29 @@ public class ContactResource extends CardDAVResource {
 			LOG.warn("Thread interrupted while waiting for member '" + uid + "'", e);
 		}		
 		return null;
+	}
+
+	private static DistributionListEntryObject createMember(Contact contact) throws OXException {
+		DistributionListEntryObject member = new DistributionListEntryObject();
+		member.setEntryID(contact.getObjectID());
+		member.setFolderID(contact.getParentFolderID());
+		member.setDisplayname(contact.getDisplayName());
+		member.setFirstname(contact.getGivenName());
+		member.setLastname(contact.getSurName());
+		if (null != contact.getEmail1() && 0 < contact.getEmail1().trim().length()) {
+			member.setEmailaddress(contact.getEmail1());
+			member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
+		} else if (null != contact.getEmail2() && 0 < contact.getEmail2().trim().length()) {
+			member.setEmailaddress(contact.getEmail2());
+			member.setEmailfield(DistributionListEntryObject.EMAILFIELD2);
+		} else if (null != contact.getEmail3() && 0 < contact.getEmail3().trim().length()) {
+			member.setEmailaddress(contact.getEmail3());
+			member.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
+		} else {
+			member.setEmailaddress(null);
+			member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
+		}
+		return member;
 	}
 	
     private static List<String> extractMembers(VersitObject versitObject) {
@@ -419,17 +432,15 @@ public class ContactResource extends CardDAVResource {
 	}
 
 	private String serializeAsContact() throws WebdavProtocolException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         VersitDefinition contactDef = Versit.getDefinition("text/vcard");
         VersitDefinition.Writer versitWriter = null;
         try {
-            versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
+            versitWriter = contactDef.getWriter(outputStream, "UTF-8");
             VersitObject versitObject = CONVERTER.convertContact(contact, "3.0");
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();
-            String outputString = new String(byteArrayOutputStream.toByteArray(), "UTF-8");
-            outputString = Patches.OutgoingFile.removeXOPENXCHANGEAttributes(outputString);
-            return outputString;
+            return new String(outputStream.toByteArray(), "UTF-8");
         } catch (IOException e) {
         	throw super.protocolException(e);
         } catch (ConverterException e) {
@@ -485,11 +496,11 @@ public class ContactResource extends CardDAVResource {
     	}
 	}
 
-	private boolean trimTruncatedAttributes(final OXException e) {
+	private boolean trimTruncatedAttributes(OXException e) {
 		try {
 			return MappedTruncation.truncate(e.getProblematics(), this.contact);
 		} catch (OXException x) {
-			LOG.warn("error trying to handle truncated attributes", x);
+			LOG.warn(getUrl() + ": error trying to handle truncated attributes", x);
 			return false;
 		}
 	}

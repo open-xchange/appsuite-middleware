@@ -78,6 +78,19 @@ public class CardDAVClient extends WebDAVClient {
 	 */
 	public static final String USER_AGENT_IOS_5_1_1 = "iOS/5.1.1 (9B206) dataaccessd/1.0";
 	
+	/**
+	 * The user agent as normally used by the Apple client in iOS 5.1.1 during configuration
+	 */
+	public static final String USER_AGENT_IOS_5_1_1_Pref = "iOS/5.1.1 (9B206) Preferences/1.0";
+	
+	/**
+	 * The user agent as normally used by the Apple client in iOS 5.0.1
+	 */
+	public static final String USER_AGENT_IOS_5_0_1 = "iOS/5.0.1 (9A405) dataaccessd/1.0";
+	
+	// CardDAV-Sync (Android) (like iOS/5.0.1 (9A405) dataaccessd/1.0)
+	
+	
 	public CardDAVClient() throws OXException {
 		super();
 		super.setUserAgent(USER_AGENT_10_7_2);
