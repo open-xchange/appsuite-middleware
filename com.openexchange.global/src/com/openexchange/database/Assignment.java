@@ -47,55 +47,24 @@
  *
  */
 
-package com.openexchange.admin.osgi;
+package com.openexchange.database;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.admin.PluginStarter;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+/**
+ * {@link Assignment} of context and server to read and write databases. Gives information to which user database needs to be connected
+ * when a certain context is processed on a certain server.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public interface Assignment {
 
-public class Activator extends HousekeepingActivator {
+    int getContextId();
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    int getServerId();
 
-    private PluginStarter starter = null;
+    int getReadPoolId();
 
-    @Override
-    public void startBundle() throws Exception {
-        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
-        track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
-        track(I18nService.class, new I18nServiceCustomizer(context));
-        track(ManagementService.class, new ManagementCustomizer(context));
-        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
-        openTrackers();
-        this.starter = new PluginStarter();
-        try {
-            this.starter.start(context);
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
-        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
-    }
+    int getWritePoolId();
 
-    @Override
-    public void stopBundle() throws Exception {
-        this.starter.stop();
-        closeTrackers();
-        cleanUp();
-    }
+    String getSchema();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return null;
-    }
 }

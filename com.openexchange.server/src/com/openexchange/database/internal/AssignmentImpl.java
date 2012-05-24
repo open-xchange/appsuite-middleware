@@ -47,55 +47,89 @@
  *
  */
 
-package com.openexchange.admin.osgi;
+package com.openexchange.database.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.admin.PluginStarter;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import java.io.Serializable;
+import com.openexchange.database.Assignment;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * Assignment of context and server to read and write databases.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class AssignmentImpl implements Serializable, Assignment {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final long serialVersionUID = -3426601066426517436L;
 
-    private PluginStarter starter = null;
+    private final int contextId;
 
-    @Override
-    public void startBundle() throws Exception {
-        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
-        track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
-        track(I18nService.class, new I18nServiceCustomizer(context));
-        track(ManagementService.class, new ManagementCustomizer(context));
-        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
-        openTrackers();
-        this.starter = new PluginStarter();
-        try {
-            this.starter.start(context);
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
-        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
+    private final int serverId;
+
+    private final int writePoolId;
+
+    private final int readPoolId;
+
+    private final String schema;
+
+    private boolean transactionInitialized = false;
+
+    private long transaction;
+
+    /**
+     * Default constructor.
+     * @param contextId
+     * @param serverId
+     * @param readPoolId
+     * @param writePoolId
+     * @param schema
+     */
+    AssignmentImpl(final int contextId, final int serverId, final int readPoolId, final int writePoolId, final String schema) {
+        super();
+        this.contextId = contextId;
+        this.serverId = serverId;
+        this.readPoolId = readPoolId;
+        this.writePoolId = writePoolId;
+        this.schema = schema;
+    }
+
+    public AssignmentImpl(Assignment assign) {
+        this(assign.getContextId(), assign.getServerId(), assign.getReadPoolId(), assign.getWritePoolId(), assign.getSchema());
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        this.starter.stop();
-        closeTrackers();
-        cleanUp();
+    public int getContextId() {
+        return contextId;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return null;
+    public int getServerId() {
+        return serverId;
+    }
+
+    @Override
+    public int getReadPoolId() {
+        return readPoolId;
+    }
+
+    @Override
+    public int getWritePoolId() {
+        return writePoolId;
+    }
+
+    @Override
+    public String getSchema() {
+        return schema;
+    }
+
+    boolean isTransactionInitialized() {
+        return transactionInitialized;
+    }
+
+    long getTransaction() {
+        return transaction;
+    }
+
+    void setTransaction(long transaction) {
+        this.transaction = transaction;
+        transactionInitialized = true;
     }
 }

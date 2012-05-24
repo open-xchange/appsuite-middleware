@@ -47,79 +47,43 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.admin.osgi;
 
-import java.io.Serializable;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.database.DatabaseService;
 
 /**
- * Assignment of context and server to read and write databases.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link DatabaseServiceCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Assignment implements Serializable {
+public final class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private static final long serialVersionUID = -3426601066426517436L;
+    private final BundleContext context;
+    private final OXAdminPoolInterface pool;
 
-    private final int contextId;
-
-    private final int serverId;
-
-    private final int writePoolId;
-
-    private final int readPoolId;
-
-    private final String schema;
-
-    private boolean transactionInitialized = false;
-
-    private long transaction;
-
-    /**
-     * Default constructor.
-     * @param contextId
-     * @param serverId
-     * @param readPoolId
-     * @param writePoolId
-     * @param schema
-     */
-    Assignment(final int contextId, final int serverId, final int readPoolId, final int writePoolId, final String schema) {
+    public DatabaseServiceCustomizer(BundleContext context, OXAdminPoolInterface pool) {
         super();
-        this.contextId = contextId;
-        this.serverId = serverId;
-        this.readPoolId = readPoolId;
-        this.writePoolId = writePoolId;
-        this.schema = schema;
+        this.context = context;
+        this.pool = pool;
     }
 
-    int getContextId() {
-        return contextId;
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        DatabaseService service = context.getService(reference);
+        pool.setService(service);
+        return service;
     }
 
-    int getServerId() {
-        return serverId;
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do.
     }
 
-    int getReadPoolId() {
-        return readPoolId;
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        pool.removeService();
+        context.ungetService(reference);
     }
 
-    int getWritePoolId() {
-        return writePoolId;
-    }
-
-    String getSchema() {
-        return schema;
-    }
-
-    boolean isTransactionInitialized() {
-        return transactionInitialized;
-    }
-
-    long getTransaction() {
-        return transaction;
-    }
-
-    void setTransaction(long transaction) {
-        this.transaction = transaction;
-        transactionInitialized = true;
-    }
 }

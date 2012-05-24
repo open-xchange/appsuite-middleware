@@ -143,7 +143,11 @@ public enum DBPoolingExceptionCodes {
     /**
      * Transaction counter is missing for context %1$d.
      */
-    TRANSACTION_MISSING(TRANSACTION_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 21);
+    TRANSACTION_MISSING(TRANSACTION_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 21),
+    /**
+     * Inserting database assignment for context %1$d and server %2$d failed!
+     */
+    INSERT_FAILED(INSERT_FAILED_MSG, Category.CATEGORY_ERROR, 22);
 
     /**
      * Message of the exception.
