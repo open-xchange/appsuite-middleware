@@ -88,10 +88,6 @@ public class RMIActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws OXException {
         log.info("Starting bundle com.openexchange.rmi");
-        // ClassLoader oldLoader = null;
-        // try {
-        // oldLoader = Thread.currentThread().getContextClassLoader();
-        // Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         try {
             serviceRegistry = new ServiceRegistry();
             for (Class<?> clazz : getNeededServices()) {
@@ -108,9 +104,6 @@ public class RMIActivator extends HousekeepingActivator {
             log.fatal(e.getMessage(), e);
             throw OXRMIExceptionCodes.RMI_START_FAILED.create(e);
         }
-        // } finally {
-        // Thread.currentThread().setContextClassLoader(oldLoader);
-        // }
     }
 
     @Override

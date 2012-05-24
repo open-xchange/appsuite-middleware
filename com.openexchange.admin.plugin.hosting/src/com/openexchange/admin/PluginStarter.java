@@ -54,7 +54,6 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,8 +70,6 @@ import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.log.LogFactory;
 
 public class PluginStarter {
-
-    private static Registry registry = null;
 
     private static Log LOG = LogFactory.getLog(PluginStarter.class);
 
@@ -94,7 +91,6 @@ public class PluginStarter {
         try {
             this.context = context;
             initCache();
-//            registry = AdminDaemon.getRegistry();
 
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
@@ -104,8 +100,6 @@ public class PluginStarter {
             final OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
 
             // bind all NEW Objects to registry
-            // registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
-            // registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
             services.add(context.registerService(Remote.class, oxctx_stub_v2, null));
             services.add(context.registerService(Remote.class, oxutil_stub_v2, null));
 
@@ -118,9 +112,6 @@ public class PluginStarter {
         } catch (final RemoteException e) {
             LOG.error(e.getMessage(), e);
             throw e;
-            // } catch (final AlreadyBoundException e) {
-            // LOG.error(e.getMessage(), e);
-            // throw e;
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
@@ -128,22 +119,6 @@ public class PluginStarter {
     }
 
     public void stop() throws AccessException, RemoteException, NotBoundException {
-        // try {
-        // if (null != registry) {
-        // registry.unbind(OXContextInterface.RMI_NAME);
-        // registry.unbind(OXUtilInterface.RMI_NAME);
-        // }
-        // } catch (final AccessException e) {
-        // LOG.error(e.getMessage(), e);
-        // throw e;
-        // } catch (final RemoteException e) {
-        // LOG.error(e.getMessage(), e);
-        // throw e;
-        // } catch (final NotBoundException e) {
-        // LOG.error(e.getMessage(), e);
-        // throw e;
-        // }
-
         for (ServiceRegistration<Remote> registration : services) {
             context.ungetService(registration.getReference());
         }
