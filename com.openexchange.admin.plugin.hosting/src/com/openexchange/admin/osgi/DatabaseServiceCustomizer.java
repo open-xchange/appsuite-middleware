@@ -49,53 +49,40 @@
 
 package com.openexchange.admin.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.admin.PluginStarter;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.context.ContextService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link DatabaseServiceCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private final BundleContext context;
+    private final OXAdminPoolInterface pool;
 
-    private PluginStarter starter = null;
-
-    @Override
-    public void startBundle() throws Exception {
-        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
-        track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
-        track(I18nService.class, new I18nServiceCustomizer(context));
-        track(ManagementService.class, new ManagementCustomizer(context));
-        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
-        openTrackers();
-        this.starter = new PluginStarter();
-        try {
-            this.starter.start(context);
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
-        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
+    public DatabaseServiceCustomizer(BundleContext context, OXAdminPoolInterface pool) {
+        super();
+        this.context = context;
+        this.pool = pool;
     }
 
-    @Override
-    public void stopBundle() throws Exception {
-        this.starter.stop();
-        closeTrackers();
-        cleanUp();
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        DatabaseService service = context.getService(reference);
+        pool.setService(service);
+        return service;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return null;
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do
+    }
+
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        pool.removeService();
+        context.ungetService(reference);
     }
 }

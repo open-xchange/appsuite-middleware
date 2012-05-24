@@ -52,24 +52,40 @@ package com.openexchange.admin.storage.sqlStorage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Assignment;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     private Log log = LogFactory.getLog(this.getClass());
+    private DatabaseService service;
 
-    public OXAdminPoolDBPool(PropertyHandler prop) {
+    public OXAdminPoolDBPool() {
         super();
+    }
+
+    public void setService(DatabaseService service) {
+        this.service = service;
+    }
+
+    public void removeService() {
+        setService(null);
+    }
+
+    public DatabaseService getService() throws PoolException {
+        if (null == service) {
+            throw new PoolException("DatabaseService is missing.");
+        }
+        return service;
     }
 
     public Connection getConnectionForConfigDB() throws PoolException {
         final Connection con;
         try {
-            con = Database.get(true);
+            con = service.getWritable();
         } catch (OXException e) {
             log.error("Error pickup configdb database write connection from pool!", e);
             throw new PoolException(e.getMessage());
@@ -80,7 +96,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     public Connection getConnectionForContext(int contextId) throws PoolException {
         final Connection con;
         try {
-            con = Database.get(contextId, true);
+            con = service.getWritable(contextId);
         } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
             throw new PoolException(e.getMessage());
@@ -91,7 +107,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
         final Connection con;
         try {
-            con = Database.getNoTimeout(contextId, true);
+            con = service.getForUpdateTask(contextId);
         } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
             throw new PoolException(e.getMessage());
@@ -108,7 +124,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             log.error("Error pushing configdb write connection to pool!", e);
             throw new PoolException(e.getMessage());
         } finally {
-            Database.back(true, con);
+            service.backWritable(con);
         }
         return true;
     }
@@ -122,7 +138,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             log.error("Error pushing context database write connection to pool!", e);
             throw new PoolException(e.getMessage());
         } finally {
-            Database.back(contextId, true, con);
+            service.backWritable(contextId, con);
         }
         return true;
     }
@@ -136,7 +152,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             log.error("Error pushing context database write connection to pool!", e);
             throw new PoolException(e.getMessage());
         } finally {
-            Database.backNoTimeout(contextId, true, con);
+            getService().backForUpdateTask(contextId, con);
         }
         return true;
     }
@@ -144,11 +160,20 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     public int getServerId() throws PoolException {
         final int serverId;
         try {
-            serverId = Database.getServerId();
+            serverId = service.getServerId();
         } catch (OXException e) {
             log.error("Error getting the identifier of the server! This is normal until at least one server is configured.", e);
             throw new PoolException(e.getMessage());
         }
         return serverId;
+    }
+
+    public void writeAssignment(Connection con, Assignment assign) throws PoolException {
+        try {
+            service.writeAssignment(con, assign);
+        } catch (OXException e) {
+            log.error("Error writing a context to database assigment.", e);
+            throw new PoolException(e.getMessage());
+        }
     }
 }

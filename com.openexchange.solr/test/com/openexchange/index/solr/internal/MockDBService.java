@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.internal;
 
 import java.sql.Connection;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -204,4 +205,9 @@ public class MockDBService implements DatabaseService {
         
     }
 
+    @Override
+    public void writeAssignment(Connection con, Assignment assignment) {
+        // TODO Auto-generated method stub
+        
+    }
 }

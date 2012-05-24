@@ -57,11 +57,13 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -99,6 +101,7 @@ public class Activator extends HousekeepingActivator {
             log.fatal(e.getMessage(), e);
             throw e;
         }
+        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
         this.daemon.initRMI(context);
 
 

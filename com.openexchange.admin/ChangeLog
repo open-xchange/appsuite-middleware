@@ -1,3 +1,7 @@
+* 2012-05-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22163: Using cache write through for context to database assignment to prevent missing information while reading from slave.
+
 * 2012-05-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 21826: Logging every create, change and delete operation of contexts, users, groups and resources.

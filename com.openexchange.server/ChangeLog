@@ -1,3 +1,7 @@
+* 2012-05-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22163: Using cache write through for context to database assignment to prevent missing information while reading from slave.
+
 * 2012-05-22 - marcus.klein@open-xchange.com
 
  - Fix for bug 22154: Fixed NullPointerException in startup of mail filter bundle.
