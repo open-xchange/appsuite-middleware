@@ -119,7 +119,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                     result.setResponseProperty("cached", Boolean.TRUE);
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("SimpleThreadStructureAction.perform(): JSON cache look-up took " + dur + "msec");
+                        LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache look-up took " + dur + "msec");
                     }
                     /*-
                      * TODO: Avoid multiple "loaders", clone AJAX* classes
