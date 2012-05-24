@@ -164,6 +164,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } finally {
             if (LogProperties.isEnabled()) {
                 final Props logProperties = LogProperties.getLogProperties();
@@ -180,8 +182,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param req The mail request
      * @return The result
      * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
      */
-    protected abstract AJAXRequestResult perform(MailRequest req) throws OXException;
+    protected abstract AJAXRequestResult perform(MailRequest req) throws OXException, JSONException;
 
     /**
      * Triggers the contact collector for specified mail's addresses.
