@@ -1941,8 +1941,8 @@ msgid "Cannot get connection to config DB."
 msgstr ""
 
 #. It was not possible to determine the database server for a specific OX server and a context.
-#. %1$d is replaced with some context identifier.
-#. %1$d is replaced with some server identifier.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
 msgid "Resolving database for context %1$d and server %2$d not possible!"
 msgstr ""
@@ -2039,6 +2039,13 @@ msgstr ""
 #. %1$d is replaced with the context identifier that is stored in the schema.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:124
 msgid "Transaction counter is missing for context %1$d."
+msgstr ""
+
+#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:129
+msgid "Inserting database assignment for context %1$d and server %2$d failed!"
 msgstr ""
 
 #. Text displayed to user if there is no message.
