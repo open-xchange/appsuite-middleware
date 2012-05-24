@@ -78,6 +78,7 @@ import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.SimpleThreadStructureAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
@@ -421,7 +422,29 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         } finally {
             jsonWriter.endArray();
         }
-        result.setResultObject(jsonWriter.getObject(), "json");
+        final JSONValue newJsonValue = jsonWriter.getObject();
+        result.setResultObject(newJsonValue, "json");
+        /*
+         * Put to cache if differs
+         */
+        final MailRequest req = new MailRequest(requestData, session);
+        final boolean cache = req.optBool("cache", false);
+        if (cache) {
+            final JsonCacheService jsonCache = JsonCaches.getCache();
+            if (null != jsonCache) {
+                final String md5Sum = AllAction.getMD5For(req);
+                final String id = "com.openexchange.mail." + md5Sum;
+                final JSONValue jsonValue = requestData.getProperty(id);
+                if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
+                    final ServerSession ses = req.getSession();
+                    if (null == jsonValue) {
+                        jsonCache.setIfDiffers(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                    } else {
+                        jsonCache.set(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                    }
+                }
+            }
+        }
     }
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");

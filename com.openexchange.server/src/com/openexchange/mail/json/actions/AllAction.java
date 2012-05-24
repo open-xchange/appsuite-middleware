@@ -135,6 +135,7 @@ public final class AllAction extends AbstractMailAction {
                  * Update cache with separate thread
                  */
                 final AJAXRequestData requestData = req.getRequest().copyOf();
+                requestData.setProperty("mail.md5", id);
                 requestData.setProperty(id, jsonValue);
                 final MailRequest mailRequest = new MailRequest(requestData, session);
                 final Runnable r = new Runnable() {
@@ -356,6 +357,10 @@ public final class AllAction extends AbstractMailAction {
      * @throws OXException If MD5 sum cannot be calculated.
      */
     public static String getMD5For(final MailRequest req) throws OXException {
+        final String id = req.getRequest().getProperty("mail.md5");
+        if (null != id) {
+            return id;
+        }
         final String md5Sum =
             JsonCaches.getMD5Sum(
                 "all",
