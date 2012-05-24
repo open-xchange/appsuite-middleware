@@ -99,7 +99,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
         /*
          * Try JSON cache
          */
-        //req.getRequest().putParameter("cache", "true");
+        req.getRequest().putParameter("cache", "true");
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
@@ -128,7 +128,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                  * Update cache with separate thread
                  */
                 final AJAXRequestData requestData = req.getRequest().copyOf();
-                requestData.setProperty("mail.md5", id);
+                requestData.setProperty("mail.md5", md5Sum);
                 requestData.setProperty(id, jsonValue);
                 final MailRequest mailRequest = new MailRequest(requestData, session);
                 final Runnable r = new Runnable() {
