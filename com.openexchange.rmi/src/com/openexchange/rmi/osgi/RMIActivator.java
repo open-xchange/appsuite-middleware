@@ -52,7 +52,6 @@ package com.openexchange.rmi.osgi;
 import java.rmi.Remote;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -81,7 +80,7 @@ public class RMIActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws OXException {
+    protected void startBundle() {
         log.info("Starting bundle com.openexchange.rmi");
         serviceRegistry = new ServiceRegistry();
         for (Class<?> clazz : getNeededServices()) {

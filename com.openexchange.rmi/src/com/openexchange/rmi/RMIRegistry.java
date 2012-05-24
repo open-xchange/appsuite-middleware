@@ -102,8 +102,9 @@ public class RMIRegistry {
         try {
             ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
             int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
+            String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
             if (registry == null) {
-                registry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
+                registry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory(hostname));
             }
             return registry;
         } catch (RemoteException e) {
