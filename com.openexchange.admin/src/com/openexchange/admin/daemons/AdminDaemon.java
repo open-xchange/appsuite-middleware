@@ -54,10 +54,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
-import java.rmi.server.RMISocketFactory;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -69,7 +68,12 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.rmi.OXAdminCoreInterface;
+import com.openexchange.admin.rmi.OXGroupInterface;
+import com.openexchange.admin.rmi.OXLoginInterface;
+import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.OXTaskMgmtInterface;
+import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
@@ -177,46 +181,46 @@ public class AdminDaemon {
 
     public void initRMI(final BundleContext context) {
         try {
-            final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
-            try {
-                // Use SslRMIServerSocketFactory for SSL here
-                registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
-            } catch (final RemoteException e) {
-                // if a registry has be already created in this osgi framework
-                // we just need to get it from the port (normally this happens
-                // on restarting
-                registry = LocateRegistry.getRegistry(
-                    ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost"),
-                    rmi_port);
-            }
+            // final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
+            // try {
+            // // Use SslRMIServerSocketFactory for SSL here
+            // registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
+            // } catch (final RemoteException e) {
+            // // if a registry has be already created in this osgi framework
+            // // we just need to get it from the port (normally this happens
+            // // on restarting
+            // registry = LocateRegistry.getRegistry(
+            // ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost"),
+            // rmi_port);
+            // }
 
             // Now export all NEW Objects
             oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
-            // final OXUserInterface oxuser_stub_v2 = (OXUserInterface) UnicastRemoteObject.exportObject(oxuser_v2, 0);
+            final OXUserInterface oxuser_stub_v2 = (OXUserInterface) UnicastRemoteObject.exportObject(oxuser_v2, 0);
 
             oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup(context);
-            // final OXGroupInterface oxgrp_stub_v2 = (OXGroupInterface) UnicastRemoteObject.exportObject(oxgrp_v2, 0);
+            final OXGroupInterface oxgrp_stub_v2 = (OXGroupInterface) UnicastRemoteObject.exportObject(oxgrp_v2, 0);
 
             oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
-            // final OXResourceInterface oxres_stub_v2 = (OXResourceInterface) UnicastRemoteObject.exportObject(oxres_v2, 0);
+            final OXResourceInterface oxres_stub_v2 = (OXResourceInterface) UnicastRemoteObject.exportObject(oxres_v2, 0);
 
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
-            // final OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface)UnicastRemoteObject.exportObject(oxlogin_v2, 0);
+            final OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface) UnicastRemoteObject.exportObject(oxlogin_v2, 0);
 
             oxadmincore = new OXAdminCoreImpl(context);
-            // final OXAdminCoreInterface oxadmincore_stub = (OXAdminCoreInterface)UnicastRemoteObject.exportObject(oxadmincore, 0);
+            final OXAdminCoreInterface oxadmincore_stub = (OXAdminCoreInterface) UnicastRemoteObject.exportObject(oxadmincore, 0);
 
             oxtaskmgmt = new OXTaskMgmtImpl();
-            // final OXTaskMgmtInterface oxtaskmgmt_stub = (OXTaskMgmtInterface) UnicastRemoteObject.exportObject(oxtaskmgmt, 0);
+            final OXTaskMgmtInterface oxtaskmgmt_stub = (OXTaskMgmtInterface) UnicastRemoteObject.exportObject(oxtaskmgmt, 0);
             // END of NEW export
 
             // bind all NEW Objects to registry
-            services.add(context.registerService(Remote.class, oxuser_v2, null));
-            services.add(context.registerService(Remote.class, oxgrp_v2, null));
-            services.add(context.registerService(Remote.class, oxres_v2, null));
-            services.add(context.registerService(Remote.class, oxlogin_v2, null));
-            services.add(context.registerService(Remote.class, oxadmincore, null));
-            services.add(context.registerService(Remote.class, oxtaskmgmt, null));
+            services.add(context.registerService(Remote.class, oxuser_stub_v2, null));
+            services.add(context.registerService(Remote.class, oxgrp_stub_v2, null));
+            services.add(context.registerService(Remote.class, oxres_stub_v2, null));
+            services.add(context.registerService(Remote.class, oxlogin_stub_v2, null));
+            services.add(context.registerService(Remote.class, oxadmincore_stub, null));
+            services.add(context.registerService(Remote.class, oxtaskmgmt_stub, null));
 
         } catch (final RemoteException e) {
             LOG.fatal("Error creating RMI registry!", e);
