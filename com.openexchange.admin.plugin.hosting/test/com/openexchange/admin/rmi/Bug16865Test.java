@@ -54,6 +54,7 @@ import static junit.framework.Assert.assertNotNull;
 import java.rmi.Naming;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
+import com.openexchange.admin.lib.rmi.OXUtilInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.dataobjects.Database;
 

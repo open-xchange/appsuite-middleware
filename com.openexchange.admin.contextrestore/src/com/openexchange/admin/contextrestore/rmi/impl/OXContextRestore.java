@@ -20,6 +20,7 @@ import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreExce
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.storage.interfaces.OXContextRestoreStorageInterface;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
@@ -27,7 +28,6 @@ import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.lib.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;

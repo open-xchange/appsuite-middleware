@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
 import com.openexchange.admin.lib.rmi.OXGroupInterface;
 import com.openexchange.admin.lib.rmi.OXResourceInterface;
 import com.openexchange.admin.lib.rmi.OXUserInterface;

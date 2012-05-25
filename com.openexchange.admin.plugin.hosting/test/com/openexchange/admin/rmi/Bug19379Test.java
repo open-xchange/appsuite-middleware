@@ -63,6 +63,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.dataobjects.User;

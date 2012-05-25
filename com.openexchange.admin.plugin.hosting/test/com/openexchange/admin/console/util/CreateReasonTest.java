@@ -49,13 +49,10 @@
 
 package com.openexchange.admin.console.util;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
-import com.openexchange.admin.console.util.reason.CreateReason;
 import com.openexchange.admin.lib.console.BasicCommandlineOptions;
+import com.openexchange.admin.lib.console.util.reason.CreateReason;
 
 /**
  * @author cutmasta
@@ -68,6 +65,7 @@ public class CreateReasonTest extends AbstractTest {
         
         resetBuffers();
         new CreateReason(getAllOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 CreateReasonTest.this.returnCode = exitCode;
             }
@@ -81,6 +79,7 @@ public class CreateReasonTest extends AbstractTest {
         
         resetBuffers();
         new CreateReason(getAllOptionDataWithInvalidCredentials()){
+            @Override
             protected void sysexit(int exitCode) {
                 CreateReasonTest.this.returnCode = exitCode;
             }
@@ -94,6 +93,7 @@ public class CreateReasonTest extends AbstractTest {
         
         resetBuffers();
         new CreateReason(getMissingOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 CreateReasonTest.this.returnCode = exitCode;
             }
@@ -107,6 +107,7 @@ public class CreateReasonTest extends AbstractTest {
         
         resetBuffers();
         new CreateReason(getUnknownOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 CreateReasonTest.this.returnCode = exitCode;
             }

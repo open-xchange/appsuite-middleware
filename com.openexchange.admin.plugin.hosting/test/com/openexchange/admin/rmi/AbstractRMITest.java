@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
 import com.openexchange.admin.lib.rmi.OXGroupInterface;
 import com.openexchange.admin.lib.rmi.OXResourceInterface;
 import com.openexchange.admin.lib.rmi.OXUserInterface;
