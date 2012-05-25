@@ -7,6 +7,10 @@ Bundle-Activator: com.openexchange.admin.contextrestore.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.mysql.jdbc,
+ com.openexchange.admin.lib.console,
+ com.openexchange.admin.lib.rmi,
+ com.openexchange.admin.lib.rmi.dataobjects,
+ com.openexchange.admin.lib.rmi.exceptions,
  com.openexchange.database,
  com.openexchange.databaseold,
  com.openexchange.exception,

@@ -51,15 +51,15 @@ package com.openexchange.admin.rmi.impl;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
-import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.*;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Database;
+import com.openexchange.admin.lib.rmi.dataobjects.Group;
+import com.openexchange.admin.lib.rmi.dataobjects.NameAndIdObject;
+import com.openexchange.admin.lib.rmi.dataobjects.Resource;
+import com.openexchange.admin.lib.rmi.dataobjects.Server;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.*;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 

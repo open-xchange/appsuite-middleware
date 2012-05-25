@@ -55,7 +55,7 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
-import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.lib.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;

@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Admin library bundle
+Bundle-SymbolicName: com.openexchange.admin.lib
+Bundle-Version: 7.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ lib/opencsv-2.0.jar
+Export-Package: com.openexchange.admin.lib.console,
+ com.openexchange.admin.lib.console.admincore,
+ com.openexchange.admin.lib.console.context,
+ com.openexchange.admin.lib.console.context.extensioninterfaces,
+ com.openexchange.admin.lib.console.exception,
+ com.openexchange.admin.lib.console.group,
+ com.openexchange.admin.lib.console.resource,
+ com.openexchange.admin.lib.console.taskmanagement,
+ com.openexchange.admin.lib.console.user,
+ com.openexchange.admin.lib.console.util,
+ com.openexchange.admin.lib.console.util.database,
+ com.openexchange.admin.lib.console.util.filestore,
+ com.openexchange.admin.lib.console.util.reason,
+ com.openexchange.admin.lib.console.util.server,
+ com.openexchange.admin.lib.plugins,
+ com.openexchange.admin.lib.rmi,
+ com.openexchange.admin.lib.rmi.dataobjects,
+ com.openexchange.admin.lib.rmi.exceptions,
+ com.openexchange.admin.lib.rmi.extensions
+Import-Package: com.openexchange.groupware.userconfiguration,
+ com.openexchange.threadpool,
+ com.openexchange.tools.pipesnfilters,
+ org.apache.commons.cli;version="1.2.0"
