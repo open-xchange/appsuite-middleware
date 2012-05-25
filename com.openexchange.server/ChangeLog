@@ -1,3 +1,7 @@
+* 2012-05-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22192: Proper decoding or MIME encoded Content-Disposition header
+
 * 2012-05-24 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22158: Ignore ITip requests for exceptions on non existing series.
