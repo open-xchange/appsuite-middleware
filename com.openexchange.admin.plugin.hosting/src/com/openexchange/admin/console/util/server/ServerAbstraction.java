@@ -48,11 +48,11 @@
  */
 package com.openexchange.admin.console.util.server;
 
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.util.UtilAbstraction;
-import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.CLIOption;
+import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.rmi.dataobjects.Server;
 
 public abstract class ServerAbstraction extends UtilAbstraction {
 

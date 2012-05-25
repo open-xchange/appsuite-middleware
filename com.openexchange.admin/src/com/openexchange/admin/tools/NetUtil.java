@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.tools;
 
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 
 /**
  * @author choeger

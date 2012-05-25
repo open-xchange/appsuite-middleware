@@ -52,19 +52,20 @@ package com.openexchange.admin.console.user;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CLIIllegalOptionValueException;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.CLIParseException;
-import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.CLIIllegalOptionValueException;
+import com.openexchange.admin.lib.console.CLIOption;
+import com.openexchange.admin.lib.console.CLIParseException;
+import com.openexchange.admin.lib.console.CLIUnknownOptionException;
+import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.console.user.UserAbstraction;
+import com.openexchange.admin.lib.rmi.OXUserInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 
 /**
  * {@link ChangeModuleAccessGlobal}

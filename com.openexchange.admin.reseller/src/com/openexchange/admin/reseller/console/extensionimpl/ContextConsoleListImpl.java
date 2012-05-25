@@ -50,10 +50,10 @@ package com.openexchange.admin.reseller.console.extensionimpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
-import com.openexchange.admin.console.exception.OXConsolePluginException;
-import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.context.extensioninterfaces.ContextConsoleListInterface;
+import com.openexchange.admin.lib.console.exception.OXConsolePluginException;
+import com.openexchange.admin.lib.plugins.PluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;

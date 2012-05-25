@@ -6,8 +6,13 @@ Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.admin.autocontextid.Activator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.admin.plugins,
- com.openexchange.admin.rmi.dataobjects,
+Import-Package: com.openexchange.admin.lib.console,
+ com.openexchange.admin.lib.console.context.extensioninterfaces,
+ com.openexchange.admin.lib.console.exception,
+ com.openexchange.admin.lib.rmi.dataobjects,
+ com.openexchange.admin.lib.rmi.exceptions,
+ com.openexchange.admin.lib.rmi.extensions,
+ com.openexchange.admin.lib.plugins,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.impl,
@@ -17,4 +22,5 @@ Import-Package: com.openexchange.admin.plugins,
  org.osgi.framework;version="1.3.0"
 Require-Bundle: com.openexchange.server,
  com.openexchange.admin,
- com.openexchange.admin.plugin.hosting
+ com.openexchange.admin.plugin.hosting,
+ com.openexchange.admin.lib

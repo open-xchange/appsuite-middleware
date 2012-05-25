@@ -48,10 +48,10 @@
  */
 package com.openexchange.admin.console.util;
 
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.CLIOption;
+import com.openexchange.admin.lib.console.ObjectNamingAbstraction;
+import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
 
 /**
  * 

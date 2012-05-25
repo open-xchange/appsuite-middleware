@@ -4,7 +4,17 @@ Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
 Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.admin.osgi.Activator
-Import-Package: com.openexchange.caching,
+Import-Package: com.openexchange.admin.lib.console,
+ com.openexchange.admin.lib.console.context,
+ com.openexchange.admin.lib.console.group,
+ com.openexchange.admin.lib.console.resource,
+ com.openexchange.admin.lib.console.user,
+ com.openexchange.admin.lib.plugins,
+ com.openexchange.admin.lib.rmi,
+ com.openexchange.admin.lib.rmi.dataobjects,
+ com.openexchange.admin.lib.rmi.exceptions,
+ com.openexchange.admin.lib.rmi.extensions,
+ com.openexchange.caching,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.databaseold,

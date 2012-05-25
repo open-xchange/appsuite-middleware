@@ -52,8 +52,8 @@ package com.openexchange.admin.tools;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
-import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.dataobjects.PasswordMechObject;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**

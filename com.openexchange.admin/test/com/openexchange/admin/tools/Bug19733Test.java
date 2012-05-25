@@ -50,7 +50,7 @@
 package com.openexchange.admin.tools;
 
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
 
 /**
  * {@link Bug19733Test}

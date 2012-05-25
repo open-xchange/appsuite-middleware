@@ -49,12 +49,12 @@
 package com.openexchange.admin.console.util.reason;
 
 import java.rmi.Naming;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.CLIOption;
+import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 
 /**
  * 

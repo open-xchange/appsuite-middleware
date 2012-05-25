@@ -51,7 +51,7 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
-import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.lib.rmi.exceptions.PoolException;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 
