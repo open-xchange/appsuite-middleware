@@ -59,7 +59,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.lib.rmi.exceptions.TaskManagerException;
+import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 

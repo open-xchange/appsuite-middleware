@@ -53,22 +53,23 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Restore extends BasicCommandlineOptions {
 	

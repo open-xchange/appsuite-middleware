@@ -52,11 +52,11 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.lib.rmi.OXResourceInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Resource;
-import com.openexchange.admin.lib.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class CreateCore extends ResourceAbstraction {
     

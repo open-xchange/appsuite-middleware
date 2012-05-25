@@ -55,17 +55,17 @@ import java.net.URISyntaxException;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import com.openexchange.admin.lib.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.lib.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchGroupException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * This abstract class declares an abstract method to get the object name with which the command line tool

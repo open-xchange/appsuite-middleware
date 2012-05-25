@@ -49,20 +49,23 @@
 
 package com.openexchange.admin.rmi;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+
 import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
-import com.openexchange.admin.lib.rmi.OXResourceInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Resource;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchResourceException;
 
 /**
  *

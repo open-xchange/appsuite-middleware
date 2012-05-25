@@ -52,12 +52,12 @@ package com.openexchange.admin.autocontextid.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.autocontextid.tools.PropertyHandlerExtended;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 /**
  * @author choeger

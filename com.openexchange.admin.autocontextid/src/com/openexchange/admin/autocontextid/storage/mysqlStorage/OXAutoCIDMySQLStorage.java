@@ -52,13 +52,13 @@ package com.openexchange.admin.autocontextid.storage.mysqlStorage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.storage.sqlStorage.OXAutoCIDSQLStorage;
-import com.openexchange.admin.lib.rmi.exceptions.PoolException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.log.LogFactory;
 
 /**
  * @author choeger

@@ -50,7 +50,7 @@
 package com.openexchange.admin.tools;
 
 import java.sql.Connection;
-import com.openexchange.admin.lib.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 

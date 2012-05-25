@@ -48,10 +48,10 @@
  */
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Group;
-import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import java.sql.Connection;
 
