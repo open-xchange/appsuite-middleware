@@ -54,7 +54,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import org.junit.Test;
-import com.openexchange.admin.lib.rmi.OXAdminCoreInterface;
 
 public class AdminCoreTest extends AbstractTest {
 

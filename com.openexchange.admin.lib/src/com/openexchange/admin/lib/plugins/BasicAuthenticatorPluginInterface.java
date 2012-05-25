@@ -48,8 +48,8 @@
  */
 package com.openexchange.admin.lib.plugins;
 
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 
 public interface BasicAuthenticatorPluginInterface {
     public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException;

@@ -60,10 +60,10 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.exceptions.PoolException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;

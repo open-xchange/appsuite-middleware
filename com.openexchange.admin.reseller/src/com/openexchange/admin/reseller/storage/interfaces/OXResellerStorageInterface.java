@@ -94,7 +94,7 @@ public abstract class OXResellerStorageInterface {
     /**
      * Creates a new instance implementing the reseller storage factory.
      * @return an instance implementing the reseller storage factory.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
+     * @throws com.openexchange.admin.rmi.exceptions.exceptions.StorageException Storage exception
      */
     public static OXResellerStorageInterface getInstance() throws StorageException {
         synchronized (OXResellerStorageInterface.class) {

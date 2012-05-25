@@ -6,7 +6,7 @@ Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: com.openexchange.admin.reseller.osgi.Activator
-Import-Package: com.openexchange.admin.lib.rmi.dataobjects,
+Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,

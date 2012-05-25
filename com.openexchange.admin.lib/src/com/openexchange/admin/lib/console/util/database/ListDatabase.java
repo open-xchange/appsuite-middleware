@@ -53,10 +53,10 @@ import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.rmi.OXUtilInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Database;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * 
