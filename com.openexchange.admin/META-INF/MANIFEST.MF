@@ -68,4 +68,5 @@ Export-Package: com.openexchange.admin.console,
  com.openexchange.admin.tools
 Bundle-ActivationPolicy: lazy
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: .
+Bundle-ClassPath: lib/opencsv-2.0.jar,
+ .
