@@ -116,7 +116,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     /**
-     * Cachable formats.
+     * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
     protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(
         Arrays.asList("apiResponse", "json")));
