@@ -53,16 +53,16 @@ import java.util.Arrays;
 import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.CLIOption;
 import com.openexchange.admin.lib.console.ObjectNamingAbstraction;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
-import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
-import com.openexchange.admin.rmi.exceptions.OXContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchReasonException;
+import com.openexchange.admin.lib.rmi.exceptions.OXContextException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 
 /**
  * This class is used to abstract to context related attributes and methods which are only needed

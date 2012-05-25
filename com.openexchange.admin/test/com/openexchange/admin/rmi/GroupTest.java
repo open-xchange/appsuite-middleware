@@ -59,18 +59,19 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.lib.rmi.OXGroupInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Group;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.extensions.OXCommonExtension;
 
 /**
  * 

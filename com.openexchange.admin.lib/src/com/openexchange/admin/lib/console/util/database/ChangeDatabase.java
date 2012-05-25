@@ -51,9 +51,9 @@ package com.openexchange.admin.lib.console.util.database;
 import java.rmi.Naming;
 import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.lib.rmi.OXUtilInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Database;
 
 /**
  * 

@@ -64,6 +64,7 @@ import java.util.Set;
 import javax.mail.internet.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -71,19 +72,19 @@ import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.lib.plugins.OXUserPluginInterface;
 import com.openexchange.admin.lib.plugins.PluginException;
+import com.openexchange.admin.lib.rmi.OXUserInterface;
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.lib.rmi.exceptions.EnforceableDataObjectException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
@@ -96,9 +97,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 
 /**
  * @author d7
@@ -1290,12 +1289,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (namedAccessCombination == null) {
                     throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
                 }
-                permissionBits = getPermissionBits(namedAccessCombination);
+                permissionBits = namedAccessCombination.getPermissionBits();
             }
         }
         
-        final int addBits = getPermissionBits(addAccess);
-        final int removeBits = getPermissionBits(removeAccess);
+        final int addBits = addAccess.getPermissionBits();
+        final int removeBits = removeAccess.getPermissionBits();
         if (log.isDebugEnabled()) {
             log.debug("Adding " + addBits + " removing " + removeBits + " to filter " + filter);
         }
@@ -1344,96 +1343,5 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error(e.getMessage(), e);
             throw e;
         }
-    }
-    
-    public int getPermissionBits(UserModuleAccess namedAccessCombination) {
-        int retval = 0;
-        
-        if (namedAccessCombination.isActiveSync()) {
-            retval |= UserConfiguration.ACTIVE_SYNC;
-        }
-        if (namedAccessCombination.getCalendar()) {
-            retval |= UserConfiguration.CALENDAR;
-        }
-        if (namedAccessCombination.isCollectEmailAddresses()) {
-            retval |= UserConfiguration.COLLECT_EMAIL_ADDRESSES;
-        }
-        if (namedAccessCombination.getContacts()) {
-            retval |= UserConfiguration.CONTACTS;
-        }
-        if (namedAccessCombination.getDelegateTask()) {
-            retval |= UserConfiguration.DELEGATE_TASKS;
-        }
-        if (namedAccessCombination.getEditGroup()) {
-            retval |= UserConfiguration.EDIT_GROUP;
-        }
-        if (namedAccessCombination.getEditPassword()) {
-            retval |= UserConfiguration.EDIT_PASSWORD;
-        }
-        if (namedAccessCombination.getEditPublicFolders()) {
-            retval |= UserConfiguration.EDIT_PUBLIC_FOLDERS;
-        }
-        if (namedAccessCombination.getEditResource()) {
-            retval |= UserConfiguration.EDIT_RESOURCE;
-        }
-        if (namedAccessCombination.getForum()) {
-            retval |= UserConfiguration.FORUM;
-        }
-        if (namedAccessCombination.getIcal()) {
-            retval |= UserConfiguration.ICAL;
-        }
-        if (namedAccessCombination.getInfostore()) {
-            retval |= UserConfiguration.INFOSTORE;
-        }
-        if (namedAccessCombination.getSyncml()) {
-            retval |= UserConfiguration.MOBILITY;
-        }
-        if (namedAccessCombination.isMultipleMailAccounts()) {
-            retval |= UserConfiguration.MULTIPLE_MAIL_ACCOUNTS;
-        }
-        if (namedAccessCombination.isOLOX20()) {
-            retval |= UserConfiguration.OLOX20;
-        }
-        if (namedAccessCombination.getPinboardWrite()) {
-            retval |= UserConfiguration.PINBOARD_WRITE_ACCESS;
-        }
-        if (namedAccessCombination.getProjects()) {
-            retval |= UserConfiguration.PROJECTS;
-        }
-        if (namedAccessCombination.isPublication()) {
-            retval |= UserConfiguration.PUBLICATION;
-        }
-        if (namedAccessCombination.getReadCreateSharedFolders()) {
-            retval |= UserConfiguration.READ_CREATE_SHARED_FOLDERS;
-        }
-        if (namedAccessCombination.getRssBookmarks()) {
-            retval |= UserConfiguration.RSS_BOOKMARKS;
-        }
-        if (namedAccessCombination.getRssPortal()) {
-            retval |= UserConfiguration.RSS_PORTAL;
-        }
-        if (namedAccessCombination.isSubscription()) {
-            retval |= UserConfiguration.SUBSCRIPTION;
-        }
-        if (namedAccessCombination.getTasks()) {
-            retval |= UserConfiguration.TASKS;
-        }
-        if (namedAccessCombination.isUSM()) {
-            retval |= UserConfiguration.USM;
-        }
-        if (namedAccessCombination.getVcard()) {
-            retval |= UserConfiguration.VCARD;
-        }
-        if (namedAccessCombination.getWebdav()) {
-            retval |= UserConfiguration.WEBDAV;
-        }
-        if (namedAccessCombination.getWebdavXml()) {
-            retval |= UserConfiguration.WEBDAV_XML;
-        }
-        if (namedAccessCombination.getWebmail()) {
-            retval |= UserConfiguration.WEBMAIL;
-        }
-        
-        return retval;
     }
 }

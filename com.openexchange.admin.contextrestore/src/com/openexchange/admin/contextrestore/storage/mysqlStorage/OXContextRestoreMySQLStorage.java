@@ -18,9 +18,9 @@ import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreExce
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.storage.sqlStorage.OXContextRestoreSQLStorage;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.exceptions.PoolException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;

@@ -3,7 +3,7 @@ package com.openexchange.admin.lib.console.context.extensioninterfaces;
 
 import java.util.ArrayList;
 import com.openexchange.admin.lib.plugins.PluginException;
-import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
 
 
 /**

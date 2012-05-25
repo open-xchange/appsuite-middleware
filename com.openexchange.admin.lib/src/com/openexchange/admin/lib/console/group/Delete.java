@@ -51,10 +51,10 @@ package com.openexchange.admin.lib.console.group;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.lib.rmi.OXGroupInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Group;
 
 public class Delete extends DeleteCore {
 

@@ -86,16 +86,16 @@ import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Database;
+import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.lib.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.OXContextException;
+import com.openexchange.admin.lib.rmi.exceptions.PoolException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.OXContextException;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -416,7 +416,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * @throws StorageException
-     * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#getData(com.openexchange.admin.rmi.dataobjects.dataobjects.Context)
+     * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#getData(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
     public Context getData(final Context ctx) throws StorageException {

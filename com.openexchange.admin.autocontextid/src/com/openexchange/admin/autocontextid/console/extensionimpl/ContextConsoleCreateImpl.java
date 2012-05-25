@@ -54,8 +54,8 @@ import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.lib.console.exception.OXConsolePluginException;
 import com.openexchange.admin.lib.console.user.UserAbstraction.CSVConstants;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     

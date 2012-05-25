@@ -54,7 +54,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
 
 /**
  * This class is used to extend the CmdLineParser which two main things:

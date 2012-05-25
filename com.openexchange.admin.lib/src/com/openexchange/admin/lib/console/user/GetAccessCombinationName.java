@@ -51,10 +51,10 @@ package com.openexchange.admin.lib.console.user;
 
 import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.OXUserInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
 
 public class GetAccessCombinationName extends UserAbstraction {
 

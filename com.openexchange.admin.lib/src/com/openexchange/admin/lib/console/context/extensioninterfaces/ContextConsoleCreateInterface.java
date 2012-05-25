@@ -4,7 +4,7 @@ package com.openexchange.admin.lib.console.context.extensioninterfaces;
 import java.util.HashMap;
 import com.openexchange.admin.lib.console.exception.OXConsolePluginException;
 import com.openexchange.admin.lib.console.user.UserAbstraction.CSVConstants;
-import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
 
 
 /**

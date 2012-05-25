@@ -53,8 +53,8 @@ import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.CLIOption;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.lib.console.util.UtilAbstraction;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.dataobjects.Database;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools

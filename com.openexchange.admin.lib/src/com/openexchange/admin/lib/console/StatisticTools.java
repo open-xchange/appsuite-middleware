@@ -64,7 +64,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 import com.openexchange.threadpool.ThreadPoolInformationMBean;
 
 public class StatisticTools extends AbstractJMXTools {

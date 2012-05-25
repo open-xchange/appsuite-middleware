@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.autocontextid.tools.PropertyHandlerExtended;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.log.LogFactory;
 
@@ -84,7 +84,7 @@ public abstract class OXAutoCIDStorageInterface {
     /**
      * Creates a new instance implementing the reseller storage factory.
      * @return an instance implementing the reseller storage factory.
-     * @throws com.openexchange.admin.rmi.exceptions.exceptions.StorageException Storage exception
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXAutoCIDStorageInterface getInstance() throws StorageException {
         synchronized (OXAutoCIDStorageInterface.class) {

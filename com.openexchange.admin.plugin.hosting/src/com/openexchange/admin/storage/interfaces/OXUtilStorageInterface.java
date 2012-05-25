@@ -56,12 +56,12 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.lib.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.lib.rmi.dataobjects.Database;
 
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.dataobjects.Server;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -94,7 +94,7 @@ public abstract class OXUtilStorageInterface {
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
-     * @throws com.openexchange.admin.rmi.exceptions.exceptions.StorageException Storage exception
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXUtilStorageInterface getInstance() throws StorageException {
         synchronized (OXUtilStorageInterface.class) {
