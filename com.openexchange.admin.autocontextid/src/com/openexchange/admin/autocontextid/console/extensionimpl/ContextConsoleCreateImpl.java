@@ -50,10 +50,10 @@
 package com.openexchange.admin.autocontextid.console.extensionimpl;
 
 import java.util.HashMap;
-import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.console.context.extensioninterfaces.ContextConsoleCreateInterface;
-import com.openexchange.admin.lib.console.exception.OXConsolePluginException;
-import com.openexchange.admin.lib.console.user.UserAbstraction.CSVConstants;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
+import com.openexchange.admin.console.user.UserAbstraction.CSVConstants;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 

@@ -59,7 +59,7 @@ import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.lib.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.log.LogFactory;
 
 public class Activator implements BundleActivator {
