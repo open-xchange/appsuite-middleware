@@ -75,6 +75,7 @@ import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.utils.MessageUtility;
@@ -135,7 +136,7 @@ public class MailAttachment extends AJAXServlet {
             /*
              * At least expect the same user agent as the one which created the attachment token
              */
-            if (null != token.getUserAgent()) {
+            if (!token.isOneTime() && null != token.getUserAgent()) {
                 final String requestUserAgent = req.getHeader("user-agent");
                 if (null == requestUserAgent) {
                     AttachmentTokenRegistry.getInstance().removeToken(id);
@@ -178,7 +179,10 @@ public class MailAttachment extends AJAXServlet {
                      * disposition.
                      */
                     res.setContentType("application/octet-stream");
-                    res.setHeader("Content-Disposition", Mail.getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
+                    final ContentDisposition cd = new ContentDisposition();
+                    cd.setAttachment();
+                    cd.addParameter("filename", fileName);
+                    res.setHeader("Content-Disposition", cd.toString());
                 } else {
                     final String userAgent = req.getHeader("user-agent");
                     final CheckedDownload checkedDownload =

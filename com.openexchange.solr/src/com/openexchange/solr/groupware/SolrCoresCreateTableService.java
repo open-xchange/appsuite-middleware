@@ -61,10 +61,10 @@ public class SolrCoresCreateTableService extends AbstractCreateTableImpl {
     
     private static final String CT_CORES =
         "CREATE TABLE solrCores (" +
-            "cid int(10) unsigned NOT NULL," +
-            "uid int(10) unsigned NOT NULL," +
-            "module int(10) unsigned NOT NULL," +
-            "store int(10) unsigned NOT NULL," +
+            "cid INT4 unsigned NOT NULL," +
+            "uid INT4 unsigned NOT NULL," +
+            "module INT4 unsigned NOT NULL," +
+            "store INT4 unsigned NOT NULL," +
             "active tinyint(1) unsigned NOT NULL," +
             "server varchar(255) DEFAULT NULL,  " +
             "PRIMARY KEY  (cid,uid,module)," +

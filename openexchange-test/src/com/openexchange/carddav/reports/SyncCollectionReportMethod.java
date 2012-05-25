@@ -88,6 +88,7 @@ public class SyncCollectionReportMethod extends ReportMethod {
 		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
 	}
 	
+    @Override
     public Document getResponseBodyAsDocument() throws IOException {
     	if (null == this.responseDocument) {
     		this.responseDocument = super.getResponseBodyAsDocument();
@@ -95,6 +96,7 @@ public class SyncCollectionReportMethod extends ReportMethod {
         return responseDocument;
     }
 	
+    @Override
     protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
     	super.processResponseBody(httpState, httpConnection);
     	Document document = null;

@@ -152,10 +152,10 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
     /* This is a SQL Test Case for the poor. Do this in an empty database to check the validity of the sql statement */
     /*
     CREATE TABLE `subscriptions` (
-        `id` int(10) unsigned NOT NULL,
-        `cid` int(10) unsigned NOT NULL,
-        `user_id` int(10) unsigned NOT NULL,
-        `configuration_id` int(10) unsigned NOT NULL,
+        `id` INT4 unsigned NOT NULL,
+        `cid` INT4 unsigned NOT NULL,
+        `user_id` INT4 unsigned NOT NULL,
+        `configuration_id` INT4 unsigned NOT NULL,
         `source_id` varchar(255) collate utf8_unicode_ci NOT NULL,
         `folder_id` varchar(255) collate utf8_unicode_ci NOT NULL,
         `last_update` bigint(20) unsigned NOT NULL,
@@ -166,8 +166,8 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
       CREATE TABLE `genconf_attributes_strings` (
-        `cid` int(10) unsigned NOT NULL,
-        `id` int(10) unsigned NOT NULL,
+        `cid` INT4 unsigned NOT NULL,
+        `id` INT4 unsigned NOT NULL,
         `name` varchar(100) collate utf8_unicode_ci default NULL,
         `value` varchar(256) collate utf8_unicode_ci default NULL,
         `widget` varchar(256) collate utf8_unicode_ci default NULL,
@@ -175,8 +175,8 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
       CREATE TABLE `genconf_attributes_bools` (
-        `cid` int(10) unsigned NOT NULL,
-        `id` int(10) unsigned NOT NULL,
+        `cid` INT4 unsigned NOT NULL,
+        `id` INT4 unsigned NOT NULL,
         `name` varchar(100) collate utf8_unicode_ci default NULL,
         `value` tinyint(1) default NULL,
         `widget` varchar(256) collate utf8_unicode_ci default NULL,

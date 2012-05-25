@@ -49,8 +49,10 @@
 
 package com.openexchange.tools.images;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,4 +64,36 @@ public interface ImageScalingService {
 
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException;
     public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException;
+    
+    /**
+     * Creates a cropped version of the supplied image as defined by a 
+     * rectangular region. Coordinates out of the bounds of the original 
+     * image are possible, resulting in empty areas in the cropped image.    
+     * 
+     * @param pictureData an input stream for the source image
+     * @param x the X coordinate of the upper-left corner of the specified rectangular region
+     * @param y the Y coordinate of the upper-left corner of the specified rectangular region
+     * @param width the width of the specified rectangular region
+     * @param height the height of the specified rectangular region 
+     * @param contentType the content type of the image 
+     * @return a stream for the cropped image
+     * @throws IOException
+     */
+    InputStream crop(InputStream pictureData, int x, int y, int width, int height, String contentType) throws IOException;
+    
+    /**
+     * Creates a cropped version of the supplied image as defined by a 
+     * rectangular region. Coordinates out of the bounds of the original 
+     * image are possible, resulting in empty areas in the cropped image.    
+     * 
+     * @param sourceImage the source image
+     * @param x the X coordinate of the upper-left corner of the specified rectangular region
+     * @param y the Y coordinate of the upper-left corner of the specified rectangular region
+     * @param width the width of the specified rectangular region
+     * @param height the height of the specified rectangular region 
+     * @return the cropped image
+     * @throws IOException
+     */
+	BufferedImage crop(BufferedImage sourceImage, int x, int y, int width, int height) throws IOException;
+
 }

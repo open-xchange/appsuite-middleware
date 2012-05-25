@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -92,7 +93,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
-        final Assignment assign = assignmentService.getAssignment(contextId);
+        final AssignmentImpl assign = assignmentService.getAssignment(contextId);
         LogProperties.putLogProperty("com.openexchange.database.schema", ForceLog.valueOf(assign.getSchema()));
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
     }
@@ -286,5 +287,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
         final Assignment assign = assignmentService.getAssignment(contextId);
         final ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
         return configDBStorage.getContextsFromSchema(assign.getSchema(), assign.getWritePoolId());
+    }
+
+    @Override
+    public void writeAssignment(Connection con, Assignment assignment) throws OXException {
+        assignmentService.writeAssignment(con, assignment);
     }
 }

@@ -77,7 +77,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -90,6 +89,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
@@ -321,7 +321,15 @@ public class AdminCache {
     }
 
     protected void initPool() {
-        this.pool = new OXAdminPoolDBPool(this.prop);
+        this.pool = new OXAdminPoolDBPool();
+    }
+
+    protected void initPool(OXAdminPoolInterface pool) {
+        this.pool = pool;
+    }
+
+    public OXAdminPoolInterface getPool() {
+        return pool;
     }
 
     public Credentials getMasterCredentials() {

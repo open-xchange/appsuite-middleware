@@ -60,9 +60,9 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.internal.DBUtils;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OAuth2ProviderCreateTableTask}

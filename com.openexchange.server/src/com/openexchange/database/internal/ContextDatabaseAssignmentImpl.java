@@ -62,6 +62,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -76,6 +77,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContextDatabaseAssignmentImpl.class));
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
+    private static final String INSERT = "INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES (?,?,?,?,?)";
 
     private final ConfigDatabaseService configDatabaseService;
 
@@ -99,15 +101,15 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     @Override
-    public Assignment getAssignment(final int contextId) throws OXException {
-        Assignment retval;
+    public AssignmentImpl getAssignment(final int contextId) throws OXException {
+        AssignmentImpl retval;
         if (null == cache) {
             retval = loadAssignment(contextId);
         } else {
             final CacheKey key = cacheService.newCacheKey(contextId, Server.getServerId());
             cacheLock.lock();
             try {
-                retval = (Assignment) cache.get(key);
+                retval = (AssignmentImpl) cache.get(key);
                 if (null == retval) {
                     retval = loadAssignment(contextId);
                     try {
@@ -123,8 +125,8 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
-    private Assignment loadAssignment(final int contextId) throws OXException {
-        Assignment retval = null;
+    private AssignmentImpl loadAssignment(final int contextId) throws OXException {
+        AssignmentImpl retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -135,7 +137,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             result = stmt.executeQuery();
             if (result.next()) {
                 int pos = 1;
-                retval = new Assignment(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++),
+                retval = new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++),
                         result.getString(pos++));
             } else {
                 throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
@@ -149,8 +151,47 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
+    private void writeAssignmentDB(Connection con, Assignment assign) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(INSERT);
+            int pos = 1;
+            stmt.setInt(pos++, assign.getServerId());
+            stmt.setInt(pos++, assign.getContextId());
+            stmt.setInt(pos++, assign.getReadPoolId());
+            stmt.setInt(pos++, assign.getWritePoolId());
+            stmt.setString(pos++, assign.getSchema());
+            int count = stmt.executeUpdate();
+            if (1 != count) {
+                throw DBPoolingExceptionCodes.INSERT_FAILED.create(I(assign.getContextId()), I(assign.getServerId()));
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     @Override
-    public void removeAssignments(final int contextId) throws OXException {
+    public void writeAssignment(Connection con, Assignment assign) throws OXException {
+        if (null != cache) {
+            final CacheKey key = cacheService.newCacheKey(assign.getContextId(), assign.getServerId());
+            cacheLock.lock();
+            try {
+                try {
+                    cache.putSafe(key, new AssignmentImpl(assign));
+                } catch (OXException e) {
+                    LOG.error("Cannot put database assignment into cache.", e);
+                }
+            } finally {
+                cacheLock.unlock();
+            }
+        }
+        writeAssignmentDB(con, assign);
+    }
+
+    @Override
+    public void removeAssignments(final int contextId) {
         if (null != cache) {
             try {
                 cache.remove(cache.newCacheKey(contextId, Server.getServerId()));

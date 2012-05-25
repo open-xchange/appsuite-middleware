@@ -60,7 +60,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AttachmentTokenRegistry}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
@@ -68,13 +68,14 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AttachmentTokenRegistry.class));
+    protected static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AttachmentTokenRegistry.class));
 
     private static volatile AttachmentTokenRegistry singleton;
 
     /**
      * Gets the singleton instance.
-     *
+     * 
      * @return The singleton instance
      * @throws OXException If instance initialization fails
      */
@@ -113,7 +114,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Initializes a new {@link AttachmentTokenRegistry}.
-     *
+     * 
      * @throws OXException If initialization fails
      */
     private AttachmentTokenRegistry() throws OXException {
@@ -136,7 +137,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Drops tokens for given user.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -158,7 +159,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Drops tokens for given session.
-     *
+     * 
      * @param Session The session
      */
     public void dropFor(final Session session) {
@@ -167,7 +168,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Removes the token with specified identifier from this registry.
-     *
+     * 
      * @param tokenId The token identifier
      */
     public void removeToken(final String tokenId) {
@@ -190,7 +191,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Gets the token for specified token identifier.
-     *
+     * 
      * @param tokenId The token identifier
      * @return The token or <code>null</code> if absent or expired
      */
@@ -203,12 +204,16 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
             removeToken(tokenId);
             return null;
         }
+        if (attachmentToken.isOneTime()) {
+            removeToken(tokenId);
+            return attachmentToken;
+        }
         return attachmentToken.touch();
     }
 
     /**
      * Puts specified token into this registry.
-     *
+     * 
      * @param token The token
      * @param session The session providing user data
      */

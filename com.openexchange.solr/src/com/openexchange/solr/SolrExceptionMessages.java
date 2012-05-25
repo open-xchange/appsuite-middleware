@@ -103,5 +103,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // %1$s is not a valid field for sorting.
     public static final String INVALID_SORT_FIELD_MSG = "%1$s is not a valid field for sorting.";
+
+    // An error occurred: %1$s
+    public static final String ERROR_MSG = "An error occurred: %1$s";
     
 }

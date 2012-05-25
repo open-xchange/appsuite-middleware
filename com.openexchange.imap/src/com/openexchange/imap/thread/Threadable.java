@@ -746,7 +746,7 @@ public final class Threadable implements Cloneable {
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
                     if (LOG.isInfoEnabled()) {
-                        LOG.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" took " + dur + "msec.");
+                        LOG.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }

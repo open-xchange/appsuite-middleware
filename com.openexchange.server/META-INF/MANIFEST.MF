@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
 Bundle-Version: 6.21.0
 OXVersion: 6.21.0
-OXRevision: 3
+OXRevision: 4
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.davekoelle,
@@ -44,6 +44,7 @@ Import-Package: com.davekoelle,
  com.openexchange.id,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.json.cache,
  com.openexchange.l10n,
  com.openexchange.log,
  com.openexchange.management,

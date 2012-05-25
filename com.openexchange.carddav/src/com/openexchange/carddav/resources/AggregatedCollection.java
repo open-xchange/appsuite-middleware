@@ -55,9 +55,6 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.mixins.CTag;
-import com.openexchange.carddav.mixins.SupportedReportSet;
-import com.openexchange.carddav.mixins.SyncToken;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.log.LogFactory;
@@ -81,12 +78,7 @@ public class AggregatedCollection extends CardDAVCollection {
         super(factory, url);
         this.displayName = displayName;
         try {
-			super.includeProperties(
-					new SupportedReportSet(), 
-					new CTag(factory), 
-					new SyncToken(factory), 
-					new CurrentUserPrivilegeSet(factory.getState().getDefaultFolder().getOwnPermission()))
-			;
+			super.includeProperties(new CurrentUserPrivilegeSet(factory.getState().getDefaultFolder().getOwnPermission()));
 		} catch (OXException e) {
 			throw protocolException(e);
 		}
@@ -107,6 +99,11 @@ public class AggregatedCollection extends CardDAVCollection {
     protected Collection<Contact> getContacts() throws OXException {
     	return factory.getState().getContacts();
     }
+	
+	@Override
+	protected String getFolderID() throws OXException {
+		return factory.getState().getDefaultFolder().getID();		
+	}
 
 	@Override
 	public void create() throws WebdavProtocolException {
@@ -128,7 +125,11 @@ public class AggregatedCollection extends CardDAVCollection {
 
 	@Override
 	public Date getLastModified() throws WebdavProtocolException {
-		return new Date(0);
+		try {
+			return factory.getState().getLastModified();
+		} catch (OXException e) {
+			throw protocolException(e);
+		}
 	}
 
 	@Override

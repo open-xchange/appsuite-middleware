@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.osgi;
 
-import static com.openexchange.oauth.provider.internal.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -60,7 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.internal.DBUtils;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -108,7 +107,7 @@ public final class CheckConfigDBTables {
 
     private void checkServiceProvider(final Connection con) throws SQLException {
         final String createSql = "CREATE TABLE oauthServiceProvider (\n" + 
-            " id int(10) unsigned NOT NULL,\n" + 
+            " id INT4 unsigned NOT NULL,\n" + 
             " requestTokenUrl varchar(255) NOT NULL,\n" + 
             " userAuthorizationUrl varchar(255) NOT NULL,\n" + 
             " accessTokenURL varchar(255) DEFAULT NULL,\n" + 
@@ -143,8 +142,8 @@ public final class CheckConfigDBTables {
 
     private void checkConsumer(final Connection con) throws SQLException {
         String createSql = "CREATE TABLE `oauthConsumer` (\n" + 
-        		" `id` int(10) unsigned NOT NULL,\n" + 
-        		" `providerId` int(10) unsigned NOT NULL,\n" + 
+        		" `id` INT4 unsigned NOT NULL,\n" + 
+        		" `providerId` INT4 unsigned NOT NULL,\n" + 
         		" `key` varchar(255) NOT NULL,\n" + 
         		" `secret` varchar(255) NOT NULL,\n" + 
         		" `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
@@ -156,7 +155,7 @@ public final class CheckConfigDBTables {
         createIfAbsent("oauthConsumer", createSql, con);
 
         createSql = "CREATE TABLE `oauthConsumerProperty` (\n" + 
-        		" `id` int(10) unsigned NOT NULL,\n" + 
+        		" `id` INT4 unsigned NOT NULL,\n" + 
         		" `name` varchar(32) NOT NULL,\n" + 
         		" `value` varchar(255) NOT NULL,\n" + 
         		" PRIMARY KEY (`id`,`name`)\n" + 
@@ -166,8 +165,8 @@ public final class CheckConfigDBTables {
 
     private void checkClient(final Connection con) throws SQLException {
         String createSql = "CREATE TABLE `oauth2Client` (\n" + 
-                " `id` int(10) unsigned NOT NULL,\n" + 
-                " `providerId` int(10) unsigned NOT NULL,\n" + 
+                " `id` INT4 unsigned NOT NULL,\n" + 
+                " `providerId` INT4 unsigned NOT NULL,\n" + 
                 " `key` varchar(255) NOT NULL,\n" + 
                 " `secret` varchar(255) NOT NULL,\n" + 
                 " `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
@@ -179,7 +178,7 @@ public final class CheckConfigDBTables {
         createIfAbsent("oauth2Client", createSql, con);
 
         createSql = "CREATE TABLE `oauth2ClientProperty` (\n" + 
-                " `id` int(10) unsigned NOT NULL,\n" + 
+                " `id` INT4 unsigned NOT NULL,\n" + 
                 " `name` varchar(32) NOT NULL,\n" + 
                 " `value` varchar(255) NOT NULL,\n" + 
                 " PRIMARY KEY (`id`,`name`)\n" + 
@@ -216,7 +215,7 @@ public final class CheckConfigDBTables {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            closeSQLStuff(rs);
+            DBUtils.closeSQLStuff(rs);
         }
         return retval;
     }

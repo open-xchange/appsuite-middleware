@@ -52,7 +52,9 @@ package com.openexchange.test;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,6 +64,9 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,18 +87,18 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.image.ImageRequest;
-import com.openexchange.ajax.image.ImageResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
@@ -560,11 +565,11 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
+    public List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
     	return transform(data, Contact.ALL_COLUMNS);
     }
 
-    private List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
+    public List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
         final List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
@@ -583,15 +588,43 @@ public class ContactTestManager implements TestManager {
             if (null != contactObject.getImage1()) {
             	String image1 = new String(contactObject.getImage1());
             	if (0 < image1.length() && image1.contains("image")) {
-            		// interpret as image url, download real image
-        			ImageResponse response = getClient().execute(new ImageRequest(image1), getSleep());
-        			contactObject.setImage1(response.getImage());
+            		// interpret as image url, download real image            		
+        			contactObject.setImage1(loadImage(image1));
+        			contactObject.setNumberOfImages(1);
             	}            	
-            }
-            
+            }            
             contacts.add(contactObject);
         }
         return contacts;
+    }
+
+    private byte[] loadImage(String imageURL) throws OXException {
+        InputStream inputStream = null;
+        try {
+            AJAXSession ajaxSession = getClient().getSession();
+            HttpGet httpRequest = new HttpGet(getClient().getProtocol() + "://" + getClient().getHostname() + imageURL);
+            HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
+            inputStream = httpResponse.getEntity().getContent();
+            int len = 8192;
+            byte[] buf = new byte[len];
+            ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
+            for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            return out.toByteArray();
+        } catch (ClientProtocolException e) {
+        	throw new OXException(e);
+		} catch (IOException e) {
+        	throw new OXException(e);
+		} finally {
+            if (null != inputStream) {
+                try {
+                    inputStream.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     @Override

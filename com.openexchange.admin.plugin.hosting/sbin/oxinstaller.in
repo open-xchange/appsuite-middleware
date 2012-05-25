@@ -59,7 +59,7 @@ test -f $OXFUNCTIONS || {
 . $OXFUNCTIONS
 
 noLongerInUse() {
-	    echo option $1 is deprected and not longer in use
+        echo option $1 is deprected and not longer in use
 }
 
 handleIPv6() {
@@ -186,14 +186,14 @@ usage() {
     printf '%-22s | %-45s | %-s\n' "Parameter" "Default value" "Possible values"
     echo "--------------------------------------------------------------------------------------------"
     for opt in $lopts; do
-	local rvar=${opt%_LONG}
-	GLOBIGNORE='*'
-	local default="$(eval echo "$rvar")"
-	local possible=$(eval echo ${opt%_LONG}_VALUES)
-	local lopt=$(eval echo $opt)
+    local rvar=${opt%_LONG}
+    GLOBIGNORE='*'
+    local default="$(eval echo "$rvar")"
+    local possible=$(eval echo ${opt%_LONG}_VALUES)
+    local lopt=$(eval echo $opt)
         # echo $opt $rvar $default $lopt
-	printf '%-22s | %-45s | %-s\n' "--$lopt" $default "$possible"
-	GLOBIGNORE=
+    printf '%-22s | %-45s | %-s\n' "--$lopt" $default "$possible"
+    GLOBIGNORE=
     done
 cat<<EOF
 
@@ -213,12 +213,12 @@ v_setprop() {
     local val="$2"
     local propfile="$3"
     if [ -f $3 ]; then 
-	# echo setting $prop in $propfile
-    	echo -n .
-    	ox_set_property "$prop" "$val" "$propfile"
+    # echo setting $prop in $propfile
+        echo -n .
+        ox_set_property "$prop" "$val" "$propfile"
     else
-	echo
-		echo skipping configuration of $1 in $3
+    echo
+        echo skipping configuration of $1 in $3
     fi
 }
 
@@ -227,12 +227,12 @@ v_comment() {
     local action="$2"
     local propfile="$3"
     if [ -f $3 ]; then
-	# echo $action hash for $prop in $propfile
-	echo -n .
-	ox_comment "$prop" "$action" "$propfile"
+    # echo $action hash for $prop in $propfile
+    echo -n .
+    ox_comment "$prop" "$action" "$propfile"
     else
-	echo
-	echo skipping configuration of $i in $3
+    echo
+    echo skipping configuration of $i in $3
     fi
 }
 
@@ -252,189 +252,189 @@ v_cache_hosting(){
 }
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
-	|| die "exiting"
+    || die "exiting"
 
 eval set -- "$TEMP"
 
 while true; do
     case "$1" in
-	-s|--$SERVER_NAME_LONG)
-	    SERVER_NAME=$2
-	    shift 2
-	    ;;
-	-i|--$IMAP_SERVER_LONG)
-	    IMAP_SERVER=$2
-	    shift 2
-	    ;;
-	--$SMTP_SERVER_LONG)
-	    SMTP_SERVER=$2
-	    shift 2
-	    ;;
-	--$LOGIN_SOURCE_LONG)
-	    LOGIN_SOURCE=$2
-	    shift 2
-	    ;;
-	--$MAIL_SERVER_SOURCE_LONG)
-	    MAIL_SERVER_SOURCE=$2
-	    shift 2
-	    ;;
-	--$TRANSPORT_SERVER_SOURCE_LONG)
-	    TRANSPORT_SERVER_SOURCE=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_USER_LONG)
-	    CONFIGDB_USER=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_PASS_LONG)
-	    CONFIGDB_PASS=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_READ_LONG)
-	    CONFIGDB_READ=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_WRITE_LONG)
-	    CONFIGDB_WRITE=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_READ_PORT_LONG)
-	    CONFIGDB_READ_PORT=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_WRITE_PORT_LONG)
-	    CONFIGDB_WRITE_PORT=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_DBNAME_LONG)
-	    CONFIGDB_DBNAME=$2
-	    shift 2
-	    ;;
-	--$SERVER_MEMORY_LONG)
-	    SERVER_MEMORY=$2
-	    shift 2
-	    ;;
-	--$ADMIN_MEMORY_LONG)
-	    ADMIN_MEMORY=$2
-	    shift 2
-	    ;;
-	--$CLT_MEMORY_LONG)
-	    CLT_MEMORY=$2
-	    shift 2
-	    ;;
-	--$TMPDIR_PATH_LONG)
-	    TMPDIR_PATH=$2
-	    shift 2
-	    ;;
-	--$MASTER_PASS_LONG)
-	    MASTER_PASS=$2
-	    shift 2
-	    ;;
-	--$MASTER_USER_LONG)
-	    MASTER_USER=$2
-	    shift 2
-	    ;;
-	--$DISABLE_RMI_AUTH_LONG)
-	    DISABLE_RMI_AUTH=true
-	    shift
-	    ;;
-	--$AJP_JVM_ROUTE_LONG)
-	    AJP_JVM_ROUTE=$2
-	    shift 2
-	    ;;
-	--$AJP_BIND_ADDR_LONG)
-	    AJP_BIND_ADDR=$2
-	    shift 2
-	    ;;
-	--$OXOBJECT_LINK_HOSTNAME_LONG)
-	    OXOBJECT_LINK_HOSTNAME=$2
-	    shift 2
-	    ;;
-	--$URL_LONG)
-	    URL=$2
-	    shift 2
-	    ;;
-	--$UDPDISCOVERYADDR_LONG)
-	    UDPDISCOVERYADDR=$2
-	    shift 2
-	    ;;
-	--$UDPDISCOVERYPORT_LONG)
-	    UDPDISCOVERYPORT=$2
-	    shift 2
-	    ;;
-	--$UDP_SESS_DISC_PORT_LONG)
-	    UDP_SESS_DISC_PORT=$2
-	    shift 2
-	    ;;
-	--$AMCACHEPORT_LONG)
-	    AMCACHEPORT=$2
-	    shift 2
-	    ;;
-	--$GWCACHEPORT_LONG)
+    -s|--$SERVER_NAME_LONG)
+        SERVER_NAME=$2
+        shift 2
+        ;;
+    -i|--$IMAP_SERVER_LONG)
+        IMAP_SERVER=$2
+        shift 2
+        ;;
+    --$SMTP_SERVER_LONG)
+        SMTP_SERVER=$2
+        shift 2
+        ;;
+    --$LOGIN_SOURCE_LONG)
+        LOGIN_SOURCE=$2
+        shift 2
+        ;;
+    --$MAIL_SERVER_SOURCE_LONG)
+        MAIL_SERVER_SOURCE=$2
+        shift 2
+        ;;
+    --$TRANSPORT_SERVER_SOURCE_LONG)
+        TRANSPORT_SERVER_SOURCE=$2
+        shift 2
+        ;;
+    --$CONFIGDB_USER_LONG)
+        CONFIGDB_USER=$2
+        shift 2
+        ;;
+    --$CONFIGDB_PASS_LONG)
+        CONFIGDB_PASS=$2
+        shift 2
+        ;;
+    --$CONFIGDB_READ_LONG)
+        CONFIGDB_READ=$2
+        shift 2
+        ;;
+    --$CONFIGDB_WRITE_LONG)
+        CONFIGDB_WRITE=$2
+        shift 2
+        ;;
+    --$CONFIGDB_READ_PORT_LONG)
+        CONFIGDB_READ_PORT=$2
+        shift 2
+        ;;
+    --$CONFIGDB_WRITE_PORT_LONG)
+        CONFIGDB_WRITE_PORT=$2
+        shift 2
+        ;;
+    --$CONFIGDB_DBNAME_LONG)
+        CONFIGDB_DBNAME=$2
+        shift 2
+        ;;
+    --$SERVER_MEMORY_LONG)
+        SERVER_MEMORY=$2
+        shift 2
+        ;;
+    --$ADMIN_MEMORY_LONG)
+        ADMIN_MEMORY=$2
+        shift 2
+        ;;
+    --$CLT_MEMORY_LONG)
+        CLT_MEMORY=$2
+        shift 2
+        ;;
+    --$TMPDIR_PATH_LONG)
+        TMPDIR_PATH=$2
+        shift 2
+        ;;
+    --$MASTER_PASS_LONG)
+        MASTER_PASS=$2
+        shift 2
+        ;;
+    --$MASTER_USER_LONG)
+        MASTER_USER=$2
+        shift 2
+        ;;
+    --$DISABLE_RMI_AUTH_LONG)
+        DISABLE_RMI_AUTH=true
+        shift
+        ;;
+    --$AJP_JVM_ROUTE_LONG)
+        AJP_JVM_ROUTE=$2
+        shift 2
+        ;;
+    --$AJP_BIND_ADDR_LONG)
+        AJP_BIND_ADDR=$2
+        shift 2
+        ;;
+    --$OXOBJECT_LINK_HOSTNAME_LONG)
+        OXOBJECT_LINK_HOSTNAME=$2
+        shift 2
+        ;;
+    --$URL_LONG)
+        URL=$2
+        shift 2
+        ;;
+    --$UDPDISCOVERYADDR_LONG)
+        UDPDISCOVERYADDR=$2
+        shift 2
+        ;;
+    --$UDPDISCOVERYPORT_LONG)
+        UDPDISCOVERYPORT=$2
+        shift 2
+        ;;
+    --$UDP_SESS_DISC_PORT_LONG)
+        UDP_SESS_DISC_PORT=$2
+        shift 2
+        ;;
+    --$AMCACHEPORT_LONG)
+        AMCACHEPORT=$2
+        shift 2
+        ;;
+    --$GWCACHEPORT_LONG)
             GWCACHEPORT=$2
-	    shift 2
-	    ;;
-	--$GWSCACHEPORT_LONG)
+        shift 2
+        ;;
+    --$GWSCACHEPORT_LONG)
             GWSCACHEPORT=$2
-	    shift 2
-	    ;;
-	--$OXCLUSTERIP_LONG)
-	    OXCLUSTERIP=$2
-	    shift 2
-	    ;;
-	--$PUSHMCPORT_LONG)
-	    PUSHMCPORT=$2
-	    shift 2
-	    ;;
-	--$SESSIONCONTAINERTIMEOUT_LONG)
-	    noLongerInUse $SESSIONCONTAINERTIMEOUT_LONG
-	    shift 2
-	    ;;
-	--$NUMBEROFSESSIONCONTAINERS_LONG)
-	    noLongerInUse $NUMBEROFSESSIONCONTAINERS_LONG
-	    shift 2
-	    ;;
-	--$MAXSESSION_LONG)
-	    MAXSESSION=$2
-	    shift 2
-	    ;;
-	--$ISDOUBLELOGINPERMITTED_LONG)
-	    noLongerInUse $ISDOUBLELOGINPERMITTED_LONG
-	    shift 2
-	    ;;
-	--$SESSIONDEFAULTLIFETIME_LONG)
-	    SESSIONDEFAULTLIFETIME=$2
-	    shift 2
-	    ;;
-	--$OLPORT_LONG)
-	    OLPORT=$2
-	    shift 2
-	    ;;
-	--$ADD_LICENSE_LONG)
-	    ADD_LICENSE=$2
-	    shift 2
-	    ;;
+        shift 2
+        ;;
+    --$OXCLUSTERIP_LONG)
+        OXCLUSTERIP=$2
+        shift 2
+        ;;
+    --$PUSHMCPORT_LONG)
+        PUSHMCPORT=$2
+        shift 2
+        ;;
+    --$SESSIONCONTAINERTIMEOUT_LONG)
+        noLongerInUse $SESSIONCONTAINERTIMEOUT_LONG
+        shift 2
+        ;;
+    --$NUMBEROFSESSIONCONTAINERS_LONG)
+        noLongerInUse $NUMBEROFSESSIONCONTAINERS_LONG
+        shift 2
+        ;;
+    --$MAXSESSION_LONG)
+        MAXSESSION=$2
+        shift 2
+        ;;
+    --$ISDOUBLELOGINPERMITTED_LONG)
+        noLongerInUse $ISDOUBLELOGINPERMITTED_LONG
+        shift 2
+        ;;
+    --$SESSIONDEFAULTLIFETIME_LONG)
+        SESSIONDEFAULTLIFETIME=$2
+        shift 2
+        ;;
+    --$OLPORT_LONG)
+        OLPORT=$2
+        shift 2
+        ;;
+    --$ADD_LICENSE_LONG)
+        ADD_LICENSE=$2
+        shift 2
+        ;;
         --$NO_LICENSE_LONG)
-	    NO_LICENSE=true
-	    shift
-	    ;;
-	-h|--help)
-	    usage
-	    exit
-	    shift
-	    ;;
-	-D)
-	    set -x
-	    shift
-	    ;;
-	--)
-	    shift
-	    break
-	    ;;
-	*)
-	    die "Internal error!"
-	    exit 1
-	    ;;
+        NO_LICENSE=true
+        shift
+        ;;
+    -h|--help)
+        usage
+        exit
+        shift
+        ;;
+    -D)
+        set -x
+        shift
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *)
+        die "Internal error!"
+        exit 1
+        ;;
     esac
 done
 
@@ -452,7 +452,7 @@ for opt in $MUSTOPTS; do
     opt_var_long=$(eval echo \$${opt}_LONG)
     if [ -z "$opt_var" ]; then
         usage;
-	die "missing required option --$opt_var_long"
+    die "missing required option --$opt_var_long"
     fi
 done
 
@@ -463,15 +463,15 @@ for opt in $ALLOPTS; do
     opt_var_long=$(eval echo \$${opt}_LONG)
     opt_var_values=$(eval echo \$${opt}_VALUES)
     if [ -n "$opt_var_values" ]; then
-	found=
-	for val in $opt_var_values; do
-	    if [ "$val" == "$opt_var" ]; then
-		found=$val
-	    fi
-	done
-	if [ -z "$found" ]; then
-	    die "\"$opt_var\" is not a valid option to --$opt_var_long"
-	fi
+    found=
+    for val in $opt_var_values; do
+        if [ "$val" == "$opt_var" ]; then
+        found=$val
+        fi
+    done
+    if [ -z "$found" ]; then
+        die "\"$opt_var\" is not a valid option to --$opt_var_long"
+    fi
     fi
 done
 
@@ -481,9 +481,12 @@ SQLOPTS=$SQLOPTS
 LICENSEFILE="/opt/open-xchange/etc/common/licensekeys.properties"
 
 
-# groupware
-setup_groupware() 
+setup() 
 {
+    #
+    # groupware configuration files
+    #
+
     echo setting up open-xchange configuration ${CONFDIR}
 
     # this formular and parameters are from Holger
@@ -514,7 +517,7 @@ setup_groupware()
     v_setprop writeUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
 
     if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
-	v_setprop useSeparateWrite "true" ${CONFDIR}/configdb.properties
+    v_setprop useSeparateWrite "true" ${CONFDIR}/configdb.properties
     fi
 
     v_setprop readProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
@@ -551,65 +554,34 @@ setup_groupware()
     v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push.properties
     v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push.properties
     v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push.properties
-}
 
-#
-# admin daemon
-#
-
-setup_admin()
-{
-    echo setting up administration daemon configuration ${CONFDIR}
+    #
+    # administration configuration files
+    #
 
     v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
 
-    # this formular and parameters are from Holger
-    NSIZE=$(( ${ADMIN_MEMORY} / 2 ))
-    ADMINOPTS="-Xmx${ADMIN_MEMORY}m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true"
-#    v_setprop JAVA_XTRAOPTS "\"$ADMINOPTS\"" ${CONFDIR}/ox-admin-scriptconf.sh
-
     NSIZE=$(( ${CLT_MEMORY} / 2 ))
     CLTOPTS="-Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true"
-#    v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-admin-scriptconf.sh
+    v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
-    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
-    SQLPORT=$CONFIGDB_WRITE_PORT
-    EVAL_SQL_URL=$(eval echo $SQL_URL)
-#    v_setprop readUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
-
-    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
-    SQLPORT=$CONFIGDB_WRITE_PORT
-    EVAL_SQL_URL=$(eval echo $SQL_URL)
-#    v_setprop writeUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
-
-#    v_setprop useSeparateWrite "false" ${CONFDIR}/configdb.properties
-
-#    v_setprop readProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
-#    v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${CONFDIR}/configdb.properties
-
-#    v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
-#    v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${CONFDIR}/configdb.properties
-
-#    v_cache_hosting ${CONFDIR}/cache.ccf LTCP $UDPDISCOVERYPORT
-#    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${CONFDIR}/cache.ccf
-
-	if [ -z "$DISABLE_RMI_AUTH" ] ; then
-		v_setprop MASTER_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
-		v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
-		echo
-		echo "*** RMI authentication is enabled"
-		if [ -z "$MASTER_PASS" ]; then
-	    	die "ERROR: master password cannot be null if authentication is enabled"
-		else
-		    echo "using $MASTER_USER as master account"
-		    /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
-			-f /opt/open-xchange/etc/mpasswd -P "$MASTER_PASS" >/dev/null
-		fi
+    if [ -z "$DISABLE_RMI_AUTH" ] ; then
+        v_setprop MASTER_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
+        v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
+        echo
+        echo "*** RMI authentication is enabled"
+        if [ -z "$MASTER_PASS" ]; then
+            die "ERROR: master password cannot be null if authentication is enabled"
+        else
+            echo "using $MASTER_USER as master account"
+            /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
+            -f /opt/open-xchange/etc/mpasswd -P "$MASTER_PASS" >/dev/null
+        fi
     else
-		v_setprop MASTER_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
-		v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
-		echo
-		echo "*** RMI authentication is disabled"
+        v_setprop MASTER_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
+        v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
+        echo
+        echo "*** RMI authentication is disabled"
     fi
 }
 
@@ -623,27 +595,26 @@ addLicense() {
 # license file ops
 if [ -n "$ADD_LICENSE" ]; then
     if [ ! -e $LICENSEFILE ]; then
-	addLicense "$ADD_LICENSE" 1
+    addLicense "$ADD_LICENSE" 1
     else
-	if ! grep "$ADD_LICENSE" $LICENSEFILE >/dev/null; then
-	    cnt=1
-	    while [ true ]; do
-		lstr="com.openexchange.licensekey.${cnt}"
-		if ! grep -E "^$lstr" $LICENSEFILE > /dev/null; then
-		    addLicense "$ADD_LICENSE" $cnt
-		    break
-		fi
-		cnt=$(( $cnt + 1 ))
-	    done
-	else
-	    echo "skipping license $ADD_LICENSE, it's already in $LICENSEFILE"
-	fi
+    if ! grep "$ADD_LICENSE" $LICENSEFILE >/dev/null; then
+        cnt=1
+        while [ true ]; do
+        lstr="com.openexchange.licensekey.${cnt}"
+        if ! grep -E "^$lstr" $LICENSEFILE > /dev/null; then
+            addLicense "$ADD_LICENSE" $cnt
+            break
+        fi
+        cnt=$(( $cnt + 1 ))
+        done
+    else
+        echo "skipping license $ADD_LICENSE, it's already in $LICENSEFILE"
+    fi
     fi
 fi
 
 if [ -d ${CONFDIR} ]; then
-    setup_groupware
-    setup_admin
+    setup
     echo
     echo "open-xchange daemon must now be restarted if already running"
 else

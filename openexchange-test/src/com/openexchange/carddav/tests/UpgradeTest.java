@@ -139,7 +139,8 @@ public class UpgradeTest extends CardDAVTest {
          */
         final ThrowableHolder throwableHolder = new ThrowableHolder();
         Thread createThread = new Thread() {
-        	public void run() {
+        	@Override
+            public void run() {
                 try {
 	                assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCard(contactUidPath, contactVCard));
 				} catch (Throwable t) {
@@ -244,7 +245,8 @@ public class UpgradeTest extends CardDAVTest {
          */
         final ThrowableHolder throwableHolder = new ThrowableHolder();
         Thread createThread = new Thread() {
-        	public void run() {
+        	@Override
+            public void run() {
                 try {
 	                assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCard(contactUid, contactVCard));
 				} catch (Throwable t) {

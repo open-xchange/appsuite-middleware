@@ -87,7 +87,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     private Connection get(final boolean write) throws OXException {
-        final Assignment assign = assignmentService.getConfigDBAssignment();
+        final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
             poolId = assign.getWritePoolId();
@@ -107,7 +107,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     private void back(final Connection con, final boolean write) {
-        final Assignment assign = assignmentService.getConfigDBAssignment();
+        final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
             poolId = assign.getWritePoolId();

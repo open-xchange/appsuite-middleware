@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.FinalContactInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -124,7 +124,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         }
         //before returning the score the contacts need to be associated GREEN here if the score is high enough, they are not associated already, and they are both on the system
         try {
-            if (score >= threshhold){
+            if (score >= threshhold && original.equalsContentwise(candidate)){
                 final List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
                 //List<Contact> associatedContacts =
                 boolean alreadyAssociated = false;
@@ -209,12 +209,12 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     }
 
     @Override
-    public Object startSession(TargetFolderDefinition target) throws OXException {
-        Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        TargetFolderSession session = new TargetFolderSession(target);
-        int folderID = target.getFolderIdAsInt();
+    public Object startSession(final TargetFolderDefinition target) throws OXException {
+        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+        final TargetFolderSession session = new TargetFolderSession(target);
+        final int folderID = target.getFolderIdAsInt();
 
-        ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
+        final ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
         		ContactInterfaceDiscoveryService.class).newContactInterface(
         				folderID,
         				session);

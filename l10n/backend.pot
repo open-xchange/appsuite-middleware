@@ -910,6 +910,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:108
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:14
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/internal/TextXtractExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:62
@@ -1940,8 +1941,8 @@ msgid "Cannot get connection to config DB."
 msgstr ""
 
 #. It was not possible to determine the database server for a specific OX server and a context.
-#. %1$d is replaced with some context identifier.
-#. %1$d is replaced with some server identifier.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
 msgid "Resolving database for context %1$d and server %2$d not possible!"
 msgstr ""
@@ -2038,6 +2039,13 @@ msgstr ""
 #. %1$d is replaced with the context identifier that is stored in the schema.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:124
 msgid "Transaction counter is missing for context %1$d."
+msgstr ""
+
+#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:129
+msgid "Inserting database assignment for context %1$d and server %2$d failed!"
 msgstr ""
 
 #. Text displayed to user if there is no message.
@@ -4074,6 +4082,14 @@ msgstr ""
 msgid ""
 "No UDP channel is configured. Check for failed channel opens on server "
 "startup."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
+msgid "Start of RMI service failed."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:64
+msgid "Could not create RMI registry."
 msgstr ""
 
 #. Access to bundle %1$s is not permitted

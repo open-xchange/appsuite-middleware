@@ -64,7 +64,7 @@ import com.openexchange.osgi.console.osgi.ConsoleActivator;
  */
 public class OsgiActivator extends HousekeepingActivator {
 
-    private ConsoleActivator consoleActivator;
+    private volatile ConsoleActivator consoleActivator;
 
     /**
      * Initializes a new {@link OsgiActivator}.
@@ -86,10 +86,11 @@ public class OsgiActivator extends HousekeepingActivator {
             registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
             track(ManagementService.class, new ManagementRegisterer(context));
             openTrackers();
-            consoleActivator = new ConsoleActivator();
+            final ConsoleActivator consoleActivator = new ConsoleActivator();
             consoleActivator.start(context);
+            this.consoleActivator = consoleActivator;
         } catch (final Exception e) {
-            logger.error("OsgiActivator: start: ", e);
+            logger.error("OsgiActivator: start: "+e.getMessage(), e);
             throw e;
         }
     }
@@ -99,13 +100,14 @@ public class OsgiActivator extends HousekeepingActivator {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
         logger.info("stopping bundle: com.openexchange.osgi");
         try {
+            final ConsoleActivator consoleActivator = this.consoleActivator;
             if (null != consoleActivator) {
                 consoleActivator.stop(context);
-                consoleActivator = null;
+                this.consoleActivator = null;
             }
             cleanUp();
         } catch (final Exception e) {
-            logger.error("OsgiActivator: stop: ", e);
+            logger.error("OsgiActivator: stop: "+e.getMessage(), e);
             throw e;
         }
     }

@@ -99,6 +99,7 @@ public final class AJAXState {
      * @param name The property name
      * @return The property or <code>null</code> if absent
      */
+    @SuppressWarnings("unchecked")
     public <V> V optProperty(final String name) {
         return (V) properties.get(name);
     }
@@ -111,6 +112,7 @@ public final class AJAXState {
      * @throws OXException If property is absent
      */
     public <V> V getProperty(final String name) throws OXException {
+        @SuppressWarnings("unchecked")
         final V value = (V) properties.get(name);
         if (null == value) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -135,6 +137,7 @@ public final class AJAXState {
      * @param name The property name
      * @return The removed property value or <code>null</code> if absent
      */
+    @SuppressWarnings("unchecked")
     public <V> V removeProperty(final String name) {
         return (V) properties.remove(name);
     }

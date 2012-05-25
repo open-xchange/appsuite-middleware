@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange XMPP Tigase Bundle
+Bundle-SymbolicName: com.openexchange.xmpp.tigase
+Bundle-Version: 7.0.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.xmpp,
+ javax.net,
+ javax.net.ssl,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-ClassPath: .,
+ lib/jdbc-mysql.jar,
+ lib/tigase-extras.jar,
+ lib/tigase-muc.jar,
+ lib/tigase-pubsub.jar,
+ lib/tigase-server.jar,
+ lib/tigase-utils.jar,
+ lib/tigase-xmltools.jar
+Bundle-Activator: com.openexchange.xmpp.tigase.osgi.TigaseXmppActivator

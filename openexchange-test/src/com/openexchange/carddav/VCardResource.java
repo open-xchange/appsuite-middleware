@@ -157,7 +157,8 @@ public class VCardResource {
 		return null;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		WRITER.setVCard(this.vCard);
 		return WRITER.buildVCardString();		
 	}

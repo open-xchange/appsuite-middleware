@@ -97,6 +97,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     private String jsessionId;
 
+    private boolean oneTime;
+
     /**
      * Initializes a new {@link AttachmentToken}.
      */
@@ -110,6 +112,26 @@ public final class AttachmentToken implements AttachmentTokenConstants {
                 UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
+    }
+
+    /**
+     * Sets whether this token is a one-time token.
+     * 
+     * @param oneTime <code>true</code> for one-time token; otherwise <code>false</code>
+     * @return This attachment token with new behavior applied
+     */
+    public AttachmentToken setOneTime(final boolean oneTime) {
+        this.oneTime = oneTime;
+        return this;
+    }
+
+    /**
+     * Checks if this token is a one-time token.
+     * 
+     * @return <code>true</code> for one-time token; otherwise <code>false</code>
+     */
+    public boolean isOneTime() {
+        return oneTime;
     }
 
     /**

@@ -77,6 +77,7 @@ public class SolrActivator extends HousekeepingActivator {
 	@Override
 	protected void startBundle() throws OXException {
 		Services.setServiceLookup(this);
+		new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
 		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess = new EmbeddedSolrAccessImpl();
 		embeddedAccess.startUp();
 		DelegationSolrAccessImpl accessService = new DelegationSolrAccessImpl(embeddedAccess);

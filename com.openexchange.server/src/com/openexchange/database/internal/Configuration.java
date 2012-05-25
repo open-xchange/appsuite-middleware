@@ -79,10 +79,6 @@ public final class Configuration {
         super();
     }
 
-    boolean isWriteDefined() {
-        return Boolean.parseBoolean(getProperty(Property.SEPERATE_WRITE, "false"));
-    }
-
     String getReadUrl() {
         return getProperty(Property.READ_URL);
     }
@@ -199,9 +195,6 @@ public final class Configuration {
         } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, readDriverClass);
         }
-        if (!isWriteDefined()) {
-            return;
-        }
         final String writeDriverClass = getProperty(Property.WRITE_DRIVER_CLASS);
         if (null == writeDriverClass) {
             throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.WRITE_DRIVER_CLASS.getPropertyName());
@@ -257,8 +250,6 @@ public final class Configuration {
         READ_DRIVER_CLASS("readDriverClass"),
         /** Class name of driver for configdb write. */
         WRITE_DRIVER_CLASS("writeDriverClass"),
-        /** Use a seperate pool for write connections. */
-        SEPERATE_WRITE("useSeparateWrite"),
         /** Interval of the cleaner threads. */
         CLEANER_INTERVAL("cleanerInterval"),
         /** Minimum of idle connections. */

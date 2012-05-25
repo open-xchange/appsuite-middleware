@@ -51,8 +51,6 @@ package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -113,12 +111,14 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -561,7 +561,9 @@ public class OXContainerConverter {
                 			imageData = doABCrop(imageData, clipRect, formatName);
                 		} catch (IOException e) {
                 			LOG.error("error cropping image, falling back to uncropped image.", e);
-                		}
+                		} catch (OXException e) {
+                			LOG.error("error cropping image, falling back to uncropped image.", e);
+						}
                 	}
                     contactContainer.setImage1(imageData);
                     value = null;
@@ -911,8 +913,9 @@ public class OXContainerConverter {
      * @param imageFormat the target image format
      * @return the cropped image
      * @throws IOException
+     * @throws OXException 
      */
-    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException {
+    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException, OXException {
     	InputStream inputStream = null;
     	ByteArrayOutputStream outputStream = null;
     	try {
@@ -921,17 +924,14 @@ public class OXContainerConverter {
     		 */
     		inputStream = new ByteArrayInputStream(source);
         	BufferedImage sourceImage = ImageIO.read(inputStream);
-    		/*
-    		 * prepare target image
-    		 */
-        	BufferedImage targetImage = new BufferedImage(clipRect.width, clipRect.height, sourceImage.getType());
-    		Graphics2D graphics = targetImage.createGraphics();
-    		graphics.setBackground(new Color(255, 255, 255, 0));
-    		graphics.clearRect(0,  0, clipRect.width, clipRect.height);
-    		/*
-    		 * draw image, translating the offsets to coordinates
-    		 */
-    		graphics.drawImage(sourceImage, clipRect.x * -1, clipRect.height + clipRect.y - sourceImage.getHeight(), null);
+        	/*
+        	 * crop the image
+        	 */
+        	ImageScalingService imageService = ServerServiceRegistry.getInstance().getService(ImageScalingService.class, true);
+        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1, 
+        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height);
+//        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1 - 1, 
+//        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width - 1, clipRect.height - 1);
     		/*
     		 * write back to byte array
     		 */    		
@@ -940,20 +940,8 @@ public class OXContainerConverter {
     		outputStream.flush();
     		return outputStream.toByteArray();
     	} finally {
-    		if (null != inputStream) {
-				try {
-					inputStream.close();
-				} catch (Exception e) {
-					LOG.debug(e);
-				}
-    		}
-    		if (null != outputStream) {
-				try {
-					outputStream.close();
-				} catch (Exception e) {
-					LOG.debug(e);
-				}
-    		}
+    		Streams.close(inputStream);
+    		Streams.close(outputStream);
     	}
     }
     
@@ -1758,15 +1746,22 @@ public class OXContainerConverter {
 
     private void addADR(final VersitObject object, final Contact contactContainer, final String[] type, final int street, final int city, final int state, final int postalCode, final int country) throws ConverterException {
         try {
-            final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
-            adr.add(null);
-            adr.add(null);
-            adr.add(makeList(getStreet(street, contactContainer)));
-            adr.add(makeList(getCity(city, contactContainer)));
-            adr.add(makeList(getState(state, contactContainer)));
-            adr.add(makeList(getPostalCode(postalCode, contactContainer)));
-            adr.add(makeList(getCountry(country, contactContainer)));
-            addProperty(object, "ADR", P_TYPE, type, adr);
+        	String streetValue = getStreet(street, contactContainer);
+        	String cityValue = getCity(city, contactContainer);
+        	String stateValue = getState(state, contactContainer);
+        	String postalCodeValue = getPostalCode(postalCode, contactContainer);
+        	String countryValue = getCountry(country, contactContainer);
+        	if (null != streetValue || null != cityValue || null != stateValue || null != postalCodeValue || null != countryValue) {
+                final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
+                adr.add(null);
+                adr.add(null);
+                adr.add(makeList(streetValue));
+                adr.add(makeList(cityValue));
+                adr.add(makeList(stateValue));
+                adr.add(makeList(postalCodeValue));
+                adr.add(makeList(countryValue));
+                addProperty(object, "ADR", P_TYPE, type, adr);
+        	}
         } catch (final Exception e) {
             throw new ConverterException(e);
         }

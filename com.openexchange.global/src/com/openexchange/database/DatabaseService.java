@@ -186,4 +186,11 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @throws OXException if resolving the server identifier fails.
      */
     void invalidate(int contextId) throws OXException;
+
+    /**
+     * Writes a database assignment for a certain context.
+     * @param assignment the assignment to write.
+     */
+    void writeAssignment(Connection con, Assignment assignment) throws OXException;
+
 }
