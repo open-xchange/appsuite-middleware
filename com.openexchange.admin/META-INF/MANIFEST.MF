@@ -59,6 +59,7 @@ Export-Package: com.openexchange.admin.console;uses:="junit.framework",
  com.openexchange.admin.daemons;uses:="org.apache.commons.logging,com.openexchange.admin.tools,org.osgi.framework",
  com.openexchange.admin.exceptions,
  com.openexchange.admin.properties,
+ com.openexchange.admin.rmi;uses:="junit.framework,com.openexchange.admin.rmi.dataobjects",
  com.openexchange.admin.rmi.impl;
   uses:="com.openexchange.admin.storage.interfaces,
    org.osgi.framework,
