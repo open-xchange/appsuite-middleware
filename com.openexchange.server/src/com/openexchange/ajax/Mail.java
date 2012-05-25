@@ -1692,11 +1692,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final int contextId = session.getContextId();
                 for (int i = 0; i < size; i++) {
                     final MailMessage mail = it.next();
-                    final JSONArray ja = new JSONArray();
-                    for (final MailFieldWriter writer : writers) {
-                        writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                    if (mail != null && !mail.isDeleted()) {
+                        final JSONArray ja = new JSONArray();
+                        for (final MailFieldWriter writer : writers) {
+                            writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                        }
+                        jsonWriter.value(ja);
                     }
-                    jsonWriter.value(ja);
                 }
             } finally {
                 if (closeMailInterface && mailInterface != null) {
