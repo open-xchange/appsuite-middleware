@@ -62,13 +62,13 @@ import com.openexchange.admin.lib.console.CLIOption;
 import com.openexchange.admin.lib.console.CLIParseException;
 import com.openexchange.admin.lib.console.CLIUnknownOptionException;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Restore extends BasicCommandlineOptions {
 	

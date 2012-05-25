@@ -70,27 +70,27 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.lib.plugins.OXContextPluginInterface;
 import com.openexchange.admin.lib.plugins.PluginException;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Database;
-import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
-import com.openexchange.admin.lib.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.lib.rmi.dataobjects.User;
-import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.lib.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.lib.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.lib.rmi.exceptions.PoolException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
-import com.openexchange.admin.lib.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -681,7 +681,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     /**
-     * @see com.openexchange.admin.rmi.OXContextInterface#moveContextDatabase(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
+     * @see com.openexchange.admin.rmi.OXContextInterface#moveContextDatabase(com.openexchange.admin.rmi.dataobjects.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.dataobjects.Credentials)
      */
     public int moveContextDatabase(final Context ctx, final Database db, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         final MaintenanceReason reason = new MaintenanceReason(42);

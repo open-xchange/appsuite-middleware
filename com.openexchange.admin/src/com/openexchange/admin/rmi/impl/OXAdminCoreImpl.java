@@ -57,7 +57,7 @@ import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
-import com.openexchange.admin.lib.rmi.OXAdminCoreInterface;
+import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 

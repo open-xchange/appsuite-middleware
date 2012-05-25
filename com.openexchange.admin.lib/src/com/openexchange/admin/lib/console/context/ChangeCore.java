@@ -54,12 +54,12 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.lib.console.context.extensioninterfaces.ContextConsoleChangeInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ChangeCore extends ContextAbstraction {
 

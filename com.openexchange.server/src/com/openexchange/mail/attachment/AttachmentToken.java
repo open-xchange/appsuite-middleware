@@ -99,6 +99,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     private boolean oneTime;
 
+    private boolean checkIp;
+
     /**
      * Initializes a new {@link AttachmentToken}.
      */
@@ -132,6 +134,26 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      */
     public boolean isOneTime() {
         return oneTime;
+    }
+
+    /**
+     * Gets the checkIp
+     *
+     * @return The checkIp
+     */
+    public boolean isCheckIp() {
+        return checkIp;
+    }
+
+    /**
+     * Sets the checkIp
+     *
+     * @param checkIp The checkIp to set
+     * @return This attachment token with new behavior applied
+     */
+    public AttachmentToken setCheckIp(final boolean checkIp) {
+        this.checkIp = checkIp;
+        return this;
     }
 
     /**
