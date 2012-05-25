@@ -51,8 +51,8 @@ package com.openexchange.admin.reseller.soap;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 
+import com.openexchange.admin.lib.rmi.OXResourceInterface;
 import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
-import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;

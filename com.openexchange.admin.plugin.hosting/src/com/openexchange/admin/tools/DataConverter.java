@@ -58,7 +58,7 @@
 //import java.util.TimeZone;
 //
 //import com.openexchange.admin.dataSource.I_OXUser;
-//import com.openexchange.admin.rmi.dataobjects.User;
+//import com.openexchange.admin.lib.rmi.dataobjects.User;
 //
 ///**
 // * @author choeger

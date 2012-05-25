@@ -49,13 +49,10 @@
 
 package com.openexchange.admin.console.util;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.filestore.RegisterFilestore;
+import com.openexchange.admin.lib.console.BasicCommandlineOptions;
+import com.openexchange.admin.lib.console.util.filestore.RegisterFilestore;
 
 /**
  * @author cutmasta
@@ -70,6 +67,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(getAllOptionData(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -84,6 +82,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "tmp/"+System.currentTimeMillis();
         new RegisterFilestore(getAllOptionData(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -98,6 +97,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         
         new RegisterFilestore(getMissingOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -112,6 +112,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         
         new RegisterFilestore(getUnknownOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -126,6 +127,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(getAllOptionDataWithInvalidCredentials(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }

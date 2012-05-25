@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
-import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.lib.plugins.OXContextPluginInterface;
+import com.openexchange.admin.lib.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.OXResellerTools.ClosureInterface;
@@ -365,7 +365,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     /**
      *
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
+     * @see com.openexchange.admin.lib.plugins.OXContextPluginInterface#list(java.lang.String,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException {

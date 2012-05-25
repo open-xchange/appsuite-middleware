@@ -12,19 +12,23 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
+import com.openexchange.admin.lib.rmi.OXGroupInterface;
+import com.openexchange.admin.lib.rmi.OXResourceInterface;
+import com.openexchange.admin.lib.rmi.OXUserInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.lib.rmi.dataobjects.Group;
+import com.openexchange.admin.lib.rmi.dataobjects.Resource;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 
 public abstract class AbstractRMITest extends AbstractTest {
 

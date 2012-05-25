@@ -63,15 +63,17 @@ import java.util.HashSet;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.OXContextInterface;
+import com.openexchange.admin.lib.rmi.OXUtilInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Database;
+import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.lib.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.lib.rmi.dataobjects.Server;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 
 /**
  * 

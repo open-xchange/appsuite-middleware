@@ -50,7 +50,7 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
-import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.lib.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 

@@ -60,10 +60,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.lib.rmi.exceptions.ProgrammErrorException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 
