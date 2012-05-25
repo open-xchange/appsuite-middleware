@@ -56,8 +56,8 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.lib.rmi.OXGroupInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Group;
 
 public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 

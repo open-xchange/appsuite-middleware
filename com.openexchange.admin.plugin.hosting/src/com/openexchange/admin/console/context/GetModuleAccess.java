@@ -53,11 +53,11 @@ import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.user.UserAbstraction;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class GetModuleAccess extends ContextAbstraction {
    

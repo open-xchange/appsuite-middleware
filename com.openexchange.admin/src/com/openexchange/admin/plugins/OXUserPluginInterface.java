@@ -48,10 +48,10 @@
  */
 package com.openexchange.admin.plugins;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
 
 public interface OXUserPluginInterface {
     public void create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials cred) throws PluginException;

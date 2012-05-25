@@ -52,7 +52,7 @@ package com.openexchange.admin.storage.sqlStorage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.lib.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;

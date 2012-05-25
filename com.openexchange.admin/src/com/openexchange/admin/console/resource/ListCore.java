@@ -52,17 +52,17 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXResourceInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.OXResourceInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Resource;
+import com.openexchange.admin.lib.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.lib.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.lib.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends ResourceAbstraction {
     

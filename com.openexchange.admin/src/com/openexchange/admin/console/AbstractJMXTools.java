@@ -73,8 +73,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
 
 public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 

@@ -49,10 +49,9 @@
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class DisableAll extends ContextAbstraction {
 

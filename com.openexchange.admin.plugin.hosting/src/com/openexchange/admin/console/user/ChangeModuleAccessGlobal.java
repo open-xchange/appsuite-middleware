@@ -58,13 +58,13 @@ import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.lib.rmi.OXUserInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.lib.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.lib.rmi.exceptions.StorageException;
 
 /**
  * {@link ChangeModuleAccessGlobal}

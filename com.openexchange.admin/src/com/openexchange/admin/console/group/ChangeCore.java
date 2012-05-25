@@ -52,12 +52,12 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.lib.rmi.OXGroupInterface;
+import com.openexchange.admin.lib.rmi.dataobjects.Context;
+import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.lib.rmi.dataobjects.Group;
+import com.openexchange.admin.lib.rmi.dataobjects.User;
+import com.openexchange.admin.lib.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class ChangeCore extends GroupAbstraction {
     
