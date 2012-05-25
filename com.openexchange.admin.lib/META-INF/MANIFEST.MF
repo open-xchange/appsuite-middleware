@@ -28,4 +28,4 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.threadpool,
  com.openexchange.tools.pipesnfilters,
- org.apache.commons.cli;version="1.2.0"
+ org.apache.commons.cli
