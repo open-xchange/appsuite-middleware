@@ -925,7 +925,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         		return false;
         	}
         	
-        	return diff.onlyTheseChanged(AppointmentFields.START_DATE,  AppointmentFields.END_DATE,  AppointmentFields.LOCATION,  AppointmentFields.TITLE);
+        	return diff.onlyTheseChanged(AppointmentFields.START_DATE,  AppointmentFields.END_DATE,  AppointmentFields.LOCATION,  AppointmentFields.TITLE, AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS);
 		}
 
 		protected boolean onlyMyStateChanged() {

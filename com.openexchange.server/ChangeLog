@@ -1,6 +1,6 @@
 * 2012-05-25 - thorben.betten@open-xchange.com
 
- - Fix for bug 22192: Proper decoding or MIME encoded Content-Disposition header
+ - Fix for bug 22192: Proper decoding of MIME encoded Content-Disposition header
 
 * 2012-05-24 - martin.herfurth@open-xchange.com
 
