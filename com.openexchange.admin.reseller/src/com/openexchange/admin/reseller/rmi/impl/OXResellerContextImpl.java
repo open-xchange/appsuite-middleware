@@ -366,7 +366,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     /**
      *
      * @see com.openexchange.admin.lib.plugins.OXContextPluginInterface#list(java.lang.String,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
+     * com.openexchange.admin.rmi.dataobjects.dataobjects.Credentials)
      */
     public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException {
         return new ResellerExtensionLoader(cache);

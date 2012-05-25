@@ -55,7 +55,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.lib.console.BasicCommandlineOptions;
-import com.openexchange.admin.lib.rmi.OXAdminCoreInterface;
+import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
 public class AllPluginsLoaded extends BasicCommandlineOptions {
 
