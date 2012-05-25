@@ -63,8 +63,6 @@ import java.util.HashSet;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.admin.lib.rmi.OXContextInterface;
-import com.openexchange.admin.lib.rmi.OXUtilInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.dataobjects.Database;

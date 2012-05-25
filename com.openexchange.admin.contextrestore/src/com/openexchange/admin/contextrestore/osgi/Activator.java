@@ -58,8 +58,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
-import com.openexchange.admin.lib.rmi.OXContextInterface;
 import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.impl.OXContext;
 import com.openexchange.log.LogFactory;
 

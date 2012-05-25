@@ -49,10 +49,13 @@
 
 package com.openexchange.admin.console.util;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
+
 import com.openexchange.admin.console.AbstractTest;
+import com.openexchange.admin.console.util.database.ListDatabase;
 import com.openexchange.admin.lib.console.BasicCommandlineOptions;
-import com.openexchange.admin.lib.console.util.database.ListDatabase;
 
 /**
  * @author cutmasta
@@ -67,7 +70,6 @@ public class ListDatabasesTest extends AbstractTest {
         resetBuffers();
         
         new ListDatabase(getMasterCredentialsOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -82,7 +84,6 @@ public class ListDatabasesTest extends AbstractTest {
         resetBuffers();
         
         new ListDatabase(getCSVMasterOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -97,7 +98,6 @@ public class ListDatabasesTest extends AbstractTest {
         resetBuffers();
         
         new ListDatabase(getWrongMasterCredentialsOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -112,7 +112,6 @@ public class ListDatabasesTest extends AbstractTest {
         resetBuffers();
         
         new ListDatabase(getUnknownOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }

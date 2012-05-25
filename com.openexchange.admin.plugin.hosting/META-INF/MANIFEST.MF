@@ -9,10 +9,6 @@ Import-Package: com.openexchange.admin.lib.console,
  com.openexchange.admin.lib.console.group,
  com.openexchange.admin.lib.console.resource,
  com.openexchange.admin.lib.console.user,
- com.openexchange.admin.lib.console.util.database,
- com.openexchange.admin.lib.console.util.filestore,
- com.openexchange.admin.lib.console.util.reason,
- com.openexchange.admin.lib.console.util.server,
  com.openexchange.admin.lib.plugins,
  com.openexchange.admin.lib.rmi,
  com.openexchange.admin.lib.rmi.dataobjects,
@@ -52,7 +48,9 @@ Import-Package: com.openexchange.admin.lib.console,
  org.osgi.framework,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin
-Export-Package: com.openexchange.admin.rmi.impl,
+Export-Package: com.openexchange.admin.rmi,
+ com.openexchange.admin.rmi.impl,
+ com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.storage.interfaces
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

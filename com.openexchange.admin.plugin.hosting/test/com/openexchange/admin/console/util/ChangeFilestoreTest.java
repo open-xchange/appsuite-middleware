@@ -49,11 +49,14 @@
 
 package com.openexchange.admin.console.util;
 
+import static org.junit.Assert.*;
+
 import org.junit.Test;
+
 import com.openexchange.admin.console.AbstractTest;
+import com.openexchange.admin.console.util.filestore.ChangeFilestore;
+import com.openexchange.admin.console.util.filestore.RegisterFilestore;
 import com.openexchange.admin.lib.console.BasicCommandlineOptions;
-import com.openexchange.admin.lib.console.util.filestore.ChangeFilestore;
-import com.openexchange.admin.lib.console.util.filestore.RegisterFilestore;
 
 /**
  * @author cutmasta
@@ -67,7 +70,6 @@ public class ChangeFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
-            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -79,7 +81,6 @@ public class ChangeFilestoreTest extends AbstractTest {
         //edit fstore via store id        
         int store_id = Integer.parseInt(outBytes.toString().trim());
         new ChangeFilestore(getAllChangeOptionData(store,store_id)){
-            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -95,7 +96,6 @@ public class ChangeFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
-            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -107,7 +107,6 @@ public class ChangeFilestoreTest extends AbstractTest {
         //edit fstore via store id        
         int store_id = Integer.parseInt(outBytes.toString().trim());
         new ChangeFilestore(getAllChangeOptionDataWithInvalidCredentials(store,store_id)){
-            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -124,7 +123,6 @@ public class ChangeFilestoreTest extends AbstractTest {
       
         
         new ChangeFilestore(getUnknownOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -141,7 +139,6 @@ public class ChangeFilestoreTest extends AbstractTest {
       
         
         new ChangeFilestore(getMissingOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }

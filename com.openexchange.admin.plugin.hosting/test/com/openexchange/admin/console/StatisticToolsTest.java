@@ -52,7 +52,6 @@ package com.openexchange.admin.console;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import com.openexchange.admin.lib.console.StatisticTools;
 
 /**
  * @author d7

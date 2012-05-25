@@ -49,10 +49,13 @@
 
 package com.openexchange.admin.console.util;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
+
 import com.openexchange.admin.console.AbstractTest;
+import com.openexchange.admin.console.util.reason.ListReason;
 import com.openexchange.admin.lib.console.BasicCommandlineOptions;
-import com.openexchange.admin.lib.console.util.reason.ListReason;
 
 /**
  * @author cutmasta
@@ -66,7 +69,6 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getMasterCredentialsOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }
@@ -81,7 +83,6 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getCSVMasterOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }
@@ -96,7 +97,6 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getWrongMasterCredentialsOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }
@@ -111,7 +111,6 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getUnknownOptionData()){
-            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }

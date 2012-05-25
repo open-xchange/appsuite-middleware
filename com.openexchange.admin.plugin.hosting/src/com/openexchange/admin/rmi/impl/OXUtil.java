@@ -56,7 +56,6 @@ import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import com.openexchange.admin.lib.rmi.OXUtilInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.dataobjects.Database;
 import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
@@ -66,6 +65,7 @@ import com.openexchange.admin.lib.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.log.LogFactory;
 
