@@ -67,7 +67,7 @@
 			<str name="echoParams">explicit</str>
 			<float name="tie">0.01</float>
 			<str name="qf">
-				content_de^1.0 content_en^1.0 subject_de^3.0 subject_en^3.0
+				content_de^1.0 content_en^1.0 subject_de^3.0 subject_en^3.0 from^2.0 to^2.0 cc^1.0 bcc^1.0
 			</str>			
 		</lst>
 		<lst name="defaults">
@@ -137,10 +137,10 @@
 		<str name="param19">flag_forwarded</str>
 		<str name="param20">flag_read_ack</str>
 		<str name="param21">user_flags</str>
-		<str name="param22">from_analyzed</str>
-		<str name="param23">to_analyzed</str>
-		<str name="param24">cc_analyzed</str>
-		<str name="param25">bcc_analyzed</str>
+		<str name="param22">from</str>
+		<str name="param23">to</str>
+		<str name="param24">cc</str>
+		<str name="param25">bcc</str>
 		<str name="param26">subject</str>
 		<str name="param27">content_flag</str>
 		<str name="param28">content</str>
