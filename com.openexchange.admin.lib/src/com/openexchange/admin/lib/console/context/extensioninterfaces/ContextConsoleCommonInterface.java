@@ -50,8 +50,8 @@ package com.openexchange.admin.lib.console.context.extensioninterfaces;
 
 import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.exception.OXConsolePluginException;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 
 /**

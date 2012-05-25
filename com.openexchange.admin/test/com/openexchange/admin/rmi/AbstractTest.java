@@ -48,9 +48,9 @@
  */
 package com.openexchange.admin.rmi;
 
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 /**
  *

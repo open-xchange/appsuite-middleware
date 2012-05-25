@@ -61,12 +61,11 @@ import java.rmi.RemoteException;
 import java.util.Vector;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.admin.lib.rmi.OXUtilInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Database;
-import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
-import com.openexchange.admin.lib.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.lib.rmi.dataobjects.Server;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  *

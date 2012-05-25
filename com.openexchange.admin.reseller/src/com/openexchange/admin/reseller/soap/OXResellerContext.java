@@ -51,12 +51,8 @@ package com.openexchange.admin.reseller.soap;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import com.openexchange.admin.lib.rmi.OXContextInterface;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchDatabaseException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchFilestoreException;
-import com.openexchange.admin.lib.rmi.exceptions.NoSuchReasonException;
-import com.openexchange.admin.lib.rmi.exceptions.OXContextException;
 import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -69,6 +65,10 @@ import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
+import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.soap.OXSOAPRMIMapper;
 

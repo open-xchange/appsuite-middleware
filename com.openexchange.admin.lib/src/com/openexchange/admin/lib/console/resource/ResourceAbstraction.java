@@ -56,8 +56,8 @@ import com.openexchange.admin.lib.console.AdminParser;
 import com.openexchange.admin.lib.console.CLIOption;
 import com.openexchange.admin.lib.console.ObjectNamingAbstraction;
 import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.lib.rmi.OXResourceInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 
 public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     

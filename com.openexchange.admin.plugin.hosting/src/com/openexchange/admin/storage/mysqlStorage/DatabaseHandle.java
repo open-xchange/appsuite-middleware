@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.admin.lib.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Database;
 
 /**
  * Internally used object for getnextdbhandlebyweight method instead of

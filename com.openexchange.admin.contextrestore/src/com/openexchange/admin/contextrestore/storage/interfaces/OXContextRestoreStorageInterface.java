@@ -12,8 +12,8 @@ import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.tools.PropertyHandlerExtended;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -36,7 +36,7 @@ public abstract class OXContextRestoreStorageInterface {
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
+     * @throws com.openexchange.admin.rmi.exceptions.exceptions.StorageException Storage exception
      */
     public static OXContextRestoreStorageInterface getInstance() throws StorageException {
         synchronized (OXContextRestoreStorageInterface.class) {

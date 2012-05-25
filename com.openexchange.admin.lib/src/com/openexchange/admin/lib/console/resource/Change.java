@@ -52,10 +52,10 @@ package com.openexchange.admin.lib.console.resource;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.rmi.OXResourceInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 
 public class Change extends ChangeCore {
 

@@ -49,19 +49,20 @@
 package com.openexchange.admin.rmi.impl;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
-import com.openexchange.admin.lib.rmi.dataobjects.Context;
-import com.openexchange.admin.lib.rmi.dataobjects.Database;
-import com.openexchange.admin.lib.rmi.dataobjects.Group;
-import com.openexchange.admin.lib.rmi.dataobjects.NameAndIdObject;
-import com.openexchange.admin.lib.rmi.dataobjects.Resource;
-import com.openexchange.admin.lib.rmi.dataobjects.Server;
-import com.openexchange.admin.lib.rmi.dataobjects.User;
-import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.lib.rmi.exceptions.*;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
+import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 
 /**
  * General abstraction class used by all impl classes
@@ -138,8 +139,8 @@ public abstract class OXCommonImpl {
      * Checks whether the context exists and updates the schema if needed
      * @param ctx
      * @throws StorageException
-     * @throws com.openexchange.admin.rmi.exceptions.DatabaseUpdateException
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException
+     * @throws com.openexchange.admin.rmi.exceptions.exceptions.DatabaseUpdateException
+     * @throws com.openexchange.admin.rmi.exceptions.exceptions.NoSuchContextException
      */
     protected void checkContextAndSchema(final Context ctx) throws StorageException, DatabaseUpdateException, NoSuchContextException {
         if(!tool.existsContext(ctx)) {

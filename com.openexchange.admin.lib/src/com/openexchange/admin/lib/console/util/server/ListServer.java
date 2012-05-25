@@ -51,10 +51,10 @@ package com.openexchange.admin.lib.console.util.server;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.rmi.OXUtilInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Server;
-import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * 

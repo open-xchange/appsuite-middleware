@@ -50,9 +50,9 @@ package com.openexchange.admin.lib.console.util.filestore;
 
 import java.rmi.Naming;
 import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.rmi.OXUtilInterface;
-import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
-import com.openexchange.admin.lib.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 /**
  * 
