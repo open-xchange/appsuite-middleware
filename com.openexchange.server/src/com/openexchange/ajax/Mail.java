@@ -520,8 +520,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
                         final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
                         for (final MailMessage mail : modified) {
-                            final JSONArray ja = new JSONArray();
                             if (mail != null) {
+                                final JSONArray ja = new JSONArray();
                                 for (final MailFieldWriter writer : writers) {
                                     writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                                 }
@@ -752,13 +752,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
-                        final JSONArray ja = new JSONArray();
                         if (mail != null && !mail.isDeleted()) {
+                            final JSONArray ja = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId);
                             }
+                            jsonWriter.value(ja);
                         }
-                        jsonWriter.value(ja);
                     }
                 } else {
                     final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
@@ -769,13 +769,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
-                        final JSONArray ja = new JSONArray();
                         if (mail != null && !mail.isDeleted()) {
+                            final JSONArray ja = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                             }
+                            jsonWriter.value(ja);
                         }
-                        jsonWriter.value(ja);
                     }
                 }
             } finally {
@@ -2972,13 +2972,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
-                                final JSONArray arr = new JSONArray();
                                 if (mail != null && !mail.isDeleted()) {
+                                    final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
                                         writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                                     }
+                                    jsonWriter.value(arr);
                                 }
-                                jsonWriter.value(arr);
                             }
                         } else {
                             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
@@ -2986,13 +2986,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
-                                final JSONArray arr = new JSONArray();
                                 if (mail != null && !mail.isDeleted()) {
+                                    final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
                                         writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                                     }
+                                    jsonWriter.value(arr);
                                 }
-                                jsonWriter.value(arr);
                             }
                         }
                     } finally {
