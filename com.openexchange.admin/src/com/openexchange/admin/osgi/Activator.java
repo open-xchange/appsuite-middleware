@@ -59,7 +59,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.lib.plugins.OXUserPluginInterface;
+import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;

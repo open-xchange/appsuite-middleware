@@ -51,12 +51,12 @@ package com.openexchange.admin.reseller.console.extensionimpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.console.CLIOption;
-import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.lib.console.context.extensioninterfaces.ContextConsoleCreateInterface;
-import com.openexchange.admin.lib.console.exception.OXConsolePluginException;
-import com.openexchange.admin.lib.console.user.UserAbstraction.CSVConstants;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
+import com.openexchange.admin.console.user.UserAbstraction.CSVConstants;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;

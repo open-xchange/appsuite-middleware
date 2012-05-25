@@ -63,10 +63,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import com.openexchange.admin.lib.console.AbstractJMXTools;
-import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.console.CLIOption;
-import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.lib.rmi.exceptions.InvalidDataException;
 import com.openexchange.threadpool.ThreadPoolInformationMBean;
 

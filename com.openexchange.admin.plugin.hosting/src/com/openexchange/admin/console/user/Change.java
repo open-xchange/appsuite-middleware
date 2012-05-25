@@ -51,8 +51,7 @@ package com.openexchange.admin.console.user;
 
 import java.rmi.RemoteException;
 
-import com.openexchange.admin.lib.console.AdminParser;
-import com.openexchange.admin.lib.console.user.ChangeCore;
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.lib.rmi.OXUserInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;

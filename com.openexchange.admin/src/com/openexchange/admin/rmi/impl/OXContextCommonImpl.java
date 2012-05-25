@@ -58,7 +58,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.admin.daemons.AdminDaemon;
-import com.openexchange.admin.lib.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.dataobjects.Database;

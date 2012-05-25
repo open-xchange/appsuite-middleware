@@ -54,8 +54,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.openexchange.admin.console.AbstractTest;
+import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.util.database.ListDatabase;
-import com.openexchange.admin.lib.console.BasicCommandlineOptions;
 
 /**
  * @author cutmasta

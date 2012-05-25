@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.reseller.console;
 
-import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
