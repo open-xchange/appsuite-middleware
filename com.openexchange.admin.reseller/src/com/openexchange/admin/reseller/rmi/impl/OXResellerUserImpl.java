@@ -51,8 +51,8 @@ package com.openexchange.admin.reseller.rmi.impl;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
-import com.openexchange.admin.plugins.OXUserPluginInterface;
-import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.lib.plugins.OXUserPluginInterface;
+import com.openexchange.admin.lib.plugins.PluginException;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;

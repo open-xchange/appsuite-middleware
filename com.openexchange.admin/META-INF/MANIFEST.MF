@@ -9,6 +9,7 @@ Bundle-Activator: com.openexchange.admin.osgi.Activator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc,
+ com.openexchange.admin.lib.plugins,
  com.openexchange.admin.lib.rmi,
  com.openexchange.admin.lib.rmi.dataobjects,
  com.openexchange.admin.lib.rmi.exceptions,
@@ -55,15 +56,8 @@ Import-Package: com.mysql.jdbc,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.admin.console,
- com.openexchange.admin.console.context,
- com.openexchange.admin.console.context.extensioninterfaces,
- com.openexchange.admin.console.exception,
- com.openexchange.admin.console.group,
- com.openexchange.admin.console.resource,
- com.openexchange.admin.console.user,
  com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
- com.openexchange.admin.plugins,
  com.openexchange.admin.properties,
  com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.impl,

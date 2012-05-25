@@ -49,8 +49,9 @@
 
 package com.openexchange.admin.console.user;
 
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.console.user.UserAbstraction;
 import com.openexchange.admin.lib.rmi.OXUserInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;

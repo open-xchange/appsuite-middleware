@@ -50,9 +50,10 @@ package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.user.UserAbstraction;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.lib.console.context.ContextAbstraction;
+import com.openexchange.admin.lib.console.user.UserAbstraction;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.dataobjects.UserModuleAccess;

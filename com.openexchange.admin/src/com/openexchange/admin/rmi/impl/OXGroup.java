@@ -63,9 +63,9 @@ import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.lib.plugins.OXGroupPluginInterface;
+import com.openexchange.admin.lib.plugins.PluginException;
 import com.openexchange.admin.lib.rmi.OXGroupInterface;
-import com.openexchange.admin.plugins.OXGroupPluginInterface;
-import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;

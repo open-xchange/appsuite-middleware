@@ -52,7 +52,8 @@ package com.openexchange.admin.console.resource;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.resource.ListCore;
 import com.openexchange.admin.lib.rmi.OXResourceInterface;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;

@@ -50,9 +50,10 @@ package com.openexchange.admin.console.context;
 
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.ObjectNamingAbstraction;
+import com.openexchange.admin.lib.console.AdminParser;
+import com.openexchange.admin.lib.console.CLIOption;
+import com.openexchange.admin.lib.console.ObjectNamingAbstraction;
+import com.openexchange.admin.lib.console.context.ContextAbstraction;
 import com.openexchange.admin.lib.rmi.dataobjects.Context;
 import com.openexchange.admin.lib.rmi.dataobjects.Credentials;
 import com.openexchange.admin.lib.rmi.exceptions.InvalidCredentialsException;
