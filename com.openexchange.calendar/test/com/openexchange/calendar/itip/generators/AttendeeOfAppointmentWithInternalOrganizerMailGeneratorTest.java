@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.itip.generators;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -133,19 +134,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
         NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail =  generator.generateUpdateMailFor("external1@otherdomain.ox");
 
-        assertNotNull(notificationMail);
-        assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());
-        assertEquals("organizer@domain.ox", notificationMail.getSender().getEmail());
-        assertEquals(appointment.getObjectID(), notificationMail.getAppointment().getObjectID());
-        
-        ITipMessage message = notificationMail.getMessage();
-        assertNotNull(message);
-        assertEquals(ITipMethod.REQUEST, message.getMethod());
-        assertEquals(appointment.getObjectID(), message.getAppointment().getObjectID());
-    
-        assertEquals("notify.appointment.accept", notificationMail.getTemplateName());
-
-
+        assertNull(notificationMail);
     }
     
     private void confirmFor(String email, ConfirmStatus status, Appointment appointment) {
