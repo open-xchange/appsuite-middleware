@@ -119,6 +119,24 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
                     ttlMillis = -1;
                 }
             }
+            boolean oneTime;
+            {
+                final String tmp = req.getParameter("oneTime");
+                if (null == tmp) {
+                    oneTime = true;
+                } else {
+                    oneTime = Boolean.parseBoolean(tmp.trim());
+                }
+            }
+            boolean checkIp;
+            {
+                final String tmp = req.getParameter("checkIp");
+                if (null == tmp) {
+                    checkIp = false;
+                } else {
+                    checkIp = Boolean.parseBoolean(tmp.trim());
+                }
+            }
             /*
              * Get mail part
              */
@@ -129,7 +147,7 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
             final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
             token.setAccessInfo(mailInterface.getAccountID(), session);
             token.setAttachmentInfo(folderPath, uid, sequenceId);
-            AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(true), session);
+            AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(oneTime).setCheckIp(checkIp), session);
             final JSONObject attachmentObject = new JSONObject();
             attachmentObject.put("id", token.getId());
             attachmentObject.put("jsessionid", token.getJSessionId());
