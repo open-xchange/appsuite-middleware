@@ -77,9 +77,9 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -880,10 +880,10 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             final ENVELOPE env = (ENVELOPE) item;
-            msg.addFrom(env.from);
-            msg.addTo(env.to);
-            msg.addCc(env.cc);
-            msg.addBcc(env.bcc);
+            msg.addFrom(wrap(env.from));
+            msg.addTo(wrap(env.to));
+            msg.addCc(wrap(env.cc));
+            msg.addBcc(wrap(env.bcc));
             try {
                 final InternetAddress[] replyTo = QuotedInternetAddress.toQuotedAddresses(env.replyTo);
                 if (null != replyTo && replyTo.length > 0) {
@@ -903,6 +903,22 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             msg.addHeader("Message-Id", env.messageId);
             msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
+        }
+
+        private InternetAddress[] wrap(final InternetAddress... addresses) {
+            if (null == addresses || 0 == addresses.length) {
+                return null;
+            }
+            final int length = addresses.length;
+            final InternetAddress[] ret = new InternetAddress[length];
+            for (int i = 0; i < length; i++) {
+                try {
+                    ret[i] = new QuotedInternetAddress(addresses[i].toString());
+                } catch (final AddressException e) {
+                    ret[i] = addresses[i];
+                }
+            }
+            return ret;
         }
 
         @Override
