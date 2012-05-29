@@ -102,7 +102,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.threadpool");
@@ -239,7 +239,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.threadpool");
