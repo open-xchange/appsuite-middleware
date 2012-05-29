@@ -119,6 +119,8 @@
             <sysproperty key="test.propfile" value="${confDir}/test.properties"/>
             <sysproperty key="user.language" value="en"/>
             <sysproperty key="user.country" value="US"/>
+            <sysproperty key="java.util.logging.config.file" value="${confDir}/logging.properties"/>
+            <sysproperty key="java.awt.headless" value="true"/>
         </junit>
     </target>
 
