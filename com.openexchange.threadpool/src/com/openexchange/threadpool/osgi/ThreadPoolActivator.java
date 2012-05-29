@@ -136,7 +136,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             final SessionThreadCounterImpl counterImpl = new SessionThreadCounterImpl(notifyThreashold, this);
             registerService(SessionThreadCounter.class, counterImpl);
             SessionThreadCounter.REFERENCE.set(counterImpl);
-            track(ManagementService.class, new ManagementServiceTrackerCustomizer2(context, counterImpl));
             /*
              * Event handler for session count events
              */
@@ -146,6 +145,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessionThreadCounter.EVENT_TOPIC);
                 registerService(EventHandler.class, handler, dict);
+                track(ManagementService.class, new ManagementServiceTrackerCustomizer2(context, counterImpl, handler));
             }
             /*
              * Event handler for session events

@@ -54,7 +54,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SessionThreadCountMBeanImpl}
@@ -64,6 +67,7 @@ import com.openexchange.session.SessionThreadCounter;
 public final class SessionThreadCountMBeanImpl extends StandardMBean implements SessionThreadCountMBean {
 
     private final SessionThreadCounter counter;
+    private final ServiceTracker<SessiondService, SessiondService> sessiondServiceTracker;
 
     /**
      * Initializes a new {@link SessionThreadCountMBeanImpl}.
@@ -71,18 +75,30 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
      * @throws NotCompliantMBeanException If the MBean interface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.
      */
-    public SessionThreadCountMBeanImpl(final SessionThreadCounter counter) throws NotCompliantMBeanException {
+    public SessionThreadCountMBeanImpl(final SessionThreadCounter counter, final ServiceTracker<SessiondService, SessiondService> sessiondServiceTracker) throws NotCompliantMBeanException {
         super(SessionThreadCountMBean.class);
         this.counter = counter;
+        this.sessiondServiceTracker = sessiondServiceTracker;
     }
 
+    @Override
     public String getThreads(final int threshold) {
         final StringBuilder info = new StringBuilder(8192);
+        final SessiondService service = sessiondServiceTracker.getService();
         final Map<String, Set<Thread>> threads = counter.getThreads(threshold);
         for (final Entry<String, Set<Thread>> entry : threads.entrySet()) {
             final Set<Thread> set = entry.getValue();
             info.append("\n\n").append(set.size()).append(" threads belonging to session \"").append(entry.getKey());
-            info.append("\":\n");
+            if (null == service) {
+                info.append("\":\n");
+            } else {
+                final Session session = service.getSession(entry.getKey());
+                if (null == session) {
+                    info.append("\":\n");
+                } else {
+                    info.append("\" (user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append("):\n");
+                }
+            }
 
             for (final Thread thread : set) {
                 info.append("\n--------------------------------------------------------------------------\n");

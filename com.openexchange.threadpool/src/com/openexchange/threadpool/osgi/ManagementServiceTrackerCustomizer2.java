@@ -54,11 +54,13 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.management.ManagementService;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCountMBean;
 import com.openexchange.sessionCount.SessionThreadCountMBeanImpl;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link ManagementServiceTrackerCustomizer2} - The {@link ServiceTrackerCustomizer customizer} for {@link ManagementService}.
@@ -70,6 +72,7 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
     private final BundleContext context;
 
     private final SessionThreadCounter counter;
+    private final ServiceTracker<SessiondService, SessiondService> sessiondServiceTracker;
 
     private ObjectName objectName;
 
@@ -79,10 +82,11 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
      * @param context The bundle context
      * @param counter The service
      */
-    public ManagementServiceTrackerCustomizer2(final BundleContext context, final SessionThreadCounter counter) {
+    public ManagementServiceTrackerCustomizer2(final BundleContext context, final SessionThreadCounter counter, final ServiceTracker<SessiondService, SessiondService> sessiondServiceTracker) {
         super();
         this.context = context;
         this.counter = counter;
+        this.sessiondServiceTracker = sessiondServiceTracker;
     }
 
     @Override
@@ -120,7 +124,7 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
                 com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagementServiceTrackerCustomizer.class));
             try {
                 objectName = getObjectName(SessionThreadCountMBeanImpl.class.getName(), SessionThreadCountMBean.SESSION_THREAD_COUNT_DOMAIN);
-                management.registerMBean(objectName, new SessionThreadCountMBeanImpl(counter));
+                management.registerMBean(objectName, new SessionThreadCountMBeanImpl(counter, sessiondServiceTracker));
             } catch (final MalformedObjectNameException e) {
                 LOG.error(e.getMessage(), e);
             } catch (final NotCompliantMBeanException e) {
