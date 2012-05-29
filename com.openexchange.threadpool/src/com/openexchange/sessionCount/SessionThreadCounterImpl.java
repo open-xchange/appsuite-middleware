@@ -103,10 +103,11 @@ public final class SessionThreadCounterImpl implements SessionThreadCounter {
 
     @Override
     public Map<String, Set<Thread>> getThreads(final int threshold) {
+        final int limit = threshold >= 0 ? threshold : 0;
         final List<ThreadCountEntry> list = new LinkedList<ThreadCountEntry>();
         for (final Iterator<ThreadCountEntry> iterator = map.values().iterator(); iterator.hasNext();) {
             final ThreadCountEntry threadCountEntry = iterator.next();
-            if (threadCountEntry.get() >= threshold) {
+            if (threadCountEntry.get() >= limit) {
                 list.add(threadCountEntry);
             }
         }
