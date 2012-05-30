@@ -62,10 +62,9 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.soap.cxf.WebserviceName;
 
-
 /**
  * {@link WebserviceCollector}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebserviceCollector implements ServiceListener {
@@ -76,35 +75,34 @@ public class WebserviceCollector implements ServiceListener {
 
     private final BundleContext context;
 
-    private boolean open;
+    private volatile boolean open;
 
-    public WebserviceCollector(BundleContext context) {
+    public WebserviceCollector(final BundleContext context) {
         this.context = context;
     }
 
-
     @Override
-    public void serviceChanged(ServiceEvent event) {
-        if(!open) {
+    public void serviceChanged(final ServiceEvent event) {
+        if (!open) {
             return;
         }
-        if(event.getType() == ServiceEvent.REGISTERED) {
-            ServiceReference ref = event.getServiceReference();
+        if (event.getType() == ServiceEvent.REGISTERED) {
+            final ServiceReference<?> ref = event.getServiceReference();
             add(ref);
         } else if (event.getType() == ServiceEvent.UNREGISTERING) {
-            ServiceReference ref = event.getServiceReference();
+            final ServiceReference<?> ref = event.getServiceReference();
             remove(ref);
         }
     }
 
     public void open() {
         try {
-            ServiceReference[] allServiceReferences = context.getAllServiceReferences(null, null);
-            for (ServiceReference serviceReference : allServiceReferences) {
-                add( serviceReference );
+            final ServiceReference<?>[] allServiceReferences = context.getAllServiceReferences(null, null);
+            for (final ServiceReference<?> serviceReference : allServiceReferences) {
+                add(serviceReference);
             }
 
-        } catch (InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
             // Impossible, no filter specified.
         }
 
@@ -113,54 +111,53 @@ public class WebserviceCollector implements ServiceListener {
 
     public void close() {
         open = false;
-        for (Entry<String, Endpoint> entry : endpoints.entrySet()) {
+        for (final Entry<String, Endpoint> entry : endpoints.entrySet()) {
             remove(entry.getKey(), entry.getValue());
         }
     }
 
+    private void remove(final ServiceReference<?> ref) {
+        final Object service = context.getService(ref);
 
-    private void remove(ServiceReference ref) {
-        Object service = context.getService(ref);
-
-        if( isWebservice(service) ) {
-            String name = getName(ref, service);
-            remove( name, service );
+        if (isWebservice(service)) {
+            final String name = getName(ref, service);
+            remove(name, service);
         }
     }
 
-    private void add(ServiceReference ref) {
-        Object service = context.getService(ref);
-        if( isWebservice(service) ) {
-            String name = getName(ref, service);
-            replace( name, service );
+    private void add(final ServiceReference<?> ref) {
+        final Object service = context.getService(ref);
+        if (isWebservice(service)) {
+            final String name = getName(ref, service);
+            replace(name, service);
         }
     }
 
-    private String getName(ServiceReference ref, Object service) {
+    private String getName(final ServiceReference<?> ref, final Object service) {
         // If an annotation is present with the name, use that
         {
-            WebserviceName webserviceName = service.getClass().getAnnotation(WebserviceName.class);
-            if(webserviceName != null) {
+            final WebserviceName webserviceName = service.getClass().getAnnotation(WebserviceName.class);
+            if (webserviceName != null) {
                 return webserviceName.value();
             }
         }
         // If a service property for WebserviceName is present, use that
         {
-            Object name = ref.getProperty(WEBSERVICE_NAME);
-            if(name != null && !"".equals(name)) {
+            final Object name = ref.getProperty(WEBSERVICE_NAME);
+            if (name != null && !"".equals(name)) {
                 return name.toString();
             }
         }
         // Next try the WebService annotation
 
         {
-            WebService webService = service.getClass().getAnnotation(WebService.class);
+            final WebService webService = service.getClass().getAnnotation(WebService.class);
             String serviceName = webService.serviceName();
-            if(serviceName != null && ! ("".equals(serviceName))) {
+            if (serviceName != null && !("".equals(serviceName))) {
                 return serviceName;
             }
             serviceName = webService.name();
-            if(serviceName != null && ! ("".equals(serviceName))) {
+            if (serviceName != null && !("".equals(serviceName))) {
                 return serviceName;
             }
         }
@@ -168,24 +165,23 @@ public class WebserviceCollector implements ServiceListener {
         return service.getClass().getSimpleName();
     }
 
-    private void remove(String name, Object service) {
-        Endpoint endpoint = endpoints.remove(name);
-        if(endpoint != null) {
+    private void remove(final String name, final Object service) {
+        final Endpoint endpoint = endpoints.remove(name);
+        if (endpoint != null) {
             endpoint.stop();
         }
     }
 
-    private void replace(String name, Object service) {
-        Endpoint oldEndpoint = endpoints.replace(name, Endpoint.publish(MessageFormat.format("/{0}", name), service));
-        if(oldEndpoint != null) {
+    private void replace(final String name, final Object service) {
+        final Endpoint oldEndpoint = endpoints.replace(name, Endpoint.publish(MessageFormat.format("/{0}", name), service));
+        if (oldEndpoint != null) {
             oldEndpoint.stop();
         }
     }
 
-    private boolean isWebservice(Object service) {
-        WebService annotation = service.getClass().getAnnotation(WebService.class);
+    private boolean isWebservice(final Object service) {
+        final WebService annotation = service.getClass().getAnnotation(WebService.class);
         return annotation != null;
     }
-
 
 }
