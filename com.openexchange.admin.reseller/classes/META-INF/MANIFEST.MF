@@ -8,10 +8,11 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: com.openexchange.admin.reseller.osgi.Activator
 Import-Package: com.openexchange.admin.plugins,
  com.openexchange.admin.rmi.dataobjects,
- com.openexchange.groupware.impl,
+ com.openexchange.exception,
  com.openexchange.groupware,
- com.openexchange.groupware.userconfiguration,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.impl,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
  org.apache.commons.logging,
  org.osgi.framework
