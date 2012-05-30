@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.admin.user.copy
 Bundle-Version: 6.20.1.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.admin.user.copy.osgi.Activator
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.admin.console,
  com.openexchange.admin.daemons,
  com.openexchange.admin.rmi,
