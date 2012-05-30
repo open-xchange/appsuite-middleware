@@ -100,8 +100,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     private volatile OSGiAJAXResultDecoratorRegistry decoratorRegistry;
 
     private volatile String prefix;
-
-    private String prefix;
     
     @Override
     protected void startBundle() throws Exception {
