@@ -18,7 +18,6 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.proxy.OAuthProxyRequest.HTTPMethod;
 import com.openexchange.tools.session.ServerSession;
 
-@DispatcherNotes(defaultFormat="string")
 public class OAuthProxyAction implements AJAXActionService {
 
 	private OAuthService oauthService;

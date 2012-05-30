@@ -1,13 +1,9 @@
 package com.openexchange.oauth.httpclient.impl.scribe;
 
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
-import org.junit.runner.Request;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
@@ -18,7 +14,6 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
@@ -43,7 +38,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		provider = getProvider(coreBuilder.getApi());
 		
 		service = new ServiceBuilder()
-        .provider(FacebookApi.class)
+        .provider(getProvider(coreBuilder.getApi()))
         .apiKey(coreBuilder.getApiKey()) 
         .apiSecret(coreBuilder.getSecret())
         .build();
