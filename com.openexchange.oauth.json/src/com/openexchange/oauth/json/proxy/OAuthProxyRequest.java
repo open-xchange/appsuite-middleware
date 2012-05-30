@@ -39,7 +39,6 @@ public class OAuthProxyRequest {
 		put(API.TWITTER,	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
 		put(API.YAHOO, 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
 	}};
->>>>>>> f5b2a1f6becf671faab49765c300917ee8528be2
 	
 	public static enum HTTPMethod {
 		GET, PUT, POST, DELETE
