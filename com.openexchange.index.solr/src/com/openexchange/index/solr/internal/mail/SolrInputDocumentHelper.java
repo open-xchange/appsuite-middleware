@@ -153,30 +153,23 @@ public final class SolrInputDocumentHelper {
     private static List<Object> createAddressHeader(final InternetAddress[] addrs) {
         if (addrs == null || addrs.length == 0) {
             return null;
-        } else {
-            final List<Object> retval = new ArrayList<Object>(addrs.length);
-            for (final InternetAddress addr : addrs) {
-                if (addr instanceof QuotedInternetAddress) {
-                    retval.add(((QuotedInternetAddress) addr).toUnicodeString());
-                } else {
-                    String quoted;
-                    try {
-                        quoted = new QuotedInternetAddress(addr.toUnicodeString()).toUnicodeString();
-                    } catch (AddressException e) {
-                        quoted = addr.toUnicodeString();
-                    }
-                    
-                    retval.add(quoted);
-                }
-            }
-<<<<<<< HEAD
-
-            return retval;
-=======
-            lineBuilder.delete(0, 2);
-            return lineBuilder.toString();
->>>>>>> f5b2a1f6becf671faab49765c300917ee8528be2
         }
+        final List<Object> retval = new ArrayList<Object>(addrs.length);
+        for (final InternetAddress addr : addrs) {
+            if (addr instanceof QuotedInternetAddress) {
+                retval.add(((QuotedInternetAddress) addr).toUnicodeString());
+            } else {
+                String quoted;
+                try {
+                    quoted = new QuotedInternetAddress(addr.toUnicodeString()).toUnicodeString();
+                } catch (final AddressException e) {
+                    quoted = addr.toUnicodeString();
+                }
+                
+                retval.add(quoted);
+            }
+        }
+        return retval;
     }
 
     private static SolrInputDocument createDocument(final String uuid, final MailMessage mail, final int accountId, final int userId, final int contextId, final long stamp) {
