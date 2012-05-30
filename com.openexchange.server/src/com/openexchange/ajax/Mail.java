@@ -107,9 +107,9 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.contactcollector.ContactCollectorService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -801,7 +801,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         jsonWriter.endArray();
         if (DEBUG) {
             final long d = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder(32).append(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix()).append("mail?action=all performed in ").append(d).append("msec"));
+            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=all performed in ").append(d).append("msec"));
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
@@ -1138,7 +1138,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setTimestamp(null);
         if (DEBUG) {
             final long d = System.currentTimeMillis() - s;
-            LOG.debug(new StringBuilder(32).append(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix()).append("mail?action=get performed in ").append(d).append("msec"));
+            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=get performed in ").append(d).append("msec"));
         }
         return response;
     }
@@ -1436,7 +1436,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     if (DEBUG) {
                         final long d = System.currentTimeMillis() - s;
-                        LOG.debug(new StringBuilder(32).append(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix()).append("mail?action=get performed in ").append(d).append(
+                        LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=get performed in ").append(d).append(
                             "msec served from message storage"));
                     }
                 }
@@ -3184,7 +3184,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         jsonWriter.endArray();
         if (DEBUG) {
             final long d = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder(32).append(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix()).append("mail?action=list performed in ").append(d).append("msec"));
+            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=list performed in ").append(d).append("msec"));
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
