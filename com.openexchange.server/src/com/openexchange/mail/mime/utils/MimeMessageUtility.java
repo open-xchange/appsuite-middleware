@@ -80,6 +80,7 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -355,7 +356,7 @@ public final class MimeMessageUtility {
         if (fromIndex < 0) {
             fromIndex = 0;
         }
-        String prefix = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix();
+        String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
         if (prefix.charAt(0) == '/') {
             prefix = prefix.substring(1);
         }
