@@ -2,7 +2,6 @@ package com.openexchange.oauth.httpclient.impl.scribe;
 
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.scribe.builder.ServiceBuilder;
@@ -15,7 +14,6 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
