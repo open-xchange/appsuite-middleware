@@ -4,7 +4,7 @@
 Name:           open-xchange-admin-plugin-reseller
 #!BuildIgnore: post-build-checks
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap >= @OXVERSION@ open-xchange-admin-plugin-autocontextid >= @OXVERSION@
+BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= 6.20.0.0 open-xchange-admin-soap >= 6.20.0.0 open-xchange-admin-plugin-autocontextid >= 6.20.0.0
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 18
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,14 +46,14 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Reseller Plugin
-Requires:       open-xchange-admin-client >= @OXVERSION@
-Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
-Requires:       open-xchange-admin-plugin-autocontextid >= @OXVERSION@ 
-Requires:       open-xchange-admin-plugin-autocontextid-client >= @OXVERSION@ 
+Requires:       open-xchange-admin-client >= 6.20.0.0
+Requires:       open-xchange-admin-plugin-hosting >= 6.20.0.0
+Requires:       open-xchange-admin-plugin-autocontextid >= 6.20.0.0 
+Requires:       open-xchange-admin-plugin-autocontextid-client >= 6.20.0.0 
 #
 %package -n	open-xchange-admin-plugin-reseller-soap
 Group:          Applications/Productivity
-Summary:	The Open Xchange Admin Reseller SOAP client
+Summary:	The Open Xchange Admin Reseller SOAP server
 Requires:       open-xchange-admin-plugin-reseller
 Requires:       open-xchange-admin-soap
 
@@ -65,7 +65,7 @@ Authors:
     Open-Xchange
 
 %description -n open-xchange-admin-plugin-reseller-soap
-Open Xchange Admin Reseller Plugin
+Open Xchange Admin Reseller Plugin SOAP server parts
 
 Authors:
 --------
@@ -119,6 +119,18 @@ mv doc javadoc
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog
+* Wed Oct 19 2011 - choeger@open-xchange.com
+ - Use the new stabilized SOAP API from SoftwareChange_Request-860
+   This change does NOT introduce any changes to users using the API with perl or php.
+   However, users using the WSDL to generate code must regenerate the code!
+* Wed Sep 07 2011 - choeger@open-xchange.com
+ - RMI API Change: Restrictions will now be exchanged as Java array and no longer as HashSet
+ - New Feature: Subadmin can create further subadmins (extra permission required, maxdepth: 1) 
+ - add new restrictions using new updaterestrictions commandline
+* Wed Sep 07 2011 - thorben.betten@open-xchange.com
+ - Fix for bug #20044: Fixed regular expression to look-up database name
+* Mon Aug 08 2011 - choeger@open-xchange.com
+ - Bugfix #20032 - SOAP api breaks when userAttributesForSOAP are set within user object
 * Mon May 16 2011 - dennis.sieben@open-xchange.com
  - Bugfix #19253 - com.openexchange.admin.reseller.console.extensionimpl.ContextConsoleChangeImpl
                    ignores RMI_HOSTNAME environment

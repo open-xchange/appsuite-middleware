@@ -54,8 +54,6 @@ import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -64,6 +62,9 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.soap.OXSOAPRMIMapper;
+import com.openexchange.admin.soap.SOAPUtils;
+import com.openexchange.admin.soap.dataobjects.User;
+import com.openexchange.admin.soap.dataobjects.UserModuleAccess;
 
 /**
  * SOAP Service implementing RMI Interface OXUserInterface
@@ -82,13 +83,12 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private void changeWrapper(ResellerContext ctx, User usrdata, UserModuleAccess access, String access_combination_name, Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         if( access == null && access_combination_name == null ) {
-            ((OXUserInterface)rmistub).change(cin, usrdata, auth);
+            ((OXUserInterface)rmistub).change(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(usrdata), auth);
         } else if( access != null ) {
-            ((OXUserInterface)rmistub).changeModuleAccess(cin, usrdata, access, auth);
+            ((OXUserInterface)rmistub).changeModuleAccess(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(usrdata), SOAPUtils.soapModuleAccess2ModuleAccess(access), auth);
         } else if( access_combination_name != null ) {
-            ((OXUserInterface)rmistub).changeModuleAccess(cin, usrdata, access_combination_name, auth);
+            ((OXUserInterface)rmistub).changeModuleAccess(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(usrdata), access_combination_name, auth);
         }
     }
     /**
@@ -169,13 +169,12 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private User createWrapper(ResellerContext ctx, User usrdata, UserModuleAccess access, String access_combination_name, Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         if( access == null && access_combination_name == null ) {
-            return ((OXUserInterface)rmistub).create(cin, usrdata, auth);
+            return new User(((OXUserInterface)rmistub).create(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(usrdata), auth));
         } else if( access != null ) {
-            return ((OXUserInterface)rmistub).create(cin, usrdata, access, auth);
+            return new User(((OXUserInterface)rmistub).create(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(usrdata), SOAPUtils.soapModuleAccess2ModuleAccess(access), auth));
         } else if( access_combination_name != null ) {
-            return ((OXUserInterface)rmistub).create(cin, usrdata, access_combination_name, auth);
+            return new User(((OXUserInterface)rmistub).create(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(usrdata), access_combination_name, auth));
         }
         return null;
     }
@@ -257,8 +256,7 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private void deleteMultipleWrapper(ResellerContext ctx, User[] users, Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        ((OXUserInterface)rmistub).delete(cin, users, auth);
+        ((OXUserInterface)rmistub).delete(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUsers2Users(users), auth);
     }
     /**
      * Same as {@link OXUserInterface#delete(Context, User[], Credentials)}
@@ -286,8 +284,7 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private void deleteWrapper(ResellerContext ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        ((OXUserInterface)rmistub).delete(cin, user, auth);
+        ((OXUserInterface)rmistub).delete(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(user), auth);
     }
     /**
      * Same as {@link OXUserInterface#delete(Context, User, Credentials)}
@@ -315,8 +312,7 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private String getAccessCombinationNameWrapper(ResellerContext ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXUserInterface)rmistub).getAccessCombinationName(cin, user, auth);
+        return ((OXUserInterface)rmistub).getAccessCombinationName(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(user), auth);
     }
     /**
      * Same as {@link OXUserInterface#getAccessCombinationName(Context, User, Credentials)}
@@ -345,8 +341,7 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private User[] getMultipleDataWrapper(ResellerContext ctx, User[] users, Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXUserInterface)rmistub).getData(cin, users, auth);   
+        return SOAPUtils.users2SoapUsers(((OXUserInterface)rmistub).getData(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUsers2Users(users), auth));   
     }
     /**
      * Same as {@link OXUserInterface#getData(Context, User[], Credentials)}
@@ -375,8 +370,7 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private User getDataWrapper(ResellerContext ctx, User user, Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXUserInterface)rmistub).getData(cin, user, auth);
+        return new User(((OXUserInterface)rmistub).getData(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(user), auth));
     }
     /**
      * Same as {@link OXUserInterface#getData(Context, User, Credentials)}
@@ -405,8 +399,7 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private UserModuleAccess getModuleAccessWrapper(ResellerContext ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXUserInterface)rmistub).getModuleAccess(cin, user, auth);
+        return new UserModuleAccess(((OXUserInterface)rmistub).getModuleAccess(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(user), auth));
     }
     /**
      * Same as {@link OXUserInterface#getModuleAccess(Context, User, Credentials)}
@@ -435,11 +428,10 @@ public class OXResellerUser extends OXSOAPRMIMapper {
     }
 
     private User[] listWrapper(ResellerContext ctx, String search_pattern, Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
         if( search_pattern != null ) {
-            return ((OXUserInterface)rmistub).list(cin, search_pattern, auth);
+            return SOAPUtils.users2SoapUsers(((OXUserInterface)rmistub).list(ResellerContextUtil.resellerContext2Context(ctx), search_pattern, auth));
         } else {
-            return ((OXUserInterface)rmistub).listAll(cin, auth);            
+            return SOAPUtils.users2SoapUsers(((OXUserInterface)rmistub).listAll(ResellerContextUtil.resellerContext2Context(ctx), auth));
         }
     }
     /**
@@ -491,4 +483,73 @@ public class OXResellerUser extends OXSOAPRMIMapper {
         }
     }
 
+    /**
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DuplicateExtensionException
+     */
+    public User getContextAdmin(ResellerContext ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException, DuplicateExtensionException {
+        reconnect();
+        try {
+            return new User(((OXUserInterface)rmistub).getContextAdmin(ResellerContextUtil.resellerContext2Context(ctx), auth));
+        } catch (ConnectException e) {
+            reconnect(true);
+            return new User(((OXUserInterface)rmistub).getContextAdmin(ResellerContextUtil.resellerContext2Context(ctx), auth));
+        }
+    }
+    
+    /**
+     * Same as {@link OXUserInterface#exists(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchContextException
+     * @throws DuplicateExtensionException 
+     */
+    public boolean exists(final ResellerContext ctx, final User user, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException, DuplicateExtensionException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).exists(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(user), auth);
+        } catch ( ConnectException e) {
+            reconnect(true);
+            return ((OXUserInterface)rmistub).exists(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapUser2User(user), auth);
+        }
+    }
+    
+    /**
+     * Same as {@link OXUserInterface#listCaseInsensitive(com.openexchange.admin.rmi.dataobjects.Context, String, Credentials)}
+     * 
+     * @param ctx
+     * @param search_pattern
+     * @param auth
+     * @return
+     * @throws RemoteException 
+     * @throws DatabaseUpdateException 
+     * @throws InvalidDataException 
+     * @throws NoSuchContextException 
+     * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     * @throws DuplicateExtensionException 
+     */
+    public User[] listCaseInsensitive(final ResellerContext ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException {
+       reconnect();
+       try {
+           return SOAPUtils.users2SoapUsers(((OXUserInterface)rmistub).listCaseInsensitive(ResellerContextUtil.resellerContext2Context(ctx), search_pattern, auth));
+       } catch ( ConnectException e) {
+           reconnect(true);
+           return SOAPUtils.users2SoapUsers(((OXUserInterface)rmistub).listCaseInsensitive(ResellerContextUtil.resellerContext2Context(ctx), search_pattern, auth));
+       }
+    }
 }

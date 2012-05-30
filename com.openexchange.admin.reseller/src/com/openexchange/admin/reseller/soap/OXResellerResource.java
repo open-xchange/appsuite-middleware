@@ -53,9 +53,7 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.rmi.OXResourceInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -64,6 +62,8 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.soap.OXSOAPRMIMapper;
+import com.openexchange.admin.soap.SOAPUtils;
+import com.openexchange.admin.soap.dataobjects.Resource;
 
 /**
  * SOAP Service implementing RMI Interface OXResourceInterface
@@ -82,8 +82,7 @@ public class OXResellerResource extends OXSOAPRMIMapper {
     }
 
     private void changeWrapper(final ResellerContext ctx, final Resource res, final Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        ((OXResourceInterface)rmistub).change(cin, res, auth);
+        ((OXResourceInterface)rmistub).change(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth);
     }
     /**
      * Same as {@link OXResourceInterface#change(Context, Resource, Credentials)}
@@ -111,8 +110,7 @@ public class OXResellerResource extends OXSOAPRMIMapper {
     }
 
     private Resource createWrapper(final ResellerContext ctx, final Resource res, final Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXResourceInterface)rmistub).create(cin, res, auth);
+        return new Resource(((OXResourceInterface)rmistub).create(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
     }
     /**
      * Same as {@link OXResourceInterface#create(Context, Resource, Credentials)}
@@ -140,8 +138,7 @@ public class OXResellerResource extends OXSOAPRMIMapper {
     }
 
     private void deleteWrapper(final ResellerContext ctx, final Resource res, final Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        ((OXResourceInterface)rmistub).delete(cin, res, auth);
+        ((OXResourceInterface)rmistub).delete(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth);
     }
     /**
      * Same as {@link OXResourceInterface#delete(Context, Resource, Credentials)}
@@ -169,8 +166,7 @@ public class OXResellerResource extends OXSOAPRMIMapper {
     }
 
     private Resource getDataWrapper(final ResellerContext ctx, final Resource res, final Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXResourceInterface)rmistub).getData(cin, res, auth);
+        return new Resource(((OXResourceInterface)rmistub).getData(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
     }
     /**
      * Same as {@link OXResourceInterface#getData(Context, Resource, Credentials)}
@@ -199,8 +195,7 @@ public class OXResellerResource extends OXSOAPRMIMapper {
     }
 
     private Resource[] getMultipleDataWrapper(final ResellerContext ctx, final Resource[] resources, final Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXResourceInterface)rmistub).getData(cin, resources, auth);
+        return SOAPUtils.resources2SoapResources(((OXResourceInterface)rmistub).getData(ResellerContextUtil.resellerContext2Context(ctx), SOAPUtils.soapResources2Resources(resources), auth));
     }
     /**
      * Same as {@link OXResourceInterface#getData(Context, Resource[], Credentials)}
@@ -229,8 +224,7 @@ public class OXResellerResource extends OXSOAPRMIMapper {
     }
 
     private Resource[] listWrapper(final ResellerContext ctx, final String pattern, final Credentials auth) throws DuplicateExtensionException, RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        Context cin = ResellerContextUtil.resellerContext2Context(ctx);
-        return ((OXResourceInterface)rmistub).list(cin, pattern, auth);
+        return SOAPUtils.resources2SoapResources(((OXResourceInterface)rmistub).list(ResellerContextUtil.resellerContext2Context(ctx), pattern, auth));
     }
     /**
      * Same as {@link OXResourceInterface#list(Context, String, Credentials)}

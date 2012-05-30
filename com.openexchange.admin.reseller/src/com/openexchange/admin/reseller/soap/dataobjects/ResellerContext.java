@@ -53,15 +53,11 @@ import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
-import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.soap.dataobjects.Context;
+import com.openexchange.admin.soap.dataobjects.Database;
 
 
 public class ResellerContext extends Context {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 8174869470824550929L;
 
     private String errortext;
     
@@ -69,17 +65,9 @@ public class ResellerContext extends Context {
     
     private String customid;
     
-    private HashSet<Restriction> restriction;
-    
-    private boolean restrictionset;
-    
-    private boolean ownerset;
+    private Restriction[] restriction;
     
     private int sid;
-    
-    private boolean sidset;
-    
-    private boolean customidset;
     
     public ResellerContext() {
         super();
@@ -93,19 +81,21 @@ public class ResellerContext extends Context {
         super(id);
     }
 
-    public ResellerContext(Context c) {
+    public ResellerContext(com.openexchange.admin.rmi.dataobjects.Context c) {
         this.setId(c.getId());
         this.setAverage_size(c.getAverage_size());
         this.setEnabled(c.getEnabled());
         this.setFilestore_name(c.getFilestore_name());
         this.setFilestoreId(c.getFilestoreId());
-        this.setLoginMappings(c.getLoginMappings());
-        this.setMaintenanceReason(c.getMaintenanceReason());
+        HashSet<String> lmappings = c.getLoginMappings();
+        if( null != lmappings && lmappings.size() > 0 ) {
+            this.setLoginMappings(lmappings.toArray(new String[lmappings.size()]));
+        }
         this.setMaxQuota(c.getMaxQuota());
         this.setName(c.getName());
-        this.setReadDatabase(c.getReadDatabase());
+        this.setReadDatabase(new Database(c.getReadDatabase()));
         this.setUsedQuota(c.getUsedQuota());
-        this.setWriteDatabase(c.getWriteDatabase());
+        this.setWriteDatabase(new Database(c.getWriteDatabase()));
         OXContextExtensionImpl oxext = (OXContextExtensionImpl)c.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         this.setExtensionError(oxext.getExtensionError());
         this.setCustomid(oxext.getCustomid());
@@ -141,44 +131,20 @@ public class ResellerContext extends Context {
      * @param owner
      */
     public final void setOwner(final ResellerAdmin owner) {
-        this.ownerset = true;
         this.owner = owner;
     }
 
     
     public final void setSid(int sid) {
-        this.sidset = true;
         this.sid = sid;
     }
 
-    
-    public final boolean isOwnerset() {
-        return ownerset;
-    }
-
-    
-    public final boolean isSidset() {
-        return sidset;
-    }
-
-    
-    public final HashSet<Restriction> getRestriction() {
+    public final Restriction[] getRestriction() {
         return restriction;
     }
 
-    
-    public final void setRestriction(HashSet<Restriction> restriction) {
-        this.restrictionset = true;
+    public final void setRestriction(Restriction[] restriction) {
         this.restriction = restriction;
-    }
-
-    
-    public final boolean isRestrictionset() {
-        return restrictionset;
-    }
-
-    public final boolean isCustomidset() {
-        return customidset;
     }
     
     /**
@@ -193,7 +159,6 @@ public class ResellerContext extends Context {
      * @param customid the customid to set
      */
     public final void setCustomid(final String customid) {
-        this.customidset = true;
         this.customid = customid;
     }
 

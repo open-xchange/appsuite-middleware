@@ -60,6 +60,25 @@ public class OXResellerTools {
         boolean checkAgainstCorrespondingRestrictions(final String string);
     }
 
+    public static boolean isTrue(final String val) {
+        if( val.toLowerCase().equals("true") ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public static HashSet<Restriction> array2HashSet(final Restriction[] rarr) {
+        if( rarr != null ) {
+            HashSet<Restriction> ret = new HashSet<Restriction>();
+            for(final Restriction r : rarr) {
+                ret.add(r);
+            }
+            return ret;
+        }
+        return null;
+    }
+
     public static void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, String name, final ClosureInterface interf) throws InvalidDataException {
         // The duplicate check is not needed any more because the HashSet prevents duplicates through the equals method
         // of the restriction object which only deals with the name
@@ -74,6 +93,11 @@ public class OXResellerTools {
             }
             if (null == rval) {
                 throw new InvalidDataException("Restriction value must be set");
+            }
+            if( rname.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) ) {
+                if( ! (rval.equals("true") || rval.equals("false")) ) {
+                    throw new InvalidDataException(rval + " is not a valid value for " + Restriction.SUBADMIN_CAN_CREATE_SUBADMINS);
+                }
             }
             final Restriction restriction = validRestrictions.get(rname);
             if (null == restriction) {

@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.reseller.rmi.extensions;
 
-import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
@@ -67,7 +66,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
     
     private String customid;
     
-    private HashSet<Restriction> restriction;
+    private Restriction[] restriction;
     
     private boolean restrictionset;
     
@@ -109,7 +108,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
      * Initializes a new {@link OXContextExtensionImpl}.
      * @param restriction
      */
-    public OXContextExtensionImpl(final HashSet<Restriction> restriction) {
+    public OXContextExtensionImpl(final Restriction[] restriction) {
         super();
         setRestriction(restriction);
     }
@@ -119,7 +118,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
      * @param owner
      * @param restriction
      */
-    public OXContextExtensionImpl(final ResellerAdmin owner, final HashSet<Restriction> restriction) {
+    public OXContextExtensionImpl(final ResellerAdmin owner, final Restriction[] restriction) {
         super();
         setOwner(owner);
         setRestriction(restriction);
@@ -181,12 +180,12 @@ public class OXContextExtensionImpl extends OXCommonExtension {
     }
 
     
-    public final HashSet<Restriction> getRestriction() {
+    public final Restriction[] getRestriction() {
         return restriction;
     }
 
     
-    public final void setRestriction(HashSet<Restriction> restriction) {
+    public final void setRestriction(Restriction[] restriction) {
         this.restrictionset = true;
         this.restriction = restriction;
     }
