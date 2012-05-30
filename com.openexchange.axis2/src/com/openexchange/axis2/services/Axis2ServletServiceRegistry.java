@@ -49,7 +49,8 @@
 
 package com.openexchange.axis2.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
+
 
 /**
  * {@link Axis2ServletServiceRegistry} - A registry for services needed by Axis2 bundle
