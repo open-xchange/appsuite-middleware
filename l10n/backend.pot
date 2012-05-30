@@ -3271,7 +3271,7 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:137
-msgid "The address %1 is not white-listed as for the %2 OAuth API"
+msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
