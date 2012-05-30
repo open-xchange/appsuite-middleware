@@ -53,7 +53,8 @@ import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
@@ -115,7 +116,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            basicauth.doAuthentication(creds);
+            int pid = 0;
+            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+                basicauth.doAuthentication(creds);
+            } else {
+                resellerauth.doAuthentication(creds);
+                pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId();
+            }
 
             checkIdOrName(adm);
 
@@ -127,8 +134,19 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             // if no password mech supplied, use the old one as set in db
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
+            if( pid > 0 && dbadm.getParentId() != pid ) {
+                log.error("unathorized access to " + dbadm.getName() + " by " + creds.getLogin());
+                throw new InvalidCredentialsException("authentication failed");
+            }
             if (adm.getPasswordMech() == null) {
                 adm.setPasswordMech(dbadm.getPasswordMech());
+            }
+
+            Restriction[] res = adm.getRestrictions();
+            if( res != null ) {
+                if( res.length > 0 && dbadm.getParentId() > 0 ) {
+                    throw new OXResellerException(Code.SUBSUBADMIN_NOT_ALLOWED_TO_CHANGE_RESTRICTIONS);
+                }
             }
 
             final String newname = adm.getName();
@@ -174,9 +192,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error("Invalid data sent by client!", e);
             throw e;
         }
-
+        int pid = 0;
         try {
-            basicauth.doAuthentication(creds);
+            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+                basicauth.doAuthentication(creds);
+            } else {
+                resellerauth.doAuthentication(creds);
+                oxresell.checkPerSubadminRestrictions(
+                    creds,
+                    null,
+                    Restriction.SUBADMIN_CAN_CREATE_SUBADMINS,
+                    Restriction.MAX_SUBADMIN_PER_SUBADMIN
+                );
+                if( oxresell.existsAdmin(new ResellerAdmin(creds.getLogin(), creds.getPassword())) ) {
+                    pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId();
+                }
+            }
 
             if (oxresell.existsAdmin(adm)) {
                 throw new OXResellerException(Code.RESELLER_ADMIN_EXISTS, adm.getName());
@@ -190,8 +221,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new InvalidDataException("Mandatory fields not set: " + adm.getUnsetMembers());
             }
 
-            // TODO: parent id must be the ID of the creator
-            adm.setParentId(0);
+            Restriction[] res = adm.getRestrictions();
+            if( res != null ) {
+                if( res.length > 0 && pid > 0 ) {
+                    throw new OXResellerException(Code.SUBSUBADMIN_NOT_ALLOWED_TO_CHANGE_RESTRICTIONS);
+                }
+            }
+            
+            adm.setParentId(pid);
 
             checkRestrictionsPerSubadmin(adm);
 
@@ -228,16 +265,29 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            basicauth.doAuthentication(creds);
+            boolean isMaster = false;
+            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+                basicauth.doAuthentication(creds);
+                isMaster = true;
+            } else {
+                resellerauth.doAuthentication(creds);
+            }
 
             checkIdOrName(adm);
 
             if (!oxresell.existsAdmin(adm)) {
                 throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, adm.getName());
             }
+            if(! isMaster ) {
+                ResellerAdmin sadmdata = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
+                ResellerAdmin dadmdata = oxresell.getData(new ResellerAdmin[] { adm })[0];
+                if( dadmdata.getParentId() != sadmdata.getId() ) {
+                    throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dadmdata.getName(), sadmdata.getName());   
+                }
+            }
             if (adm.getName() == null) {
                 if (oxresell.ownsContext(null, adm.getId())) {
-                    throw new OXResellerException(Code.UNABLE_TO_DELETE, adm.getName());
+                    throw new OXResellerException(Code.UNABLE_TO_DELETE, adm.getId().toString());
                 }
             } else {
                 if (oxresell.checkOwnsContextAndSetSid(null, new Credentials(adm.getName(), null))) {
@@ -268,9 +318,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
+    public Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
-            basicauth.doAuthentication(creds);
+            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+                basicauth.doAuthentication(creds);
+            } else {
+                resellerauth.doAuthentication(creds);
+            }
 
             final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
             if (validRestrictions == null || validRestrictions.size() <= 0) {
@@ -281,7 +335,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             for (final String key : validRestrictions.keySet()) {
                 ret.add(validRestrictions.get(key));
             }
-            return ret;
+            return ret.toArray(new Restriction[ret.size()]);
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -316,10 +370,17 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            basicauth.doAuthentication(creds);
+            int pid = 0;
+            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+                basicauth.doAuthentication(creds);
+            } else {
+                resellerauth.doAuthentication(creds);
+                pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId();
+            }
+
             checkAdminIdOrName(admins);
             for (final ResellerAdmin admin : admins) {
-                if (!oxresell.existsAdmin(admin)) {
+                if (!oxresell.existsAdmin(admin, pid)) {
                     throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
                 }
             }
@@ -350,7 +411,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#getRestrictionsFromContext(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public HashSet<Restriction> getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
+    public Restriction[] getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
         try {
             doNullCheck(ctx);
             doNullCheck(ctx.getId());
@@ -426,9 +487,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            basicauth.doAuthentication(creds);
-
-            return oxresell.list(search_pattern);
+            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+                basicauth.doAuthentication(creds);
+                return oxresell.list(search_pattern);
+            } else {
+                resellerauth.doAuthentication(creds);
+                int pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId();
+                return oxresell.list(search_pattern, pid);
+            }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -481,7 +547,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
             if (validRestrictions == null || validRestrictions.size() == 0) {
-                throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "remove");
+                throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "update");
             }
 
             oxresell.updateModuleAccessRestrictions();
@@ -547,13 +613,38 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
         }
 
-        final HashSet<Restriction> res = adm.getRestrictions();
+        final HashSet<Restriction> res = OXResellerTools.array2HashSet(adm.getRestrictions());
         if (null != res) {
             OXResellerTools.checkRestrictions(res, validRestrictions, "subadmin", new ClosureInterface() {
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
-                    return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
+                    return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) || rname.equals(Restriction.MAX_SUBADMIN_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
                 }
             });
+        }
+    }
+
+    public void updateDatabaseRestrictions(Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
+        try {
+            basicauth.doAuthentication(creds);
+
+            final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+            if (validRestrictions == null || validRestrictions.size() == 0) {
+                throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "update");
+            }
+
+            oxresell.updateRestrictions();
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (OXResellerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 

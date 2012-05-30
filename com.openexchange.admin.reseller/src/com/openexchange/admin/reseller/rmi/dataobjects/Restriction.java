@@ -49,15 +49,14 @@
 
 package com.openexchange.admin.reseller.rmi.dataobjects;
 
-import java.lang.reflect.Field;
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.rmi.dataobjects.EnforceableDataObject;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 
 /**
  * @author choeger
  *
  */
-public class Restriction extends ExtendableDataObject implements Cloneable {
+public class Restriction extends EnforceableDataObject implements Cloneable {
 
     /**
      * The maximum number of contexts a subadmin may create
@@ -75,6 +74,19 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
      *            MaxOverallUser to 10, only 9 additional users can be created 
      */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN = "Subadmin.MaxOverallUser";
+
+    /**
+     * Per default a subadmin can only create contexts. Use this setting to enable a subadmin
+     * to be able to create further subadmins.
+     * Possible values are: true/false
+     */
+    public static final String SUBADMIN_CAN_CREATE_SUBADMINS = "Subadmin.CanCreateSubadmin";
+    
+    /**
+     * If {@link Restriction.SUBADMIN_CAN_CREATE_SUBADMINS} is enabled, limit the amount of subadmins
+     * to be created by a subadmin to this value. If not set, there's no limit.
+     */
+    public static final String MAX_SUBADMIN_PER_SUBADMIN = "Subadmin.MaxSubadmin";
     
     /**
      * The maximum number of users with a specific {@link UserModuleAccess} a subadmin may create distibuted over all contexts
@@ -97,6 +109,17 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
      */
     public static final String MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
     
+    /**
+     * All currently existing restrictions <b>except</b> the BY_MODULEACCESS restrictions
+     */
+    public static final String[] ALL_RESTRICTIONS = new String[] {
+        MAX_CONTEXT_PER_SUBADMIN,
+        MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
+        MAX_OVERALL_USER_PER_SUBADMIN,
+        MAX_USER_PER_CONTEXT,
+        SUBADMIN_CAN_CREATE_SUBADMINS,
+        MAX_SUBADMIN_PER_SUBADMIN
+        };
     /**
      * 
      */
@@ -266,30 +289,12 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
         this.value = value;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
-    public final String toString() {
-        final StringBuilder ret = new StringBuilder();
-        ret.append("[ \n");
-        for (final Field f : this.getClass().getDeclaredFields()) {
-            try {
-                final Object ob = f.get(this);
-                final String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID") &&
-                    !tname.startsWith("MAX")) {
-                    ret.append("  ");
-                    ret.append(tname);
-                    ret.append(": ");
-                    ret.append(ob);
-                    ret.append("\n");
-                }
-            } catch (final IllegalArgumentException e) {
-                ret.append("IllegalArgument\n");
-            } catch (final IllegalAccessException e) {
-                ret.append("IllegalAccessException\n");
-            }
-        }
-        ret.append("]");
-        return ret.toString();
+    public String toString() {
+        return "Restriction [id=" + id + ", name=" + name + ", value=" + value + "]";
     }
 
     /* (non-Javadoc)

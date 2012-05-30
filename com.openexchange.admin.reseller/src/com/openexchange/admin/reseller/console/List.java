@@ -52,7 +52,6 @@ package com.openexchange.admin.reseller.console;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -127,12 +126,11 @@ public class List extends ResellerAbstraction {
     private void sysoutOutput(final java.util.List<ResellerAdmin> admns) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final ResellerAdmin admin : admns) {
-            printExtensionsError(admin);
             data.add(makeStandardData(admin));
         }
 
         // doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Restrictions" }, data);
+        doOutput(new String[] { "r", "l", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Parent", "Restrictions" }, data);
     }
 
     private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws InvalidDataException {
@@ -141,6 +139,7 @@ public class List extends ResellerAbstraction {
         columns.add("id");
         columns.add("name");
         columns.add("displayname");
+        columns.add("parentid");
         columns.add("restrictions");
 
         // Needed for csv output
@@ -148,7 +147,6 @@ public class List extends ResellerAbstraction {
 
         for (final ResellerAdmin admin : adminlist) {
             data.add(makeDataForCsv(admin));
-            printExtensionsError(admin);
         }
         doCSVOutput(columns, data);
     }
@@ -188,7 +186,8 @@ public class List extends ResellerAbstraction {
         } else {
             admin_data.add(null); // displayname
         }
-        final HashSet<Restriction> restrictions = admin.getRestrictions();
+        admin_data.add(admin.getParentId().toString());
+        final Restriction[] restrictions = admin.getRestrictions();
         if (null != restrictions) {
             admin_data.add(ResellerAbstraction.getObjectsAsString(restrictions)); // restrictions
         } else {

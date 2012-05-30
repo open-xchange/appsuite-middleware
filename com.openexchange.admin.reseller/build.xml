@@ -54,7 +54,7 @@
 	<property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
 	<property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
 	<property name="cachebundle"          value="com.openexchange.caching.jar"/>
-	<property name="commonbundle"         value="common.jar"/>
+	<property name="commonbundle"         value="com.openexchange.common.jar"/>
 
 	<!-- non-osgi jars -->
 	<property name="commons-io"         value="commons-io-1.4.jar"/>

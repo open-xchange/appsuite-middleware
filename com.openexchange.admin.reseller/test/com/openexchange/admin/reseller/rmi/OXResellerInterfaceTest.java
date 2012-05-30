@@ -57,7 +57,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Stack;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -162,10 +161,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
         for(final String user : new String[]{ TESTRESTRICTIONUSER, TESTRESTCHANGERICTIONUSER} ) {
             ResellerAdmin adm = TestAdminUser(user,"Test Restriction User");
-            HashSet<Restriction> res = new HashSet<Restriction>();
-            res.add(MaxContextRestriction());
-            res.add(MaxContextQuotaRestriction());
-            adm.setRestrictions(res);
+            adm.setRestrictions(new Restriction[]{MaxContextRestriction(), MaxContextQuotaRestriction()});
             adm = oxresell.create(adm, creds);
 
             System.out.println(adm);
@@ -247,9 +243,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         final ResellerAdmin adm = TestAdminUser();
 
         // add some restrictions to adm
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN, "2"));
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN, "2")});
         final ResellerAdmin dbadm = oxresell.getData(adm, creds);
         // and check whether they are still there after getData call
         assertNull("there must be no restrictions set",dbadm.getRestrictions());
@@ -262,7 +256,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         
         final ResellerAdmin dbadm = oxresell.getData(adm, creds);
         
-        HashSet<Restriction> res = dbadm.getRestrictions();
+        Restriction[] res = dbadm.getRestrictions();
         assertNotNull("ResellerAdmin must contain Restrictions",res);
 
         boolean foundmaxctx = getRestrictionByName(Restriction.MAX_CONTEXT_PER_SUBADMIN, res) == null ? false : true;
@@ -292,11 +286,9 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
             User oxadmin = ContextAdmin();
             Context ctx1 = new Context();
             ctx1.setMaxQuota(100000L);
-            HashSet<Restriction> res = new HashSet<Restriction>();
-            res.add(MaxUserPerContextRestriction());
             
             try {
-                ctx1.addExtension(new OXContextExtensionImpl(res));
+                ctx1.addExtension(new OXContextExtensionImpl(new Restriction[]{MaxUserPerContextRestriction()}));
             } catch (final DuplicateExtensionException e) {
                 // cannot occur on a newly created context
                 e.printStackTrace();
@@ -311,10 +303,10 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         for(final Credentials creds : new Credentials[]{TestUserCredentials(), DummyMasterCredentials()} ) {
             final Context ctx = restrictionContexts.pop();
 
-            HashSet<Restriction> res = oxresell.getRestrictionsFromContext(ctx, creds);
+            Restriction[] res = oxresell.getRestrictionsFromContext(ctx, creds);
             assertNotNull("Context restrictions must not be null",res);
-            assertEquals("Context restrictions must contain one restriction",1, res.size());
-            assertEquals("Restriction value does not match expected value", MaxUserPerContextRestriction().getValue(), res.toArray(new Restriction[res.size()])[0].getValue());
+            assertEquals("Context restrictions must contain one restriction",1, res.length);
+            assertEquals("Restriction value does not match expected value", MaxUserPerContextRestriction().getValue(), res[0].getValue());
             deleteContext(ctx, creds);
         }
     }

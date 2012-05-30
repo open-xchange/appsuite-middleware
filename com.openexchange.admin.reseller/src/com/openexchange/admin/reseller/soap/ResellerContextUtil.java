@@ -48,10 +48,11 @@
  */
 package com.openexchange.admin.reseller.soap;
 
+import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.soap.SOAPUtils;
 
 
 public final class ResellerContextUtil {
@@ -61,20 +62,26 @@ public final class ResellerContextUtil {
      * @return
      * @throws DuplicateExtensionException
      */
-    public static Context resellerContext2Context(ResellerContext ctx) throws DuplicateExtensionException {
-        Context ret = new Context();
+    public static com.openexchange.admin.rmi.dataobjects.Context resellerContext2Context(ResellerContext ctx) throws DuplicateExtensionException {
+        com.openexchange.admin.rmi.dataobjects.Context ret = new com.openexchange.admin.rmi.dataobjects.Context();
         ret.setId(ctx.getId());
         ret.setAverage_size(ctx.getAverage_size());
         ret.setEnabled(ctx.getEnabled());
         ret.setFilestore_name(ctx.getFilestore_name());
         ret.setFilestoreId(ctx.getFilestoreId());
-        ret.setLoginMappings(ctx.getLoginMappings());
-        ret.setMaintenanceReason(ctx.getMaintenanceReason());
+        String[] lmappings = ctx.getLoginMappings();
+        if( null != lmappings && lmappings.length > 0 ) {
+            HashSet<String> lmh = new HashSet<String>();
+            for(final String l : lmappings) {
+                lmh.add(l);
+            }
+            ret.setLoginMappings(lmh);
+        }
         ret.setMaxQuota(ctx.getMaxQuota());
         ret.setName(ctx.getName());
-        ret.setReadDatabase(ctx.getReadDatabase());
+        ret.setReadDatabase(SOAPUtils.soapDatabase2Database(ctx.getReadDatabase()));
         ret.setUsedQuota(ctx.getUsedQuota());
-        ret.setWriteDatabase(ctx.getWriteDatabase());
+        ret.setWriteDatabase(SOAPUtils.soapDatabase2Database(ctx.getWriteDatabase()));
         OXContextExtensionImpl ctxext = new OXContextExtensionImpl();
         ctxext.setCustomid(ctx.getCustomid());
         ctxext.setOwner(ctx.getOwner());

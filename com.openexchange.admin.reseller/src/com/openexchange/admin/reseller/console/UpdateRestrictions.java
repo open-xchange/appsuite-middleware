@@ -46,42 +46,54 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.reseller.tools;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.admin.tools.PropertyHandler;
+package com.openexchange.admin.reseller.console;
 
-public class PropertyHandlerExtended extends PropertyHandler {
-    
-    private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
-    
-    // The following lines define the property values for the database implementations
-    public static final String RESELLER_STORAGE = "RESELLER_STORAGE";
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.reseller.rmi.OXResellerInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-    private PropertyHandlerExtended() {
-        super(null);
+/**
+ * @author choeger
+ */
+public class UpdateRestrictions extends ResellerAbstraction {
+
+    protected final void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setCSVOutputOption(parser);
     }
-    
-    public PropertyHandlerExtended(final Properties sysprops) {
-        super(sysprops);
-        final StringBuilder configfile = new StringBuilder(); 
-        configfile.append(sysprops.getProperty("configdir"));
-        configfile.append(File.separatorChar);
-        configfile.append("plugin");
-        configfile.append(File.separatorChar);
-        configfile.append("reseller.properties");
+
+    /**
+     * 
+     */
+    public UpdateRestrictions() {
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(final String[] args) {
+        final UpdateRestrictions update = new UpdateRestrictions();
+        update.start(args);
+    }
+
+    public void start(final String[] args) {
+        final AdminParser parser = new AdminParser("updaterestrictions");
+
+        setOptions(parser);
+
+        // parse the command line
         try {
-            addpropsfromfile(configfile.toString());
-        } catch (final FileNotFoundException e) {
-            log.error("Unable to read file: " + configfile);
-        } catch (final IOException e) {
-            log.error("Problems reading file: " + configfile);
+            parser.ownparse(args);
+
+            final Credentials auth = credentialsparsing(parser);
+
+            final OXResellerInterface rsi = getResellerInterface();
+
+            rsi.updateDatabaseRestrictions(auth);
+        } catch (final Exception e) {
+            printErrors(null, null, e, parser);
+            sysexit(1);
         }
     }
-   
 }
