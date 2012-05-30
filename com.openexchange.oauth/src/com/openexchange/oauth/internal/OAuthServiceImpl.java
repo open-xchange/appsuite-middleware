@@ -52,6 +52,7 @@ package com.openexchange.oauth.internal;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
@@ -65,6 +66,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -78,6 +80,7 @@ import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
+
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
@@ -85,6 +88,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -372,9 +376,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
             }
             account.setToken(encrypt(account.getToken(), session));
-            if (isEmpty(account.getSecret())) {
+            /*if (isEmpty(account.getSecret())) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
-            }
+            }*/
             account.setSecret(encrypt(account.getSecret(), session));
             /*
              * Create INSERT command
@@ -569,6 +573,26 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseReadConnection(context, con);
         }
     }
+    
+    @Override
+	public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
+    	List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
+    	for (OAuthServiceMetaData metaData : allServices) {
+			if (metaData.getAPI() == api) {
+				List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
+				OAuthAccount likely = null;
+				for(OAuthAccount acc: accounts){
+					if(likely == null || acc.getId() < likely.getId()){
+						likely = acc;
+					}
+				}
+				if(likely != null){
+					return likely;
+				}
+			}
+		}
+    	throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:"+api.toString(), session.getUserId(), session.getContextId());
+	}
 
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
@@ -896,5 +920,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseWriteConnection(context, con);
         }
     }
+
+	
 
 }

@@ -54,10 +54,12 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
+import com.openexchange.oauth.json.proxy.OAuthProxyActionFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -77,7 +79,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class };
     }
 
     @Override
@@ -125,6 +127,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
              */
             registerModule(AccountActionFactory.getInstance(), "oauth/accounts");
             registerModule(MetaDataActionFactory.getInstance(), "oauth/services");
+            registerModule(new OAuthProxyActionFactory(getService(OAuthService.class), getService(OAuthHTTPClientFactory.class)), "oauth/proxy");
             /*
              * Apply OAuth service to actions
              */

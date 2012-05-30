@@ -79,4 +79,10 @@ public interface OAuthAccount extends OAuthToken {
      */
     OAuthServiceMetaData getMetaData();
 
+    /**
+     * Gets the API style
+     * @return
+     */
+	API getAPI();
+
 }

@@ -169,8 +169,13 @@ public final class SolrInputDocumentHelper {
                     retval.add(quoted);
                 }
             }
+<<<<<<< HEAD
 
             return retval;
+=======
+            lineBuilder.delete(0, 2);
+            return lineBuilder.toString();
+>>>>>>> f5b2a1f6becf671faab49765c300917ee8528be2
         }
     }
 

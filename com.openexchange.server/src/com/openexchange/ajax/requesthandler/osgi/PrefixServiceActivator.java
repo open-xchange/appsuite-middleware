@@ -89,7 +89,6 @@ public class PrefixServiceActivator extends HousekeepingActivator {
 	        ImageMatcher.setPrefixService(prefixService);
 	        registerService(DispatcherPrefixService.class, prefixService);
 		} catch (final Throwable t) {
-			t.printStackTrace();
 		}
 
 	}

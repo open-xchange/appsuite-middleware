@@ -101,6 +101,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private volatile String prefix;
 
+    private String prefix;
+    
     @Override
     protected void startBundle() throws Exception {
 

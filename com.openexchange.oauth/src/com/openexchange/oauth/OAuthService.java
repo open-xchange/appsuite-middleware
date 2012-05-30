@@ -178,4 +178,13 @@ public interface OAuthService {
      */
     OAuthAccount getAccount(int accountId, Session session, int user, int contextId) throws OXException;
 
+    /**
+     * Gets a default account for the given API type. Throws an exception if no account for the API can be found.
+     * @param api The API type
+     * @param session TODO
+     * @return The default account for this API type
+     * @throws OXException 
+     */
+	OAuthAccount getDefaultAccount(API api, Session session) throws OXException;
+
 }
