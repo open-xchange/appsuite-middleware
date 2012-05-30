@@ -61,7 +61,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.rmi.exceptions.OXRMIExceptionCodes;
 import com.openexchange.rmi.osgi.RMIActivator;
 
@@ -72,11 +71,11 @@ import com.openexchange.rmi.osgi.RMIActivator;
  */
 public class RMIRegistry {
 
-    private static Log log = LogFactory.getLog(RMIRegistry.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(RMIRegistry.class);
 
     private static Registry registry = null;
 
-    private static Lock lock = new ReentrantLock();
+    private static final Lock lock = new ReentrantLock();
 
     /**
      * Initializes a new {@link RMIRegistry}.
@@ -100,14 +99,14 @@ public class RMIRegistry {
     private static Registry createRMIRegistry() throws OXException {
         lock.lock();
         try {
-            ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
-            int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
-            String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
+            final ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
+            final int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
+            final String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
             if (registry == null) {
                 registry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory(hostname));
             }
             return registry;
-        } catch (RemoteException e) {
+        } catch (final RemoteException e) {
             log.error(e.getMessage(), e);
             throw OXRMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
         } finally {
@@ -115,21 +114,21 @@ public class RMIRegistry {
         }
     }
 
-    public static String findRMIName(ServiceReference<Remote> reference, Remote r) {
-        Object name = reference.getProperty("RMIName");
+    public static String findRMIName(final ServiceReference<Remote> reference, final Remote r) {
+        final Object name = reference.getProperty("RMIName");
         if (name != null) {
             return (String) name;
         }
         try {
-            Field field = r.getClass().getField("RMI_NAME");
+            final Field field = r.getClass().getField("RMI_NAME");
             return (String) field.get(r);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             return r.getClass().getSimpleName();
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             return r.getClass().getSimpleName();
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return r.getClass().getSimpleName();
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             return r.getClass().getSimpleName();
         }
     }

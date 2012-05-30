@@ -50,11 +50,11 @@
 package com.openexchange.soap.cxf.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.service.http.HttpService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.DeferredActivator;
 
 /**
@@ -62,7 +62,7 @@ import com.openexchange.osgi.DeferredActivator;
  */
 public class CXFActivator extends DeferredActivator {
 
-    private static final String PATH = "/webservices";
+    private static final String PATH = "/webservices"; // /servlet/axis2/services
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CXFActivator.class));
 

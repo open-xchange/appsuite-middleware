@@ -54,7 +54,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link LocalServerFactory}
@@ -63,11 +62,11 @@ import com.openexchange.log.LogFactory;
  */
 public class LocalServerFactory implements RMIServerSocketFactory {
 
-    private final Log Log = LogFactory.getLog(LocalServerFactory.class);
+    private final Log Log = com.openexchange.log.Log.loggerFor(LocalServerFactory.class);
 
     private final String hostname;
 
-    public LocalServerFactory(String hostname) {
+    public LocalServerFactory(final String hostname) {
         this.hostname = hostname;
     }
 

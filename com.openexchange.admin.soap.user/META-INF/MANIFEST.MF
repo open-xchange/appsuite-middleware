@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Admin SOAP User Bundle
+Bundle-SymbolicName: com.openexchange.admin.soap.user
+Bundle-Version: 6.21.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

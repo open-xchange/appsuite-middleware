@@ -60,7 +60,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.rmi.RMIRegistry;
 
 /**
@@ -71,30 +70,30 @@ import com.openexchange.rmi.RMIRegistry;
  */
 public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Remote> {
 
-    private static final Log log = LogFactory.getLog(RMITrackerCustomizer.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(RMITrackerCustomizer.class);
     private final BundleContext context;
 
-    public RMITrackerCustomizer(BundleContext context) {
+    public RMITrackerCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Remote addingService(ServiceReference<Remote> reference) {
-        Remote r = context.getService(reference);
+    public Remote addingService(final ServiceReference<Remote> reference) {
+        final Remote r = context.getService(reference);
         if (r == null) {
             log.warn("Added service is null.");
         } else {
-            String name = RMIRegistry.findRMIName(reference, r);
+            final String name = RMIRegistry.findRMIName(reference, r);
             try {
                 RMIRegistry.getRMIRegistry().bind(name, UnicastRemoteObject.exportObject(r, 0));
-            } catch (AccessException e) {
+            } catch (final AccessException e) {
                 log.error(e.getMessage(), e);
-            } catch (RemoteException e) {
+            } catch (final RemoteException e) {
                 log.error(e.getMessage(), e);
-            } catch (AlreadyBoundException e) {
+            } catch (final AlreadyBoundException e) {
                 log.error(e.getMessage(), e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 log.error(e.getMessage(), e);
             }
         }
@@ -102,22 +101,22 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
     }
 
     @Override
-    public void modifiedService(ServiceReference<Remote> reference, Remote service) {
+    public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
         //nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<Remote> reference, Remote service) {
-        String name = RMIRegistry.findRMIName(reference, service);
+    public void removedService(final ServiceReference<Remote> reference, final Remote service) {
+        final String name = RMIRegistry.findRMIName(reference, service);
         try {
             RMIRegistry.getRMIRegistry().unbind(name);
-        } catch (AccessException e) {
+        } catch (final AccessException e) {
             log.error(e.getMessage(), e);
-        } catch (RemoteException e) {
+        } catch (final RemoteException e) {
             log.error(e.getMessage(), e);
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             log.error(e.getMessage(), e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             log.error(e.getMessage(), e);
         }
     }
