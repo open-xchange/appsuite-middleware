@@ -49,6 +49,7 @@
 
 package com.openexchange.exception;
 
+import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +74,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXException extends Exception implements OXExceptionConstants {
+public class OXException extends Exception implements OXExceptionConstants, Serializable {
 
     // ([A-Z_]+)\((".*").*,
     // public static final String $1_MSG = $2;
