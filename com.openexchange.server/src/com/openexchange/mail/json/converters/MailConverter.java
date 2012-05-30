@@ -240,8 +240,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         if (cache) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (null != jsonCache) {
-                final String md5Sum = SimpleThreadStructureAction.getMD5For(req);
-                final String id = "com.openexchange.mail." + md5Sum;
+                final String sha1Sum = SimpleThreadStructureAction.getSHA1For(req);
+                final String id = "com.openexchange.mail." + sha1Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
                     final ServerSession ses = req.getSession();
@@ -432,8 +432,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         if (cache) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (null != jsonCache) {
-                final String md5Sum = AllAction.getMD5For(req);
-                final String id = "com.openexchange.mail." + md5Sum;
+                final String sha1Sum = AllAction.getSHA1For(req);
+                final String id = "com.openexchange.mail." + sha1Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
                     final ServerSession ses = req.getSession();
