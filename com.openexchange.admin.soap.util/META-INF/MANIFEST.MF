@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Admin SOAP Resource Bundle
-Bundle-SymbolicName: com.openexchange.admin.soap.resource
+Bundle-Name: Open-Xchange Admin SOAP Util Bundle
+Bundle-SymbolicName: com.openexchange.admin.soap.util
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -12,5 +12,6 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Require-Bundle: com.openexchange.admin
-Bundle-Activator: com.openexchange.admin.soap.resource.osgi.SoapResourceActivator
+Require-Bundle: com.openexchange.admin,
+ com.openexchange.admin.plugin.hosting
+Bundle-Activator: com.openexchange.admin.soap.util.osgi.SoapUtilActivator
