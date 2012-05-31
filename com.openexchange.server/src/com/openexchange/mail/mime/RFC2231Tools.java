@@ -77,7 +77,7 @@ public final class RFC2231Tools {
         super();
     }
 
-    private static final Pattern PAT_CL = Pattern.compile("([\\p{L}&&[^']]+)'([\\p{L}&&[^']]*)'(\\p{L}+)");
+    private static final Pattern PAT_CL = Pattern.compile("([\\p{ASCII}&&[^']]+)'([\\p{ASCII}&&[^']]*)'(\\p{ASCII}+)");
 
     /**
      * Parses given <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value into its charset, language and
