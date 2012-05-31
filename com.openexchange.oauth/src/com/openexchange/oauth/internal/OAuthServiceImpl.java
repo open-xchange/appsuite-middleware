@@ -52,7 +52,6 @@ package com.openexchange.oauth.internal;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
@@ -66,7 +65,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -80,7 +78,6 @@ import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
-
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
@@ -575,13 +572,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
     
     @Override
-	public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
-    	List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
-    	for (OAuthServiceMetaData metaData : allServices) {
+	public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
+    	final List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
+    	for (final OAuthServiceMetaData metaData : allServices) {
 			if (metaData.getAPI() == api) {
-				List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
+				final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
 				OAuthAccount likely = null;
-				for(OAuthAccount acc: accounts){
+				for(final OAuthAccount acc: accounts){
 					if(likely == null || acc.getId() < likely.getId()){
 						likely = acc;
 					}
@@ -883,14 +880,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
             do {
-                final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                account.setId(rs.getInt(1));
                 try {
                     // Try using the new secret. Maybe this account doesn't need the migration
                     cryptoService.decrypt(rs.getString(2), newSecret);
                     cryptoService.decrypt(rs.getString(3), newSecret);
                 } catch (final OXException e) {
                     // Needs migration
+                    final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                    account.setId(rs.getInt(1));
                     account.setToken(cryptoService.decrypt(rs.getString(2), oldSecret));
                     account.setSecret(cryptoService.decrypt(rs.getString(3), oldSecret));
                     accounts.add(account);
