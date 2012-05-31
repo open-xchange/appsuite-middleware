@@ -77,9 +77,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.actions.AbstractMailAction;
-import com.openexchange.mail.json.actions.AllAction;
-import com.openexchange.mail.json.actions.SimpleThreadStructureAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MimeFilter;
@@ -239,8 +238,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final boolean cache = req.optBool("cache", false);
         if (cache) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
-            if (null != jsonCache) {
-                final String sha1Sum = SimpleThreadStructureAction.getSHA1For(req);
+            final MailRequestSha1Calculator sha1Calculator = req.getRequest().getProperty("mail.sha1calc");
+            if (null != jsonCache && null != sha1Calculator) {
+                final String sha1Sum = sha1Calculator.getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
@@ -431,8 +431,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final boolean cache = req.optBool("cache", false);
         if (cache) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
-            if (null != jsonCache) {
-                final String sha1Sum = AllAction.getSHA1For(req);
+            final MailRequestSha1Calculator sha1Calculator = req.getRequest().getProperty("mail.sha1calc");
+            if (null != jsonCache && null != sha1Calculator) {
+                final String sha1Sum = sha1Calculator.getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
