@@ -1,6 +1,7 @@
 * 2012-05-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 22228: Guess Content-Type by file name if broken within client request
+ - Fix for bug 22231: Proper check for possibly empty file name
 
 * 2012-05-31 - martin.herfurth@open-xchange.com
 
