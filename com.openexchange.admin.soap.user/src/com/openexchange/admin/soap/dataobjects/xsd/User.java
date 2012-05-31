@@ -564,6 +564,15 @@ public class User {
     }
 
     /**
+     * Sets the aliases
+     *
+     * @param aliases The aliases to set
+     */
+    public void setAliases(final List<String> aliases) {
+        this.aliases = aliases;
+    }
+
+    /**
      * Ruft den Wert der anniversary-Eigenschaft ab.
      * 
      * @return
@@ -583,7 +592,7 @@ public class User {
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setAnniversary(XMLGregorianCalendar value) {
+    public void setAnniversary(final XMLGregorianCalendar value) {
         this.anniversary = value;
     }
 
@@ -607,7 +616,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setAssistantName(String value) {
+    public void setAssistantName(final String value) {
         this.assistantName = value;
     }
 
@@ -631,7 +640,7 @@ public class User {
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setBirthday(XMLGregorianCalendar value) {
+    public void setBirthday(final XMLGregorianCalendar value) {
         this.birthday = value;
     }
 
@@ -655,7 +664,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setBranches(String value) {
+    public void setBranches(final String value) {
         this.branches = value;
     }
 
@@ -679,7 +688,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setBusinessCategory(String value) {
+    public void setBusinessCategory(final String value) {
         this.businessCategory = value;
     }
 
@@ -703,7 +712,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCategories(String value) {
+    public void setCategories(final String value) {
         this.categories = value;
     }
 
@@ -727,7 +736,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCellularTelephone1(String value) {
+    public void setCellularTelephone1(final String value) {
         this.cellularTelephone1 = value;
     }
 
@@ -751,7 +760,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCellularTelephone2(String value) {
+    public void setCellularTelephone2(final String value) {
         this.cellularTelephone2 = value;
     }
 
@@ -775,7 +784,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCityBusiness(String value) {
+    public void setCityBusiness(final String value) {
         this.cityBusiness = value;
     }
 
@@ -799,7 +808,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCityHome(String value) {
+    public void setCityHome(final String value) {
         this.cityHome = value;
     }
 
@@ -823,7 +832,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCityOther(String value) {
+    public void setCityOther(final String value) {
         this.cityOther = value;
     }
 
@@ -847,7 +856,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCommercialRegister(String value) {
+    public void setCommercialRegister(final String value) {
         this.commercialRegister = value;
     }
 
@@ -871,7 +880,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCompany(String value) {
+    public void setCompany(final String value) {
         this.company = value;
     }
 
@@ -895,7 +904,7 @@ public class User {
      *     {@link Boolean }
      *     
      */
-    public void setContextadmin(Boolean value) {
+    public void setContextadmin(final Boolean value) {
         this.contextadmin = value;
     }
 
@@ -919,7 +928,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCountryBusiness(String value) {
+    public void setCountryBusiness(final String value) {
         this.countryBusiness = value;
     }
 
@@ -943,7 +952,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCountryHome(String value) {
+    public void setCountryHome(final String value) {
         this.countryHome = value;
     }
 
@@ -967,7 +976,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setCountryOther(String value) {
+    public void setCountryOther(final String value) {
         this.countryOther = value;
     }
 
@@ -991,7 +1000,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setDefaultSenderAddress(String value) {
+    public void setDefaultSenderAddress(final String value) {
         this.defaultSenderAddress = value;
     }
 
@@ -1015,7 +1024,7 @@ public class User {
      *     {@link Group }
      *     
      */
-    public void setDefaultGroup(Group value) {
+    public void setDefaultGroup(final Group value) {
         this.defaultGroup = value;
     }
 
@@ -1039,7 +1048,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setDepartment(String value) {
+    public void setDepartment(final String value) {
         this.department = value;
     }
 
@@ -1063,7 +1072,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setDisplayName(String value) {
+    public void setDisplayName(final String value) {
         this.displayName = value;
     }
 
@@ -1087,7 +1096,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setEmail1(String value) {
+    public void setEmail1(final String value) {
         this.email1 = value;
     }
 
@@ -1111,7 +1120,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setEmail2(String value) {
+    public void setEmail2(final String value) {
         this.email2 = value;
     }
 
@@ -1135,7 +1144,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setEmail3(String value) {
+    public void setEmail3(final String value) {
         this.email3 = value;
     }
 
@@ -1159,7 +1168,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setEmployeeType(String value) {
+    public void setEmployeeType(final String value) {
         this.employeeType = value;
     }
 
@@ -1183,7 +1192,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setFaxBusiness(String value) {
+    public void setFaxBusiness(final String value) {
         this.faxBusiness = value;
     }
 
@@ -1207,7 +1216,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setFaxHome(String value) {
+    public void setFaxHome(final String value) {
         this.faxHome = value;
     }
 
@@ -1231,7 +1240,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setFaxOther(String value) {
+    public void setFaxOther(final String value) {
         this.faxOther = value;
     }
 
@@ -1255,7 +1264,7 @@ public class User {
      *     {@link Integer }
      *     
      */
-    public void setFolderTree(Integer value) {
+    public void setFolderTree(final Integer value) {
         this.folderTree = value;
     }
 
@@ -1279,7 +1288,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setGivenName(String value) {
+    public void setGivenName(final String value) {
         this.givenName = value;
     }
 
@@ -1303,7 +1312,7 @@ public class User {
      *     {@link SOAPStringMap }
      *     
      */
-    public void setGuiPreferencesForSoap(SOAPStringMap value) {
+    public void setGuiPreferencesForSoap(final SOAPStringMap value) {
         this.guiPreferencesForSoap = value;
     }
 
@@ -1327,7 +1336,7 @@ public class User {
      *     {@link Boolean }
      *     
      */
-    public void setGuiSpamFilterEnabled(Boolean value) {
+    public void setGuiSpamFilterEnabled(final Boolean value) {
         this.guiSpamFilterEnabled = value;
     }
 
@@ -1351,7 +1360,7 @@ public class User {
      *     {@link Integer }
      *     
      */
-    public void setId(Integer value) {
+    public void setId(final Integer value) {
         this.id = value;
     }
 
@@ -1375,7 +1384,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setImapLogin(String value) {
+    public void setImapLogin(final String value) {
         this.imapLogin = value;
     }
 
@@ -1399,7 +1408,7 @@ public class User {
      *     {@link Integer }
      *     
      */
-    public void setImapPort(Integer value) {
+    public void setImapPort(final Integer value) {
         this.imapPort = value;
     }
 
@@ -1423,7 +1432,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setImapSchema(String value) {
+    public void setImapSchema(final String value) {
         this.imapSchema = value;
     }
 
@@ -1447,7 +1456,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setImapServer(String value) {
+    public void setImapServer(final String value) {
         this.imapServer = value;
     }
 
@@ -1471,7 +1480,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setImapServerString(String value) {
+    public void setImapServerString(final String value) {
         this.imapServerString = value;
     }
 
@@ -1495,7 +1504,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setInfo(String value) {
+    public void setInfo(final String value) {
         this.info = value;
     }
 
@@ -1519,7 +1528,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setInstantMessenger1(String value) {
+    public void setInstantMessenger1(final String value) {
         this.instantMessenger1 = value;
     }
 
@@ -1543,7 +1552,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setInstantMessenger2(String value) {
+    public void setInstantMessenger2(final String value) {
         this.instantMessenger2 = value;
     }
 
@@ -1567,7 +1576,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setLanguage(String value) {
+    public void setLanguage(final String value) {
         this.language = value;
     }
 
@@ -1591,7 +1600,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMailFolderConfirmedHamName(String value) {
+    public void setMailFolderConfirmedHamName(final String value) {
         this.mailFolderConfirmedHamName = value;
     }
 
@@ -1615,7 +1624,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMailFolderConfirmedSpamName(String value) {
+    public void setMailFolderConfirmedSpamName(final String value) {
         this.mailFolderConfirmedSpamName = value;
     }
 
@@ -1639,7 +1648,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMailFolderDraftsName(String value) {
+    public void setMailFolderDraftsName(final String value) {
         this.mailFolderDraftsName = value;
     }
 
@@ -1663,7 +1672,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMailFolderSentName(String value) {
+    public void setMailFolderSentName(final String value) {
         this.mailFolderSentName = value;
     }
 
@@ -1687,7 +1696,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMailFolderSpamName(String value) {
+    public void setMailFolderSpamName(final String value) {
         this.mailFolderSpamName = value;
     }
 
@@ -1711,7 +1720,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMailFolderTrashName(String value) {
+    public void setMailFolderTrashName(final String value) {
         this.mailFolderTrashName = value;
     }
 
@@ -1735,7 +1744,7 @@ public class User {
      *     {@link Boolean }
      *     
      */
-    public void setMailenabled(Boolean value) {
+    public void setMailenabled(final Boolean value) {
         this.mailenabled = value;
     }
 
@@ -1759,7 +1768,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setManagerName(String value) {
+    public void setManagerName(final String value) {
         this.managerName = value;
     }
 
@@ -1783,7 +1792,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMaritalStatus(String value) {
+    public void setMaritalStatus(final String value) {
         this.maritalStatus = value;
     }
 
@@ -1807,7 +1816,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setMiddleName(String value) {
+    public void setMiddleName(final String value) {
         this.middleName = value;
     }
 
@@ -1831,7 +1840,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setName(String value) {
+    public void setName(final String value) {
         this.name = value;
     }
 
@@ -1855,7 +1864,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setNickname(String value) {
+    public void setNickname(final String value) {
         this.nickname = value;
     }
 
@@ -1879,7 +1888,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setNote(String value) {
+    public void setNote(final String value) {
         this.note = value;
     }
 
@@ -1903,7 +1912,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setNumberOfChildren(String value) {
+    public void setNumberOfChildren(final String value) {
         this.numberOfChildren = value;
     }
 
@@ -1927,7 +1936,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setNumberOfEmployee(String value) {
+    public void setNumberOfEmployee(final String value) {
         this.numberOfEmployee = value;
     }
 
@@ -1951,7 +1960,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPassword(String value) {
+    public void setPassword(final String value) {
         this.password = value;
     }
 
@@ -1975,7 +1984,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPasswordMech(String value) {
+    public void setPasswordMech(final String value) {
         this.passwordMech = value;
     }
 
@@ -1999,7 +2008,7 @@ public class User {
      *     {@link Boolean }
      *     
      */
-    public void setPasswordExpired(Boolean value) {
+    public void setPasswordExpired(final Boolean value) {
         this.passwordExpired = value;
     }
 
@@ -2023,7 +2032,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPosition(String value) {
+    public void setPosition(final String value) {
         this.position = value;
     }
 
@@ -2047,7 +2056,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPostalCodeBusiness(String value) {
+    public void setPostalCodeBusiness(final String value) {
         this.postalCodeBusiness = value;
     }
 
@@ -2071,7 +2080,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPostalCodeHome(String value) {
+    public void setPostalCodeHome(final String value) {
         this.postalCodeHome = value;
     }
 
@@ -2095,7 +2104,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPostalCodeOther(String value) {
+    public void setPostalCodeOther(final String value) {
         this.postalCodeOther = value;
     }
 
@@ -2119,7 +2128,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setPrimaryEmail(String value) {
+    public void setPrimaryEmail(final String value) {
         this.primaryEmail = value;
     }
 
@@ -2143,7 +2152,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setProfession(String value) {
+    public void setProfession(final String value) {
         this.profession = value;
     }
 
@@ -2167,7 +2176,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setRoomNumber(String value) {
+    public void setRoomNumber(final String value) {
         this.roomNumber = value;
     }
 
@@ -2191,7 +2200,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSalesVolume(String value) {
+    public void setSalesVolume(final String value) {
         this.salesVolume = value;
     }
 
@@ -2215,7 +2224,7 @@ public class User {
      *     {@link Integer }
      *     
      */
-    public void setSmtpPort(Integer value) {
+    public void setSmtpPort(final Integer value) {
         this.smtpPort = value;
     }
 
@@ -2239,7 +2248,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSmtpSchema(String value) {
+    public void setSmtpSchema(final String value) {
         this.smtpSchema = value;
     }
 
@@ -2263,7 +2272,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSmtpServer(String value) {
+    public void setSmtpServer(final String value) {
         this.smtpServer = value;
     }
 
@@ -2287,7 +2296,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSmtpServerString(String value) {
+    public void setSmtpServerString(final String value) {
         this.smtpServerString = value;
     }
 
@@ -2311,7 +2320,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSpouseName(String value) {
+    public void setSpouseName(final String value) {
         this.spouseName = value;
     }
 
@@ -2335,7 +2344,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setStateBusiness(String value) {
+    public void setStateBusiness(final String value) {
         this.stateBusiness = value;
     }
 
@@ -2359,7 +2368,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setStateHome(String value) {
+    public void setStateHome(final String value) {
         this.stateHome = value;
     }
 
@@ -2383,7 +2392,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setStateOther(String value) {
+    public void setStateOther(final String value) {
         this.stateOther = value;
     }
 
@@ -2407,7 +2416,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setStreetBusiness(String value) {
+    public void setStreetBusiness(final String value) {
         this.streetBusiness = value;
     }
 
@@ -2431,7 +2440,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setStreetHome(String value) {
+    public void setStreetHome(final String value) {
         this.streetHome = value;
     }
 
@@ -2455,7 +2464,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setStreetOther(String value) {
+    public void setStreetOther(final String value) {
         this.streetOther = value;
     }
 
@@ -2479,7 +2488,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSuffix(String value) {
+    public void setSuffix(final String value) {
         this.suffix = value;
     }
 
@@ -2503,7 +2512,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setSurName(String value) {
+    public void setSurName(final String value) {
         this.surName = value;
     }
 
@@ -2527,7 +2536,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTaxId(String value) {
+    public void setTaxId(final String value) {
         this.taxId = value;
     }
 
@@ -2551,7 +2560,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneAssistant(String value) {
+    public void setTelephoneAssistant(final String value) {
         this.telephoneAssistant = value;
     }
 
@@ -2575,7 +2584,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneBusiness1(String value) {
+    public void setTelephoneBusiness1(final String value) {
         this.telephoneBusiness1 = value;
     }
 
@@ -2599,7 +2608,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneBusiness2(String value) {
+    public void setTelephoneBusiness2(final String value) {
         this.telephoneBusiness2 = value;
     }
 
@@ -2623,7 +2632,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneCallback(String value) {
+    public void setTelephoneCallback(final String value) {
         this.telephoneCallback = value;
     }
 
@@ -2647,7 +2656,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneCar(String value) {
+    public void setTelephoneCar(final String value) {
         this.telephoneCar = value;
     }
 
@@ -2671,7 +2680,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneCompany(String value) {
+    public void setTelephoneCompany(final String value) {
         this.telephoneCompany = value;
     }
 
@@ -2695,7 +2704,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneHome1(String value) {
+    public void setTelephoneHome1(final String value) {
         this.telephoneHome1 = value;
     }
 
@@ -2719,7 +2728,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneHome2(String value) {
+    public void setTelephoneHome2(final String value) {
         this.telephoneHome2 = value;
     }
 
@@ -2743,7 +2752,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneIp(String value) {
+    public void setTelephoneIp(final String value) {
         this.telephoneIp = value;
     }
 
@@ -2767,7 +2776,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneIsdn(String value) {
+    public void setTelephoneIsdn(final String value) {
         this.telephoneIsdn = value;
     }
 
@@ -2791,7 +2800,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneOther(String value) {
+    public void setTelephoneOther(final String value) {
         this.telephoneOther = value;
     }
 
@@ -2815,7 +2824,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephonePager(String value) {
+    public void setTelephonePager(final String value) {
         this.telephonePager = value;
     }
 
@@ -2839,7 +2848,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephonePrimary(String value) {
+    public void setTelephonePrimary(final String value) {
         this.telephonePrimary = value;
     }
 
@@ -2863,7 +2872,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneRadio(String value) {
+    public void setTelephoneRadio(final String value) {
         this.telephoneRadio = value;
     }
 
@@ -2887,7 +2896,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneTelex(String value) {
+    public void setTelephoneTelex(final String value) {
         this.telephoneTelex = value;
     }
 
@@ -2911,7 +2920,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTelephoneTtytdd(String value) {
+    public void setTelephoneTtytdd(final String value) {
         this.telephoneTtytdd = value;
     }
 
@@ -2935,7 +2944,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTimezone(String value) {
+    public void setTimezone(final String value) {
         this.timezone = value;
     }
 
@@ -2959,7 +2968,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setTitle(String value) {
+    public void setTitle(final String value) {
         this.title = value;
     }
 
@@ -2983,7 +2992,7 @@ public class User {
      *     {@link Integer }
      *     
      */
-    public void setUploadFileSizeLimit(Integer value) {
+    public void setUploadFileSizeLimit(final Integer value) {
         this.uploadFileSizeLimit = value;
     }
 
@@ -3007,7 +3016,7 @@ public class User {
      *     {@link Integer }
      *     
      */
-    public void setUploadFileSizeLimitPerFile(Integer value) {
+    public void setUploadFileSizeLimitPerFile(final Integer value) {
         this.uploadFileSizeLimitPerFile = value;
     }
 
@@ -3031,7 +3040,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUrl(String value) {
+    public void setUrl(final String value) {
         this.url = value;
     }
 
@@ -3055,7 +3064,7 @@ public class User {
      *     {@link SOAPStringMapMap }
      *     
      */
-    public void setUserAttributes(SOAPStringMapMap value) {
+    public void setUserAttributes(final SOAPStringMapMap value) {
         this.userAttributes = value;
     }
 
@@ -3079,7 +3088,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield01(String value) {
+    public void setUserfield01(final String value) {
         this.userfield01 = value;
     }
 
@@ -3103,7 +3112,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield02(String value) {
+    public void setUserfield02(final String value) {
         this.userfield02 = value;
     }
 
@@ -3127,7 +3136,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield03(String value) {
+    public void setUserfield03(final String value) {
         this.userfield03 = value;
     }
 
@@ -3151,7 +3160,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield04(String value) {
+    public void setUserfield04(final String value) {
         this.userfield04 = value;
     }
 
@@ -3175,7 +3184,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield05(String value) {
+    public void setUserfield05(final String value) {
         this.userfield05 = value;
     }
 
@@ -3199,7 +3208,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield06(String value) {
+    public void setUserfield06(final String value) {
         this.userfield06 = value;
     }
 
@@ -3223,7 +3232,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield07(String value) {
+    public void setUserfield07(final String value) {
         this.userfield07 = value;
     }
 
@@ -3247,7 +3256,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield08(String value) {
+    public void setUserfield08(final String value) {
         this.userfield08 = value;
     }
 
@@ -3271,7 +3280,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield09(String value) {
+    public void setUserfield09(final String value) {
         this.userfield09 = value;
     }
 
@@ -3295,7 +3304,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield10(String value) {
+    public void setUserfield10(final String value) {
         this.userfield10 = value;
     }
 
@@ -3319,7 +3328,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield11(String value) {
+    public void setUserfield11(final String value) {
         this.userfield11 = value;
     }
 
@@ -3343,7 +3352,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield12(String value) {
+    public void setUserfield12(final String value) {
         this.userfield12 = value;
     }
 
@@ -3367,7 +3376,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield13(String value) {
+    public void setUserfield13(final String value) {
         this.userfield13 = value;
     }
 
@@ -3391,7 +3400,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield14(String value) {
+    public void setUserfield14(final String value) {
         this.userfield14 = value;
     }
 
@@ -3415,7 +3424,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield15(String value) {
+    public void setUserfield15(final String value) {
         this.userfield15 = value;
     }
 
@@ -3439,7 +3448,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield16(String value) {
+    public void setUserfield16(final String value) {
         this.userfield16 = value;
     }
 
@@ -3463,7 +3472,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield17(String value) {
+    public void setUserfield17(final String value) {
         this.userfield17 = value;
     }
 
@@ -3487,7 +3496,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield18(String value) {
+    public void setUserfield18(final String value) {
         this.userfield18 = value;
     }
 
@@ -3511,7 +3520,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield19(String value) {
+    public void setUserfield19(final String value) {
         this.userfield19 = value;
     }
 
@@ -3535,7 +3544,7 @@ public class User {
      *     {@link String }
      *     
      */
-    public void setUserfield20(String value) {
+    public void setUserfield20(final String value) {
         this.userfield20 = value;
     }
 

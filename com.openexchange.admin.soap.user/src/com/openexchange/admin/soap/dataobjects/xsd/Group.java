@@ -69,7 +69,7 @@ public class Group {
      *     {@link String }
      *     
      */
-    public void setDisplayname(String value) {
+    public void setDisplayname(final String value) {
         this.displayname = value;
     }
 
@@ -93,7 +93,7 @@ public class Group {
      *     {@link Integer }
      *     
      */
-    public void setId(Integer value) {
+    public void setId(final Integer value) {
         this.id = value;
     }
 
@@ -125,6 +125,15 @@ public class Group {
         }
         return this.members;
     }
+    
+    /**
+     * Sets the members
+     *
+     * @param members The members to set
+     */
+    public void setMembers(final List<Integer> members) {
+        this.members = members;
+    }
 
     /**
      * Ruft den Wert der name-Eigenschaft ab.
@@ -146,7 +155,7 @@ public class Group {
      *     {@link String }
      *     
      */
-    public void setName(String value) {
+    public void setName(final String value) {
         this.name = value;
     }
 

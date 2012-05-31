@@ -663,9 +663,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         user.setUserfield18(soapUser.getUserfield18());
         user.setUserfield19(soapUser.getUserfield19());
         user.setUserfield20(soapUser.getUserfield20());
-        
-        
-        return null;
+        return user;
     }
 
     private static com.openexchange.admin.rmi.dataobjects.Group soap2Group(final Group soapGroup) {
