@@ -1,6 +1,7 @@
 * 2012-05-31 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22109: Use default sender address for IMip Mails.
+ - Fix for bug 22098: Added resource tag to mails for resource invitations.
 
 * 2012-05-25 - thorben.betten@open-xchange.com
 

@@ -89,6 +89,7 @@ import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -509,21 +510,21 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     protected NotificationMail create(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.create");
-        mail.setSubject(new Sentence(Messages.SUBJECT_NEW_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_NEW_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
 
     protected NotificationMail update(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.update");
-        mail.setSubject(new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
 
     protected NotificationMail delete(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.delete");
-        mail.setSubject(new Sentence(Messages.SUBJECT_CANCELLED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_CANCELLED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
@@ -531,7 +532,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail createException(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.createexception");
         recalculateOccurrence(mail);
-        mail.setSubject(new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
@@ -539,7 +540,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail askForUpdate(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.refresh");
         recalculateOccurrence(mail);
-        mail.setSubject(new Sentence(Messages.SUBJECT_REFRESH).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_REFRESH).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
@@ -547,7 +548,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail declinecounter(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.declinecounter");
         recalculateOccurrence(mail);
-        mail.setSubject(new Sentence(Messages.SUBJECT_DECLINECOUNTER).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_DECLINECOUNTER).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
@@ -581,11 +582,11 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail counter(final NotificationMail mail, final ITipRole role) throws OXException {
         switch (role) {
         case ATTENDEE:
-            mail.setSubject(new Sentence(Messages.SUBJECT_COUNTER_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_COUNTER_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.counter.participant");
             break;
         case ORGANIZER:
-            mail.setSubject(new Sentence(Messages.SUBJECT_COUNTER_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_COUNTER_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.counter.organizer");
             break;
         }
@@ -596,25 +597,34 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail stateChanged(final NotificationMail mail, final ConfirmStatus status) throws OXException {
         switch (status) {
         case ACCEPT:
-            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.accept");
             break;
         case DECLINE:
-            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.DECLINED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.DECLINED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.decline");
             break;
         case TENTATIVE:
-            mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.TENTATIVELY_ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.TENTATIVELY_ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.tentative");
             break;
         case NONE:
-            mail.setSubject(new Sentence(Messages.SUBJECT_NONE).add(actor.getDisplayName()).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+            mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_NONE).add(actor.getDisplayName()).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.none");
             break;
         }
         render(mail);
         return mail;
     }
+
+    private String prefix(NotificationMail mail) {
+        if (mail.getRecipient().isResource()) {
+            return "[" + StringHelper.valueOf(mail.getRecipient().getLocale()).getString(Messages.LABEL_RESOURCES) + "] ";
+        }
+
+        return "";
+    }
+        
 
     private void render(final NotificationMail mail) throws OXException {
         if (services == null) {
