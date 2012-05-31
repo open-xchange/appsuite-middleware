@@ -71,6 +71,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
@@ -90,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response or the string \u201cthread\u201d to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public final class AllAction extends AbstractMailAction {
+public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
     protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(AllAction.class);
 
@@ -112,7 +113,7 @@ public final class AllAction extends AbstractMailAction {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (null != jsonCache) {
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
-                final String sha1Sum = getSHA1For(req);
+                final String sha1Sum = getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final ServerSession session = req.getSession();
                 final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
@@ -136,6 +137,7 @@ public final class AllAction extends AbstractMailAction {
                  */
                 final AJAXRequestData requestData = req.getRequest().copyOf();
                 requestData.setProperty("mail.sha1", sha1Sum);
+                requestData.setProperty("mail.sha1calc", this);
                 requestData.setProperty(id, jsonValue);
                 final MailRequest mailRequest = new MailRequest(requestData, session);
                 final Runnable r = new Runnable() {
@@ -349,14 +351,8 @@ public final class AllAction extends AbstractMailAction {
         }
     }
 
-    /**
-     * Gets the SHA1 sum for given mail request.
-     * 
-     * @param req The mail request
-     * @return The SHA1 sum
-     * @throws OXException If SHA1 sum cannot be calculated.
-     */
-    public static String getSHA1For(final MailRequest req) throws OXException {
+    @Override
+    public String getSha1For(final MailRequest req) throws OXException {
         final String id = req.getRequest().getProperty("mail.sha1");
         if (null != id) {
             return id;
